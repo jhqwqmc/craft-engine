@@ -26,6 +26,8 @@ public interface NetWorkUser {
 
     Key clientSideDimension();
 
+    int bundleSelectedItemIndex();
+
     Object serverPlayer();
 
     Object platformPlayer();

@@ -4860,4 +4860,17 @@ public class Reflections {
                     clazz$FluidState, clazz$Fluid
             )
     );
+
+    public static final Class<?> clazz$ServerboundSelectBundleItemPacket =
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ServerboundSelectBundleItemPacket")
+            );
+
+    public static final Field field$ServerboundSelectBundleItemPacket$slotId = Optional.ofNullable(clazz$ServerboundSelectBundleItemPacket)
+            .map(it -> ReflectionUtils.getDeclaredField(it, int.class, 0))
+            .orElse(null);
+
+    public static final Field field$ServerboundSelectBundleItemPacket$selectedItemIndex = Optional.ofNullable(clazz$ServerboundSelectBundleItemPacket)
+            .map(it -> ReflectionUtils.getDeclaredField(it, int.class, 1))
+            .orElse(null);
 }

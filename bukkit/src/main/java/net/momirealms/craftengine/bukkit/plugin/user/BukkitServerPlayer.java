@@ -45,6 +45,7 @@ public class BukkitServerPlayer extends Player {
     private int lastSuccessfulInteraction;
     private long lastAttributeSyncTime;
     private Key clientSideDimension;
+    private int bundleSelectedItemIndex;
 
     private int lastSentState = -1;
     private int lastHitBlockTime;
@@ -227,6 +228,15 @@ public class BukkitServerPlayer extends Player {
 
     public void setClientSideDimension(Key clientSideDimension) {
         this.clientSideDimension = clientSideDimension;
+    }
+
+    @Override
+    public int bundleSelectedItemIndex() {
+        return bundleSelectedItemIndex;
+    }
+
+    public void setBundleSelectedItemIndex(int bundleSelectedItemIndex) {
+        this.bundleSelectedItemIndex = bundleSelectedItemIndex;
     }
 
     public void setConnectionState(ConnectionState connectionState) {

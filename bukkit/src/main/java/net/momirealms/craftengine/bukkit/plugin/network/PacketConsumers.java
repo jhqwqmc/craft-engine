@@ -26,6 +26,7 @@ import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.RayTraceResult;
@@ -659,6 +660,25 @@ public class PacketConsumers {
             }
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("Failed to handle ClientboundSoundPacket", e);
+        }
+    };
+
+    public static final TriConsumer<NetWorkUser, NMSPacketEvent, Object> BUNDLE_SELECT_ITEM = (user, event, packet) -> {
+        try {
+            Player player = (Player) user.platformPlayer();
+            BukkitServerPlayer serverPlayer = BukkitCraftEngine.instance().adapt(player);
+            int slotId = (int) Reflections.field$ServerboundSelectBundleItemPacket$slotId.get(packet);
+            int selectedItemIndex = (int) Reflections.field$ServerboundSelectBundleItemPacket$selectedItemIndex.get(packet);
+            if (selectedItemIndex != -1) {
+                if (user.bundleSelectedItemIndex() - selectedItemIndex == -1 || user.bundleSelectedItemIndex() - selectedItemIndex == 2) {
+                    player.sendMessage("向下");
+                } else {
+                    player.sendMessage("向上");
+                }
+            }
+            serverPlayer.setBundleSelectedItemIndex(selectedItemIndex);
+        } catch (Exception e) {
+            CraftEngine.instance().logger().warn("Failed to handle ServerboundSelectBundleItemPacket", e);
         }
     };
 }
