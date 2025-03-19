@@ -4,10 +4,7 @@ import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.registry.Registries;
 import net.momirealms.craftengine.core.registry.WritableRegistry;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.ResourceKey;
+import net.momirealms.craftengine.core.util.*;
 
 import java.util.Map;
 
@@ -18,6 +15,8 @@ public class Properties {
     public static final Key AXIS = Key.of("craftengine:axis");
     public static final Key HORIZONTAL_DIRECTION = Key.of("craftengine:4-direction");
     public static final Key DIRECTION = Key.of("craftengine:6-direction");
+    public static final Key HORIZONTAL_FACING = Key.of("craftengine:horizontal-facing");
+    public static final Key DOUBLE_BLOCK_HALF = Key.of("craftengine:double-block-half");
 
     static {
         register(BOOLEAN, BooleanProperty.FACTORY);
@@ -26,6 +25,8 @@ public class Properties {
         register(AXIS, new EnumProperty.Factory<>(Direction.Axis.class));
         register(DIRECTION, new EnumProperty.Factory<>(Direction.class));
         register(HORIZONTAL_DIRECTION, new EnumProperty.Factory<>(HorizontalDirection.class));
+        register(HORIZONTAL_FACING, new EnumProperty.Factory<>(DoorHingeSide.class));
+        register(DOUBLE_BLOCK_HALF, new EnumProperty.Factory<>(DoubleBlockHalf.class));
     }
 
     public static void register(Key key, PropertyFactory factory) {

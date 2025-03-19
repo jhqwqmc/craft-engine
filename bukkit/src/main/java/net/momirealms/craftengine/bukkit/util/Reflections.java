@@ -1832,6 +1832,13 @@ public class Reflections {
             )
     );
 
+    public static final Class<?> clazz$BlockBehaviour$BlockStateBase = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.level.block.state.BlockBehaviour$BlockStateBase"),
+                    BukkitReflectionUtils.assembleMCClass("world.level.block.state.BlockBase$BlockData")
+            )
+    );
+
     public static final Method method$BlockBehaviour$Properties$of = requireNonNull(
             ReflectionUtils.getStaticMethod(
                     clazz$BlockBehaviour$Properties, clazz$BlockBehaviour$Properties
@@ -5013,6 +5020,58 @@ public class Reflections {
     public static final Method method$ItemStack$getItem = requireNonNull(
             ReflectionUtils.getMethod(
                     clazz$ItemStack, clazz$Item
+            )
+    );
+
+    public static final Method method$BlockBehaviour$BlockStateBase$isFaceSturdy = requireNonNull(
+            ReflectionUtils.getMethod(
+                    clazz$BlockBehaviour$BlockStateBase, boolean.class, clazz$BlockGetter, clazz$BlockPos, clazz$Direction
+            )
+    );
+
+    // 1.21.3+
+    public static final Class<?> clazz$Orientation =
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.level.redstone.Orientation")
+            );
+
+    public static final Method method$BlockBehaviour$neighborChanged = requireNonNull(
+            VersionHelper.isVersionNewerThan1_21_2() ?
+            ReflectionUtils.getDeclaredMethod(
+                    clazz$BlockBehaviour, void.class, new String[]{"neighborChanged"}, clazz$BlockState, clazz$Level, clazz$BlockPos, clazz$Block, clazz$Orientation, boolean.class
+            ) :
+            ReflectionUtils.getDeclaredMethod(
+                    clazz$BlockBehaviour, void.class, new String[]{"neighborChanged", "a"}, clazz$BlockState, clazz$Level, clazz$BlockPos, clazz$Block, clazz$BlockPos, boolean.class
+            )
+    );
+
+    public static final Method method$RandomSource$getRandom = requireNonNull(
+            ReflectionUtils.getMethod(
+                    clazz$Level, clazz$RandomSource
+            )
+    );
+
+    public static final Method method$LevelAccessor$gameEvent = requireNonNull(
+            ReflectionUtils.getMethod(
+                    clazz$LevelAccessor, void.class, clazz$Entity, clazz$Holder, clazz$BlockPos
+            )
+    );
+
+    public static final Class<?> clazz$GameEvent = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.level.gameevent.GameEvent")
+            )
+    );
+
+    public static final Field field$GameEvent$BLOCK_OPEN = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$GameEvent, VersionHelper.isVersionNewerThan1_20_5() ? clazz$Holder$Reference : clazz$GameEvent, 7
+            )
+    );
+
+    public static final Field field$GameEvent$BLOCK_CLOSE = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$GameEvent, VersionHelper.isVersionNewerThan1_20_5() ? clazz$Holder$Reference : clazz$GameEvent, 3
             )
     );
 }

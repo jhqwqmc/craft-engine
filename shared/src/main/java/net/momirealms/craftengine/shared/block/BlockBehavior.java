@@ -8,6 +8,10 @@ public abstract class BlockBehavior {
         return superMethod.call();
     }
 
+    public void neighborChanged(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        superMethod.call();
+    }
+
     public Object getFluidState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         return superMethod.call();
     }

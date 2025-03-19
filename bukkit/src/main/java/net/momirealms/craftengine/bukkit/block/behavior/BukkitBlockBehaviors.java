@@ -11,6 +11,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final Key LEAVES_BLOCK = Key.from("craftengine:leaves_block");
     public static final Key STRIPPABLE_BLOCK = Key.from("craftengine:strippable_block");
     public static final Key SAPLING_BLOCK = Key.from("craftengine:sapling_block");
+    public static final Key DOOR_BLOCK = Key.from("craftengine:door_block");
 
     public static void init() {
         register(EMPTY, (block, args) -> EmptyBlockBehavior.INSTANCE);
@@ -19,5 +20,6 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
         register(LEAVES_BLOCK, LeavesBlockBehavior.FACTORY);
         register(STRIPPABLE_BLOCK, StrippableBlockBehavior.FACTORY);
         register(SAPLING_BLOCK, SaplingBlockBehavior.FACTORY);
+        register(DOOR_BLOCK, DoorBlockBehavior.FACTORY);
     }
 }

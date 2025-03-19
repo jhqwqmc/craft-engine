@@ -16,12 +16,15 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.Fallable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.momirealms.craftengine.mod.util.NoteBlockUtils;
 import net.momirealms.craftengine.shared.ObjectHolder;
 import net.momirealms.craftengine.shared.block.*;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public class CraftEngineBlock extends Block implements BehaviorHolder, ShapeHolder, NoteBlockIndicator, Fallable, BonemealableBlock {
     private static final PaperWeightStoneBlockShape STONE = new PaperWeightStoneBlockShape(Blocks.STONE.defaultBlockState());
@@ -144,6 +147,24 @@ public class CraftEngineBlock extends Block implements BehaviorHolder, ShapeHold
         } catch (Exception e) {
             e.printStackTrace();
             return super.updateShape(state, level, scheduledTickAccess, pos, direction, neighborPos, neighborState, random);
+        }
+    }
+
+    @Override
+    protected void neighborChanged(@NotNull BlockState state,
+                                   @NotNull Level level,
+                                   @NotNull BlockPos pos,
+                                   @NotNull Block neighborBlock,
+                                   @Nullable Orientation orientation,
+                                   boolean movedByPiston) {
+        try {
+            behaviorHolder.value().neighborChanged(this, new Object[]{state, level, pos, neighborBlock, orientation, movedByPiston}, () -> {
+                super.neighborChanged(state, level, pos, neighborBlock, orientation, movedByPiston);
+                return null;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            super.neighborChanged(state, level, pos, neighborBlock, orientation, movedByPiston);
         }
     }
 

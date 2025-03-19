@@ -242,6 +242,9 @@ public class BukkitInjector {
                             .and(ElementMatchers.takesArgument(1, Reflections.clazz$LevelReader).or(ElementMatchers.takesArgument(1, Reflections.clazz$Direction)))
                             .and(ElementMatchers.named("updateShape").or(ElementMatchers.named("a"))))
                     .intercept(MethodDelegation.to(UpdateShapeInterceptor.INSTANCE))
+                    // neighborChanged
+                    .method(ElementMatchers.is(Reflections.method$BlockBehaviour$neighborChanged))
+                    .intercept(MethodDelegation.to(NeighborChangedInterceptor.INSTANCE))
                     // getFluidState
                     .method(ElementMatchers.returns(Reflections.clazz$FluidState)
                             .and(ElementMatchers.takesArgument(0, Reflections.clazz$BlockState)))
@@ -667,6 +670,20 @@ public class BukkitInjector {
             } catch (Exception e) {
                 CraftEngine.instance().logger().severe("Failed to run updateShape", e);
                 return args[0];
+            }
+        }
+    }
+
+    public static class NeighborChangedInterceptor {
+        public static final NeighborChangedInterceptor INSTANCE = new NeighborChangedInterceptor();
+
+        @RuntimeType
+        public void intercept(@This Object thisObj, @AllArguments Object[] args, @SuperCall Callable<Object> superMethod) throws Exception {
+            ObjectHolder<BlockBehavior> holder = ((BehaviorHolder) thisObj).getBehaviorHolder();
+            try {
+                holder.value().neighborChanged(thisObj, args, superMethod);
+            } catch (Exception e) {
+                CraftEngine.instance().logger().severe("Failed to run neighborChanged", e);
             }
         }
     }
