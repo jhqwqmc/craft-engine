@@ -111,6 +111,20 @@ list_resource:
     - /craftengine resource list
     - /ce resource list
 
+import_resource:
+  enable: true
+  permission: ce.command.admin.resource
+  usage:
+    - /craftengine resource import
+    - /ce resource import
+
+export_resource:
+  enable: true
+  permission: ce.command.admin.resource
+  usage:
+    - /craftengine resource export
+    - /ce resource export
+
 # Debug commands
 debug_set_block:
   enable: true
