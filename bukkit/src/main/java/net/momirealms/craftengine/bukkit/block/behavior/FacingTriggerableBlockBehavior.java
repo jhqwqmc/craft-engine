@@ -2,8 +2,8 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
-import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -88,7 +88,7 @@ public abstract class FacingTriggerableBlockBehavior extends BukkitBlockBehavior
         Key blockId = Optional.ofNullable(BukkitBlockManager.instance().getImmutableBlockState(BlockStateUtils.blockStateToId(blockState)))
                 .filter(state -> !state.isEmpty())
                 .map(state -> state.owner().value().id())
-                .orElseGet(() -> BlockStateUtils.getBlockOwnerIdFromState(blockState));
+                .orElseGet(() -> FastNMS.INSTANCE.method$DefaultedRegistry$getKey(MBuiltInRegistries.BLOCK, FastNMS.INSTANCE.method$BlockState$getBlock(blockState)));
         return blockCheckByKey(blockId);
     }
 
