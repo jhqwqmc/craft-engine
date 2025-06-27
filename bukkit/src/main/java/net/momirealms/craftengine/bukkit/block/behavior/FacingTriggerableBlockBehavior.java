@@ -4,10 +4,12 @@ import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.item.context.PlaceBlockBlockPlaceContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
@@ -78,7 +80,11 @@ public abstract class FacingTriggerableBlockBehavior extends BukkitBlockBehavior
 
     @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
-        return state.owner().value().defaultState().with(this.facingProperty, context.getNearestLookingDirection().opposite());
+        if (context instanceof PlaceBlockBlockPlaceContext placeContext) {
+            return state.owner().value().defaultState().with(this.facingProperty, placeContext.getNearestLookingDirection().opposite());
+        }
+        Direction direction = DirectionUtils.fromNMSDirection(FastNMS.INSTANCE.method$Direction$getOpposite(FastNMS.INSTANCE.method$Direction$orderedByNearest(context.getPlayer().serverPlayer())[0]));
+        return state.owner().value().defaultState().with(this.facingProperty, direction);
     }
 
     protected boolean blockCheckByBlockState(Object blockState) {
