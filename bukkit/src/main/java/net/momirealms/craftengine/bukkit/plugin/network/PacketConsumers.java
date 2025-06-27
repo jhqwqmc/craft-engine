@@ -2374,6 +2374,7 @@ public class PacketConsumers {
             if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$SUCCESSFULLY_LOADED) {
                 user.setSentResourcePack(true);
                 if (VersionHelper.isOrAbove1_21_7()) {
+                    // 1.21.7-rc2 开始模拟玩家收到成功加载包也无济于事只能直接调用内部方法强行结束异步任务
                     NetworkReflections.methodHandle$ServerConfigurationPacketListenerImpl$finishCurrentTask.invokeExact(
                             user.getPacketListener(), NetworkReflections.instance$ServerResourcePackConfigurationTask$TYPE
                     );
