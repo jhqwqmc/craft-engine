@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.block.state.properties.DoubleBlockHalf;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.Direction;
@@ -58,24 +57,20 @@ public class PickaxeBlockBehavior extends FacingTriggerableBlockBehavior {
         Object breakState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, breakPos);
         if (blockCheckByBlockState(breakState)) {
             FastNMS.INSTANCE.method$LevelWriter$destroyBlock(level, breakPos, true, null, 512);
-            tryHandleDoubleBlock(level, breakState, breakPos);
+            tryDropItem(level, breakState, breakPos); // TODO: 这里应该在调用destroyBlock的时候被正确处理
         }
     }
 
-    private static void tryHandleDoubleBlock(Object level, Object state, Object blockPos) {
+    private static void tryDropItem(Object level, Object state, Object blockPos) {
         int stateId = BlockStateUtils.blockStateToId(state);
         ImmutableBlockState blockState = BukkitBlockManager.instance().getImmutableBlockState(stateId);
         if (blockState == null || blockState.isEmpty()) return;
-        for (Property<?> property : blockState.getProperties()) {
-            if (property.valueClass() != DoubleBlockHalf.class) continue;
-            World world = BukkitWorldManager.instance().wrap(level);
-            WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(LocationUtils.fromBlockPos(blockPos)));
-            ContextHolder.Builder builder = ContextHolder.builder().withParameter(DirectContextParameters.POSITION, position);
-            blockState.getDrops(builder, world, null).forEach(item -> world.dropItemNaturally(position, item));
-            world.playBlockSound(position, blockState.sounds().breakSound());
-            FastNMS.INSTANCE.method$Level$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, stateId);
-            return;
-        }
+        World world = BukkitWorldManager.instance().wrap(level);
+        WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(LocationUtils.fromBlockPos(blockPos)));
+        ContextHolder.Builder builder = ContextHolder.builder().withParameter(DirectContextParameters.POSITION, position);
+        blockState.getDrops(builder, world, null).forEach(item -> world.dropItemNaturally(position, item));
+        world.playBlockSound(position, blockState.sounds().breakSound());
+        FastNMS.INSTANCE.method$Level$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, stateId);
     }
 
     public static class Factory implements BlockBehaviorFactory {

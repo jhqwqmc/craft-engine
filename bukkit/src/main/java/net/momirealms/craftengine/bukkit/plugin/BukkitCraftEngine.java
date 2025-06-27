@@ -15,7 +15,6 @@ import net.momirealms.craftengine.bukkit.item.behavior.BukkitItemBehaviors;
 import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
 import net.momirealms.craftengine.bukkit.loot.BukkitVanillaLootManager;
 import net.momirealms.craftengine.bukkit.pack.BukkitPackManager;
-import net.momirealms.craftengine.bukkit.plugin.agent.LevelInjector;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitSenderFactory;
 import net.momirealms.craftengine.bukkit.plugin.gui.BukkitGuiManager;
@@ -135,12 +134,6 @@ public class BukkitCraftEngine extends CraftEngine {
             ProtectedFieldVisitor.init();
         } catch (Exception e) {
             throw new InjectionException("Error initializing ProtectedFieldVisitor", e);
-        }
-        try {
-            logger.info("Patching the server...");
-            LevelInjector.patch();
-        } catch (Exception e) {
-            throw new InjectionException("Error injecting Level", e);
         }
         super.onPluginLoad();
         super.blockManager.init();
