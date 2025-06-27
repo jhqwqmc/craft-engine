@@ -7,6 +7,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.network.id.PacketIdFinder;
@@ -41,7 +42,7 @@ import java.util.function.BiConsumer;
 
 public class BukkitNetworkManager implements NetworkManager, Listener, PluginMessageListener {
     private static BukkitNetworkManager instance;
-    private static final Map<Class<?>, TriConsumer<NetWorkUser, NMSPacketEvent, Object>> NMS_PACKET_HANDLERS = new HashMap<>();
+    private static final Map<Class<?>, TriConsumer<NetWorkUser, NMSPacketEvent, Object>> NMS_PACKET_HANDLERS = new Object2ObjectOpenHashMap<>();
     // only for game stage for the moment
     private static BiConsumer<NetWorkUser, ByteBufPacketEvent>[] S2C_BYTE_BUFFER_PACKET_HANDLERS;
     private static BiConsumer<NetWorkUser, ByteBufPacketEvent>[] C2S_BYTE_BUFFER_PACKET_HANDLERS;

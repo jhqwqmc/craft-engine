@@ -396,10 +396,10 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void tick() {
         // not fully online
-        if (serverPlayer() == null) return;
+        Object serverPlayer = serverPlayer();
+        if (serverPlayer == null) return;
         if (VersionHelper.isFolia()) {
             try {
-                Object serverPlayer = serverPlayer();
                 Object gameMode = FastNMS.INSTANCE.field$ServerPlayer$gameMode(serverPlayer);
                 this.gameTicks = (int) CoreReflections.field$ServerPlayerGameMode$gameTicks.get(gameMode);
             } catch (ReflectiveOperationException e) {
