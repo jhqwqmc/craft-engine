@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
@@ -16,12 +17,12 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.World;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 public abstract class FacingTriggerableBlockBehavior extends BukkitBlockBehavior {
-    protected static final List<Key> DEFAULT_BLACKLIST_BLOCKS = List.of(
+    protected static final Set<Key> DEFAULT_BLACKLIST_BLOCKS = ObjectOpenHashSet.of(
             Key.of("minecraft:bedrock"),
             Key.of("minecraft:end_portal_frame"),
             Key.of("minecraft:end_portal"),
@@ -41,10 +42,10 @@ public abstract class FacingTriggerableBlockBehavior extends BukkitBlockBehavior
     );
     protected final Property<Direction> facingProperty;
     protected final Property<Boolean> triggeredProperty;
-    protected final List<Key> blocks;
+    protected final Set<Key> blocks;
     protected final boolean whitelistMode;
 
-    public FacingTriggerableBlockBehavior(CustomBlock customBlock, Property<Direction> facing, Property<Boolean> triggered, List<Key> blocks, boolean whitelistMode) {
+    public FacingTriggerableBlockBehavior(CustomBlock customBlock, Property<Direction> facing, Property<Boolean> triggered, Set<Key> blocks, boolean whitelistMode) {
         super(customBlock);
         this.facingProperty = facing;
         this.triggeredProperty = triggered;

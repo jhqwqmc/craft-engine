@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BlockItemBehavior;
@@ -30,17 +31,15 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PlaceBlockBehavior extends FacingTriggerableBlockBehavior {
     public static final Factory FACTORY = new Factory();
 
-    public PlaceBlockBehavior(CustomBlock customBlock, Property<Direction> facing, Property<Boolean> triggered, List<Key> blocks, boolean whitelistMode) {
+    public PlaceBlockBehavior(CustomBlock customBlock, Property<Direction> facing, Property<Boolean> triggered, Set<Key> blocks, boolean whitelistMode) {
         super(customBlock, facing, triggered, blocks, whitelistMode);
     }
 
@@ -224,7 +223,7 @@ public class PlaceBlockBehavior extends FacingTriggerableBlockBehavior {
             Property<Direction> facing = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.place_block.missing_facing");
             Property<Boolean> triggered = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("triggered"), "warning.config.block.behavior.place_block.missing_triggered");
             boolean whitelistMode = (boolean) arguments.getOrDefault("whitelist", false);
-            List<Key> blocks = MiscUtils.getAsStringList(arguments.get("blocks")).stream().map(Key::of).toList();
+            Set<Key> blocks = MiscUtils.getAsStringList(arguments.get("blocks")).stream().map(Key::of).collect(Collectors.toCollection(ObjectOpenHashSet::new));
             if (blocks.isEmpty() && !whitelistMode) {
                 blocks = FacingTriggerableBlockBehavior.DEFAULT_BLACKLIST_BLOCKS;
             }
