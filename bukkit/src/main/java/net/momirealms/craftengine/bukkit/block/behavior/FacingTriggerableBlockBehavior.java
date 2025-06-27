@@ -3,12 +3,16 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.VersionHelper;
+import org.bukkit.World;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +61,15 @@ public abstract class FacingTriggerableBlockBehavior extends BukkitBlockBehavior
         boolean triggeredValue = blockState.get(this.triggeredProperty);
         if (hasNeighborSignal && !triggeredValue) {
             // FastNMS.INSTANCE.method$LevelAccessor$scheduleBlockTick(level, pos, thisBlock, 1, this.getTickPriority()); // 鬼知道为什么这个无法触发 tick
-            tick(state, level, pos);
+            World world = null;
+            int x = 0;
+            int z = 0;
+            if (VersionHelper.isFolia()) {
+                world = FastNMS.INSTANCE.method$Level$getCraftWorld(level);
+                x = FastNMS.INSTANCE.field$Vec3i$x(pos) >> 4;
+                z = FastNMS.INSTANCE.field$Vec3i$z(pos) >> 4;
+            }
+            CraftEngine.instance().scheduler().sync().runLater(() -> tick(state, level, pos), 1, world, x, z);
             FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, blockState.with(this.triggeredProperty, true).customBlockState().handle(), 2);
         } else if (!hasNeighborSignal && triggeredValue) {
             FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, blockState.with(this.triggeredProperty, false).customBlockState().handle(), 2);
