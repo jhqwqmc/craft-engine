@@ -62,7 +62,6 @@ public class StringKeyConstructor extends SafeConstructor {
     /**
      * 场景A (块合并与路径展开): 构造一个Map，同时处理其中的版本化块合并和 `::` 分隔的深层键。
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected Map<Object, Object> constructMapping(MappingNode node) {
         Map<Object, Object> map = new LinkedHashMap<>();
@@ -101,6 +100,7 @@ public class StringKeyConstructor extends SafeConstructor {
     }
 
     // 处理深层键
+    @SuppressWarnings("unchecked")
     private void processDeepKey(Map<Object, Object> rootMap, String fullKey, Node valueNode, Node keyNode) {
         // 分割出不同的层级
         String[] keyParts = fullKey.split(DEEP_KEY_SEPARATOR);
@@ -143,7 +143,7 @@ public class StringKeyConstructor extends SafeConstructor {
 
 
     // 设置值并检查重复键
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "DuplicatedCode"})
     private void setValueWithDuplicationCheck(Map<Object, Object> targetMap, String key, Object newValue, String fullKeyPath, Node keyNode) {
         Object existingValue = targetMap.get(key);
 

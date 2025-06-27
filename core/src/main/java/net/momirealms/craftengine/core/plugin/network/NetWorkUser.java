@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.plugin.Plugin;
 import net.momirealms.craftengine.core.util.ClientInformation;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -69,4 +70,6 @@ public interface NetWorkUser {
     void setClientInformation(ClientInformation clientInformation);
 
     ClientInformation clientInformation();
+
+    @Nullable Object getPacketListener();
 }

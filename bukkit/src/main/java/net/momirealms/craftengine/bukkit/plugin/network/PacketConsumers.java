@@ -2333,7 +2333,7 @@ public class PacketConsumers {
                 user.simulatePacket(FastNMS.INSTANCE.constructor$ServerboundResourcePackPacket$SUCCESSFULLY_LOADED(packUUID));
                 return null;
             });
-        } catch (Exception e) {
+        } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Failed to handle ClientboundResourcePackPushPacket", e);
         }
     };
@@ -2373,6 +2373,11 @@ public class PacketConsumers {
             }
             if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$SUCCESSFULLY_LOADED) {
                 user.setSentResourcePack(true);
+                if (VersionHelper.isOrAbove1_21_7()) {
+                    NetworkReflections.methodHandle$ServerConfigurationPacketListenerImpl$finishCurrentTask.invokeExact(
+                            user.getPacketListener(), NetworkReflections.instance$ServerResourcePackConfigurationTask$TYPE
+                    );
+                }
             }
         } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Failed to handle ServerboundResourcePackPacket", e);

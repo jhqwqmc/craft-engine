@@ -20,7 +20,7 @@ public final class MinecraftVersion implements Comparable<MinecraftVersion> {
         PACK_FORMATS.put(1_21_04, 46);
         PACK_FORMATS.put(1_21_05, 55);
         PACK_FORMATS.put(1_21_06, 63);
-        PACK_FORMATS.put(1_21_07, 63);
+        PACK_FORMATS.put(1_21_07, 64);
         PACK_FORMATS.put(1_99_99, 1000);
     }
 

@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.plugin.reflection.minecraft;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
 import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
@@ -1255,6 +1256,11 @@ public final class NetworkReflections {
             ReflectionUtils.getDeclaredField(clazz$ServerboundResourcePackPacket, clazz$ServerboundResourcePackPacket$Action, 0)
     );
 
+    // 1.20.3+
+    public static final Field field$ServerboundResourcePackPacket$id = ReflectionUtils.getDeclaredField(
+            clazz$ServerboundResourcePackPacket, UUID.class, 0
+    );
+
     public static final Class<?> clazz$ClientboundCustomPayloadPacket = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     List.of("network.protocol.game.PacketPlayOutCustomPayload", "network.protocol.common.ClientboundCustomPayloadPacket"),
@@ -1346,6 +1352,7 @@ public final class NetworkReflections {
     public static final MethodHandle methodHandle$ClientboundRotateHeadPacket$entityIdGetter;
     public static final MethodHandle methodHandle$ClientboundSetEntityMotionPacket$idGetter;
     public static final MethodHandle methodHandle$ClientboundUpdateAttributesPacket0Constructor;
+    public static final MethodHandle methodHandle$ServerboundResourcePackPacket$idGetter;
 
     static {
         try {
@@ -1493,6 +1500,14 @@ public final class NetworkReflections {
             } else {
                 methodHandle$ClientboundRespawnPacket$dimensionGetter = null;
             }
+            if (field$ServerboundResourcePackPacket$id != null) {
+                methodHandle$ServerboundResourcePackPacket$idGetter = requireNonNull(
+                        ReflectionUtils.unreflectGetter(field$ServerboundResourcePackPacket$id)
+                                .asType(MethodType.methodType(UUID.class, Object.class))
+                );
+            } else {
+                methodHandle$ServerboundResourcePackPacket$idGetter = null;
+            }
         } catch (Throwable e) {
             throw new ReflectionInitException("Failed to initialize reflection", e);
         }
@@ -1572,4 +1587,56 @@ public final class NetworkReflections {
                     clazz$ClientboundRotateHeadPacket, CoreReflections.clazz$Entity, byte.class
             )
     );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerResourcePackConfigurationTask = ReflectionUtils.getClazz(
+            BukkitReflectionUtils.assembleMCClass("server.network.config.ServerResourcePackConfigurationTask")
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ConfigurationTask$Type = BukkitReflectionUtils.findReobfOrMojmapClass(
+            "server.network.ConfigurationTask$a",
+            "server.network.ConfigurationTask$Type"
+    );
+
+    // 1.20.2+
+    public static final Field field$ServerResourcePackConfigurationTask$TYPE = Optional.ofNullable(clazz$ServerResourcePackConfigurationTask)
+            .map(it -> ReflectionUtils.getDeclaredField(it, clazz$ConfigurationTask$Type, 0))
+            .orElse(null);
+
+    // 1.20.2+
+    public static final Object instance$ServerResourcePackConfigurationTask$TYPE;
+
+    static {
+        try {
+            if (field$ServerResourcePackConfigurationTask$TYPE != null) {
+                instance$ServerResourcePackConfigurationTask$TYPE = field$ServerResourcePackConfigurationTask$TYPE.get(null);
+            } else {
+                instance$ServerResourcePackConfigurationTask$TYPE = null;
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerConfigurationPacketListenerImpl = ReflectionUtils.getClazz(
+            BukkitReflectionUtils.assembleMCClass("server.network.ServerConfigurationPacketListenerImpl")
+    );
+
+    // 1.20.2+
+    public static final Method method$ServerConfigurationPacketListenerImpl$finishCurrentTask = Optional.ofNullable(clazz$ServerConfigurationPacketListenerImpl)
+            .map(it -> ReflectionUtils.getDeclaredMethod(it, void.class, clazz$ConfigurationTask$Type))
+            .orElse(null);
+
+    // 1.20.2+
+    public static final MethodHandle methodHandle$ServerConfigurationPacketListenerImpl$finishCurrentTask = Optional.ofNullable(method$ServerConfigurationPacketListenerImpl$finishCurrentTask)
+            .map(it -> {
+                try {
+                    return ReflectionUtils.unreflectMethod(it).asType(MethodType.methodType(void.class, Object.class, Object.class));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .orElse(null);
 }

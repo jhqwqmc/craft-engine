@@ -2769,10 +2769,6 @@ public final class CoreReflections {
             )
     );
 
-    public static final Class<?> clazz$ServerCommonPacketListenerImpl = requireNonNull(
-            clazz$ServerGamePacketListenerImpl.getSuperclass()
-    );
-
     public static final Field field$ServerPlayer$connection = requireNonNull(
             ReflectionUtils.getInstanceDeclaredField(clazz$ServerPlayer, clazz$ServerGamePacketListenerImpl, 0)
     );

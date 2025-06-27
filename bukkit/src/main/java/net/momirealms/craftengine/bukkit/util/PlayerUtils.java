@@ -177,6 +177,7 @@ public final class PlayerUtils {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static Set<Player> getTrackedBy(Player player) {
         return VersionHelper.isOrAbove1_20_2() ? player.getTrackedBy() : player.getTrackedPlayers();
     }

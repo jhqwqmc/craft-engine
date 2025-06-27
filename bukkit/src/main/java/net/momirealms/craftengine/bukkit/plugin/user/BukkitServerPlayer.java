@@ -900,6 +900,12 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    @Nullable
+    public Object getPacketListener() {
+        return FastNMS.INSTANCE.method$Connection$getPacketListener(connection());
+    }
+
+    @Override
     public void clearView() {
         this.entityTypeView.clear();
     }
