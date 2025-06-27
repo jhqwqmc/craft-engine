@@ -70,7 +70,7 @@ public class BukkitServerPlayer extends Player {
     private ConnectionState decoderState;
     private ConnectionState encoderState;
     private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
-    private boolean sentResourcePack = !Config.sendPackOnJoin();
+    private boolean sentResourcePack = false;
     // some references
     private Reference<org.bukkit.entity.Player> playerRef;
     private Reference<Object> serverPlayerRef;
