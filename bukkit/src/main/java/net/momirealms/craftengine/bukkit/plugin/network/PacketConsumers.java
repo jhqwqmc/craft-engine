@@ -2373,6 +2373,7 @@ public class PacketConsumers {
                         );
                     }
                 }
+                return;
             }
             if (!Config.sendPackOnJoin() || !Config.kickOnDeclined()) return;
             if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$DECLINED
