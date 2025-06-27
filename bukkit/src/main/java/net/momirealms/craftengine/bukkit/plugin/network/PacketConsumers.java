@@ -2361,7 +2361,7 @@ public class PacketConsumers {
     public static final TriConsumer<NetWorkUser, NMSPacketEvent, Object> RESOURCE_PACK_RESPONSE = (user, event, packet) -> {
         try {
             if (user.sentResourcePack()) return;
-            Object action = NetworkReflections.methodHandle$ServerboundResourcePackPacket$actionGetter.invokeExact(packet);
+            Object action = FastNMS.INSTANCE.field$ServerboundResourcePackPacket$action(packet);
             if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$SUCCESSFULLY_LOADED) {
                 user.setSentResourcePack(true);
                 if (VersionHelper.isOrAbove1_21_7()) {
@@ -2375,14 +2375,15 @@ public class PacketConsumers {
                 }
                 return;
             }
-            if (!Config.sendPackOnJoin() || !Config.kickOnDeclined()) return;
-            if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$DECLINED
-                    || action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$FAILED_DOWNLOAD) {
-                Object kickPacket = NetworkReflections.constructor$ClientboundDisconnectPacket.newInstance(
-                        ComponentUtils.adventureToMinecraft(Component.translatable("multiplayer.requiredTexturePrompt.disconnect")));
-                user.sendPacket(kickPacket, true);
-                user.nettyChannel().disconnect();
-            }
+            if (!Config.sendPackOnJoin() || !Config.kickOnDeclined()
+                    || action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$ACCEPTED
+                    || action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$DOWNLOADED
+            ) return;
+            Object kickPacket = FastNMS.INSTANCE.constructor$ClientboundDisconnectPacket(
+                    ComponentUtils.adventureToMinecraft(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"))
+            );
+            user.sendPacket(kickPacket, true);
+            user.nettyChannel().disconnect();
         } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Failed to handle ServerboundResourcePackPacket", e);
         }
