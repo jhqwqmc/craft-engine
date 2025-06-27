@@ -2375,9 +2375,12 @@ public class PacketConsumers {
                 user.setSentResourcePack(true);
                 if (VersionHelper.isOrAbove1_21_7()) {
                     // 1.21.7-rc2 开始模拟玩家收到成功加载包也无济于事只能直接调用内部方法强行结束异步任务
-                    NetworkReflections.methodHandle$ServerConfigurationPacketListenerImpl$finishCurrentTask.invokeExact(
-                            user.getPacketListener(), NetworkReflections.instance$ServerResourcePackConfigurationTask$TYPE
-                    );
+                    Object packetListener = user.getPacketListener();
+                    if (NetworkReflections.clazz$ServerConfigurationPacketListenerImpl.isInstance(packetListener)) {
+                        NetworkReflections.methodHandle$ServerConfigurationPacketListenerImpl$finishCurrentTask.invokeExact(
+                                packetListener, NetworkReflections.instance$ServerResourcePackConfigurationTask$TYPE
+                        );
+                    }
                 }
             }
         } catch (Throwable e) {
