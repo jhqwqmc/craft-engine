@@ -2320,6 +2320,7 @@ public class PacketConsumers {
             ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
             host.requestResourcePackDownloadLink(user.uuid()).thenAccept(dataList -> {
                 if (dataList.isEmpty()) {
+                    user.setForceFinishCurrentTask(false);
                     user.simulatePacket(FastNMS.INSTANCE.constructor$ServerboundResourcePackPacket$SUCCESSFULLY_LOADED(packUUID));
                     return;
                 }
@@ -2330,6 +2331,7 @@ public class PacketConsumers {
                 }
             }).exceptionally(throwable -> {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundResourcePackPushPacket", throwable);
+                user.setForceFinishCurrentTask(false);
                 user.simulatePacket(FastNMS.INSTANCE.constructor$ServerboundResourcePackPacket$SUCCESSFULLY_LOADED(packUUID));
                 return null;
             });
@@ -2364,7 +2366,7 @@ public class PacketConsumers {
             Object action = FastNMS.INSTANCE.field$ServerboundResourcePackPacket$action(packet);
             if (action == NetworkReflections.instance$ServerboundResourcePackPacket$Action$SUCCESSFULLY_LOADED) {
                 user.setSentResourcePack(true);
-                if (VersionHelper.isOrAbove1_21_7()) {
+                if (user.forceFinishCurrentTask()) {
                     // 1.21.7-rc2 开始模拟玩家收到成功加载包也无济于事只能直接调用内部方法强行结束异步任务
                     Object packetListener = user.getPacketListener();
                     if (NetworkReflections.clazz$ServerConfigurationPacketListenerImpl.isInstance(packetListener)) {

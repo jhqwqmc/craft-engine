@@ -10,6 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public interface NetWorkUser {
@@ -58,6 +59,10 @@ public interface NetWorkUser {
     void setClientModState(boolean enable);
 
     void addResourcePackUUID(UUID uuid);
+
+    void setForceFinishCurrentTask(boolean force);
+
+    boolean forceFinishCurrentTask();
 
     ProtocolVersion protocolVersion();
 

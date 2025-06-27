@@ -71,6 +71,7 @@ public class BukkitServerPlayer extends Player {
     private ConnectionState encoderState;
     private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
     private boolean sentResourcePack = false;
+    private boolean forceFinishCurrentTask = VersionHelper.isOrAbove1_21_7();
     // some references
     private Reference<org.bukkit.entity.Player> playerRef;
     private Reference<Object> serverPlayerRef;
@@ -867,6 +868,18 @@ public class BukkitServerPlayer extends Player {
         if (VersionHelper.isOrAbove1_20_3()) {
             this.resourcePackUUID.add(uuid);
         }
+    }
+
+    @Override
+    public void setForceFinishCurrentTask(boolean force) {
+        this.forceFinishCurrentTask = force;
+    }
+
+    @Override
+    public boolean forceFinishCurrentTask() {
+        boolean force = this.forceFinishCurrentTask;
+        this.forceFinishCurrentTask = VersionHelper.isOrAbove1_21_7();
+        return force;
     }
 
     @Override
