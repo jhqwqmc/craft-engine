@@ -1558,10 +1558,10 @@ public class PacketConsumers {
 
     private static ListTag generateLore(ItemStack[] storageContents) {
         ListTag lore = new ListTag();
-        int addedLore = 0;
+        int addedLoreCount = 0;
         for (ItemStack itemStack : storageContents) {
             if (itemStack == null) continue;
-            if (addedLore++ < 5) {
+            if (addedLoreCount++ < 5) {
                 lore.add(AdventureHelper.componentToTag(
                         Component.translatable("item.container.item_count")
                                 .arguments(BukkitItemManager.instance().wrap(itemStack).itemNameComponent()
@@ -1570,15 +1570,14 @@ public class PacketConsumers {
                                 .decoration(TextDecoration.ITALIC, false)
                                 .color(NamedTextColor.WHITE)
                 ));
-            } else {
-                lore.add(AdventureHelper.componentToTag(
-                        Component.translatable("item.container.more_items")
-                                .arguments(Component.text(storageContents.length - 5))
-                                .color(NamedTextColor.WHITE)
-                ));
-                break;
             }
         }
+        if (addedLoreCount - 5 <= 0) return lore;
+        lore.add(AdventureHelper.componentToTag(
+                Component.translatable("item.container.more_items")
+                        .arguments(Component.text(addedLoreCount - 5))
+                        .color(NamedTextColor.WHITE)
+        ));
         return lore;
     }
 
