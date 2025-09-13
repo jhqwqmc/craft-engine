@@ -15,6 +15,7 @@ import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.SoundData;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class SimpleStorageBlockEntity extends BlockEntity {
+    public static final Key STORAGE_BLOCK_ENTITY_DATA_ITEM_ID = Key.of("craftengine", "simple_storage_block_entity_data");
     private final SimpleStorageBlockBehavior behavior;
     private final Inventory inventory;
     private double maxInteractionDistance;
@@ -46,7 +48,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveCustomData(CompoundTag tag) {
+    public void saveCustomData(CompoundTag tag) {
         // 保存前先把所有打开此容器的玩家界面关闭
         this.inventory.close();
         ListTag itemsTag = new ListTag();

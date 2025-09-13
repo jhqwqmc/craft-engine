@@ -64,7 +64,7 @@ public abstract class BlockEntity {
         tag.putInt("z", this.pos.z());
     }
 
-    protected void saveCustomData(CompoundTag tag) {
+    public void saveCustomData(CompoundTag tag) {
     }
 
     public void loadCustomData(CompoundTag tag) {
