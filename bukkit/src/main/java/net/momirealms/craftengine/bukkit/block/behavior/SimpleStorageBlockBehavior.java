@@ -42,8 +42,6 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
     private final SoundData openSound;
     private final SoundData closeSound;
     private final boolean hasAnalogOutputSignal;
-    private final boolean canPlaceItem;
-    private final boolean canTakeItem;
     @Nullable
     private final Property<Boolean> openProperty;
 
@@ -53,8 +51,6 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
                                       SoundData openSound,
                                       SoundData closeSound,
                                       boolean hasAnalogOutputSignal,
-                                      boolean canPlaceItem,
-                                      boolean canTakeItem,
                                       @Nullable Property<Boolean> openProperty) {
         super(customBlock);
         this.containerTitle = containerTitle;
@@ -62,8 +58,6 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
         this.openSound = openSound;
         this.closeSound = closeSound;
         this.hasAnalogOutputSignal = hasAnalogOutputSignal;
-        this.canPlaceItem = canPlaceItem;
-        this.canTakeItem = canTakeItem;
         this.openProperty = openProperty;
     }
 
@@ -135,14 +129,6 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
         return this.rows;
     }
 
-    public boolean canPlaceItem() {
-        return this.canPlaceItem;
-    }
-
-    public boolean canTakeItem() {
-        return this.canTakeItem;
-    }
-
     public @Nullable Property<Boolean> openProperty() {
         return openProperty;
     }
@@ -178,17 +164,6 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
         return this.hasAnalogOutputSignal;
     }
 
-    @Override
-    public Object getContainer(Object thisBlock, Object[] args) {
-        CEWorld ceWorld = BukkitWorldManager.instance().getWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(args[1]));
-        BlockPos blockPos = LocationUtils.fromBlockPos(args[2]);
-        BlockEntity blockEntity = ceWorld.getBlockEntityAtIfLoaded(blockPos);
-        if (blockEntity instanceof SimpleStorageBlockEntity entity) {
-            return FastNMS.INSTANCE.method$CraftInventory$getInventory(entity.inventory());
-        }
-        return null;
-    }
-
     public static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
@@ -204,15 +179,8 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
                 openSound = Optional.ofNullable(sounds.get("open")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_0_5, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
                 closeSound = Optional.ofNullable(sounds.get("close")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_0_5, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
             }
-            Map<String, Object> hopperBehavior = (Map<String, Object>) arguments.get("hopper-behavior");
-            boolean canPlaceItem = true;
-            boolean canTakeItem = true;
-            if (hopperBehavior != null) {
-                canPlaceItem = ResourceConfigUtils.getAsBoolean(hopperBehavior.getOrDefault("can-place-item", true), "can-place-item");
-                canTakeItem = ResourceConfigUtils.getAsBoolean(hopperBehavior.getOrDefault("can-take-item", true), "can-take-item");
-            }
             Property<Boolean> property = (Property<Boolean>) block.getProperty("open");
-            return new SimpleStorageBlockBehavior(block, title, rows, openSound, closeSound, hasAnalogOutputSignal, canPlaceItem, canTakeItem, property);
+            return new SimpleStorageBlockBehavior(block, title, rows, openSound, closeSound, hasAnalogOutputSignal, property);
         }
     }
 }
