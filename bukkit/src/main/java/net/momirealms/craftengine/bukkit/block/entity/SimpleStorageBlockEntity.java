@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.SimpleStorageBlockBehavior;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.bukkit.item.ComponentTypes;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
@@ -34,6 +32,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,14 +66,14 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         // 1.21.4 不显示所以说不添加
         if (VersionHelper.isOrAbove1_21_5()) {
             List<Component> lore = generateLore(inventory().getStorageContents());
-            List<Component> originalLore = item.loreComponent().orElseGet(ObjectArrayList::new);
+            List<Component> originalLore = item.loreComponent().orElseGet(ArrayList::new);
             originalLore.addAll(lore);
             item.loreComponent(originalLore);
         }
     }
 
     private static List<Component> generateLore(ItemStack[] storageContents) {
-        List<Component> lore = new ObjectArrayList<>();
+        List<Component> lore = new ArrayList<>();
         int addedLoreCount = 0;
         for (ItemStack itemStack : storageContents) {
             if (itemStack == null) continue;
