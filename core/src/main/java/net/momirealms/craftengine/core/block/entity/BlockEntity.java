@@ -78,7 +78,7 @@ public abstract class BlockEntity {
         if (!canSaveToItem() || storageItemKey() == null) return;
         CompoundTag tag = new CompoundTag();
         saveCustomData(tag);
-        item.setTag(storageItemKey(), tag);
+        item.setTag(tag, storageItemKey());
     }
 
     public void loadCustomDataFromItem(Item<?> item) {
