@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.block.entity;
 
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
+import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.ChunkPos;
@@ -64,7 +65,30 @@ public abstract class BlockEntity {
         tag.putInt("z", this.pos.z());
     }
 
-    public void saveCustomData(CompoundTag tag) {
+    protected boolean canSaveToItem() {
+        return false;
+    }
+
+    @Nullable
+    protected String storageItemKey() {
+        return null;
+    }
+
+    public void saveCustomDataToItem(Item<?> item) {
+        if (!canSaveToItem() || storageItemKey() == null) return;
+        CompoundTag tag = new CompoundTag();
+        saveCustomData(tag);
+        item.setTag(storageItemKey(), tag);
+    }
+
+    public void loadCustomDataFromItem(Item<?> item) {
+        if (!canSaveToItem() || storageItemKey() == null) return;
+        if (item.getTag(storageItemKey()) instanceof CompoundTag storageData) {
+            loadCustomData(storageData);
+        }
+    }
+
+    protected void saveCustomData(CompoundTag tag) {
     }
 
     public void loadCustomData(CompoundTag tag) {

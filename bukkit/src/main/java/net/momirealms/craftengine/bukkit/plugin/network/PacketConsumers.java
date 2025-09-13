@@ -1531,20 +1531,8 @@ public class PacketConsumers {
         if (blockPos != null && includeData) {
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
             BlockEntity blockEntity = serverPlayer.world().storageWorld().getBlockEntityAtIfLoaded(pos);
-            if (blockEntity instanceof SimpleStorageBlockEntity storageBlockEntity) {
-                Tag tag = customItem.getSparrowNBTComponent(ComponentTypes.CUSTOM_DATA);
-                CompoundTag customData = tag instanceof CompoundTag compoundTag ? compoundTag : new CompoundTag();
-                CompoundTag storageData = new CompoundTag();
-                storageBlockEntity.saveCustomData(storageData);
-                customData.put(SimpleStorageBlockEntity.STORAGE_BLOCK_ENTITY_DATA_ITEM_ID.asString(), storageData);
-                customItem.setNBTComponent(ComponentTypes.CUSTOM_DATA, customData);
-                if (VersionHelper.isOrAbove1_21_5()) { // 1.21.4 不显示所以说不添加
-                    ListTag lore = generateLore(storageBlockEntity.inventory().getStorageContents());
-                    if (customItem.getSparrowNBTComponent(ComponentTypes.LORE) instanceof ListTag originalLore) {
-                        lore.addAll(originalLore); // 这个在 lore 的顶上
-                    }
-                    customItem.setNBTComponent(ComponentTypes.LORE, lore);
-                }
+            if (blockEntity != null) {
+                blockEntity.saveCustomDataToItem(customItem);
             }
         }
         assert CoreReflections.method$ServerGamePacketListenerImpl$tryPickItem != null;
@@ -1554,31 +1542,6 @@ public class PacketConsumers {
         } else {
             CoreReflections.method$ServerGamePacketListenerImpl$tryPickItem.invoke(packetListener, FastNMS.INSTANCE.method$CraftItemStack$asNMSCopy(customItem.getItem()));
         }
-    }
-
-    private static ListTag generateLore(ItemStack[] storageContents) {
-        ListTag lore = new ListTag();
-        int addedLoreCount = 0;
-        for (ItemStack itemStack : storageContents) {
-            if (itemStack == null) continue;
-            if (addedLoreCount++ < 5) {
-                lore.add(AdventureHelper.componentToTag(
-                        Component.translatable("item.container.item_count")
-                                .arguments(BukkitItemManager.instance().wrap(itemStack).itemNameComponent()
-                                                .orElseGet(() -> Component.translatable(itemStack.translationKey())),
-                                        Component.text(itemStack.getAmount()))
-                                .decoration(TextDecoration.ITALIC, false)
-                                .color(NamedTextColor.WHITE)
-                ));
-            }
-        }
-        if (addedLoreCount - 5 <= 0) return lore;
-        lore.add(AdventureHelper.componentToTag(
-                Component.translatable("item.container.more_items")
-                        .arguments(Component.text(addedLoreCount - 5))
-                        .color(NamedTextColor.WHITE)
-        ));
-        return lore;
     }
 
     public static final BiConsumer<NetWorkUser, ByteBufPacketEvent> ADD_ENTITY = (user, event) -> {

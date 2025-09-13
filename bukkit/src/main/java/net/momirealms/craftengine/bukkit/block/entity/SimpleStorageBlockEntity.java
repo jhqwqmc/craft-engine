@@ -1,8 +1,13 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.SimpleStorageBlockBehavior;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
+import net.momirealms.craftengine.bukkit.item.ComponentTypes;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
@@ -13,9 +18,9 @@ import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -33,7 +38,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class SimpleStorageBlockEntity extends BlockEntity {
-    public static final Key STORAGE_BLOCK_ENTITY_DATA_ITEM_ID = Key.of("craftengine", "simple_storage_block_entity_data");
     private final SimpleStorageBlockBehavior behavior;
     private final Inventory inventory;
     private double maxInteractionDistance;
@@ -48,7 +52,52 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void saveCustomData(CompoundTag tag) {
+    public boolean canSaveToItem() {
+        return true;
+    }
+
+    @Override
+    public String storageItemKey() {
+        return "craftengine:simple_storage_block_entity_data";
+    }
+
+    @Override
+    public void saveCustomDataToItem(Item<?> item) {
+        super.saveCustomDataToItem(item);
+        // 1.21.4 不显示所以说不添加
+        if (VersionHelper.isOrAbove1_21_5()) {
+            List<Component> lore = generateLore(inventory().getStorageContents());
+            List<Component> originalLore = item.loreComponent().orElseGet(ObjectArrayList::new);
+            originalLore.addAll(lore);
+            item.loreComponent(originalLore);
+        }
+    }
+
+    private static List<Component> generateLore(ItemStack[] storageContents) {
+        List<Component> lore = new ObjectArrayList<>();
+        int addedLoreCount = 0;
+        for (ItemStack itemStack : storageContents) {
+            if (itemStack == null) continue;
+            if (addedLoreCount++ < 5) {
+                lore.add(Component.translatable("item.container.item_count")
+                        .arguments(BukkitItemManager.instance().wrap(itemStack).itemNameComponent()
+                                        .orElseGet(() -> Component.translatable(itemStack.translationKey())),
+                                Component.text(itemStack.getAmount()))
+                        .decoration(TextDecoration.ITALIC, false)
+                        .color(NamedTextColor.WHITE)
+                );
+            }
+        }
+        if (addedLoreCount - 5 <= 0) return lore;
+        lore.add(Component.translatable("item.container.more_items")
+                .arguments(Component.text(addedLoreCount - 5))
+                .color(NamedTextColor.WHITE)
+        );
+        return lore;
+    }
+
+    @Override
+    protected void saveCustomData(CompoundTag tag) {
         // 保存前先把所有打开此容器的玩家界面关闭
         this.inventory.close();
         ListTag itemsTag = new ListTag();

@@ -15,6 +15,7 @@ import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
+import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -135,11 +136,9 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         // place custom block
         placeBlock(placeLocation, blockStateToPlace, revertStates);
         // loading storage data from the item
-        if (VersionHelper.isOrAbove1_21_4() && context.getItem().getSparrowNBTComponent(ComponentTypes.CUSTOM_DATA) instanceof CompoundTag customData) {
-            CompoundTag storageData = customData.getCompound(SimpleStorageBlockEntity.STORAGE_BLOCK_ENTITY_DATA_ITEM_ID.asString());
-            if (storageData != null && context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos) instanceof SimpleStorageBlockEntity storageBlockEntity) {
-                storageBlockEntity.loadCustomData(storageData);
-            }
+        BlockEntity blockEntity = context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos);
+        if (blockEntity != null) {
+            blockEntity.loadCustomDataFromItem(context.getItem());
         }
 
         if (player != null) {
