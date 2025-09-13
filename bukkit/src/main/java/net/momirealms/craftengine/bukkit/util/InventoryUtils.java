@@ -1,11 +1,8 @@
 package net.momirealms.craftengine.bukkit.util;
 
-import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -51,12 +48,5 @@ public final class InventoryUtils {
             }
         }
         return -1;
-    }
-
-    public static boolean isCustomContainer(Inventory inventory) {
-        if (inventory == null) return false;
-        Object container = FastNMS.INSTANCE.method$CraftInventory$getInventory(inventory);
-        if (container == null) return false;
-        return CraftBukkitReflections.clazz$MinecraftInventory.isInstance(container) || container.getClass().getSimpleName().equals("CraftEngineWorldlyContainer");
     }
 }
