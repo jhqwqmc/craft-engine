@@ -15,11 +15,14 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
+import net.momirealms.craftengine.core.block.entity.BlockEntityTypeKeys;
+import net.momirealms.craftengine.core.block.entity.ItemStorageCapable;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.SoundData;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -36,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class SimpleStorageBlockEntity extends BlockEntity {
+public class SimpleStorageBlockEntity extends BlockEntity implements ItemStorageCapable {
     private final SimpleStorageBlockBehavior behavior;
     private final Inventory inventory;
     private double maxInteractionDistance;
@@ -51,18 +54,13 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     }
 
     @Override
-    public boolean canSaveToItem() {
-        return true;
-    }
-
-    @Override
-    public String storageItemKey() {
-        return "craftengine:simple_storage_block_entity_data";
+    public Key storageKey() {
+        return BlockEntityTypeKeys.SIMPLE_STORAGE;
     }
 
     @Override
     public void saveCustomDataToItem(Item<?> item) {
-        super.saveCustomDataToItem(item);
+        ItemStorageCapable.super.saveCustomDataToItem(item);
         // 1.21.4 不显示所以说不添加
         if (VersionHelper.isOrAbove1_21_5()) {
             List<Component> lore = generateLore(inventory().getStorageContents());

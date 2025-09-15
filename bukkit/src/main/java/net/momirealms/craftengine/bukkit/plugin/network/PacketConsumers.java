@@ -46,6 +46,7 @@ import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
+import net.momirealms.craftengine.core.block.entity.ItemStorageCapable;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
@@ -1532,8 +1533,8 @@ public class PacketConsumers {
         if (blockPos != null && includeData) {
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
             BlockEntity blockEntity = serverPlayer.world().storageWorld().getBlockEntityAtIfLoaded(pos);
-            if (blockEntity != null) {
-                blockEntity.saveCustomDataToItem(customItem);
+            if (blockEntity instanceof ItemStorageCapable itemStorageCapable) {
+                itemStorageCapable.saveCustomDataToItem(customItem);
             }
         }
         assert CoreReflections.method$ServerGamePacketListenerImpl$tryPickItem != null;

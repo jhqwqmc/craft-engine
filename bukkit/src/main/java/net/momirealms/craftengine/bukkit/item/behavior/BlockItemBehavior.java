@@ -16,6 +16,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
+import net.momirealms.craftengine.core.block.entity.ItemStorageCapable;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -137,8 +138,8 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         placeBlock(placeLocation, blockStateToPlace, revertStates);
         // loading storage data from the item
         BlockEntity blockEntity = context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos);
-        if (blockEntity != null) {
-            blockEntity.loadCustomDataFromItem(context.getItem());
+        if (blockEntity instanceof ItemStorageCapable itemStorageCapable) {
+            itemStorageCapable.loadCustomDataFromItem(context.getItem());
         }
 
         if (player != null) {
