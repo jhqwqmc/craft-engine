@@ -25,10 +25,8 @@ public class TickingBlockEntityImpl<T extends BlockEntity> implements TickingBlo
 
     @Override
     public void tick() {
-        // 已无效
-        if (!this.isValid()) return;
         // 还没加载完全
-        if (this.blockEntity.world() == null) return;
+        if (this.blockEntity.world == null) return;
         BlockPos pos = pos();
         ImmutableBlockState state = this.chunk.getBlockState(pos);
         // 不是合法方块

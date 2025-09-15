@@ -25,7 +25,6 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
-import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.HumanEntity;
@@ -47,7 +46,8 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         super(BukkitBlockEntityTypes.SIMPLE_STORAGE, pos, blockState);
         this.behavior = super.blockState.behavior().getAs(SimpleStorageBlockBehavior.class).orElseThrow();
         BlockEntityHolder holder = new BlockEntityHolder(this);
-        this.inventory = Bukkit.createInventory(holder, this.behavior.rows() * 9);
+        this.inventory = FastNMS.INSTANCE.createSimpleStorageContainer(holder, this.behavior.rows() * 9, this.behavior.canPlaceItem(), this.behavior.canTakeItem());
+        holder.setInventory(this.inventory);
     }
 
     @Override

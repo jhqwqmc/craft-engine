@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.block.behavior.special;
 
 import java.util.concurrent.Callable;
 
-public interface TriggerOnceBlockBehavior {
+public interface FallOnBlockBehavior {
 
     // 1.20.1~1.21.4 Level world, BlockState state, BlockPos pos, Entity entity, float fallDistance
     // 1.21.5+ Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance

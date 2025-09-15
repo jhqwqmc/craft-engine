@@ -23,7 +23,7 @@ import net.momirealms.craftengine.core.block.BlockKeys;
 import net.momirealms.craftengine.core.block.BlockShape;
 import net.momirealms.craftengine.core.block.DelegatingBlock;
 import net.momirealms.craftengine.core.block.behavior.EmptyBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.TriggerOnceBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.special.FallOnBlockBehavior;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.Key;
@@ -715,7 +715,7 @@ public final class BlockGenerator {
         public void intercept(@This Object thisObj, @AllArguments Object[] args, @SuperCall Callable<Object> superMethod) {
             ObjectHolder<BlockBehavior> holder = ((DelegatingBlock) thisObj).behaviorDelegate();
             try {
-                if (holder.value() instanceof TriggerOnceBlockBehavior behavior) {
+                if (holder.value() instanceof FallOnBlockBehavior behavior) {
                     behavior.fallOn(thisObj, args, superMethod);
                 } else {
                     superMethod.call();
@@ -733,7 +733,7 @@ public final class BlockGenerator {
         public void intercept(@This Object thisObj, @AllArguments Object[] args, @SuperCall Callable<Object> superMethod) {
             ObjectHolder<BlockBehavior> holder = ((DelegatingBlock) thisObj).behaviorDelegate();
             try {
-                if (holder.value() instanceof TriggerOnceBlockBehavior behavior) {
+                if (holder.value() instanceof FallOnBlockBehavior behavior) {
                     behavior.updateEntityMovementAfterFallOn(thisObj, args, superMethod);
                 } else {
                     superMethod.call();

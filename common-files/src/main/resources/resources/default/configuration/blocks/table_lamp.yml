@@ -60,21 +60,21 @@ items:
             east_on:
               state: barrier
               entity-renderer:
-                item: default:table_lamp
+                item: default:table_lamp_on
             north_on:
               state: barrier
               entity-renderer:
-                item: default:table_lamp
+                item: default:table_lamp_on
                 yaw: -90
             south_on:
               state: barrier
               entity-renderer:
-                item: default:table_lamp
+                item: default:table_lamp_on
                 yaw: 90
             west_on:
               state: barrier
               entity-renderer:
-                item: default:table_lamp
+                item: default:table_lamp_on
                 yaw: 180
           variants:
             facing=east,lit=false:
@@ -109,6 +109,16 @@ items:
               id: 19
               settings:
                 luminance: 15
+  default:table_lamp_on:
+    material: nether_brick
+    custom-model-data: 3016
+    model:
+      type: minecraft:model
+      path: minecraft:item/custom/table_lamp_on
+      generation:
+        parent: minecraft:item/custom/table_lamp
+        textures:
+          "0": "minecraft:item/custom/table_lamp_on"
 recipes:
   default:table_lamp:
     type: shaped

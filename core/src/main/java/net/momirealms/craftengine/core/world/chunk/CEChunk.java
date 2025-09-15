@@ -5,6 +5,7 @@ import net.momirealms.craftengine.core.block.EmptyBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
+import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRenderer;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
@@ -25,12 +26,13 @@ public class CEChunk {
     public final ChunkPos chunkPos;
     public final CESection[] sections;
     public final WorldHeight worldHeightAccessor;
-    public final Map<BlockPos, BlockEntity> blockEntities;
-    public final Map<BlockPos, ConstantBlockEntityRenderer> blockEntityRenderers;
+    public final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
+    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingBlockEntitiesByPos; // 从区域线程上访问，安全
+    public final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    public final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
-    protected final Map<BlockPos, ReplaceableTickingBlockEntity> tickingBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
@@ -38,7 +40,9 @@ public class CEChunk {
         this.worldHeightAccessor = world.worldHeight();
         this.sections = new CESection[this.worldHeightAccessor.getSectionsCount()];
         this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.blockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.tickingBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
         this.fillEmptySection();
     }
 
@@ -46,6 +50,8 @@ public class CEChunk {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.tickingBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
         int sectionCount = this.worldHeightAccessor.getSectionsCount();
         this.sections = new CESection[sectionCount];
         if (sections != null) {
@@ -67,21 +73,24 @@ public class CEChunk {
             this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
         }
         if (itemDisplayBlockRenders != null) {
-            this.blockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(itemDisplayBlockRenders.size(), 10), 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(itemDisplayBlockRenders.size(), 10), 0.5f);
             List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, itemDisplayBlockRenders);
             for (BlockPos pos : blockEntityRendererPoses) {
-                this.addBlockEntityRenderer(pos);
+                this.addConstantBlockEntityRenderer(pos);
             }
         } else {
-            this.blockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
         }
     }
 
     public void spawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.blockEntityRenderers.values()) {
-                renderer.spawn(player);
+            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                renderer.show(player);
+            }
+            for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
+                renderer.show(player);
             }
         } finally {
             this.renderLock.readLock().unlock();
@@ -91,19 +100,22 @@ public class CEChunk {
     public void despawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.blockEntityRenderers.values()) {
-                renderer.despawn(player);
+            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                renderer.hide(player);
+            }
+            for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
+                renderer.hide(player);
             }
         } finally {
             this.renderLock.readLock().unlock();
         }
     }
 
-    public void addBlockEntityRenderer(BlockPos pos) {
-        this.addBlockEntityRenderer(pos, this.getBlockState(pos));
+    public void addConstantBlockEntityRenderer(BlockPos pos) {
+        this.addConstantBlockEntityRenderer(pos, this.getBlockState(pos));
     }
 
-    public void addBlockEntityRenderer(BlockPos pos, ImmutableBlockState state) {
+    public void addConstantBlockEntityRenderer(BlockPos pos, ImmutableBlockState state) {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
@@ -111,23 +123,41 @@ public class CEChunk {
             for (int i = 0; i < elements.length; i++) {
                 elements[i] = renderers[i].create(wrappedWorld, pos);
             }
-            ConstantBlockEntityRenderer renderer = this.world.createBlockEntityRenderer(elements, wrappedWorld, pos);
-            renderer.spawn();
+            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements);
+            for (Player player : getTrackedBy()) {
+                renderer.show(player);
+            }
             try {
                 this.renderLock.writeLock().lock();
-                this.blockEntityRenderers.put(pos, renderer);
+                this.constantBlockEntityRenderers.put(pos, renderer);
             } finally {
                 this.renderLock.writeLock().unlock();
             }
         }
     }
 
-    public void removeBlockEntityRenderer(BlockPos pos) {
+    public void removeConstantBlockEntityRenderer(BlockPos pos) {
         try {
             this.renderLock.writeLock().lock();
-            ConstantBlockEntityRenderer removed = this.blockEntityRenderers.remove(pos);
+            ConstantBlockEntityRenderer removed = this.constantBlockEntityRenderers.remove(pos);
             if (removed != null) {
-                removed.despawn();
+                for (Player player : getTrackedBy()) {
+                    removed.hide(player);
+                }
+            }
+        } finally {
+            this.renderLock.writeLock().unlock();
+        }
+    }
+
+    private void removeDynamicBlockEntityRenderer(BlockPos pos) {
+        try {
+            this.renderLock.writeLock().lock();
+            DynamicBlockEntityRenderer renderer = this.dynamicBlockEntityRenderers.remove(pos);
+            if (renderer != null) {
+                for (Player player : getTrackedBy()) {
+                    renderer.hide(player);
+                }
             }
         } finally {
             this.renderLock.writeLock().unlock();
@@ -137,6 +167,7 @@ public class CEChunk {
     public void addBlockEntity(BlockEntity blockEntity) {
         this.setBlockEntity(blockEntity);
         this.replaceOrCreateTickingBlockEntity(blockEntity);
+        this.createDynamicBlockEntityRenderer(blockEntity);
     }
 
     public void removeBlockEntity(BlockPos blockPos) {
@@ -145,21 +176,28 @@ public class CEChunk {
             removedBlockEntity.setValid(false);
         }
         this.removeBlockEntityTicker(blockPos);
+        this.removeDynamicBlockEntityRenderer(blockPos);
     }
 
     public void activateAllBlockEntities() {
         for (BlockEntity blockEntity : this.blockEntities.values()) {
             blockEntity.setValid(true);
-            replaceOrCreateTickingBlockEntity(blockEntity);
+            this.replaceOrCreateTickingBlockEntity(blockEntity);
+            this.createDynamicBlockEntityRenderer(blockEntity);
         }
-        for (ConstantBlockEntityRenderer renderer : this.blockEntityRenderers.values()) {
+        for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
             renderer.activate();
         }
     }
 
+    public List<Player> getTrackedBy() {
+        return this.world.world.getTrackedBy(this.chunkPos);
+    }
+
     public void deactivateAllBlockEntities() {
         this.blockEntities.values().forEach(e -> e.setValid(false));
-        this.blockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
+        this.constantBlockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
+        this.dynamicBlockEntityRenderers.clear();
         this.tickingBlockEntitiesByPos.values().forEach((ticker) -> ticker.setTicker(DummyTickingBlockEntity.INSTANCE));
         this.tickingBlockEntitiesByPos.clear();
     }
@@ -181,6 +219,34 @@ public class CEChunk {
             }));
         } else {
             this.removeBlockEntityTicker(blockEntity.pos());
+        }
+    }
+
+    public <T extends BlockEntity> void createDynamicBlockEntityRenderer(T blockEntity) {
+        DynamicBlockEntityRenderer renderer = blockEntity.blockEntityRenderer();
+        if (renderer != null) {
+            DynamicBlockEntityRenderer previous;
+            try {
+                this.renderLock.writeLock().lock();
+                previous = this.dynamicBlockEntityRenderers.put(blockEntity.pos(), renderer);
+            } finally {
+                this.renderLock.writeLock().unlock();
+            }
+            if (previous != null) {
+                if (previous == renderer) {
+                    return;
+                }
+                for (Player player : getTrackedBy()) {
+                    previous.hide(player);
+                    renderer.show(player);
+                }
+            } else {
+                for (Player player : getTrackedBy()) {
+                    renderer.show(player);
+                }
+            }
+        } else {
+            this.removeDynamicBlockEntityRenderer(blockEntity.pos());
         }
     }
 
@@ -239,10 +305,10 @@ public class CEChunk {
         return Collections.unmodifiableCollection(this.blockEntities.values());
     }
 
-    public List<BlockPos> blockEntityRenderers() {
+    public List<BlockPos> constantBlockEntityRenderers() {
         try {
             this.renderLock.readLock().lock();
-            return new ArrayList<>(this.blockEntityRenderers.keySet());
+            return new ArrayList<>(this.constantBlockEntityRenderers.keySet());
         } finally {
             this.renderLock.readLock().unlock();
         }

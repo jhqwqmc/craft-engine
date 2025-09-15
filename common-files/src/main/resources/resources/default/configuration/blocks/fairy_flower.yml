@@ -17,7 +17,7 @@ items:
             - default:sound/grass
           overrides:
             item: default:fairy_flower
-            push-reaction: DESTROY
+            push-reaction: destroy
             map-color: 19
         behavior:
           type: bush_block

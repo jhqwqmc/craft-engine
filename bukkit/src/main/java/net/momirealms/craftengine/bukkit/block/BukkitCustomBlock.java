@@ -76,10 +76,10 @@ public final class BukkitCustomBlock extends AbstractCustomBlock {
         try {
             for (ImmutableBlockState immutableBlockState : variantProvider().states()) {
                 if (immutableBlockState.vanillaBlockState() == null) {
-                    CraftEngine.instance().logger().warn("Could not find vanilla block immutableBlockState for " + immutableBlockState + ". This might cause errors!");
+                    CraftEngine.instance().logger().warn("Could not find vanilla visual block state for " + immutableBlockState + ". This might cause errors!");
                     continue;
                 } else if (immutableBlockState.customBlockState() == null) {
-                    CraftEngine.instance().logger().warn("Could not find custom block immutableBlockState for " + immutableBlockState + ". This might cause errors!");
+                    CraftEngine.instance().logger().warn("Could not find real block state for " + immutableBlockState + ". This might cause errors!");
                     continue;
                 }
                 DelegatingBlockState nmsState = (DelegatingBlockState) immutableBlockState.customBlockState().literalObject();

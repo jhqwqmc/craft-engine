@@ -16,7 +16,7 @@ items:
             - default:hardness/none
             - default:sound/grass
           overrides:
-            push-reaction: DESTROY
+            push-reaction: destroy
             map-color: 15
             is-randomly-ticking: true
         behaviors:

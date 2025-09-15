@@ -1,20 +1,38 @@
 package net.momirealms.craftengine.core.block.entity.render;
 
+import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
-public abstract class ConstantBlockEntityRenderer {
+public class ConstantBlockEntityRenderer {
+    private final BlockEntityElement[] elements;
 
-    public abstract void spawn();
+    public ConstantBlockEntityRenderer(BlockEntityElement[] elements) {
+        this.elements = elements;
+    }
 
-    public abstract void despawn();
+    public void show(Player player) {
+        for (BlockEntityElement element : this.elements) {
+            element.show(player);
+        }
+    }
 
-    public abstract void spawn(Player player);
+    public void hide(Player player) {
+        for (BlockEntityElement element : this.elements) {
+            element.hide(player);
+        }
+    }
 
-    public abstract void despawn(Player player);
+    public void deactivate() {
+        for (BlockEntityElement element : this.elements) {
+            element.deactivate();
+        }
+    }
 
-    public abstract void deactivate();
-
-    public abstract void activate();
+    public void activate() {
+        for (BlockEntityElement element : this.elements) {
+            element.activate();
+        }
+    }
 }

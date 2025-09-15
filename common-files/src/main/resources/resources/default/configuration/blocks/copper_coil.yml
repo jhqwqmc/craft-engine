@@ -24,8 +24,10 @@ items:
             replaceable: false
             is-redstone-conductor: true
             is-suffocating: true
-            instrument: BASEDRUM
+            instrument: basedrum
             map-color: 15
+            tags:
+              - minecraft:mineable/pickaxe
         behavior:
           type: lamp_block
         states:

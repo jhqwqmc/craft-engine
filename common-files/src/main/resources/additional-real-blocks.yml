@@ -83,3 +83,5 @@ minecraft:crimson_fence_gate: 16
 minecraft:warped_fence_gate: 16
 minecraft:barrier: 128
 minecraft:white_bed: 1
+minecraft:redstone_torch: 1
+minecraft:redstone_wall_torch: 4

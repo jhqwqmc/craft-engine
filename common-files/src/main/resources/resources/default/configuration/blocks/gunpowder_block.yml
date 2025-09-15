@@ -25,7 +25,7 @@ items:
           overrides:
             hardness: 0.5
             resistance: 0.5
-            instrument: SNARE
+            instrument: snare
             map-color: 45
         state:
           id: 16
@@ -59,7 +59,7 @@ items:
           overrides:
             hardness: 1.8
             resistance: 1.8
-            instrument: BASEDRUM
+            instrument: basedrum
             map-color: 45
         state:
           id: 17

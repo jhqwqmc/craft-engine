@@ -93,6 +93,7 @@ public class Config {
     protected boolean resource_pack$delivery$send_on_join;
     protected boolean resource_pack$delivery$resend_on_upload;
     protected boolean resource_pack$delivery$auto_upload;
+    protected boolean resource_pack$delivery$strict_player_uuid_validation;
     protected Path resource_pack$delivery$file_to_upload;
     protected Component resource_pack$send$prompt;
 
@@ -271,6 +272,7 @@ public class Config {
         resource_pack$delivery$kick_if_declined = config.getBoolean("resource-pack.delivery.kick-if-declined", true);
         resource_pack$delivery$kick_if_failed_to_apply = config.getBoolean("resource-pack.delivery.kick-if-failed-to-apply", true);
         resource_pack$delivery$auto_upload = config.getBoolean("resource-pack.delivery.auto-upload", true);
+        resource_pack$delivery$strict_player_uuid_validation = config.getBoolean("resource-pack.delivery.strict-player-uuid-validation", true);
         resource_pack$delivery$file_to_upload = resolvePath(config.getString("resource-pack.delivery.file-to-upload", "./generated/resource_pack.zip"));
         resource_pack$send$prompt = AdventureHelper.miniMessage().deserialize(config.getString("resource-pack.delivery.prompt", "<yellow>To fully experience our server, please accept our custom resource pack.</yellow>"));
         resource_pack$protection$crash_tools$method_1 = config.getBoolean("resource-pack.protection.crash-tools.method-1", false);
@@ -589,6 +591,9 @@ public class Config {
 
     public static boolean autoUpload() {
         return instance.resource_pack$delivery$auto_upload;
+    }
+    public static boolean strictPlayerUuidValidation() {
+        return instance.resource_pack$delivery$strict_player_uuid_validation;
     }
 
     public static Path fileToUpload() {

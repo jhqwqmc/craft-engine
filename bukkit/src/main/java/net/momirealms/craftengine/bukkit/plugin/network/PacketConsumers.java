@@ -65,6 +65,7 @@ import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.*;
 import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
@@ -1246,17 +1247,17 @@ public class PacketConsumers {
         try {
             BukkitServerPlayer player = (BukkitServerPlayer) user;
             String name = (String) NetworkReflections.methodHandle$ServerboundHelloPacket$nameGetter.invokeExact(packet);
-            player.setName(name);
+            player.setUnverifiedName(name);
             if (VersionHelper.isOrAbove1_20_2()) {
                 UUID uuid = (UUID) NetworkReflections.methodHandle$ServerboundHelloPacket$uuidGetter.invokeExact(packet);
-                player.setUUID(uuid);
+                player.setUnverifiedUUID(uuid);
             } else {
                 @SuppressWarnings("unchecked")
                 Optional<UUID> uuid = (Optional<UUID>) NetworkReflections.methodHandle$ServerboundHelloPacket$uuidGetter.invokeExact(packet);
                 if (uuid.isPresent()) {
-                    player.setUUID(uuid.get());
+                    player.setUnverifiedUUID(uuid.get());
                 } else {
-                    player.setUUID(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8)));
+                    player.setUnverifiedUUID(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8)));
                 }
             }
         } catch (Throwable e) {
@@ -2515,6 +2516,18 @@ public class PacketConsumers {
             // 防止后续加入的JoinWorldTask再次处理
             user.setShouldProcessFinishConfiguration(false);
 
+            // 检查用户UUID是否已经校验
+            if (!user.isUUIDVerified()) {
+                if (Config.strictPlayerUuidValidation()) {
+                    TranslationManager.instance().log("warning.network.resource_pack.unverified_uuid", user.name(), user.uuid().toString());
+                    user.kick(Component.translatable("disconnect.loginFailed"));
+                    return;
+                }
+                if (Config.debugResourcePack()) {
+                    TranslationManager.instance().log("warning.network.resource_pack.unverified_uuid", user.name(), user.uuid().toString());
+                }
+            }
+
             // 取消 ClientboundFinishConfigurationPacket，让客户端发呆，并结束掉当前的进入世界任务
             event.setCancelled(true);
             try {
@@ -2564,8 +2577,8 @@ public class PacketConsumers {
     public static final TriConsumer<NetWorkUser, NMSPacketEvent, Object> LOGIN_FINISHED = (user, event, packet) -> {
         try {
             GameProfile gameProfile = FastNMS.INSTANCE.field$ClientboundLoginFinishedPacket$gameProfile(packet);
-            user.setName(gameProfile.getName());
-            user.setUUID(gameProfile.getId());
+            user.setVerifiedName(gameProfile.getName());
+            user.setVerifiedUUID(gameProfile.getId());
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("Failed to handle ClientboundLoginFinishedPacket", e);
         }

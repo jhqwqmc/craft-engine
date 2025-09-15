@@ -48,4 +48,23 @@ public class BlockPlaceContext extends UseOnContext {
     public Direction getNearestLookingDirection() {
         return Direction.orderedByNearest(this.getPlayer())[0];
     }
+
+    public Direction[] getNearestLookingDirections() {
+        Direction[] directions = Direction.orderedByNearest(this.getPlayer());
+        if (!this.replaceClicked) {
+            Direction clickedFace = this.getClickedFace();
+            int i = 0;
+
+            while (i < directions.length && directions[i] != clickedFace.opposite()) {
+                i++;
+            }
+
+            if (i > 0) {
+                System.arraycopy(directions, 0, directions, 1, i);
+                directions[0] = clickedFace.opposite();
+            }
+
+        }
+        return directions;
+    }
 }

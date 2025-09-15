@@ -17,7 +17,7 @@ items:
               - default:hardness/none
             overrides:
               map-color: 11
-              push-reaction: DESTROY
+              push-reaction: destroy
           behaviors:
             - type: sturdy_base_block
               direction: down

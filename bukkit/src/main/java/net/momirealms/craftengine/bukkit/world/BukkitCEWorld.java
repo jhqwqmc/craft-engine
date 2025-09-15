@@ -1,17 +1,14 @@
 package net.momirealms.craftengine.bukkit.world;
 
-import net.momirealms.craftengine.bukkit.block.entity.renderer.BukkitConstantBlockEntityRenderer;
-import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.LightUtils;
-import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.SectionPosUtils;
-import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.CEWorld;
+import net.momirealms.craftengine.core.world.SectionPos;
+import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.chunk.storage.StorageAdaptor;
 import net.momirealms.craftengine.core.world.chunk.storage.WorldDataStorage;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,10 +39,5 @@ public class BukkitCEWorld extends CEWorld {
             super.pendingLightSections = new ArrayList<>(Math.max(pendingLightSections.size() / 2, 8));
             super.lightSections.addAll(pendingLightSections);
         }
-    }
-
-    @Override
-    public ConstantBlockEntityRenderer createBlockEntityRenderer(BlockEntityElement[] elements, World world, BlockPos pos) {
-        return new BukkitConstantBlockEntityRenderer(world, new ChunkPos(pos), elements);
     }
 }

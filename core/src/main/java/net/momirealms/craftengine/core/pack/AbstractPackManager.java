@@ -273,7 +273,7 @@ public abstract class AbstractPackManager implements PackManager {
     @Override
     public void initCachedAssets() {
         try {
-            PackCacheData cacheData = new PackCacheData(plugin);
+            PackCacheData cacheData = new PackCacheData(this.plugin);
             this.cacheEventDispatcher.accept(cacheData);
             this.updateCachedAssets(cacheData, null);
         } catch (Exception e) {
@@ -430,6 +430,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/configuration/blocks/table_lamp.yml");
         plugin.saveResource("resources/default/configuration/blocks/topaz_ore.yml");
         plugin.saveResource("resources/default/configuration/blocks/netherite_anvil.yml");
+        plugin.saveResource("resources/default/configuration/blocks/amethyst_torch.yml");
         // assets
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/font/image/emojis.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/chinese_lantern.png");
@@ -506,6 +507,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/fairy_flower_3.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/fairy_flower_4.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/reed.png");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/amethyst_torch.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/flame_cane_1.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/flame_cane_2.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/ender_pearl_flower_stage_0.png");
@@ -523,6 +525,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/wooden_chair.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/bench.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/table_lamp.png");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/table_lamp_on.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/wooden_chair.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/bench.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/flower_basket_ceiling.json");
@@ -725,7 +728,7 @@ public abstract class AbstractPackManager implements PackManager {
             this.plugin.logger().info("Validated resource pack in " + (time3 - time2) + "ms");
             Path finalPath = resourcePackPath();
             Files.createDirectories(finalPath.getParent());
-            if (!VersionHelper.PREMIUM) {
+            if (!VersionHelper.PREMIUM && Config.enableObfuscation()) {
                 Config.instance().setObf(false);
                 this.plugin.logger().warn("Resource pack obfuscation requires Premium Edition.");
             }

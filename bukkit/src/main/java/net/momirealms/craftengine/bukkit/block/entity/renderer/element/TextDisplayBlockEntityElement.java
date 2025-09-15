@@ -31,12 +31,12 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
     }
 
     @Override
-    public void despawn(Player player) {
+    public void hide(Player player) {
         player.sendPacket(this.cachedDespawnPacket, false);
     }
 
     @Override
-    public void spawn(Player player) {
+    public void show(Player player) {
         player.sendPackets(List.of(this.cachedSpawnPacket, FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player))), true);
     }
 }

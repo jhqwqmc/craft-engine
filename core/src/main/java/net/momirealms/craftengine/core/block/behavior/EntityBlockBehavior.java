@@ -20,7 +20,12 @@ public interface EntityBlockBehavior {
     }
 
     @SuppressWarnings("unchecked")
-    static <E extends BlockEntity> BlockEntityTicker<E> createTickerHelper(BlockEntityTicker<? super E> ticker) {
+    static <E extends BlockEntity, T extends BlockEntity> BlockEntityTicker<E> createTickerHelper(BlockEntityTicker<? super T> ticker) {
         return (BlockEntityTicker<E>) ticker;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <E extends BlockEntity> BlockEntityType<E> blockEntityTypeHelper(BlockEntityType<?> type) {
+        return (BlockEntityType<E>) type;
     }
 }

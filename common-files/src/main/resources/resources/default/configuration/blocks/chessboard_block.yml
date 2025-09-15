@@ -19,8 +19,8 @@ items:
           resistance: 1.4
           is-suffocating: true
           is-redstone-conductor: true
-          push-reaction: PUSH_ONLY
-          instrument: BASEDRUM
+          push-reaction: push_only
+          instrument: basedrum
           map-color: 36
           sounds:
             break: minecraft:block.stone.break

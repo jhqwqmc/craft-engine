@@ -1,15 +1,13 @@
 package net.momirealms.craftengine.core.world;
 
 import ca.spottedleaf.concurrentutil.map.ConcurrentLong2ReferenceChainedHashTable;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
-import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.tick.TickingBlockEntity;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
+import net.momirealms.craftengine.core.util.BlockEntityTickersList;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
 import net.momirealms.craftengine.core.world.chunk.storage.StorageAdaptor;
 import net.momirealms.craftengine.core.world.chunk.storage.WorldDataStorage;
@@ -21,13 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class CEWorld {
     public static final String REGION_DIRECTORY = "craftengine";
-    protected final World world;
+    public final World world;
     protected final ConcurrentLong2ReferenceChainedHashTable<CEChunk> loadedChunkMap;
     protected final WorldDataStorage worldDataStorage;
     protected final WorldHeight worldHeightAccessor;
     protected List<SectionPos> pendingLightSections = new ArrayList<>();
     protected final Set<SectionPos> lightSections = ConcurrentHashMap.newKeySet(128);
-    protected final List<TickingBlockEntity> tickingBlockEntities = new ArrayList<>();
+    protected final BlockEntityTickersList tickingBlockEntities = new BlockEntityTickersList();
     protected final List<TickingBlockEntity> pendingTickingBlockEntities = new ArrayList<>();
     protected volatile boolean isTickingBlockEntities = false;
     protected volatile boolean isUpdatingLights = false;
@@ -207,18 +205,17 @@ public abstract class CEWorld {
             this.pendingTickingBlockEntities.clear();
         }
         if (!this.tickingBlockEntities.isEmpty()) {
-            ReferenceOpenHashSet<TickingBlockEntity> toRemove = new ReferenceOpenHashSet<>();
-            for (TickingBlockEntity blockEntity : this.tickingBlockEntities) {
-                if (blockEntity.isValid()) {
-                    blockEntity.tick();
+            Object[] entities = this.tickingBlockEntities.elements();
+            for (int i = 0, size = this.tickingBlockEntities.size(); i < size; i++) {
+                TickingBlockEntity entity = (TickingBlockEntity) entities[i];
+                if (entity.isValid()) {
+                    entity.tick();
                 } else {
-                    toRemove.add(blockEntity);
+                    this.tickingBlockEntities.markAsRemoved(i);
                 }
             }
-            this.tickingBlockEntities.removeAll(toRemove);
+            this.tickingBlockEntities.removeMarkedEntries();
         }
         this.isTickingBlockEntities = false;
     }
-
-    public abstract ConstantBlockEntityRenderer createBlockEntityRenderer(BlockEntityElement[] elements, World world, BlockPos pos);
 }

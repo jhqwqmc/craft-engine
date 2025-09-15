@@ -6,9 +6,9 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Experimental
 public interface BlockEntityElement {
 
-    void spawn(Player player);
+    void show(Player player);
 
-    void despawn(Player player);
+    void hide(Player player);
 
     default void deactivate() {}
 

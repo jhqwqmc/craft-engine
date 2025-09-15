@@ -40,14 +40,11 @@ import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManagerImp
 import net.momirealms.craftengine.core.plugin.locale.TranslationManagerImpl;
 import net.momirealms.craftengine.core.plugin.logger.JavaPluginLogger;
 import net.momirealms.craftengine.core.plugin.logger.PluginLogger;
-import net.momirealms.craftengine.core.plugin.logger.filter.DisconnectLogFilter;
-import net.momirealms.craftengine.core.plugin.logger.filter.LogFilter;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerAdapter;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
 import net.momirealms.craftengine.core.util.CharacterUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
-import org.apache.logging.log4j.LogManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;

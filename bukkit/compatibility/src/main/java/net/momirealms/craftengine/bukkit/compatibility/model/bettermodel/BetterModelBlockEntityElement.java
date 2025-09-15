@@ -32,14 +32,14 @@ public class BetterModelBlockEntityElement implements BlockEntityElement {
     }
 
     @Override
-    public void despawn(Player player) {
+    public void hide(Player player) {
         if (this.dummyTracker != null) {
             this.dummyTracker.remove((org.bukkit.entity.Player) player.platformPlayer());
         }
     }
 
     @Override
-    public void spawn(Player player) {
+    public void show(Player player) {
         if (this.dummyTracker != null) {
             this.dummyTracker.spawn((org.bukkit.entity.Player) player.platformPlayer());
         }

@@ -21,8 +21,8 @@ items:
             - default:sound/wood
             - default:settings/solid_1x1x1
           overrides:
-            push-reaction: NORMAL
-            instrument: HARP
+            push-reaction: normal
+            instrument: harp
             luminance: 15
             map-color: 36
         state:

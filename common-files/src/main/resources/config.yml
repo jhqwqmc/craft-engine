@@ -98,6 +98,8 @@ resource-pack:
     file-to-upload: "./generated/resource_pack.zip"
     # Resend the resource pack to players upon successful upload
     resend-on-upload: true
+    # Whether a verified player UUID is required to get the resource pack
+    strict-player-uuid-validation: true
   duplicated-files-handler:
     - term:
         type: any_of

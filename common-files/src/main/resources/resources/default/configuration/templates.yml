@@ -747,7 +747,7 @@ templates#settings#blocks:
       - default:hardness/none
       - default:sound/grass
     overrides:
-      push-reaction: DESTROY
+      push-reaction: destroy
       is-randomly-ticking: true
       map-color: 7
       tags:
@@ -763,11 +763,11 @@ templates#settings#blocks:
     overrides:
       hardness: 0.2
       resistance: 0.2
-      push-reaction: DESTROY
+      push-reaction: destroy
       replaceable: false
       is-redstone-conductor: false
       is-suffocating: false
-      instrument: HARP
+      instrument: harp
       tags:
         - minecraft:mineable/hoe
         - minecraft:sword_efficient
@@ -780,11 +780,11 @@ templates#settings#blocks:
       - default:burn_data/wood
       - default:hardness/wood
     overrides:
-      push-reaction: NORMAL
+      push-reaction: normal
       replaceable: false
       is-redstone-conductor: true
       is-suffocating: true
-      instrument: BASS
+      instrument: bass
       can-occlude: true
       tags:
         - minecraft:mineable/axe
@@ -798,11 +798,11 @@ templates#settings#blocks:
       - default:burn_data/planks
       - default:hardness/planks
     overrides:
-      push-reaction: NORMAL
+      push-reaction: normal
       replaceable: false
       is-redstone-conductor: true
       is-suffocating: true
-      instrument: BASS
+      instrument: bass
       can-occlude: true
       tags:
         - minecraft:mineable/axe
@@ -814,10 +814,10 @@ templates#settings#blocks:
     overrides:
       hardness: 3.0
       resistance: 3.0
-      push-reaction: NORMAL
+      push-reaction: normal
       is-redstone-conductor: true
       is-suffocating: true
-      instrument: BASEDRUM
+      instrument: basedrum
       can-occlude: true
       map-color: 11
       tags:
@@ -830,10 +830,10 @@ templates#settings#blocks:
     overrides:
       hardness: 4.5
       resistance: 3.0
-      push-reaction: NORMAL
+      push-reaction: normal
       is-redstone-conductor: true
       is-suffocating: true
-      instrument: BASEDRUM
+      instrument: basedrum
       can-occlude: true
       map-color: 59
       tags:

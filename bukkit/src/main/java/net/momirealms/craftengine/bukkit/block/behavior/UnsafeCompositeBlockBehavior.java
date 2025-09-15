@@ -5,7 +5,8 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.TriggerOnceBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.special.FallOnBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.special.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
@@ -15,12 +16,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior implements TriggerOnceBlockBehavior {
+public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
+        implements FallOnBlockBehavior, PlaceLiquidBlockBehavior {
     private final AbstractBlockBehavior[] behaviors;
 
     public UnsafeCompositeBlockBehavior(CustomBlock customBlock, List<AbstractBlockBehavior> behaviors) {
         super(customBlock);
         this.behaviors = behaviors.toArray(new AbstractBlockBehavior[0]);
+    }
+
+    @Override
+    public boolean canPlaceLiquid(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        for (AbstractBlockBehavior behavior : behaviors) {
+            if (behavior instanceof PlaceLiquidBlockBehavior) {
+                return behavior.canPlaceLiquid(thisBlock, args, superMethod);
+            }
+        }
+        return super.canPlaceLiquid(thisBlock, args, superMethod);
+    }
+
+    @Override
+    public boolean placeLiquid(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        for (AbstractBlockBehavior behavior : behaviors) {
+            if (behavior instanceof PlaceLiquidBlockBehavior) {
+                return behavior.placeLiquid(thisBlock, args, superMethod);
+            }
+        }
+        return super.placeLiquid(thisBlock, args, superMethod);
     }
 
     @SuppressWarnings("unchecked")
@@ -341,22 +363,22 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior implements
     @Override
     public void fallOn(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
-            if (behavior instanceof TriggerOnceBlockBehavior f) {
+            if (behavior instanceof FallOnBlockBehavior f) {
                 f.fallOn(thisBlock, args, superMethod);
                 return;
             }
         }
-        TriggerOnceBlockBehavior.super.fallOn(thisBlock, args, superMethod);
+        FallOnBlockBehavior.super.fallOn(thisBlock, args, superMethod);
     }
 
     @Override
     public void updateEntityMovementAfterFallOn(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
-            if (behavior instanceof TriggerOnceBlockBehavior f) {
+            if (behavior instanceof FallOnBlockBehavior f) {
                 f.updateEntityMovementAfterFallOn(thisBlock, args, superMethod);
                 return;
             }
         }
-        TriggerOnceBlockBehavior.super.updateEntityMovementAfterFallOn(thisBlock, args, superMethod);
+        FallOnBlockBehavior.super.updateEntityMovementAfterFallOn(thisBlock, args, superMethod);
     }
 }

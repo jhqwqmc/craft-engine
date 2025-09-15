@@ -21,8 +21,8 @@ items:
           burnable: true
           is-suffocating: false
           is-redstone-conductor: false
-          push-reaction: BLOCK
-          instrument: BASS
+          push-reaction: block
+          instrument: bass
           sounds:
             break: minecraft:block.wood.break
             fall: minecraft:block.wood.fall
@@ -68,8 +68,8 @@ items:
           burnable: true
           is-suffocating: false
           is-redstone-conductor: false
-          push-reaction: BLOCK
-          instrument: BASS
+          push-reaction: block
+          instrument: bass
           sounds:
             break: minecraft:block.wood.break
             fall: minecraft:block.wood.fall

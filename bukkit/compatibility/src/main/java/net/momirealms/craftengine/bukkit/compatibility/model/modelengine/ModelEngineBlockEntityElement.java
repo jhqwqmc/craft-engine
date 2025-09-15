@@ -39,14 +39,14 @@ public class ModelEngineBlockEntityElement implements BlockEntityElement {
     }
 
     @Override
-    public void despawn(Player player) {
+    public void hide(Player player) {
         if (this.dummy != null) {
             this.dummy.setForceViewing((org.bukkit.entity.Player) player.platformPlayer(), true);
         }
     }
 
     @Override
-    public void spawn(Player player) {
+    public void show(Player player) {
         if (this.dummy != null) {
             this.dummy.setForceHidden((org.bukkit.entity.Player) player.platformPlayer(), true);
         }

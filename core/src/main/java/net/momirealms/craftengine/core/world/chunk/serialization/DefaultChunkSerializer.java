@@ -30,7 +30,7 @@ public final class DefaultChunkSerializer {
         if (!blockEntities.isEmpty()) {
             chunkNbt.put("block_entities", blockEntities);
         }
-        ListTag blockEntityRenders = DefaultBlockEntityRendererSerializer.serialize(chunk.blockEntityRenderers());
+        ListTag blockEntityRenders = DefaultBlockEntityRendererSerializer.serialize(chunk.constantBlockEntityRenderers());
         if (!blockEntityRenders.isEmpty()) {
             chunkNbt.put("block_entity_renderers", blockEntityRenders);
         }

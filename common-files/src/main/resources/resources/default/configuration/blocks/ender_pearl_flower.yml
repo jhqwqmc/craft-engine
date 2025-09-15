@@ -19,7 +19,7 @@ blocks:
         - default:sound/grass
       overrides:
         item: default:ender_pearl_flower_seeds
-        push-reaction: DESTROY
+        push-reaction: destroy
         map-color: 24
         is-randomly-ticking: true
     behaviors:
