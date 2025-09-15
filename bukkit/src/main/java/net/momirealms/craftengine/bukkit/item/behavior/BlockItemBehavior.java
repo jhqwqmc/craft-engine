@@ -6,8 +6,6 @@ import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.event.CustomBlockAttemptPlaceEvent;
 import net.momirealms.craftengine.bukkit.api.event.CustomBlockPlaceEvent;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
-import net.momirealms.craftengine.bukkit.block.entity.SimpleStorageBlockEntity;
-import net.momirealms.craftengine.bukkit.item.ComponentTypes;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.*;
@@ -37,7 +35,6 @@ import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigExce
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.WorldPosition;
-import net.momirealms.sparrow.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
 import org.bukkit.Location;
@@ -136,15 +133,14 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         revertStates.add(previousState);
         // place custom block
         placeBlock(placeLocation, blockStateToPlace, revertStates);
-        // loading storage data from the item
+
         if (player != null) {
+            // loading storage data from the item
             BlockEntity blockEntity = context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos);
             if (blockEntity instanceof ItemStorageCapable itemStorageCapable && itemStorageCapable.hasPermission(player)) {
                 itemStorageCapable.loadCustomDataFromItem(context.getItem());
             }
-        }
 
-        if (player != null) {
             // call bukkit event
             BlockPlaceEvent bukkitPlaceEvent = new BlockPlaceEvent(bukkitBlock, previousState, againstBlock, (ItemStack) context.getItem().getItem(), bukkitPlayer, true, context.getHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND);
             if (EventUtils.fireAndCheckCancel(bukkitPlaceEvent)) {
