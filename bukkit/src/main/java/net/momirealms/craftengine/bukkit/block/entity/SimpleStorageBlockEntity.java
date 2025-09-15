@@ -2,8 +2,6 @@ package net.momirealms.craftengine.bukkit.block.entity;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.SimpleStorageBlockBehavior;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
@@ -19,6 +17,7 @@ import net.momirealms.craftengine.core.block.entity.BlockEntityTypeKeys;
 import net.momirealms.craftengine.core.block.entity.ItemStorageCapable;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.ComponentKeys;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.SoundData;
@@ -60,37 +59,29 @@ public class SimpleStorageBlockEntity extends BlockEntity implements ItemStorage
 
     @Override
     public void saveCustomDataToItem(Item<?> item) {
+        if (inventory().isEmpty()) return;
         ItemStorageCapable.super.saveCustomDataToItem(item);
-        // 1.21.4 不显示所以说不添加
         if (VersionHelper.isOrAbove1_21_5()) {
-            List<Component> lore = generateLore(inventory().getStorageContents());
-            List<Component> originalLore = item.loreComponent().map(ObjectArrayList::new).orElseGet(ObjectArrayList::new);
-            originalLore.addAll(lore);
-            item.loreComponent(originalLore);
-        }
-    }
-
-    private static List<Component> generateLore(ItemStack[] storageContents) {
-        List<Component> lore = new ObjectArrayList<>();
-        int addedLoreCount = 0;
-        for (ItemStack itemStack : storageContents) {
-            if (itemStack == null) continue;
-            if (addedLoreCount++ < 5) {
-                lore.add(Component.translatable("item.container.item_count")
-                        .arguments(BukkitItemManager.instance().wrap(itemStack).itemNameComponent()
-                                        .orElseGet(() -> Component.translatable(itemStack.translationKey())),
-                                Component.text(itemStack.getAmount()))
-                        .decoration(TextDecoration.ITALIC, false)
-                        .color(NamedTextColor.WHITE)
-                );
+            // 1.20.5~1.21.4 不显示所以说不添加
+            try {
+                List<Object> items = new ObjectArrayList<>();
+                for (ItemStack itemStack : inventory().getStorageContents()) {
+                    if (itemStack == null) continue;
+                    items.add(FastNMS.INSTANCE.field$CraftItemStack$handle(itemStack));
+                }
+                Object itemContainerContents = CoreReflections.method$ItemContainerContents$fromItems.invoke(null, items);
+                CoreReflections.instance$ItemContainerContents$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, itemContainerContents)
+                        .ifSuccess(success -> item.setNBTComponent(ComponentKeys.CONTAINER, success))
+                        .ifError(error -> CraftEngine.instance().logger().warn("Error when converting to ItemContainerContents: " + error));
+            } catch (ReflectiveOperationException e) {
+                CraftEngine.instance().logger().warn("An error occurred while retrieving ItemContainerContents.", e);
             }
+        } else if (!VersionHelper.isOrAbove1_20_5()) {
+            // 1.20~1.20.4添加一个 (+NBT) 的lore
+            List<Component> lore = item.loreComponent().map(ObjectArrayList::new).orElseGet(ObjectArrayList::new);
+            lore.addLast(Component.text("(+NBT)"));
+            item.loreComponent(lore);
         }
-        if (addedLoreCount - 5 <= 0) return lore;
-        lore.add(Component.translatable("item.container.more_items")
-                .arguments(Component.text(addedLoreCount - 5))
-                .color(NamedTextColor.WHITE)
-        );
-        return lore;
     }
 
     @Override

@@ -137,9 +137,11 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         // place custom block
         placeBlock(placeLocation, blockStateToPlace, revertStates);
         // loading storage data from the item
-        BlockEntity blockEntity = context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos);
-        if (blockEntity instanceof ItemStorageCapable itemStorageCapable) {
-            itemStorageCapable.loadCustomDataFromItem(context.getItem());
+        if (player != null) {
+            BlockEntity blockEntity = context.getLevel().storageWorld().getBlockEntityAtIfLoaded(pos);
+            if (blockEntity instanceof ItemStorageCapable itemStorageCapable && itemStorageCapable.hasPermission(player)) {
+                itemStorageCapable.loadCustomDataFromItem(context.getItem());
+            }
         }
 
         if (player != null) {

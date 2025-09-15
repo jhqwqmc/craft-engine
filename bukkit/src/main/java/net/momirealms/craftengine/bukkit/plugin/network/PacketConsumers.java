@@ -1533,7 +1533,7 @@ public class PacketConsumers {
         if (blockPos != null && includeData) {
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
             BlockEntity blockEntity = serverPlayer.world().storageWorld().getBlockEntityAtIfLoaded(pos);
-            if (blockEntity instanceof ItemStorageCapable itemStorageCapable) {
+            if (blockEntity instanceof ItemStorageCapable itemStorageCapable && itemStorageCapable.hasPermission(serverPlayer)) {
                 itemStorageCapable.saveCustomDataToItem(customItem);
             }
         }
