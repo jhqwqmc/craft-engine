@@ -34,6 +34,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.*;
@@ -714,6 +715,19 @@ public final class InteractUtils {
         registerInteraction(BlockKeys.BAMBOO_WALL_HANGING_SIGN, (player, item, blockState, result) -> true);
         registerInteraction(BlockKeys.CRIMSON_WALL_HANGING_SIGN, (player, item, blockState, result) -> true);
         registerInteraction(BlockKeys.WARPED_WALL_HANGING_SIGN, (player, item, blockState, result) -> true);
+        // 展示柜
+        registerInteraction(BlockKeys.OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.SPRUCE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.BIRCH_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.JUNGLE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.ACACIA_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.DARK_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.MANGROVE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.CHERRY_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.PALE_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.BAMBOO_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.CRIMSON_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.WARPED_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
     }
 
     static {

@@ -734,10 +734,6 @@ public abstract class AbstractPackManager implements PackManager {
             this.plugin.logger().info("Optimized resource pack in " + (time4 - time3) + "ms");
             Path finalPath = resourcePackPath();
             Files.createDirectories(finalPath.getParent());
-            if (!VersionHelper.PREMIUM && Config.enableObfuscation()) {
-                Config.instance().setObf(false);
-                this.plugin.logger().warn("Resource pack obfuscation requires Premium Edition.");
-            }
             try {
                 this.zipGenerator.accept(generatedPackPath, finalPath);
             } catch (Exception e) {
