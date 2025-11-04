@@ -113,9 +113,9 @@ public class BukkitSeatManager implements SeatManager {
         if (!isSeat) return;
         Location location = seat.getLocation();
         if (seat instanceof ArmorStand) {
-            location.add(0, 0.9875,0);
+            location.add(0, 0.3875,0);
         } else {
-            location.add(0,0.25,0);
+            location.add(0,-0.35,0);
         }
         seat.remove();
         EntityUtils.safeDismount(player, location);
