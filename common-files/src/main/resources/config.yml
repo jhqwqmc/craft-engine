@@ -81,6 +81,15 @@ resource-pack:
         suffix: "minecraft/atlases"
       resolution:
         type: merge_atlas
+    - term:
+        type: any_of
+        terms:
+          - type: exact
+            path: "assets/minecraft/font/default.json"
+          - type: exact
+            path: "assets/minecraft/font/uniform.json"
+      resolution:
+        type: merge_font
   # Validate if there is any error in the resource pack, such as missing textures or models
   # If your resource pack is compliant with the standard, you can disable validation to improve the resource pack generation speed.
   validation:
