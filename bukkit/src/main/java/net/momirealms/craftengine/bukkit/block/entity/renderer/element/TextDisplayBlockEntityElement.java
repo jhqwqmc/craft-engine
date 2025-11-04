@@ -16,13 +16,14 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
     public final TextDisplayBlockEntityElementConfig config;
     public final Object cachedSpawnPacket;
     public final Object cachedDespawnPacket;
+    public final Object cachedUpdatePosPacket;
     public final int entityId;
 
     public TextDisplayBlockEntityElement(TextDisplayBlockEntityElementConfig config, BlockPos pos) {
-        this(config, pos, CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet());
+        this(config, pos, CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet(), false);
     }
 
-    public TextDisplayBlockEntityElement(TextDisplayBlockEntityElementConfig config, BlockPos pos, int entityId) {
+    public TextDisplayBlockEntityElement(TextDisplayBlockEntityElementConfig config, BlockPos pos, int entityId, boolean posChanged) {
         Vector3f position = config.position();
         this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                 entityId, UUID.randomUUID(), pos.x() + position.x, pos.y() + position.y, pos.z() + position.z,
@@ -31,6 +32,7 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
         this.config = config;
         this.cachedDespawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(IntList.of(entityId));
         this.entityId = entityId;
+        this.cachedUpdatePosPacket = posChanged ? FastNMS.INSTANCE.constructor$ClientboundEntityPositionSyncPacket(this.entityId, pos.x() + position.x, pos.y() + position.y, pos.z() + position.z, config.yRot(), config.xRot(), false) : null;
     }
 
     @Override
@@ -45,7 +47,13 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
 
     @Override
     public void transform(Player player) {
-        player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)), false);
+        if (this.cachedUpdatePosPacket != null) {
+            player.sendPackets(List.of(
+                    FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)),
+                   this.cachedUpdatePosPacket), false);
+        } else {
+            player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)), false);
+        }
     }
 
     public int entityId() {

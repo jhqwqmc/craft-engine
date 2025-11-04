@@ -68,10 +68,7 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public TextDisplayBlockEntityElement create(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
-        if (previous.config.yRot != this.yRot || !previous.config.position.equals(this.position)) {
-            return null;
-        }
-        return new TextDisplayBlockEntityElement(this, pos, previous.entityId);
+        return new TextDisplayBlockEntityElement(this, pos, previous.entityId, previous.config.yRot != this.yRot || !previous.config.position.equals(this.position));
     }
 
     @Override

@@ -80,10 +80,7 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public ItemDisplayBlockEntityElement create(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
-        if (previous.config.yRot != this.yRot || !previous.config.position.equals(this.position)) {
-            return null;
-        }
-        return new ItemDisplayBlockEntityElement(this, pos, previous.entityId);
+        return new ItemDisplayBlockEntityElement(this, pos, previous.entityId, previous.config.yRot != this.yRot || !previous.config.position.equals(this.position));
     }
 
     @Override
