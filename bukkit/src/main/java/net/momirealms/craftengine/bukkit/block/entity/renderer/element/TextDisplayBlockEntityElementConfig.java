@@ -66,6 +66,19 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
         return new TextDisplayBlockEntityElement(this, pos);
     }
 
+    @Override
+    public TextDisplayBlockEntityElement create(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
+        if (previous.config.yRot != this.yRot || !previous.config.position.equals(this.position)) {
+            return null;
+        }
+        return new TextDisplayBlockEntityElement(this, pos, previous.entityId);
+    }
+
+    @Override
+    public Class<TextDisplayBlockEntityElement> elementClass() {
+        return TextDisplayBlockEntityElement.class;
+    }
+
     public Component text(Player player) {
         return AdventureHelper.miniMessage().deserialize(this.text, PlayerOptionalContext.of(player).tagResolvers());
     }

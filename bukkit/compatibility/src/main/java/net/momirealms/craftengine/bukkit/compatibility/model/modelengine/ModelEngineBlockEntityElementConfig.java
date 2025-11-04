@@ -44,6 +44,11 @@ public class ModelEngineBlockEntityElementConfig implements BlockEntityElementCo
         return new ModelEngineBlockEntityElement(world, pos, this);
     }
 
+    @Override
+    public Class<ModelEngineBlockEntityElement> elementClass() {
+        return ModelEngineBlockEntityElement.class;
+    }
+
     public static class Factory implements BlockEntityElementConfigFactory {
 
         @SuppressWarnings("unchecked")

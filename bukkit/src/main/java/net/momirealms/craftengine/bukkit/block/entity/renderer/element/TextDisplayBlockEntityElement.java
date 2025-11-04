@@ -13,13 +13,16 @@ import java.util.List;
 import java.util.UUID;
 
 public class TextDisplayBlockEntityElement implements BlockEntityElement {
-    private final TextDisplayBlockEntityElementConfig config;
-    private final Object cachedSpawnPacket;
-    private final Object cachedDespawnPacket;
-    private final int entityId;
+    public final TextDisplayBlockEntityElementConfig config;
+    public final Object cachedSpawnPacket;
+    public final Object cachedDespawnPacket;
+    public final int entityId;
 
     public TextDisplayBlockEntityElement(TextDisplayBlockEntityElementConfig config, BlockPos pos) {
-        int entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
+        this(config, pos, CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet());
+    }
+
+    public TextDisplayBlockEntityElement(TextDisplayBlockEntityElementConfig config, BlockPos pos, int entityId) {
         Vector3f position = config.position();
         this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                 entityId, UUID.randomUUID(), pos.x() + position.x, pos.y() + position.y, pos.z() + position.z,
@@ -38,5 +41,14 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
     @Override
     public void show(Player player) {
         player.sendPackets(List.of(this.cachedSpawnPacket, FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player))), true);
+    }
+
+    @Override
+    public void transform(Player player) {
+        player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)), false);
+    }
+
+    public int entityId() {
+        return entityId;
     }
 }

@@ -44,6 +44,11 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
         return new BetterModelBlockEntityElement(world, pos, this);
     }
 
+    @Override
+    public Class<BetterModelBlockEntityElement> elementClass() {
+        return BetterModelBlockEntityElement.class;
+    }
+
     public static class Factory implements BlockEntityElementConfigFactory {
 
         @SuppressWarnings("unchecked")
