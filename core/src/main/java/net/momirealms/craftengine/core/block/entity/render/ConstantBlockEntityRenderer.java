@@ -4,8 +4,6 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collection;
-
 @ApiStatus.Experimental
 public class ConstantBlockEntityRenderer {
     private final BlockEntityElement[] elements;
