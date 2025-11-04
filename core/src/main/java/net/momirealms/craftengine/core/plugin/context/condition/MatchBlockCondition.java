@@ -2,22 +2,32 @@ package net.momirealms.craftengine.core.plugin.context.condition;
 
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
+import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
+import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.ExistingBlock;
+import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.WorldPosition;
 
 import java.util.*;
 
 public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> {
     private final Set<String> ids;
     private final boolean regexMatch;
+    private final NumberProvider x;
+    private final NumberProvider y;
+    private final NumberProvider z;
 
-    public MatchBlockCondition(Collection<String> ids, boolean regexMatch) {
+    public MatchBlockCondition(Collection<String> ids, boolean regexMatch, NumberProvider x, NumberProvider y, NumberProvider z) {
         this.ids = new HashSet<>(ids);
         this.regexMatch = regexMatch;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     @Override
@@ -27,8 +37,13 @@ public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> 
 
     @Override
     public boolean test(CTX ctx) {
-        Optional<ExistingBlock> block = ctx.getOptionalParameter(DirectContextParameters.BLOCK);
-        return block.filter(blockInWorld -> MiscUtils.matchRegex(blockInWorld.id().asString(), this.ids, this.regexMatch)).isPresent();
+        Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
+        if (optionalWorldPosition.isPresent()) {
+            World world = optionalWorldPosition.get().world();
+            ExistingBlock blockAt = world.getBlockAt(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)));
+            return MiscUtils.matchRegex(blockAt.id().asString(), this.ids, this.regexMatch);
+        }
+        return false;
     }
 
     public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
@@ -40,7 +55,10 @@ public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> 
                 throw new LocalizedResourceConfigException("warning.config.condition.match_block.missing_id");
             }
             boolean regex = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("regex", false), "regex");
-            return new MatchBlockCondition<>(ids, regex);
+            return new MatchBlockCondition<>(ids, regex,
+                    NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
+                    NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
+                    NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")));
         }
     }
 }
