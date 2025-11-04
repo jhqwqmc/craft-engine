@@ -728,6 +728,24 @@ public final class InteractUtils {
         registerInteraction(BlockKeys.BAMBOO_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
         registerInteraction(BlockKeys.CRIMSON_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
         registerInteraction(BlockKeys.WARPED_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        // 铜傀儡雕像
+        registerInteraction(BlockKeys.COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.EXPOSED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WEATHERED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.OXIDIZED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_EXPOSED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_WEATHERED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_OXIDIZED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
+        // 铜箱子
+        registerInteraction(BlockKeys.COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.EXPOSED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WEATHERED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.OXIDIZED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_EXPOSED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_WEATHERED_COPPER_CHEST, ((player, item, blockData, result) -> true));
+        registerInteraction(BlockKeys.WAXED_OXIDIZED_COPPER_CHEST, ((player, item, blockData, result) -> true));
     }
 
     static {

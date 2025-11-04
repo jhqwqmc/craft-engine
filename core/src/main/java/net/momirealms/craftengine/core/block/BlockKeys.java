@@ -343,6 +343,24 @@ public final class BlockKeys {
     public static final Key CRIMSON_SHELF = Key.of("minecraft:crimson_shelf");
     public static final Key WARPED_SHELF = Key.of("minecraft:warped_shelf");
 
+    public static final Key COPPER_GOLEM_STATUE = Key.of("minecraft:copper_golem_statue");
+    public static final Key EXPOSED_COPPER_GOLEM_STATUE = Key.of("minecraft:exposed_copper_golem_statue");
+    public static final Key WEATHERED_COPPER_GOLEM_STATUE = Key.of("minecraft:weathered_copper_golem_statue");
+    public static final Key OXIDIZED_COPPER_GOLEM_STATUE = Key.of("minecraft:oxidized_copper_golem_statue");
+    public static final Key WAXED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_copper_golem_statue");
+    public static final Key WAXED_EXPOSED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_exposed_copper_golem_statue");
+    public static final Key WAXED_WEATHERED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_weathered_copper_golem_statue");
+    public static final Key WAXED_OXIDIZED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_oxidized_copper_golem_statue");
+
+    public static final Key COPPER_CHEST = Key.of("minecraft:copper_chest");
+    public static final Key EXPOSED_COPPER_CHEST = Key.of("minecraft:exposed_copper_chest");
+    public static final Key WEATHERED_COPPER_CHEST = Key.of("minecraft:weathered_copper_chest");
+    public static final Key OXIDIZED_COPPER_CHEST = Key.of("minecraft:oxidized_copper_chest");
+    public static final Key WAXED_COPPER_CHEST = Key.of("minecraft:waxed_copper_chest");
+    public static final Key WAXED_EXPOSED_COPPER_CHEST = Key.of("minecraft:waxed_exposed_copper_chest");
+    public static final Key WAXED_WEATHERED_COPPER_CHEST = Key.of("minecraft:waxed_weathered_copper_chest");
+    public static final Key WAXED_OXIDIZED_COPPER_CHEST = Key.of("minecraft:waxed_oxidized_copper_chest");
+
     public static final Key[] BUTTONS = new Key[]{
             OAK_BUTTON, SPRUCE_BUTTON, BIRCH_BUTTON, JUNGLE_BUTTON, ACACIA_BUTTON, DARK_OAK_BUTTON, MANGROVE_BUTTON, CHERRY_BUTTON,
             PALE_OAK_BUTTON, BAMBOO_BUTTON, CRIMSON_BUTTON, WARPED_BUTTON, STONE_BUTTON, POLISHED_BLACKSTONE_BUTTON
