@@ -27,6 +27,11 @@ public class CachedStorage<T extends WorldDataStorage> implements WorldDataStora
     }
 
     @Override
+    public CEChunk readNewChunkAt(CEWorld world, ChunkPos pos) throws IOException {
+        return this.storage.readNewChunkAt(world, pos);
+    }
+
+    @Override
     public @NotNull CEChunk readChunkAt(@NotNull CEWorld world, @NotNull ChunkPos pos) throws IOException {
         CEChunk chunk = this.chunkCache.getIfPresent(pos);
         if (chunk != null) {
@@ -40,6 +45,12 @@ public class CachedStorage<T extends WorldDataStorage> implements WorldDataStora
     @Override
     public void writeChunkAt(@NotNull ChunkPos pos, @NotNull CEChunk chunk) throws IOException {
         this.storage.writeChunkAt(pos, chunk);
+    }
+
+    @Override
+    public void clearChunkAt(@NotNull ChunkPos pos) throws IOException {
+        this.storage.clearChunkAt(pos);
+        this.chunkCache.invalidate(pos);
     }
 
     @Override

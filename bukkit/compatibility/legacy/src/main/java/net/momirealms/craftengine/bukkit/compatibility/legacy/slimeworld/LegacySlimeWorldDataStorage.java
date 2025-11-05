@@ -27,6 +27,14 @@ public class LegacySlimeWorldDataStorage implements WorldDataStorage {
     }
 
     @Override
+    public CEChunk readNewChunkAt(CEWorld world, ChunkPos pos) {
+        SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
+        if (slimeChunk == null) return new CEChunk(world, pos);
+        slimeChunk.getExtraData().getValue().remove("craftengine");
+        return new CEChunk(world, pos);
+    }
+
+    @Override
     public @NotNull CEChunk readChunkAt(@NotNull CEWorld world, @NotNull ChunkPos pos) {
         SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
         if (slimeChunk == null) return new CEChunk(world, pos);
@@ -55,6 +63,13 @@ public class LegacySlimeWorldDataStorage implements WorldDataStorage {
                 throw new RuntimeException("Failed to write chunk tag to slime world. " + pos, e);
             }
         }
+    }
+
+    @Override
+    public void clearChunkAt(@NotNull ChunkPos pos) {
+        SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
+        if (slimeChunk == null) return;
+        slimeChunk.getExtraData().getValue().remove("craftengine");
     }
 
     @Override

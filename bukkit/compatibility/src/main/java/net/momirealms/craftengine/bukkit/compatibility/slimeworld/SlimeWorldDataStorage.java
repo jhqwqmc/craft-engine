@@ -28,6 +28,14 @@ public class SlimeWorldDataStorage implements WorldDataStorage {
     }
 
     @Override
+    public CEChunk readNewChunkAt(CEWorld world, ChunkPos pos) {
+        SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
+        if (slimeChunk == null) return new CEChunk(world, pos);
+        slimeChunk.getExtraData().remove("craftengine");
+        return new CEChunk(world, pos);
+    }
+
+    @Override
     public @NotNull CEChunk readChunkAt(@NotNull CEWorld world, @NotNull ChunkPos pos) {
         SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
         if (slimeChunk == null) return new CEChunk(world, pos);
@@ -42,7 +50,7 @@ public class SlimeWorldDataStorage implements WorldDataStorage {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void writeChunkAt(@NotNull ChunkPos pos, @NotNull CEChunk chunk) {
         SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
@@ -53,13 +61,19 @@ public class SlimeWorldDataStorage implements WorldDataStorage {
         } else {
             try {
                 Object tag = adaptor.bytesToByteArrayTag(NBT.toBytes(nbt));
-                Map<String, ?> data1 = slimeChunk.getExtraData();
-                Map<String, Object> data2 = (Map<String, Object>) data1;
+                Map<String, Object> data2 = (Map) slimeChunk.getExtraData();
                 data2.put("craftengine", tag);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to write chunk tag to slime world. " + pos, e);
             }
         }
+    }
+
+    @Override
+    public void clearChunkAt(@NotNull ChunkPos pos) {
+        SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
+        if (slimeChunk == null) return;
+        slimeChunk.getExtraData().remove("craftengine");
     }
 
     @Override

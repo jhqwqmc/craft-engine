@@ -35,6 +35,7 @@ public class CEChunk {
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
+    private volatile boolean activated;
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
@@ -274,7 +275,12 @@ public class CEChunk {
         this.removeDynamicBlockEntityRenderer(blockPos);
     }
 
+    public List<Player> getTrackedBy() {
+        return this.world.world.getTrackedBy(this.chunkPos);
+    }
+
     public void activateAllBlockEntities() {
+        if (this.activated) return;
         for (BlockEntity blockEntity : this.blockEntities.values()) {
             blockEntity.setValid(true);
             this.replaceOrCreateTickingBlockEntity(blockEntity);
@@ -283,13 +289,11 @@ public class CEChunk {
         for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
             renderer.activate();
         }
-    }
-
-    public List<Player> getTrackedBy() {
-        return this.world.world.getTrackedBy(this.chunkPos);
+        this.activated = true;
     }
 
     public void deactivateAllBlockEntities() {
+        if (!this.activated) return;
         this.blockEntities.values().forEach(e -> e.setValid(false));
         this.constantBlockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
         this.dynamicBlockEntityRenderers.clear();
@@ -297,6 +301,7 @@ public class CEChunk {
         this.tickingSyncBlockEntitiesByPos.clear();
         this.tickingAsyncBlockEntitiesByPos.values().forEach((ticker) -> ticker.setTicker(DummyTickingBlockEntity.INSTANCE));
         this.tickingAsyncBlockEntitiesByPos.clear();
+        this.activated = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -543,14 +548,12 @@ public class CEChunk {
     public void load() {
         if (this.loaded) return;
         this.world.addLoadedChunk(this);
-        this.activateAllBlockEntities();
         this.loaded = true;
     }
 
     public void unload() {
         if (!this.loaded) return;
         this.world.removeLoadedChunk(this);
-        this.deactivateAllBlockEntities();
         this.loaded = false;
     }
 }

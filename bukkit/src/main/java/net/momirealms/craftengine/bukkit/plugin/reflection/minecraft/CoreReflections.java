@@ -3135,7 +3135,8 @@ public final class CoreReflections {
     public static final Class<?> clazz$ChunkMap = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "server.level.PlayerChunkMap",
-                    "server.level.ChunkMap"
+                    "server.level.PlayerChunkMap" // paper remap的问题，所以使用旧mapping
+//                    "server.level.ChunkMap"
             )
     );
 
@@ -4535,5 +4536,17 @@ public final class CoreReflections {
 
     public static final Method method$DismountHelper$canDismountTo1 = requireNonNull(
             ReflectionUtils.getStaticMethod(clazz$DismountHelper, boolean.class, clazz$CollisionGetter, clazz$Vec3, clazz$LivingEntity, clazz$Pose)
+    );
+
+    public static final Class<?> clazz$WorldGenContext = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("world.level.chunk.status.WorldGenContext")), VersionHelper.isOrAbove1_20_5()
+    );
+
+    public static final Field field$ChunkMap$worldGenContext = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$ChunkMap, clazz$WorldGenContext, 0), VersionHelper.isOrAbove1_20_5()
+    );
+
+    public static final Field field$ChunkMap$chunkGenerator = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$ChunkMap, clazz$ChunkGenerator, 0), !VersionHelper.isOrAbove1_20_5()
     );
 }
