@@ -165,29 +165,27 @@ public class CEChunk {
                 } else {
                     outer: for (int i = 0; i < elements.length; i++) {
                         BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[i];
-                         {
-                            for (int j = 0; j < previousElements.length; j++) {
-                                BlockEntityElement previousElement = previousElements[j];
-                                if (previousElement != null && config.elementClass().isInstance(previousElement)) {
-                                    BlockEntityElement newElement = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
-                                    if (newElement != null) {
-                                        previousElements[i] = null;
-                                        elements[i] = newElement;
-                                        if (hasTrackedBy) {
-                                            for (Player player : trackedBy) {
-                                                newElement.transform(player);
-                                            }
+                        for (int j = 0; j < previousElements.length; j++) {
+                            BlockEntityElement previousElement = previousElements[j];
+                            if (previousElement != null && config.elementClass().isInstance(previousElement)) {
+                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
+                                if (newElement != null) {
+                                    previousElements[j] = null;
+                                    elements[i] = newElement;
+                                    if (hasTrackedBy) {
+                                        for (Player player : trackedBy) {
+                                            newElement.transform(player);
                                         }
-                                        continue outer;
                                     }
+                                    continue outer;
                                 }
                             }
-                            BlockEntityElement newElement = config.create(wrappedWorld, pos);
-                            elements[i] = newElement;
-                            if (hasTrackedBy) {
-                                for (Player player : trackedBy) {
-                                    newElement.show(player);
-                                }
+                        }
+                        BlockEntityElement newElement = config.create(wrappedWorld, pos);
+                        elements[i] = newElement;
+                        if (hasTrackedBy) {
+                            for (Player player : trackedBy) {
+                                newElement.show(player);
                             }
                         }
                     }
