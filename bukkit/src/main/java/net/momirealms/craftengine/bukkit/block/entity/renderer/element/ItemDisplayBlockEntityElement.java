@@ -48,9 +48,7 @@ public class ItemDisplayBlockEntityElement implements BlockEntityElement {
     @Override
     public void transform(Player player) {
         if (this.cachedUpdatePosPacket != null) {
-            player.sendPackets(List.of(
-                    FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)),
-                    this.cachedUpdatePosPacket), false);
+            player.sendPackets(List.of(this.cachedUpdatePosPacket, FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player))), false);
         } else {
             player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player)), false);
         }
