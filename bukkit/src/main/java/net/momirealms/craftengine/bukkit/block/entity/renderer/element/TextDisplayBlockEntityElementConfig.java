@@ -68,6 +68,10 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public TextDisplayBlockEntityElement create(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
+        Quaternionf previousRotation = previous.config.rotation;
+        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
+            return null;
+        }
         return new TextDisplayBlockEntityElement(this, pos, previous.entityId, previous.config.yRot != this.yRot || !previous.config.position.equals(this.position));
     }
 
