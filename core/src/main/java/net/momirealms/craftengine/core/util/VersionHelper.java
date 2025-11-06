@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class VersionHelper {
     public static final boolean PREMIUM = true;
@@ -35,20 +36,30 @@ public class VersionHelper {
     private static final boolean v1_21_8;
     private static final boolean v1_21_9;
     private static final boolean v1_21_10;
+    private static final Class<?> UNOBFUSCATED_CLAZZ = Objects.requireNonNull(ReflectionUtils.getClazz(
+            "net.minecraft.obfuscate.DontObfuscate", // 因为无混淆版本没有这个类所以说多写几个防止找不到了
+            "net.minecraft.data.Main",
+            "net.minecraft.server.Main",
+            "net.minecraft.gametest.Main",
+            "net.minecraft.client.main.Main",
+            "net.minecraft.client.data.Main"
+    ));
 
     static {
-        try (InputStream inputStream = Class.forName("net.minecraft.obfuscate.DontObfuscate").getResourceAsStream("/version.json")) {
+        try (InputStream inputStream = UNOBFUSCATED_CLAZZ.getResourceAsStream("/version.json")) {
             if (inputStream == null) {
                 throw new IOException("Failed to load version.json");
             }
             JsonObject json = GsonHelper.parseJsonToJsonObject(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            String versionString = json.getAsJsonPrimitive("id").getAsString().split("-", 2)[0];
+            String versionString = json.getAsJsonPrimitive("id").getAsString()
+                    .split("-", 2)[0]  // 1.21.10-rc1          -> 1.21.10
+                    .split("_", 2)[0]; // 1.21.11_unobfuscated -> 1.21.11
 
             MINECRAFT_VERSION = new MinecraftVersion(versionString);
 
             String[] split = versionString.split("\\.");
             int major = Integer.parseInt(split[1]);
-            int minor = split.length == 3 ? Integer.parseInt(split[2].split("-", 2)[0]) : 0;
+            int minor = split.length == 3 ? Integer.parseInt(split[2]) : 0;
 
             // 12001 = 1.20.1
             // 12104 = 1.21.4
