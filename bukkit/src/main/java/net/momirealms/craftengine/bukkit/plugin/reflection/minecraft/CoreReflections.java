@@ -3133,10 +3133,9 @@ public final class CoreReflections {
     );
 
     public static final Class<?> clazz$ChunkMap = requireNonNull(
-            BukkitReflectionUtils.findReobfOrMojmapClass(
-                    "server.level.PlayerChunkMap",
-                    "server.level.PlayerChunkMap" // paper remap的问题，所以使用旧mapping
-//                    "server.level.ChunkMap"
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("server.level.PlayerChunkMap"),  // 这里paper会自动获取到NM.server.level.ChunkMap
+                    BukkitReflectionUtils.assembleMCClass("server.level.ChunkMap") // 如果插件是mojmap就会走这个
             )
     );
 
