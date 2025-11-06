@@ -56,7 +56,7 @@ public record ClientCustomBlockPacket(int vanillaSize, int currentSize) implemen
             return;
         }
         int serverBlockRegistrySize = RegistryUtils.currentBlockRegistrySize();
-        if (this.currentSize != serverBlockRegistrySize) {
+        if (this.currentSize < serverBlockRegistrySize) {
             user.kick(Component.translatable(
                     "disconnect.craftengine.current_block_registry_mismatch",
                     TranslationArgument.numeric(this.currentSize),
