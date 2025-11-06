@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.World;
-import org.bukkit.Bukkit;
 import org.joml.Vector3f;
 
 import java.util.Map;
@@ -16,24 +15,18 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
     private final float yaw;
     private final float pitch;
     private final String model;
-    private final float viewRange;
     private final boolean sightTrace;
-    private final boolean shadow;
 
     public BetterModelBlockEntityElementConfig(String model,
                                                Vector3f position,
                                                float yaw,
                                                float pitch,
-                                               float viewRange,
-                                               boolean sightTrace,
-                                               boolean shadow) {
+                                               boolean sightTrace) {
         this.pitch = pitch;
         this.position = position;
         this.yaw = yaw;
         this.model = model;
-        this.viewRange = viewRange;
         this.sightTrace = sightTrace;
-        this.shadow = shadow;
     }
 
     public String model() {
@@ -52,16 +45,8 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
         return this.yaw;
     }
 
-    public float viewRange() {
-        return this.viewRange;
-    }
-
     public boolean sightTrace() {
         return this.sightTrace;
-    }
-
-    public boolean shadow() {
-        return this.shadow;
     }
 
     @Override
@@ -85,9 +70,7 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 0f), "pitch"),
-                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", (float) Bukkit.getViewDistance() / 4.0F), "view-range"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("sight-trace", true), "sight-trace"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("shadow", true), "shadow")
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("sight-trace", true), "sight-trace")
             );
         }
     }

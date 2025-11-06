@@ -24,14 +24,12 @@ public class BetterModelBlockEntityElement implements BlockEntityElement {
     }
 
     private DummyTracker createDummyTracker() {
-        ModelRenderer modelRenderer = BetterModel.plugin().modelManager().renderer(this.config.model());
+        ModelRenderer modelRenderer = BetterModel.plugin().modelManager().model(this.config.model());
         if (modelRenderer == null) {
             return null;
         } else {
             return modelRenderer.create(this.location, TrackerModifier.builder()
-                    .viewRange(this.config.viewRange())
                     .sightTrace(this.config.sightTrace())
-                    .shadow(this.config.shadow())
                     .build());
         }
     }

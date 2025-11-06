@@ -9,7 +9,7 @@ import org.bukkit.entity.Entity;
 public class BetterModelUtils {
 
     public static void bindModel(Entity base, String id) {
-        ModelRenderer renderer = BetterModel.plugin().modelManager().renderer(id);
+        ModelRenderer renderer = BetterModel.plugin().modelManager().model(id);
         if (renderer == null) {
             throw new NullPointerException("Could not find BetterModel blueprint " + id);
         }
