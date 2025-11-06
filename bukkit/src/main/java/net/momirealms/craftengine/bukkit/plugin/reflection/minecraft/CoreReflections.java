@@ -1082,7 +1082,7 @@ public final class CoreReflections {
     public static final Class<?> clazz$MobEffect = requireNonNull(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("world.effect.MobEffectList"),  // 这里paper会自动获取到NM.world.effect.MobEffect
-                    BukkitReflectionUtils.assembleMCClass("world.effect.MobEffect") // 如果插件是mojmap就会走这个
+                    BukkitReflectionUtils.assembleMCClass("world.effect.MobEffect") // paper柠檬酸了
             )
     );
 
@@ -1125,7 +1125,7 @@ public final class CoreReflections {
     public static final Class<?> clazz$Fluid = requireNonNull(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("world.level.material.FluidType"),  // 这里paper会自动获取到NM.world.level.material.Fluid
-                    BukkitReflectionUtils.assembleMCClass("world.level.material.Fluid") // 如果插件是mojmap就会走这个
+                    BukkitReflectionUtils.assembleMCClass("world.level.material.Fluid") // paper柠檬酸了
             )
     );
 
@@ -3135,7 +3135,7 @@ public final class CoreReflections {
     public static final Class<?> clazz$ChunkMap = requireNonNull(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("server.level.PlayerChunkMap"),  // 这里paper会自动获取到NM.server.level.ChunkMap
-                    BukkitReflectionUtils.assembleMCClass("server.level.ChunkMap") // 如果插件是mojmap就会走这个
+                    BukkitReflectionUtils.assembleMCClass("server.level.ChunkMap") // paper柠檬酸了
             )
     );
 
@@ -3238,7 +3238,7 @@ public final class CoreReflections {
     public static final Class<?> clazz$ResourceManager = requireNonNull(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("server.packs.resources.IResourceManager"),  // 这里paper会自动获取到NM.server.packs.resources.ResourceManager
-                    BukkitReflectionUtils.assembleMCClass("server.packs.resources.ResourceManager") // 如果插件是mojmap就会走这个
+                    BukkitReflectionUtils.assembleMCClass("server.packs.resources.ResourceManager") // paper柠檬酸了
             )
     );
 
