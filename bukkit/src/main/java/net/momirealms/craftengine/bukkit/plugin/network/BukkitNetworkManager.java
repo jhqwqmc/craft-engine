@@ -1857,11 +1857,20 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
 
     public static class UpdateTagsListener implements NMSPacketListener {
 
+        @SuppressWarnings("unchecked")
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            Object modifiedPacket = BukkitBlockManager.instance().cachedUpdateTagsPacket();
-            if (packet.equals(modifiedPacket) || modifiedPacket == null) return;
-            event.replacePacket(modifiedPacket);
+            List<TagUtils.TagEntry> cachedUpdateTags = BukkitBlockManager.instance().cachedUpdateTags();
+            if (cachedUpdateTags.isEmpty()) return;
+            Map<Object, Object> tags;
+            try {
+                tags = (Map<Object, Object>) NetworkReflections.field$ClientboundUpdateTagsPacket$tags.get(packet);
+            } catch (Throwable e) {
+                CraftEngine.instance().logger().warn("Failed to get tags from ClientboundUpdateTagsPacket", e);
+                return;
+            }
+            if (tags.get(MRegistries.BLOCK) == null) return;
+            event.replacePacket(TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, cachedUpdateTags), tags));
         }
     }
 

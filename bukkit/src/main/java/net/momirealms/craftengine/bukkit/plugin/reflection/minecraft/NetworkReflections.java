@@ -1720,4 +1720,10 @@ public final class NetworkReflections {
                 "network.protocol.game.ClientboundBlockEntityDataPacket"
             )
     );
+
+    public static final Field field$ClientboundUpdateTagsPacket$tags = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ClientboundUpdateTagsPacket, Map.class, 0
+            )
+    );
 }
