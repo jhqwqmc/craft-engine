@@ -59,7 +59,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     private Map<Integer, List<String>> clientBoundTags = Map.of();
     private Map<Integer, List<String>> previousClientBoundTags = Map.of();
     // 缓存的原版方块tag包
-    private Map<Object, List<TagUtils.TagEntry>> cachedUpdateTags;
+    private List<TagUtils.TagEntry> cachedUpdateTags = List.of();
     // 被移除声音的原版方块
     private Set<Object> missingPlaceSounds = Set.of();
     private Set<Object> missingBreakSounds = Set.of();
@@ -157,7 +157,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
         for (Map.Entry<Integer, List<String>> entry : this.clientBoundTags.entrySet()) {
             list.add(new TagUtils.TagEntry(entry.getKey(), entry.getValue()));
         }
-        this.cachedUpdateTags = Map.of(MRegistries.BLOCK, list);
+        this.cachedUpdateTags = list;
         Object packet = TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, list));
         for (BukkitServerPlayer player : this.plugin.networkManager().onlineUsers()) {
             player.sendPacket(packet, false);
@@ -359,7 +359,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
         }
     }
 
-    public Map<Object, List<TagUtils.TagEntry>> cachedUpdateTags() {
+    public List<TagUtils.TagEntry> cachedUpdateTags() {
         return this.cachedUpdateTags;
     }
 

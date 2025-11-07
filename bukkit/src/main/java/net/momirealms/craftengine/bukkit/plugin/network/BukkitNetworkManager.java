@@ -1860,6 +1860,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         @SuppressWarnings("unchecked")
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            List<TagUtils.TagEntry> cachedUpdateTags = BukkitBlockManager.instance().cachedUpdateTags();
+            if (cachedUpdateTags.isEmpty()) return;
             Map<Object, Object> tags;
             try {
                 tags = (Map<Object, Object>) NetworkReflections.field$ClientboundUpdateTagsPacket$tags.get(packet);
@@ -1868,7 +1870,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 return;
             }
             if (tags.get(MRegistries.BLOCK) == null) return;
-            event.replacePacket(TagUtils.createUpdateTagsPacket(BukkitBlockManager.instance().cachedUpdateTags(), tags));
+            event.replacePacket(TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, cachedUpdateTags), tags));
         }
     }
 
