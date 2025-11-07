@@ -241,6 +241,19 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         this.c2sGamePacketListeners[id] = new ByteBufferPacketListenerHolder(name, listener);
     }
 
+    @Override
+    public void delayedLoad() {
+        this.resendTags();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void resendTags() {
+        Object packet = TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, BukkitBlockManager.instance().cachedUpdateTags()), FastNMS.INSTANCE.method$TagNetworkSerialization$serializeTagsToNetwork());
+        for (BukkitServerPlayer player : onlineUsers()) {
+            player.sendPacket(packet, false);
+        }
+    }
+
     public void addFakePlayer(Player player) {
         FakeBukkitServerPlayer fakePlayer = new FakeBukkitServerPlayer(this.plugin);
         fakePlayer.setPlayer(player);
@@ -1862,13 +1875,10 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
             List<TagUtils.TagEntry> cachedUpdateTags = BukkitBlockManager.instance().cachedUpdateTags();
             if (cachedUpdateTags.isEmpty()) return;
-            Map<Object, Object> tags;
-            try {
-                tags = (Map<Object, Object>) NetworkReflections.field$ClientboundUpdateTagsPacket$tags.get(packet);
-            } catch (Throwable e) {
-                CraftEngine.instance().logger().warn("Failed to get tags from ClientboundUpdateTagsPacket", e);
-                return;
-            }
+            Map<Object, Object> tags = FastNMS.INSTANCE.field$ClientboundUpdateTagsPacket$tags(packet);
+            // 已经替换过了
+            if (tags instanceof MarkedHashMap<Object, Object>) return;
+            // 需要虚假的block
             if (tags.get(MRegistries.BLOCK) == null) return;
             event.replacePacket(TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, cachedUpdateTags), tags));
         }

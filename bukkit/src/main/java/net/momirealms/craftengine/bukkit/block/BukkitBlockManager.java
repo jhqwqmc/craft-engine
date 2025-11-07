@@ -150,7 +150,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     }
 
     @Override
-    protected void resendTags() {
+    protected void updateTags() {
         // if there's no change
         if (this.clientBoundTags.equals(this.previousClientBoundTags)) return;
         List<TagUtils.TagEntry> list = new ArrayList<>();
@@ -158,10 +158,6 @@ public final class BukkitBlockManager extends AbstractBlockManager {
             list.add(new TagUtils.TagEntry(entry.getKey(), entry.getValue()));
         }
         this.cachedUpdateTags = list;
-        Object packet = TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, list));
-        for (BukkitServerPlayer player : this.plugin.networkManager().onlineUsers()) {
-            player.sendPacket(packet, false);
-        }
     }
 
     @Nullable
