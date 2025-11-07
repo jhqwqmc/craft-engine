@@ -59,11 +59,23 @@ public class SeatBlockEntity extends BlockEntity implements SeatOwner {
         }
         for (Seat<SeatBlockEntity> seat : this.seats) {
             if (!seat.isOccupied()) {
-                if (seat.spawnSeat(player, new WorldPosition(super.world.world(), super.pos.x() + 0.5, super.pos.y(), super.pos.z() + 0.5, 0, 180 - yRot))) {
+                if (seat.spawnSeat(player, new WorldPosition(super.world.world(), super.pos.x() + 0.5, super.pos.y(), super.pos.z() + 0.5, 180 - yRot, getYRot()))) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private float getYRot() {
+        Property<?> facing = super.blockState.owner().value().getProperty("facing");
+        if (facing == null || facing.valueClass() != HorizontalDirection.class) return 0;
+        HorizontalDirection direction = (HorizontalDirection) super.blockState.get(facing);
+        return switch (direction) {
+            case NORTH -> 0;
+            case SOUTH -> 180;
+            case WEST -> 270;
+            case EAST -> 90;
+        };
     }
 }
