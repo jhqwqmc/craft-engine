@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
-import net.momirealms.craftengine.bukkit.block.behavior.SeatBlockBehavior;
 import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeat;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
@@ -13,8 +12,6 @@ import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.sparrow.nbt.CompoundTag;
-
-import java.util.Optional;
 
 public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     private final Seat<SeatBlockEntity>[] seats;
@@ -41,41 +38,24 @@ public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     }
 
     public boolean spawnSeat(Player player) {
-        Optional<SeatBlockBehavior> seatBehavior = super.blockState.behavior().getAs(SeatBlockBehavior.class);
-        if (seatBehavior.isEmpty()) {
-            return false;
-        }
-        float yRot = 0;
-        Property<HorizontalDirection> directionProperty = seatBehavior.get().directionProperty();
-        if (directionProperty != null) {
-            HorizontalDirection direction = super.blockState.get(directionProperty);
-            if (direction == HorizontalDirection.NORTH) {
-                yRot = 180;
-            } else if (direction == HorizontalDirection.EAST) {
-                yRot = -90;
-            } else if (direction == HorizontalDirection.WEST) {
-                yRot = 90;
-            }
+        Property<?> facing = super.blockState.owner().value().getProperty("facing");
+        int yRot = 0;
+        if (facing != null && facing.valueClass() == HorizontalDirection.class) {
+            HorizontalDirection direction = (HorizontalDirection) super.blockState.get(facing);
+            yRot = switch (direction) {
+                case NORTH -> 0;
+                case SOUTH -> 180;
+                case WEST -> 270;
+                case EAST -> 90;
+            };
         }
         for (Seat<SeatBlockEntity> seat : this.seats) {
             if (!seat.isOccupied()) {
-                if (seat.spawnSeat(player, new WorldPosition(super.world.world(), super.pos.x() + 0.5, super.pos.y(), super.pos.z() + 0.5, 180 - yRot, getYRot()))) {
+                if (seat.spawnSeat(player, new WorldPosition(super.world.world(), super.pos.x() + 0.5, super.pos.y(), super.pos.z() + 0.5, 0, yRot))) {
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    private float getYRot() {
-        Property<?> facing = super.blockState.owner().value().getProperty("facing");
-        if (facing == null || facing.valueClass() != HorizontalDirection.class) return 0;
-        HorizontalDirection direction = (HorizontalDirection) super.blockState.get(facing);
-        return switch (direction) {
-            case NORTH -> 0;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            case EAST -> 90;
-        };
     }
 }
