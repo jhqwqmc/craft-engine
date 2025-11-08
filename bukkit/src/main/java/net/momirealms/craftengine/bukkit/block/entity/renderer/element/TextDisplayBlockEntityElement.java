@@ -42,7 +42,7 @@ public class TextDisplayBlockEntityElement implements BlockEntityElement {
 
     @Override
     public void show(Player player) {
-        player.sendPackets(List.of(this.cachedSpawnPacket, FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player))), true);
+        player.sendPackets(List.of(this.cachedSpawnPacket, FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadataValues(player))), false);
     }
 
     @Override

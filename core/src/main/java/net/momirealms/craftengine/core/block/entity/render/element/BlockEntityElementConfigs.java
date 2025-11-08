@@ -13,6 +13,7 @@ import java.util.Optional;
 public abstract class BlockEntityElementConfigs {
     public static final Key ITEM_DISPLAY = Key.of("craftengine:item_display");
     public static final Key TEXT_DISPLAY = Key.of("craftengine:text_display");
+    public static final Key ITEM = Key.of("craftengine:item");
 
     public static void register(Key key, BlockEntityElementConfigFactory type) {
         ((WritableRegistry<BlockEntityElementConfigFactory>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE)

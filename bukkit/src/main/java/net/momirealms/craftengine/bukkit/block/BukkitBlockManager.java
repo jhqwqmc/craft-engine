@@ -290,6 +290,10 @@ public final class BukkitBlockManager extends AbstractBlockManager {
                 this.burnOdds.put(nmsBlock, settings.fireSpreadChance());
                 this.burnableBlocks.add(nmsBlock);
             }
+
+            Key vanillaBlockId = state.vanillaBlockState().ownerId();
+            BlockGenerator.field$CraftEngineBlock$isNoteBlock().set(nmsBlock, vanillaBlockId.equals(BlockKeys.NOTE_BLOCK));
+            BlockGenerator.field$CraftEngineBlock$isTripwire().set(nmsBlock, vanillaBlockId.equals(BlockKeys.TRIPWIRE));
         } catch (ReflectiveOperationException e) {
             this.plugin.logger().warn("Failed to apply platform block settings for block state " + state, e);
         }
