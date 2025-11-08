@@ -40,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import javax.imageio.ImageIO;
@@ -618,6 +619,9 @@ public abstract class AbstractPackManager implements PackManager {
                                     } else {
                                         AbstractPackManager.this.plugin.logger().severe("Error found while reading config file: " + path, e);
                                     }
+                                    return FileVisitResult.CONTINUE;
+                                } catch (ParserException e) {
+                                    AbstractPackManager.this.plugin.logger().severe("Invalid YAML file found: " + path + ".\n" + e.getMessage() + "\nIt is recommended to use Visual Studio Code as your YAML editor to fix problems more quickly.");
                                     return FileVisitResult.CONTINUE;
                                 } catch (LocalizedException e) {
                                     e.setArgument(0, path.toString());
