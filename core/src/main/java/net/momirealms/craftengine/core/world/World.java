@@ -39,6 +39,14 @@ public interface World {
         this.setBlockAt(x, y, z, blockState.customBlockState(), flags);
     }
 
+    default void setBlockAt(BlockPos pos, BlockStateWrapper blockState, int flags) {
+        this.setBlockAt(pos.x(), pos.y(), pos.z(), blockState, flags);
+    }
+
+    default void setBlockAt(BlockPos pos, ImmutableBlockState blockState, int flags) {
+        this.setBlockAt(pos.x(), pos.y(), pos.z(), blockState, flags);
+    }
+
     String name();
 
     Path directory();
