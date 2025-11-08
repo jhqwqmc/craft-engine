@@ -58,6 +58,7 @@ items:
                     front: minecraft:block/custom/safe_block_front
                     side: minecraft:block/custom/safe_block_side
                     top: minecraft:block/custom/safe_block_top
+                    bottom: minecraft:block/custom/safe_block_bottom
             east_open:
               auto-state: note_block
               model:
@@ -69,6 +70,7 @@ items:
                     front: minecraft:block/custom/safe_block_front_open
                     side: minecraft:block/custom/safe_block_side
                     top: minecraft:block/custom/safe_block_top
+                    bottom: minecraft:block/custom/safe_block_bottom
             north:
               auto-state: note_block
               model:
