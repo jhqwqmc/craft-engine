@@ -5,12 +5,11 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
-import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
-import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.*;
+import net.momirealms.craftengine.core.block.BlockBehavior;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -29,20 +28,6 @@ public class SpreadingBlockBehavior extends BukkitBlockBehavior {
         super(customBlock);
         this.spreadLight = spreadLight;
         this.spreadBlock = LazyReference.lazyReference(() -> Objects.requireNonNull(BukkitBlockManager.instance().createBlockState(spreadBlock)).literalObject());
-    }
-
-    @Override
-    public Object updateShape(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
-        if (args[updateShape$direction] != CoreReflections.instance$Direction$UP) return superMethod.call();
-        return BlockStateUtils.toBlockStateWrapper(args[0]).withProperty("snowy", String.valueOf(isSnowySetting(args[updateShape$neighborState]))).literalObject();
-    }
-
-    @Override
-    public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
-        BooleanProperty snowy = (BooleanProperty) this.block().getProperty("snowy");
-        if (snowy == null) return state;
-        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos().above()));
-        return state.with(snowy, isSnowySetting(blockState));
     }
 
     @Override
@@ -86,10 +71,6 @@ public class SpreadingBlockBehavior extends BukkitBlockBehavior {
                     )
             ) < 15;
         }
-    }
-
-    private static boolean isSnowySetting(Object state) {
-        return FastNMS.INSTANCE.method$BlockStateBase$is(state, MTagKeys.Block$SNOW);
     }
 
     private static boolean canPropagate(Object state, Object level, Object pos) {
