@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.compatibility.model.bettermodel;
 import kr.toxicity.model.api.BetterModel;
 import kr.toxicity.model.api.data.renderer.ModelRenderer;
 import kr.toxicity.model.api.tracker.DummyTracker;
+import kr.toxicity.model.api.tracker.TrackerModifier;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -23,11 +24,13 @@ public class BetterModelBlockEntityElement implements BlockEntityElement {
     }
 
     private DummyTracker createDummyTracker() {
-        ModelRenderer modelRenderer = BetterModel.plugin().modelManager().renderer(this.config.model());
+        ModelRenderer modelRenderer = BetterModel.plugin().modelManager().model(this.config.model());
         if (modelRenderer == null) {
             return null;
         } else {
-            return modelRenderer.create(this.location);
+            return modelRenderer.create(this.location, TrackerModifier.builder()
+                    .sightTrace(this.config.sightTrace())
+                    .build());
         }
     }
 

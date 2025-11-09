@@ -330,6 +330,37 @@ public final class BlockKeys {
     public static final Key CHERRY_SAPLING = Key.of("minecraft:cherry_sapling");
     public static final Key PALE_OAK_SAPLING = Key.of("minecraft:pale_oak_sapling");
 
+    public static final Key OAK_SHELF = Key.of("minecraft:oak_shelf");
+    public static final Key SPRUCE_SHELF = Key.of("minecraft:spruce_shelf");
+    public static final Key BIRCH_SHELF = Key.of("minecraft:birch_shelf");
+    public static final Key JUNGLE_SHELF = Key.of("minecraft:jungle_shelf");
+    public static final Key ACACIA_SHELF = Key.of("minecraft:acacia_shelf");
+    public static final Key DARK_OAK_SHELF = Key.of("minecraft:dark_oak_shelf");
+    public static final Key MANGROVE_SHELF = Key.of("minecraft:mangrove_shelf");
+    public static final Key CHERRY_SHELF = Key.of("minecraft:cherry_shelf");
+    public static final Key PALE_OAK_SHELF = Key.of("minecraft:pale_oak_shelf");
+    public static final Key BAMBOO_SHELF = Key.of("minecraft:bamboo_shelf");
+    public static final Key CRIMSON_SHELF = Key.of("minecraft:crimson_shelf");
+    public static final Key WARPED_SHELF = Key.of("minecraft:warped_shelf");
+
+    public static final Key COPPER_GOLEM_STATUE = Key.of("minecraft:copper_golem_statue");
+    public static final Key EXPOSED_COPPER_GOLEM_STATUE = Key.of("minecraft:exposed_copper_golem_statue");
+    public static final Key WEATHERED_COPPER_GOLEM_STATUE = Key.of("minecraft:weathered_copper_golem_statue");
+    public static final Key OXIDIZED_COPPER_GOLEM_STATUE = Key.of("minecraft:oxidized_copper_golem_statue");
+    public static final Key WAXED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_copper_golem_statue");
+    public static final Key WAXED_EXPOSED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_exposed_copper_golem_statue");
+    public static final Key WAXED_WEATHERED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_weathered_copper_golem_statue");
+    public static final Key WAXED_OXIDIZED_COPPER_GOLEM_STATUE = Key.of("minecraft:waxed_oxidized_copper_golem_statue");
+
+    public static final Key COPPER_CHEST = Key.of("minecraft:copper_chest");
+    public static final Key EXPOSED_COPPER_CHEST = Key.of("minecraft:exposed_copper_chest");
+    public static final Key WEATHERED_COPPER_CHEST = Key.of("minecraft:weathered_copper_chest");
+    public static final Key OXIDIZED_COPPER_CHEST = Key.of("minecraft:oxidized_copper_chest");
+    public static final Key WAXED_COPPER_CHEST = Key.of("minecraft:waxed_copper_chest");
+    public static final Key WAXED_EXPOSED_COPPER_CHEST = Key.of("minecraft:waxed_exposed_copper_chest");
+    public static final Key WAXED_WEATHERED_COPPER_CHEST = Key.of("minecraft:waxed_weathered_copper_chest");
+    public static final Key WAXED_OXIDIZED_COPPER_CHEST = Key.of("minecraft:waxed_oxidized_copper_chest");
+
     public static final Key[] BUTTONS = new Key[]{
             OAK_BUTTON, SPRUCE_BUTTON, BIRCH_BUTTON, JUNGLE_BUTTON, ACACIA_BUTTON, DARK_OAK_BUTTON, MANGROVE_BUTTON, CHERRY_BUTTON,
             PALE_OAK_BUTTON, BAMBOO_BUTTON, CRIMSON_BUTTON, WARPED_BUTTON, STONE_BUTTON, POLISHED_BLACKSTONE_BUTTON

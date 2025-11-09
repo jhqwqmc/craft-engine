@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
+import net.momirealms.craftengine.core.util.MarkedHashMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,9 @@ import java.util.Map;
 public final class TagUtils {
 
     private TagUtils() {}
+
+    public record TagEntry(int id, List<String> tags) {
+    }
 
     /**
      * 构建模拟标签更新数据包（用于向客户端添加虚拟标签）
@@ -39,11 +43,9 @@ public final class TagUtils {
      *
      * @return 可发送给客户端的 ClientboundUpdateTagsPacket 数据包对象
      */
-    @SuppressWarnings("unchecked")
-    public static Object createUpdateTagsPacket(Map<Object, List<TagEntry>> tags) {
-        Map<Object, Object> registriesNetworkPayload = (Map<Object, Object>) FastNMS.INSTANCE.method$TagNetworkSerialization$serializeTagsToNetwork();
-        Map<Object, Object> modified = new HashMap<>();
-        for (Map.Entry<Object, Object> payload : registriesNetworkPayload.entrySet()) {
+    public static Object createUpdateTagsPacket(Map<Object, List<TagEntry>> tags, Map<Object, Object> existingTags) {
+        Map<Object, Object> modified = new MarkedHashMap<>();
+        for (Map.Entry<Object, Object> payload : existingTags.entrySet()) {
             List<TagEntry> overrides = tags.get(payload.getKey());
             if (overrides == null || overrides.isEmpty()) {
                 modified.put(payload.getKey(), payload.getValue());
@@ -82,8 +84,5 @@ public final class TagUtils {
             modified.put(payload.getKey(), mergedPayload);
         }
         return FastNMS.INSTANCE.constructor$ClientboundUpdateTagsPacket(modified);
-    }
-
-    public record TagEntry(int id, List<String> tags) {
     }
 }

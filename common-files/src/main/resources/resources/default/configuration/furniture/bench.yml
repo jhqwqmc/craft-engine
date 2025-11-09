@@ -2,7 +2,7 @@ items:
   default:bench:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.bench>
+      item-name: <!i><l10n:item.bench>
     model:
       type: minecraft:model
       path: minecraft:item/custom/bench

@@ -7,6 +7,7 @@ public class BukkitBlockEntityElementConfigs extends BlockEntityElementConfigs {
     static {
         register(ITEM_DISPLAY, ItemDisplayBlockEntityElementConfig.FACTORY);
         register(TEXT_DISPLAY, TextDisplayBlockEntityElementConfig.FACTORY);
+        register(ITEM, ItemBlockEntityElementConfig.FACTORY);
     }
 
     private BukkitBlockEntityElementConfigs() {}

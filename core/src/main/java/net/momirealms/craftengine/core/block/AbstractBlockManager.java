@@ -143,7 +143,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
     @Override
     public void delayedLoad() {
         this.initSuggestions();
-        this.resendTags();
+        this.updateTags();
         this.processSounds();
         this.clearCache();
     }
@@ -232,7 +232,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
 
     public abstract BlockBehavior createBlockBehavior(CustomBlock customBlock, List<Map<String, Object>> behaviorConfig);
 
-    protected abstract void resendTags();
+    protected abstract void updateTags();
 
     protected abstract boolean isVanillaBlock(Key id);
 

@@ -15,33 +15,48 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
     private final float yaw;
     private final float pitch;
     private final String model;
+    private final boolean sightTrace;
 
-    public BetterModelBlockEntityElementConfig(String model, Vector3f position, float yaw, float pitch) {
+    public BetterModelBlockEntityElementConfig(String model,
+                                               Vector3f position,
+                                               float yaw,
+                                               float pitch,
+                                               boolean sightTrace) {
         this.pitch = pitch;
         this.position = position;
         this.yaw = yaw;
         this.model = model;
+        this.sightTrace = sightTrace;
     }
 
     public String model() {
-        return model;
+        return this.model;
     }
 
     public float pitch() {
-        return pitch;
+        return this.pitch;
     }
 
     public Vector3f position() {
-        return position;
+        return this.position;
     }
 
     public float yaw() {
-        return yaw;
+        return this.yaw;
+    }
+
+    public boolean sightTrace() {
+        return this.sightTrace;
     }
 
     @Override
     public BetterModelBlockEntityElement create(World world, BlockPos pos) {
         return new BetterModelBlockEntityElement(world, pos, this);
+    }
+
+    @Override
+    public Class<BetterModelBlockEntityElement> elementClass() {
+        return BetterModelBlockEntityElement.class;
     }
 
     public static class Factory implements BlockEntityElementConfigFactory {
@@ -54,7 +69,8 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
                     model,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),
-                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 0f), "pitch")
+                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 0f), "pitch"),
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("sight-trace", true), "sight-trace")
             );
         }
     }

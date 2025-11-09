@@ -4,6 +4,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
+import net.momirealms.craftengine.core.util.SegmentedAngle;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ public abstract class Property<T extends Comparable<T>> {
                 Property<Direction> directionProperty = (Property<Direction>) property;
                 return (context, state) -> state.with(directionProperty, context.getNearestLookingDirection().opposite());
             } else {
-                throw new IllegalArgumentException("Unsupported property type used in hard-coded `facing` property: " + property.valueClass());
+                return (context, state) -> state;
             }
         }));
         HARD_CODED_PLACEMENTS.put("facing_clockwise", (property -> {
@@ -41,13 +42,26 @@ public abstract class Property<T extends Comparable<T>> {
                 Property<HorizontalDirection> directionProperty = (Property<HorizontalDirection>) property;
                 return (context, state) -> state.with(directionProperty, context.getHorizontalDirection().clockWise().toHorizontalDirection());
             } else {
-                throw new IllegalArgumentException("Unsupported property type used in hard-coded `facing_clockwise` property: " + property.valueClass());
+                return (context, state) -> state;
             }
         }));
         HARD_CODED_PLACEMENTS.put("waterlogged", (property -> {
             Property<Boolean> waterloggedProperty = (Property<Boolean>) property;
             return (context, state) -> state.with(waterloggedProperty, context.isWaterSource());
         }));
+        HARD_CODED_PLACEMENTS.put("rotation", property -> {
+            if (property.valueClass() == Integer.class) {
+                IntegerProperty rotationProperty = (IntegerProperty) property;
+                if (rotationProperty.min == 0 && rotationProperty.max > 0) {
+                    return (context, state) -> {
+                        float rotation = context.getRotation();
+                        SegmentedAngle segmentedAngle = new SegmentedAngle(rotationProperty.max + 1);
+                        return state.with(rotationProperty, segmentedAngle.fromDegrees(rotation + 180));
+                    };
+                }
+            }
+            return (context, state) -> state;
+        });
     }
 
     private final Class<T> clazz;

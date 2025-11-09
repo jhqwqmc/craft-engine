@@ -35,6 +35,7 @@ public class CEChunk {
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
+    private volatile boolean activated;
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
@@ -115,40 +116,129 @@ public class CEChunk {
         }
     }
 
-    public void addConstantBlockEntityRenderer(BlockPos pos) {
-        this.addConstantBlockEntityRenderer(pos, this.getBlockState(pos));
+    public ConstantBlockEntityRenderer addConstantBlockEntityRenderer(BlockPos pos) {
+        return this.addConstantBlockEntityRenderer(pos, this.getBlockState(pos), null);
     }
 
-    public void addConstantBlockEntityRenderer(BlockPos pos, ImmutableBlockState state) {
+    public ConstantBlockEntityRenderer addConstantBlockEntityRenderer(BlockPos pos, ImmutableBlockState state) {
+        return this.addConstantBlockEntityRenderer(pos, state, null);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public ConstantBlockEntityRenderer addConstantBlockEntityRenderer(BlockPos pos, ImmutableBlockState state, @Nullable ConstantBlockEntityRenderer previous) {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
-            World wrappedWorld = this.world.world();
-            for (int i = 0; i < elements.length; i++) {
-                elements[i] = renderers[i].create(wrappedWorld, pos);
-            }
             ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements);
-            for (Player player : getTrackedBy()) {
-                renderer.show(player);
+            World wrappedWorld = this.world.world();
+            List<Player> trackedBy = getTrackedBy();
+            boolean hasTrackedBy = trackedBy != null && !trackedBy.isEmpty();
+            // 处理旧到新的转换
+            if (previous != null) {
+                // 由于entity-render的体量基本都很小，所以考虑一个特殊情况，即前后都是1个renderer，对此情况进行简化和优化
+                BlockEntityElement[] previousElements = previous.elements().clone();
+                if (previousElements.length == 1 && renderers.length == 1) {
+                    BlockEntityElement previousElement = previousElements[0];
+                    BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[0];
+                    outer: {
+                        if (config.elementClass().isInstance(previousElement)) {
+                            BlockEntityElement element = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
+                            if (element != null) {
+                                elements[0] = element;
+                                if (hasTrackedBy) {
+                                    for (Player player : trackedBy) {
+                                        element.transform(player);
+                                    }
+                                }
+                                break outer;
+                            }
+                        }
+                        BlockEntityElement element = config.create(wrappedWorld, pos);
+                        elements[0] = element;
+                        if (hasTrackedBy) {
+                            for (Player player : trackedBy) {
+                                previousElement.hide(player);
+                                element.show(player);
+                            }
+                        }
+                    }
+                } else {
+                    outer: for (int i = 0; i < elements.length; i++) {
+                        BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[i];
+                        for (int j = 0; j < previousElements.length; j++) {
+                            BlockEntityElement previousElement = previousElements[j];
+                            if (previousElement != null && config.elementClass().isInstance(previousElement)) {
+                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
+                                if (newElement != null) {
+                                    previousElements[j] = null;
+                                    elements[i] = newElement;
+                                    if (hasTrackedBy) {
+                                        for (Player player : trackedBy) {
+                                            newElement.transform(player);
+                                        }
+                                    }
+                                    continue outer;
+                                }
+                            }
+                        }
+                        BlockEntityElement newElement = config.create(wrappedWorld, pos);
+                        elements[i] = newElement;
+                        if (hasTrackedBy) {
+                            for (Player player : trackedBy) {
+                                newElement.show(player);
+                            }
+                        }
+                    }
+                    if (hasTrackedBy) {
+                        for (int i = 0; i < previousElements.length; i++) {
+                            BlockEntityElement previousElement = previousElements[i];
+                            if (previousElement != null) {
+                                for (Player player : trackedBy) {
+                                    previousElement.hide(player);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i < elements.length; i++) {
+                    elements[i] = renderers[i].create(wrappedWorld, pos);
+                }
+                if (hasTrackedBy) {
+                    for (Player player : trackedBy) {
+                        renderer.show(player);
+                    }
+                }
             }
             try {
                 this.renderLock.writeLock().lock();
                 this.constantBlockEntityRenderers.put(pos, renderer);
+                return renderer;
             } finally {
                 this.renderLock.writeLock().unlock();
             }
         }
+        return null;
     }
 
-    public void removeConstantBlockEntityRenderer(BlockPos pos) {
+    @Nullable
+    public ConstantBlockEntityRenderer removeConstantBlockEntityRenderer(BlockPos pos) {
+        return this.removeConstantBlockEntityRenderer(pos, true);
+    }
+
+    @Nullable
+    public ConstantBlockEntityRenderer removeConstantBlockEntityRenderer(BlockPos pos, boolean hide) {
         try {
             this.renderLock.writeLock().lock();
             ConstantBlockEntityRenderer removed = this.constantBlockEntityRenderers.remove(pos);
             if (removed != null) {
-                for (Player player : getTrackedBy()) {
-                    removed.hide(player);
+                if (hide) {
+                    for (Player player : getTrackedBy()) {
+                        removed.hide(player);
+                    }
                 }
             }
+            return removed;
         } finally {
             this.renderLock.writeLock().unlock();
         }
@@ -183,7 +273,12 @@ public class CEChunk {
         this.removeDynamicBlockEntityRenderer(blockPos);
     }
 
+    public List<Player> getTrackedBy() {
+        return this.world.world.getTrackedBy(this.chunkPos);
+    }
+
     public void activateAllBlockEntities() {
+        if (this.activated) return;
         for (BlockEntity blockEntity : this.blockEntities.values()) {
             blockEntity.setValid(true);
             this.replaceOrCreateTickingBlockEntity(blockEntity);
@@ -192,13 +287,11 @@ public class CEChunk {
         for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
             renderer.activate();
         }
-    }
-
-    public List<Player> getTrackedBy() {
-        return this.world.world.getTrackedBy(this.chunkPos);
+        this.activated = true;
     }
 
     public void deactivateAllBlockEntities() {
+        if (!this.activated) return;
         this.blockEntities.values().forEach(e -> e.setValid(false));
         this.constantBlockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
         this.dynamicBlockEntityRenderers.clear();
@@ -206,6 +299,7 @@ public class CEChunk {
         this.tickingSyncBlockEntitiesByPos.clear();
         this.tickingAsyncBlockEntitiesByPos.values().forEach((ticker) -> ticker.setTicker(DummyTickingBlockEntity.INSTANCE));
         this.tickingAsyncBlockEntitiesByPos.clear();
+        this.activated = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -452,14 +546,12 @@ public class CEChunk {
     public void load() {
         if (this.loaded) return;
         this.world.addLoadedChunk(this);
-        this.activateAllBlockEntities();
         this.loaded = true;
     }
 
     public void unload() {
         if (!this.loaded) return;
         this.world.removeLoadedChunk(this);
-        this.deactivateAllBlockEntities();
         this.loaded = false;
     }
 }

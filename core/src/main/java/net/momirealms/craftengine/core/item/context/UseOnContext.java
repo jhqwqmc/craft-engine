@@ -73,6 +73,10 @@ public class UseOnContext {
         return this.level;
     }
 
+    public World getWorld() {
+        return this.level;
+    }
+
     public Direction getHorizontalDirection() {
         return this.player == null ? Direction.NORTH : this.player.getDirection();
     }

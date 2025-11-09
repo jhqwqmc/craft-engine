@@ -6,7 +6,7 @@ items:
       arguments:
         path: minecraft:item/custom/magma_fruit
     data:
-      item-name: <!i><white><i18n:item.magma_fruit>
+      item-name: <!i><white><l10n:item.magma_fruit>
       $$>=1.20.5:
         food:
           nutrition: 3

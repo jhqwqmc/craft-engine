@@ -66,6 +66,20 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
         return new TextDisplayBlockEntityElement(this, pos);
     }
 
+    @Override
+    public TextDisplayBlockEntityElement create(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
+        Quaternionf previousRotation = previous.config.rotation;
+        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
+            return null;
+        }
+        return new TextDisplayBlockEntityElement(this, pos, previous.entityId, previous.config.yRot != this.yRot || previous.config.xRot != this.xRot || !previous.config.position.equals(this.position));
+    }
+
+    @Override
+    public Class<TextDisplayBlockEntityElement> elementClass() {
+        return TextDisplayBlockEntityElement.class;
+    }
+
     public Component text(Player player) {
         return AdventureHelper.miniMessage().deserialize(this.text, PlayerOptionalContext.of(player).tagResolvers());
     }

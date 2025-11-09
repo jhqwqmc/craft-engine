@@ -92,10 +92,12 @@ public class BukkitWorldManager implements WorldManager, Listener {
     public void delayedInit() {
         // load loaded chunks
         for (World world : Bukkit.getWorlds()) {
+            BukkitWorld wrappedWorld = new BukkitWorld(world);
             try {
-                CEWorld ceWorld = this.worlds.computeIfAbsent(world.getUID(), k -> new BukkitCEWorld(new BukkitWorld(world), this.storageAdaptor));
+                CEWorld ceWorld = this.worlds.computeIfAbsent(world.getUID(), k -> new BukkitCEWorld(wrappedWorld, this.storageAdaptor));
+                injectChunkGenerator(ceWorld);
                 for (Chunk chunk : world.getLoadedChunks()) {
-                    handleChunkLoad(ceWorld, chunk);
+                    handleChunkLoad(ceWorld, chunk, false);
                 }
                 ceWorld.setTicking(true);
             } catch (Exception e) {
@@ -142,8 +144,9 @@ public class BukkitWorldManager implements WorldManager, Listener {
         CEWorld ceWorld = new BukkitCEWorld(world, this.storageAdaptor);
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
+        this.injectChunkGenerator(ceWorld);
         for (Chunk chunk : ((World) world.platformWorld()).getLoadedChunks()) {
-            handleChunkLoad(ceWorld, chunk);
+            handleChunkLoad(ceWorld, chunk, false);
         }
         ceWorld.setTicking(true);
     }
@@ -154,10 +157,18 @@ public class BukkitWorldManager implements WorldManager, Listener {
         if (this.worlds.containsKey(uuid)) return;
         this.worlds.put(uuid, world);
         this.resetWorldArray();
+        this.injectChunkGenerator(world);
         for (Chunk chunk : ((World) world.world().platformWorld()).getLoadedChunks()) {
-            handleChunkLoad(world, chunk);
+            handleChunkLoad(world, chunk, false);
         }
         world.setTicking(true);
+    }
+
+    private void injectChunkGenerator(CEWorld world) {
+        Object serverLevel = world.world.serverWorld();
+        Object serverChunkCache = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
+        Object chunkMap = FastNMS.INSTANCE.field$ServerChunkCache$chunkMap(serverChunkCache);
+        FastNMS.INSTANCE.injectedWorldGen(world, chunkMap);
     }
 
     @Override
@@ -219,7 +230,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         if (world == null) {
             return;
         }
-        handleChunkLoad(world, event.getChunk());
+        handleChunkLoad(world, event.getChunk(), event.isNewChunk());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -273,14 +284,42 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 FastNMS.INSTANCE.method$LevelChunk$markUnsaved(levelChunk);
             }
             ceChunk.unload();
+            ceChunk.deactivateAllBlockEntities();
         }
     }
 
-    private void handleChunkLoad(CEWorld ceWorld, Chunk chunk) {
+    public void handleChunkGenerate(CEWorld ceWorld, ChunkPos chunkPos, Object chunkAccess) {
+        Object[] sections = FastNMS.INSTANCE.method$ChunkAccess$getSections(chunkAccess);
+        CEChunk ceChunk;
+        try {
+            ceChunk = ceWorld.worldDataStorage().readNewChunkAt(ceWorld, chunkPos);
+            CESection[] ceSections = ceChunk.sections();
+            synchronized (sections) {
+                for (int i = 0; i < ceSections.length; i++) {
+                    CESection ceSection = ceSections[i];
+                    Object section = sections[i];
+                    int finalI = i;
+                    WorldStorageInjector.injectLevelChunkSection(section, ceSection, ceChunk, new SectionPos(chunkPos.x, ceChunk.sectionY(i), chunkPos.z),
+                            (injected) -> sections[finalI] = injected);
+                }
+            }
+            ceChunk.load();
+        } catch (IOException e) {
+            this.plugin.logger().warn("Failed to read new chunk at " + chunkPos.x + " " + chunkPos.z, e);
+        }
+    }
+
+    private void handleChunkLoad(CEWorld ceWorld, Chunk chunk, boolean isNew) {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
         ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-        if (ceWorld.isChunkLoaded(chunkPos.longKey)) return;
+        CEChunk chunkAtIfLoaded = ceWorld.getChunkAtIfLoaded(chunkPos.longKey);
+        if (chunkAtIfLoaded != null) {
+            if (isNew) {
+                chunkAtIfLoaded.activateAllBlockEntities();
+            }
+            return;
+        }
         CEChunk ceChunk;
         try {
             ceChunk = ceWorld.worldDataStorage().readChunkAt(ceWorld, chunkPos);
@@ -382,5 +421,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
             return;
         }
         ceChunk.load();
+        ceChunk.activateAllBlockEntities();
     }
 }

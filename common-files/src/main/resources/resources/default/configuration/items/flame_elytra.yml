@@ -8,7 +8,7 @@ items:
           asset-id: flame
           wings: flame_elytra
       data:
-        item-name: <!i><#FF8C00><i18n:item.flame_elytra>
+        item-name: <!i><#FF8C00><l10n:item.flame_elytra>
       model:
         template: default:model/simplified_elytra
         arguments:

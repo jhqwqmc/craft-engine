@@ -184,6 +184,8 @@ public abstract class CraftEngine implements Plugin {
                     delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.recipeManager.delayedLoad(), this.scheduler.async()));
                 }
                 CompletableFutures.allOf(delayedLoadTasks).join();
+                // 重新发送tags，需要等待tags更新完成
+                this.networkManager.delayedLoad();
                 long time2 = System.currentTimeMillis();
                 asyncTime = time2 - time1;
             } finally {

@@ -14,25 +14,37 @@ public class ConstantBlockEntityRenderer {
 
     public void show(Player player) {
         for (BlockEntityElement element : this.elements) {
-            element.show(player);
+            if (element != null) {
+                element.show(player);
+            }
         }
     }
 
     public void hide(Player player) {
         for (BlockEntityElement element : this.elements) {
-            element.hide(player);
+            if (element != null) {
+                element.hide(player);
+            }
         }
     }
 
     public void deactivate() {
         for (BlockEntityElement element : this.elements) {
-            element.deactivate();
+            if (element != null) {
+                element.deactivate();
+            }
         }
     }
 
     public void activate() {
         for (BlockEntityElement element : this.elements) {
-            element.activate();
+            if (element != null) {
+                element.activate();
+            }
         }
+    }
+
+    public BlockEntityElement[] elements() {
+        return this.elements;
     }
 }

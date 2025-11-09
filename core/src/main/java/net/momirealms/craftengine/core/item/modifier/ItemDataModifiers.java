@@ -28,6 +28,7 @@ public final class ItemDataModifiers {
     public static final Key CUSTOM_NAME = Key.of("craftengine:custom-name");
     public static final Key CUSTOM_MODEL_DATA = Key.of("craftengine:custom-model-data");
     public static final Key COMPONENTS = Key.of("craftengine:components");
+    public static final Key COMPONENT = Key.of("craftengine:component");
     public static final Key ATTRIBUTE_MODIFIERS = Key.of("craftengine:attribute-modifiers");
     public static final Key ATTRIBUTES = Key.of("craftengine:attributes");
     public static final Key ARGUMENTS = Key.of("craftengine:arguments");
@@ -37,6 +38,7 @@ public final class ItemDataModifiers {
     public static final Key OVERWRITABLE_ITEM_NAME = Key.of("craftengine:overwritable-item-name");
     public static final Key JUKEBOX_PLAYABLE = Key.of("craftengine:jukebox-playable");
     public static final Key REMOVE_COMPONENTS = Key.of("craftengine:remove-components");
+    public static final Key REMOVE_COMPONENT = Key.of("craftengine:remove-component");
     public static final Key TAGS = Key.of("craftengine:tags");
     public static final Key NBT = Key.of("craftengine:nbt");
     public static final Key TOOLTIP_STYLE = Key.of("craftengine:tooltip-style");
@@ -84,7 +86,9 @@ public final class ItemDataModifiers {
             register(ITEM_NAME, ItemNameModifier.FACTORY);
             register(DISPLAY_NAME, ItemNameModifier.FACTORY);
             register(COMPONENTS, ComponentsModifier.FACTORY);
+            register(COMPONENT, ComponentsModifier.FACTORY);
             register(REMOVE_COMPONENTS, RemoveComponentModifier.FACTORY);
+            register(REMOVE_COMPONENT, RemoveComponentModifier.FACTORY);
             register(FOOD, FoodModifier.FACTORY);
             register(MAX_DAMAGE, MaxDamageModifier.FACTORY);
         } else {

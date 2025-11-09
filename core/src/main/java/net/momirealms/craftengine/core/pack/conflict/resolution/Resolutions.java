@@ -14,6 +14,7 @@ public class Resolutions {
     public static final Key RETAIN_MATCHING = Key.of("craftengine:retain_matching");
     public static final Key MERGE_JSON = Key.of("craftengine:merge_json");
     public static final Key MERGE_ATLAS = Key.of("craftengine:merge_atlas");
+    public static final Key MERGE_FONT = Key.of("craftengine:merge_font");
     public static final Key CONDITIONAL = Key.of("craftengine:conditional");
     public static final Key MERGE_PACK_MCMETA = Key.of("craftengine:merge_pack_mcmeta");
     public static final Key MERGE_LEGACY_MODEL = Key.of("craftengine:merge_legacy_model");
@@ -25,6 +26,7 @@ public class Resolutions {
         register(MERGE_PACK_MCMETA, ResolutionMergePackMcMeta.FACTORY);
         register(MERGE_ATLAS, ResolutionMergeAltas.FACTORY);
         register(MERGE_LEGACY_MODEL, ResolutionMergeLegacyModel.FACTORY);
+        register(MERGE_FONT, ResolutionMergeFont.FACTORY);
     }
 
     public static void register(Key key, ResolutionFactory factory) {

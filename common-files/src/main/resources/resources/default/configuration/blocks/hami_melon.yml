@@ -2,7 +2,7 @@ items:
   default:hami_melon_slice:
     material: melon_slice
     data:
-      item-name: <!i><i18n:item.hami_melon_slice>
+      item-name: <!i><l10n:item.hami_melon_slice>
       $$>=1.20.5:
         food:
           nutrition: 2
@@ -20,7 +20,7 @@ items:
   default:hami_melon:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.hami_melon>
+      item-name: <!i><l10n:item.hami_melon>
     model:
       path: minecraft:item/custom/hami_melon
       generation:
@@ -31,7 +31,7 @@ items:
   default:hami_melon_seeds:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.hami_melon_seeds>
+      item-name: <!i><l10n:item.hami_melon_seeds>
     model:
       template: default:model/simplified_generated
       arguments:

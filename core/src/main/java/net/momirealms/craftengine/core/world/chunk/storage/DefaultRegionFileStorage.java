@@ -121,6 +121,19 @@ public class DefaultRegionFileStorage implements WorldDataStorage {
     }
 
     @Override
+    public CEChunk readNewChunkAt(CEWorld world, ChunkPos pos) throws IOException {
+        RegionFile regionFile = this.getRegionFile(pos, false, true);
+        try {
+            if (regionFile.doesChunkExist(pos)) {
+                regionFile.clear(pos);
+            }
+            return new CEChunk(world, pos);
+        } finally {
+            regionFile.fileLock.unlock();
+        }
+    }
+
+    @Override
     public @NotNull CEChunk readChunkAt(@NotNull CEWorld world, @NotNull ChunkPos pos) throws IOException {
         RegionFile regionFile = this.getRegionFile(pos, false, true);
         try {
@@ -150,6 +163,11 @@ public class DefaultRegionFileStorage implements WorldDataStorage {
     public void writeChunkAt(@NotNull ChunkPos pos, @NotNull CEChunk chunk) throws IOException {
         CompoundTag nbt = DefaultChunkSerializer.serialize(chunk);
         writeChunkTagAt(pos, nbt);
+    }
+
+    @Override
+    public void clearChunkAt(@NotNull ChunkPos pos) throws IOException {
+        this.writeChunkTagAt(pos, null);
     }
 
     public void writeChunkTagAt(@NotNull ChunkPos pos, @Nullable CompoundTag nbt) throws IOException {

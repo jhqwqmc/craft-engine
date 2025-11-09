@@ -43,7 +43,7 @@ public class SingleItemLootEntryContainer<T> extends AbstractSingleLootEntryCont
         @SuppressWarnings("unchecked")
         @Override
         public LootEntryContainer<A> create(Map<String, Object> arguments) {
-            String itemObj = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.loot_table.entry.item.missing_item");
+            String itemObj = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "item", "id"), "warning.config.loot_table.entry.item.missing_item");
             Key item = Key.from(itemObj);
             int weight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("weight", 1), "weight");
             int quality = ResourceConfigUtils.getAsInt(arguments.getOrDefault("quality", 0), "quality");

@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
 
 public class LootFunctions {
     public static final Key APPLY_BONUS = Key.from("craftengine:apply_bonus");
+    public static final Key APPLY_DATA = Key.from("craftengine:apply_data");
     public static final Key SET_COUNT = Key.from("craftengine:set_count");
     public static final Key EXPLOSION_DECAY = Key.from("craftengine:explosion_decay");
     public static final Key DROP_EXP = Key.from("craftengine:drop_exp");
@@ -24,6 +25,7 @@ public class LootFunctions {
 
     static {
         register(SET_COUNT, SetCountFunction.FACTORY);
+        register(APPLY_DATA, ApplyDataFunction.FACTORY);
         register(EXPLOSION_DECAY, ExplosionDecayFunction.FACTORY);
         register(APPLY_BONUS, ApplyBonusCountFunction.FACTORY);
         register(DROP_EXP, DropExpFunction.FACTORY);

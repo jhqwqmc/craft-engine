@@ -241,6 +241,19 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         this.c2sGamePacketListeners[id] = new ByteBufferPacketListenerHolder(name, listener);
     }
 
+    @Override
+    public void delayedLoad() {
+        this.resendTags();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void resendTags() {
+        Object packet = TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, BukkitBlockManager.instance().cachedUpdateTags()), FastNMS.INSTANCE.method$TagNetworkSerialization$serializeTagsToNetwork());
+        for (BukkitServerPlayer player : onlineUsers()) {
+            player.sendPacket(packet, false);
+        }
+    }
+
     public void addFakePlayer(Player player) {
         FakeBukkitServerPlayer fakePlayer = new FakeBukkitServerPlayer(this.plugin);
         fakePlayer.setPlayer(player);
@@ -1857,11 +1870,17 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
 
     public static class UpdateTagsListener implements NMSPacketListener {
 
+        @SuppressWarnings("unchecked")
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            Object modifiedPacket = BukkitBlockManager.instance().cachedUpdateTagsPacket();
-            if (packet.equals(modifiedPacket) || modifiedPacket == null) return;
-            event.replacePacket(modifiedPacket);
+            List<TagUtils.TagEntry> cachedUpdateTags = BukkitBlockManager.instance().cachedUpdateTags();
+            if (cachedUpdateTags.isEmpty()) return;
+            Map<Object, Object> tags = FastNMS.INSTANCE.field$ClientboundUpdateTagsPacket$tags(packet);
+            // 已经替换过了
+            if (tags instanceof MarkedHashMap<Object, Object>) return;
+            // 需要虚假的block
+            if (tags.get(MRegistries.BLOCK) == null) return;
+            event.replacePacket(TagUtils.createUpdateTagsPacket(Map.of(MRegistries.BLOCK, cachedUpdateTags), tags));
         }
     }
 
@@ -4132,16 +4151,22 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             CompoundTag tag = (CompoundTag) buf.readNbt(named);
             // todo 刷怪笼里的物品？
 
-            // 展示架
-            if (VersionHelper.isOrAbove1_21_9() && tag != null && tag.containsKey("Items")) {
+            // 通用方块实体存储的物品
+            if (tag != null && tag.containsKey("Items")) {
                 BukkitItemManager itemManager = BukkitItemManager.instance();
                 ListTag itemsTag = tag.getList("Items");
                 List<Pair<Byte, ItemStack>> items = new ArrayList<>();
                 for (Tag itemTag : itemsTag) {
                     if (itemTag instanceof CompoundTag itemCompoundTag) {
                         byte slot = itemCompoundTag.getByte("Slot");
-                        Object nmsStack = CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, itemCompoundTag)
-                                .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to parse invalid item: '" + error + "'")).orElse(null);
+                        Object nmsStack;
+                        if (VersionHelper.isOrAbove1_20_5()) {
+                            nmsStack = CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, itemCompoundTag)
+                                    .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to parse invalid item: '" + error + "'")).orElse(null);
+                        } else {
+                            Object nmsTag = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, itemTag);
+                            nmsStack = FastNMS.INSTANCE.method$ItemStack$of(nmsTag);
+                        }
                         ItemStack bukkitStack = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsStack);
                         Optional<ItemStack> optional = itemManager.s2c(bukkitStack, (BukkitServerPlayer) user);
                         if (optional.isPresent()) {
@@ -4155,8 +4180,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 if (changed) {
                     ListTag newItemsTag = new ListTag();
                     for (Pair<Byte, ItemStack> pair : items) {
-                        CompoundTag newItemCompoundTag = (CompoundTag) CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, FastNMS.INSTANCE.field$CraftItemStack$handle(pair.right()))
-                                .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to encode invalid item: '" + error + "'")).orElse(null);
+                        CompoundTag newItemCompoundTag;
+                        if (VersionHelper.isOrAbove1_20_5()) {
+                            newItemCompoundTag = (CompoundTag) CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, FastNMS.INSTANCE.field$CraftItemStack$handle(pair.right()))
+                                    .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to encode invalid item: '" + error + "'")).orElse(null);
+                        } else {
+                            Object nmsTag = FastNMS.INSTANCE.method$itemStack$save(FastNMS.INSTANCE.field$CraftItemStack$handle(pair.right()), FastNMS.INSTANCE.constructor$CompoundTag());
+                            newItemCompoundTag = (CompoundTag) MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, nmsTag);
+                        }
                         if (newItemCompoundTag != null) {
                             newItemCompoundTag.putByte("Slot", pair.left());
                             newItemsTag.add(newItemCompoundTag);

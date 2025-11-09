@@ -2,7 +2,7 @@ items:
   default:topaz_ore:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.topaz_ore>
+      item-name: <!i><l10n:item.topaz_ore>
     model:
       type: minecraft:model
       path: minecraft:item/custom/topaz_ore
@@ -14,7 +14,7 @@ items:
   default:deepslate_topaz_ore:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.deepslate_topaz_ore>
+      item-name: <!i><l10n:item.deepslate_topaz_ore>
     model:
       type: minecraft:model
       path: minecraft:item/custom/deepslate_topaz_ore
@@ -31,7 +31,7 @@ items:
             - '#default:topaz_tools'
           percent: 0.25
     data:
-      item-name: <!i><#FF8C00><i18n:item.topaz>
+      item-name: <!i><#FF8C00><l10n:item.topaz>
     model:
       template: default:model/simplified_generated
       arguments:

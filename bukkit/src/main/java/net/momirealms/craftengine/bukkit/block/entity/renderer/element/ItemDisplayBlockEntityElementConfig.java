@@ -78,6 +78,20 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         return new ItemDisplayBlockEntityElement(this, pos);
     }
 
+    @Override
+    public ItemDisplayBlockEntityElement create(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
+        Quaternionf previousRotation = previous.config.rotation;
+        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
+            return null;
+        }
+        return new ItemDisplayBlockEntityElement(this, pos, previous.entityId, previous.config.yRot != this.yRot || previous.config.xRot != this.xRot || !previous.config.position.equals(this.position));
+    }
+
+    @Override
+    public Class<ItemDisplayBlockEntityElement> elementClass() {
+        return ItemDisplayBlockEntityElement.class;
+    }
+
     public Item<?> item(Player player) {
         return this.item.apply(player);
     }

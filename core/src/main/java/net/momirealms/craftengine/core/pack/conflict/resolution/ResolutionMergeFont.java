@@ -11,9 +11,9 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.HashSet;
 import java.util.Map;
 
-public class ResolutionMergeAltas implements Resolution {
+public class ResolutionMergeFont implements Resolution {
     public static final Factory FACTORY = new Factory();
-    public static final ResolutionMergeAltas INSTANCE = new ResolutionMergeAltas();
+    public static final ResolutionMergeFont INSTANCE = new ResolutionMergeFont();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -21,8 +21,8 @@ public class ResolutionMergeAltas implements Resolution {
             JsonObject j1 = GsonHelper.readJsonFile(existing.path()).getAsJsonObject();
             JsonObject j2 = GsonHelper.readJsonFile(conflict.path()).getAsJsonObject();
             JsonObject j3 = new JsonObject();
-            JsonArray ja1 = j1.getAsJsonArray("sources");
-            JsonArray ja2 = j2.getAsJsonArray("sources");
+            JsonArray ja1 = j1.getAsJsonArray("providers");
+            JsonArray ja2 = j2.getAsJsonArray("providers");
             JsonArray ja3 = new JsonArray();
             HashSet<String> elements = new HashSet<>();
             for (JsonElement je : ja1) {
@@ -35,16 +35,16 @@ public class ResolutionMergeAltas implements Resolution {
                     ja3.add(je);
                 }
             }
-            j3.add("sources", ja3);
+            j3.add("providers", ja3);
             GsonHelper.writeJsonFile(j3, existing.path());
         } catch (Exception e) {
-            CraftEngine.instance().logger().severe("Failed to merge altas when resolving file conflicts", e);
+            CraftEngine.instance().logger().severe("Failed to merge font when resolving file conflicts", e);
         }
     }
 
     @Override
     public Key type() {
-        return Resolutions.MERGE_ATLAS;
+        return Resolutions.MERGE_FONT;
     }
 
     public static class Factory implements ResolutionFactory {

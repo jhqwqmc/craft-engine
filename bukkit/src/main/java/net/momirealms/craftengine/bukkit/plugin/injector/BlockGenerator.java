@@ -201,6 +201,14 @@ public final class BlockGenerator {
         field$CraftEngineBlock$isTripwire = clazz$CraftEngineBlock.getField("isClientSideTripwire");
     }
 
+    public static Field field$CraftEngineBlock$isNoteBlock() {
+        return field$CraftEngineBlock$isNoteBlock;
+    }
+
+    public static Field field$CraftEngineBlock$isTripwire() {
+        return field$CraftEngineBlock$isTripwire;
+    }
+
     public static DelegatingBlock generateBlock(Key blockId) throws Throwable {
         ObjectHolder<BlockBehavior> behaviorHolder = new ObjectHolder<>(EmptyBlockBehavior.INSTANCE);
         ObjectHolder<BlockShape> shapeHolder = new ObjectHolder<>(STONE_SHAPE);

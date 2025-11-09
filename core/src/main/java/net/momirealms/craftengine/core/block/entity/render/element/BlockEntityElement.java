@@ -10,6 +10,8 @@ public interface BlockEntityElement {
 
     void hide(Player player);
 
+    default void transform(Player player) {}
+
     default void deactivate() {}
 
     default void activate() {}

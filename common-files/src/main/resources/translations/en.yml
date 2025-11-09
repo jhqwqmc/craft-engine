@@ -374,6 +374,7 @@ warning.config.loot_table.function.apply_bonus.missing_enchantment: "<yellow>Iss
 warning.config.loot_table.function.apply_bonus.missing_formula: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, function 'apply_bonus' is missing the required 'formula' argument.</yellow>"
 warning.config.loot_table.function.drop_exp.missing_count: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, function 'drop_exp' is missing the required 'count' argument.</yellow>"
 warning.config.loot_table.function.set_count.missing_count: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, function 'set_count' is missing the required 'count' argument.</yellow>"
+warning.config.loot_table.function.apply_data.missing_data: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, function 'apply_data' is missing the required 'data' argument.</yellow>"
 warning.config.loot_table.entry.missing_type: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, one of the entries is missing the required 'type' argument.</yellow>"
 warning.config.loot_table.entry.invalid_type: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, one of the entries is using an invalid entry type '<arg:2>'.</yellow>"
 warning.config.loot_table.entry.exp.missing_count: "<yellow>Issue found in file <arg:0> - '<arg:1>' has a misconfigured loot table, entry 'exp' is missing the required 'count' argument.</yellow>"

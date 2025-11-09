@@ -40,10 +40,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -620,6 +620,9 @@ public abstract class AbstractPackManager implements PackManager {
                                         AbstractPackManager.this.plugin.logger().severe("Error found while reading config file: " + path, e);
                                     }
                                     return FileVisitResult.CONTINUE;
+                                } catch (ParserException e) {
+                                    AbstractPackManager.this.plugin.logger().severe("Invalid YAML file found: " + path + ".\n" + e.getMessage() + "\nIt is recommended to use Visual Studio Code as your YAML editor to fix problems more quickly.");
+                                    return FileVisitResult.CONTINUE;
                                 } catch (LocalizedException e) {
                                     e.setArgument(0, path.toString());
                                     TranslationManager.instance().log(e.node(), e.arguments());
@@ -734,10 +737,6 @@ public abstract class AbstractPackManager implements PackManager {
             this.plugin.logger().info("Optimized resource pack in " + (time4 - time3) + "ms");
             Path finalPath = resourcePackPath();
             Files.createDirectories(finalPath.getParent());
-            if (!VersionHelper.PREMIUM && Config.enableObfuscation()) {
-                Config.instance().setObf(false);
-                this.plugin.logger().warn("Resource pack obfuscation requires Premium Edition.");
-            }
             try {
                 this.zipGenerator.accept(generatedPackPath, finalPath);
             } catch (Exception e) {

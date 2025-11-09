@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.block.DelegatingBlockState;
 import net.momirealms.craftengine.core.block.EmptyBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
+import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
@@ -226,7 +227,10 @@ public final class WorldStorageInjector {
             // 处理  自定义块到自定义块或原版块到自定义块
             CEChunk chunk = holder.ceChunk();
             chunk.setDirty(true);
+
+            ConstantBlockEntityRenderer previousRenderer = null;
             // 如果两个方块没有相同的主人 且 旧方块有方块实体
+
             if (!previousImmutableBlockState.isEmpty()) {
                 if (previousImmutableBlockState.owner() != newImmutableBlockState.owner() && previousImmutableBlockState.hasBlockEntity()) {
                     BlockPos pos = new BlockPos(chunk.chunkPos.x * 16 + x, section.sectionY * 16 + y, chunk.chunkPos.z * 16 + z);
@@ -242,9 +246,11 @@ public final class WorldStorageInjector {
                 }
                 if (previousImmutableBlockState.hasConstantBlockEntityRenderer()) {
                     BlockPos pos = new BlockPos(chunk.chunkPos.x * 16 + x, section.sectionY * 16 + y, chunk.chunkPos.z * 16 + z);
-                    chunk.removeConstantBlockEntityRenderer(pos);
+                    // 如果新状态没有entity renderer，那么直接移除，否则暂存
+                    previousRenderer = chunk.removeConstantBlockEntityRenderer(pos, !newImmutableBlockState.hasConstantBlockEntityRenderer());
                 }
             }
+
             if (newImmutableBlockState.hasBlockEntity()) {
                 BlockPos pos = new BlockPos(chunk.chunkPos.x * 16 + x, section.sectionY * 16 + y, chunk.chunkPos.z * 16 + z);
                 BlockEntity blockEntity = chunk.getBlockEntity(pos, false);
@@ -264,10 +270,13 @@ public final class WorldStorageInjector {
                     chunk.createDynamicBlockEntityRenderer(blockEntity);
                 }
             }
+
+            // 处理新老entity renderer更替
             if (newImmutableBlockState.hasConstantBlockEntityRenderer()) {
                 BlockPos pos = new BlockPos(chunk.chunkPos.x * 16 + x, section.sectionY * 16 + y, chunk.chunkPos.z * 16 + z);
-                chunk.addConstantBlockEntityRenderer(pos, newImmutableBlockState);
+                chunk.addConstantBlockEntityRenderer(pos, newImmutableBlockState, previousRenderer);
             }
+
             // 如果新方块的光照属性和客户端认为的不同
             if (Config.enableLightSystem()) {
                 if (previousImmutableBlockState.isEmpty()) {
