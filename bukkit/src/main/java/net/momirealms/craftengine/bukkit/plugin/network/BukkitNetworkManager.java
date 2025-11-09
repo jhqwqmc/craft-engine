@@ -121,6 +121,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -433,6 +434,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 new SetObjectiveListener1_20(),
                 this.packetIds.clientboundSetObjectivePacket(), "ClientboundSetObjectivePacket"
         );
+        registerS2CGamePacketListener(
+                VersionHelper.isOrAbove1_20_3() ?
+                new PlayerChatListener_1_20_3() :
+                new PlayerChatListener_1_20(),
+                this.packetIds.clientboundPlayerChatPacket(), "ClientboundPlayerChatPacket");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -4203,6 +4209,195 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 buf.writeBlockPos(pos);
                 buf.writeVarInt(entityType);
                 buf.writeNbt(tag, named);
+            }
+        }
+    }
+
+    public static class PlayerChatListener_1_20 implements ByteBufferPacketListener {
+
+        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
+            if (!Config.interceptPlayerChat()) return;
+            FriendlyByteBuf buf = event.getBuffer();
+            boolean changed = false;
+            UUID sender = buf.readUUID();
+            int index = buf.readVarInt();
+            byte @Nullable [] messageSignature = buf.readNullable(b -> {
+                byte[] bs = new byte[256];
+                buf.readBytes(bs);
+                return bs;
+            });
+            // SignedMessageBody.Packed start
+            String content = buf.readUtf(256);
+            Instant timeStamp = buf.readInstant();
+            long salt = buf.readLong();
+            // LastSeenMessages.Packed start
+            ArrayList<Pair<Integer, byte[]>> lastSeen = buf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), b -> {
+                int i = b.readVarInt() - 1;
+                if (i == -1) {
+                    byte[] bs = new byte[256];
+                    buf.readBytes(bs);
+                    return Pair.of(-1, bs);
+                } else {
+                    return Pair.of(i, null);
+                }
+            });
+            // LastSeenMessages.Packed end
+            // SignedMessageBody.Packed end
+            @Nullable String unsignedContent = buf.readNullable(FriendlyByteBuf::readUtf);
+            if (unsignedContent != null) {
+                Map<String, ComponentProvider> unsignedContentTokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
+                if (!unsignedContentTokens.isEmpty()) {
+                    Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(unsignedContent, JsonElement.class));
+                    Component component = AdventureHelper.nbtToComponent(tag);
+                    component = AdventureHelper.replaceText(component, unsignedContentTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                    unsignedContent = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
+                    changed = true;
+                }
+            }
+            // FilterMask start
+            int type = buf.readVarInt();
+            BitSet mask = type == 2 /* PARTIALLY_FILTERED */ ? buf.readBitSet() : null;
+            // FilterMask end
+            // ChatType.BoundNetwork start
+            int chatType = buf.readVarInt();
+            String name = buf.readUtf();
+            Map<String, ComponentProvider> nameTokens = CraftEngine.instance().fontManager().matchTags(name);
+            if (!nameTokens.isEmpty()) {
+                Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(name, JsonElement.class));
+                Component component = AdventureHelper.nbtToComponent(tag);
+                component = AdventureHelper.replaceText(component, nameTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                name = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
+                changed = true;
+            }
+            @Nullable String targetName = buf.readNullable(FriendlyByteBuf::readUtf);
+            if (targetName != null) {
+                Map<String, ComponentProvider> targetNameTokens = CraftEngine.instance().fontManager().matchTags(targetName);
+                if (!targetNameTokens.isEmpty()) {
+                    Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(targetName, JsonElement.class));
+                    Component component = AdventureHelper.nbtToComponent(tag);
+                    component = AdventureHelper.replaceText(component, targetNameTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                    targetName = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
+                    changed = true;
+                }
+            }
+            // ChatType.BoundNetwork end
+            if (changed) {
+                event.setChanged(true);
+                buf.clear();
+                buf.writeVarInt(event.packetID());
+                buf.writeUUID(sender);
+                buf.writeVarInt(index);
+                buf.writeNullable(messageSignature, (b, bs) -> buf.writeBytes(bs));
+                buf.writeUtf(content);
+                buf.writeInstant(timeStamp);
+                buf.writeLong(salt);
+                buf.writeCollection(lastSeen, (b, pair) -> {
+                    b.writeVarInt(pair.left() + 1);
+                    if (pair.right() != null) {
+                        b.writeBytes(pair.right());
+                    }
+                });
+                buf.writeNullable(unsignedContent, FriendlyByteBuf::writeUtf);
+                buf.writeVarInt(type);
+                if (type == 2) buf.writeBitSet(mask);
+                buf.writeVarInt(chatType);
+                buf.writeUtf(name);
+                buf.writeNullable(targetName, FriendlyByteBuf::writeUtf);
+            }
+        }
+    }
+
+    public static class PlayerChatListener_1_20_3 implements ByteBufferPacketListener {
+
+        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
+            if (!Config.interceptPlayerChat()) return;
+            FriendlyByteBuf buf = event.getBuffer();
+            boolean changed = false;
+            int globalIndex = VersionHelper.isOrAbove1_21_5() ? buf.readVarInt() : -1;
+            UUID sender = buf.readUUID();
+            int index = buf.readVarInt();
+            byte @Nullable [] messageSignature = buf.readNullable(b -> {
+                byte[] bs = new byte[256];
+                buf.readBytes(bs);
+                return bs;
+            });
+            // SignedMessageBody.Packed start
+            String content = buf.readUtf(256);
+            Instant timeStamp = buf.readInstant();
+            long salt = buf.readLong();
+            // LastSeenMessages.Packed start
+            ArrayList<Pair<Integer, byte[]>> lastSeen = buf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), b -> {
+                int i = b.readVarInt() - 1;
+                if (i == -1) {
+                    byte[] bs = new byte[256];
+                    buf.readBytes(bs);
+                    return Pair.of(-1, bs);
+                } else {
+                    return Pair.of(i, null);
+                }
+            });
+            // LastSeenMessages.Packed end
+            // SignedMessageBody.Packed end
+            @Nullable Tag unsignedContent = buf.readNullable(b -> b.readNbt(false));
+            if (unsignedContent != null) {
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
+                if (!tokens.isEmpty()) {
+                    Component component = AdventureHelper.tagToComponent(unsignedContent);
+                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                    unsignedContent = AdventureHelper.componentToTag(component);
+                    changed = true;
+                }
+            }
+            // FilterMask start
+            int type = buf.readVarInt();
+            BitSet mask = type == 2 /* PARTIALLY_FILTERED */ ? buf.readBitSet() : null;
+            // FilterMask end
+            // ChatType.Bound start
+            int chatType = buf.readVarInt();
+            Tag name = buf.readNbt(false);
+            if (name != null) {
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(name);
+                if (!tokens.isEmpty()) {
+                    Component component = AdventureHelper.tagToComponent(name);
+                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                    name = AdventureHelper.componentToTag(component);
+                    changed = true;
+                }
+            }
+            @Nullable Tag targetName = buf.readNullable(b -> b.readNbt(false));
+            if (targetName != null) {
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(targetName);
+                if (!tokens.isEmpty()) {
+                    Component component = AdventureHelper.tagToComponent(targetName);
+                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
+                    targetName = AdventureHelper.componentToTag(component);
+                    changed = true;
+                }
+            }
+            // ChatType.Bound end
+            if (changed) {
+                event.setChanged(true);
+                buf.clear();
+                buf.writeVarInt(event.packetID());
+                if (VersionHelper.isOrAbove1_21_5()) buf.writeVarInt(globalIndex);
+                buf.writeUUID(sender);
+                buf.writeVarInt(index);
+                buf.writeNullable(messageSignature, (b, bs) -> buf.writeBytes(bs));
+                buf.writeUtf(content);
+                buf.writeInstant(timeStamp);
+                buf.writeLong(salt);
+                buf.writeCollection(lastSeen, (b, pair) -> {
+                    b.writeVarInt(pair.left() + 1);
+                    if (pair.right() != null) {
+                        b.writeBytes(pair.right());
+                    }
+                });
+                buf.writeNullable(unsignedContent, (b, tag) -> b.writeNbt(tag, false));
+                buf.writeVarInt(type);
+                if (type == 2) buf.writeBitSet(mask);
+                buf.writeVarInt(chatType);
+                buf.writeNbt(name, false);
+                buf.writeNullable(targetName, (b, tag) -> b.writeNbt(tag, false));
             }
         }
     }

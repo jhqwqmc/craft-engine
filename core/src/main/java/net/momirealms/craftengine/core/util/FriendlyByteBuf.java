@@ -74,6 +74,16 @@ public class FriendlyByteBuf extends ByteBuf {
         this.writeLong(instant.toEpochMilli());
     }
 
+    public static <T> IntFunction<T> limitValue(IntFunction<T> applier, int max) {
+        return (j) -> {
+            if (j > max) {
+                throw new DecoderException("Value " + j + " is larger than limit " + max);
+            } else {
+                return applier.apply(j);
+            }
+        };
+    }
+
     public <T, C extends Collection<T>> C readCollection(IntFunction<C> collectionFactory, Reader<T> reader) {
         int i = this.readVarInt();
         C collection = collectionFactory.apply(i);

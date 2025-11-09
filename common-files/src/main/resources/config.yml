@@ -403,6 +403,7 @@ network:
     text-display: true  # Modern Holograms
     item: true
     advancement: true
+    player-chat: true
 
 recipe:
   # Master switch for custom recipes

@@ -75,4 +75,6 @@ public interface PacketIds {
     int clientboundForgetLevelChunkPacket();
 
     int serverboundCustomPayloadPacket();
+
+    int clientboundPlayerChatPacket();
 }
