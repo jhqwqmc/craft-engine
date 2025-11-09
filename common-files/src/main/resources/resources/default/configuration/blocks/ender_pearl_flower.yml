@@ -2,7 +2,7 @@ items:
   default:ender_pearl_flower_seeds:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.ender_pearl_flower_seeds>
+      item-name: <!i><l10n:item.ender_pearl_flower_seeds>
     model:
       template: default:model/simplified_generated
       arguments:

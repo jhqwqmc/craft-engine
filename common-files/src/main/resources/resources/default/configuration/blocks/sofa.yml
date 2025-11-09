@@ -2,7 +2,7 @@ items:
   default:sleeper_sofa:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.sofa>
+      item-name: <!i><l10n:item.sofa>
     model:
       type: minecraft:model
       path: minecraft:item/custom/sleeper_sofa
@@ -50,7 +50,7 @@ items:
   default:sofa:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.sofa>
+      item-name: <!i><l10n:item.sofa>
     model:
       type: minecraft:model
       path: minecraft:item/custom/sofa

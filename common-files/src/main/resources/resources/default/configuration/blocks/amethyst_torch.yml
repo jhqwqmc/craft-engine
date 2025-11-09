@@ -2,7 +2,7 @@ items:
   default:amethyst_torch:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.amethyst_torch>
+      item-name: <!i><l10n:item.amethyst_torch>
     model:
       type: minecraft:model
       path: minecraft:item/custom/amethyst_torch
@@ -20,7 +20,7 @@ items:
   default:amethyst_standing_torch:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.amethyst_torch>
+      item-name: <!i><l10n:item.amethyst_torch>
     model:
       type: minecraft:model
       path: minecraft:block/custom/amethyst_torch
@@ -31,7 +31,7 @@ items:
   default:amethyst_wall_torch:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.amethyst_torch>
+      item-name: <!i><l10n:item.amethyst_torch>
     model:
       type: minecraft:model
       path: minecraft:block/custom/amethyst_wall_torch

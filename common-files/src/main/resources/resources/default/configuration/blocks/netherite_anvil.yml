@@ -2,7 +2,7 @@ items:
   default:netherite_anvil:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.netherite_anvil>
+      item-name: <!i><l10n:item.netherite_anvil>
     model:
       type: minecraft:model
       path: minecraft:item/custom/netherite_anvil

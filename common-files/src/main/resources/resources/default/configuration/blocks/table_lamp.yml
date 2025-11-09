@@ -2,7 +2,7 @@ items:
   default:table_lamp:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.table_lamp>
+      item-name: <!i><l10n:item.table_lamp>
     model:
       type: minecraft:model
       path: minecraft:item/custom/table_lamp
