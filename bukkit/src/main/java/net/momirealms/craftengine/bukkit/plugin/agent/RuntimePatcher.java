@@ -15,8 +15,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public final class RuntimePatcher {
-    private RuntimePatcher() {}
+public class RuntimePatcher {
 
     public static void patch(BukkitCraftEngine plugin) throws ReflectiveOperationException {
         Class<?> holderClass = new ByteBuddy()
