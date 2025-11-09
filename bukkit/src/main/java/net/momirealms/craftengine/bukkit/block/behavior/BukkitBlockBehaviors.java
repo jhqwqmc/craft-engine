@@ -44,7 +44,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final Key CHIME_BLOCK = Key.from("craftengine:chime_block");
     public static final Key BUDDING_BLOCK = Key.from("craftengine:budding_block");
     public static final Key SEAT_BLOCK = Key.from("craftengine:seat_block");
-    public static final Key SPREADING_BLOCK = Key.from("craftengine:spreading_block");
+    public static final Key SURFACE_SPREADING_BLOCK = Key.from("craftengine:surface_spreading_block");
     public static final Key SNOWY_BLOCK = Key.from("craftengine:snowy_block");
 
     public static void init() {
@@ -88,7 +88,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
         register(CHIME_BLOCK, ChimeBlockBehavior.FACTORY);
         register(BUDDING_BLOCK, BuddingBlockBehavior.FACTORY);
         register(SEAT_BLOCK, SeatBlockBehavior.FACTORY);
-        register(SPREADING_BLOCK, SpreadingBlockBehavior.FACTORY);
+        register(SURFACE_SPREADING_BLOCK, SurfaceSpreadingBlockBehavior.FACTORY);
         register(SNOWY_BLOCK, SnowyBlockBehavior.FACTORY);
     }
 }

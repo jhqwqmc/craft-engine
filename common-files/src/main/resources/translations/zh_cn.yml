@@ -353,7 +353,7 @@ warning.config.block.behavior.attached_stem.missing_facing: "<yellow>在文件 <
 warning.config.block.behavior.attached_stem.missing_fruit: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'attached_stem_block' 行为缺少必需的 'fruit' 选项</yellow>"
 warning.config.block.behavior.attached_stem.missing_stem: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'attached_stem_block' 行为缺少必需的 'stem' 选项</yellow>"
 warning.config.block.behavior.chime.missing_sounds_projectile_hit: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'chime_block' 行为缺少必需的 'sounds.projectile-hit' 选项</yellow>"
-warning.config.block.behavior.spreading.missing_spread_block: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'spreading_block' 行为缺少必需的 'spread-block' 选项</yellow>"
+warning.config.block.behavior.surface_spreading.missing_base_block: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'surface_spreading_block' 行为缺少必需的 'base-block' 选项</yellow>"
 warning.config.block.behavior.snowy.missing_snowy: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'snowy_block' 行为缺少必需的 'snowy' 属性</yellow>"
 warning.config.model.generation.missing_parent: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 的 'generation' 段落缺少必需的 'parent' 参数</yellow>"
 warning.config.model.generation.conflict: "<yellow>在文件 <arg:0> 发现问题 - 无法为 '<arg:1>' 生成模型 存在多个配置尝试使用相同路径 '<arg:2>' 生成不同的 JSON 模型</yellow>"

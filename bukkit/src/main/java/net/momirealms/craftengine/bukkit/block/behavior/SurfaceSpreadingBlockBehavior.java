@@ -19,15 +19,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-public class SpreadingBlockBehavior extends BukkitBlockBehavior {
+public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
     public static final Factory FACTORY = new Factory();
-    private final int spreadLight;
-    private final LazyReference<Object> spreadBlock;
+    private final int requiredLight;
+    private final LazyReference<Object> baseBlock;
 
-    public SpreadingBlockBehavior(CustomBlock customBlock, int spreadLight, String spreadBlock) {
+    public SurfaceSpreadingBlockBehavior(CustomBlock customBlock, int requiredLight, String baseBlock) {
         super(customBlock);
-        this.spreadLight = spreadLight;
-        this.spreadBlock = LazyReference.lazyReference(() -> Objects.requireNonNull(BukkitBlockManager.instance().createBlockState(spreadBlock)).literalObject());
+        this.requiredLight = requiredLight;
+        this.baseBlock = LazyReference.lazyReference(() -> Objects.requireNonNull(BukkitBlockManager.instance().createBlockState(baseBlock)).literalObject());
     }
 
     @Override
@@ -36,15 +36,15 @@ public class SpreadingBlockBehavior extends BukkitBlockBehavior {
         Object level = args[1];
         Object pos = args[2];
         if (!canBeGrass(state, level, pos)) {
-            FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, this.spreadBlock.get(), 3);
+            FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, this.baseBlock.get(), 3);
             return;
         }
-        if (FastNMS.INSTANCE.method$LevelReader$getMaxLocalRawBrightness(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)) < this.spreadLight) return;
+        if (FastNMS.INSTANCE.method$LevelReader$getMaxLocalRawBrightness(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)) < this.requiredLight) return;
         ImmutableBlockState blockState = this.block().defaultState();
         BooleanProperty snowy = (BooleanProperty) this.block().getProperty("snowy");
         for (int i = 0; i < 4; i++) {
             Object blockPos = FastNMS.INSTANCE.method$BlockPos$offset(pos, RandomUtils.generateRandomInt(-1, 2), RandomUtils.generateRandomInt(-3, 2), RandomUtils.generateRandomInt(-1, 2));
-            if (FastNMS.INSTANCE.method$BlockStateBase$isBlock(FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, blockPos), FastNMS.INSTANCE.method$BlockState$getBlock(this.spreadBlock.get())) && canPropagate(state, level, blockPos)) {
+            if (FastNMS.INSTANCE.method$BlockStateBase$isBlock(FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, blockPos), FastNMS.INSTANCE.method$BlockState$getBlock(this.baseBlock.get())) && canPropagate(state, level, blockPos)) {
                 if (snowy != null) blockState = blockState.with(snowy, FastNMS.INSTANCE.method$BlockStateBase$isBlock(FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)), MBlocks.SNOW));
                 FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, blockState.customBlockState().literalObject(), 3);
             }
@@ -82,9 +82,9 @@ public class SpreadingBlockBehavior extends BukkitBlockBehavior {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
-            int spreadLight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("spread-light", 9), "spread-light");
-            String spreadBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.getOrDefault("spread-block", "minecraft:dirt"), "warning.config.block.behavior.spreading.missing_spread_block");
-            return new SpreadingBlockBehavior(block, spreadLight, spreadBlock);
+            int requiredLight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("required-light", 9), "required-light");
+            String baseBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.getOrDefault("base-block", "minecraft:dirt"), "warning.config.block.behavior.surface_spreading.missing_base_block");
+            return new SurfaceSpreadingBlockBehavior(block, requiredLight, baseBlock);
         }
     }
 }
