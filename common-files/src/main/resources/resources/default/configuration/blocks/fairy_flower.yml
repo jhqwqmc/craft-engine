@@ -2,7 +2,7 @@ items:
   default:fairy_flower:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.fairy_flower>
+      item-name: <!i><l10n:item.fairy_flower>
     model:
       template: default:model/simplified_generated
       arguments:

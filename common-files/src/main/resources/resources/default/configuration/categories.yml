@@ -1,16 +1,16 @@
 categories:
   default:default:
     priority: 1
-    name: <!i><white><i18n:category.default.name></white>
+    name: <!i><white><l10n:category.default.name></white>
     lore:
-      - <!i><gray><i18n:category.default.lore>
+      - <!i><gray><l10n:category.default.lore>
     icon: default:topaz
     list:
       - '#default:palm_tree'
       - '#default:topaz'
       - '#default:misc'
   default:palm_tree:
-    name: <!i><green><i18n:category.palm_tree></green>
+    name: <!i><green><l10n:category.palm_tree></green>
     hidden: true
     icon: default:palm_log
     list:
@@ -30,7 +30,7 @@ categories:
       - default:palm_pressure_plate
       - default:palm_button
   default:topaz:
-    name: <!i><#FF8C00><i18n:category.topaz></#FF8C00>
+    name: <!i><#FF8C00><l10n:category.topaz></#FF8C00>
     hidden: true
     icon: default:topaz
     list:
@@ -51,7 +51,7 @@ categories:
       - default:topaz_leggings
       - default:topaz_boots
   default:misc:
-    name: <!i><gray><i18n:category.misc></gray>
+    name: <!i><gray><l10n:category.misc></gray>
     hidden: true
     icon: default:chinese_lantern
     list:

@@ -2,7 +2,7 @@ items:
   default:pebble:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.pebble>
+      item-name: <!i><l10n:item.pebble>
     model:
       template: default:model/simplified_generated
       arguments:

@@ -2,7 +2,7 @@ items:
   default:chessboard_block:
     material: nether_brick
     data:
-      item-name: <!i><i18n:item.chessboard_block>
+      item-name: <!i><l10n:item.chessboard_block>
     model:
       type: minecraft:model
       path: minecraft:item/custom/chessboard_block

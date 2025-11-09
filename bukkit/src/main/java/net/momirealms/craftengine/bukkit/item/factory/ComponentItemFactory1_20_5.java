@@ -501,10 +501,17 @@ public class ComponentItemFactory1_20_5 extends BukkitItemFactory<ComponentItemW
         if (trim == null) {
             item.resetComponent(DataComponentTypes.TRIM);
         } else {
-            item.setJavaComponent(DataComponentTypes.TRIM, Map.of(
-                    "pattern", trim.pattern().asString(),
-                    "material", trim.material().asString()
-            ));
+            try {
+                item.setJavaComponent(DataComponentTypes.TRIM, Map.of(
+                        "pattern", trim.pattern().asString(),
+                        "material", trim.material().asString()
+                ));
+            } catch (Exception e) {
+                // 预防未启用基于纹饰盔甲时，锁链甲可能产生的网络问题（由用户配置决定）
+                if (!trim.material().equals(Key.of("minecraft", "custom")) && !trim.pattern().equals(Key.of("minecraft", "chainmail"))) {
+                    this.plugin.logger().warn("Failed to apply trim " + trim, e);
+                }
+            }
         }
     }
 

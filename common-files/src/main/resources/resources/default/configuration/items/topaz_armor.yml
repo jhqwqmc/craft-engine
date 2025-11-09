@@ -2,7 +2,7 @@ templates:
   default:armor/topaz:
     material: chainmail_${part}
     data:
-      item-name: <!i><#FF8C00><i18n:item.topaz_${part}>
+      item-name: <!i><#FF8C00><l10n:item.topaz_${part}>
       tooltip-style: minecraft:topaz
     settings:
       tags:
