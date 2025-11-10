@@ -18,5 +18,10 @@ public interface StatePropertyAccessor {
     Object withProperty(String propertyName, String value);
 
     @NotNull
-    Object cycleProperty(String propertyName);
+    default Object cycleProperty(String propertyName) {
+        return cycleProperty(propertyName, false);
+    }
+
+    @NotNull
+    Object cycleProperty(String propertyName, boolean backwards);
 }

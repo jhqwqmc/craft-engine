@@ -23,6 +23,8 @@ public interface BlockStateWrapper extends Comparable<BlockStateWrapper> {
 
     BlockStateWrapper withProperty(String propertyName, String propertyValue);
 
+    BlockStateWrapper cycleProperty(String propertyName, boolean backwards);
+
     String getAsString();
 
     boolean isCustom();

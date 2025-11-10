@@ -478,6 +478,7 @@ warning.config.function.when.missing_source: "<yellow>在文件 <arg:0> 发现�
 warning.config.function.if_else.missing_rules: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'if_else' 函数所需的 'rules' 参数</yellow>"
 warning.config.function.update_block_property.missing_properties: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'update_block_property' 函数所需的 'properties' 参数</yellow>"
 warning.config.function.transform_block.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'transform_block' 函数所需的 'block' 参数</yellow>"
+warning.config.function.cycle_block_property.missing_property: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'cycle_block_property' 函数所需的 'property' 参数</yellow>"
 warning.config.selector.missing_type: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少选择器必需的 'type' 参数</yellow>"
 warning.config.selector.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 使用了无效的选择器类型 '<arg:2>'</yellow>"
 warning.config.selector.invalid_target: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 使用了无效的选择器目标 '<arg:2>'</yellow>"

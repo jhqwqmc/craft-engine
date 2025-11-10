@@ -60,6 +60,15 @@ public class BukkitCustomBlockStateWrapper extends AbstractBlockStateWrapper imp
     }
 
     @Override
+    public BlockStateWrapper cycleProperty(String propertyName, boolean backwards) {
+        return getImmutableBlockState().map(state -> {
+            Property<?> property = state.owner().value().getProperty(propertyName);
+            if (property == null) return null;
+            return state.cycle(property, backwards).customBlockState();
+        }).orElse(this);
+    }
+
+    @Override
     public boolean hasProperty(String propertyName) {
         return getImmutableBlockState().map(state -> state.owner().value().getProperty(propertyName) != null).orElse(false);
     }
