@@ -1726,4 +1726,10 @@ public final class NetworkReflections {
                     clazz$ClientboundUpdateTagsPacket, Map.class, 0
             )
     );
+
+    public static final Class<?> clazz$ClientboundPlayerChatPacket = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundPlayerChatPacket")
+            )
+    );
 }
