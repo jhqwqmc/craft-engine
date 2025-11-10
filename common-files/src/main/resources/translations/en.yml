@@ -479,6 +479,7 @@ warning.config.function.when.missing_source: "<yellow>Issue found in file <arg:0
 warning.config.function.if_else.missing_rules: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'rules' argument for 'if_else' function.</yellow>"
 warning.config.function.update_block_property.missing_properties: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'properties' argument for 'update_block_property' function.</yellow>"
 warning.config.function.transform_block.missing_block: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'block' argument for 'transform_block' function.</yellow>"
+warning.config.function.cycle_block_property.missing_property: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'property' argument for 'cycle_block_property' function.</yellow>"
 warning.config.selector.missing_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'type' argument for selector.</yellow>"
 warning.config.selector.invalid_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is using an invalid selector type '<arg:2>'.</yellow>"
 warning.config.selector.invalid_target: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is using an invalid selector target '<arg:2>'.</yellow>"

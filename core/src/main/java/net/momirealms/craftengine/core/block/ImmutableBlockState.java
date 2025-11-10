@@ -14,6 +14,7 @@ import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.registry.Holder;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.sparrow.nbt.CompoundTag;
@@ -150,6 +151,16 @@ public final class ImmutableBlockState {
 
     public Holder<CustomBlock> owner() {
         return this.owner;
+    }
+
+    public <T extends Comparable<T>> ImmutableBlockState cycle(Property<T> property, boolean backwards) {
+        T currentValue = get(property);
+        List<T> values = property.possibleValues();
+        return with(property, getRelative(values, currentValue, backwards));
+    }
+
+    private static <T> T getRelative(List<T> values, T currentValue, boolean backwards) {
+        return backwards ? MiscUtils.findPreviousInIterable(values, currentValue) : getNextValue(values, currentValue);
     }
 
     public <T extends Comparable<T>> ImmutableBlockState cycle(Property<T> property) {
