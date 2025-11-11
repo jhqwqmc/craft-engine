@@ -233,6 +233,13 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     }
 
     @Override
+    public Collection<Key> itemTags() {
+        Set<Key> tags = new HashSet<>(VANILLA_ITEM_TAGS.keySet());
+        tags.addAll(this.customItemTags.keySet());
+        return tags;
+    }
+
+    @Override
     public Collection<Suggestion> cachedCustomItemSuggestions() {
         return Collections.unmodifiableCollection(this.cachedCustomItemSuggestions);
     }

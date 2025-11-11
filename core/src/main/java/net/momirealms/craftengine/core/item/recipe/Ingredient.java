@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContents.IngredientInfo<UniqueKey> {
+    private final List<IngredientElement> elements;
     // 自定义物品与原版物品混合的列表
     private final List<UniqueKey> items;
     // 自定义物品原版材质与原版物品混合的列表
@@ -13,7 +14,8 @@ public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContent
     // ingredient里是否含有自定义物品
     private final boolean hasCustomItem;
 
-    private Ingredient(List<UniqueKey> items, List<UniqueKey> vanillaItems, boolean hasCustomItem) {
+    private Ingredient(List<IngredientElement> elements, List<UniqueKey> items, List<UniqueKey> vanillaItems, boolean hasCustomItem) {
+        this.elements = List.copyOf(elements);
         this.items = List.copyOf(items);
         this.vanillaItems = List.copyOf(vanillaItems);
         this.hasCustomItem = hasCustomItem;
@@ -24,12 +26,8 @@ public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContent
                 .orElseGet(stack::isEmpty);
     }
 
-    public static <T> Ingredient<T> of(Set<UniqueKey> items, Set<UniqueKey> minecraftItems, boolean hasCustomItem) {
-        return new Ingredient<>(new ArrayList<>(items), new ArrayList<>(minecraftItems), hasCustomItem);
-    }
-
-    public boolean hasCustomItem() {
-        return hasCustomItem;
+    public static <T> Ingredient<T> of(List<IngredientElement> elements, Set<UniqueKey> items, Set<UniqueKey> minecraftItems, boolean hasCustomItem) {
+        return new Ingredient<>(elements, new ArrayList<>(items), new ArrayList<>(minecraftItems), hasCustomItem);
     }
 
     @Override
@@ -40,6 +38,14 @@ public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContent
             }
         }
         return false;
+    }
+
+    public List<IngredientElement> elements() {
+        return this.elements;
+    }
+
+    public boolean hasCustomItem() {
+        return this.hasCustomItem;
     }
 
     public List<UniqueKey> items() {
