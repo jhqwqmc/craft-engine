@@ -51,13 +51,14 @@ items:
         settings:
           template:
             - default:sound/stone
-            - default:pickaxe_power/level_1
             - default:settings/solid_1x1x1
           overrides:
             hardness: 1.8
             resistance: 1.8
             instrument: basedrum
             map-color: 45
+            correct-tools:
+              template: default:pickaxe_power/level_1
         state:
           auto-state: solid
           model:

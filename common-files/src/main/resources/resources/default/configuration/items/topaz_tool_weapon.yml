@@ -53,10 +53,7 @@ items:
       item-name: <!i><#FF8C00><l10n:item.topaz_pickaxe>
       tooltip-style: minecraft:topaz
       max-damage: 64
-    model:
-      template: default:model/simplified_handheld
-      arguments:
-        path: minecraft:item/custom/topaz_pickaxe
+    texture: minecraft:item/custom/topaz_pickaxe
   default:topaz_axe:
     material: golden_axe
     settings:
@@ -66,10 +63,7 @@ items:
       item-name: <!i><#FF8C00><l10n:item.topaz_axe>
       tooltip-style: minecraft:topaz
       max-damage: 64
-    model:
-      template: default:model/simplified_handheld
-      arguments:
-        path: minecraft:item/custom/topaz_axe
+    texture: minecraft:item/custom/topaz_axe
   default:topaz_hoe:
     material: golden_hoe
     settings:
@@ -79,36 +73,25 @@ items:
       item-name: <!i><#FF8C00><l10n:item.topaz_hoe>
       tooltip-style: minecraft:topaz
       max-damage: 64
-    model:
-      template: default:model/simplified_handheld
-      arguments:
-        path: minecraft:item/custom/topaz_hoe
+    texture: minecraft:item/custom/topaz_hoe
   default:topaz_shovel:
     material: golden_shovel
     settings:
-      tags:
-        - default:topaz_tools
+      tags: ["default:topaz_tools"]
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz_shovel>
       tooltip-style: minecraft:topaz
       max-damage: 64
-    model:
-      template: default:model/simplified_handheld
-      arguments:
-        path: minecraft:item/custom/topaz_shovel
+    texture: minecraft:item/custom/topaz_shovel
   default:topaz_sword:
     material: golden_sword
     settings:
-      tags:
-        - default:topaz_tools
+      tags: ["default:topaz_tools"]
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz_sword>
       tooltip-style: minecraft:topaz
       max-damage: 64
-    model:
-      template: default:model/simplified_handheld
-      arguments:
-        path: minecraft:item/custom/topaz_sword
+    texture: minecraft:item/custom/topaz_sword
   $$>=1.21.4#topaz_trident:
     default:topaz_trident:
       material: trident

@@ -3,9 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.wooden_chair>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/wooden_chair
+    model: minecraft:item/custom/wooden_chair
     behavior:
       type: furniture_item
       furniture:

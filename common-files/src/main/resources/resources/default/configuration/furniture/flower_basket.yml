@@ -3,10 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.flower_basket>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/flower_basket_2d
+    texture: minecraft:item/custom/flower_basket_2d
     behavior:
       type: furniture_item
       furniture: default:flower_basket

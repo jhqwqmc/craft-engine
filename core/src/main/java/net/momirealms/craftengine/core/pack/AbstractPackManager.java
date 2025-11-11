@@ -22,6 +22,9 @@ import net.momirealms.craftengine.core.pack.model.RangeDispatchItemModel;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGenerator;
 import net.momirealms.craftengine.core.pack.model.rangedisptach.CustomModelDataRangeDispatchProperty;
+import net.momirealms.craftengine.core.pack.model.simplified.GeneratedModelReader;
+import net.momirealms.craftengine.core.pack.model.simplified.HandheldModelReader;
+import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -67,16 +70,28 @@ import static net.momirealms.craftengine.core.util.MiscUtils.castToMap;
 
 @SuppressWarnings("DuplicatedCode")
 public abstract class AbstractPackManager implements PackManager {
+    // 1.21.4+物品模型
     public static final Map<Key, JsonObject> PRESET_MODERN_MODELS_ITEM = new HashMap<>();
+    // 旧版本的物品模型
     public static final Map<Key, JsonObject> PRESET_LEGACY_MODELS_ITEM = new HashMap<>();
+    // 全版本的方块模型
     public static final Map<Key, JsonObject> PRESET_MODELS_BLOCK = new HashMap<>();
+    // 1.21.4+物品模型定义
     public static final Map<Key, ModernItemModel> PRESET_ITEMS = new HashMap<>();
+
+    // 原版资产id
     public static final Set<Key> VANILLA_TEXTURES = new HashSet<>();
     public static final Set<Key> VANILLA_MODELS = new HashSet<>();
     public static final Set<Key> VANILLA_SOUNDS = new HashSet<>();
+
+    // 简化的model读取器
+    public static final Map<Key, SimplifiedModelReader> SIMPLIFIED_MODEL_READERS = new HashMap<>();
+
     public static final String NEW_TRIM_MATERIAL = "custom";
+
     public static final Set<String> ALLOWED_VANILLA_EQUIPMENT = Set.of("chainmail", "diamond", "gold", "iron", "netherite");
     public static final Set<String> ALLOWED_MODEL_TAGS = Set.of("parent", "ambientocclusion", "display", "textures", "elements", "gui_light", "overrides");
+
     private static final byte[] EMPTY_1X1_IMAGE;
     private static final byte[] EMPTY_EQUIPMENT_IMAGE;
     private static final byte[] EMPTY_16X16_IMAGE;
@@ -166,6 +181,15 @@ public abstract class AbstractPackManager implements PackManager {
         loadInternalData("internal/models/item/_all.json", ((key, jsonObject) -> {
             PRESET_MODERN_MODELS_ITEM.put(key, jsonObject);
             VANILLA_MODELS.add(Key.of(key.namespace(), "item/" + key.value()));
+            JsonElement parent = jsonObject.get("parent");
+            if (parent instanceof JsonPrimitive primitive) {
+                String parentModel = primitive.getAsString();
+                if (parentModel.equals("minecraft:item/handheld")) {
+                    SIMPLIFIED_MODEL_READERS.put(key, HandheldModelReader.INSTANCE);
+                } else {
+                    SIMPLIFIED_MODEL_READERS.put(key, GeneratedModelReader.INSTANCE);
+                }
+            }
         }));
         loadInternalData("internal/models/block/_all.json", ((key, jsonObject) -> {
             PRESET_MODELS_BLOCK.put(key, jsonObject);
@@ -428,7 +452,12 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/pack.mcmeta");
         plugin.saveResource("resources/default/resourcepack/pack.png");
         // configs
-        plugin.saveResource("resources/default/configuration/templates.yml");
+        plugin.saveResource("resources/default/configuration/templates/block_settings.yml");
+        plugin.saveResource("resources/default/configuration/templates/block_states.yml");
+        plugin.saveResource("resources/default/configuration/templates/models.yml");
+        plugin.saveResource("resources/default/configuration/templates/loot_tables.yml");
+        plugin.saveResource("resources/default/configuration/templates/recipes.yml");
+        plugin.saveResource("resources/default/configuration/templates/tool_levels.yml");
         plugin.saveResource("resources/default/configuration/categories.yml");
         plugin.saveResource("resources/default/configuration/emoji.yml");
         plugin.saveResource("resources/default/configuration/translations.yml");

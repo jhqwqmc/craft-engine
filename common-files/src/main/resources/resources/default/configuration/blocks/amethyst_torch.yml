@@ -3,13 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.amethyst_torch>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/amethyst_torch
-      generation:
-        parent: minecraft:item/generated
-        textures:
-          layer0: minecraft:block/custom/amethyst_torch
+    texture: minecraft:block/custom/amethyst_torch
     behavior:
       - type: wall_block_item
         block: default:amethyst_wall_torch

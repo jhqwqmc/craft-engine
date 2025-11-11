@@ -1,0 +1,28 @@
+templates:
+  # template: default:recipe/planks
+  # arguments:
+  #   wood_type: the wood type, for instance 'default:palm'
+  default:recipe/planks:
+    type: shapeless
+    category: building
+    group: planks
+    ingredients:
+      - '#${wood_type}_logs'
+    result:
+      id: ${wood_type}_planks
+      count: 4
+  # template: default:recipe/log_2_wood
+  # arguments:
+  #   wood_type: the wood type, for instance 'default:palm'
+  default:recipe/log_2_wood:
+    type: shaped
+    category: building
+    group: bark
+    pattern:
+      - AA
+      - AA
+    ingredients:
+      A: ${wood_type}_log
+    result:
+      id: ${wood_type}_wood
+      count: 3

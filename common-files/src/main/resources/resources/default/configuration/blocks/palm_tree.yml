@@ -157,11 +157,7 @@ items:
       lore:
         - "<!i><gray>Requires the datapack tree configuration to function."
         - "<!i><gray>If not configured, an oak tree will grow by default."
-    model:
-      template: default:model/generated
-      arguments:
-        model: minecraft:item/custom/palm_sapling
-        texture: minecraft:block/custom/palm_sapling
+    texture: minecraft:block/custom/palm_sapling
     behavior:
       type: block_item
       block:
@@ -284,10 +280,7 @@ items:
       item-name: <!i><l10n:item.palm_door>
     settings:
       fuel-time: 200
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/palm_door
+    texture: minecraft:item/custom/palm_door
     behavior:
       type: double_high_block_item
       block:
@@ -693,15 +686,15 @@ recipes:
   default:palm_planks:
     template: default:recipe/planks
     arguments:
-      wood_type: palm
+      wood_type: default:palm
   default:palm_wood:
     template: default:recipe/log_2_wood
     arguments:
-      wood_type: palm
+      wood_type: default:palm
   default:stripped_palm_wood:
     template: default:recipe/log_2_wood
     arguments:
-      wood_type: stripped_palm
+      wood_type: default:stripped_palm
   default:palm_trapdoor:
     type: shaped
     pattern:

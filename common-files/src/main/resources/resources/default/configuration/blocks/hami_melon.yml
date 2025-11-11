@@ -1,6 +1,7 @@
 items:
   default:hami_melon_slice:
     material: melon_slice
+    texture: minecraft:item/custom/hami_melon_slice
     data:
       item-name: <!i><l10n:item.hami_melon_slice>
       $$>=1.20.5:
@@ -13,10 +14,6 @@ items:
         food:
           nutrition: 2
           saturation: 1.0
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/hami_melon_slice
   default:hami_melon:
     material: nether_brick
     data:
@@ -32,10 +29,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.hami_melon_seeds>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/hami_melon_seeds
+    texture: minecraft:item/custom/hami_melon_seeds
     behavior:
       type: block_item
       block: default:hami_melon_stem

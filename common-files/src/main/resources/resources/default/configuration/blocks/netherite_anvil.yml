@@ -30,21 +30,19 @@ items:
               - type: expression
                 expression: '!<arg:player.is_sneaking>'
         settings:
-          template:
-            - default:pickaxe_power/level_4
-          overrides:
-            tags:
-              - minecraft:mineable/pickaxe
-            sounds:
-              break: minecraft:block.anvil.break
-              step: minecraft:block.anvil.step
-              place: minecraft:block.anvil.place
-              hit: minecraft:block.anvil.hit
-              fall: minecraft:block.anvil.fall
-            map-color: 29
-            hardness: 10.0
-            resistance: 1200
-            push-reaction: block
+          sounds:
+            break: minecraft:block.anvil.break
+            step: minecraft:block.anvil.step
+            place: minecraft:block.anvil.place
+            hit: minecraft:block.anvil.hit
+            fall: minecraft:block.anvil.fall
+          map-color: 29
+          hardness: 10.0
+          resistance: 1200
+          push-reaction: block
+          correct-tools:
+            template: default:pickaxe_power/level_4
+          tags: ["minecraft:mineable/pickaxe"]
         states:
           properties:
             facing_clockwise:

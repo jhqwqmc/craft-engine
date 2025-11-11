@@ -1,6 +1,6 @@
 templates:
   default:emoji/basic:
-    content: <hover:show_text:'<l10n:emoji.tip>'><!shadow><white><arg:emoji></white></!shadow></hover>
+    content: <hover:show_text:'<i18n:emoji.tip>'><!shadow><white><arg:emoji></white></!shadow></hover>
 emoji:
   default:emoji_smiley:
     template: default:emoji/basic

@@ -10,16 +10,14 @@ import net.momirealms.craftengine.core.item.updater.ItemUpdateConfig;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
 import net.momirealms.craftengine.core.item.updater.ItemUpdaters;
-import net.momirealms.craftengine.core.pack.AbstractPackManager;
-import net.momirealms.craftengine.core.pack.LoadingSequence;
-import net.momirealms.craftengine.core.pack.Pack;
-import net.momirealms.craftengine.core.pack.ResourceLocation;
+import net.momirealms.craftengine.core.pack.*;
 import net.momirealms.craftengine.core.pack.allocator.IdAllocator;
 import net.momirealms.craftengine.core.pack.model.*;
 import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenerator;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.model.select.ChargeTypeSelectProperty;
 import net.momirealms.craftengine.core.pack.model.select.TrimMaterialSelectProperty;
+import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
@@ -518,18 +516,56 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 CustomItem.Builder<I> itemBuilder = createPlatformItemBuilder(uniqueId, material, clientBoundMaterial);
 
-                // 模型配置区域，如果这里被配置了，那么用户必须要配置custom-model-data或item-model
+                // 模型配置区域，如果这里被配置了，那么用户可以配置custom-model-data或item-model
                 // model可以是一个string也可以是一个区域
                 Object modelSection = section.get("model");
                 Map<String, Object> legacyModelSection = MiscUtils.castToMap(section.get("legacy-model"), true);
-                boolean hasModelSection = modelSection != null || legacyModelSection != null;
+                // model可以是一个map，也可以是一个string或list
+                boolean hasModelSection = modelSection instanceof Map<?,?> || legacyModelSection != null;
+                if (!hasModelSection) {
+                    Object texture = ResourceConfigUtils.get(section, "textures", "texture");
+                    // 如果使用的是textures，那么model指的是
+                    if (texture != null) {
+                        // 获取textures列表
+                        List<String> textures = texture instanceof List<?> ? MiscUtils.getAsStringList(texture) : List.of(texture.toString());
+                        if (!textures.isEmpty()) {
+                            // 获取可选的模型列表，此时的model不可能是map了
+                            List<String> modelPath = modelSection != null ? MiscUtils.getAsStringList(modelSection) : List.of();
+                            // 根据父item model选择处理方案
+                            Key templateModel = itemModel != null && AbstractPackManager.PRESET_MODERN_MODELS_ITEM.containsKey(itemModel) ? itemModel : clientBoundMaterial;
+                            SimplifiedModelReader simplifiedModelReader = AbstractPackManager.SIMPLIFIED_MODEL_READERS.get(templateModel);
+                            if (simplifiedModelReader != null) {
+                                modelSection = simplifiedModelReader.convert(textures, modelPath, id);
+                                if (modelSection != null) {
+                                    hasModelSection = true;
+                                }
+                            }
+                        }
+                    }
+                    // 如果没有配贴图，且model为string或list，直接生成相应类型的模型
+                    else if (modelSection != null) {
+                        if (modelSection instanceof String singleModel) {
+                            modelSection = Map.of(
+                                    "type", "model",
+                                    "path", singleModel
+                            );
+                            hasModelSection = true;
+                        } else if (modelSection instanceof List<?>) {
+                            modelSection = List.of(
+                                    "type", "composite",
+                                    "models", MiscUtils.getAsStringList(modelSection)
+                            );
+                            hasModelSection = true;
+                        }
+                    }
+                }
 
                 if (customModelData > 0 && (hasModelSection || forceCustomModelData)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new CustomModelDataModifier<>(customModelData));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataModifier<>(customModelData));
                     else itemBuilder.dataModifier(new CustomModelDataModifier<>(customModelData));
                 }
                 if (itemModel != null && (hasModelSection || forceItemModel)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new ItemModelModifier<>(itemModel));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelModifier<>(itemModel));
                     else itemBuilder.dataModifier(new ItemModelModifier<>(itemModel));
                 }
 

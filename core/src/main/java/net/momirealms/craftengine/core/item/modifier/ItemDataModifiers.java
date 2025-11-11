@@ -15,6 +15,7 @@ public final class ItemDataModifiers {
     private ItemDataModifiers() {}
 
     public static final Key ITEM_MODEL = Key.of("craftengine:item-model");
+    public static final Key OVERWRITABLE_ITEM_MODEL = Key.of("craftengine:overwritable-item-model");
     public static final Key ID = Key.of("craftengine:id");
     public static final Key HIDE_TOOLTIP = Key.of("craftengine:hide-tooltip");
     public static final Key FOOD = Key.of("craftengine:food");
@@ -27,6 +28,7 @@ public final class ItemDataModifiers {
     public static final Key DISPLAY_NAME = Key.of("craftengine:display-name");
     public static final Key CUSTOM_NAME = Key.of("craftengine:custom-name");
     public static final Key CUSTOM_MODEL_DATA = Key.of("craftengine:custom-model-data");
+    public static final Key OVERWRITABLE_CUSTOM_MODEL_DATA = Key.of("craftengine:overwritable-custom-model-data");
     public static final Key COMPONENTS = Key.of("craftengine:components");
     public static final Key COMPONENT = Key.of("craftengine:component");
     public static final Key ATTRIBUTE_MODIFIERS = Key.of("craftengine:attribute-modifiers");
