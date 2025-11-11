@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.item.recipe;
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
+import net.momirealms.craftengine.core.item.data.Enchantment;
 import net.momirealms.craftengine.core.item.recipe.input.RecipeInput;
 import net.momirealms.craftengine.core.item.recipe.input.SmithingInput;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
@@ -18,10 +19,9 @@ import net.momirealms.craftengine.core.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecipe<T>
         implements ConditionalRecipe<T>, VisualResultRecipe<T>, FunctionalRecipe<T> {
@@ -30,6 +30,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     private final Ingredient<T> template;
     private final Ingredient<T> addition;
     private final boolean mergeComponents;
+    private final boolean mergeEnchantments;
     private final List<ItemDataProcessor> processors;
     private final Condition<Context> condition;
     private final Function<Context>[] smithingFunctions;
@@ -44,6 +45,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                                          @Nullable CustomRecipeResult<T> visualResult,
                                          List<ItemDataProcessor> processors,
                                          boolean mergeComponents,
+                                         boolean mergeEnchantments,
                                          Function<Context>[] smithingFunctions,
                                          Condition<Context> condition
     ) {
@@ -53,9 +55,18 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         this.addition = addition;
         this.processors = processors;
         this.mergeComponents = mergeComponents;
+        this.mergeEnchantments = mergeEnchantments;
         this.condition = condition;
         this.smithingFunctions = smithingFunctions;
         this.visualResult = visualResult;
+    }
+
+    public boolean mergeComponents() {
+        return mergeComponents;
+    }
+
+    public boolean mergeEnchantments() {
+        return mergeEnchantments;
     }
 
     @Override
@@ -179,6 +190,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             List<String> template = MiscUtils.getAsStringList(arguments.get("template-type"));
             List<String> addition = MiscUtils.getAsStringList(arguments.get("addition"));
             boolean mergeComponents = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-components", true), "merge-components");
+            boolean mergeEnchantments = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-enchantments", false), "merge-enchantments");
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> processors = (List<Map<String, Object>>) arguments.getOrDefault("post-processors", List.of());
             return new CustomSmithingTransformRecipe<>(id,
@@ -190,6 +202,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                     parseVisualResult(arguments),
                     ItemDataProcessors.fromMapList(processors),
                     mergeComponents,
+                    mergeEnchantments,
                     functions(arguments), conditions(arguments)
             );
         }
@@ -206,6 +219,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                     null,
                     null,
                     true,
+                    false,
                     null, null
             );
         }
@@ -214,6 +228,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     public static class ItemDataProcessors {
         public static final Key KEEP_COMPONENTS = Key.of("craftengine:keep_components");
         public static final Key KEEP_TAGS = Key.of("craftengine:keep_tags");
+        public static final Key MERGE_ENCHANTMENTS = Key.of("craftengine:merge_enchantments");
 
         static {
             if (VersionHelper.isOrAbove1_20_5()) {
@@ -221,6 +236,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             } else {
                 register(KEEP_TAGS, KeepTags.FACTORY);
             }
+            register(MERGE_ENCHANTMENTS, MergeEnchantments.FACTORY);
         }
 
         public static List<ItemDataProcessor> fromMapList(List<Map<String, Object>> mapList) {
@@ -257,6 +273,42 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
 
         interface ProcessorFactory {
             ItemDataProcessor create(Map<String, Object> arguments);
+        }
+    }
+
+    public static class MergeEnchantments implements ItemDataProcessor {
+        public static final MergeEnchantments INSTANCE = new MergeEnchantments();
+        public static final Factory FACTORY = new Factory();
+
+        @Override
+        public Key type() {
+            return ItemDataProcessors.MERGE_ENCHANTMENTS;
+        }
+
+        @Override
+        public void accept(Item<?> item1, Item<?> item2, Item<?> item3) {
+            item1.enchantments().ifPresent(e1 -> {
+                item3.enchantments().ifPresent(e2 -> {
+                    item3.setEnchantments(Stream.concat(e1.stream(), e2.stream())
+                            .collect(Collectors.toMap(
+                                    Enchantment::id,
+                                    enchantment -> enchantment,
+                                    (existing, replacement) ->
+                                            existing.level() > replacement.level() ? existing : replacement
+                            ))
+                            .values()
+                            .stream()
+                            .toList());
+                });
+            });
+        }
+
+        public static class Factory implements ProcessorFactory {
+
+            @Override
+            public ItemDataProcessor create(Map<String, Object> arguments) {
+                return INSTANCE;
+            }
         }
     }
 

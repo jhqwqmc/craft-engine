@@ -150,6 +150,10 @@ public interface Item<I> {
 
     Optional<Enchantment> getEnchantment(Key enchantmentId);
 
+    Optional<List<Enchantment>> enchantments();
+
+    Optional<List<Enchantment>> storedEnchantments();
+
     Item<I> setEnchantments(List<Enchantment> enchantments);
 
     Item<I> setStoredEnchantments(List<Enchantment> enchantments);

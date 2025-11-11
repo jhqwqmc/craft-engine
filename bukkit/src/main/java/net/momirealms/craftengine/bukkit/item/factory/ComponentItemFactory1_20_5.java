@@ -450,6 +450,30 @@ public class ComponentItemFactory1_20_5 extends BukkitItemFactory<ComponentItemW
     }
 
     @Override
+    protected Optional<List<Enchantment>> enchantments(ComponentItemWrapper item) {
+        Object exactEnchantments = item.getComponentExact(DataComponentTypes.ENCHANTMENTS);
+        if (exactEnchantments == null) return Optional.empty();
+        try {
+            return Optional.of(EnchantmentUtils.toList(exactEnchantments));
+        } catch (ReflectiveOperationException e) {
+            this.plugin.logger().warn("Failed to get enchantments " + exactEnchantments, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    protected Optional<List<Enchantment>> storedEnchantments(ComponentItemWrapper item) {
+        Object exactEnchantments = item.getComponentExact(DataComponentTypes.STORED_ENCHANTMENTS);
+        if (exactEnchantments == null) return Optional.empty();
+        try {
+            return Optional.of(EnchantmentUtils.toList(exactEnchantments));
+        } catch (ReflectiveOperationException e) {
+            this.plugin.logger().warn("Failed to get stored enchantments " + exactEnchantments, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
     protected void storedEnchantments(ComponentItemWrapper item, List<Enchantment> enchantments) {
         if (enchantments == null || enchantments.isEmpty()) {
             item.resetComponent(DataComponentTypes.STORED_ENCHANTMENTS);
