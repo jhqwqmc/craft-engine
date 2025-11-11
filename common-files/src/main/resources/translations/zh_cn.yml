@@ -220,6 +220,8 @@ warning.config.item.legacy_model.missing_path: "<yellow>在文件 <arg:0> 发现
 warning.config.item.legacy_model.overrides.missing_path: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的旧版模型覆写规则(overrides)缺少必需的 'path' 参数</yellow>"
 warning.config.item.legacy_model.overrides.missing_predicate: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的旧版模型覆写规则(overrides)缺少必需的 'predicate' 参数</yellow>"
 warning.config.item.legacy_model.cannot_convert: "<yellow>在文件 <arg:0> 发现问题 - 无法将物品 '<arg:1>' 自动转换为旧版格式, 请手动为此物品创建 'legacy-model' 配置项</yellow>"
+warning.config.item.simplified_model.invalid_model: "<yellow>在文件 <arg:0> 中发现配置问题 - 物品 '<arg:1>' 包含的参数数量不匹配. 预期模型数量为 '<arg:2>', 但实际数量为 '<arg:3>'</yellow>"
+warning.config.item.simplified_model.invalid_texture: "<yellow>在文件 <arg:0> 中发现配置问题 - 物品 '<arg:1>' 包含的参数数量不匹配. 预期纹理数量为 '<arg:2>', 但实际数量为 '<arg:3>'</yellow>"
 warning.config.item.model.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的模型类型 '<arg:2>'</yellow>"
 warning.config.item.model.tint.missing_type: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的染色配置缺少必需的 'type' 参数</yellow>"
 warning.config.item.model.tint.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的染色类型 '<arg:2>'</yellow>"
