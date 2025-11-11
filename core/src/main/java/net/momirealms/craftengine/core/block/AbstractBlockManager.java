@@ -752,7 +752,10 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                 json.addProperty("x", ResourceConfigUtils.getAsInt(section.get("x"), "x"));
             if (section.containsKey("y"))
                 json.addProperty("y", ResourceConfigUtils.getAsInt(section.get("y"), "y"));
-            if (section.containsKey("uvlock")) json.addProperty("uvlock", ResourceConfigUtils.getAsBoolean(section.get("uvlock"), "uvlock"));
+            if (section.containsKey("z"))
+                json.addProperty("z", ResourceConfigUtils.getAsInt(section.get("z"), "z"));
+            if (section.containsKey("uvlock"))
+                json.addProperty("uvlock", ResourceConfigUtils.getAsBoolean(section.get("uvlock"), "uvlock"));
             if (section.containsKey("weight"))
                 json.addProperty("weight", ResourceConfigUtils.getAsInt(section.get("weight"), "weight"));
             Map<String, Object> generationMap = MiscUtils.castToMap(section.get("generation"), true);
