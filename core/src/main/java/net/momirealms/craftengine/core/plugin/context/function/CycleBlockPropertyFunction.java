@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.plugin.context.function;
 
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
@@ -21,14 +20,16 @@ import java.util.Optional;
 
 public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final String property;
+    private final NumberProvider inverse;
     private final NumberProvider x;
     private final NumberProvider y;
     private final NumberProvider z;
     private final NumberProvider updateFlags;
 
-    public CycleBlockPropertyFunction(List<Condition<CTX>> predicates, String property, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags) {
+    public CycleBlockPropertyFunction(List<Condition<CTX>> predicates, String property, NumberProvider inverse, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags) {
         super(predicates);
         this.property = property;
+        this.inverse = inverse;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -44,10 +45,7 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
         int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
         ExistingBlock blockAt = world.getBlockAt(x, y, z);
-        boolean isSecondaryUseActive = ctx.getOptionalParameter(DirectContextParameters.PLAYER)
-                .map(Player::isSecondaryUseActive)
-                .orElse(false);
-        BlockStateWrapper wrapper = blockAt.blockState().cycleProperty(this.property, isSecondaryUseActive);
+        BlockStateWrapper wrapper = blockAt.blockState().cycleProperty(this.property, this.inverse.getInt(ctx) == 0);
         world.setBlockAt(x, y, z, wrapper, this.updateFlags.getInt(ctx));
     }
 
@@ -66,6 +64,7 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         public Function<CTX> create(Map<String, Object> arguments) {
             return new CycleBlockPropertyFunction<>(getPredicates(arguments),
                     ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("property"), "warning.config.function.cycle_block_property.missing_property"),
+                    NumberProviders.fromObject(arguments.getOrDefault("inverse", "<arg:player.is_sneaking>")),
                     NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
                     NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
                     NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")),

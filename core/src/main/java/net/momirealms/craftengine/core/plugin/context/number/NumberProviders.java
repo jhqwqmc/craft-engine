@@ -64,6 +64,8 @@ public class NumberProviders {
         }
         if (object instanceof Number number) {
             return new FixedNumberProvider(number.floatValue());
+        } else if (object instanceof Boolean bool) {
+            return new FixedNumberProvider(bool ? 1 : 0);
         } else if (object instanceof Map<?,?> map) {
             return fromMap((Map<String, Object>) map);
         } else {
