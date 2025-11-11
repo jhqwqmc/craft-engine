@@ -7,6 +7,7 @@ import com.google.common.jimfs.Jimfs;
 import com.google.gson.*;
 import net.momirealms.craftengine.core.font.BitmapImage;
 import net.momirealms.craftengine.core.font.Font;
+import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
@@ -22,9 +23,7 @@ import net.momirealms.craftengine.core.pack.model.RangeDispatchItemModel;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGenerator;
 import net.momirealms.craftengine.core.pack.model.rangedisptach.CustomModelDataRangeDispatchProperty;
-import net.momirealms.craftengine.core.pack.model.simplified.GeneratedModelReader;
-import net.momirealms.craftengine.core.pack.model.simplified.HandheldModelReader;
-import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
+import net.momirealms.craftengine.core.pack.model.simplified.*;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -181,15 +180,6 @@ public abstract class AbstractPackManager implements PackManager {
         loadInternalData("internal/models/item/_all.json", ((key, jsonObject) -> {
             PRESET_MODERN_MODELS_ITEM.put(key, jsonObject);
             VANILLA_MODELS.add(Key.of(key.namespace(), "item/" + key.value()));
-            JsonElement parent = jsonObject.get("parent");
-            if (parent instanceof JsonPrimitive primitive) {
-                String parentModel = primitive.getAsString();
-                if (parentModel.equals("minecraft:item/handheld")) {
-                    SIMPLIFIED_MODEL_READERS.put(key, HandheldModelReader.INSTANCE);
-                } else {
-                    SIMPLIFIED_MODEL_READERS.put(key, GeneratedModelReader.INSTANCE);
-                }
-            }
         }));
         loadInternalData("internal/models/block/_all.json", ((key, jsonObject) -> {
             PRESET_MODELS_BLOCK.put(key, jsonObject);
@@ -203,6 +193,28 @@ public abstract class AbstractPackManager implements PackManager {
         }
         loadInternalList("internal/textures/processed.json", VANILLA_TEXTURES::add);
         loadInternalList("internal/sounds/processed.json", VANILLA_SOUNDS::add);
+
+        // 不是一个非常好的方案
+        for (Key item : PRESET_ITEMS.keySet()) {
+            JsonObject jsonObject = PRESET_MODERN_MODELS_ITEM.get(item);
+            if (jsonObject != null) {
+                JsonElement parent = jsonObject.get("parent");
+                if (parent instanceof JsonPrimitive primitive) {
+                    String parentModel = primitive.getAsString();
+                    if (parentModel.equals("minecraft:item/handheld")) {
+                        SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.HANDHELD);
+                        continue;
+                    }
+                }
+            }
+            SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.GENERATED);
+        }
+
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.FISHING_ROD, ConditionModelReader.FISHING_ROD);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.ELYTRA, ConditionModelReader.ELYTRA);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.SHIELD, ConditionModelReader.SHIELD);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.BOW, BowModelReader.INSTANCE);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.CROSSBOW, CrossbowModelReader.INSTANCE);
     }
 
     private void loadModernItemModel(String path, BiConsumer<Key, ModernItemModel> callback) {
@@ -532,7 +544,7 @@ public abstract class AbstractPackManager implements PackManager {
             plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/topaz_" + item + ".png.mcmeta");
         }
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flame_elytra.png");
-        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/broken_flame_elytra.png");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flame_elytra_broken.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/entity/equipment/wings/flame_elytra.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/cap.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/cap.json");

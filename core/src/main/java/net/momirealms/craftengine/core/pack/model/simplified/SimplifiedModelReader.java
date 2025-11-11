@@ -10,4 +10,7 @@ public interface SimplifiedModelReader {
 
     @Nullable
     Map<String, Object> convert(List<String> textures, List<String> optionalModelPaths, Key id);
+
+    @Nullable
+    Map<String, Object> convert(List<String> models);
 }

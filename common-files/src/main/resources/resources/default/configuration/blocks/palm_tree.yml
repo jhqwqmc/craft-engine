@@ -9,11 +9,7 @@ items:
         - minecraft:logs_that_burn
     data:
       item-name: <!i><l10n:item.palm_log>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_log
-      generation:
-        parent: minecraft:block/custom/palm_log
+    model: minecraft:block/custom/palm_log
     behavior:
       type: block_item
       block:
@@ -41,11 +37,7 @@ items:
         - minecraft:logs_that_burn
     data:
       item-name: <!i><l10n:item.stripped_palm_log>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/stripped_palm_log
-      generation:
-        parent: minecraft:block/custom/stripped_palm_log
+    model: minecraft:block/custom/stripped_palm_log
     behavior:
       type: block_item
       block:
@@ -70,11 +62,7 @@ items:
         - minecraft:logs_that_burn
     data:
       item-name: <!i><l10n:item.palm_wood>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_wood
-      generation:
-        parent: minecraft:block/custom/palm_wood
+    model: minecraft:block/custom/palm_wood
     behavior:
       type: block_item
       block:
@@ -102,11 +90,7 @@ items:
         - minecraft:logs_that_burn
     data:
       item-name: <!i><l10n:item.stripped_palm_wood>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/stripped_palm_wood
-      generation:
-        parent: minecraft:block/custom/stripped_palm_wood
+    model: minecraft:block/custom/stripped_palm_wood
     behavior:
       type: block_item
       block:
@@ -130,11 +114,7 @@ items:
         - minecraft:wooden_tool_materials
     data:
       item-name: <!i><l10n:item.palm_planks>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_planks
-      generation:
-        parent: minecraft:block/custom/palm_planks
+    model: minecraft:block/custom/palm_planks
     behavior:
       type: block_item
       block:
@@ -226,11 +206,7 @@ items:
       item-name: <!i><l10n:item.palm_trapdoor>
     settings:
       fuel-time: 300
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_trapdoor
-      generation:
-        parent: minecraft:block/custom/palm_trapdoor_bottom
+    model: minecraft:block/custom/palm_trapdoor_bottom
     behavior:
       type: block_item
       block:
@@ -351,11 +327,7 @@ items:
       item-name: <!i><l10n:item.palm_fence_gate>
     settings:
       fuel-time: 300
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_fence_gate
-      generation:
-        parent: minecraft:block/custom/palm_fence_gate
+    model: minecraft:block/custom/palm_fence_gate
     behavior:
       type: block_item
       block:
@@ -407,11 +379,7 @@ items:
       item-name: <!i><l10n:item.palm_slab>
     settings:
       fuel-time: 150
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_slab
-      generation:
-        parent: minecraft:block/custom/palm_slab
+    model: minecraft:block/custom/palm_slab
     behavior:
       type: block_item
       block:
@@ -449,11 +417,7 @@ items:
             model_double_path: minecraft:block/custom/palm_planks
   default:palm_stairs:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_stairs
-      generation:
-        parent: minecraft:block/custom/palm_stairs
+    model: minecraft:block/custom/palm_stairs
     data:
       item-name: <!i><l10n:item.palm_stairs>
     settings:
@@ -498,11 +462,7 @@ items:
               textures: *textures
   default:palm_pressure_plate:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/palm_pressure_plate
-      generation:
-        parent: minecraft:block/custom/palm_pressure_plate
+    model: minecraft:block/custom/palm_pressure_plate
     data:
       item-name: <!i><l10n:item.palm_pressure_plate>
     settings:

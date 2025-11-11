@@ -1,16 +1,28 @@
 package net.momirealms.craftengine.core.pack.model.simplified;
 
+import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GeneratedModelReader implements SimplifiedModelReader {
-    public static final GeneratedModelReader INSTANCE = new GeneratedModelReader();
+    public static final GeneratedModelReader GENERATED = new GeneratedModelReader("generated");
+    public static final GeneratedModelReader HANDHELD = new GeneratedModelReader("handheld");
+
+    private final String model;
+
+    public GeneratedModelReader(String model) {
+        this.model = model;
+    }
 
     @Override
     public Map<String, Object> convert(List<String> textures, List<String> optionalModelPaths, Key id) {
+        if (optionalModelPaths.size() >= 2) {
+            throw new LocalizedResourceConfigException("warning.config.item.simplified_model.invalid_model", "1", String.valueOf(optionalModelPaths.size()));
+        }
         boolean autoModelPath = optionalModelPaths.size() != 1;
         Map<String, String> texturesProperty;
         switch (textures.size()) {
@@ -30,9 +42,21 @@ public class GeneratedModelReader implements SimplifiedModelReader {
                 "type", "model",
                 "path", autoModelPath ? id.namespace() + ":item/" + id.value() : optionalModelPaths.getFirst(),
                 "generation", Map.of(
-                        "parent", "item/generated",
+                        "parent", "item/" + this.model,
                         "textures", texturesProperty
                 )
         );
+    }
+
+    @Override
+    public @Nullable Map<String, Object> convert(List<String> optionalModelPaths) {
+        if (optionalModelPaths.size() >= 2) {
+            return Map.of(
+                    "type", "composite",
+                    "models", optionalModelPaths
+            );
+        } else {
+            return Map.of("path", optionalModelPaths.getFirst());
+        }
     }
 }

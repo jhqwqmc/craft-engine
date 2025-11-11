@@ -220,6 +220,8 @@ warning.config.item.legacy_model.missing_path: "<yellow>Issue found in file <arg
 warning.config.item.legacy_model.overrides.missing_path: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the require 'path' argument for legacy-model overrides.</yellow>"
 warning.config.item.legacy_model.overrides.missing_predicate: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the require 'predicate' argument for legacy-model overrides.</yellow>"
 warning.config.item.legacy_model.cannot_convert: "<yellow>Issue found in file <arg:0> - Cannot convert 1.21.4+ items to legacy format for item '<arg:1>'. Please manually create 'legacy-model' section for this item.</yellow>"
+warning.config.item.simplified_model.invalid_model: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' contains a mismatched number of parameters. The expected number of models is '<arg:2>', but the actual number is '<arg:3>'.</yellow>"
+warning.config.item.simplified_model.invalid_texture: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' contains a mismatched number of parameters. The expected number of textures is '<arg:2>', but the actual number is '<arg:3>'.</yellow>"
 warning.config.item.model.invalid_type: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is using an invalid model type '<arg:2>'.</yellow>"
 warning.config.item.model.tint.missing_type: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'type' argument for tint.</yellow>"
 warning.config.item.model.tint.invalid_type: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is using an invalid tint type '<arg:2>'.</yellow>"

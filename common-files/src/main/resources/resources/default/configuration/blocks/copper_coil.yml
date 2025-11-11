@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.copper_coil>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/copper_coil
-      generation:
-        parent: minecraft:block/custom/copper_coil
+    model: minecraft:block/custom/copper_coil
     behavior:
       type: block_item
       block:

@@ -10,7 +10,10 @@ import net.momirealms.craftengine.core.item.updater.ItemUpdateConfig;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
 import net.momirealms.craftengine.core.item.updater.ItemUpdaters;
-import net.momirealms.craftengine.core.pack.*;
+import net.momirealms.craftengine.core.pack.AbstractPackManager;
+import net.momirealms.craftengine.core.pack.LoadingSequence;
+import net.momirealms.craftengine.core.pack.Pack;
+import net.momirealms.craftengine.core.pack.ResourceLocation;
 import net.momirealms.craftengine.core.pack.allocator.IdAllocator;
 import net.momirealms.craftengine.core.pack.model.*;
 import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenerator;
@@ -516,6 +519,10 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 CustomItem.Builder<I> itemBuilder = createPlatformItemBuilder(uniqueId, material, clientBoundMaterial);
 
+
+                // 对于不重要的配置，可以仅警告，不返回
+                ExceptionCollector<LocalizedResourceConfigException> collector = new ExceptionCollector<>();
+
                 // 模型配置区域，如果这里被配置了，那么用户可以配置custom-model-data或item-model
                 // model可以是一个string也可以是一个区域
                 Object modelSection = section.get("model");
@@ -535,27 +542,33 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                             Key templateModel = itemModel != null && AbstractPackManager.PRESET_MODERN_MODELS_ITEM.containsKey(itemModel) ? itemModel : clientBoundMaterial;
                             SimplifiedModelReader simplifiedModelReader = AbstractPackManager.SIMPLIFIED_MODEL_READERS.get(templateModel);
                             if (simplifiedModelReader != null) {
-                                modelSection = simplifiedModelReader.convert(textures, modelPath, id);
-                                if (modelSection != null) {
-                                    hasModelSection = true;
+                                try {
+                                    modelSection = simplifiedModelReader.convert(textures, modelPath, id);
+                                    if (modelSection != null) {
+                                        hasModelSection = true;
+                                    }
+                                } catch (LocalizedResourceConfigException e) {
+                                    collector.add(e);
                                 }
                             }
                         }
                     }
                     // 如果没有配贴图，且model为string或list，直接生成相应类型的模型
                     else if (modelSection != null) {
-                        if (modelSection instanceof String singleModel) {
-                            modelSection = Map.of(
-                                    "type", "model",
-                                    "path", singleModel
-                            );
-                            hasModelSection = true;
-                        } else if (modelSection instanceof List<?>) {
-                            modelSection = List.of(
-                                    "type", "composite",
-                                    "models", MiscUtils.getAsStringList(modelSection)
-                            );
-                            hasModelSection = true;
+                        List<String> models = modelSection instanceof List<?> ? MiscUtils.getAsStringList(modelSection) : List.of(modelSection.toString());
+                        if (!models.isEmpty()) {
+                            Key templateModel = itemModel != null && AbstractPackManager.PRESET_MODERN_MODELS_ITEM.containsKey(itemModel) ? itemModel : clientBoundMaterial;
+                            SimplifiedModelReader simplifiedModelReader = AbstractPackManager.SIMPLIFIED_MODEL_READERS.get(templateModel);
+                            if (simplifiedModelReader != null) {
+                                try {
+                                    modelSection = simplifiedModelReader.convert(models);
+                                    if (modelSection != null) {
+                                        hasModelSection = true;
+                                    }
+                                } catch (LocalizedResourceConfigException e) {
+                                    collector.add(e);
+                                }
+                            }
                         }
                     }
                 }
@@ -568,9 +581,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                     if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelModifier<>(itemModel));
                     else itemBuilder.dataModifier(new ItemModelModifier<>(itemModel));
                 }
-
-                // 对于不重要的配置，可以仅警告，不返回
-                ExceptionCollector<LocalizedResourceConfigException> collector = new ExceptionCollector<>();
 
                 // 应用物品数据
                 try {

@@ -1,13 +1,8 @@
 items:
   default:netherite_anvil:
-    material: nether_brick
     data:
       item-name: <!i><l10n:item.netherite_anvil>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/netherite_anvil
-      generation:
-        parent: minecraft:block/custom/netherite_anvil
+    model: minecraft:block/custom/netherite_anvil
     behavior:
       type: block_item
       block:

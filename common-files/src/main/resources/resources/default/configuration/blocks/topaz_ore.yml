@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.topaz_ore>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/topaz_ore
-      generation:
-        parent: minecraft:block/custom/topaz_ore
+    model: minecraft:block/custom/topaz_ore
     behavior:
       type: block_item
       block: default:topaz_ore
@@ -15,11 +11,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.deepslate_topaz_ore>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/deepslate_topaz_ore
-      generation:
-        parent: minecraft:block/custom/deepslate_topaz_ore
+    model: minecraft:block/custom/deepslate_topaz_ore
     behavior:
       type: block_item
       block: default:deepslate_topaz_ore

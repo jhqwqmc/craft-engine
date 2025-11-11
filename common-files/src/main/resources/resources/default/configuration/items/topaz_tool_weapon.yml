@@ -7,11 +7,9 @@ items:
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz_rod>
       tooltip-style: minecraft:topaz
-    model:
-      template: default:model/simplified_fishing_rod_2d
-      arguments:
-        path: minecraft:item/custom/topaz_rod
-        cast_path: minecraft:item/custom/topaz_rod_cast
+    textures:
+      - minecraft:item/custom/topaz_rod
+      - minecraft:item/custom/topaz_rod_cast
   default:topaz_bow:
     material: bow
     settings:
@@ -20,13 +18,11 @@ items:
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz_bow>
       tooltip-style: minecraft:topaz
-    model:
-      template: default:model/simplified_bow_2d
-      arguments:
-        path: minecraft:item/custom/topaz_bow
-        pulling_0_path: minecraft:item/custom/topaz_bow_pulling_0
-        pulling_1_path: minecraft:item/custom/topaz_bow_pulling_1
-        pulling_2_path: minecraft:item/custom/topaz_bow_pulling_2
+    textures:
+      - minecraft:item/custom/topaz_bow
+      - minecraft:item/custom/topaz_bow_pulling_0
+      - minecraft:item/custom/topaz_bow_pulling_1
+      - minecraft:item/custom/topaz_bow_pulling_2
   default:topaz_crossbow:
     material: crossbow
     settings:
@@ -35,15 +31,13 @@ items:
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz_crossbow>
       tooltip-style: minecraft:topaz
-    model:
-      template: default:model/simplified_crossbow_2d
-      arguments:
-        path: minecraft:item/custom/topaz_crossbow
-        pulling_0_path: minecraft:item/custom/topaz_crossbow_pulling_0
-        pulling_1_path: minecraft:item/custom/topaz_crossbow_pulling_1
-        pulling_2_path: minecraft:item/custom/topaz_crossbow_pulling_2
-        arrow_path: minecraft:item/custom/topaz_crossbow_arrow
-        firework_path: minecraft:item/custom/topaz_crossbow_firework
+    textures:
+      - minecraft:item/custom/topaz_crossbow
+      - minecraft:item/custom/topaz_crossbow_pulling_0
+      - minecraft:item/custom/topaz_crossbow_pulling_1
+      - minecraft:item/custom/topaz_crossbow_pulling_2
+      - minecraft:item/custom/topaz_crossbow_arrow
+      - minecraft:item/custom/topaz_crossbow_firework
   default:topaz_pickaxe:
     material: golden_pickaxe
     settings:

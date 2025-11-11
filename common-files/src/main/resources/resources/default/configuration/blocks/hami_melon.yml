@@ -18,10 +18,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.hami_melon>
-    model:
-      path: minecraft:item/custom/hami_melon
-      generation:
-        parent: minecraft:block/custom/hami_melon
+    model: minecraft:block/custom/hami_melon
     behavior:
       type: block_item
       block: default:hami_melon
