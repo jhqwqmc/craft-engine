@@ -485,7 +485,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 if (throwable != null) {
                     // 检测custom model data 冲突
                     if (throwable instanceof IdAllocator.IdConflictException exception) {
-                        if (section.containsKey("model") || section.containsKey("legacy-model")) {
+                        if (section.containsKey("model") || section.containsKey("models") || section.containsKey("texture") || section.containsKey("textures") || section.containsKey("legacy-model")) {
                             throw new LocalizedResourceConfigException("warning.config.item.custom_model_data.conflict", String.valueOf(exception.id()), exception.previousOwner());
                         }
                         customModelData = exception.id();
@@ -532,12 +532,12 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 模型配置区域，如果这里被配置了，那么用户可以配置custom-model-data或item-model
                 // model可以是一个string也可以是一个区域
-                Object modelSection = section.get("model");
+                Object modelSection = ResourceConfigUtils.get(section, "model", "models");
                 Map<String, Object> legacyModelSection = MiscUtils.castToMap(section.get("legacy-model"), true);
                 // model可以是一个map，也可以是一个string或list
                 boolean hasModelSection = modelSection instanceof Map<?,?> || legacyModelSection != null;
                 if (!hasModelSection) {
-                    Object texture = ResourceConfigUtils.get(section, "textures", "texture");
+                    Object texture = ResourceConfigUtils.get(section, "texture", "textures");
                     // 如果使用的是textures，那么model指的是
                     if (texture != null) {
                         // 获取textures列表
@@ -612,7 +612,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
                 try {
-                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
+                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                     eventTriggerListMap = Map.of();
