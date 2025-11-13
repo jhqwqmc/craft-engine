@@ -40,13 +40,34 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
             return;
         }
         if (FastNMS.INSTANCE.method$LevelReader$getMaxLocalRawBrightness(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)) < this.requiredLight) return;
-        ImmutableBlockState blockState = this.block().defaultState();
+        
         BooleanProperty snowy = (BooleanProperty) this.block().getProperty("snowy");
+        
         for (int i = 0; i < 4; i++) {
-            Object blockPos = FastNMS.INSTANCE.method$BlockPos$offset(pos, RandomUtils.generateRandomInt(-1, 2), RandomUtils.generateRandomInt(-3, 2), RandomUtils.generateRandomInt(-1, 2));
-            if (FastNMS.INSTANCE.method$BlockStateBase$isBlock(FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, blockPos), FastNMS.INSTANCE.method$BlockState$getBlock(this.baseBlock.get())) && canPropagate(state, level, blockPos)) {
-                if (snowy != null) blockState = blockState.with(snowy, FastNMS.INSTANCE.method$BlockStateBase$isBlock(FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)), MBlocks.SNOW));
-                FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, blockState.customBlockState().literalObject(), 3);
+            Object blockPos = FastNMS.INSTANCE.method$BlockPos$offset(
+                pos, 
+                RandomUtils.generateRandomInt(-1, 2), 
+                RandomUtils.generateRandomInt(-3, 2), 
+                RandomUtils.generateRandomInt(-1, 2)
+            );
+            
+            if (FastNMS.INSTANCE.method$BlockStateBase$isBlock(
+                FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, blockPos), 
+                FastNMS.INSTANCE.method$BlockState$getBlock(this.baseBlock.get())
+            ) && canPropagate(state, level, blockPos)) {
+                
+                ImmutableBlockState newState = this.block().defaultState();
+                
+                if (snowy != null) {
+                    boolean hasSnow = FastNMS.INSTANCE.method$BlockStateBase$isBlock(
+                        FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, 
+                            FastNMS.INSTANCE.method$BlockPos$relative(blockPos, CoreReflections.instance$Direction$UP)), 
+                        MBlocks.SNOW
+                    );
+                    newState = newState.with(snowy, hasSnow);
+                }
+                
+                FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, newState.customBlockState().literalObject(), 3);
             }
         }
     }
