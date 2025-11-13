@@ -30,7 +30,8 @@ public class SnowyBlockBehavior extends BukkitBlockBehavior {
         if (args[updateShape$direction] != CoreReflections.instance$Direction$UP) return superMethod.call();
         ImmutableBlockState state = BlockStateUtils.getOptionalCustomBlockState(args[0]).orElse(null);
         if (state == null || state.isEmpty()) return superMethod.call();
-        return state.with(this.snowyProperty, isSnowySetting(args[updateShape$neighborState]));
+        ImmutableBlockState newState = state.with(this.snowyProperty, isSnowySetting(args[updateShape$neighborState]));
+        return newState.customBlockState().literalObject();
     }
 
     @Override
