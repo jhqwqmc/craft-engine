@@ -65,7 +65,6 @@ public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
         return blockState;
     }
 
-
     @Override
     public Object playerWillDestroy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         Object level = args[0];
@@ -111,7 +110,7 @@ public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
     }
 
     @Override
-    public void setPlacedBy(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+    public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) {
         Object blockState = args[2];
         Object pos = args[1];
         Optional<ImmutableBlockState> immutableBlockState = BlockStateUtils.getOptionalCustomBlockState(blockState);
@@ -119,10 +118,18 @@ public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
     }
 
     @Override
+    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+        if (pos.y() >= accessor.worldHeight().getMaxBuildHeight() - 1) {
+            return false;
+        }
+        return accessor.getBlockState(pos.above()).isAir();
+    }
+
+    @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
         World world  = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        if (pos.y() < context.getLevel().worldHeight().getMaxBuildHeight() && world.getBlockAt(pos.above()).canBeReplaced(context)) {
+        if (pos.y() < context.getLevel().worldHeight().getMaxBuildHeight() - 1 && world.getBlock(pos.above()).canBeReplaced(context)) {
             return state.with(this.halfProperty, DoubleBlockHalf.LOWER);
         }
         return null;

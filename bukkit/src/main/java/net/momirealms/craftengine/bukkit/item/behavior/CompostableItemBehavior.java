@@ -38,7 +38,7 @@ public class CompostableItemBehavior extends ItemBehavior {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public InteractionResult useOnBlock(UseOnContext context) {
-        BukkitExistingBlock block = (BukkitExistingBlock) context.getLevel().getBlockAt(context.getClickedPos());
+        BukkitExistingBlock block = (BukkitExistingBlock) context.getLevel().getBlock(context.getClickedPos());
         BlockData blockData = block.block().getBlockData();
         Object blockOwner = BlockStateUtils.getBlockOwner(BlockStateUtils.blockDataToBlockState(blockData));
         if (blockOwner != MBlocks.COMPOSTER) return InteractionResult.PASS;

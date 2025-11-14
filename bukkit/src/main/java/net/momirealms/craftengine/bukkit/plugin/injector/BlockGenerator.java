@@ -822,7 +822,7 @@ public final class BlockGenerator {
         public void intercept(@This Object thisObj, @AllArguments Object[] args, @SuperCall Callable<Object> superMethod) {
             ObjectHolder<BlockBehavior> holder = ((DelegatingBlock) thisObj).behaviorDelegate();
             try {
-                holder.value().setPlacedBy(thisObj, args, superMethod);
+                holder.value().placeMultiState(thisObj, args, superMethod);
             } catch (Exception e) {
                 CraftEngine.instance().logger().severe("Failed to run setPlaceBy", e);
             }

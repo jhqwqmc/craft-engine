@@ -61,4 +61,9 @@ public class BukkitVanillaBlockStateWrapper extends AbstractBlockStateWrapper {
         if (newState == super.blockState) return this;
         return BlockRegistryMirror.byId(BlockStateUtils.blockStateToId(newState));
     }
+
+    @Override
+    public boolean isAir() {
+        return FastNMS.INSTANCE.method$BlockStateBase$isAir(super.blockState);
+    }
 }

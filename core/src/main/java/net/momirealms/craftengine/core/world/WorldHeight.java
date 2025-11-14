@@ -63,7 +63,7 @@ public interface WorldHeight {
 
         @Override
         public int getMinBuildHeight() {
-            return bottomY;
+            return this.bottomY;
         }
 
         @Override

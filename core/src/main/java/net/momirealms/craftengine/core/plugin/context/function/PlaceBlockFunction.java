@@ -40,7 +40,7 @@ public class PlaceBlockFunction<CTX extends Context> extends AbstractConditional
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
             World world = optionalWorldPosition.get().world();
-            world.setBlockAt(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)), this.lazyBlockState.get(), this.updateFlags.getInt(ctx));
+            world.setBlockState(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)), this.lazyBlockState.get(), this.updateFlags.getInt(ctx));
         }
     }
 

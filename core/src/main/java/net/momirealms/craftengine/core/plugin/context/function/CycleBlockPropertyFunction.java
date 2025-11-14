@@ -44,9 +44,9 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
         int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
         int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
-        ExistingBlock blockAt = world.getBlockAt(x, y, z);
+        ExistingBlock blockAt = world.getBlock(x, y, z);
         BlockStateWrapper wrapper = blockAt.blockState().cycleProperty(this.property, this.inverse.getInt(ctx) == 0);
-        world.setBlockAt(x, y, z, wrapper, this.updateFlags.getInt(ctx));
+        world.setBlockState(x, y, z, wrapper, this.updateFlags.getInt(ctx));
     }
 
     @Override

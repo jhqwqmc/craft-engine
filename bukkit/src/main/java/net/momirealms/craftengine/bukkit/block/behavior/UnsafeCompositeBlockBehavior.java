@@ -9,6 +9,8 @@ import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
+import net.momirealms.craftengine.core.world.BlockAccessor;
+import net.momirealms.craftengine.core.world.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -394,9 +396,19 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     }
 
     @Override
-    public void setPlacedBy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
-            behavior.setPlacedBy(thisBlock, args, superMethod);
+            behavior.placeMultiState(thisBlock, args, superMethod);
         }
+    }
+
+    @Override
+    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            if (!behavior.canPlaceMultiState(accessor, pos, state)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

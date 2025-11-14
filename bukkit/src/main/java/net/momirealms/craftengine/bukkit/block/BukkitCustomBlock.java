@@ -35,7 +35,7 @@ public final class BukkitCustomBlock extends AbstractCustomBlock {
     @Override
     public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
         try {
-            this.behavior.setPlacedBy(BlockStateUtils.getBlockOwner(state.customBlockState().literalObject()), new Object[]{
+            this.behavior.placeMultiState(BlockStateUtils.getBlockOwner(state.customBlockState().literalObject()), new Object[]{
                     context.getLevel().serverWorld(),
                     LocationUtils.toBlockPos(context.getClickedPos()),
                     state.customBlockState().literalObject(),

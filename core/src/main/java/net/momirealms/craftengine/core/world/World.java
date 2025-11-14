@@ -1,7 +1,5 @@
 package net.momirealms.craftengine.core.world;
 
-import net.momirealms.craftengine.core.block.BlockStateWrapper;
-import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.Context;
@@ -17,7 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-public interface World {
+public interface World extends BlockAccessor {
 
     CEWorld storageWorld();
 
@@ -25,26 +23,10 @@ public interface World {
 
     Object serverWorld();
 
-    WorldHeight worldHeight();
+    ExistingBlock getBlock(int x, int y, int z);
 
-    ExistingBlock getBlockAt(int x, int y, int z);
-
-    default ExistingBlock getBlockAt(final BlockPos pos) {
-        return getBlockAt(pos.x(), pos.y(), pos.z());
-    }
-
-    void setBlockAt(int x, int y, int z, BlockStateWrapper blockState, int flags);
-
-    default void setBlockAt(int x, int y, int z, ImmutableBlockState blockState, int flags) {
-        this.setBlockAt(x, y, z, blockState.customBlockState(), flags);
-    }
-
-    default void setBlockAt(BlockPos pos, BlockStateWrapper blockState, int flags) {
-        this.setBlockAt(pos.x(), pos.y(), pos.z(), blockState, flags);
-    }
-
-    default void setBlockAt(BlockPos pos, ImmutableBlockState blockState, int flags) {
-        this.setBlockAt(pos.x(), pos.y(), pos.z(), blockState, flags);
+    default ExistingBlock getBlock(final BlockPos pos) {
+        return getBlock(pos.x(), pos.y(), pos.z());
     }
 
     String name();

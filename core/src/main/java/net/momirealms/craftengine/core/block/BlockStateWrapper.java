@@ -29,6 +29,8 @@ public interface BlockStateWrapper extends Comparable<BlockStateWrapper> {
 
     boolean isCustom();
 
+    boolean isAir();
+
     @Override
     default int compareTo(@NotNull BlockStateWrapper o) {
         return Integer.compare(registryId(), o.registryId());

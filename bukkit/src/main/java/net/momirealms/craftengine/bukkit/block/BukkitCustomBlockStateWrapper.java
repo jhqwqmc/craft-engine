@@ -87,4 +87,9 @@ public class BukkitCustomBlockStateWrapper extends AbstractBlockStateWrapper imp
     public Optional<ImmutableBlockState> getImmutableBlockState() {
         return BlockStateUtils.getOptionalCustomBlockState(super.blockState);
     }
+
+    @Override
+    public boolean isAir() {
+        return false;
+    }
 }

@@ -40,7 +40,7 @@ public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> 
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
             World world = optionalWorldPosition.get().world();
-            ExistingBlock blockAt = world.getBlockAt(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)));
+            ExistingBlock blockAt = world.getBlock(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)));
             return MiscUtils.matchRegex(blockAt.id().asString(), this.ids, this.regexMatch);
         }
         return false;

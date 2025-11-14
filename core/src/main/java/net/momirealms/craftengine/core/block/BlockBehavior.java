@@ -10,6 +10,8 @@ import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.world.BlockAccessor;
+import net.momirealms.craftengine.core.world.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -188,7 +190,12 @@ public abstract class BlockBehavior {
     }
 
     // Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack
-    public void setPlacedBy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    }
+
+    // Level level, BlockPos pos, BlockState state
+    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+        return true;
     }
 
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {

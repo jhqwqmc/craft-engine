@@ -21,7 +21,7 @@ public class BlockPlaceContext extends UseOnContext {
         super(world, player, hand, stack, hit);
         this.relativePos = hit.getBlockPos().relative(hit.getDirection());
         this.replaceClicked = true;
-        this.replaceClicked = world.getBlockAt(hit.getBlockPos()).canBeReplaced(this);
+        this.replaceClicked = world.getBlock(hit.getBlockPos()).canBeReplaced(this);
     }
 
     @Override
@@ -34,11 +34,11 @@ public class BlockPlaceContext extends UseOnContext {
     }
 
     public boolean canPlace() {
-        return this.replaceClicked || this.getLevel().getBlockAt(this.getClickedPos()).canBeReplaced(this);
+        return this.replaceClicked || this.getLevel().getBlock(this.getClickedPos()).canBeReplaced(this);
     }
 
     public boolean isWaterSource() {
-        return this.getLevel().getBlockAt(this.getClickedPos()).isWaterSource(this);
+        return this.getLevel().getBlock(this.getClickedPos()).isWaterSource(this);
     }
 
     public boolean replacingClickedOnBlock() {

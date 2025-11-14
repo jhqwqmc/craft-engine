@@ -175,7 +175,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         if (state == null || state.behavior() != this.behavior) return;
         Property<Boolean> property = this.behavior.openProperty();
         if (property == null) return;
-        super.world.world().setBlockAt(this.pos.x(), this.pos.y(), this.pos.z(), state.with(property, open), UpdateOption.UPDATE_ALL.flags());
+        super.world.world().setBlockState(this.pos.x(), this.pos.y(), this.pos.z(), state.with(property, open), UpdateOption.UPDATE_ALL.flags());
     }
 
     public void checkOpeners(Object level, Object pos, Object blockState) {

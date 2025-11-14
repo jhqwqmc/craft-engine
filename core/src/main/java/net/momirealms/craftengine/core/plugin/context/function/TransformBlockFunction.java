@@ -48,7 +48,7 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
             int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
             int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
             int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
-            BlockStateWrapper existingBlockState = world.getBlockAt(x, y, z).blockState().withProperties(this.properties);
+            BlockStateWrapper existingBlockState = world.getBlock(x, y, z).blockState().withProperties(this.properties);
             CompoundTag newProperties = new CompoundTag();
             for (String propertyName : existingBlockState.getPropertyNames()) {
                 newProperties.putString(propertyName, String.valueOf(existingBlockState.getProperty(propertyName)).toLowerCase(Locale.ROOT));
@@ -58,7 +58,7 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
                     newProperties.put(tagEntry.getKey(), tagEntry.getValue());
                 }
             }
-            world.setBlockAt(x, y, z, this.lazyBlockState.get().withProperties(newProperties), this.updateFlags.getInt(ctx));
+            world.setBlockState(x, y, z, this.lazyBlockState.get().withProperties(newProperties), this.updateFlags.getInt(ctx));
         }
     }
 
