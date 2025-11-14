@@ -1124,7 +1124,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
             BukkitServerPlayer player = (BukkitServerPlayer) user;
-            if (!player.isMiningBlock()) return;
             Object hand = FastNMS.INSTANCE.field$ServerboundSwingPacket$hand(packet);
             if (hand == CoreReflections.instance$InteractionHand$MAIN_HAND) {
                 player.onSwingHand();
