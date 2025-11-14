@@ -187,6 +187,10 @@ public abstract class BlockBehavior {
     public void onProjectileHit(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
     }
 
+    // Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack
+    public void setPlacedBy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    }
+
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
         return state;
     }
@@ -206,9 +210,6 @@ public abstract class BlockBehavior {
             }
         }
         return state.settings().replaceable();
-    }
-
-    public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
     }
 
     public InteractionResult useOnBlock(UseOnContext context, ImmutableBlockState state) {

@@ -505,12 +505,12 @@ public class FriendlyByteBuf extends ByteBuf {
         return this;
     }
 
-    public FriendlyByteBuf writeNbt(@Nullable Tag compound, boolean named) {
-        if (compound == null) {
+    public FriendlyByteBuf writeNbt(@Nullable Tag tag, boolean named) {
+        if (tag == null) {
             this.writeByte(0);
         } else {
             try {
-                NBT.writeUnnamedTag(compound, new ByteBufOutputStream(this), named);
+                NBT.writeUnnamedTag(tag, new ByteBufOutputStream(this), named);
             } catch (IOException e) {
                 throw new EncoderException("Failed to write NBT compound: " + e.getMessage(), e);
             }

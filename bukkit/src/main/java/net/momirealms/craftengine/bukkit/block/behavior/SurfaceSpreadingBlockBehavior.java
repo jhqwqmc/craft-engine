@@ -8,12 +8,15 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
 import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
+import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -23,10 +26,12 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final int requiredLight;
     private final LazyReference<Object> baseBlock;
+    private final Property<Boolean> snowyProperty;
 
-    public SurfaceSpreadingBlockBehavior(CustomBlock customBlock, int requiredLight, String baseBlock) {
+    public SurfaceSpreadingBlockBehavior(CustomBlock customBlock, int requiredLight, String baseBlock, @Nullable Property<Boolean> snowyProperty) {
         super(customBlock);
         this.requiredLight = requiredLight;
+        this.snowyProperty = snowyProperty;
         this.baseBlock = LazyReference.lazyReference(() -> Objects.requireNonNull(BukkitBlockManager.instance().createBlockState(baseBlock)).literalObject());
     }
 
@@ -40,9 +45,7 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
             return;
         }
         if (FastNMS.INSTANCE.method$LevelReader$getMaxLocalRawBrightness(level, FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$UP)) < this.requiredLight) return;
-        
-        BooleanProperty snowy = (BooleanProperty) this.block().getProperty("snowy");
-        
+
         for (int i = 0; i < 4; i++) {
             Object blockPos = FastNMS.INSTANCE.method$BlockPos$offset(
                 pos, 
@@ -58,16 +61,16 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
                 
                 ImmutableBlockState newState = this.block().defaultState();
                 
-                if (snowy != null) {
+                if (this.snowyProperty != null) {
                     boolean hasSnow = FastNMS.INSTANCE.method$BlockStateBase$isBlock(
                         FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, 
                             FastNMS.INSTANCE.method$BlockPos$relative(blockPos, CoreReflections.instance$Direction$UP)), 
                         MBlocks.SNOW
                     );
-                    newState = newState.with(snowy, hasSnow);
+                    newState = newState.with(this.snowyProperty, hasSnow);
                 }
                 
-                FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, newState.customBlockState().literalObject(), 3);
+                FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, newState.customBlockState().literalObject(), UpdateOption.UPDATE_ALL.flags());
             }
         }
     }
@@ -101,11 +104,12 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
 
     public static class Factory implements BlockBehaviorFactory {
 
+        @SuppressWarnings("unchecked")
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             int requiredLight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("required-light", 9), "required-light");
             String baseBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.getOrDefault("base-block", "minecraft:dirt"), "warning.config.block.behavior.surface_spreading.missing_base_block");
-            return new SurfaceSpreadingBlockBehavior(block, requiredLight, baseBlock);
+            return new SurfaceSpreadingBlockBehavior(block, requiredLight, baseBlock, (Property<Boolean>) block.getProperty("snowy"));
         }
     }
 }

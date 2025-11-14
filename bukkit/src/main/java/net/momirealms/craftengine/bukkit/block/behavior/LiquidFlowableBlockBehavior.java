@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
-import net.momirealms.craftengine.core.block.behavior.special.PlaceLiquidBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.world.WorldEvents;
 
 import java.util.Map;

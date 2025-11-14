@@ -4,8 +4,8 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.FallOnBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.PlaceLiquidBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
@@ -252,13 +252,6 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     }
 
     @Override
-    public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
-        for (AbstractBlockBehavior behavior : this.behaviors) {
-            behavior.setPlacedBy(context, state);
-        }
-    }
-
-    @Override
     public boolean canBeReplaced(BlockPlaceContext context, ImmutableBlockState state) {
         for (AbstractBlockBehavior behavior : this.behaviors) {
             if (!behavior.canBeReplaced(context, state)) {
@@ -397,6 +390,13 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     public void onProjectileHit(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
             behavior.onProjectileHit(thisBlock, args, superMethod);
+        }
+    }
+
+    @Override
+    public void setPlacedBy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            behavior.setPlacedBy(thisBlock, args, superMethod);
         }
     }
 }

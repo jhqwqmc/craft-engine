@@ -129,6 +129,11 @@ public class BukkitCraftEngine extends CraftEngine {
         } catch (Exception e) {
             throw new InjectionException("Error injecting loot entries", e);
         }
+        try {
+            BlockStateProviderInjector.init();
+        } catch (Exception e) {
+            throw new InjectionException("Error injecting block state providers", e);
+        }
     }
 
     @Override
