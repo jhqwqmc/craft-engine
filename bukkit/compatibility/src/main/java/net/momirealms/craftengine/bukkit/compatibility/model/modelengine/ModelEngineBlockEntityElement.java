@@ -11,7 +11,6 @@ import net.momirealms.craftengine.core.world.World;
 import org.bukkit.Location;
 import org.joml.Vector3f;
 
-// TODO not tested yet
 public class ModelEngineBlockEntityElement implements BlockEntityElement {
     private Dummy<?> dummy;
     private final Location location;
@@ -41,14 +40,14 @@ public class ModelEngineBlockEntityElement implements BlockEntityElement {
     @Override
     public void hide(Player player) {
         if (this.dummy != null) {
-            this.dummy.setForceViewing((org.bukkit.entity.Player) player.platformPlayer(), true);
+            this.dummy.setForceHidden((org.bukkit.entity.Player) player.platformPlayer(), true);
         }
     }
 
     @Override
     public void show(Player player) {
         if (this.dummy != null) {
-            this.dummy.setForceHidden((org.bukkit.entity.Player) player.platformPlayer(), true);
+            this.dummy.setForceViewing((org.bukkit.entity.Player) player.platformPlayer(), true);
         }
     }
 
