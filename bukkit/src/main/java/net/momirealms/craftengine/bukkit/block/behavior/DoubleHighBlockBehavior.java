@@ -1,31 +1,38 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
-import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
+import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.*;
+import net.momirealms.craftengine.bukkit.world.BukkitWorld;
+import net.momirealms.craftengine.core.block.BlockBehavior;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.DoubleBlockHalf;
+import net.momirealms.craftengine.core.entity.player.InteractionHand;
+import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.BlockPos;
-import net.momirealms.craftengine.core.world.World;
-import net.momirealms.craftengine.core.world.WorldEvents;
+import net.momirealms.craftengine.core.world.*;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public class DoubleHighBlockBehavior extends BukkitBlockBehavior {
+public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final Property<DoubleBlockHalf> halfProperty;
 
     public DoubleHighBlockBehavior(CustomBlock customBlock, Property<DoubleBlockHalf> halfProperty) {
-        super(customBlock);
+        super(customBlock, 0);
         this.halfProperty = halfProperty;
     }
 
@@ -34,33 +41,79 @@ public class DoubleHighBlockBehavior extends BukkitBlockBehavior {
         Object level = args[updateShape$level];
         Object blockPos = args[updateShape$blockPos];
         Object blockState = args[0];
-
-        ImmutableBlockState customState = BukkitBlockManager.instance().getImmutableBlockState(BlockStateUtils.blockStateToId(blockState));
+        ImmutableBlockState customState = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
         if (customState == null || customState.isEmpty()) return blockState;
         DoubleBlockHalf half = customState.get(this.halfProperty);
-        if (half == null) return blockState;
+        Object direction = args[updateShape$direction];
+        if (DirectionUtils.isYAxis(direction) && half == DoubleBlockHalf.LOWER == (direction == CoreReflections.instance$Direction$UP)) {
+            ImmutableBlockState neighborState = BlockStateUtils.getOptionalCustomBlockState(args[updateShape$neighborState]).orElse(null);
+            if (neighborState == null || neighborState.isEmpty()) return MBlocks.AIR$defaultState;
+            DoubleHighBlockBehavior anotherDoorBehavior = neighborState.behavior().getAs(DoubleHighBlockBehavior.class).orElse(null);
+            if (anotherDoorBehavior == null) return MBlocks.AIR$defaultState;
+            if (neighborState.get(anotherDoorBehavior.halfProperty) != half) {
+                return neighborState.with(anotherDoorBehavior.halfProperty, half).customBlockState().literalObject();
+            }
+            return MBlocks.AIR$defaultState;
+        } else if (half == DoubleBlockHalf.LOWER && direction == CoreReflections.instance$Direction$DOWN && !canSurvive(thisBlock, blockState, level, blockPos)) {
+            BlockPos pos = LocationUtils.fromBlockPos(blockPos);
+            World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(pos));
+            world.playBlockSound(position, customState.settings().sounds().breakSound());
+            FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId());
+            return MBlocks.AIR$defaultState;
+        }
+        return blockState;
+    }
 
-        // 获取另一半
-        Object anotherHalfPos = FastNMS.INSTANCE.method$BlockPos$relative(blockPos,
-                half == DoubleBlockHalf.UPPER
-                        ? CoreReflections.instance$Direction$DOWN
-                        : CoreReflections.instance$Direction$UP
-        );
-        Object anotherHalfState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, anotherHalfPos);
-        ImmutableBlockState anotherHalfCustomState = BukkitBlockManager.instance().getImmutableBlockState(BlockStateUtils.blockStateToId(anotherHalfState));
-        if (anotherHalfCustomState != null && !anotherHalfCustomState.isEmpty()) return blockState;
 
-        // 破坏
-        FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId());
-        return MBlocks.AIR$defaultState;
+    @Override
+    public Object playerWillDestroy(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        Object level = args[0];
+        Object pos = args[1];
+        Object state = args[2];
+        Object player = args[3];
+        ImmutableBlockState blockState = BlockStateUtils.getOptionalCustomBlockState(state).orElse(null);
+        if (blockState == null || blockState.isEmpty()) return superMethod.call();
+        BukkitServerPlayer cePlayer = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$ServerPlayer$getBukkitEntity(player));
+        Item<ItemStack> item = cePlayer.getItemInHand(InteractionHand.MAIN_HAND);
+        if (cePlayer.canInstabuild() || !BlockStateUtils.isCorrectTool(blockState, item)) {
+            preventDropFromBottomPart(level, pos, blockState, player);
+        }
+        return superMethod.call();
+    }
+
+    private void preventDropFromBottomPart(Object level, Object pos, ImmutableBlockState state, Object player) {
+        if (state.get(this.halfProperty) != DoubleBlockHalf.UPPER) return;
+        Object blockPos = FastNMS.INSTANCE.method$BlockPos$relative(pos, CoreReflections.instance$Direction$DOWN);
+        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(level, blockPos);
+        ImmutableBlockState belowState = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
+        if (belowState == null || belowState.isEmpty()) return;
+        Optional<DoubleHighBlockBehavior> belowDoubleHighBlockBehavior = belowState.behavior().getAs(DoubleHighBlockBehavior.class);
+        if (belowDoubleHighBlockBehavior.isEmpty() || belowState.get(this.halfProperty) != DoubleBlockHalf.LOWER) return;
+        FastNMS.INSTANCE.method$LevelWriter$setBlock(level, blockPos, MBlocks.AIR$defaultState, UpdateOption.builder().updateSuppressDrops().updateClients().updateNeighbors().build().flags());
+        FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, player, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, belowState.customBlockState().registryId());
+    }
+
+    @Override
+    protected boolean canSurvive(Object thisBlock, Object state, Object world, Object blockPos) throws Exception {
+        ImmutableBlockState customState = BlockStateUtils.getOptionalCustomBlockState(state).orElse(null);
+        if (customState == null || customState.isEmpty()) return false;
+        if (customState.get(this.halfProperty) == DoubleBlockHalf.UPPER) {
+            int x = FastNMS.INSTANCE.field$Vec3i$x(blockPos);
+            int y = FastNMS.INSTANCE.field$Vec3i$y(blockPos) - 1;
+            int z = FastNMS.INSTANCE.field$Vec3i$z(blockPos);
+            Object belowPos = FastNMS.INSTANCE.constructor$BlockPos(x, y, z);
+            Object belowState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(world, belowPos);
+            Optional<ImmutableBlockState> belowCustomState = BlockStateUtils.getOptionalCustomBlockState(belowState);
+            return belowCustomState.filter(immutableBlockState -> immutableBlockState.owner().value() == super.customBlock).isPresent();
+        }
+        return true;
     }
 
     @Override
     public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
-        World level = context.getLevel();
-        BlockPos anotherHalfPos = context.getClickedPos().relative(Direction.UP);
-        BlockStateWrapper blockStateWrapper = state.with(this.halfProperty, DoubleBlockHalf.UPPER).customBlockState();
-        FastNMS.INSTANCE.method$LevelWriter$setBlock(level.serverWorld(), LocationUtils.toBlockPos(anotherHalfPos), blockStateWrapper.literalObject(), UpdateOption.Flags.UPDATE_CLIENTS);
+        BlockPos pos = context.getClickedPos();
+        context.getLevel().setBlockAt(pos.x(), pos.y() + 1, pos.z(), state.with(this.halfProperty, DoubleBlockHalf.UPPER).customBlockState(), UpdateOption.UPDATE_ALL.flags());
     }
 
     @Override
