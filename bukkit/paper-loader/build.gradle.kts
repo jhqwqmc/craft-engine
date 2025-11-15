@@ -73,6 +73,7 @@ paper {
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
         register("SlimeWorldPlugin") { required = false }
+        register("SlimeWorldManager") { required = false }
 
         // external tag
         register("CustomNameplates") { required = false }
