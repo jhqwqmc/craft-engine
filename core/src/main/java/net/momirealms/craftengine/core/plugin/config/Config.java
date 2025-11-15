@@ -47,6 +47,7 @@ public class Config {
     protected boolean metrics;
     protected boolean filterConfigurationPhaseDisconnect;
     protected Locale forcedLocale;
+    protected boolean delayConfigurationLoad;
 
     protected boolean debug$common;
     protected boolean debug$packet;
@@ -288,6 +289,7 @@ public class Config {
     public void loadFullSettings() {
         YamlDocument config = settings();
         forcedLocale = TranslationManager.parseLocale(config.getString("forced-locale", ""));
+        delayConfigurationLoad = config.getBoolean("delay-configuration-load", false);
 
         // basics
         metrics = config.getBoolean("metrics", false);
@@ -575,6 +577,10 @@ public class Config {
 
     public static String configVersion() {
         return instance.configVersion;
+    }
+
+    public static boolean delayConfigurationLoad() {
+        return instance.delayConfigurationLoad;
     }
 
     public static boolean debugCommon() {

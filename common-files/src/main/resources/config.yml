@@ -8,6 +8,9 @@ update-checker: true
 forced-locale: ''
 # Filter configuration phase player disconnection logs
 filter-configuration-phase-disconnect: false
+# Plugins must register CraftEngine content during onLoad or via CraftEngine#beforeEnableTaskRegistry, as onEnable is too late.
+# This option delays CraftEngine's config reading until after all plugins start, and only affects datapack-generated spawn chunks.
+delay-configuration-load: false
 
 resource-pack:
   # This option determines the location of the generated resource pack

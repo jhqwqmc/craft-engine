@@ -227,7 +227,7 @@ public abstract class CraftEngine implements Plugin {
                         long time3 = System.currentTimeMillis();
                         // 注册唱片机音乐
                         this.soundManager.runDelayedSyncTasks();
-                        // 重载配方
+                        // 同步注册配方
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
@@ -271,14 +271,16 @@ public abstract class CraftEngine implements Plugin {
         // 延迟任务
         this.beforeEnableTaskRegistry.executeTasks();
 
-        // 清理缓存，初始化一些东西，不需要读config和translation，因为boostrap阶段已经读取过了
-        this.reloadManagers();
-        // 加载packs
-        this.packManager.loadPacks();
-        this.packManager.updateCachedConfigFiles();
-        // 不要加载配方
-        this.packManager.loadResources((p) -> p.loadingSequence() != LoadingSequence.RECIPE);
-        this.runDelayTasks(false);
+        if (!Config.delayConfigurationLoad()) {
+            // 清理缓存，初始化一些东西，不需要读config和translation，因为boostrap阶段已经读取过了
+            this.reloadManagers();
+            // 加载packs
+            this.packManager.loadPacks();
+            this.packManager.updateCachedConfigFiles();
+            // 不要加载配方
+            this.packManager.loadResources((p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+            this.runDelayTasks(false);
+        }
 
         // 延迟任务
         this.afterEnableTaskRegistry.executeTasks();
@@ -291,19 +293,25 @@ public abstract class CraftEngine implements Plugin {
             // 延迟兼容性任务，比如物品库的支持。保证后续配方正确加载
             this.compatibilityManager.onDelayedEnable();
 
-            // 单独加载配方
-            this.recipeManager.reload();
-            this.packManager.loadResources((p) -> p.loadingSequence() == LoadingSequence.RECIPE);
-            this.recipeManager.delayedLoad();
-
-            this.packManager.clearResourceConfigs();
-
-            // 重新发送tags，需要等待tags更新完成
-            this.networkManager.delayedLoad();
-
-            // 注册唱片机音乐
-            this.soundManager.runDelayedSyncTasks();
-            this.recipeManager.runDelayedSyncTasks();
+            if (!Config.delayConfigurationLoad()) {
+                // 单独加载配方
+                this.recipeManager.reload();
+                this.packManager.loadResources((p) -> p.loadingSequence() == LoadingSequence.RECIPE);
+                this.recipeManager.delayedLoad();
+                this.packManager.clearResourceConfigs();
+                // 重新发送tags，需要等待tags更新完成
+                this.networkManager.delayedLoad();
+                // 注册唱片机音乐
+                this.soundManager.runDelayedSyncTasks();
+                // 同步注册配方
+                this.recipeManager.runDelayedSyncTasks();
+            } else {
+                try {
+                    this.reloadPlugin(Runnable::run, Runnable::run, true);
+                } catch (Exception e) {
+                    this.logger.severe("Failed to reload plugin on delayed enable stage", e);
+                }
+            }
 
             // 必须要在完整重载后再初始化，否则会因为配置不存在，导致家具、弹射物等无法正确被加载
             this.projectileManager.delayedInit();
