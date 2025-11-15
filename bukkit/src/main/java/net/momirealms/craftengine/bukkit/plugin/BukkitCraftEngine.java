@@ -223,19 +223,6 @@ public class BukkitCraftEngine extends CraftEngine {
         super.seatManager = new BukkitSeatManager(this);
         super.onPluginEnable();
         super.compatibilityManager().onEnable();
-
-        // todo 未来版本移除
-        Path legacyFile1 = this.dataFolderPath().resolve("additional-real-blocks.yml");
-        Path legacyFile2 = this.dataFolderPath().resolve("mappings.yml");
-        if (Files.exists(legacyFile1)) {
-            try {
-                Files.delete(legacyFile1);
-                Files.deleteIfExists(legacyFile2);
-                this.saveResource("resources/internal/configuration/mappings.yml");
-            } catch (IOException e) {
-                this.logger.warn("Failed to delete legacy files", e);
-            }
-        }
     }
 
     @Override
