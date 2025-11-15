@@ -99,7 +99,7 @@ resource-pack:
     fix-atlas: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:
-    enable: true
+    enable: false
     # .png
     texture:
       enable: true

@@ -49,10 +49,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.plugin = plugin;
         this.worlds = ConcurrentUUID2ReferenceChainedHashTable.createWithCapacity(10, 0.5f);
         this.storageAdaptor = new DefaultStorageAdaptor();
-        // fixme 初始化
-        for (World world : Bukkit.getWorlds()) {
-            this.worlds.put(world.getUID(), new BukkitCEWorld(new BukkitWorld(world), this.storageAdaptor));
-        }
     }
 
     @Override
@@ -77,6 +73,11 @@ public class BukkitWorldManager implements WorldManager, Listener {
         if (world != null) {
             this.lastWorldUUID = uuid;
             this.lastWorld = world;
+        } else {
+            World bukkitWorld = Bukkit.getWorld(uuid);
+            if (bukkitWorld != null) {
+                world = this.loadWorld(new BukkitWorld(bukkitWorld));
+            }
         }
         return world;
     }
@@ -139,9 +140,11 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     @Override
-    public void loadWorld(net.momirealms.craftengine.core.world.World world) {
+    public CEWorld loadWorld(net.momirealms.craftengine.core.world.World world) {
         UUID uuid = world.uuid();
-        if (this.worlds.containsKey(uuid)) return;
+        if (this.worlds.containsKey(uuid)) {
+            return this.worlds.get(uuid);
+        }
         CEWorld ceWorld = new BukkitCEWorld(world, this.storageAdaptor);
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
@@ -150,6 +153,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             handleChunkLoad(ceWorld, chunk, false);
         }
         ceWorld.setTicking(true);
+        return ceWorld;
     }
 
     @Override

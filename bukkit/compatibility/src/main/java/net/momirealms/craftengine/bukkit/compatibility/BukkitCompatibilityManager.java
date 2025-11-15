@@ -70,6 +70,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     @Override
     public void onEnable() {
+        this.initSlimeWorldHook();
         // WorldEdit
         // FastAsyncWorldEdit
         if (this.isPluginEnabled("FastAsyncWorldEdit")) {
@@ -110,7 +111,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     @Override
     public void onDelayedEnable() {
-        this.initSlimeWorldHook();
         if (this.isPluginEnabled("PlaceholderAPI")) {
             PlaceholderAPIUtils.registerExpansions(this.plugin);
             this.hasPlaceholderAPI = true;
@@ -234,7 +234,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
                 logHook("AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
-                if (Bukkit.getPluginManager().isPluginEnabled("SlimeWorldPlugin")) {
+                if (hasPlugin("SlimeWorldPlugin")) {
                     LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 2);
                     worldManager.setStorageAdaptor(adaptor);
                     Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());

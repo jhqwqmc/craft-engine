@@ -1613,7 +1613,7 @@ public abstract class AbstractPackManager implements PackManager {
             JsonObject textures = sourceModelJson.get("textures").getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : textures.entrySet()) {
                 String value = entry.getValue().getAsString();
-                if (value.charAt(0) == '#') continue;
+                if (value.isEmpty() || value.charAt(0) == '#') continue;
                 Key textureResourceLocation = Key.from(value);
                 imageToModels.put(textureResourceLocation, sourceModelLocation);
             }

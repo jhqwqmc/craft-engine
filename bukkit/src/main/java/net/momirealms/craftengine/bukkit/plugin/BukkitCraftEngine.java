@@ -234,8 +234,12 @@ public class BukkitCraftEngine extends CraftEngine {
         super.senderFactory = new BukkitSenderFactory(this);
         // 初始化指令管理器
         super.commandManager = new BukkitCommandManager(this);
+        try {
+            super.compatibilityManager().onEnable();
+        } catch (Throwable t) {
+            this.logger.severe("Failed to enable compatibility manager", t);
+        }
         super.onPluginEnable();
-        super.compatibilityManager().onEnable();
     }
 
     @Override
