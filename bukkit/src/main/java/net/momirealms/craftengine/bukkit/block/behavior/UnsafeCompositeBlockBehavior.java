@@ -121,7 +121,6 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
         return previous;
     }
 
-
     @Override
     public Object getContainer(Object thisBlock, Object[] args) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
@@ -410,5 +409,15 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            if (behavior.hasMultiState(baseState)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

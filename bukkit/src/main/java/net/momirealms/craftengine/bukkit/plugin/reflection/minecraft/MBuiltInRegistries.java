@@ -27,6 +27,7 @@ public final class MBuiltInRegistries {
     public static final Object LOOT_POOL_ENTRY_TYPE;
     public static final Object GAME_EVENT;
     public static final Object BLOCKSTATE_PROVIDER_TYPE;
+    public static final Object FEATURE;
 
     static {
         Field[] fields = CoreReflections.clazz$BuiltInRegistries.getDeclaredFields();
@@ -46,6 +47,7 @@ public final class MBuiltInRegistries {
             Object registries$LootPoolEntryType  = null;
             Object registries$GameEvent  = null;
             Object registries$BlockStateProviderType  = null;
+            Object registries$Feature  = null;
 
             for (Field field : fields) {
                 Type fieldType = field.getGenericType();
@@ -63,6 +65,8 @@ public final class MBuiltInRegistries {
                             registries$BlockEntityType = field.get(null);
                         } else if (rawType == CoreReflections.clazz$BlockStateProviderType) {
                             registries$BlockStateProviderType = field.get(null);
+                        } else if (rawType == CoreReflections.clazz$Feature) {
+                            registries$Feature = field.get(null);
                         } else if (VersionHelper.isOrAbove1_20_5() && rawType == CoreReflections.clazz$DataComponentType && registries$DataComponentType == null) {
                             registries$DataComponentType = field.get(null);
                         } else if (VersionHelper.isOrAbove1_21_5() && rawType == CoreReflections.clazz$DataComponentPredicate$Type) {
@@ -103,6 +107,7 @@ public final class MBuiltInRegistries {
             DATA_COMPONENT_TYPE = registries$DataComponentType;
             GAME_EVENT = requireNonNull(registries$GameEvent);
             BLOCKSTATE_PROVIDER_TYPE = requireNonNull(registries$BlockStateProviderType);
+            FEATURE = requireNonNull(registries$Feature);
             DATA_COMPONENT_PREDICATE_TYPE = registries$DataComponentPredicateType;
         } catch (ReflectiveOperationException e) {
             throw new ReflectionInitException("Failed to init BuiltInRegistries", e);

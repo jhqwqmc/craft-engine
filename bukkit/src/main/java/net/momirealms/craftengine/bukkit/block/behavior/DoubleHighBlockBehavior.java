@@ -118,6 +118,11 @@ public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
     }
 
     @Override
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        return baseState.get(this.halfProperty) == DoubleBlockHalf.LOWER;
+    }
+
+    @Override
     public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         if (pos.y() >= accessor.worldHeight().getMaxBuildHeight() - 1) {
             return false;

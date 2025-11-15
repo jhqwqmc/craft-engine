@@ -189,13 +189,16 @@ public abstract class BlockBehavior {
     public void onProjectileHit(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
     }
 
-    // Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack
+    // Level/WorldGenLevel level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack
     public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
     }
 
-    // Level level, BlockPos pos, BlockState state
     public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         return true;
+    }
+
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        return false;
     }
 
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {

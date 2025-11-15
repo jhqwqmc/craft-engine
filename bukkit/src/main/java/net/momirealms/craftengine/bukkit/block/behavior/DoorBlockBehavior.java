@@ -185,6 +185,11 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior {
     }
 
     @Override
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        return baseState.get(this.halfProperty) == DoubleBlockHalf.LOWER;
+    }
+
+    @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
         World world  = context.getLevel();
         Object level = world.serverWorld();

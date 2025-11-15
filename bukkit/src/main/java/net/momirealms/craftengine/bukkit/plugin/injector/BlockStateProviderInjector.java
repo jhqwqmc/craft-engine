@@ -10,6 +10,8 @@ import java.util.Set;
 
 public final class BlockStateProviderInjector {
 
+    private BlockStateProviderInjector() {}
+
     public static void init() throws ReflectiveOperationException {
         CoreReflections.field$MappedRegistry$frozen.set(MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, false);
 

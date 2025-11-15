@@ -639,7 +639,6 @@ public final class CoreReflections {
     ), VersionHelper.isOrAbove1_21_5());
 
 
-
     public static final Method method$Registry$getId = requireNonNull(
             ReflectionUtils.getMethod(clazz$Registry, int.class, Object.class)
     );
@@ -4564,6 +4563,13 @@ public final class CoreReflections {
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProviders",
                     "world.level.levelgen.feature.stateproviders.BlockStateProviderType"
+            )
+    );
+
+    public static final Class<?> clazz$Feature = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.levelgen.feature.WorldGenerator",
+                    "world.level.levelgen.feature.Feature"
             )
     );
 }

@@ -43,6 +43,8 @@ public final class WorldStorageInjector {
     private static Class<?> clazz$InjectedPalettedContainer;
     private static MethodHandle constructor$InjectedLevelChunkSection;
 
+    private WorldStorageInjector() {}
+
     public static void init() throws ReflectiveOperationException {
         ByteBuddy byteBuddy = new ByteBuddy(ClassFileVersion.JAVA_V17);
         // Paletted Container
