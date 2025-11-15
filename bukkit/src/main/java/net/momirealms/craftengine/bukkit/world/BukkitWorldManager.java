@@ -49,6 +49,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.plugin = plugin;
         this.worlds = ConcurrentUUID2ReferenceChainedHashTable.createWithCapacity(10, 0.5f);
         this.storageAdaptor = new DefaultStorageAdaptor();
+        // fixme 初始化
         for (World world : Bukkit.getWorlds()) {
             this.worlds.put(world.getUID(), new BukkitCEWorld(new BukkitWorld(world), this.storageAdaptor));
         }

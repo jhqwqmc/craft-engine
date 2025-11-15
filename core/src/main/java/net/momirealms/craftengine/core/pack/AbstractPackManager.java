@@ -301,9 +301,8 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public void loadResources(boolean recipe) {
-        this.loadPacks();
-        this.loadResourceConfigs(recipe ? (p) -> true : (p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+    public void loadResources(Predicate<ConfigParser> predicate) {
+        this.loadResourceConfigs(predicate);
     }
 
     @Override
@@ -362,7 +361,8 @@ public abstract class AbstractPackManager implements PackManager {
         return true;
     }
 
-    private void loadPacks() {
+    @Override
+    public void loadPacks() {
         Path resourcesFolder = this.plugin.dataFolderPath().resolve("resources");
         try {
             if (Files.notExists(resourcesFolder)) {
@@ -621,7 +621,8 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/block/custom/magma_plant_stage_3.json");
     }
 
-    private void updateCachedConfigFiles() {
+    @Override
+    public void updateCachedConfigFiles() {
         Map<Path, CachedConfigFile> previousFiles = this.cachedConfigFiles;
         this.cachedConfigFiles = new HashMap<>(64, 0.5f);
         for (Pack pack : loadedPacks()) {
@@ -684,22 +685,23 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void loadResourceConfigs(Predicate<ConfigParser> predicate) {
-        long o1 = System.nanoTime();
-        this.updateCachedConfigFiles();
-        long o2 = System.nanoTime();
-        this.plugin.logger().info("Loaded packs. Took " + String.format("%.2f", ((o2 - o1) / 1_000_000.0)) + " ms");
         for (ConfigParser parser : this.sortedParsers) {
             if (!predicate.test(parser)) {
-                parser.clear();
                 continue;
             }
             long t1 = System.nanoTime();
             parser.preProcess();
             parser.loadAll();
             parser.postProcess();
-            parser.clear();
             long t2 = System.nanoTime();
             this.plugin.logger().info("Loaded " + parser.sectionId()[0] + " in " + String.format("%.2f", ((t2 - t1) / 1_000_000.0)) + " ms");
+        }
+    }
+
+    @Override
+    public void clearResourceConfigs() {
+        for (ConfigParser parser : this.sortedParsers) {
+            parser.clear();
         }
     }
 

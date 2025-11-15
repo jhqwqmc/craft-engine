@@ -2,11 +2,13 @@ package net.momirealms.craftengine.bukkit.compatibility;
 
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
+import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.compatibility.item.*;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
 import net.momirealms.craftengine.bukkit.compatibility.leveler.*;
+import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelBlockEntityElementConfig;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelModel;
-import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelUtils;
+import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineBlockEntityElementConfig;
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineModel;
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineUtils;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicItemDropListener;
@@ -68,16 +70,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     @Override
     public void onEnable() {
-        this.initSlimeWorldHook();
-        if (this.isPluginEnabled("PlaceholderAPI")) {
-            PlaceholderAPIUtils.registerExpansions(this.plugin);
-            this.hasPlaceholderAPI = true;
-            logHook("PlaceholderAPI");
-        }
-        if (this.isPluginEnabled("Skript")) {
-            SkriptHook.register();
-            logHook("Skript");
-        }
         // WorldEdit
         // FastAsyncWorldEdit
         if (this.isPluginEnabled("FastAsyncWorldEdit")) {
@@ -91,15 +83,47 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             this.initWorldEditHook();
             logHook("WorldEdit");
         }
+        if (this.hasPlugin("BetterModel")) {
+            BukkitBlockEntityElementConfigs.register(Key.of("craftengine:better_model"), new BetterModelBlockEntityElementConfig.Factory());
+            logHook("BetterModel");
+        }
+        if (this.hasPlugin("ModelEngine")) {
+            BukkitBlockEntityElementConfigs.register(Key.of("craftengine:model_engine"), new ModelEngineBlockEntityElementConfig.Factory());
+            logHook("ModelEngine");
+        }
+        if (this.hasPlugin("CustomNameplates")) {
+            registerTagResolverProvider(new CustomNameplateProviders.Background());
+            registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
+            registerTagResolverProvider(new CustomNameplateProviders.Bubble());
+            logHook("CustomNameplates");
+        }
+        Key worldGuardRegion = Key.of("worldguard:region");
+        if (this.hasPlugin("WorldGuard")) {
+            EventConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+            LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+            logHook("WorldGuard");
+        } else {
+            EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+            LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+        }
     }
 
     @Override
     public void onDelayedEnable() {
+        this.initSlimeWorldHook();
+        if (this.isPluginEnabled("PlaceholderAPI")) {
+            PlaceholderAPIUtils.registerExpansions(this.plugin);
+            this.hasPlaceholderAPI = true;
+            logHook("PlaceholderAPI");
+        }
         this.initItemHooks();
-
         if (this.isPluginEnabled("LuckPerms")) {
             this.initLuckPermsHook();
             logHook("LuckPerms");
+        }
+        if (this.isPluginEnabled("Skript")) {
+            SkriptHook.register();
+            logHook("Skript");
         }
         if (this.isPluginEnabled("AuraSkills")) {
             this.registerLevelerProvider("AuraSkills", new AuraSkillsLevelerProvider());
@@ -133,32 +157,9 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             new MythicItemDropListener(this.plugin);
             logHook("MythicMobs");
         }
-        Key worldGuardRegion = Key.of("worldguard:region");
-        if (this.isPluginEnabled("WorldGuard")) {
-            EventConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
-            LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
-            logHook("WorldGuard");
-        } else {
-            EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
-            LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
-        }
-        if (this.isPluginEnabled("BetterModel")) {
-            BetterModelUtils.registerConstantBlockEntityRender();
-            logHook("BetterModel");
-        }
-        if (this.isPluginEnabled("ModelEngine")) {
-            ModelEngineUtils.registerConstantBlockEntityRender();
-            logHook("ModelEngine");
-        }
         if (this.isPluginEnabled("QuickShop-Hikari")) {
             new QuickShopItemExpressionHandler(this.plugin).register();
             logHook("QuickShop-Hikari");
-        }
-        if (this.isPluginEnabled("CustomNameplates")) {
-            registerTagResolverProvider(new CustomNameplateProviders.Background());
-            registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
-            registerTagResolverProvider(new CustomNameplateProviders.Bubble());
-            logHook("CustomNameplates");
         }
     }
 

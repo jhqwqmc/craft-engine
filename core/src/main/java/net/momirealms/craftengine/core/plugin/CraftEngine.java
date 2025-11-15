@@ -12,6 +12,7 @@ import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeTy
 import net.momirealms.craftengine.core.item.recipe.network.modern.display.RecipeDisplayTypes;
 import net.momirealms.craftengine.core.item.recipe.network.modern.display.slot.SlotDisplayTypes;
 import net.momirealms.craftengine.core.loot.VanillaLootManager;
+import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.PackManager;
 import net.momirealms.craftengine.core.plugin.classpath.ClassPathAppender;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
@@ -30,6 +31,7 @@ import net.momirealms.craftengine.core.plugin.gui.GuiManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManagerImpl;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManagerImpl;
 import net.momirealms.craftengine.core.plugin.logger.PluginLogger;
 import net.momirealms.craftengine.core.plugin.logger.filter.DisconnectLogFilter;
 import net.momirealms.craftengine.core.plugin.logger.filter.LogFilter;
@@ -79,8 +81,8 @@ public abstract class CraftEngine implements Plugin {
     protected ProjectileManager projectileManager;
     protected SeatManager seatManager;
 
-    private final PluginTaskRegistry preLoadTaskRegistry = new PluginTaskRegistry();
-    private final PluginTaskRegistry postLoadTaskRegistry = new PluginTaskRegistry();
+    private final PluginTaskRegistry beforeEnableTaskRegistry = new PluginTaskRegistry();
+    private final PluginTaskRegistry afterEnableTaskRegistry = new PluginTaskRegistry();
 
     private final Consumer<CraftEngine> reloadEventDispatcher;
     private boolean isReloading;
@@ -110,6 +112,24 @@ public abstract class CraftEngine implements Plugin {
         RecipeDisplayTypes.init();
         SlotDisplayTypes.init();
         LegacyRecipeTypes.init();
+
+        // 初始化模板管理器
+        this.templateManager = new TemplateManagerImpl();
+        // 初始化全局变量管理器
+        this.globalVariableManager = new GlobalVariableManager();
+        // 初始化物品浏览器
+        this.itemBrowserManager = new ItemBrowserManagerImpl(this);
+    }
+
+    public void setUpConfigAndLocale() {
+        this.config = new Config(this);
+        this.config.updateConfigCache();
+        // 先读取语言后，再重载语言文件系统
+        this.config.loadForcedLocale();
+        this.translationManager = new TranslationManagerImpl(this);
+        this.translationManager.reload();
+        // 最后才加载完整的config配置
+        this.config.loadFullSettings();
     }
 
     public record ReloadResult(boolean success, long asyncTime, long syncTime) {
@@ -123,6 +143,48 @@ public abstract class CraftEngine implements Plugin {
         }
     }
 
+    private void reloadManagers() {
+        this.templateManager.reload();
+        this.globalVariableManager.reload();
+        this.furnitureManager.reload();
+        this.fontManager.reload();
+        this.itemManager.reload();
+        this.soundManager.reload();
+        this.itemBrowserManager.reload();
+        this.blockManager.reload();
+        this.worldManager.reload();
+        this.vanillaLootManager.reload();
+        this.guiManager.reload();
+        this.packManager.reload();
+        this.advancementManager.reload();
+        this.projectileManager.reload();
+        this.seatManager.reload();
+    }
+
+    private void runDelayTasks(boolean reloadRecipe) {
+        List<CompletableFuture<Void>> delayedLoadTasks = new ArrayList<>();
+        // 指令补全，重置外部配方原料
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemManager.delayedLoad(), this.scheduler.async()));
+        // 重置映射表，指令补全，发送tags，收集声音
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.blockManager.delayedLoad(), this.scheduler.async()));
+        // 处理block_name特殊语言键
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.translationManager.delayedLoad(), this.scheduler.async()));
+        // 指令补全
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.furnitureManager.delayedLoad(), this.scheduler.async()));
+        // 处理外部category，加载ui常量
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemBrowserManager.delayedLoad(), this.scheduler.async()));
+        // 收集非法字符，构造前缀树，指令补全
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.fontManager.delayedLoad(), this.scheduler.async()));
+        // 指令补全
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.soundManager.delayedLoad(), this.scheduler.async()));
+        // 如果重载配方
+        if (reloadRecipe) {
+            // 转换数据包配方
+            delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.recipeManager.delayedLoad(), this.scheduler.async()));
+        }
+        CompletableFutures.allOf(delayedLoadTasks).join();
+    }
+
     public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe) {
         CompletableFuture<ReloadResult> future = new CompletableFuture<>();
         asyncExecutor.execute(() -> {
@@ -134,56 +196,26 @@ public abstract class CraftEngine implements Plugin {
                 }
                 this.isReloading = true;
                 long time1 = System.currentTimeMillis();
-                // firstly reload main config
+                // 重载config
                 this.config.load();
-                // now we reload the translations
+                // 重载翻译
                 this.translationManager.reload();
-                // clear the outdated cache by reloading the managers
-                this.templateManager.reload();
-                this.globalVariableManager.reload();
-                this.furnitureManager.reload();
-                this.fontManager.reload();
-                this.itemManager.reload();
-                this.soundManager.reload();
-                this.itemBrowserManager.reload();
-                this.blockManager.reload();
-                this.worldManager.reload();
-                this.vanillaLootManager.reload();
-                this.guiManager.reload();
-                this.packManager.reload();
-                this.advancementManager.reload();
-                this.projectileManager.reload();
-                this.seatManager.reload();
+                // 重载其他管理器
+                this.reloadManagers();
                 if (reloadRecipe) {
                     this.recipeManager.reload();
                 }
                 try {
-                    // now we load resources
-                    this.packManager.loadResources(reloadRecipe);
+                    // 加载全部配置资源
+                    this.packManager.loadPacks();
+                    this.packManager.updateCachedConfigFiles();
+                    this.packManager.loadResources(reloadRecipe ? (p) -> true : (p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+                    this.packManager.clearResourceConfigs();
                 } catch (Exception e) {
                     this.logger().warn("Failed to load resources folder", e);
                 }
-                List<CompletableFuture<Void>> delayedLoadTasks = new ArrayList<>();
-                // 指令补全，重置外部配方原料
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemManager.delayedLoad(), this.scheduler.async()));
-                // 重置映射表，指令补全，发送tags，收集声音
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.blockManager.delayedLoad(), this.scheduler.async()));
-                // 处理block_name特殊语言键
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.translationManager.delayedLoad(), this.scheduler.async()));
-                // 指令补全
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.furnitureManager.delayedLoad(), this.scheduler.async()));
-                // 处理外部category，加载ui常量
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemBrowserManager.delayedLoad(), this.scheduler.async()));
-                // 收集非法字符，构造前缀树，指令补全
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.fontManager.delayedLoad(), this.scheduler.async()));
-                // 指令补全
-                delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.soundManager.delayedLoad(), this.scheduler.async()));
-                // 如果重载配方
-                if (reloadRecipe) {
-                    // 转换数据包配方
-                    delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.recipeManager.delayedLoad(), this.scheduler.async()));
-                }
-                CompletableFutures.allOf(delayedLoadTasks).join();
+                // 执行延迟任务
+                this.runDelayTasks(reloadRecipe);
                 // 重新发送tags，需要等待tags更新完成
                 this.networkManager.delayedLoad();
                 long time2 = System.currentTimeMillis();
@@ -193,9 +225,9 @@ public abstract class CraftEngine implements Plugin {
                 syncExecutor.execute(() -> {
                     try {
                         long time3 = System.currentTimeMillis();
-                        // register songs
+                        // 注册唱片机音乐
                         this.soundManager.runDelayedSyncTasks();
-                        // register recipes
+                        // 重载配方
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
@@ -214,43 +246,76 @@ public abstract class CraftEngine implements Plugin {
 
     protected void onPluginEnable() {
         this.isInitializing = true;
+
+        // 注册网络相关的bukkit事件监听器
         this.networkManager.init();
-        this.templateManager = new TemplateManagerImpl();
-        this.globalVariableManager = new GlobalVariableManager();
-        this.itemBrowserManager = new ItemBrowserManagerImpl(this);
+        // 注册指令
         this.commandManager.registerDefaultFeatures();
-        // delay the reload so other plugins can register some custom parsers
+        // 注册物品相关的事件监听器
+        this.itemManager.delayedInit();
+        // 注册方块相关的事件监听器
+        this.blockManager.delayedInit();
+        // 注册容器相关的监听器
+        this.guiManager.delayedInit();
+        // 注册配方相关的监听器
+        this.recipeManager.delayedInit();
+        // 注册数据包状态的监听器
+        this.packManager.delayedInit();
+        // 注册聊天监听器
+        this.fontManager.delayedInit();
+        // 注册实体死亡监听器
+        this.vanillaLootManager.delayedInit();
+        // 注册脱离坐骑监听器
+        this.seatManager.delayedInit();
+
+        // 延迟任务
+        this.beforeEnableTaskRegistry.executeTasks();
+
+        // 清理缓存，初始化一些东西，不需要读config和translation，因为boostrap阶段已经读取过了
+        this.reloadManagers();
+        // 加载packs
+        this.packManager.loadPacks();
+        this.packManager.updateCachedConfigFiles();
+        // 不要加载配方
+        this.packManager.loadResources((p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+        this.runDelayTasks(false);
+
+        // 延迟任务
+        this.afterEnableTaskRegistry.executeTasks();
+
+        // 延迟重载，以便其他依赖CraftEngine的插件能注册parser
         this.scheduler.sync().runDelayed(() -> {
-            this.preLoadTaskRegistry.executeTasks();
-            this.registerDefaultParsers();
-            // hook external item plugins
-            this.itemManager.delayedInit();
-            // hook worldedit
-            this.blockManager.delayedInit();
-            // register listeners and tasks
-            this.guiManager.delayedInit();
-            this.recipeManager.delayedInit();
-            this.packManager.delayedInit();
-            this.fontManager.delayedInit();
-            this.vanillaLootManager.delayedInit();
-            this.advancementManager.delayedInit();
-            this.seatManager.delayedInit();
+            // 初始化一些平台的任务
+            this.platformDelayedEnable();
+
+            // 延迟兼容性任务，比如物品库的支持。保证后续配方正确加载
             this.compatibilityManager.onDelayedEnable();
-            // reload the plugin
-            try {
-                this.reloadPlugin(Runnable::run, Runnable::run, true);
-            } catch (Exception e) {
-                this.logger.warn("Failed to reload plugin on enable stage", e);
-            }
-            // must be after reloading because this process loads furniture
+
+            // 单独加载配方
+            this.recipeManager.reload();
+            this.packManager.loadResources((p) -> p.loadingSequence() == LoadingSequence.RECIPE);
+            this.recipeManager.delayedLoad();
+
+            this.packManager.clearResourceConfigs();
+
+            // 重新发送tags，需要等待tags更新完成
+            this.networkManager.delayedLoad();
+
+            // 注册唱片机音乐
+            this.soundManager.runDelayedSyncTasks();
+            this.recipeManager.runDelayedSyncTasks();
+
+            // 必须要在完整重载后再初始化，否则会因为配置不存在，导致家具、弹射物等无法正确被加载
             this.projectileManager.delayedInit();
             this.worldManager.delayedInit();
             this.furnitureManager.delayedInit();
-            // set up some platform extra tasks
-            this.platformDelayedEnable();
+
+            // 完成初始化
             this.isInitializing = false;
-            this.postLoadTaskRegistry.executeTasks();
+            // 异步去缓存资源包相关文件
             this.scheduler.executeAsync(() -> this.packManager.initCachedAssets());
+            // 正式完成重载
+            this.reloadEventDispatcher.accept(this);
         });
     }
 
@@ -490,13 +555,27 @@ public abstract class CraftEngine implements Plugin {
         return platform;
     }
 
+    /**
+     *
+     * This task registry allows you to schedule tasks to run before CraftEngine enable, without dealing with plugin dependencies.
+     * You must register these tasks during the onLoad phase; otherwise, they will not be executed.
+     *
+     * @return PluginTaskRegistry
+     */
     @ApiStatus.Experimental
-    public PluginTaskRegistry preLoadTaskRegistry() {
-        return preLoadTaskRegistry;
+    public PluginTaskRegistry beforeEnableTaskRegistry() {
+        return beforeEnableTaskRegistry;
     }
 
+    /**
+     *
+     * This task registry allows you to schedule tasks to run after CraftEngine enable, without dealing with plugin dependencies.
+     * You must register these tasks during the onLoad phase; otherwise, they will not be executed.
+     *
+     * @return PluginTaskRegistry
+     */
     @ApiStatus.Experimental
-    public PluginTaskRegistry postLoadTaskRegistry() {
-        return postLoadTaskRegistry;
+    public PluginTaskRegistry afterEnableTaskRegistry() {
+        return afterEnableTaskRegistry;
     }
 }
