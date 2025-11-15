@@ -11,15 +11,20 @@ import java.util.Set;
 public final class BlockStateProviderInjector {
 
     public static void init() throws ReflectiveOperationException {
-        Object registry = MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE;
-        CoreReflections.field$MappedRegistry$frozen.set(registry, false);
+        CoreReflections.field$MappedRegistry$frozen.set(MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, false);
 
-        Object rl1 = KeyUtils.toResourceLocation(Key.of("craftengine:simple_state_provider"));
-        Object type1 = FastNMS.INSTANCE.getCraftEngineCustomSimpleStateProviderType();
-        Object holder1 = CoreReflections.method$Registry$registerForHolder.invoke(null, registry, rl1, type1);
-        CoreReflections.method$Holder$Reference$bindValue.invoke(holder1, type1);
-        CoreReflections.field$Holder$Reference$tags.set(holder1, Set.of());
+        register(Key.of("craftengine:simple_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomSimpleStateProviderType());
+        register(Key.of("craftengine:weighted_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomWeightedStateProviderType());
+        register(Key.of("craftengine:rotated_block_provider"), FastNMS.INSTANCE.getCraftEngineCustomRotatedBlockProviderType());
+        register(Key.of("craftengine:randomized_int_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomRandomizedIntStateProviderType());
 
-        CoreReflections.field$MappedRegistry$frozen.set(registry, true);
+        CoreReflections.field$MappedRegistry$frozen.set(MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, true);
+    }
+
+    private static void register(Key id, Object type) throws ReflectiveOperationException {
+        Object resourceLocation = KeyUtils.toResourceLocation(id);
+        Object holder = CoreReflections.method$Registry$registerForHolder.invoke(null, MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, resourceLocation, type);
+        CoreReflections.method$Holder$Reference$bindValue.invoke(holder, type);
+        CoreReflections.field$Holder$Reference$tags.set(holder, Set.of());
     }
 }
