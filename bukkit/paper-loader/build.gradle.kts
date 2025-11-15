@@ -72,8 +72,11 @@ paper {
         register("LuckPerms") { required = false }
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
+
+        // AdvancedSlimePaper
         register("SlimeWorldPlugin") { required = false }
         register("SlimeWorldManager") { required = false }
+        register("ASPaperPlugin") { required = false }
 
         // external tag
         register("CustomNameplates") { required = false }
