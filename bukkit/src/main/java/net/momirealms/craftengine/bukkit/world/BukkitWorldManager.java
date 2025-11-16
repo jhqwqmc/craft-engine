@@ -92,7 +92,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     public void delayedInit() {
-        // load loaded chunks
+        // 此时大概率为空，暂且保留代码
         for (World world : Bukkit.getWorlds()) {
             BukkitWorld wrappedWorld = new BukkitWorld(world);
             try {
@@ -135,8 +135,29 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onWorldInit(WorldInitEvent event) {
+        World world = event.getWorld();
+        UUID uuid = world.getUID();
+        if (this.worlds.containsKey(uuid)) return;
+        CEWorld ceWorld = new BukkitCEWorld(new BukkitWorld(world), this.storageAdaptor);
+        this.worlds.put(uuid, ceWorld);
+        this.resetWorldArray();
+        this.injectChunkGenerator(ceWorld);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onWorldLoad(WorldLoadEvent event) {
-        this.loadWorld(new BukkitWorld(event.getWorld()));
+        World world = event.getWorld();
+        UUID uuid = world.getUID();
+        if (this.worlds.containsKey(uuid)) {
+            CEWorld ceWorld = this.worlds.get(uuid);
+            for (Chunk chunk : world.getLoadedChunks()) {
+                handleChunkLoad(ceWorld, chunk, true);
+            }
+            ceWorld.setTicking(true);
+        } else {
+            this.loadWorld(new BukkitWorld(world));
+        }
     }
 
     @Override

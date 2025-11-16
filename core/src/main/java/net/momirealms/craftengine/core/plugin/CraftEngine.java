@@ -267,6 +267,8 @@ public abstract class CraftEngine implements Plugin {
         this.vanillaLootManager.delayedInit();
         // 注册脱离坐骑监听器
         this.seatManager.delayedInit();
+        // 注册世界加载相关监听器
+        this.worldManager.delayedInit();
 
         // 延迟任务
         this.beforeEnableTaskRegistry.executeTasks();
@@ -315,9 +317,7 @@ public abstract class CraftEngine implements Plugin {
 
             // 必须要在完整重载后再初始化，否则会因为配置不存在，导致家具、弹射物等无法正确被加载
             this.projectileManager.delayedInit();
-            this.worldManager.delayedInit();
             this.furnitureManager.delayedInit();
-
             // 完成初始化
             this.isInitializing = false;
             // 异步去缓存资源包相关文件
