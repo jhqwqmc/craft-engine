@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.nio.file.Path;
@@ -26,10 +27,12 @@ public class CeilingBlockItemBehavior extends BlockItemBehavior {
 
     @Override
     public InteractionResult place(BlockPlaceContext context) {
-        if (context.getClickedFace().stepY() != -1) {
-            return InteractionResult.PASS;
+        for (Direction direction : context.getNearestLookingDirections()) {
+            if (direction.axis() != Direction.Axis.Y) continue;
+            if (direction == Direction.DOWN) break; // 如果最后只能放到地面就直接不放置
+            super.place(context);
         }
-        return super.place(context);
+        return InteractionResult.PASS;
     }
 
     public static class Factory implements ItemBehaviorFactory {
