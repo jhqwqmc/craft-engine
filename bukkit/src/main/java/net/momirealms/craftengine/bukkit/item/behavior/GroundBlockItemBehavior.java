@@ -13,10 +13,10 @@ import net.momirealms.craftengine.core.util.Key;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class CeilingBlockItemBehavior extends BlockItemBehavior {
+public class GroundBlockItemBehavior extends BlockItemBehavior {
     public static final Factory FACTORY = new Factory();
 
-    public CeilingBlockItemBehavior(Key ceilingBlockId) {
+    public GroundBlockItemBehavior(Key ceilingBlockId) {
         super(ceilingBlockId);
     }
 
@@ -27,7 +27,7 @@ public class CeilingBlockItemBehavior extends BlockItemBehavior {
 
     @Override
     public InteractionResult place(BlockPlaceContext context) {
-        if (context.getClickedFace() != Direction.DOWN) {
+        if (context.getClickedFace() != Direction.UP) {
             return InteractionResult.PASS;
         }
         return super.place(context);
@@ -38,13 +38,13 @@ public class CeilingBlockItemBehavior extends BlockItemBehavior {
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
-                throw new LocalizedResourceConfigException("warning.config.item.behavior.ceiling_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for ceiling_block_item behavior"));
+                throw new LocalizedResourceConfigException("warning.config.item.behavior.ground_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for ground_block_item behavior"));
             }
             if (id instanceof Map<?, ?> map) {
                 addPendingSection(pack, path, node, key, map);
-                return new CeilingBlockItemBehavior(key);
+                return new GroundBlockItemBehavior(key);
             } else {
-                return new CeilingBlockItemBehavior(Key.of(id.toString()));
+                return new GroundBlockItemBehavior(Key.of(id.toString()));
             }
         }
     }
