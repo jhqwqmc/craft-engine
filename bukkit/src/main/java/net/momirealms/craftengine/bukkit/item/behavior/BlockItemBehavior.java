@@ -81,7 +81,7 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         CustomBlock block = optionalBlock.get();
         BlockPos pos = context.getClickedPos();
         int maxY = context.getLevel().worldHeight().getMaxBuildHeight() - 1;
-        if (context.getClickedFace() == Direction.UP && pos.y() >= maxY) {
+        if (context.getClickedFace() == Direction.UP && pos.y() > maxY) {
             if (player != null) {
                 player.sendActionBar(Component.translatable("build.tooHigh").arguments(Component.text(maxY)).color(NamedTextColor.RED));
             }

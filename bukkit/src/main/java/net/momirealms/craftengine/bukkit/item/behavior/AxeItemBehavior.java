@@ -77,7 +77,7 @@ public class AxeItemBehavior extends ItemBehavior {
         }
 
         newState = newState.withProperties(behaviorOptional.get().filter(customState.propertiesNbt()));
-        BukkitExistingBlock clicked = (BukkitExistingBlock) context.getLevel().getBlockAt(context.getClickedPos());
+        BukkitExistingBlock clicked = (BukkitExistingBlock) context.getLevel().getBlock(context.getClickedPos());
         org.bukkit.entity.Player bukkitPlayer = null;
         if (player != null) {
             bukkitPlayer = ((org.bukkit.entity.Player) player.platformPlayer());

@@ -9,8 +9,6 @@ items:
           wings: flame_elytra
       data:
         item-name: <!i><#FF8C00><l10n:item.flame_elytra>
-      model:
-        template: default:model/simplified_elytra
-        arguments:
-          path: minecraft:item/custom/flame_elytra
-          broken_path: minecraft:item/custom/broken_flame_elytra
+      textures:
+        - minecraft:item/custom/flame_elytra
+        - minecraft:item/custom/flame_elytra_broken

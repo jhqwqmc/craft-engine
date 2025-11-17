@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,11 +81,11 @@ public class ConditionItemModel implements ItemModel {
         @Override
         public ItemModel create(Map<String, Object> arguments) {
             ConditionProperty property = ConditionProperties.fromMap(arguments);
-            ItemModel onTrue = ItemModels.fromObj(arguments.get("on-true"));
+            ItemModel onTrue = ItemModels.fromObj(ResourceConfigUtils.get(arguments, "on-true", "on_true"));
             if (onTrue == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.model.condition.missing_on_true");
             }
-            ItemModel onFalse = ItemModels.fromObj(arguments.get("on-false"));
+            ItemModel onFalse = ItemModels.fromObj(ResourceConfigUtils.get(arguments, "on-false", "on_false"));
             if (onFalse == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.model.condition.missing_on_false");
             }

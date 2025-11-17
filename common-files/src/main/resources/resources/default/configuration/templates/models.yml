@@ -1,0 +1,560 @@
+# blocks
+templates#models#block:
+  # template: default:model/cube_all
+  # arguments:
+  #   model: model_path
+  #   texture: texture_path
+  default:model/cube_all:
+    path: ${model}
+    generation:
+      parent: minecraft:block/cube_all
+      textures:
+        all: ${texture}
+  # template: default:model/simplified_cube_all
+  # arguments:
+  #   path: [model/texture]_path
+  default:model/simplified_cube_all:
+    path: ${path}
+    generation:
+      parent: minecraft:block/cube_all
+      textures:
+        all: ${path}
+  # template: default:model/cube_column
+  # arguments:
+  #   model: model_path
+  #   end_texture: end_texture_path
+  #   side_texture: side_texture_path
+  default:model/cube_column:
+    path: ${model}
+    generation:
+      parent: minecraft:block/cube_column
+      textures:
+        end: ${end_texture}
+        side: ${side_texture}
+  # template: default:model/cube
+  # arguments:
+  #   model: model_path
+  #   particle_texture: particle_texture_path
+  #   down_texture: down_texture_path
+  #   up_texture: up_texture_path
+  #   north_texture: north_texture_path
+  #   east_texture: east_texture_path
+  #   south_texture: south_texture_path
+  #   west_texture: west_texture_path
+  default:model/cube:
+    path: ${model}
+    generation:
+      parent: minecraft:block/cube_column
+      textures:
+        particle: ${particle_texture}
+        down: ${down_texture}
+        up: ${up_texture}
+        north: ${north_texture}
+        east: ${east_texture}
+        south: ${south_texture}
+        west: ${west_texture}
+
+# 2D items
+templates#models#2d:
+  # template: default:model/generated
+  # arguments:
+  #   model: model_path
+  #   texture: texture_path
+  default:model/generated:
+    type: minecraft:model
+    path: ${model}
+    generation:
+      parent: minecraft:item/generated
+      textures:
+        layer0: ${texture}
+  # template: default:model/simplified_generated
+  # arguments:
+  #   path: [model/texture]_path
+  default:model/simplified_generated:
+    type: minecraft:model
+    path: ${path}
+    generation:
+      parent: minecraft:item/generated
+      textures:
+        layer0: ${path}
+  # template: default:model/2_layer_generated
+  # arguments:
+  #   model: model_path
+  #   layer0: texture_path
+  #   layer1: texture_path
+  default:model/2_layer_generated:
+    type: minecraft:model
+    path: ${model}
+    generation:
+      parent: minecraft:item/generated
+      textures:
+        layer0: ${layer0}
+        layer1: ${layer1}
+  # template: default:model/handheld
+  # arguments:
+  #   model: model_path
+  #   texture: texture_path
+  default:model/handheld:
+    type: minecraft:model
+    path: ${model}
+    generation:
+      parent: minecraft:item/handheld
+      textures:
+        layer0: ${texture}
+  # template: default:model/simplified_handheld
+  # arguments:
+  #   path: [model/texture]_path
+  default:model/simplified_handheld:
+    type: minecraft:model
+    path: ${path}
+    generation:
+      parent: minecraft:item/handheld
+      textures:
+        layer0: ${path}
+  # template: default:model/elytra
+  # arguments:
+  #   model: model_path
+  #   broken_model: broken_model_path
+  #   texture: texture_path
+  #   broken_texture: broken_texture_path
+  default:model/elytra:
+    type: minecraft:condition
+    property: minecraft:broken
+    on-false:
+      path: ${model}
+      generation:
+        parent: minecraft:item/generated
+        textures:
+          layer0: ${texture}
+    on-true:
+      path: ${broken_model}
+      generation:
+        parent: minecraft:item/generated
+        textures:
+          layer0: ${broken_texture}
+  # template: default:model/simplified_elytra
+  # arguments:
+  #   path: [model/texture]_path
+  #   broken_path: broken_[model/texture]_path
+  default:model/simplified_elytra:
+    template: default:model/elytra
+    arguments:
+      model: ${path}
+      texture: ${path}
+      broken_model: ${broken_path}
+      broken_texture: ${broken_path}
+  # template: default:model/armor_trim
+  # arguments:
+  #   material: armor material type
+  #   part: slot type
+  #   texture: the texture path of the armor item
+  default:model/armor_trim:
+    type: minecraft:select
+    property: minecraft:trim_material
+    fallback:
+      type: minecraft:model
+      path: ${__NAMESPACE__}:item/${material}_${part}
+      generation:
+        parent: minecraft:item/generated
+        textures:
+          layer0: ${texture}
+    cases:
+      - when: minecraft:quartz
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_quartz_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_quartz
+      - when: minecraft:iron
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_iron_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_iron
+      - when: minecraft:netherite
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_netherite_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_netherite
+      - when: minecraft:redstone
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_redstone_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_redstone
+      - when: minecraft:copper
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_copper_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_copper
+      - when: minecraft:gold
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_gold_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_gold
+      - when: minecraft:emerald
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_emerald_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_emerald
+      - when: minecraft:diamond
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_diamond_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_diamond
+      - when: minecraft:lapis
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_lapis_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_lapis
+      - when: minecraft:amethyst
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_amethyst_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_amethyst
+      - when: minecraft:resin
+        model:
+          type: minecraft:model
+          path: ${__NAMESPACE__}:item/${material}_${part}_resin_trim
+          generation:
+            parent: minecraft:item/generated
+            textures:
+              layer0: ${texture}
+              layer1: minecraft:trims/items/${part}_trim_resin
+
+# shield
+templates#models#shield:
+  # template: default:model/shield_3d
+  # arguments:
+  #   model: shield_model_path
+  #   block_model: shield_block_model_path
+  default:model/shield_3d:
+    type: minecraft:condition
+    property: minecraft:using_item
+    on-false:
+      type: minecraft:model
+      path: ${model}
+    on-true:
+      type: minecraft:model
+      path: ${block_model}
+
+# fishing rods
+templates#models#fishing_rod:
+  # template: default:model/fishing_rod_3d
+  # arguments:
+  #   model: rod_model_path
+  #   cast_model: rod_cast_model_path
+  default:model/fishing_rod_3d:
+    type: minecraft:condition
+    property: minecraft:fishing_rod/cast
+    on-false:
+      type: minecraft:model
+      path: ${model}
+    on-true:
+      type: minecraft:model
+      path: ${cast_model}
+  # template: default:model/fishing_rod_2d
+  # arguments:
+  #   model: rod_model_path
+  #   cast_model: rod_cast_model_path
+  #   texture: rod_texture_path
+  #   cast_texture: rod_cast_texture_path
+  default:model/fishing_rod_2d:
+    type: minecraft:condition
+    property: minecraft:fishing_rod/cast
+    on-false:
+      type: minecraft:model
+      path: ${model}
+      generation:
+        parent: minecraft:item/fishing_rod
+        textures:
+          layer0: ${texture}
+    on-true:
+      type: minecraft:model
+      path: ${cast_model}
+      generation:
+        parent: minecraft:item/fishing_rod
+        textures:
+          layer0: ${cast_texture}
+  # template: default:model/simplified_fishing_rod_2d
+  # arguments:
+  #   path: rod_[model/texture]_path
+  #   cast_path: rod_cast_[model/texture]_path
+  default:model/simplified_fishing_rod_2d:
+    template: default:model/fishing_rod_2d
+    arguments:
+      texture: ${path}
+      model: ${path}
+      cast_texture: ${cast_path}
+      cast_model: ${cast_path}
+
+# bows
+templates#models#bow:
+  # template: default:model/bow_3d
+  # arguments:
+  #   model: bow_model_path
+  #   pulling_0_model: bow_pulling_0_model_path
+  #   pulling_1_model: bow_pulling_1_model_path
+  #   pulling_2_model: bow_pulling_2_model_path
+  default:model/bow_3d:
+    type: minecraft:condition
+    property: minecraft:using_item
+    on-false:
+      type: minecraft:model
+      path: ${model}
+    on-true:
+      type: minecraft:range_dispatch
+      property: minecraft:use_duration
+      scale: 0.05
+      entries:
+        - model:
+            type: minecraft:model
+            path: ${pulling_1_model}
+          threshold: 0.65
+        - model:
+            type: minecraft:model
+            path: ${pulling_2_model}
+          threshold: 0.9
+      fallback:
+        type: minecraft:model
+        path: ${pulling_0_model}
+  # template: default:model/bow_2d
+  # arguments:
+  #   model: bow_model_path
+  #   pulling_0_model: bow_pulling_0_model_path
+  #   pulling_1_model: bow_pulling_1_model_path
+  #   pulling_2_model: bow_pulling_2_model_path
+  #   texture: bow_texture_path
+  #   pulling_0_texture: bow_pulling_0_texture_path
+  #   pulling_1_texture: bow_pulling_1_texture_path
+  #   pulling_2_texture: bow_pulling_2_texture_path
+  default:model/bow_2d:
+    type: minecraft:condition
+    property: minecraft:using_item
+    on-false:
+      type: minecraft:model
+      path: ${model}
+      generation:
+        parent: minecraft:item/bow
+        textures:
+          layer0: ${texture}
+    on-true:
+      type: minecraft:range_dispatch
+      property: minecraft:use_duration
+      scale: 0.05
+      entries:
+        - model:
+            type: minecraft:model
+            path: ${pulling_1_model}
+            generation:
+              parent: minecraft:item/bow_pulling_1
+              textures:
+                layer0: ${pulling_1_texture}
+          threshold: 0.65
+        - model:
+            type: minecraft:model
+            path: ${pulling_2_model}
+            generation:
+              parent: minecraft:item/bow_pulling_2
+              textures:
+                layer0: ${pulling_2_texture}
+          threshold: 0.9
+      fallback:
+        type: minecraft:model
+        path: ${pulling_0_model}
+        generation:
+          parent: minecraft:item/bow_pulling_0
+          textures:
+            layer0: ${pulling_0_texture}
+  # template: default:model/simplified_bow_2d
+  # arguments:
+  #   path: bow_[model/texture]_path
+  #   pulling_0_path: bow_pulling_0_[model/texture]_path
+  #   pulling_1_path: bow_pulling_1_[model/texture]_path
+  #   pulling_2_path: bow_pulling_2_[model/texture]_path
+  default:model/simplified_bow_2d:
+    template: default:model/bow_2d
+    arguments:
+      model: ${path}
+      pulling_0_model: ${pulling_0_path}
+      pulling_1_model: ${pulling_1_path}
+      pulling_2_model: ${pulling_2_path}
+      texture: ${path}
+      pulling_0_texture: ${pulling_0_path}
+      pulling_1_texture: ${pulling_1_path}
+      pulling_2_texture: ${pulling_2_path}
+
+# crossbows
+templates#models#crossbow:
+  # template: default:model/crossbow_3d
+  # arguments:
+  #   model: crossbow_model_path
+  #   arrow_model: crossbow_arrow_model_path
+  #   firework_model: crossbow_firework_model_path
+  #   pulling_0_model: crossbow_pulling_0_model_path
+  #   pulling_1_model: crossbow_pulling_1_model_path
+  #   pulling_2_model: crossbow_pulling_2_model_path
+  default:model/crossbow_3d:
+    type: minecraft:condition
+    property: minecraft:using_item
+    on-false:
+      type: minecraft:select
+      property: minecraft:charge_type
+      cases:
+        - when: arrow
+          model:
+            type: minecraft:model
+            path: ${arrow_model}
+        - when: rocket
+          model:
+            type: minecraft:model
+            path: ${firework_model}
+      fallback:
+        type: minecraft:model
+        path: ${model}
+    on-true:
+      type: minecraft:range_dispatch
+      property: minecraft:crossbow/pull
+      entries:
+        - model:
+            type: minecraft:model
+            path: ${pulling_1_model}
+          threshold: 0.58
+        - model:
+            type: minecraft:model
+            path: ${pulling_2_model}
+          threshold: 1.0
+      fallback:
+        type: minecraft:model
+        path: ${pulling_0_model}
+  # template: default:model/crossbow_2d
+  # arguments:
+  #   model: crossbow_model_path
+  #   texture: crossbow_texture_path
+  #   arrow_model: crossbow_arrow_model_path
+  #   arrow_texture: crossbow_arrow_texture_path
+  #   firework_model: crossbow_firework_model_path
+  #   firework_texture: crossbow_firework_texture_path
+  #   pulling_0_model: crossbow_pulling_0_model_path
+  #   pulling_0_texture: crossbow_pulling_0_texture_path
+  #   pulling_1_model: crossbow_pulling_1_model_path
+  #   pulling_1_texture: crossbow_pulling_1_texture_path
+  #   pulling_2_model: crossbow_pulling_2_model_path
+  #   pulling_2_texture: crossbow_pulling_2_texture_path
+  default:model/crossbow_2d:
+    type: minecraft:condition
+    property: minecraft:using_item
+    on-false:
+      type: minecraft:select
+      property: minecraft:charge_type
+      cases:
+        - when: arrow
+          model:
+            type: minecraft:model
+            path: ${arrow_model}
+            generation:
+              parent: minecraft:item/crossbow_arrow
+              textures:
+                layer0: ${arrow_texture}
+        - when: rocket
+          model:
+            type: minecraft:model
+            path: ${firework_model}
+            generation:
+              parent: minecraft:item/crossbow_firework
+              textures:
+                layer0: ${firework_texture}
+      fallback:
+        type: minecraft:model
+        path: ${model}
+        generation:
+          parent: minecraft:item/crossbow
+          textures:
+            layer0: ${texture}
+    on-true:
+      type: minecraft:range_dispatch
+      property: minecraft:crossbow/pull
+      entries:
+        - model:
+            type: minecraft:model
+            path: ${pulling_1_model}
+            generation:
+              parent: minecraft:item/crossbow_pulling_1
+              textures:
+                layer0: ${pulling_1_texture}
+          threshold: 0.58
+        - model:
+            type: minecraft:model
+            path: ${pulling_2_model}
+            generation:
+              parent: minecraft:item/crossbow_pulling_2
+              textures:
+                layer0: ${pulling_2_texture}
+          threshold: 1.0
+      fallback:
+        type: minecraft:model
+        path: ${pulling_0_model}
+        generation:
+          parent: minecraft:item/crossbow_pulling_0
+          textures:
+            layer0: ${pulling_0_texture}
+  # template: default:model/simplified_crossbow_2d
+  # arguments:
+  #   path: crossbow_[model/texture]_path
+  #   arrow_path: crossbow_arrow_[model/texture]_path
+  #   firework_path: crossbow_firework_[model/texture]_path
+  #   pulling_0_path: crossbow_pulling_0_[model/texture]_path
+  #   pulling_1_path: crossbow_pulling_1_[model/texture]_path
+  #   pulling_2_path: crossbow_pulling_2_[model/texture]_path
+  default:model/simplified_crossbow_2d:
+    template: default:model/crossbow_2d
+    arguments:
+      model: ${path}
+      texture: ${path}
+      arrow_model: ${arrow_path}
+      arrow_texture: ${arrow_path}
+      firework_model: ${firework_path}
+      firework_texture: ${firework_path}
+      pulling_0_model: ${pulling_0_path}
+      pulling_0_texture: ${pulling_0_path}
+      pulling_1_model: ${pulling_1_path}
+      pulling_1_texture: ${pulling_1_path}
+      pulling_2_model: ${pulling_2_path}
+      pulling_2_texture: ${pulling_2_path}

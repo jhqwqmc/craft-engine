@@ -20,6 +20,7 @@ import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenera
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.model.select.ChargeTypeSelectProperty;
 import net.momirealms.craftengine.core.pack.model.select.TrimMaterialSelectProperty;
+import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
@@ -229,6 +230,13 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     @Override
     public List<UniqueKey> customItemIdsByTag(Key tag) {
         return Collections.unmodifiableList(this.customItemTags.getOrDefault(tag, List.of()));
+    }
+
+    @Override
+    public Collection<Key> itemTags() {
+        Set<Key> tags = new HashSet<>(VANILLA_ITEM_TAGS.keySet());
+        tags.addAll(this.customItemTags.keySet());
+        return tags;
     }
 
     @Override
@@ -477,7 +485,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 if (throwable != null) {
                     // 检测custom model data 冲突
                     if (throwable instanceof IdAllocator.IdConflictException exception) {
-                        if (section.containsKey("model") || section.containsKey("legacy-model")) {
+                        if (section.containsKey("model") || section.containsKey("models") || section.containsKey("texture") || section.containsKey("textures") || section.containsKey("legacy-model")) {
                             throw new LocalizedResourceConfigException("warning.config.item.custom_model_data.conflict", String.valueOf(exception.id()), exception.previousOwner());
                         }
                         customModelData = exception.id();
@@ -518,23 +526,68 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 CustomItem.Builder<I> itemBuilder = createPlatformItemBuilder(uniqueId, material, clientBoundMaterial);
 
-                // 模型配置区域，如果这里被配置了，那么用户必须要配置custom-model-data或item-model
-                // model可以是一个string也可以是一个区域
-                Object modelSection = section.get("model");
-                Map<String, Object> legacyModelSection = MiscUtils.castToMap(section.get("legacy-model"), true);
-                boolean hasModelSection = modelSection != null || legacyModelSection != null;
-
-                if (customModelData > 0 && (hasModelSection || forceCustomModelData)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new CustomModelDataModifier<>(customModelData));
-                    else itemBuilder.dataModifier(new CustomModelDataModifier<>(customModelData));
-                }
-                if (itemModel != null && (hasModelSection || forceItemModel)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new ItemModelModifier<>(itemModel));
-                    else itemBuilder.dataModifier(new ItemModelModifier<>(itemModel));
-                }
 
                 // 对于不重要的配置，可以仅警告，不返回
                 ExceptionCollector<LocalizedResourceConfigException> collector = new ExceptionCollector<>();
+
+                // 模型配置区域，如果这里被配置了，那么用户可以配置custom-model-data或item-model
+                // model可以是一个string也可以是一个区域
+                Object modelSection = ResourceConfigUtils.get(section, "model", "models");
+                Map<String, Object> legacyModelSection = MiscUtils.castToMap(section.get("legacy-model"), true);
+                // model可以是一个map，也可以是一个string或list
+                boolean hasModelSection = modelSection instanceof Map<?,?> || legacyModelSection != null;
+                if (!hasModelSection) {
+                    Object texture = ResourceConfigUtils.get(section, "texture", "textures");
+                    // 如果使用的是textures，那么model指的是
+                    if (texture != null) {
+                        // 获取textures列表
+                        List<String> textures = texture instanceof List<?> ? MiscUtils.getAsStringList(texture) : List.of(texture.toString());
+                        if (!textures.isEmpty()) {
+                            // 获取可选的模型列表，此时的model不可能是map了
+                            List<String> modelPath = modelSection != null ? MiscUtils.getAsStringList(modelSection) : List.of();
+                            // 根据父item model选择处理方案
+                            Key templateModel = itemModel != null && AbstractPackManager.PRESET_MODERN_MODELS_ITEM.containsKey(itemModel) ? itemModel : clientBoundMaterial;
+                            SimplifiedModelReader simplifiedModelReader = AbstractPackManager.SIMPLIFIED_MODEL_READERS.get(templateModel);
+                            if (simplifiedModelReader != null) {
+                                try {
+                                    modelSection = simplifiedModelReader.convert(textures, modelPath, id);
+                                    if (modelSection != null) {
+                                        hasModelSection = true;
+                                    }
+                                } catch (LocalizedResourceConfigException e) {
+                                    collector.add(e);
+                                }
+                            }
+                        }
+                    }
+                    // 如果没有配贴图，且model为string或list，直接生成相应类型的模型
+                    else if (modelSection != null) {
+                        List<String> models = modelSection instanceof List<?> ? MiscUtils.getAsStringList(modelSection) : List.of(modelSection.toString());
+                        if (!models.isEmpty()) {
+                            Key templateModel = itemModel != null && AbstractPackManager.PRESET_MODERN_MODELS_ITEM.containsKey(itemModel) ? itemModel : clientBoundMaterial;
+                            SimplifiedModelReader simplifiedModelReader = AbstractPackManager.SIMPLIFIED_MODEL_READERS.get(templateModel);
+                            if (simplifiedModelReader != null) {
+                                try {
+                                    modelSection = simplifiedModelReader.convert(models);
+                                    if (modelSection != null) {
+                                        hasModelSection = true;
+                                    }
+                                } catch (LocalizedResourceConfigException e) {
+                                    collector.add(e);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (customModelData > 0 && (hasModelSection || forceCustomModelData)) {
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataModifier<>(customModelData));
+                    else itemBuilder.dataModifier(new CustomModelDataModifier<>(customModelData));
+                }
+                if (itemModel != null && (hasModelSection || forceItemModel)) {
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelModifier<>(itemModel));
+                    else itemBuilder.dataModifier(new ItemModelModifier<>(itemModel));
+                }
 
                 // 应用物品数据
                 try {
@@ -559,7 +612,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
                 try {
-                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
+                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                     eventTriggerListMap = Map.of();

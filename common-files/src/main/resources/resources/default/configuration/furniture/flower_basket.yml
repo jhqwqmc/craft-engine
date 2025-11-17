@@ -3,28 +3,19 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.flower_basket>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/flower_basket_2d
+    texture: minecraft:item/custom/flower_basket_2d
     behavior:
       type: furniture_item
       furniture: default:flower_basket
   default:flower_basket_ground:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/flower_basket_ground
+    model: minecraft:item/custom/flower_basket_ground
   default:flower_basket_wall:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/flower_basket_wall
+    model: minecraft:item/custom/flower_basket_wall
   default:flower_basket_ceiling:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/flower_basket_ceiling
+    model: minecraft:item/custom/flower_basket_ceiling
 furniture:
   default:flower_basket:
     settings:

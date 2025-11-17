@@ -47,6 +47,7 @@ public class Config {
     protected boolean metrics;
     protected boolean filterConfigurationPhaseDisconnect;
     protected Locale forcedLocale;
+    protected boolean delayConfigurationLoad;
 
     protected boolean debug$common;
     protected boolean debug$packet;
@@ -175,6 +176,7 @@ public class Config {
     protected boolean network$intercept_packets$set_score;
     protected boolean network$intercept_packets$item;
     protected boolean network$intercept_packets$advancement;
+    protected boolean network$intercept_packets$player_chat;
     protected boolean network$disable_item_operations;
 
     protected boolean item$client_bound_model;
@@ -287,6 +289,7 @@ public class Config {
     public void loadFullSettings() {
         YamlDocument config = settings();
         forcedLocale = TranslationManager.parseLocale(config.getString("forced-locale", ""));
+        delayConfigurationLoad = config.getBoolean("delay-configuration-load", false);
 
         // basics
         metrics = config.getBoolean("metrics", false);
@@ -546,6 +549,7 @@ public class Config {
         network$intercept_packets$set_score = config.getBoolean("network.intercept-packets.set-score", true);
         network$intercept_packets$item = config.getBoolean("network.intercept-packets.item", true);
         network$intercept_packets$advancement = config.getBoolean("network.intercept-packets.advancement", true);
+        network$intercept_packets$player_chat = config.getBoolean("network.intercept-packets.player-chat", true);
 
         // emoji
         emoji$contexts$chat = config.getBoolean("emoji.contexts.chat", true);
@@ -573,6 +577,10 @@ public class Config {
 
     public static String configVersion() {
         return instance.configVersion;
+    }
+
+    public static boolean delayConfigurationLoad() {
+        return instance.delayConfigurationLoad;
     }
 
     public static boolean debugCommon() {
@@ -978,6 +986,10 @@ public class Config {
 
     public static boolean interceptAdvancement() {
         return instance.network$intercept_packets$advancement;
+    }
+
+    public static boolean interceptPlayerChat() {
+        return instance.network$intercept_packets$player_chat;
     }
 
     public static boolean predictBreaking() {

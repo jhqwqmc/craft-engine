@@ -1,10 +1,7 @@
 items:
   default:magma_fruit:
     material: carrot
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/magma_fruit
+    texture: minecraft:item/custom/magma_fruit
     data:
       item-name: <!i><white><l10n:item.magma_fruit>
       $$>=1.20.5:

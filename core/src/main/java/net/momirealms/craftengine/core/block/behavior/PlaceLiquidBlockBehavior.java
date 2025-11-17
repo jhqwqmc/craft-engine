@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.block.behavior.special;
+package net.momirealms.craftengine.core.block.behavior;
 
 import java.util.concurrent.Callable;
 

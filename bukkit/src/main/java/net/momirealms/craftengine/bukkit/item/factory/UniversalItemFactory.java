@@ -226,6 +226,34 @@ public class UniversalItemFactory extends BukkitItemFactory<LegacyItemWrapper> {
         return Optional.of(new Enchantment(key, level));
     }
 
+    @SuppressWarnings("DuplicatedCode")
+    @Override
+    protected Optional<List<Enchantment>> enchantments(LegacyItemWrapper item) {
+        ListTag enchantmentTag = (ListTag) item.getNBTTag("Enchantments");
+        if (enchantmentTag == null) return Optional.empty();
+        List<Enchantment> enchantments = new ArrayList<>();
+        for (Tag tag : enchantmentTag) {
+            if (tag instanceof CompoundTag enchantTag) {
+                enchantments.add(new Enchantment(Key.of(enchantTag.getString("id")), enchantTag.getInt("lvl")));
+            }
+        }
+        return Optional.of(enchantments);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @Override
+    protected Optional<List<Enchantment>> storedEnchantments(LegacyItemWrapper item) {
+        ListTag enchantmentTag = (ListTag) item.getNBTTag("StoredEnchantments");
+        if (enchantmentTag == null) return Optional.empty();
+        List<Enchantment> enchantments = new ArrayList<>();
+        for (Tag tag : enchantmentTag) {
+            if (tag instanceof CompoundTag enchantTag) {
+                enchantments.add(new Enchantment(Key.of(enchantTag.getString("id")), enchantTag.getInt("lvl")));
+            }
+        }
+        return Optional.of(enchantments);
+    }
+
     @Override
     protected void itemFlags(LegacyItemWrapper item, List<String> flags) {
         if (flags == null || flags.isEmpty()) {

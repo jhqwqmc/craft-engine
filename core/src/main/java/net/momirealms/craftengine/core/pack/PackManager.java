@@ -9,12 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public interface PackManager extends Manageable {
 
     ConfigParser parser();
 
-    void loadResources(boolean recipe);
+    void loadResources(Predicate<ConfigParser> predicate);
 
     void initCachedAssets();
 
@@ -36,6 +37,12 @@ public interface PackManager extends Manageable {
             unregisterConfigSectionParser(id);
         }
     }
+
+    void loadPacks();
+
+    void updateCachedConfigFiles();
+
+    void clearResourceConfigs();
 
     void generateResourcePack() throws IOException;
 

@@ -18,6 +18,8 @@ import java.lang.reflect.Modifier;
 public final class ProtectedFieldVisitor {
     private static FieldAccessor internalFieldAccessor;
 
+    private ProtectedFieldVisitor() {}
+
     public static void init() throws ReflectiveOperationException {
         ByteBuddy byteBuddy = new ByteBuddy(ClassFileVersion.JAVA_V17);
         // InternalFieldAccessor Interface

@@ -321,6 +321,16 @@ public class AbstractItem<W extends ItemWrapper<I>, I> implements Item<I> {
     }
 
     @Override
+    public Optional<List<Enchantment>> enchantments() {
+        return this.factory.enchantments(this.item);
+    }
+
+    @Override
+    public Optional<List<Enchantment>> storedEnchantments() {
+        return this.factory.storedEnchantments(this.item);
+    }
+
+    @Override
     public Item<I> setEnchantments(List<Enchantment> enchantments) {
         this.factory.enchantments(this.item, enchantments);
         return this;

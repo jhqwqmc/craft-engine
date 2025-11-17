@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.copper_coil>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/copper_coil
-      generation:
-        parent: minecraft:block/custom/copper_coil
+    model: minecraft:block/custom/copper_coil
     behavior:
       type: block_item
       block:
@@ -16,7 +12,6 @@ items:
         settings:
           template:
             - default:sound/metal
-            - default:pickaxe_power/level_1
           overrides:
             hardness: 3.0
             resistance: 4.5
@@ -27,6 +22,8 @@ items:
             map-color: 15
             tags:
               - minecraft:mineable/pickaxe
+            correct-tools:
+              template: default:pickaxe_power/level_1
         behavior:
           type: lamp_block
         states:

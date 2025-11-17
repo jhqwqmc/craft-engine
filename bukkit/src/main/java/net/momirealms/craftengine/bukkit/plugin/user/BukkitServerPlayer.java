@@ -104,6 +104,7 @@ public class BukkitServerPlayer extends Player {
     private boolean isDestroyingBlock;
     private boolean isDestroyingCustomBlock;
     private boolean swingHandAck;
+    private int lastSwingHandTick;
     private float miningProgress;
     // for client visual sync
     private int resentSoundTick;
@@ -131,6 +132,12 @@ public class BukkitServerPlayer extends Player {
     // selected client locale
     @Nullable
     private Locale selectedLocale;
+    // 存储客户端在发送停止破坏包前正在破坏的最后一个方块
+    private BlockPos lastStopMiningPos;
+    // 修复连续挖掘的标志位
+    private boolean isHackedBreak;
+    // 上一次停止挖掘包发出的时间
+    private int lastStopMiningTick;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -518,8 +525,33 @@ public class BukkitServerPlayer extends Player {
         if (this.gameTicks % 20 == 0) {
             this.updateGUI();
         }
-        if (this.isDestroyingBlock) {
-            this.tickBlockDestroy();
+        if (hasSwingHand()) {
+            if (this.isDestroyingBlock) {
+                this.tickBlockDestroy();
+            } else if (this.lastStopMiningPos != null && this.gameTicks - this.lastStopMiningTick <= 5) {
+                double range = getCachedInteractionRange();
+                RayTraceResult result = platformPlayer().rayTraceBlocks(range, FluidCollisionMode.NEVER);
+                if (result != null) {
+                    Block hitBlock = result.getHitBlock();
+                    if (hitBlock != null) {
+                        Location location = hitBlock.getLocation();
+                        BlockPos hitPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+                        if (hitPos.equals(this.lastStopMiningPos)) {
+                            Object blockState = BlockStateUtils.getBlockState(hitBlock);
+                            this.startMiningBlock(hitPos, blockState, BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null));
+                            this.lastStopMiningPos = null;
+                            this.lastStopMiningTick = 0;
+                            this.isHackedBreak = true;
+                        }
+                    }
+                }
+            }
+            this.swingHandAck = false;
+        } else {
+            if (this.isHackedBreak) {
+                this.abortMiningBlock();
+                this.isHackedBreak = false;
+            }
         }
         if (Config.predictBreaking() && !this.isDestroyingCustomBlock) {
             // if it's not destroying blocks, we do predict
@@ -607,6 +639,10 @@ public class BukkitServerPlayer extends Player {
     }
 
     public void startMiningBlock(BlockPos pos, Object state, @Nullable ImmutableBlockState immutableBlockState) {
+        if (this.isHackedBreak) {
+            this.isHackedBreak = false;
+            this.abortMiningBlock();
+        }
         // instant break
         boolean custom = immutableBlockState != null;
         if (custom && getDestroyProgress(state, pos) >= 1f) {
@@ -668,8 +704,11 @@ public class BukkitServerPlayer extends Player {
         }
     }
 
+    // 客户端觉得要停止破坏方块了
     @Override
     public void stopMiningBlock() {
+        this.lastStopMiningPos = this.destroyPos;
+        this.lastStopMiningTick = gameTicks();
         setClientSideCanBreakBlock(true);
         setIsDestroyingBlock(false, false);
     }
@@ -705,8 +744,6 @@ public class BukkitServerPlayer extends Player {
 
     private void tickBlockDestroy() {
         // if player swings hand is this tick
-        if (!this.swingHandAck) return;
-        this.swingHandAck = false;
         int currentTick = gameTicks();
         // optimize break speed, otherwise it would be too fast
         if (currentTick - this.lastSuccessfulBreak <= 5) return;
@@ -863,6 +900,11 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void onSwingHand() {
         this.swingHandAck = true;
+        this.lastSwingHandTick = gameTicks();
+    }
+
+    public boolean hasSwingHand() {
+        return this.swingHandAck && this.lastSwingHandTick + 2 > gameTicks();
     }
 
     @Override

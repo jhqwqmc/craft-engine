@@ -86,7 +86,7 @@ public class GrassBlockBehavior extends BukkitBlockBehavior {
         if (ItemUtils.isEmpty(item) || !item.vanillaId().equals(ItemKeys.BONE_MEAL) || context.getPlayer().isAdventureMode())
             return InteractionResult.PASS;
         BlockPos pos = context.getClickedPos();
-        BukkitExistingBlock upper = (BukkitExistingBlock) context.getLevel().getBlockAt(pos.x(), pos.y() + 1, pos.z());
+        BukkitExistingBlock upper = (BukkitExistingBlock) context.getLevel().getBlock(pos.x(), pos.y() + 1, pos.z());
         Block block = upper.block();
         if (!block.isEmpty())
             return InteractionResult.PASS;

@@ -4,11 +4,13 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.FallOnBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.PlaceLiquidBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
+import net.momirealms.craftengine.core.world.BlockAccessor;
+import net.momirealms.craftengine.core.world.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -118,7 +120,6 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
         }
         return previous;
     }
-
 
     @Override
     public Object getContainer(Object thisBlock, Object[] args) throws Exception {
@@ -248,13 +249,6 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     public void onExplosionHit(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         for (AbstractBlockBehavior behavior : this.behaviors) {
             behavior.onExplosionHit(thisBlock, args, superMethod);
-        }
-    }
-
-    @Override
-    public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
-        for (AbstractBlockBehavior behavior : this.behaviors) {
-            behavior.setPlacedBy(context, state);
         }
     }
 
@@ -398,5 +392,32 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
         for (AbstractBlockBehavior behavior : this.behaviors) {
             behavior.onProjectileHit(thisBlock, args, superMethod);
         }
+    }
+
+    @Override
+    public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            behavior.placeMultiState(thisBlock, args, superMethod);
+        }
+    }
+
+    @Override
+    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            if (!behavior.canPlaceMultiState(accessor, pos, state)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        for (AbstractBlockBehavior behavior : this.behaviors) {
+            if (behavior.hasMultiState(baseState)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

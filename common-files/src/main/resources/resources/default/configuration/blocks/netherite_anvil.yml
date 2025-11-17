@@ -1,13 +1,8 @@
 items:
   default:netherite_anvil:
-    material: nether_brick
     data:
       item-name: <!i><l10n:item.netherite_anvil>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/netherite_anvil
-      generation:
-        parent: minecraft:block/custom/netherite_anvil
+    model: minecraft:block/custom/netherite_anvil
     behavior:
       type: block_item
       block:
@@ -30,21 +25,19 @@ items:
               - type: expression
                 expression: '!<arg:player.is_sneaking>'
         settings:
-          template:
-            - default:pickaxe_power/level_4
-          overrides:
-            tags:
-              - minecraft:mineable/pickaxe
-            sounds:
-              break: minecraft:block.anvil.break
-              step: minecraft:block.anvil.step
-              place: minecraft:block.anvil.place
-              hit: minecraft:block.anvil.hit
-              fall: minecraft:block.anvil.fall
-            map-color: 29
-            hardness: 10.0
-            resistance: 1200
-            push-reaction: block
+          sounds:
+            break: minecraft:block.anvil.break
+            step: minecraft:block.anvil.step
+            place: minecraft:block.anvil.place
+            hit: minecraft:block.anvil.hit
+            fall: minecraft:block.anvil.fall
+          map-color: 29
+          hardness: 10.0
+          resistance: 1200
+          push-reaction: block
+          correct-tools:
+            template: default:pickaxe_power/level_4
+          tags: ["minecraft:mineable/pickaxe"]
         states:
           properties:
             facing_clockwise:

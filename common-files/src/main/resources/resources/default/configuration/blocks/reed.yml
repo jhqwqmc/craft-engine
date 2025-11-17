@@ -3,10 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.reed>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/reed
+    texture: minecraft:item/custom/reed
     behavior:
       type: liquid_collision_block_item
       block:

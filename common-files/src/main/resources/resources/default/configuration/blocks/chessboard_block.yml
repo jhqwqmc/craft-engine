@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.chessboard_block>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/chessboard_block
-      generation:
-        parent: minecraft:block/custom/chessboard_block
+    model: minecraft:block/custom/chessboard_block
     behavior:
       type: block_item
       block:

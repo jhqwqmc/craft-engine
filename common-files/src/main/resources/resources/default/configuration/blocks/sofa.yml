@@ -3,9 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.sofa>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/sleeper_sofa
+    model: minecraft:item/custom/sleeper_sofa
     behavior:
       type: block_item
       block:
@@ -44,9 +42,7 @@ items:
             item: default:sleeper_sofa
   default:sofa_inner:
     material: nether_brick
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/sofa_inner
+    model: minecraft:item/custom/sofa_inner
   default:sofa:
     material: nether_brick
     data:

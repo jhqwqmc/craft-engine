@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.plugin;
 
 public interface Manageable {
 
-    // on plugin enable
     default void init() {
     }
 

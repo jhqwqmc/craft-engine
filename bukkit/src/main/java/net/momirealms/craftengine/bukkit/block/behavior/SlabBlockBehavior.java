@@ -60,7 +60,7 @@ public class SlabBlockBehavior extends BukkitBlockBehavior {
     @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
         BlockPos clickedPos = context.getClickedPos();
-        ImmutableBlockState blockState = context.getLevel().getBlockAt(clickedPos).customBlockState();
+        ImmutableBlockState blockState = context.getLevel().getBlock(clickedPos).customBlockState();
         if (blockState != null && blockState.owner().value() == super.customBlock) {
             if (super.waterloggedProperty != null)
                 blockState = blockState.with(super.waterloggedProperty, false);

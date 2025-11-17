@@ -639,7 +639,6 @@ public final class CoreReflections {
     ), VersionHelper.isOrAbove1_21_5());
 
 
-
     public static final Method method$Registry$getId = requireNonNull(
             ReflectionUtils.getMethod(clazz$Registry, int.class, Object.class)
     );
@@ -4485,6 +4484,10 @@ public final class CoreReflections {
             ReflectionUtils.getDeclaredField(clazz$EnumProperty, VersionHelper.isOrAbove1_21_2() ? List.class : ImmutableSet.class, 0)
     );
 
+    public static final Method method$Block$setPlacedBy = requireNonNull(
+            ReflectionUtils.getMethod(clazz$Block, void.class, clazz$Level, clazz$BlockPos, clazz$BlockState, clazz$LivingEntity, clazz$ItemStack)
+    );
+
     public static final Class<?> clazz$ItemCost = MiscUtils.requireNonNullIf(
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "world.item.trading.ItemCost",
@@ -4547,5 +4550,26 @@ public final class CoreReflections {
 
     public static final Field field$ChunkMap$chunkGenerator = MiscUtils.requireNonNullIf(
             ReflectionUtils.getDeclaredField(clazz$ChunkMap, clazz$ChunkGenerator, 0), !VersionHelper.isOrAbove1_20_5()
+    );
+
+    public static final Class<?> clazz$BlockStateProvider = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProvider",
+                    "world.level.levelgen.feature.stateproviders.BlockStateProvider"
+            )
+    );
+
+    public static final Class<?> clazz$BlockStateProviderType = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProviders",
+                    "world.level.levelgen.feature.stateproviders.BlockStateProviderType"
+            )
+    );
+
+    public static final Class<?> clazz$Feature = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.levelgen.feature.WorldGenerator",
+                    "world.level.levelgen.feature.Feature"
+            )
     );
 }

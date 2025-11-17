@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.gunpowder_block>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/gunpowder_block
-      generation:
-        parent: minecraft:block/custom/gunpowder_block
+    model: minecraft:block/custom/gunpowder_block
     behavior:
       type: block_item
       block:
@@ -51,13 +47,14 @@ items:
         settings:
           template:
             - default:sound/stone
-            - default:pickaxe_power/level_1
             - default:settings/solid_1x1x1
           overrides:
             hardness: 1.8
             resistance: 1.8
             instrument: basedrum
             map-color: 45
+            correct-tools:
+              template: default:pickaxe_power/level_1
         state:
           auto-state: solid
           model:

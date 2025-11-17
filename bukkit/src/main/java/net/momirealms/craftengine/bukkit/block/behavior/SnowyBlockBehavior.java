@@ -1,0 +1,55 @@
+package net.momirealms.craftengine.bukkit.block.behavior;
+
+import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
+import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
+import net.momirealms.craftengine.core.block.BlockBehavior;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.properties.BooleanProperty;
+import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+
+import java.util.Map;
+import java.util.concurrent.Callable;
+
+public class SnowyBlockBehavior extends BukkitBlockBehavior {
+    public static final Factory FACTORY = new Factory();
+    private final BooleanProperty snowyProperty;
+
+    public SnowyBlockBehavior(CustomBlock customBlock, BooleanProperty snowyProperty) {
+        super(customBlock);
+        this.snowyProperty = snowyProperty;
+    }
+
+    @Override
+    public Object updateShape(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        if (args[updateShape$direction] != CoreReflections.instance$Direction$UP) return superMethod.call();
+        ImmutableBlockState state = BlockStateUtils.getOptionalCustomBlockState(args[0]).orElse(null);
+        if (state == null || state.isEmpty()) return superMethod.call();
+        ImmutableBlockState newState = state.with(this.snowyProperty, isSnowySetting(args[updateShape$neighborState]));
+        return newState.customBlockState().literalObject();
+    }
+
+    @Override
+    public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
+        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos().above()));
+        return state.with(this.snowyProperty, isSnowySetting(blockState));
+    }
+
+    private static boolean isSnowySetting(Object state) {
+        return FastNMS.INSTANCE.method$BlockStateBase$is(state, MTagKeys.Block$SNOW);
+    }
+
+    public static class Factory implements BlockBehaviorFactory {
+
+        @Override
+        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+            BooleanProperty snowyProperty = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("snowy"), "warning.config.block.behavior.snowy.missing_snowy");
+            return new SnowyBlockBehavior(block, snowyProperty);
+        }
+    }
+}

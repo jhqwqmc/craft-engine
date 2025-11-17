@@ -56,6 +56,7 @@ public class BukkitPackManager extends AbstractPackManager implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (Config.sendPackOnJoin() && !VersionHelper.isOrAbove1_20_2()) {
             Player player = BukkitAdaptors.adapt(event.getPlayer());
+            // 可能有假人
             if (player == null) return;
             this.sendResourcePack(player);
         }

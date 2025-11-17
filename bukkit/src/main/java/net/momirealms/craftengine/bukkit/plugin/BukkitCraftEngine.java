@@ -35,8 +35,6 @@ import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import net.momirealms.craftengine.core.plugin.dependency.Dependency;
-import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManagerImpl;
-import net.momirealms.craftengine.core.plugin.locale.TranslationManagerImpl;
 import net.momirealms.craftengine.core.plugin.logger.JavaPluginLogger;
 import net.momirealms.craftengine.core.plugin.logger.PluginLogger;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerAdapter;
@@ -56,7 +54,6 @@ import org.jspecify.annotations.Nullable;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -104,17 +101,13 @@ public class BukkitCraftEngine extends CraftEngine {
         this.javaPlugin = javaPlugin;
     }
 
-    protected void setUpConfigAndLocale() {
-        this.config = new Config(this);
-        this.config.updateConfigCache();
-        // 先读取语言后，再重载语言文件系统
-        this.config.loadForcedLocale();
-        this.translationManager = new TranslationManagerImpl(this);
-        this.translationManager.reload();
-        // 最后才加载完整的config配置
-        this.config.loadFullSettings();
+    @Override
+    public void setUpConfigAndLocale() {
+        super.setUpConfigAndLocale();
+        super.packManager = new BukkitPackManager(this);
     }
 
+    // 这个方法应该尽早被执行，最好是boostrap阶段
     public void injectRegistries() {
         if (super.blockManager != null) return;
         try {
@@ -129,13 +122,25 @@ public class BukkitCraftEngine extends CraftEngine {
         } catch (Exception e) {
             throw new InjectionException("Error injecting loot entries", e);
         }
+        try {
+            FeatureInjector.init();
+        } catch (Exception e) {
+            throw new InjectionException("Error injecting features", e);
+        }
+        try {
+            BlockStateProviderInjector.init();
+        } catch (Exception e) {
+            throw new InjectionException("Error injecting block state providers", e);
+        }
     }
 
     @Override
     public void onPluginLoad() {
+        // 普通bukkit插件会到这里才注册自定义方块
         if (super.blockManager == null) {
             this.injectRegistries();
         }
+        // 注入一些新的类型，但是并不需要太早
         try {
             WorldStorageInjector.init();
         } catch (Exception e) {
@@ -151,12 +156,44 @@ public class BukkitCraftEngine extends CraftEngine {
         } catch (Exception e) {
             throw new InjectionException("Error initializing ProtectedFieldVisitor", e);
         }
+        // 初始化一些注册表
         super.onPluginLoad();
-        super.networkManager = new BukkitNetworkManager(this);
-        super.blockManager.init();
-        super.itemManager = new BukkitItemManager(this);
-        this.successfullyLoaded = true;
+        BukkitBlockBehaviors.init();
+        BukkitItemBehaviors.init();
+        BukkitHitBoxTypes.init();
+        BukkitBlockEntityElementConfigs.init();
+        // 初始化 onload 阶段的兼容性
         super.compatibilityManager().onLoad();
+        // 创建网络管理器
+        super.networkManager = new BukkitNetworkManager(this);
+        // 初始化方块管理器，获取镜像注册表，初始化网络映射
+        super.blockManager.init();
+        // 初始化物品管理器
+        super.itemManager = new BukkitItemManager(this);
+        // 初始化配方管理器
+        super.recipeManager = new BukkitRecipeManager(this);
+        // 初始化GUI管理器
+        super.guiManager = new BukkitGuiManager(this);
+        // 初始化世界管理器
+        super.worldManager = new BukkitWorldManager(this);
+        // 初始化声音管理器
+        super.soundManager = new BukkitSoundManager(this);
+        // 初始化战利品管理器
+        super.vanillaLootManager = new BukkitVanillaLootManager(this);
+        // 初始化字体管理器
+        super.fontManager = new BukkitFontManager(this);
+        // 初始化进度管理器
+        super.advancementManager = new BukkitAdvancementManager(this);
+        // 初始化弹射物管理器
+        super.projectileManager = new BukkitProjectileManager(this);
+        // 初始化座椅管理器
+        super.seatManager = new BukkitSeatManager(this);
+        // 初始化家具管理器
+        super.furnitureManager = new BukkitFurnitureManager(this);
+        // 注册默认的parser
+        this.registerDefaultParsers();
+        // 完成加载
+        this.successfullyLoaded = true;
     }
 
     @Override
@@ -193,39 +230,16 @@ public class BukkitCraftEngine extends CraftEngine {
             Bukkit.getServer().shutdown();
             return;
         }
-        BukkitBlockBehaviors.init();
-        BukkitItemBehaviors.init();
-        BukkitHitBoxTypes.init();
-        BukkitBlockEntityElementConfigs.init();
-        super.packManager = new BukkitPackManager(this);
+        // 初始化指令发送者工厂
         super.senderFactory = new BukkitSenderFactory(this);
-        super.recipeManager = new BukkitRecipeManager(this);
+        // 初始化指令管理器
         super.commandManager = new BukkitCommandManager(this);
-        super.itemBrowserManager = new ItemBrowserManagerImpl(this);
-        super.guiManager = new BukkitGuiManager(this);
-        super.worldManager = new BukkitWorldManager(this);
-        super.soundManager = new BukkitSoundManager(this);
-        super.vanillaLootManager = new BukkitVanillaLootManager(this);
-        super.fontManager = new BukkitFontManager(this);
-        super.advancementManager = new BukkitAdvancementManager(this);
-        super.projectileManager = new BukkitProjectileManager(this);
-        super.furnitureManager = new BukkitFurnitureManager(this);
-        super.seatManager = new BukkitSeatManager(this);
-        super.onPluginEnable();
-        super.compatibilityManager().onEnable();
-
-        // todo 未来版本移除
-        Path legacyFile1 = this.dataFolderPath().resolve("additional-real-blocks.yml");
-        Path legacyFile2 = this.dataFolderPath().resolve("mappings.yml");
-        if (Files.exists(legacyFile1)) {
-            try {
-                Files.delete(legacyFile1);
-                Files.deleteIfExists(legacyFile2);
-                this.saveResource("resources/internal/configuration/mappings.yml");
-            } catch (IOException e) {
-                this.logger.warn("Failed to delete legacy files", e);
-            }
+        try {
+            super.compatibilityManager().onEnable();
+        } catch (Throwable t) {
+            this.logger.severe("Failed to enable compatibility manager", t);
         }
+        super.onPluginEnable();
     }
 
     @Override

@@ -42,7 +42,7 @@ public class CustomSmokingRecipe<T> extends CustomCookingRecipe<T> {
                     parseResult(arguments), arguments.containsKey("group") ? arguments.get("group").toString() : null, cookingRecipeCategory(arguments),
                     singleInputIngredient(arguments),
                     ResourceConfigUtils.getAsInt(arguments.getOrDefault("time", 80), "time"),
-                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("experience", 0.0f), "experience")
+                    ResourceConfigUtils.getAsFloat(ResourceConfigUtils.get(arguments, "exp", "experience"), "experience")
             );
         }
 

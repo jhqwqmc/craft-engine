@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.safe_block>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/safe_block
-      generation:
-        parent: minecraft:block/custom/safe_block
+    model: minecraft:block/custom/safe_block
     behavior:
       type: block_item
       block:

@@ -25,7 +25,7 @@ import net.momirealms.craftengine.core.block.BlockKeys;
 import net.momirealms.craftengine.core.block.BlockShape;
 import net.momirealms.craftengine.core.block.DelegatingBlock;
 import net.momirealms.craftengine.core.block.behavior.EmptyBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.special.FallOnBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.Key;
@@ -175,6 +175,9 @@ public final class BlockGenerator {
                 // onProjectileHit
                 .method(ElementMatchers.is(CoreReflections.method$BlockBehaviour$onProjectileHit))
                 .intercept(MethodDelegation.to(OnProjectileHitInterceptor.INSTANCE))
+                // setPlaceBy
+                .method(ElementMatchers.is(CoreReflections.method$Block$setPlacedBy))
+                .intercept(MethodDelegation.to(SetPlaceByInterceptor.INSTANCE))
                 ;
         // 1.21.5+
         if (CoreReflections.method$BlockBehaviour$affectNeighborsAfterRemoval != null) {
@@ -808,6 +811,20 @@ public final class BlockGenerator {
                 holder.value().onProjectileHit(thisObj, args, superMethod);
             } catch (Exception e) {
                 CraftEngine.instance().logger().severe("Failed to run onProjectileHit", e);
+            }
+        }
+    }
+
+    public static class SetPlaceByInterceptor {
+        public static final SetPlaceByInterceptor INSTANCE = new SetPlaceByInterceptor();
+
+        @RuntimeType
+        public void intercept(@This Object thisObj, @AllArguments Object[] args, @SuperCall Callable<Object> superMethod) {
+            ObjectHolder<BlockBehavior> holder = ((DelegatingBlock) thisObj).behaviorDelegate();
+            try {
+                holder.value().placeMultiState(thisObj, args, superMethod);
+            } catch (Exception e) {
+                CraftEngine.instance().logger().severe("Failed to run setPlaceBy", e);
             }
         }
     }

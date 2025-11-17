@@ -14,6 +14,8 @@ templates:
           slot: ${slot}
     model:
       template: default:model/armor_trim
+      arguments:
+        texture: minecraft:item/custom/topaz_${part}
 items:
   default:topaz_helmet:
     template:

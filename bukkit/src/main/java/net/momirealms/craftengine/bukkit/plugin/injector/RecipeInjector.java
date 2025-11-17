@@ -40,6 +40,8 @@ public final class RecipeInjector {
     private static Class<?> clazz$InjectedRepairItemRecipe;
     private static Class<?> clazz$InjectedFireworkStarFadeRecipe;
 
+    private RecipeInjector() {}
+
     public static void init() {
         ByteBuddy byteBuddy = new ByteBuddy(ClassFileVersion.JAVA_V17);
 

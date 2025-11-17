@@ -8,6 +8,9 @@ update-checker: true
 forced-locale: ''
 # Filter configuration phase player disconnection logs
 filter-configuration-phase-disconnect: false
+# This option delays CraftEngine's config reading until after all plugins start.
+# Don't disable this setting unless you need datapack-generated spawn chunks.
+delay-configuration-load: true
 
 resource-pack:
   # This option determines the location of the generated resource pack
@@ -99,7 +102,7 @@ resource-pack:
     fix-atlas: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:
-    enable: true
+    enable: false
     # .png
     texture:
       enable: true
@@ -403,6 +406,7 @@ network:
     text-display: true  # Modern Holograms
     item: true
     advancement: true
+    player-chat: true
 
 recipe:
   # Master switch for custom recipes

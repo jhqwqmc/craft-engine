@@ -148,6 +148,10 @@ public abstract class ItemFactory<W extends ItemWrapper<I>, I> {
 
     protected abstract void maxDamage(W item, Integer damage);
 
+    protected abstract Optional<List<Enchantment>> enchantments(W item);
+
+    protected abstract Optional<List<Enchantment>> storedEnchantments(W item);
+
     protected abstract void enchantments(W item, List<Enchantment> enchantments);
 
     protected abstract void storedEnchantments(W item, List<Enchantment> enchantments);

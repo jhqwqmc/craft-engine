@@ -43,9 +43,9 @@ public class UpdateBlockPropertyFunction<CTX extends Context> extends AbstractCo
             int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
             int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
             int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
-            ExistingBlock blockAt = world.getBlockAt(x, y, z);
+            ExistingBlock blockAt = world.getBlock(x, y, z);
             BlockStateWrapper wrapper = blockAt.blockState().withProperties(this.properties);
-            world.setBlockAt(x, y, z, wrapper, this.updateFlags.getInt(ctx));
+            world.setBlockState(x, y, z, wrapper, this.updateFlags.getInt(ctx));
         }
     }
 

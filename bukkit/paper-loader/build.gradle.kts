@@ -46,7 +46,7 @@ tasks.withType<JavaCompile> {
 }
 
 paper {
-    load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD
+    load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.STARTUP
     main = "net.momirealms.craftengine.bukkit.plugin.PaperCraftEnginePlugin"
     bootstrapper = "net.momirealms.craftengine.bukkit.plugin.PaperCraftEngineBootstrap"
     version = rootProject.properties["project_version"] as String
@@ -56,10 +56,7 @@ paper {
     contributors = listOf("https://github.com/Xiao-MoMi/craft-engine/graphs/contributors")
     foliaSupported = true
     serverDependencies {
-        register("PlaceholderAPI") {
-            required = false
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-        }
+        // WorldEdit
         register("WorldEdit") {
             required = false
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
@@ -69,13 +66,17 @@ paper {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             joinClasspath = false
         }
-        register("Skript") {
-            required = false
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-        }
+
+        register("PlaceholderAPI") { required = false }
+        register("Skript") { required = false }
         register("LuckPerms") { required = false }
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
+
+        // AdvancedSlimePaper
+        register("SlimeWorldPlugin") { required = false }
+        register("SlimeWorldManager") { required = false }
+        register("ASPaperPlugin") { required = false }
 
         // external tag
         register("CustomNameplates") { required = false }
@@ -143,7 +144,7 @@ tasks {
         manifest {
             attributes["paperweight-mappings-namespace"] = "mojang"
         }
-        archiveFileName = "${rootProject.name}-${rootProject.properties["project_version"]}-community-paper.jar"
+        archiveFileName = "${rootProject.name}-paper-plugin-${rootProject.properties["project_version"]}.jar"
         destinationDirectory.set(file("$rootDir/target"))
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")

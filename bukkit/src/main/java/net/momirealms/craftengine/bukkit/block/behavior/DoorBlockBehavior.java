@@ -169,9 +169,24 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior {
     }
 
     @Override
-    public void setPlacedBy(BlockPlaceContext context, ImmutableBlockState state) {
-        BlockPos pos = context.getClickedPos();
-        context.getLevel().setBlockAt(pos.x(), pos.y() + 1, pos.z(), state.with(this.halfProperty, DoubleBlockHalf.UPPER).customBlockState(), UpdateOption.UPDATE_ALL.flags());
+    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+        if (pos.y() >= accessor.worldHeight().getMaxBuildHeight() - 1) {
+            return false;
+        }
+        return accessor.getBlockState(pos.above()).isAir();
+    }
+
+    @Override
+    public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        Object blockState = args[2];
+        Object pos = args[1];
+        Optional<ImmutableBlockState> immutableBlockState = BlockStateUtils.getOptionalCustomBlockState(blockState);
+        immutableBlockState.ifPresent(state -> FastNMS.INSTANCE.method$LevelWriter$setBlock(args[0], LocationUtils.above(pos), state.with(this.halfProperty, DoubleBlockHalf.UPPER).customBlockState().literalObject(), UpdateOption.UPDATE_ALL.flags()));
+    }
+
+    @Override
+    public boolean hasMultiState(ImmutableBlockState baseState) {
+        return baseState.get(this.halfProperty) == DoubleBlockHalf.LOWER;
     }
 
     @Override
@@ -179,7 +194,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior {
         World world  = context.getLevel();
         Object level = world.serverWorld();
         BlockPos pos = context.getClickedPos();
-        if (pos.y() < context.getLevel().worldHeight().getMaxBuildHeight() && world.getBlockAt(pos.above()).canBeReplaced(context)) {
+        if (pos.y() < world.worldHeight().getMaxBuildHeight() - 1 && world.getBlock(pos.above()).canBeReplaced(context)) {
             boolean hasSignal = FastNMS.INSTANCE.method$SignalGetter$hasNeighborSignal(level, LocationUtils.toBlockPos(pos)) || FastNMS.INSTANCE.method$SignalGetter$hasNeighborSignal(level, LocationUtils.toBlockPos(pos.above()));
             return state.with(this.poweredProperty, hasSignal)
                     .with(this.facingProperty, context.getHorizontalDirection().toHorizontalDirection())

@@ -8,6 +8,4 @@ public abstract class AbstractAdvancementManager implements AdvancementManager {
     public AbstractAdvancementManager(CraftEngine plugin) {
         this.plugin = plugin;
     }
-
-
 }

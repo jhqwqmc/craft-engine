@@ -3,11 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.topaz_ore>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/topaz_ore
-      generation:
-        parent: minecraft:block/custom/topaz_ore
+    model: minecraft:block/custom/topaz_ore
     behavior:
       type: block_item
       block: default:topaz_ore
@@ -15,11 +11,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.deepslate_topaz_ore>
-    model:
-      type: minecraft:model
-      path: minecraft:item/custom/deepslate_topaz_ore
-      generation:
-        parent: minecraft:block/custom/deepslate_topaz_ore
+    model: minecraft:block/custom/deepslate_topaz_ore
     behavior:
       type: block_item
       block: default:deepslate_topaz_ore
@@ -32,10 +24,7 @@ items:
           percent: 0.25
     data:
       item-name: <!i><#FF8C00><l10n:item.topaz>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/topaz
+    texture: minecraft:item/custom/topaz
 blocks:
   default:topaz_ore:
     loot:
@@ -75,26 +64,42 @@ blocks:
           path: minecraft:block/custom/deepslate_topaz_ore
 recipes:
   default:topaz_from_smelting_topaz_ore:
-    template: default:recipe/smelting_ore
-    arguments:
-      exp: 1.0
-      ingredient: default:topaz_ore
-      result: default:topaz
+    type: smelting
+    experience: 1.0
+    category: misc
+    group: topaz
+    time: 200
+    ingredient: default:topaz_ore
+    result:
+      id: default:topaz
+      count: 1
   default:topaz_from_smelting_deepslate_topaz_ore:
-    template: default:recipe/smelting_ore
-    arguments:
-      exp: 1.0
-      ingredient: default:deepslate_topaz_ore
-      result: default:topaz
+    type: smelting
+    experience: 1.0
+    category: misc
+    group: topaz
+    time: 200
+    ingredient: default:deepslate_topaz_ore
+    result:
+      id: default:topaz
+      count: 1
   default:topaz_from_blasting_topaz_ore:
-    template: default:recipe/blasting_ore
-    arguments:
-      exp: 1.0
-      ingredient: default:topaz_ore
-      result: default:topaz
+    type: blasting
+    experience: 1.0
+    category: misc
+    group: topaz
+    time: 100
+    ingredient: default:topaz_ore
+    result:
+      id: default:topaz
+      count: 1
   default:topaz_from_blasting_deepslate_topaz_ore:
-    template: default:recipe/blasting_ore
-    arguments:
-      exp: 1.0
-      ingredient: default:deepslate_topaz_ore
-      result: default:topaz
+    type: blasting
+    experience: 1.0
+    category: misc
+    group: topaz
+    time: 100
+    ingredient: default:deepslate_topaz_ore
+    result:
+      id: default:topaz
+      count: 1

@@ -190,4 +190,9 @@ public class PacketIds1_20 implements PacketIds {
     public int serverboundCustomPayloadPacket() {
         return PlayPacketIdHelper.byClazz(NetworkReflections.clazz$ServerboundCustomPayloadPacket, PacketFlow.SERVERBOUND);
     }
+
+    @Override
+    public int clientboundPlayerChatPacket() {
+        return PlayPacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundPlayerChatPacket, PacketFlow.CLIENTBOUND);
+    }
 }

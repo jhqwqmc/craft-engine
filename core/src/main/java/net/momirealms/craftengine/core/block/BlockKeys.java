@@ -45,6 +45,10 @@ public final class BlockKeys {
     public static final Key CHISELED_BOOKSHELF = Key.of("minecraft:chiseled_bookshelf");
     public static final Key LECTERN = Key.of("minecraft:lectern");
     public static final Key FARMLAND = Key.of("minecraft:farmland");
+    public static final Key CAVE_VINES = Key.of("minecraft:cave_vines");
+    public static final Key WEEPING_VINES = Key.of("minecraft:weeping_vines");
+    public static final Key TWISTING_VINES = Key.of("minecraft:twisting_vines");
+    public static final Key KELP = Key.of("minecraft:kelp");
 
     public static final Key CHEST = Key.of("minecraft:chest");
     public static final Key BARREL = Key.of("minecraft:barrel");

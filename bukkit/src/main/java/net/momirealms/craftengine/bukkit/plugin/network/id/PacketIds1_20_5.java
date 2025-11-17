@@ -189,4 +189,9 @@ public class PacketIds1_20_5 implements PacketIds {
     public int serverboundCustomPayloadPacket() {
         return PlayPacketIdHelper.byName("minecraft:custom_payload", PacketFlow.SERVERBOUND);
     }
+
+    @Override
+    public int clientboundPlayerChatPacket() {
+        return PlayPacketIdHelper.byName("minecraft:player_chat", PacketFlow.CLIENTBOUND);
+    }
 }

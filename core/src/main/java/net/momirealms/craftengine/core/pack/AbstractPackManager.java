@@ -7,6 +7,7 @@ import com.google.common.jimfs.Jimfs;
 import com.google.gson.*;
 import net.momirealms.craftengine.core.font.BitmapImage;
 import net.momirealms.craftengine.core.font.Font;
+import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
@@ -22,6 +23,7 @@ import net.momirealms.craftengine.core.pack.model.RangeDispatchItemModel;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGenerator;
 import net.momirealms.craftengine.core.pack.model.rangedisptach.CustomModelDataRangeDispatchProperty;
+import net.momirealms.craftengine.core.pack.model.simplified.*;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -67,16 +69,28 @@ import static net.momirealms.craftengine.core.util.MiscUtils.castToMap;
 
 @SuppressWarnings("DuplicatedCode")
 public abstract class AbstractPackManager implements PackManager {
+    // 1.21.4+物品模型
     public static final Map<Key, JsonObject> PRESET_MODERN_MODELS_ITEM = new HashMap<>();
+    // 旧版本的物品模型
     public static final Map<Key, JsonObject> PRESET_LEGACY_MODELS_ITEM = new HashMap<>();
+    // 全版本的方块模型
     public static final Map<Key, JsonObject> PRESET_MODELS_BLOCK = new HashMap<>();
+    // 1.21.4+物品模型定义
     public static final Map<Key, ModernItemModel> PRESET_ITEMS = new HashMap<>();
+
+    // 原版资产id
     public static final Set<Key> VANILLA_TEXTURES = new HashSet<>();
     public static final Set<Key> VANILLA_MODELS = new HashSet<>();
     public static final Set<Key> VANILLA_SOUNDS = new HashSet<>();
+
+    // 简化的model读取器
+    public static final Map<Key, SimplifiedModelReader> SIMPLIFIED_MODEL_READERS = new HashMap<>();
+
     public static final String NEW_TRIM_MATERIAL = "custom";
+
     public static final Set<String> ALLOWED_VANILLA_EQUIPMENT = Set.of("chainmail", "diamond", "gold", "iron", "netherite");
     public static final Set<String> ALLOWED_MODEL_TAGS = Set.of("parent", "ambientocclusion", "display", "textures", "elements", "gui_light", "overrides");
+
     private static final byte[] EMPTY_1X1_IMAGE;
     private static final byte[] EMPTY_EQUIPMENT_IMAGE;
     private static final byte[] EMPTY_16X16_IMAGE;
@@ -179,6 +193,28 @@ public abstract class AbstractPackManager implements PackManager {
         }
         loadInternalList("internal/textures/processed.json", VANILLA_TEXTURES::add);
         loadInternalList("internal/sounds/processed.json", VANILLA_SOUNDS::add);
+
+        // 不是一个非常好的方案
+        for (Key item : PRESET_ITEMS.keySet()) {
+            JsonObject jsonObject = PRESET_MODERN_MODELS_ITEM.get(item);
+            if (jsonObject != null) {
+                JsonElement parent = jsonObject.get("parent");
+                if (parent instanceof JsonPrimitive primitive) {
+                    String parentModel = primitive.getAsString();
+                    if (parentModel.equals("minecraft:item/handheld")) {
+                        SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.HANDHELD);
+                        continue;
+                    }
+                }
+            }
+            SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.GENERATED);
+        }
+
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.FISHING_ROD, ConditionModelReader.FISHING_ROD);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.ELYTRA, ConditionModelReader.ELYTRA);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.SHIELD, ConditionModelReader.SHIELD);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.BOW, BowModelReader.INSTANCE);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.CROSSBOW, CrossbowModelReader.INSTANCE);
     }
 
     private void loadModernItemModel(String path, BiConsumer<Key, ModernItemModel> callback) {
@@ -265,9 +301,8 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public void loadResources(boolean recipe) {
-        this.loadPacks();
-        this.loadResourceConfigs(recipe ? (p) -> true : (p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+    public void loadResources(Predicate<ConfigParser> predicate) {
+        this.loadResourceConfigs(predicate);
     }
 
     @Override
@@ -326,7 +361,8 @@ public abstract class AbstractPackManager implements PackManager {
         return true;
     }
 
-    private void loadPacks() {
+    @Override
+    public void loadPacks() {
         Path resourcesFolder = this.plugin.dataFolderPath().resolve("resources");
         try {
             if (Files.notExists(resourcesFolder)) {
@@ -428,7 +464,12 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/pack.mcmeta");
         plugin.saveResource("resources/default/resourcepack/pack.png");
         // configs
-        plugin.saveResource("resources/default/configuration/templates.yml");
+        plugin.saveResource("resources/default/configuration/templates/block_settings.yml");
+        plugin.saveResource("resources/default/configuration/templates/block_states.yml");
+        plugin.saveResource("resources/default/configuration/templates/models.yml");
+        plugin.saveResource("resources/default/configuration/templates/loot_tables.yml");
+        plugin.saveResource("resources/default/configuration/templates/recipes.yml");
+        plugin.saveResource("resources/default/configuration/templates/tool_levels.yml");
         plugin.saveResource("resources/default/configuration/categories.yml");
         plugin.saveResource("resources/default/configuration/emoji.yml");
         plugin.saveResource("resources/default/configuration/translations.yml");
@@ -503,7 +544,7 @@ public abstract class AbstractPackManager implements PackManager {
             plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/topaz_" + item + ".png.mcmeta");
         }
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flame_elytra.png");
-        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/broken_flame_elytra.png");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flame_elytra_broken.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/entity/equipment/wings/flame_elytra.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/cap.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/cap.json");
@@ -580,7 +621,8 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/block/custom/magma_plant_stage_3.json");
     }
 
-    private void updateCachedConfigFiles() {
+    @Override
+    public void updateCachedConfigFiles() {
         Map<Path, CachedConfigFile> previousFiles = this.cachedConfigFiles;
         this.cachedConfigFiles = new HashMap<>(64, 0.5f);
         for (Pack pack : loadedPacks()) {
@@ -643,22 +685,23 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void loadResourceConfigs(Predicate<ConfigParser> predicate) {
-        long o1 = System.nanoTime();
-        this.updateCachedConfigFiles();
-        long o2 = System.nanoTime();
-        this.plugin.logger().info("Loaded packs. Took " + String.format("%.2f", ((o2 - o1) / 1_000_000.0)) + " ms");
         for (ConfigParser parser : this.sortedParsers) {
             if (!predicate.test(parser)) {
-                parser.clear();
                 continue;
             }
             long t1 = System.nanoTime();
             parser.preProcess();
             parser.loadAll();
             parser.postProcess();
-            parser.clear();
             long t2 = System.nanoTime();
             this.plugin.logger().info("Loaded " + parser.sectionId()[0] + " in " + String.format("%.2f", ((t2 - t1) / 1_000_000.0)) + " ms");
+        }
+    }
+
+    @Override
+    public void clearResourceConfigs() {
+        for (ConfigParser parser : this.sortedParsers) {
+            parser.clear();
         }
     }
 
@@ -1570,7 +1613,8 @@ public abstract class AbstractPackManager implements PackManager {
             JsonObject textures = sourceModelJson.get("textures").getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : textures.entrySet()) {
                 String value = entry.getValue().getAsString();
-                if (value.charAt(0) == '#') continue;
+                // fixme 应该报错，这个影响资源包加载
+                if (value.isEmpty() || value.charAt(0) == '#') continue;
                 Key textureResourceLocation = Key.from(value);
                 imageToModels.put(textureResourceLocation, sourceModelLocation);
             }

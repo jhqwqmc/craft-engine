@@ -75,7 +75,6 @@ public class BukkitFurniture implements Furniture {
             this.hasExternalModel = false;
         }
 
-
         Quaternionf conjugated = QuaternionUtils.toQuaternionf(0, Math.toRadians(180 - this.location.getYaw()), 0).conjugate();
         List<Object> packets = new ArrayList<>();
         List<Object> minimizedPackets = new ArrayList<>();

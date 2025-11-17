@@ -3,10 +3,7 @@ items:
     material: nether_brick
     data:
       item-name: <!i><l10n:item.ender_pearl_flower_seeds>
-    model:
-      template: default:model/simplified_generated
-      arguments:
-        path: minecraft:item/custom/ender_pearl_flower_seeds
+    texture: minecraft:item/custom/ender_pearl_flower_seeds
     behavior:
       type: block_item
       block: default:ender_pearl_flower

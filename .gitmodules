@@ -1,3 +1,6 @@
 [submodule "wiki"]
 	path = wiki
 	url = https://github.com/Xiao-MoMi/craft-engine-wiki.git
+[submodule "client-mod"]
+	path = client-mod
+	url = https://github.com/Xiao-MoMi/craft-engine-client-mod.git
