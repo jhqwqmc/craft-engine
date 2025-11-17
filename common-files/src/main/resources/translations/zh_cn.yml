@@ -213,6 +213,7 @@ warning.config.item.behavior.missing_type: "<yellow>在文件 <arg:0> 发现问�
 warning.config.item.behavior.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的行为类型 '<arg:2>'</yellow>"
 warning.config.item.behavior.block.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的 'block_item' 行为缺少必需的 'block' 参数</yellow>"
 warning.config.item.behavior.wall_block.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 缺少 'wall_block_item' 行为所需的 'block' 参数</yellow>"
+warning.config.item.behavior.ceiling_block.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 缺少 'ceiling_block_item' 行为所需的 'block' 参数</yellow>"
 warning.config.item.behavior.furniture.missing_furniture: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的 'furniture_item' 行为缺少必需的 'furniture' 参数</yellow>"
 warning.config.item.behavior.liquid_collision.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的 'liquid_collision_block_item' 行为缺少必需的 'block' 参数</yellow>"
 warning.config.item.behavior.double_high.missing_block: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 的 'double_high_block_item' 行为缺少必需的 'block' 参数</yellow>"

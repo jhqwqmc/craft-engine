@@ -213,6 +213,7 @@ warning.config.item.behavior.missing_type: "<yellow>Issue found in file <arg:0> 
 warning.config.item.behavior.invalid_type: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is using an invalid item behavior type '<arg:2>'.</yellow>"
 warning.config.item.behavior.block.missing_block: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'block' argument for 'block_item' behavior.</yellow>"
 warning.config.item.behavior.wall_block.missing_block: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'block' argument for 'wall_block_item' behavior.</yellow>"
+warning.config.item.behavior.ceiling_block.missing_block: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'block' argument for 'ceiling_block_item' behavior.</yellow>"
 warning.config.item.behavior.furniture.missing_furniture: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'furniture' argument for 'furniture_item' behavior.</yellow>"
 warning.config.item.behavior.liquid_collision.missing_block: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'block' argument for 'liquid_collision_block_item' behavior.</yellow>"
 warning.config.item.behavior.double_high.missing_block: "<yellow>Issue found in file <arg:0> - The item '<arg:1>' is missing the required 'block' argument for 'double_high_block_item' behavior.</yellow>"
