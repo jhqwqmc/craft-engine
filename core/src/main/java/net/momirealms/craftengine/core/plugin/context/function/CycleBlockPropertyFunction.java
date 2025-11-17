@@ -95,7 +95,7 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
             Map<String, String> rules;
             if (arguments.containsKey("rules")) {
                 rules = new Object2ObjectOpenHashMap<>();
-                MiscUtils.castToMap(arguments.get("rules"), true).forEach((k, v) -> rules.put(k, v.toString()));
+                MiscUtils.castToMap(arguments.get("rules"), false).forEach((k, v) -> rules.put(k, v.toString()));
             } else rules = null;
             return new CycleBlockPropertyFunction<>(getPredicates(arguments),
                     property,
