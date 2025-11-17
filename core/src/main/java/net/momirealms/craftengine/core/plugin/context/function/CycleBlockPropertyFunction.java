@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.plugin.context.Condition;
@@ -10,9 +11,9 @@ import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextPar
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.ExistingBlock;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -20,15 +21,28 @@ import java.util.Optional;
 
 public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final String property;
+    @Nullable
+    private final Map<String, String> rules;
+    @Nullable
     private final NumberProvider inverse;
     private final NumberProvider x;
     private final NumberProvider y;
     private final NumberProvider z;
     private final NumberProvider updateFlags;
 
-    public CycleBlockPropertyFunction(List<Condition<CTX>> predicates, String property, NumberProvider inverse, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags) {
+    public CycleBlockPropertyFunction(
+            List<Condition<CTX>> predicates,
+            String property,
+            @Nullable Map<String, String> rules,
+            @Nullable NumberProvider inverse,
+            NumberProvider x,
+            NumberProvider y,
+            NumberProvider z,
+            NumberProvider updateFlags
+    ) {
         super(predicates);
         this.property = property;
+        this.rules = rules;
         this.inverse = inverse;
         this.x = x;
         this.y = y;
@@ -44,9 +58,24 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
         int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
         int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
-        ExistingBlock blockAt = world.getBlock(x, y, z);
-        BlockStateWrapper wrapper = blockAt.blockState().cycleProperty(this.property, this.inverse.getInt(ctx) == 0);
+        BlockStateWrapper wrapper = updateBlockState(world.getBlock(x, y, z).blockState(), ctx);
         world.setBlockState(x, y, z, wrapper, this.updateFlags.getInt(ctx));
+    }
+
+    private BlockStateWrapper updateBlockState(BlockStateWrapper wrapper, CTX ctx) {
+        boolean inverse = this.inverse != null && this.inverse.getInt(ctx) == 0;
+        if (this.rules == null) {
+            return wrapper.cycleProperty(this.property, inverse);
+        }
+        Object value = wrapper.getProperty(this.property);
+        if (value == null) {
+            return wrapper.cycleProperty(this.property, inverse);
+        }
+        String mapValue = this.rules.get(value.toString());
+        if (mapValue == null) {
+            return wrapper.cycleProperty(this.property, inverse);
+        }
+        return wrapper.withProperty(this.property, mapValue);
     }
 
     @Override
@@ -62,8 +91,15 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
 
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
+            String property = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("property"), "warning.config.function.cycle_block_property.missing_property");
+            Map<String, String> rules;
+            if (arguments.containsKey("rules")) {
+                rules = new Object2ObjectOpenHashMap<>();
+                MiscUtils.castToMap(arguments.get("rules"), true).forEach((k, v) -> rules.put(k, v.toString()));
+            } else rules = null;
             return new CycleBlockPropertyFunction<>(getPredicates(arguments),
-                    ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("property"), "warning.config.function.cycle_block_property.missing_property"),
+                    property,
+                    rules,
                     NumberProviders.fromObject(arguments.getOrDefault("inverse", "<arg:player.is_sneaking>")),
                     NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
                     NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
