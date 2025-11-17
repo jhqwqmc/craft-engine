@@ -12,6 +12,7 @@ import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
+import net.momirealms.craftengine.core.pack.PendingConfigSection;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Direction;
