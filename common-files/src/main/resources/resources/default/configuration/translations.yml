@@ -127,6 +127,70 @@ translations:
     emoji.tip: 使用<yellow>'<arg:keyword>'</yellow>来发送表情'<arg:emoji>'
     emoji.time: '<bold>当前时间: <papi:player_world_time_12></bold>'
     emoji.location: '<bold>当前坐标: <papi:player_x>,<papi:player_y>,<papi:player_z></bold>'
+  fr_fr:
+    item.chinese_lantern: Lanterne Chinoise
+    item.fairy_flower: Fleur Fée
+    item.reed: Roseau
+    item.flame_cane: Canne de Flamme
+    item.ender_pearl_flower_seeds: Graines de Fleur de Perle du Néant
+    item.bench: Banc
+    item.table_lamp: Lampe de Table
+    item.wooden_chair: Chaise en Bois
+    item.topaz_rod: Canne à Topaze
+    item.topaz_bow: Arc en Topaze
+    item.topaz_crossbow: Arbalète en Topaze
+    item.topaz_pickaxe: Pioche en Topaze
+    item.topaz_axe: Hache en Topaze
+    item.topaz_hoe: Houe en Topaze
+    item.topaz_shovel: Pelle en Topaze
+    item.topaz_sword: Épée en Topaze
+    item.topaz_helmet: Casque en Topaze
+    item.topaz_chestplate: Plastron en Topaze
+    item.topaz_leggings: Jambières en Topaze
+    item.topaz_boots: Bottes en Topaze
+    item.topaz_trident: Trident en Topaze
+    item.topaz_ore: Minerai de Topaze
+    item.deepslate_topaz_ore: Minerai de Topaze en Schiste Sombre
+    item.topaz: Topaze
+    item.palm_log: Bois de Palmier
+    item.stripped_palm_log: Bois de Palmier Écorcé
+    item.palm_wood: Bois de Palmier
+    item.stripped_palm_wood: Bois de Palmier Écorcé
+    item.palm_planks: Planches de Palmier
+    item.palm_sapling: Pousse de Palmier
+    item.palm_leaves: Feuilles de Palmier
+    item.palm_trapdoor: Trappe en Palmier
+    item.palm_door: Porte en Palmier
+    item.palm_fence_gate: Portail de Barrière en Palmier
+    item.palm_slab: Dalle en Palmier
+    item.palm_stairs: Escalier en Palmier
+    item.palm_pressure_plate: Plaque de Pression en Palmier
+    item.palm_button: Bouton en Palmier
+    item.palm_fence: Barrière en Palmier
+    item.netherite_anvil: Enclume en Netherite
+    item.gunpowder_block: Bloc de Poudre à Canon
+    item.solid_gunpowder_block: Bloc de Poudre à Canon Solide
+    item.copper_coil: Bobine de Cuivre
+    item.flame_elytra: Élytres de Flamme
+    item.pebble: Caillou
+    item.cap: Casquette
+    item.flower_basket: Panier de Fleurs
+    item.chessboard_block: Bloc Damier
+    item.safe_block: Coffre-Fort
+    item.sofa: Canapé
+    item.amethyst_torch: Torche en Améthyste
+    item.hami_melon_slice: Tranche de Melon de Hami
+    item.hami_melon: Melon de Hami
+    item.hami_melon_seeds: Graines de Melon de Hami
+    item.magma_fruit: Fruit de Magma
+    category.default.name: Ressources par Défaut
+    category.default.lore: Contient la configuration par défaut de CraftEngine
+    category.palm_tree: Palmier
+    category.topaz: Topaze
+    category.misc: Divers
+    emoji.tip: Utilisez <yellow>'<arg:keyword>'</yellow> pour envoyer l'emoji '<arg:emoji>'
+    emoji.time: '<bold>Heure actuelle: <papi:player_world_time_12></bold>'
+    emoji.location: '<bold>Coordonnées actuelles: <papi:player_x>,<papi:player_y>,<papi:player_z></bold>'
 # This section is for localizing internal block IDs (craftengine:xxx_xx).
 # Some other plugins support displaying block names using lang components.
 # This might be useful for the client-side, but it's not mandatory.
@@ -203,3 +267,39 @@ lang:
     block_name:default:hami_melon_stem: 哈密瓜茎
     block_name:default:attached_hami_melon_stem: 哈密瓜茎
     block_name:default:magma_plant: 岩浆植物
+  fr_fr:
+    block_name:default:chinese_lantern: Lanterne Chinoise
+    block_name:default:netherite_anvil: Enclume en Netherite
+    block_name:default:topaz_ore: Minerai de Topaze
+    block_name:default:deepslate_topaz_ore: Minerai de Topaze en Schiste Sombre
+    block_name:default:palm_log: Bois de Palmier
+    block_name:default:stripped_palm_log: Bois de Palmier Écorcé
+    block_name:default:palm_wood: Bois de Palmier
+    block_name:default:stripped_palm_wood: Bois de Palmier Écorcé
+    block_name:default:palm_planks: Planches de Palmier
+    block_name:default:palm_sapling: Pousse de Palmier
+    block_name:default:palm_leaves: Feuilles de Palmier
+    block_name:default:palm_trapdoor: Trappe en Palmier
+    block_name:default:palm_door: Porte en Palmier
+    block_name:default:palm_fence_gate: Portail de Barrière en Palmier
+    block_name:default:palm_slab: Dalle en Palmier
+    block_name:default:palm_stairs: Escalier en Palmier
+    block_name:default:palm_button: Bouton en Palmier
+    block_name:default:palm_fence: Barrière en Palmier
+    block_name:default:fairy_flower: Fleur Fée
+    block_name:default:reed: Roseau
+    block_name:default:flame_cane: Canne de Flamme
+    block_name:default:ender_pearl_flower: Fleur de Perle du Néant
+    block_name:default:gunpowder_block: Bloc de Poudre à Canon
+    block_name:default:solid_gunpowder_block: Bloc de Poudre à Canon Solide
+    block_name:default:copper_coil: Bobine de Cuivre
+    block_name:default:chessboard_block: Bloc Damier
+    block_name:default:safe_block: Coffre-Fort
+    block_name:default:sleeper_sofa: Canapé
+    block_name:default:sofa: Canapé
+    block_name:default:amethyst_torch: Torche en Améthyste
+    block_name:default:amethyst_wall_torch: Torche en Améthyste
+    block_name:default:hami_melon: Melon de Hami
+    block_name:default:hami_melon_stem: Tige de Melon de Hami
+    block_name:default:attached_hami_melon_stem: Tige de Melon de Hami
+    block_name:default:magma_plant: Plante de Magma
