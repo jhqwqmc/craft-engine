@@ -165,7 +165,7 @@ public class LeavesBlockBehavior extends BukkitBlockBehavior {
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Boolean> persistent = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("persistent"), "warning.config.block.behavior.leaves.missing_persistent");
             Property<Integer> distance = (Property<Integer>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("distance"), "warning.config.block.behavior.leaves.missing_distance");
-            int actual = distance.possibleValues().get(distance.possibleValues().size() - 1);
+            int actual = distance.possibleValues().getLast();
             return new LeavesBlockBehavior(block, actual, distance, persistent);
         }
     }
