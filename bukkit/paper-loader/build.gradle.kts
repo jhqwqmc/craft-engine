@@ -215,10 +215,11 @@ fun registerPaperTask(
             jvmArgs("-Ddisable.watchdog=true")
             jvmArgs("-Xlog:redefine+class*=info")
             jvmArgs("-XX:+AllowEnhancedClassRedefinition")
-            downloadPlugins?.let { downloadPlugins(it) }
-            downloadPlugins {
-                url("https://ci.viaversion.com/job/ViaVersion/lastBuild/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaVersion/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
-                url("https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards/662/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaBackwards/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
+            if (taskName.contains("viaversion")) {
+                downloadPlugins {
+                    url("https://ci.viaversion.com/job/ViaVersion/lastBuild/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaVersion/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
+                    url("https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards/662/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaBackwards/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
+                }
             }
         }
     }
