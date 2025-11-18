@@ -131,7 +131,7 @@ public class PngOptimizer {
 
     private byte[] tryNormal(BufferedImage src, boolean hasAlpha, boolean isGrayscale) throws IOException {
         byte[] bytes = generatePngData(src, hasAlpha, isGrayscale);
-        int zopfli = Config.zopfliIterations();
+        int zopfli = Config.optimizeTexture() ? Config.zopfliIterations() : 0;
         return zopfli > 0 ? compressImageZopfli(bytes, zopfli) : compressImageStandard(bytes);
     }
 
@@ -177,7 +177,7 @@ public class PngOptimizer {
             writeChunkPLTE(paletteOs, palette);
         }
         byte[] bytes = generatePaletteData(src, palette);
-        int zopfli = Config.zopfliIterations();
+        int zopfli = Config.optimizeTexture() ? Config.zopfliIterations() : 0;
         paletteOs.write(zopfli > 0 ? compressImageZopfli(bytes, zopfli) : compressImageStandard(bytes));
         return Pair.of(palette, paletteOs.toByteArray());
     }
