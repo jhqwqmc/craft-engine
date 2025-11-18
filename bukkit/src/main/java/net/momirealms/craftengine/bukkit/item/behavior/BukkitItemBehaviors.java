@@ -13,6 +13,8 @@ public class BukkitItemBehaviors extends ItemBehaviors {
     public static final Key AXE_ITEM = Key.from("craftengine:axe_item");
     public static final Key DOUBLE_HIGH_BLOCK_ITEM = Key.from("craftengine:double_high_block_item");
     public static final Key WALL_BLOCK_ITEM = Key.from("craftengine:wall_block_item");
+    public static final Key CEILING_BLOCK_ITEM = Key.from("craftengine:ceiling_block_item");
+    public static final Key GROUND_BLOCK_ITEM = Key.from("craftengine:ground_block_item");
 
     public static void init() {
         register(EMPTY, EmptyItemBehavior.FACTORY);
@@ -24,5 +26,7 @@ public class BukkitItemBehaviors extends ItemBehaviors {
         register(AXE_ITEM, AxeItemBehavior.FACTORY);
         register(DOUBLE_HIGH_BLOCK_ITEM, DoubleHighBlockItemBehavior.FACTORY);
         register(WALL_BLOCK_ITEM, WallBlockItemBehavior.FACTORY);
+        register(CEILING_BLOCK_ITEM, CeilingBlockItemBehavior.FACTORY);
+        register(GROUND_BLOCK_ITEM, GroundBlockItemBehavior.FACTORY);
     }
 }

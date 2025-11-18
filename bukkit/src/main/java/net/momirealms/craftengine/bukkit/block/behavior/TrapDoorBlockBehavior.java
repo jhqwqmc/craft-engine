@@ -118,6 +118,7 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
     @SuppressWarnings("unchecked")
     private void playerToggle(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
+        if (player == null) return;
         this.toggle(state, context.getLevel(), context.getClickedPos(), player);
         if (!InteractUtils.isInteractable((org.bukkit.entity.Player) player.platformPlayer(), BlockStateUtils.fromBlockData(state.vanillaBlockState().literalObject()), context.getHitResult(), (Item<ItemStack>) context.getItem())) {
             player.swingHand(context.getHand());

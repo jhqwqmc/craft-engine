@@ -46,7 +46,7 @@ public class StackableBlockBehavior extends BukkitBlockBehavior {
     @SuppressWarnings("unchecked")
     public InteractionResult useOnBlock(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
-        if (player.isSecondaryUseActive()) {
+        if (player == null || player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         }
         Item<ItemStack> item = (Item<ItemStack>) context.getItem();

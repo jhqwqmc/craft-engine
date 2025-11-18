@@ -7,16 +7,17 @@ import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-public class WallBlockItemBehavior extends BlockItemBehavior {
+public class GroundBlockItemBehavior extends BlockItemBehavior {
     public static final Factory FACTORY = new Factory();
 
-    public WallBlockItemBehavior(Key wallBlockId) {
-        super(wallBlockId);
+    public GroundBlockItemBehavior(Key ceilingBlockId) {
+        super(ceilingBlockId);
     }
 
     @Override
@@ -26,7 +27,7 @@ public class WallBlockItemBehavior extends BlockItemBehavior {
 
     @Override
     public InteractionResult place(BlockPlaceContext context) {
-        if (context.getClickedFace().stepY() != 0) {
+        if (context.getClickedFace() != Direction.UP) {
             return InteractionResult.PASS;
         }
         return super.place(context);
@@ -37,13 +38,13 @@ public class WallBlockItemBehavior extends BlockItemBehavior {
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
-                throw new LocalizedResourceConfigException("warning.config.item.behavior.wall_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for wall_block_item behavior"));
+                throw new LocalizedResourceConfigException("warning.config.item.behavior.ground_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for ground_block_item behavior"));
             }
             if (id instanceof Map<?, ?> map) {
                 addPendingSection(pack, path, node, key, map);
-                return new WallBlockItemBehavior(key);
+                return new GroundBlockItemBehavior(key);
             } else {
-                return new WallBlockItemBehavior(Key.of(id.toString()));
+                return new GroundBlockItemBehavior(Key.of(id.toString()));
             }
         }
     }

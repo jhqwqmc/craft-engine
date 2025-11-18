@@ -16,6 +16,7 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
@@ -148,7 +149,8 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
     @Override
     public InteractionResult useOnBlock(UseOnContext context, ImmutableBlockState state) {
         Item<?> item = context.getItem();
-        if (ItemUtils.isEmpty(item) || !item.vanillaId().equals(ItemKeys.BONE_MEAL) || context.getPlayer().isAdventureMode())
+        Player player = context.getPlayer();
+        if (ItemUtils.isEmpty(item) || !item.vanillaId().equals(ItemKeys.BONE_MEAL) || player == null || player.isAdventureMode())
             return InteractionResult.PASS;
         boolean sendSwing = false;
         Object visualState = state.vanillaBlockState().literalObject();
@@ -162,7 +164,7 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
             sendSwing = true;
         }
         if (sendSwing) {
-            context.getPlayer().swingHand(context.getHand());
+            player.swingHand(context.getHand());
         }
         return InteractionResult.SUCCESS;
     }

@@ -73,7 +73,7 @@ public abstract class BlockBehavior {
         superMethod.call();
     }
 
-    // 1.20+ BlockState state, LevelReader world, BlockPos pos
+    // BlockState state, LevelReader world, BlockPos pos
     public boolean canSurvive(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         return (boolean) superMethod.call();
     }
