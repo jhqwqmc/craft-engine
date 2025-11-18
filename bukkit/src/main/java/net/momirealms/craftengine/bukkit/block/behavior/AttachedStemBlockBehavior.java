@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public class AttachedStemBlockBehavior extends BukkitBlockBehavior {
+public class AttachedStemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Key fruit;
