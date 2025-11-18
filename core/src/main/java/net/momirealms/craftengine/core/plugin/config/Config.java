@@ -138,6 +138,8 @@ public class Config {
     protected ColliderType furniture$collision_entity_type;
 
     protected boolean block$sound_system$enable;
+    protected boolean block$sound_system$process_cancelled_events$step;
+    protected boolean block$sound_system$process_cancelled_events$break;
     protected boolean block$simplify_adventure_break_check;
     protected boolean block$simplify_adventure_place_check;
     protected boolean block$predict_breaking;
@@ -475,6 +477,8 @@ public class Config {
 
         // block
         block$sound_system$enable = config.getBoolean("block.sound-system.enable", true);
+        block$sound_system$process_cancelled_events$step = config.getBoolean("block.sound-system.process-cancelled-events.step", true);
+        block$sound_system$process_cancelled_events$break = config.getBoolean("block.sound-system.process-cancelled-events.break", true);
         block$simplify_adventure_break_check = config.getBoolean("block.simplify-adventure-break-check", false);
         block$simplify_adventure_place_check = config.getBoolean("block.simplify-adventure-place-check", false);
         block$predict_breaking = config.getBoolean("block.predict-breaking.enable", true);
@@ -673,6 +677,14 @@ public class Config {
 
     public static boolean enableSoundSystem() {
         return instance.block$sound_system$enable;
+    }
+
+    public static boolean processCancelledStep() {
+        return instance.block$sound_system$process_cancelled_events$step;
+    }
+
+    public static boolean processCancelledBreak() {
+        return instance.block$sound_system$process_cancelled_events$break;
     }
 
     public static boolean simplifyAdventureBreakCheck() {
