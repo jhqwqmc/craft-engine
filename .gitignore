@@ -30,3 +30,4 @@ build/
 !/libs/*.jar
 !/gradle/wrapper/*.jar
 .vscode/settings.json
+/runPaper/
