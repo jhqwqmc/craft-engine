@@ -37,7 +37,7 @@ public class TranslationManagerImpl implements TranslationManager {
     private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
     private final Path translationsDirectory;
     private final String langVersion;
-    private final String[] supportedLanguages;
+    private final Set<String> supportedLanguages;
     private final Map<String, String> translationFallback = new LinkedHashMap<>();
     private Locale selectedLocale = DEFAULT_LOCALE;
     private MiniMessageTranslationRegistry registry;
@@ -52,7 +52,7 @@ public class TranslationManagerImpl implements TranslationManager {
         this.plugin = plugin;
         this.translationsDirectory = this.plugin.dataFolderPath().resolve("translations");
         this.langVersion = PluginProperties.getValue("lang-version");
-        this.supportedLanguages = PluginProperties.getValue("supported-languages").split(",");
+        this.supportedLanguages = Arrays.stream(PluginProperties.getValue("supported-languages").split(",")).collect(Collectors.toSet());
         this.langParser = new LangParser();
         this.translationParser = new TranslationParser();
         Yaml yaml = new Yaml(new TranslationConfigConstructor(new LoaderOptions()));
@@ -201,7 +201,7 @@ public class TranslationManagerImpl implements TranslationManager {
                                 Map<String, String> data = yaml.load(inputStream);
                                 if (data == null) return FileVisitResult.CONTINUE;
                                 String langVersion = data.getOrDefault("lang-version", "");
-                                if (!langVersion.equals(TranslationManagerImpl.this.langVersion)) {
+                                if (!langVersion.equals(TranslationManagerImpl.this.langVersion) && TranslationManagerImpl.this.supportedLanguages.contains(localeName)) {
                                     data = updateLangFile(data, path);
                                 }
                                 cachedFile = new CachedTranslation(data, lastModifiedTime, size);
