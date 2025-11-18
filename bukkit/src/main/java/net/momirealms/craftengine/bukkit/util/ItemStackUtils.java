@@ -51,4 +51,8 @@ public final class ItemStackUtils {
         Item<ItemStack> wrappedItem = BukkitItemManager.instance().wrap(itemStack);
         return UniqueIdItem.of(wrappedItem);
     }
+
+    public static ItemStack asCraftMirror(Object itemStack) {
+        return FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack);
+    }
 }

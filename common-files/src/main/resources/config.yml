@@ -261,6 +261,10 @@ block:
   # Enables the sound system, which prevents the client from hearing some non-custom block sounds and improves the client experience.
   sound-system:
     enable: true
+    # Should we process events that were canceled by other plugins to restore sounds?
+    process-cancelled-events:
+      step: true
+      break: true
   # Adventure mode requires correct tools to break custom blocks.
   # Vanilla clients cannot recognize custom block IDs (e.g., craftengine:custom_100).
   #

@@ -2,10 +2,7 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
-import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.*;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
@@ -18,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
-        implements FallOnBlockBehavior, PlaceLiquidBlockBehavior {
+        implements FallOnBlockBehavior, PlaceLiquidBlockBehavior, IsPathFindableBlockBehavior {
     private final AbstractBlockBehavior[] behaviors;
 
     public UnsafeCompositeBlockBehavior(CustomBlock customBlock, List<AbstractBlockBehavior> behaviors) {
@@ -237,12 +234,18 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
 
     @Override
     public boolean isPathFindable(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+        boolean processed = false;
         for (AbstractBlockBehavior behavior : this.behaviors) {
-            if (!behavior.isPathFindable(thisBlock, args, superMethod)) {
-                return false;
+            if (behavior instanceof IsPathFindableBlockBehavior pathFindableBlockBehavior) {
+                if (!pathFindableBlockBehavior.isPathFindable(thisBlock, args, superMethod)) {
+                    return false;
+                } else {
+                    processed = true;
+                }
             }
         }
-        return (boolean) superMethod.call();
+        if (!processed) return (boolean) superMethod.call();
+        return true;
     }
 
     @Override

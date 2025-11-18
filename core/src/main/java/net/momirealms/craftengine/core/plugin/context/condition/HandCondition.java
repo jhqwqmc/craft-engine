@@ -5,6 +5,7 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.EnumUtils;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -42,7 +43,7 @@ public class HandCondition<CTX extends Context> implements Condition<CTX> {
             try {
                 return new HandCondition<>(InteractionHand.valueOf(hand.toUpperCase(Locale.ENGLISH)));
             } catch (IllegalArgumentException e) {
-                throw new LocalizedResourceConfigException("warning.config.condition.hand.invalid_hand", hand);
+                throw new LocalizedResourceConfigException("warning.config.condition.hand.invalid_hand", hand, EnumUtils.toString(InteractionHand.values()));
             }
         }
     }
