@@ -704,7 +704,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
 
         @NotNull
         private Map<String, Property<?>> parseBlockProperties(Map<String, Object> propertiesSection) {
-            Map<String, Property<?>> properties = new HashMap<>();
+            Map<String, Property<?>> properties = new LinkedHashMap<>();
             for (Map.Entry<String, Object> entry : propertiesSection.entrySet()) {
                 Property<?> property = Properties.fromMap(entry.getKey(), ResourceConfigUtils.getAsMap(entry.getValue(), entry.getKey()));
                 properties.put(entry.getKey(), property);
