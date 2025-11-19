@@ -946,6 +946,13 @@ public class BukkitServerPlayer extends Player {
         return BukkitItemManager.instance().wrap(hand == InteractionHand.MAIN_HAND ? inventory.getItemInMainHand() : inventory.getItemInOffHand());
     }
 
+    @NotNull
+    @Override
+    public Item<ItemStack> getItemBySlot(int slot) {
+        PlayerInventory inventory = platformPlayer().getInventory();
+        return BukkitItemManager.instance().wrap(inventory.getItem(slot));
+    }
+
     @Override
     public World world() {
         return new BukkitWorld(platformPlayer().getWorld());
