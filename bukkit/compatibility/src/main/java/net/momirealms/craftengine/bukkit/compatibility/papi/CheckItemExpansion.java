@@ -94,7 +94,7 @@ public class CheckItemExpansion extends PlaceholderExpansion {
         if (param.length < 1 || param[0] == null || param[0].isEmpty()) {
             return player.getItemInHand(InteractionHand.MAIN_HAND);
         }
-        return switch (param[0].toLowerCase(Locale.ROOT)) {
+        return switch (param[0]) {
             case "main_hand" -> player.getItemInHand(InteractionHand.MAIN_HAND);
             case "off_hand" -> player.getItemInHand(InteractionHand.OFF_HAND);
             default -> {
