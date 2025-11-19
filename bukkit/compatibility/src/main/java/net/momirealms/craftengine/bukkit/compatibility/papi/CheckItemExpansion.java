@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.compatibility.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
@@ -24,21 +23,18 @@ public class CheckItemExpansion extends PlaceholderExpansion {
         this.plugin = plugin;
     }
 
-    @NotNull
     @Override
-    public String getIdentifier() {
+    public @NotNull String getIdentifier() {
         return "checkceitem";
     }
 
-    @NotNull
     @Override
-    public String getAuthor() {
+    public @NotNull String getAuthor() {
         return "jhqwqmc";
     }
 
-    @NotNull
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return "1.0";
     }
 
@@ -74,7 +70,6 @@ public class CheckItemExpansion extends PlaceholderExpansion {
                 try {
                     requiredAmount = param.length < 3 ? 1 : Integer.parseInt(param[2]);
                 } catch (NumberFormatException e) {
-                    this.plugin.logger().warn("Invalid amount: " + param[2], e);
                     yield null;
                 }
                 if (requiredAmount < 1) yield "true";
@@ -106,8 +101,7 @@ public class CheckItemExpansion extends PlaceholderExpansion {
                 try {
                     int slot = Integer.parseInt(param[0]);
                     yield player.getItemBySlot(Math.max(slot, 0));
-                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                    this.plugin.logger().warn("Invalid slot: " + param[0], e);
+                } catch (NumberFormatException e) {
                     yield null;
                 }
             }
@@ -116,7 +110,7 @@ public class CheckItemExpansion extends PlaceholderExpansion {
 
     private int getItemCount(BukkitServerPlayer player, String[] param) {
         Key itemId = Key.of(param[0], param[1]);
-        Predicate<Object> predicate = nmsStack -> BukkitItemManager.instance().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
+        Predicate<Object> predicate = nmsStack -> this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
         Object inventory = FastNMS.INSTANCE.method$Player$getInventory(player.serverPlayer());
         Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(player.serverPlayer());
         Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
