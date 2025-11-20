@@ -237,6 +237,20 @@ debug_clean_cache:
     - /craftengine debug clean-cache
     - /ce debug clean-cache
 
+debug_custom_model_data:
+  enable: true
+  permission: ce.command.debug.custom_model_data
+  usage:
+    - /craftengine debug custom-model-data
+    - /ce debug custom-model-data
+
+debug_image:
+  enable: true
+  permission: ce.command.debug.image
+  usage:
+    - /craftengine debug image
+    - /ce debug image
+
 debug_generate_internal_assets:
   enable: false
   permission: ce.command.debug.generate_internal_assets

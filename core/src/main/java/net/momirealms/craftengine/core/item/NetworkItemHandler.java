@@ -18,7 +18,7 @@ public interface NetworkItemHandler<T> {
     String NETWORK_OPERATION = "type";
     String NETWORK_VALUE = "value";
 
-    Optional<Item<T>> s2c(Item<T> itemStack, Player player);
+    Optional<Item<T>> s2c(Item<T> itemStack, @Nullable Player player);
 
     Optional<Item<T>> c2s(Item<T> itemStack);
 
