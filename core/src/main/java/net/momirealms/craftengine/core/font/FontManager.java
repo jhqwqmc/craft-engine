@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.sparrow.nbt.Tag;
+import org.incendo.cloud.suggestion.Suggestion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +80,8 @@ public interface FontManager extends Manageable {
     Optional<BitmapImage> bitmapImageByImageId(Key imageId);
 
     Optional<Font> fontById(Key font);
+
+    Collection<Suggestion> cachedImagesSuggestions();
 
     int codepointByImageId(Key imageId, int x, int y);
 

@@ -115,7 +115,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     }
 
     @Override
-    public Optional<Item<ItemStack>> s2c(Item<ItemStack> item, Player player) {
+    public Optional<Item<ItemStack>> s2c(Item<ItemStack> item, @Nullable Player player) {
         if (item.isEmpty()) return Optional.empty();
         return this.networkItemHandler.s2c(item, player);
     }
