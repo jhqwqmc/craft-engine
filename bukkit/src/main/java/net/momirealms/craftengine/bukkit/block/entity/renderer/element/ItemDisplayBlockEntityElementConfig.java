@@ -84,11 +84,14 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
             return null;
         }
+        Vector3f translation = previous.config.translation;
+        if (translation.x != 0 || translation.y != 0 || translation.z != 0) {
+            return null;
+        }
         return new ItemDisplayBlockEntityElement(this, pos, previous.entityId,
                 previous.config.yRot != this.yRot ||
                         previous.config.xRot != this.xRot ||
-                        !previous.config.position.equals(this.position) ||
-                        !previous.config.translation.equals(this.translation)
+                        !previous.config.position.equals(this.position)
         );
     }
 
