@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.bukkit.sound;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
@@ -9,13 +11,15 @@ import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.AbstractSoundManager;
 import net.momirealms.craftengine.core.sound.JukeboxSong;
+import net.momirealms.craftengine.core.util.AdventureHelper;
+import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class BukkitSoundManager extends AbstractSoundManager {
 
@@ -25,6 +29,65 @@ public class BukkitSoundManager extends AbstractSoundManager {
             Object resourceLocation = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
             VANILLA_SOUND_EVENTS.add(KeyUtils.resourceLocationToKey(resourceLocation));
         }
+        this.registerSongs(this.loadLastRegisteredSongs());
+    }
+
+    @Override
+    public void disable() {
+        this.saveLastRegisteredSongs(super.songs);
+        super.disable();
+    }
+
+    private void saveLastRegisteredSongs(Map<Key, JukeboxSong> songs) {
+        if (songs == null || songs.isEmpty()) return;
+        Path persistSongPath = this.plugin.dataFolderPath()
+                .resolve("cache")
+                .resolve("jukebox-songs.json");
+        try {
+            Files.createDirectories(persistSongPath.getParent());
+            JsonObject cache = new JsonObject();
+            for (Map.Entry<Key, JukeboxSong> entry : songs.entrySet()) {
+                JsonObject songJson = new JsonObject();
+                JukeboxSong song = entry.getValue();
+                songJson.addProperty("sound_event", song.sound().asString());
+                songJson.add("description", AdventureHelper.componentToJsonElement(song.description()));
+                songJson.addProperty("length_in_seconds", song.lengthInSeconds());
+                songJson.addProperty("comparator_output", song.comparatorOutput());
+                songJson.addProperty("range", song.range());
+                cache.add(entry.getKey().asString(), songJson);
+            }
+            GsonHelper.writeJsonFile(cache, persistSongPath);
+        } catch (IOException e) {
+            this.plugin.logger().warn("Failed to save registered songs.", e);
+        }
+    }
+
+    private Map<Key, JukeboxSong> loadLastRegisteredSongs() {
+        Path persistSongPath = this.plugin.dataFolderPath()
+                .resolve("cache")
+                .resolve("jukebox-songs.json");
+        if (Files.exists(persistSongPath) && Files.isRegularFile(persistSongPath)) {
+            try {
+                Map<Key, JukeboxSong> songs = new HashMap<>();
+                JsonObject cache = GsonHelper.readJsonFile(persistSongPath).getAsJsonObject();
+                for (Map.Entry<String, JsonElement> songEntry : cache.entrySet()) {
+                    Key id = Key.of(songEntry.getKey());
+                    if (songEntry.getValue() instanceof JsonObject jo) {
+                        songs.put(id, new JukeboxSong(
+                                Key.of(jo.get("sound_event").getAsString()),
+                                AdventureHelper.jsonElementToComponent(jo.get("description")),
+                                jo.get("length_in_seconds").getAsFloat(),
+                                jo.get("comparator_output").getAsInt(),
+                                jo.get("range").getAsFloat()
+                        ));
+                    }
+                }
+                return songs;
+            } catch (IOException e) {
+                this.plugin.logger().warn("Failed to load registered songs.", e);
+            }
+        }
+        return Map.of();
     }
 
     @Override
