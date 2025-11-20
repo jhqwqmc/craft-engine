@@ -52,11 +52,11 @@ public class TemplateManagerImpl implements TemplateManager {
 
         @Override
         public void parseObject(Pack pack, Path path, String node, Key id, Object obj) {
-            if (templates.containsKey(id)) {
+            if (TemplateManagerImpl.this.templates.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.template.duplicate");
             }
             // 预处理会将 string类型的键或值解析为ArgumentString，以加速模板应用。所以处理后不可能存在String类型。
-            templates.put(id, preprocessUnknownValue(obj));
+            TemplateManagerImpl.this.templates.put(id, preprocessUnknownValue(obj));
         }
     }
 
