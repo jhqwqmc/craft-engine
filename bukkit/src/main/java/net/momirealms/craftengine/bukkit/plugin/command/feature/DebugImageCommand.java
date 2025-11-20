@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.font.BitmapImage;
@@ -22,6 +23,7 @@ import org.incendo.cloud.parser.standard.IntegerParser;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.incendo.cloud.suggestion.SuggestionProvider;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DebugImageCommand extends BukkitCommandFeature<CommandSender> {
@@ -49,12 +51,14 @@ public class DebugImageCommand extends BukkitCommandFeature<CommandSender> {
                         String string = image.isValidCoordinate(row, column)
                                 ? imageId.asString() + ((row != 0 || column != 0) ? ":" + row + ":" + column : "") // 自动最小化
                                 : imageId.asString() + ":" + (row = 0) + ":" + (column = 0); // 因为是无效的所以说要强调告诉获取的是00
-                        Component component = Component.text()
-                                .append(Component.text(string)
-                                        .hoverEvent(image.componentAt(row, column).color(NamedTextColor.WHITE))
-                                        .clickEvent(ClickEvent.suggestCommand(string)))
-                                .append(getHelperInfo(image, row, column))
-                                .build();
+                        Component component = Component.empty().children(
+                                List.of(
+                                        Component.text(string)
+                                                .hoverEvent(image.componentAt(row, column).color(NamedTextColor.WHITE))
+                                                .clickEvent(ClickEvent.suggestCommand(string)),
+                                        getHelperInfo(image, row, column)
+                                )
+                        );
                         plugin().senderFactory().wrap(context.sender()).sendMessage(component);
                     });
                 });
@@ -65,24 +69,25 @@ public class DebugImageCommand extends BukkitCommandFeature<CommandSender> {
         return "debug_image";
     }
 
-    private static TextComponent.Builder getHelperInfo(BitmapImage image, int row, int column) {
+    private static TextComponent getHelperInfo(BitmapImage image, int row, int column) {
         String raw = new String(Character.toChars(image.codepointAt(row, column)));
         String font = image.font().toString();
-        return Component.text()
-                .append(Component.text(" "))
-                .append(Component.text("[MM]")
-                        .color(NamedTextColor.YELLOW)
+        return Component.empty().children(List.of(
+                Component.text(" "),
+                Component.text("[MiniMessage]")
+                        .color(TextColor.color(255,192,203))
                         .hoverEvent(Component.text("Copy", NamedTextColor.YELLOW))
-                        .clickEvent(ClickEvent.suggestCommand(FormatUtils.miniMessageFont(raw, font))))
-                .append(Component.text(" "))
-                .append(Component.text("[MD]")
-                        .color(NamedTextColor.YELLOW)
+                        .clickEvent(ClickEvent.suggestCommand(FormatUtils.miniMessageFont(raw, font))),
+                Component.text(" "),
+                Component.text("[MineDown]")
+                        .color(TextColor.color(123,104,238))
                         .hoverEvent(Component.text("Copy", NamedTextColor.YELLOW))
-                        .clickEvent(ClickEvent.suggestCommand(FormatUtils.mineDownFont(raw, font))))
-                .append(Component.text(" "))
-                .append(Component.text("[RAW]")
-                        .color(NamedTextColor.YELLOW)
+                        .clickEvent(ClickEvent.suggestCommand(FormatUtils.mineDownFont(raw, font))),
+                Component.text(" "),
+                Component.text("[RAW]")
+                        .color(TextColor.color(119,136,153))
                         .hoverEvent(Component.text("Copy", NamedTextColor.YELLOW))
-                        .clickEvent(ClickEvent.suggestCommand(raw)));
+                        .clickEvent(ClickEvent.suggestCommand("{\"text\":\"" + raw + "\",\"font\":\"" + font + "\"}"))
+        ));
     }
 }
