@@ -195,9 +195,13 @@ resource-pack:
         protocol: "http"
         deny-non-minecraft-request: true
         one-time-token: true
-        rate-limit:
+        rate-limitation-per-ip:
+          enable: true
           max-requests: 10
           reset-interval: 30
+        token-bucket:
+          enable: true
+          qps: 1000
 
 item:
   # [Premium Exclusive]
