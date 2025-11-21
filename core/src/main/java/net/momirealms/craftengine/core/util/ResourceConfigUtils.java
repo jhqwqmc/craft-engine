@@ -134,7 +134,7 @@ public final class ResourceConfigUtils {
             }
             case String s -> {
                 try {
-                    return Integer.parseInt(s);
+                    return Integer.parseInt(s.replace("_", ""));
                 } catch (NumberFormatException e) {
                     throw new LocalizedResourceConfigException("warning.config.type.int", e, s, option);
                 }
@@ -231,7 +231,7 @@ public final class ResourceConfigUtils {
             }
             case String s -> {
                 try {
-                    return Long.parseLong(s);
+                    return Long.parseLong(s.replace("_", ""));
                 } catch (NumberFormatException e) {
                     throw new LocalizedResourceConfigException("warning.config.type.long", e, s, option);
                 }

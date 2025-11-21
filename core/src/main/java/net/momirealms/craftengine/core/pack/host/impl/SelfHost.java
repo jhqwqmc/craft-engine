@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
-import com.google.common.util.concurrent.RateLimiter;
 import io.github.bucket4j.Bandwidth;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
@@ -10,7 +9,6 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.nio.file.Path;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class SelfHost implements ResourcePackHost {
     public static final Factory FACTORY = new Factory();
@@ -81,30 +78,28 @@ public class SelfHost implements ResourcePackHost {
             boolean oneTimeToken = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("one-time-token", true), "one-time-token");
             String protocol = arguments.getOrDefault("protocol", "http").toString();
             boolean denyNonMinecraftRequest = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deny-non-minecraft-request", true), "deny-non-minecraft-request");
-            Map<String, Object> rateLimitPerIp = MiscUtils.castToMap(arguments.get("rate-limitation-per-ip"), true);
-            boolean enabledLimitPerIp = false;
+
+
             Bandwidth limit = null;
-            out:
-            if (rateLimitPerIp != null) {
-                enabledLimitPerIp = ResourceConfigUtils.getAsBoolean(rateLimitPerIp.getOrDefault("enable", false), "enable");
-                if (!enabledLimitPerIp) break out;
-                int maxRequests = Math.max(ResourceConfigUtils.getAsInt(rateLimitPerIp.getOrDefault("max-requests", 5), "max-requests"), 1);
-                int resetInterval = Math.max(ResourceConfigUtils.getAsInt(rateLimitPerIp.getOrDefault("reset-interval", 20), "reset-interval"), 1);
-                limit = Bandwidth.builder()
-                        .capacity(maxRequests)
-                        .refillGreedy(maxRequests, Duration.ofSeconds(resetInterval))
-                        .build();
+            Map<String, Object> rateLimitingSection = ResourceConfigUtils.getAsMapOrNull(arguments.get("rate-limiting"), "rate-limiting");
+            long maxBandwidthUsage = 0L;
+            long minDownloadSpeed = 50_000L;
+            if (rateLimitingSection != null) {
+                if (rateLimitingSection.containsKey("qps-per-ip")) {
+                    String qps = rateLimitingSection.get("qps-per-ip").toString();
+                    String[] split = qps.split("/", 2);
+                    if (split.length == 1) split = new String[]{split[0], "1"};
+                    int maxRequests = ResourceConfigUtils.getAsInt(split[0], "qps-per-ip");
+                    int resetInterval = ResourceConfigUtils.getAsInt(split[1], "qps-per-ip");
+                    limit = Bandwidth.builder()
+                            .capacity(maxRequests)
+                            .refillGreedy(maxRequests, Duration.ofSeconds(resetInterval))
+                            .build();
+                }
+                maxBandwidthUsage = ResourceConfigUtils.getAsLong(rateLimitingSection.getOrDefault("max-bandwidth-per-second", 0), "max-bandwidth");
+                minDownloadSpeed = ResourceConfigUtils.getAsLong(rateLimitingSection.getOrDefault("min-download-speed-per-player", 50_000), "min-download-speed-per-player");
             }
-            Map<String, Object> tokenBucket = MiscUtils.castToMap(arguments.get("token-bucket"), true);
-            boolean enabledTokenBucket = false;
-            RateLimiter globalLimiter = null;
-            out:
-            if (tokenBucket != null) {
-                enabledTokenBucket = ResourceConfigUtils.getAsBoolean(tokenBucket.getOrDefault("enable", false), "enable");
-                if (!enabledTokenBucket) break out;
-                globalLimiter = RateLimiter.create(ResourceConfigUtils.getAsDouble(tokenBucket.getOrDefault("qps", 1000), "qps"));
-            }
-            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, enabledLimitPerIp, enabledTokenBucket, globalLimiter, oneTimeToken);
+            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, oneTimeToken, maxBandwidthUsage, minDownloadSpeed);
             return INSTANCE;
         }
     }

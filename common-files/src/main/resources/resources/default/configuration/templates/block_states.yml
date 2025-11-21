@@ -83,15 +83,18 @@ templates:
   # any leaves block
   default:block_state/leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: leaves
+    arguments:
+      auto_state: leaves
   # tintable leaves block
   default:block_state/tintable_leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: tintable_leaves
+    arguments:
+      auto_state: tintable_leaves
   # non-tintable leaves block
   default:block_state/non_tintable_leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: non_tintable_leaves
+    arguments:
+      auto_state: non_tintable_leaves
   # trapdoor block
   default:block_state/trapdoor:
     properties:
