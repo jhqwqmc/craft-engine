@@ -132,7 +132,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                             .item(Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(element.get("item"), "warning.config.furniture.element.missing_item")))
                             .applyDyedColor(ResourceConfigUtils.getAsBoolean(element.getOrDefault("apply-dyed-color", true), "apply-dyed-color"))
                             .billboard(ResourceConfigUtils.getOrDefault(element.get("billboard"), o -> Billboard.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), Billboard.FIXED))
-                            .transform(ResourceConfigUtils.getOrDefault(element.get("transform"), o -> ItemDisplayContext.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), ItemDisplayContext.NONE))
+                            .transform(ResourceConfigUtils.getOrDefault(ResourceConfigUtils.get(element, "transform", "display-transform"), o -> ItemDisplayContext.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), ItemDisplayContext.NONE))
                             .scale(ResourceConfigUtils.getAsVector3f(element.getOrDefault("scale", "1"), "scale"))
                             .position(ResourceConfigUtils.getAsVector3f(element.getOrDefault("position", "0"), "position"))
                             .translation(ResourceConfigUtils.getAsVector3f(element.getOrDefault("translation", "0"), "translation"))

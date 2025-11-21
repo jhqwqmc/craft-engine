@@ -3,6 +3,9 @@ package net.momirealms.craftengine.core.pack.host.impl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
+import com.google.common.util.concurrent.RateLimiter;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -23,10 +26,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SelfHostHttpServer {
     private static SelfHostHttpServer instance;
     private final Cache<String, Boolean> oneTimePackUrls = Caffeine.newBuilder()
@@ -34,17 +39,23 @@ public class SelfHostHttpServer {
             .scheduler(Scheduler.systemScheduler())
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-    private final Cache<String, IpAccessRecord> ipAccessCache = Caffeine.newBuilder()
+    private final Cache<String, Bucket> ipRateLimiters = Caffeine.newBuilder()
             .maximumSize(256)
             .scheduler(Scheduler.systemScheduler())
-            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build();
 
     private final AtomicLong totalRequests = new AtomicLong();
     private final AtomicLong blockedRequests = new AtomicLong();
 
-    private int rateLimit = 1;
-    private long rateLimitInterval = 1000;
+    private Bandwidth limitPerIp = Bandwidth.builder()
+            .capacity(1)
+            .refillGreedy(1, Duration.ofSeconds(1))
+            .initialTokens(1)
+            .build();
+    private RateLimiter globalLimiter = RateLimiter.create(1);
+    private boolean enabledLimitPerIp = false;
+    private boolean enabledGlobalLimit = false;
     private String ip = "localhost";
     private int port = -1;
     private String protocol = "http";
@@ -72,15 +83,19 @@ public class SelfHostHttpServer {
                                  String url,
                                  boolean denyNonMinecraft,
                                  String protocol,
-                                 int maxRequests,
-                                 int resetInterval,
+                                 Bandwidth limitPerIp,
+                                 boolean enabledLimitPerIp,
+                                 boolean enabledGlobalLimit,
+                                 RateLimiter globalLimiter,
                                  boolean token) {
         this.ip = ip;
         this.url = url;
         this.denyNonMinecraft = denyNonMinecraft;
         this.protocol = protocol;
-        this.rateLimit = maxRequests;
-        this.rateLimitInterval = resetInterval;
+        this.limitPerIp = limitPerIp;
+        this.enabledLimitPerIp = enabledLimitPerIp;
+        this.enabledGlobalLimit = enabledGlobalLimit;
+        this.globalLimiter = globalLimiter;
         this.useToken = token;
 
         if (port <= 0 || port > 65535) {
@@ -136,7 +151,13 @@ public class SelfHostHttpServer {
                 String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress())
                         .getAddress().getHostAddress();
 
-                if (checkRateLimit(clientIp)) {
+                if (enabledGlobalLimit && !globalLimiter.tryAcquire()) {
+                    sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Rate limit exceeded");
+                    blockedRequests.incrementAndGet();
+                    return;
+                }
+
+                if (enabledLimitPerIp && !checkIpRateLimit(clientIp)) {
                     sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Rate limit exceeded");
                     blockedRequests.incrementAndGet();
                     return;
@@ -213,23 +234,12 @@ public class SelfHostHttpServer {
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 
-        private boolean checkRateLimit(String clientIp) {
-            IpAccessRecord record = ipAccessCache.getIfPresent(clientIp);
-            long now = System.currentTimeMillis();
-
-            if (record == null) {
-                record = new IpAccessRecord(now, 1);
-                ipAccessCache.put(clientIp, record);
-                return false;
-            }
-
-            if (now - record.lastAccessTime > rateLimitInterval) {
-                record.lastAccessTime = now;
-                record.accessCount = 1;
-                return false;
-            }
-
-            return ++record.accessCount > rateLimit;
+        private boolean checkIpRateLimit(String clientIp) {
+            Bucket rateLimiter = ipRateLimiters.get(clientIp, k ->
+                    Bucket.builder().addLimit(limitPerIp).build()
+            );
+            assert rateLimiter != null;
+            return rateLimiter.tryConsume(1);
         }
 
         private boolean validateToken(String token) {
@@ -310,16 +320,6 @@ public class SelfHostHttpServer {
             this.packUUID = UUID.nameUUIDFromBytes(this.packHash.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
             CraftEngine.instance().logger().severe("SHA-1 algorithm not available", e);
-        }
-    }
-
-    private static class IpAccessRecord {
-        long lastAccessTime;
-        int accessCount;
-
-        IpAccessRecord(long lastAccessTime, int accessCount) {
-            this.lastAccessTime = lastAccessTime;
-            this.accessCount = accessCount;
         }
     }
 }

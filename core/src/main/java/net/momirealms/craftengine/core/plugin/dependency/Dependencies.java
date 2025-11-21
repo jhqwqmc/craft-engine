@@ -372,6 +372,13 @@ public class Dependencies {
             List.of(Relocation.of("jimfs", "com{}google{}common{}jimfs"))
     );
 
+    public static final Dependency BUCKET_4_J = new Dependency(
+            "bucket4j",
+            "com{}bucket4j",
+            "bucket4j_jdk17-core",
+            List.of(Relocation.of("bucket4j", "io{}github{}bucket4j"))
+    );
+
     public static final Dependency NETTY_HTTP = new Dependency(
             "netty-codec-http",
             "io{}netty",
