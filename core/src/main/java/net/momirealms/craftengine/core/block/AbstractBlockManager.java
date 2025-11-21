@@ -550,7 +550,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         }
                         AutoStateGroup group = AutoStateGroup.byId(autoStateType);
                         if (group == null) {
-                            throw new LocalizedResourceConfigException("warning.config.block.state.invalid_auto_state", autoStateId, EnumUtils.toString(AutoStateGroup.values()));
+                            throw new LocalizedResourceConfigException("warning.config.block.state.invalid_auto_state", autoStateType, EnumUtils.toString(AutoStateGroup.values()));
                         }
                         futureVisualStates.put(appearanceName, this.visualBlockStateAllocator.requestAutoState(autoStateId, group));
                     } else {
