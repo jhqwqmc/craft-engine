@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
+import io.github.bucket4j.Bandwidth;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
@@ -12,6 +13,7 @@ import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,14 +78,19 @@ public class SelfHost implements ResourcePackHost {
             boolean oneTimeToken = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("one-time-token", true), "one-time-token");
             String protocol = arguments.getOrDefault("protocol", "http").toString();
             boolean denyNonMinecraftRequest = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deny-non-minecraft-request", true), "deny-non-minecraft-request");
-            Map<String, Object> rateMap = MiscUtils.castToMap(arguments.get("rate-map"), true);
+            Map<String, Object> rateMap = MiscUtils.castToMap(arguments.getOrDefault("rate-map", arguments.get("rate-limit")), true);
             int maxRequests = 5;
-            int resetInterval = 20_000;
+            int resetInterval = 20;
             if (rateMap != null) {
-                maxRequests = ResourceConfigUtils.getAsInt(rateMap.getOrDefault("max-requests", 5), "max-requests");
-                resetInterval = ResourceConfigUtils.getAsInt(rateMap.getOrDefault("reset-interval", 20), "reset-interval") * 1000;
+                maxRequests = Math.max(ResourceConfigUtils.getAsInt(rateMap.getOrDefault("max-requests", 5), "max-requests"), 1);
+                resetInterval = Math.max(ResourceConfigUtils.getAsInt(rateMap.getOrDefault("reset-interval", 20), "reset-interval"), 1);
             }
-            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, maxRequests, resetInterval, oneTimeToken);
+            Bandwidth limit = Bandwidth.builder()
+                    .capacity(maxRequests)
+                    .refillGreedy(maxRequests, Duration.ofSeconds(resetInterval))
+                    .initialTokens(maxRequests / 2) // 修正首次可以直接突破限制请求 maxRequests * 2 次
+                    .build();
+            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, oneTimeToken);
             return INSTANCE;
         }
     }

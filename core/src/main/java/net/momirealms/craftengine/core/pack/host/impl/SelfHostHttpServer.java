@@ -3,6 +3,8 @@ package net.momirealms.craftengine.core.pack.host.impl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -23,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,17 +37,20 @@ public class SelfHostHttpServer {
             .scheduler(Scheduler.systemScheduler())
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build();
-    private final Cache<String, IpAccessRecord> ipAccessCache = Caffeine.newBuilder()
+    private final Cache<String, Bucket> ipRateLimiters = Caffeine.newBuilder()
             .maximumSize(256)
             .scheduler(Scheduler.systemScheduler())
-            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build();
 
     private final AtomicLong totalRequests = new AtomicLong();
     private final AtomicLong blockedRequests = new AtomicLong();
 
-    private int rateLimit = 1;
-    private long rateLimitInterval = 1000;
+    private Bandwidth limit = Bandwidth.builder()
+            .capacity(1)
+            .refillGreedy(1, Duration.ofSeconds(1))
+            .initialTokens(1)
+            .build();
     private String ip = "localhost";
     private int port = -1;
     private String protocol = "http";
@@ -72,15 +78,13 @@ public class SelfHostHttpServer {
                                  String url,
                                  boolean denyNonMinecraft,
                                  String protocol,
-                                 int maxRequests,
-                                 int resetInterval,
+                                 Bandwidth limit,
                                  boolean token) {
         this.ip = ip;
         this.url = url;
         this.denyNonMinecraft = denyNonMinecraft;
         this.protocol = protocol;
-        this.rateLimit = maxRequests;
-        this.rateLimitInterval = resetInterval;
+        this.limit = limit;
         this.useToken = token;
 
         if (port <= 0 || port > 65535) {
@@ -214,22 +218,12 @@ public class SelfHostHttpServer {
         }
 
         private boolean checkRateLimit(String clientIp) {
-            IpAccessRecord record = ipAccessCache.getIfPresent(clientIp);
-            long now = System.currentTimeMillis();
-
-            if (record == null) {
-                record = new IpAccessRecord(now, 1);
-                ipAccessCache.put(clientIp, record);
-                return false;
+            Bucket rateLimiter = ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(limit).build());
+            if (rateLimiter == null) { // 怎么可能null?
+                rateLimiter = Bucket.builder().addLimit(limit).build();
+                ipRateLimiters.put(clientIp, rateLimiter);
             }
-
-            if (now - record.lastAccessTime > rateLimitInterval) {
-                record.lastAccessTime = now;
-                record.accessCount = 1;
-                return false;
-            }
-
-            return ++record.accessCount > rateLimit;
+            return !rateLimiter.tryConsume(1);
         }
 
         private boolean validateToken(String token) {
@@ -310,16 +304,6 @@ public class SelfHostHttpServer {
             this.packUUID = UUID.nameUUIDFromBytes(this.packHash.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
             CraftEngine.instance().logger().severe("SHA-1 algorithm not available", e);
-        }
-    }
-
-    private static class IpAccessRecord {
-        long lastAccessTime;
-        int accessCount;
-
-        IpAccessRecord(long lastAccessTime, int accessCount) {
-            this.lastAccessTime = lastAccessTime;
-            this.accessCount = accessCount;
         }
     }
 }

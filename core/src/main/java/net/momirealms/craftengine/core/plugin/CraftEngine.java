@@ -419,7 +419,8 @@ public abstract class CraftEngine implements Plugin {
                 Dependencies.LZ4,
                 Dependencies.EVALEX,
                 Dependencies.NETTY_HTTP,
-                Dependencies.JIMFS
+                Dependencies.JIMFS,
+                Dependencies.BUCKET_4_J
         );
     }
 
