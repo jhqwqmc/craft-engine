@@ -18,6 +18,7 @@ public class LootEntryContainers {
     public static final Key ITEM = Key.from("craftengine:item");
     public static final Key FURNITURE_ITEM = Key.from("craftengine:furniture_item");
     public static final Key EXP = Key.from("craftengine:exp");
+    public static final Key EMPTY = Key.from("craftengine:empty");
 
     static {
         register(ALTERNATIVES, AlternativesLootEntryContainer.FACTORY);
@@ -25,6 +26,7 @@ public class LootEntryContainers {
         register(ITEM, SingleItemLootEntryContainer.FACTORY);
         register(EXP, ExpLootEntryContainer.FACTORY);
         register(FURNITURE_ITEM, FurnitureItemLootEntryContainer.FACTORY);
+        register(EMPTY, EmptyLoopEntryContainer.FACTORY);
     }
 
     public static <T> void register(Key key, LootEntryContainerFactory<T> factory) {
