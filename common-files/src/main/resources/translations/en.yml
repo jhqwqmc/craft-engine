@@ -80,6 +80,7 @@ warning.config.yaml.duplicated_key: "<red>Issue found in file <arg:0> - Found du
 warning.config.yaml.inconsistent_value_type: "<red>Issue found in file <arg:0> - Found duplicated key '<arg:1>' at line <arg:2> with different value types, this might cause unexpected results.</red>"
 warning.config.type.int: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to integer type for option '<arg:3>'.</yellow>"
 warning.config.type.boolean: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to boolean type for option '<arg:3>'.</yellow>"
+warning.config.type.long: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to long type for option '<arg:3>'.</yellow>"
 warning.config.type.float: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to float type for option '<arg:3>'.</yellow>"
 warning.config.type.double: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to double type for option '<arg:3>'.</yellow>"
 warning.config.type.quaternionf: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to Quaternionf type for option '<arg:3>'.</yellow>"

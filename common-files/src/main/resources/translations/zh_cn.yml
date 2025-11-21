@@ -80,6 +80,7 @@ warning.config.yaml.duplicated_key: "<red>在文件 <arg:0> 发现问题 - 在�
 warning.config.yaml.inconsistent_value_type: "<red>在文件 <arg:0> 发现问题 - 在第<arg:2>行发现重复且值类型不同的键 '<arg:1>', 这可能会导致一些意料之外的问题</red>"
 warning.config.type.int: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为整数类型 (选项 '<arg:3>')</yellow>"
 warning.config.type.boolean: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为布尔类型 (选项 '<arg:3>')</yellow>"
+warning.config.type.long: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为长整型类型 (选项 '<arg:3>')</yellow>"
 warning.config.type.float: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为浮点数类型 (选项 '<arg:3>')</yellow>"
 warning.config.type.double: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为双精度类型 (选项 '<arg:3>')</yellow>"
 warning.config.type.quaternionf: "<yellow>在文件 <arg:0> 发现问题 - 无法加载 '<arg:1>': 无法将 '<arg:2>' 转换为四元数类型 (选项 '<arg:3>')</yellow>"

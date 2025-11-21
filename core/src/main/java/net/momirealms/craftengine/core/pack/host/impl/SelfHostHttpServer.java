@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.pack.host.impl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
+import com.google.common.util.concurrent.RateLimiter;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.netty.bootstrap.ServerBootstrap;
@@ -30,6 +31,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SelfHostHttpServer {
     private static SelfHostHttpServer instance;
     private final Cache<String, Boolean> oneTimePackUrls = Caffeine.newBuilder()
@@ -46,11 +48,14 @@ public class SelfHostHttpServer {
     private final AtomicLong totalRequests = new AtomicLong();
     private final AtomicLong blockedRequests = new AtomicLong();
 
-    private Bandwidth limit = Bandwidth.builder()
+    private Bandwidth limitPerIp = Bandwidth.builder()
             .capacity(1)
             .refillGreedy(1, Duration.ofSeconds(1))
             .initialTokens(1)
             .build();
+    private RateLimiter globalLimiter = RateLimiter.create(1);
+    private boolean enabledLimitPerIp = false;
+    private boolean enabledGlobalLimit = false;
     private String ip = "localhost";
     private int port = -1;
     private String protocol = "http";
@@ -78,13 +83,19 @@ public class SelfHostHttpServer {
                                  String url,
                                  boolean denyNonMinecraft,
                                  String protocol,
-                                 Bandwidth limit,
+                                 Bandwidth limitPerIp,
+                                 boolean enabledLimitPerIp,
+                                 boolean enabledGlobalLimit,
+                                 RateLimiter globalLimiter,
                                  boolean token) {
         this.ip = ip;
         this.url = url;
         this.denyNonMinecraft = denyNonMinecraft;
         this.protocol = protocol;
-        this.limit = limit;
+        this.limitPerIp = limitPerIp;
+        this.enabledLimitPerIp = enabledLimitPerIp;
+        this.enabledGlobalLimit = enabledGlobalLimit;
+        this.globalLimiter = globalLimiter;
         this.useToken = token;
 
         if (port <= 0 || port > 65535) {
@@ -140,7 +151,13 @@ public class SelfHostHttpServer {
                 String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress())
                         .getAddress().getHostAddress();
 
-                if (checkRateLimit(clientIp)) {
+                if (enabledGlobalLimit && !globalLimiter.tryAcquire()) {
+                    sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Rate limit exceeded");
+                    blockedRequests.incrementAndGet();
+                    return;
+                }
+
+                if (enabledLimitPerIp && !checkIpRateLimit(clientIp)) {
                     sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Rate limit exceeded");
                     blockedRequests.incrementAndGet();
                     return;
@@ -217,13 +234,12 @@ public class SelfHostHttpServer {
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 
-        private boolean checkRateLimit(String clientIp) {
-            Bucket rateLimiter = ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(limit).build());
-            if (rateLimiter == null) { // 怎么可能null?
-                rateLimiter = Bucket.builder().addLimit(limit).build();
-                ipRateLimiters.put(clientIp, rateLimiter);
-            }
-            return !rateLimiter.tryConsume(1);
+        private boolean checkIpRateLimit(String clientIp) {
+            Bucket rateLimiter = ipRateLimiters.get(clientIp, k ->
+                    Bucket.builder().addLimit(limitPerIp).build()
+            );
+            assert rateLimiter != null;
+            return rateLimiter.tryConsume(1);
         }
 
         private boolean validateToken(String token) {

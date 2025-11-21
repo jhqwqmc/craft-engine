@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
+import com.google.common.util.concurrent.RateLimiter;
 import io.github.bucket4j.Bandwidth;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class SelfHost implements ResourcePackHost {
     public static final Factory FACTORY = new Factory();
@@ -60,6 +62,7 @@ public class SelfHost implements ResourcePackHost {
 
     public static class Factory implements ResourcePackHostFactory {
 
+        @SuppressWarnings("UnstableApiUsage")
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {
             SelfHostHttpServer selfHostHttpServer = SelfHostHttpServer.instance();
@@ -78,19 +81,30 @@ public class SelfHost implements ResourcePackHost {
             boolean oneTimeToken = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("one-time-token", true), "one-time-token");
             String protocol = arguments.getOrDefault("protocol", "http").toString();
             boolean denyNonMinecraftRequest = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deny-non-minecraft-request", true), "deny-non-minecraft-request");
-            Map<String, Object> rateMap = MiscUtils.castToMap(ResourceConfigUtils.get(arguments, "rate-map", "rate-limit"), true);
-            int maxRequests = 5;
-            int resetInterval = 20;
-            if (rateMap != null) {
-                maxRequests = Math.max(ResourceConfigUtils.getAsInt(rateMap.getOrDefault("max-requests", 5), "max-requests"), 1);
-                resetInterval = Math.max(ResourceConfigUtils.getAsInt(rateMap.getOrDefault("reset-interval", 20), "reset-interval"), 1);
+            Map<String, Object> rateLimitPerIp = MiscUtils.castToMap(arguments.get("rate-limitation-per-ip"), true);
+            boolean enabledLimitPerIp = false;
+            Bandwidth limit = null;
+            out:
+            if (rateLimitPerIp != null) {
+                enabledLimitPerIp = ResourceConfigUtils.getAsBoolean(rateLimitPerIp.getOrDefault("enable", false), "enable");
+                if (!enabledLimitPerIp) break out;
+                int maxRequests = Math.max(ResourceConfigUtils.getAsInt(rateLimitPerIp.getOrDefault("max-requests", 5), "max-requests"), 1);
+                int resetInterval = Math.max(ResourceConfigUtils.getAsInt(rateLimitPerIp.getOrDefault("reset-interval", 20), "reset-interval"), 1);
+                limit = Bandwidth.builder()
+                        .capacity(maxRequests)
+                        .refillGreedy(maxRequests, Duration.ofSeconds(resetInterval))
+                        .build();
             }
-            Bandwidth limit = Bandwidth.builder()
-                    .capacity(maxRequests)
-                    .refillGreedy(maxRequests, Duration.ofSeconds(resetInterval))
-                    .initialTokens(maxRequests / 2) // 修正首次可以直接突破限制请求 maxRequests * 2 次
-                    .build();
-            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, oneTimeToken);
+            Map<String, Object> tokenBucket = MiscUtils.castToMap(arguments.get("token-bucket"), true);
+            boolean enabledTokenBucket = false;
+            RateLimiter globalLimiter = null;
+            out:
+            if (tokenBucket != null) {
+                enabledTokenBucket = ResourceConfigUtils.getAsBoolean(tokenBucket.getOrDefault("enable", false), "enable");
+                if (!enabledTokenBucket) break out;
+                globalLimiter = RateLimiter.create(ResourceConfigUtils.getAsDouble(tokenBucket.getOrDefault("qps", 1000), "qps"));
+            }
+            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, enabledLimitPerIp, enabledTokenBucket, globalLimiter, oneTimeToken);
             return INSTANCE;
         }
     }

@@ -218,6 +218,30 @@ public final class ResourceConfigUtils {
         }
     }
 
+    public static long getAsLong(Object o, String option) {
+        switch (o) {
+            case null -> {
+                return 0;
+            }
+            case Long l -> {
+                return l;
+            }
+            case Number number -> {
+                return number.longValue();
+            }
+            case String s -> {
+                try {
+                    return Long.parseLong(s);
+                } catch (NumberFormatException e) {
+                    throw new LocalizedResourceConfigException("warning.config.type.long", e, s, option);
+                }
+            }
+            default -> {
+                throw new LocalizedResourceConfigException("warning.config.type.long", o.toString(), option);
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getAsMap(Object obj, String option) {
         if (obj instanceof Map<?, ?> map) {
