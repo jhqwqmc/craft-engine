@@ -1544,7 +1544,14 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                 }
                 if (Config.fixTextureAtlas()) {
-                    texturesToFix.add(key);
+                    String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
+                    for (Path rootPath : rootPaths) {
+                        if (Files.exists(rootPath.resolve(imagePath))) {
+                            texturesToFix.add(key);
+                            continue label;
+                        }
+                    }
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
                 } else {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas", key.toString());
                 }
