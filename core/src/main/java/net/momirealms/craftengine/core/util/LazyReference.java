@@ -6,6 +6,8 @@ public interface LazyReference<T> {
     
     T get();
 
+    boolean initialized();
+
     static <T> LazyReference<T> lazyReference(final Supplier<T> supplier) {
         return new LazyReference<>() {
             private T value;
@@ -16,6 +18,11 @@ public interface LazyReference<T> {
                     this.value = supplier.get();
                 }
                 return this.value;
+            }
+
+            @Override
+            public boolean initialized() {
+                return this.value != null;
             }
         };
     }

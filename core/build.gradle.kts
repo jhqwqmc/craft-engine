@@ -116,7 +116,16 @@ tasks {
 publishing {
     repositories {
         maven {
+            name = "releases"
             url = uri("https://repo.momirealms.net/releases")
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("REPO_USERNAME")
+                password = System.getenv("REPO_PASSWORD")
+            }
+        }
+        maven {
+            name = "snapshot"
+            url = uri("https://repo.momirealms.net/snapshots")
             credentials(PasswordCredentials::class) {
                 username = System.getenv("REPO_USERNAME")
                 password = System.getenv("REPO_PASSWORD")
@@ -142,5 +151,35 @@ publishing {
                 }
             }
         }
+        create<MavenPublication>("mavenJavaSnapshot") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-core"
+            version = "${rootProject.properties["project_version"]}-SNAPSHOT"
+            artifact(tasks["sourcesJar"])
+            from(components["shadow"])
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+                licenses {
+                    license {
+                        name = "GNU General Public License v3.0"
+                        url = "https://www.gnu.org/licenses/gpl-3.0.html"
+                        distribution = "repo"
+                    }
+                }
+            }
+        }
     }
+}
+
+tasks.register("publishRelease") {
+    group = "publishing"
+    description = "Publishes to the release repository"
+    dependsOn("publishMavenJavaPublicationToReleaseRepository")
+}
+
+tasks.register("publishSnapshot") {
+    group = "publishing"
+    description = "Publishes to the snapshot repository"
+    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository")
 }

@@ -294,9 +294,8 @@ public class SelfHostHttpServer {
         }
 
         private boolean checkIpRateLimit(String clientIp) {
-            Bucket rateLimiter = ipRateLimiters.get(clientIp, k ->
-                    Bucket.builder().addLimit(limitPerIp).build()
-            );
+            if (limitPerIp == null) return true;
+            Bucket rateLimiter = ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(limitPerIp).build());
             assert rateLimiter != null;
             return rateLimiter.tryConsume(1);
         }
