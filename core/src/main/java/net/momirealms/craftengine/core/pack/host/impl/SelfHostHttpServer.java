@@ -39,7 +39,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-@SuppressWarnings("UnstableApiUsage")
 public class SelfHostHttpServer {
     private static SelfHostHttpServer instance;
     private final Cache<String, Boolean> oneTimePackUrls = Caffeine.newBuilder()

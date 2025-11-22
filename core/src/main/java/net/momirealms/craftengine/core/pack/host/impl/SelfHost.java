@@ -59,7 +59,6 @@ public class SelfHost implements ResourcePackHost {
 
     public static class Factory implements ResourcePackHostFactory {
 
-        @SuppressWarnings("UnstableApiUsage")
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {
             SelfHostHttpServer selfHostHttpServer = SelfHostHttpServer.instance();
