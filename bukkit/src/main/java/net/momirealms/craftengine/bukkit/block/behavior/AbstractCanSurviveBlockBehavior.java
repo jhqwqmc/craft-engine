@@ -34,7 +34,7 @@ public abstract class AbstractCanSurviveBlockBehavior extends BukkitBlockBehavio
                     net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
                     WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(LocationUtils.fromBlockPos(blockPos)));
                     world.playBlockSound(position, customState.settings().sounds().breakSound());
-                    FastNMS.INSTANCE.method$Level$destroyBlock(level, blockPos, true);
+                    FastNMS.INSTANCE.method$LevelWriter$destroyBlock(level, blockPos, true);
                 }
             });
         }
