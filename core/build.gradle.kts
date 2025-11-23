@@ -21,7 +21,7 @@ dependencies {
     implementation("net.momirealms:sparrow-nbt-codec:${rootProject.properties["sparrow_nbt_version"]}")
     implementation("net.momirealms:sparrow-nbt-legacy-codec:${rootProject.properties["sparrow_nbt_version"]}")
     // S3
-    implementation("net.momirealms:craft-engine-s3:0.8")
+    implementation("net.momirealms:craft-engine-s3:0.9")
     // Util
     compileOnly("net.momirealms:sparrow-util:${rootProject.properties["sparrow_util_version"]}")
     // Adventure
@@ -69,6 +69,8 @@ dependencies {
     compileOnly("com.mojang:authlib:${rootProject.properties["authlib_version"]}")
     // concurrentutil
     compileOnly("ca.spottedleaf:concurrentutil:${rootProject.properties["concurrent_util_version"]}")
+    // bucket4j
+    compileOnly("com.bucket4j:bucket4j_jdk17-core:${rootProject.properties["bucket4j_version"]}")
 }
 
 java {
@@ -107,13 +109,23 @@ tasks {
         relocate("io.netty.handler.codec.rtsp", "net.momirealms.craftengine.libraries.netty.handler.codec.rtsp")
         relocate("io.netty.handler.codec.spdy", "net.momirealms.craftengine.libraries.netty.handler.codec.spdy")
         relocate("io.netty.handler.codec.http2", "net.momirealms.craftengine.libraries.netty.handler.codec.http2")
+        relocate("io.github.bucket4j", "net.momirealms.craftengine.libraries.bucket4j") // bucket4j
     }
 }
 
 publishing {
     repositories {
         maven {
+            name = "releases"
             url = uri("https://repo.momirealms.net/releases")
+            credentials(PasswordCredentials::class) {
+                username = System.getenv("REPO_USERNAME")
+                password = System.getenv("REPO_PASSWORD")
+            }
+        }
+        maven {
+            name = "snapshot"
+            url = uri("https://repo.momirealms.net/snapshots")
             credentials(PasswordCredentials::class) {
                 username = System.getenv("REPO_USERNAME")
                 password = System.getenv("REPO_PASSWORD")
@@ -139,5 +151,35 @@ publishing {
                 }
             }
         }
+        create<MavenPublication>("mavenJavaSnapshot") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-core"
+            version = "${rootProject.properties["project_version"]}-SNAPSHOT"
+            artifact(tasks["sourcesJar"])
+            from(components["shadow"])
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+                licenses {
+                    license {
+                        name = "GNU General Public License v3.0"
+                        url = "https://www.gnu.org/licenses/gpl-3.0.html"
+                        distribution = "repo"
+                    }
+                }
+            }
+        }
     }
+}
+
+tasks.register("publishRelease") {
+    group = "publishing"
+    description = "Publishes to the release repository"
+    dependsOn("publishMavenJavaPublicationToReleaseRepository")
+}
+
+tasks.register("publishSnapshot") {
+    group = "publishing"
+    description = "Publishes to the snapshot repository"
+    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository")
 }

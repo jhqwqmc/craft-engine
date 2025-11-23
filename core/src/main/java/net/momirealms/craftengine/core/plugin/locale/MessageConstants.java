@@ -35,4 +35,10 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_LOCALE_SET_FAILURE = Component.translatable().key("command.locale.set.failure");
     TranslatableComponent.Builder COMMAND_LOCALE_SET_SUCCESS = Component.translatable().key("command.locale.set.success");
     TranslatableComponent.Builder COMMAND_LOCALE_UNSET_SUCCESS = Component.translatable().key("command.locale.unset.success");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_SUCCESS_SINGLE = Component.translatable().key("command.item.clear.success.single");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_SUCCESS_MULTIPLE = Component.translatable().key("command.item.clear.success.multiple");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_FAILED_SINGLE = Component.translatable().key("command.item.clear.failed.single");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_FAILED_MULTIPLE = Component.translatable().key("command.item.clear.failed.multiple");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_TEST_SINGLE = Component.translatable().key("command.item.clear.test.single");
+    TranslatableComponent.Builder COMMAND_ITEM_CLEAR_TEST_MULTIPLE = Component.translatable().key("command.item.clear.test.multiple");
 }

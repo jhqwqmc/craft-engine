@@ -72,7 +72,7 @@ public class Vec3d implements Position {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Vec3d vec3d)) return false;
-        return Double.compare(x, vec3d.x) == 0 && Double.compare(y, vec3d.y) == 0 && Double.compare(z, vec3d.z) == 0;
+        return this.x == vec3d.x && this.y == vec3d.y && this.z == vec3d.z;
     }
 
     @Override

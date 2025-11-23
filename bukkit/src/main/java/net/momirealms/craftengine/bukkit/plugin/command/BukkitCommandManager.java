@@ -33,6 +33,7 @@ public class BukkitCommandManager extends AbstractCommandManager<CommandSender> 
                 new ReloadCommand(this, plugin),
                 new GetItemCommand(this, plugin),
                 new GiveItemCommand(this, plugin),
+                new ClearItemCommand(this, plugin),
                 new ItemBrowserPlayerCommand(this, plugin),
                 new ItemBrowserAdminCommand(this, plugin),
                 new SearchRecipePlayerCommand(this, plugin),
@@ -63,8 +64,9 @@ public class BukkitCommandManager extends AbstractCommandManager<CommandSender> 
                 new SendResourcePackCommand(this, plugin),
                 new DebugSaveDefaultResourcesCommand(this, plugin),
                 new DebugCleanCacheCommand(this, plugin),
-                new DebugGenerateInternalAssetsCommand(this, plugin)
-//                new OverrideGiveCommand(this, plugin)
+                new DebugGenerateInternalAssetsCommand(this, plugin),
+                new DebugCustomModelDataCommand(this, plugin),
+                new DebugImageCommand(this, plugin)
         ));
         final LegacyPaperCommandManager<CommandSender> manager = (LegacyPaperCommandManager<CommandSender>) getCommandManager();
         manager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);

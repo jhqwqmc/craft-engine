@@ -19,6 +19,7 @@ import net.momirealms.sparrow.nbt.ListTag;
 import net.momirealms.sparrow.nbt.StringTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +111,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
     }
 
     @Override
-    public Optional<Item<ItemStack>> s2c(Item<ItemStack> wrapped, Player player) {
+    public Optional<Item<ItemStack>> s2c(Item<ItemStack> wrapped, @Nullable Player player) {
         boolean forceReturn = false;
 
         // 处理收纳袋

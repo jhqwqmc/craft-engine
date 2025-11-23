@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
-import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
@@ -9,53 +8,36 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.*;
+import net.momirealms.craftengine.core.block.BlockBehavior;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.parser.BlockStateParser;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.BlockFormEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ConcretePowderBlockBehavior extends BukkitBlockBehavior {
     public static final Factory FACTORY = new Factory();
-    private final Key targetBlock; // TODO 更宽泛的，使用state，似乎也不是很好的方案？
-    private Object defaultBlockState;
-    private ImmutableBlockState defaultImmutableBlockState;
+    private final LazyReference<@Nullable ImmutableBlockState> targetBlock;
 
-    public ConcretePowderBlockBehavior(CustomBlock block, Key targetBlock) {
+    public ConcretePowderBlockBehavior(CustomBlock block, String targetBlock) {
         super(block);
-        this.targetBlock = targetBlock;
-    }
-
-    public ImmutableBlockState defaultImmutableBlockState() {
-        if (this.defaultImmutableBlockState == null) {
-            this.getDefaultBlockState();
-        }
-        return this.defaultImmutableBlockState;
+        this.targetBlock = LazyReference.lazyReference(() -> BlockStateParser.deserialize(targetBlock));
     }
 
     public Object getDefaultBlockState() {
-        if (this.defaultBlockState != null) {
-            return this.defaultBlockState;
-        }
-        Optional<CustomBlock> optionalCustomBlock = BukkitBlockManager.instance().blockById(this.targetBlock);
-        if (optionalCustomBlock.isPresent()) {
-            CustomBlock customBlock = optionalCustomBlock.get();
-            this.defaultBlockState = customBlock.defaultState().customBlockState().literalObject();
-            this.defaultImmutableBlockState = customBlock.defaultState();
-        } else {
-            CraftEngine.instance().logger().warn("Failed to create solid block " + this.targetBlock + " in ConcretePowderBlockBehavior");
-            this.defaultBlockState = MBlocks.STONE$defaultState;
-            this.defaultImmutableBlockState = EmptyBlock.STATE;
-        }
-        return this.defaultBlockState;
+        ImmutableBlockState state = this.targetBlock.get();
+        return state != null ? state.customBlockState().literalObject() : MBlocks.STONE$defaultState;
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -72,7 +54,7 @@ public class ConcretePowderBlockBehavior extends BukkitBlockBehavior {
                 craftBlockState.setBlockData(BlockStateUtils.fromBlockData(getDefaultBlockState()));
                 BlockFormEvent event = new BlockFormEvent(craftBlockState.getBlock(), craftBlockState);
                 if (!EventUtils.fireAndCheckCancel(event)) {
-                    return defaultImmutableBlockState();
+                    return this.targetBlock.get();
                 } else {
                     return super.updateStateForPlacement(context, state);
                 }
@@ -148,7 +130,7 @@ public class ConcretePowderBlockBehavior extends BukkitBlockBehavior {
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String solidBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("solid-block"), "warning.config.block.behavior.concrete.missing_solid");
-            return new ConcretePowderBlockBehavior(block, Key.of(solidBlock));
+            return new ConcretePowderBlockBehavior(block, solidBlock);
         }
     }
 }

@@ -35,6 +35,7 @@ import net.momirealms.craftengine.core.plugin.locale.LangData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.sound.AbstractSoundManager;
 import net.momirealms.craftengine.core.sound.SoundEvent;
 import net.momirealms.craftengine.core.util.*;
@@ -1122,7 +1123,7 @@ public abstract class AbstractPackManager implements PackManager {
                 futures.add(CompletableFuture.runAsync(() -> {
                     try {
                         byte[] previousImageBytes = Files.readAllBytes(imagePath);
-                        byte[] optimized = optimizeImage(previousImageBytes);
+                        byte[] optimized = optimizeImage(imagePath, previousImageBytes);
                         previousBytes.addAndGet(previousImageBytes.length);
                         if (optimized.length < previousImageBytes.length) {
                             afterBytes.addAndGet(optimized.length);
@@ -1190,9 +1191,13 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private byte[] optimizeImage(byte[] previousImageBytes) throws IOException {
+    private byte[] optimizeImage(Path imagePath, byte[] previousImageBytes) throws IOException {
         try (ByteArrayInputStream is = new ByteArrayInputStream(previousImageBytes)) {
             BufferedImage src = ImageIO.read(is);
+            if (src == null) {
+                Debugger.RESOURCE_PACK.debug(() -> "Cannot read image " + imagePath.toString());
+                return previousImageBytes;
+            }
             if (src.getType() == BufferedImage.TYPE_CUSTOM) {
                 return previousImageBytes;
             }
@@ -1539,7 +1544,14 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                 }
                 if (Config.fixTextureAtlas()) {
-                    texturesToFix.add(key);
+                    String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
+                    for (Path rootPath : rootPaths) {
+                        if (Files.exists(rootPath.resolve(imagePath))) {
+                            texturesToFix.add(key);
+                            continue label;
+                        }
+                    }
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
                 } else {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas", key.toString());
                 }
@@ -1903,6 +1915,11 @@ public abstract class AbstractPackManager implements PackManager {
 
     private void processComponentBasedEquipment(ComponentBasedEquipment componentBasedEquipment, Path generatedPackPath) {
         Key assetId = componentBasedEquipment.assetId();
+        if (assetId == null) {
+            this.plugin.logger().severe("Asset id is null for equipment " + componentBasedEquipment);
+            return;
+        }
+
         if (Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4)) {
             Path equipmentPath = generatedPackPath
                     .resolve("assets")

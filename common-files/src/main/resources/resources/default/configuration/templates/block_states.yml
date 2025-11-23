@@ -61,7 +61,7 @@ templates:
         model:
           path: ${model_path}
           generation:
-            parent: minecraft:block/leaves
+            parent: minecraft:block/${leaves_base_model}
             textures:
               all: ${texture_path}
       waterlogged:
@@ -83,15 +83,21 @@ templates:
   # any leaves block
   default:block_state/leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: leaves
+    arguments:
+      auto_state: leaves
+      leaves_base_model: leaves
   # tintable leaves block
   default:block_state/tintable_leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: tintable_leaves
+    arguments:
+      auto_state: tintable_leaves
+      leaves_base_model: leaves
   # non-tintable leaves block
   default:block_state/non_tintable_leaves:
     template: default:block_state/__leaves__
-    arguments::auto_state: non_tintable_leaves
+    arguments:
+      auto_state: non_tintable_leaves
+      leaves_base_model: cube_all
   # trapdoor block
   default:block_state/trapdoor:
     properties:

@@ -267,8 +267,11 @@ public abstract class CraftEngine implements Plugin {
         this.vanillaLootManager.delayedInit();
         // 注册脱离坐骑监听器
         this.seatManager.delayedInit();
-        // 注册世界加载相关监听器
-        this.worldManager.delayedInit();
+
+        if (!Config.delayConfigurationLoad()) {
+            // 注册世界加载相关监听器
+            this.worldManager.delayedInit();
+        }
 
         // 延迟任务
         this.beforeEnableTaskRegistry.executeTasks();
@@ -310,6 +313,7 @@ public abstract class CraftEngine implements Plugin {
             } else {
                 try {
                     this.reloadPlugin(Runnable::run, Runnable::run, true);
+                    this.worldManager.delayedInit();
                 } catch (Exception e) {
                     this.logger.severe("Failed to reload plugin on delayed enable stage", e);
                 }
@@ -415,7 +419,8 @@ public abstract class CraftEngine implements Plugin {
                 Dependencies.LZ4,
                 Dependencies.EVALEX,
                 Dependencies.NETTY_HTTP,
-                Dependencies.JIMFS
+                Dependencies.JIMFS,
+                Dependencies.BUCKET_4_J
         );
     }
 

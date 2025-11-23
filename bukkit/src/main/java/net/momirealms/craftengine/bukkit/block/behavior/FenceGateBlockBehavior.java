@@ -12,6 +12,7 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.*;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -40,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
-public class FenceGateBlockBehavior extends BukkitBlockBehavior {
+public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> inWallProperty;
@@ -144,6 +145,7 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior {
     @SuppressWarnings("unchecked")
     private void playerToggle(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
+        if (player == null) return;
         this.toggle(state, context.getLevel(), context.getClickedPos(), player);
         if (!InteractUtils.isInteractable((org.bukkit.entity.Player) player.platformPlayer(), BlockStateUtils.fromBlockData(state.vanillaBlockState().literalObject()), context.getHitResult(), (Item<ItemStack>) context.getItem())) {
             player.swingHand(context.getHand());

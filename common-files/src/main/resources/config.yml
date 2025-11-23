@@ -193,11 +193,17 @@ resource-pack:
         ip: "localhost"
         port: 8163
         protocol: "http"
+        # Blocks all requests from non-Minecraft clients.
         deny-non-minecraft-request: true
+        # Generates a single-use, time-limited download link for each player.
         one-time-token: true
-        rate-limit:
-          max-requests: 10
-          reset-interval: 30
+        rate-limiting:
+          # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
+          max-bandwidth-per-second: 5_000_000 # 5MB/s
+          # Minimum guaranteed download speed per player to ensure acceptable download performance during concurrent downloads
+          min-download-speed-per-player: 50_000 # 50KB/s
+          # Prevent a single IP from sending too many resource pack download requests in a short time period
+          qps-per-ip: 5/60 #  5 requests per 60 seconds
 
 item:
   # [Premium Exclusive]
@@ -261,6 +267,10 @@ block:
   # Enables the sound system, which prevents the client from hearing some non-custom block sounds and improves the client experience.
   sound-system:
     enable: true
+    # Should we process events that were canceled by other plugins to restore sounds?
+    process-cancelled-events:
+      step: true
+      break: true
   # Adventure mode requires correct tools to break custom blocks.
   # Vanilla clients cannot recognize custom block IDs (e.g., craftengine:custom_100).
   #
@@ -541,6 +551,12 @@ chunk-system:
     enable: false
     remove: []
     convert: {}
+
+#client-optimization:
+#  # Using server-side ray tracing algorithms to hide certain entities and reduce client-side rendering pressure.
+#  entity-culling:
+#    enable: false
+#    whitelist-entities: []
 
 # Enables or disables debug mode
 debug:

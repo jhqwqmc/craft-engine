@@ -47,6 +47,7 @@ public class ItemSettings {
     Color dyeColor;
     @Nullable
     Color fireworkColor;
+    Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private ItemSettings() {}
 
@@ -108,6 +109,7 @@ public class ItemSettings {
         newSettings.dyeColor = settings.dyeColor;
         newSettings.fireworkColor = settings.fireworkColor;
         newSettings.ingredientSubstitutes = settings.ingredientSubstitutes;
+        newSettings.customData = settings.customData;
         return newSettings;
     }
 
@@ -123,73 +125,86 @@ public class ItemSettings {
         return settings;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomData(CustomDataType<T> type) {
+        return (T) this.customData.get(type);
+    }
+
+    public void clearCustomData() {
+        this.customData.clear();
+    }
+
+    public <T> void addCustomData(CustomDataType<T> key, T value) {
+        this.customData.put(key, value);
+    }
+
     public ProjectileMeta projectileMeta() {
-        return projectileMeta;
+        return this.projectileMeta;
     }
 
     public boolean disableVanillaBehavior() {
-        return disableVanillaBehavior;
+        return this.disableVanillaBehavior;
     }
 
     public Repairable repairable() {
-        return repairable;
+        return this.repairable;
     }
 
     public int fuelTime() {
-        return fuelTime;
+        return this.fuelTime;
     }
 
     public boolean renameable() {
-        return renameable;
+        return this.renameable;
     }
 
     public Set<Key> tags() {
-        return tags;
+        return this.tags;
     }
 
     public Tristate dyeable() {
-        return dyeable;
+        return this.dyeable;
     }
 
     public boolean canEnchant() {
-        return canEnchant;
+        return this.canEnchant;
     }
 
     public List<AnvilRepairItem> repairItems() {
-        return anvilRepairItems;
+        return this.anvilRepairItems;
     }
 
     public boolean respectRepairableComponent() {
-        return respectRepairableComponent;
+        return this.respectRepairableComponent;
     }
 
     public List<Key> ingredientSubstitutes() {
-        return ingredientSubstitutes;
+        return this.ingredientSubstitutes;
     }
 
     @Nullable
     public FoodData foodData() {
-        return foodData;
+        return this.foodData;
     }
 
     @Nullable
     public Key consumeReplacement() {
-        return consumeReplacement;
+        return this.consumeReplacement;
     }
 
     @Nullable
     public CraftRemainder craftRemainder() {
-        return craftRemainder;
+        return this.craftRemainder;
     }
 
     @Nullable
     public Helmet helmet() {
-        return helmet;
+        return this.helmet;
     }
 
     @Nullable
     public ItemEquipment equipment() {
-        return equipment;
+        return this.equipment;
     }
 
     @Nullable
@@ -203,11 +218,11 @@ public class ItemSettings {
     }
 
     public List<DamageSource> invulnerable() {
-        return invulnerable;
+        return this.invulnerable;
     }
 
     public float compostProbability() {
-        return compostProbability;
+        return this.compostProbability;
     }
 
     public ItemSettings fireworkColor(Color color) {
@@ -384,6 +399,9 @@ public class ItemSettings {
             registerFactory("equippable", (value -> {
                 Map<String, Object> args = MiscUtils.castToMap(value, false);
                 EquipmentData data = EquipmentData.fromMap(args);
+                if (data.assetId() == null) {
+                    throw new IllegalArgumentException("Please move 'equippable' option to 'data' section.");
+                }
                 ComponentBasedEquipment componentBasedEquipment = ComponentBasedEquipment.FACTORY.create(data.assetId(), args);
                 ((AbstractItemManager<?>) CraftEngine.instance().itemManager()).addOrMergeEquipment(componentBasedEquipment);
                 ItemEquipment itemEquipment = new ItemEquipment(Tristate.FALSE, data, componentBasedEquipment);
@@ -482,7 +500,7 @@ public class ItemSettings {
             registerFactory("ingredient-substitute", (value -> settings -> settings.ingredientSubstitutes(MiscUtils.getAsStringList(value).stream().map(Key::of).toList())));
         }
 
-        private static void registerFactory(String id, ItemSettings.Modifier.Factory factory) {
+        public static void registerFactory(String id, ItemSettings.Modifier.Factory factory) {
             FACTORIES.put(id, factory);
         }
     }

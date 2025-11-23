@@ -13,6 +13,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.*;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public class StemBlockBehavior extends BukkitBlockBehavior {
+public class StemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final IntegerProperty ageProperty;
     private final Key fruit;

@@ -113,7 +113,7 @@ public interface ItemManager<T> extends Manageable, ModelGenerator {
 
     Optional<Item<T>> c2s(Item<T> item);
 
-    Optional<Item<T>> s2c(Item<T> item, Player player);
+    Optional<Item<T>> s2c(Item<T> item, @Nullable Player player);
 
     UniqueIdItem<T> uniqueEmptyItem();
 

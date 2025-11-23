@@ -14,6 +14,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SingleBlockHalf;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
@@ -40,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
-public class TrapDoorBlockBehavior extends BukkitBlockBehavior {
+public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final Property<SingleBlockHalf> halfProperty;
     private final Property<HorizontalDirection> facingProperty;
@@ -117,6 +118,7 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior {
     @SuppressWarnings("unchecked")
     private void playerToggle(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
+        if (player == null) return;
         this.toggle(state, context.getLevel(), context.getClickedPos(), player);
         if (!InteractUtils.isInteractable((org.bukkit.entity.Player) player.platformPlayer(), BlockStateUtils.fromBlockData(state.vanillaBlockState().literalObject()), context.getHitResult(), (Item<ItemStack>) context.getItem())) {
             player.swingHand(context.getHand());
