@@ -8,11 +8,11 @@ public abstract class AbstractEquipment implements Equipment {
     protected final Key assetId;
 
     protected AbstractEquipment(Key assetId) {
-        this.assetId = Objects.requireNonNull(assetId, "assetId cannot be null");
+        this.assetId = Objects.requireNonNull(assetId, "asset-id cannot be null");
     }
 
     @Override
     public Key assetId() {
-        return assetId;
+        return this.assetId;
     }
 }

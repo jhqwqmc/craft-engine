@@ -143,5 +143,21 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
                 return dyeData;
             }
         }
+
+        @Override
+        public @NotNull String toString() {
+            return "Layer{" +
+                    "texture='" + texture + '\'' +
+                    ", data=" + data +
+                    ", usePlayerTexture=" + usePlayerTexture +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ComponentBasedEquipment{" +
+                "layers=" + this.layers +
+                '}';
     }
 }

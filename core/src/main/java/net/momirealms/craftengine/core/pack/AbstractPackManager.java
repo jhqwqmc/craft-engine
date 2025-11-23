@@ -1915,6 +1915,11 @@ public abstract class AbstractPackManager implements PackManager {
 
     private void processComponentBasedEquipment(ComponentBasedEquipment componentBasedEquipment, Path generatedPackPath) {
         Key assetId = componentBasedEquipment.assetId();
+        if (assetId == null) {
+            this.plugin.logger().severe("Asset id is null for equipment " + componentBasedEquipment);
+            return;
+        }
+
         if (Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4)) {
             Path equipmentPath = generatedPackPath
                     .resolve("assets")
