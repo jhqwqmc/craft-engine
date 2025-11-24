@@ -49,7 +49,7 @@ public class SetLevelFunction<CTX extends Context> extends AbstractConditionalFu
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.getOrDefault("target", "self"), conditionFactory());
-            Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.exp.missing_count");
+            Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.set_level.missing_count");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
             return new SetLevelFunction<>(getPredicates(arguments), selector, NumberProviders.fromObject(value), add ? ADD_LEVELS : SET_LEVELS);
         }
