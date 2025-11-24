@@ -35,10 +35,7 @@ import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
 import net.momirealms.craftengine.core.sound.SoundSource;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.IntIdentityList;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.chunk.ChunkStatus;
@@ -1252,5 +1249,33 @@ public class BukkitServerPlayer extends Player {
         } else {
             platformPlayer().getPersistentDataContainer().remove(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY));
         }
+    }
+
+    @Override
+    public void giveExperiencePoints(int xpPoints) {
+        platformPlayer().giveExp(xpPoints);
+    }
+
+    @Override
+    public void giveExperienceLevels(int levels) {
+        platformPlayer().giveExpLevels(levels);
+    }
+
+    @Override
+    public int getXpNeededForNextLevel() {
+        return platformPlayer().getExperiencePointsNeededForNextLevel();
+    }
+
+    @Override
+    public void setExperiencePoints(int experiencePoints) {
+        float xpNeededForNextLevel = this.getXpNeededForNextLevel();
+        float maxProgressThreshold = (xpNeededForNextLevel - 1.0F) / xpNeededForNextLevel;
+        float experienceProgress = MiscUtils.clamp(experiencePoints / xpNeededForNextLevel, 0.0F, maxProgressThreshold);
+        platformPlayer().setExp(experienceProgress);
+    }
+
+    @Override
+    public void setExperienceLevels(int level) {
+        platformPlayer().setLevel(level);
     }
 }

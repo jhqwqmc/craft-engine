@@ -46,4 +46,5 @@ public final class CommonFunctions {
     public static final Key DUMMY = Key.of("craftengine:dummy");
     public static final Key DAMAGE_ITEM = Key.of("craftengine:damage_item");
     public static final Key CYCLE_BLOCK_PROPERTY = Key.of("craftengine:cycle_block_property");
+    public static final Key EXP = Key.of("craftengine:exp");
 }
