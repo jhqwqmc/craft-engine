@@ -55,7 +55,8 @@ public class EventFunctions {
         register(CommonFunctions.WHEN, new WhenFunction.FactoryImpl<>(EventConditions::fromMap, EventFunctions::fromMap));
         register(CommonFunctions.DAMAGE_ITEM, new DamageItemFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.CYCLE_BLOCK_PROPERTY, new CycleBlockPropertyFunction.FactoryImpl<>(EventConditions::fromMap));
-        register(CommonFunctions.EXP, new ExpFunction.FactoryImpl<>(EventConditions::fromMap));
+        register(CommonFunctions.SET_EXP, new SetExpFunction.FactoryImpl<>(EventConditions::fromMap));
+        register(CommonFunctions.SET_LEVEL, new SetLevelFunction.FactoryImpl<>(EventConditions::fromMap));
     }
 
     public static void register(Key key, FunctionFactory<Context> factory) {
