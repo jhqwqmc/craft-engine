@@ -43,6 +43,7 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         SHORT(e -> e.getNumberValue().shortValueExact()),
         DOUBLE(e -> e.getNumberValue().doubleValue()),
         FLOAT(e -> e.getNumberValue().floatValue()),
+        BYTE(e -> e.getNumberValue().byteValue()),
         BOOLEAN(EvaluationValue::getBooleanValue),;
 
         private final Function<EvaluationValue, Object> formatter;
@@ -61,7 +62,7 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         public TemplateArgument create(Map<String, Object> arguments) {
             return new ExpressionTemplateArgument(
                     arguments.getOrDefault("expression", "").toString(),
-                    ValueType.valueOf(arguments.getOrDefault("value-type", "double").toString().toUpperCase(Locale.ENGLISH))
+                    ValueType.valueOf(arguments.getOrDefault("value-type", "double").toString().toUpperCase(Locale.ROOT))
             );
         }
     }
