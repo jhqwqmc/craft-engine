@@ -32,11 +32,11 @@ public class TemplateArguments {
     }
 
     public static TemplateArgument fromMap(Map<String, Object> map) {
-        String type = (String) map.get("type");
-        if (type == null) {
+        Object type = map.get("type");
+        if (!(type instanceof String type0) || map.containsKey("__skip_template_argument__")) {
             return new MapTemplateArgument(map);
         } else {
-            Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
+            Key key = Key.withDefaultNamespace(type0, Key.DEFAULT_NAMESPACE);
             TemplateArgumentFactory factory = BuiltInRegistries.TEMPLATE_ARGUMENT_FACTORY.getValue(key);
             if (factory == null) {
                 throw new IllegalArgumentException("Unknown argument type: " + type);
