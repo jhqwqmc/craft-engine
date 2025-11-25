@@ -1281,7 +1281,7 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean removeSound) {
-        PlayerUtils.sendTotemAnimation(this, totem, sound, removeSound);
+    public void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent) {
+        PlayerUtils.sendTotemAnimation(this, totem, sound, silent);
     }
 }

@@ -194,7 +194,7 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setExperienceLevels(int level);
 
-    public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean removeSound);
+    public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent);
 
     @Override
     public void remove() {
