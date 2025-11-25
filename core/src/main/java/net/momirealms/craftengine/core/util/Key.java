@@ -39,9 +39,7 @@ public record Key(String namespace, String value) {
 
     @Override
     public int hashCode() {
-        int result = this.namespace.hashCode();
-        result = 31 * result + this.value.hashCode();
-        return result;
+        return 31 * this.namespace.hashCode() + this.value.hashCode();
     }
 
     @Override
@@ -54,7 +52,7 @@ public record Key(String namespace, String value) {
         }
         if (!(obj instanceof Key key)) return false;
         // 先比value命中率高
-        return this.value.equals(key.value()) && this.namespace.equals(key.namespace());
+        return this.value.equals(key.value) && this.namespace.equals(key.namespace);
     }
 
     @Override
