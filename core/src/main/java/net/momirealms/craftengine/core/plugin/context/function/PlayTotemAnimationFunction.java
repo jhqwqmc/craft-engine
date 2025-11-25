@@ -29,8 +29,6 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
     private final Key sound;
     private final NumberProvider volume;
     private final NumberProvider pitch;
-    private final NumberProvider minVolume;
-    private final NumberProvider minPitch;
     private final boolean silent;
 
     public PlayTotemAnimationFunction(
@@ -40,8 +38,6 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
             @Nullable Key sound,
             NumberProvider volume,
             NumberProvider pitch,
-            NumberProvider minVolume,
-            NumberProvider minPitch,
             boolean silent
     ) {
         super(predicates);
@@ -50,8 +46,6 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
         this.sound = sound;
         this.volume = volume;
         this.pitch = pitch;
-        this.minVolume = minVolume;
-        this.minPitch = minPitch;
         this.silent = silent;
     }
 
@@ -65,8 +59,8 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
         if (this.sound != null) {
             soundData = SoundData.of(
                     this.sound,
-                    SoundData.SoundValue.ranged(Math.max(this.minVolume.getFloat(ctx), 0f), Math.max(this.volume.getFloat(ctx), 0f)),
-                    SoundData.SoundValue.ranged(MiscUtils.clamp(this.minPitch.getFloat(ctx), 0f, 2f), MiscUtils.clamp(this.pitch.getFloat(ctx), 0f, 2f))
+                    SoundData.SoundValue.fixed(Math.max(this.volume.getFloat(ctx), 0f)),
+                    SoundData.SoundValue.fixed(MiscUtils.clamp(this.pitch.getFloat(ctx), 0f, 2f))
             );
         }
         for (Player player : this.selector.get(ctx)) {
@@ -96,10 +90,8 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
             @Nullable Key sound = Optional.ofNullable(arguments.get("sound")).map(String::valueOf).map(Key::of).orElse(null);
             NumberProvider volume = NumberProviders.fromObject(arguments.getOrDefault("volume", 1f));
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", 1f));
-            NumberProvider minVolume = NumberProviders.fromObject(arguments.getOrDefault("min-volume", 1f));
-            NumberProvider minPitch = NumberProviders.fromObject(arguments.getOrDefault("min-pitch", 1f));
             boolean silent = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("silent", false), "silent");
-            return new PlayTotemAnimationFunction<>(getPredicates(arguments), selector, item, sound, volume, pitch, minVolume, minPitch, silent);
+            return new PlayTotemAnimationFunction<>(getPredicates(arguments), selector, item, sound, volume, pitch, silent);
         }
     }
 }
