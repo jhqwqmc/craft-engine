@@ -20,6 +20,7 @@ public class TemplateArguments {
     public static final Key OBJECT = Key.of("craftengine:object"); // No Factory, internal use
     public static final Key TO_UPPER_CASE = Key.of("craftengine:to_upper_case");
     public static final Key TO_LOWER_CASE = Key.of("craftengine:to_lower_case");
+    public static final Key WHEN = Key.of("craftengine:when");
 
     public static void register(Key key, TemplateArgumentFactory factory) {
         ((WritableRegistry<TemplateArgumentFactory>) BuiltInRegistries.TEMPLATE_ARGUMENT_FACTORY)
@@ -36,6 +37,7 @@ public class TemplateArguments {
         register(CONDITION, ConditionTemplateArgument.FACTORY);
         register(TO_UPPER_CASE, ToUpperCaseTemplateArgument.FACTORY);
         register(TO_LOWER_CASE, ToLowerCaseTemplateArgument.FACTORY);
+        register(WHEN, WhenTemplateArgument.FACTORY);
     }
 
     @SuppressWarnings("unchecked")

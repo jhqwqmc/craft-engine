@@ -1,5 +1,5 @@
 templates:
-  # pillar/log blocks
+  # axis based blocks
   default:block_state/pillar:
     properties:
       axis:
