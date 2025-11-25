@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.plugin.config.template;
+package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;

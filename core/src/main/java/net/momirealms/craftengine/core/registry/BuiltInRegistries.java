@@ -37,7 +37,7 @@ import net.momirealms.craftengine.core.pack.model.special.SpecialModelFactory;
 import net.momirealms.craftengine.core.pack.model.special.SpecialModelReader;
 import net.momirealms.craftengine.core.pack.model.tint.TintFactory;
 import net.momirealms.craftengine.core.pack.model.tint.TintReader;
-import net.momirealms.craftengine.core.plugin.config.template.TemplateArgumentFactory;
+import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgumentFactory;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.context.function.FunctionFactory;

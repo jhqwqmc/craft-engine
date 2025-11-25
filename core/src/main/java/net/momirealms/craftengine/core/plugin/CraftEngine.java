@@ -114,7 +114,7 @@ public abstract class CraftEngine implements Plugin {
         LegacyRecipeTypes.init();
 
         // 初始化模板管理器
-        this.templateManager = new TemplateManagerImpl();
+        this.templateManager = TemplateManager.INSTANCE;
         // 初始化全局变量管理器
         this.globalVariableManager = new GlobalVariableManager();
         // 初始化物品浏览器

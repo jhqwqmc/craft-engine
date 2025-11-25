@@ -4,6 +4,7 @@ import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdObjectConfigParser;
+import net.momirealms.craftengine.core.plugin.config.template.argument.*;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -14,16 +15,16 @@ import java.util.*;
 
 @SuppressWarnings("DuplicatedCode")
 public class TemplateManagerImpl implements TemplateManager {
-    private static final ArgumentString TEMPLATE = Literal.literal("template");
-    private static final ArgumentString OVERRIDES = Literal.literal("overrides");
-    private static final ArgumentString ARGUMENTS = Literal.literal("arguments");
-    private static final ArgumentString MERGES = Literal.literal("merges");
+    private static final ArgumentString TEMPLATE = ArgumentString.Literal.literal("template");
+    private static final ArgumentString OVERRIDES = ArgumentString.Literal.literal("overrides");
+    private static final ArgumentString ARGUMENTS = ArgumentString.Literal.literal("arguments");
+    private static final ArgumentString MERGES = ArgumentString.Literal.literal("merges");
     private final static Set<ArgumentString> NON_TEMPLATE_ARGUMENTS = new HashSet<>(Set.of(TEMPLATE, ARGUMENTS, OVERRIDES, MERGES));
 
     private final Map<Key, Object> templates = new HashMap<>();
     private final TemplateParser templateParser;
 
-    public TemplateManagerImpl() {
+    protected TemplateManagerImpl() {
         this.templateParser = new TemplateParser();
     }
 
@@ -69,13 +70,13 @@ public class TemplateManagerImpl implements TemplateManager {
         ));
     }
 
-    private Object preprocessUnknownValue(Object value) {
+    public Object preprocessUnknownValue(Object value) {
         switch (value) {
             case Map<?, ?> map -> {
                 Map<String, Object> in = MiscUtils.castToMap(map, false);
                 Map<ArgumentString, Object> out = new LinkedHashMap<>(map.size());
                 for (Map.Entry<String, Object> entry : in.entrySet()) {
-                    out.put(TemplateManager.preParse(entry.getKey()), preprocessUnknownValue(entry.getValue()));
+                    out.put(ArgumentString.preParse(entry.getKey()), preprocessUnknownValue(entry.getValue()));
                 }
                 return out;
             }
@@ -87,7 +88,7 @@ public class TemplateManagerImpl implements TemplateManager {
                 return objList;
             }
             case String string -> {
-                return TemplateManager.preParse(string);
+                return ArgumentString.preParse(string);
             }
             case null, default -> {
                 return value;
@@ -188,8 +189,8 @@ public class TemplateManagerImpl implements TemplateManager {
 
     // 处理一个类型未知的值，本方法只管将member处理好后，传递回调用者a
     @SuppressWarnings("unchecked")
-    private Object processUnknownValue(Object value,
-                                     Map<String, TemplateArgument> arguments) {
+    public Object processUnknownValue(Object value,
+                                      Map<String, TemplateArgument> arguments) {
         switch (value) {
             case Map<?, ?> innerMap ->
             // map下面还是个map吗？这并不一定
@@ -237,7 +238,7 @@ public class TemplateManagerImpl implements TemplateManager {
             // 如果模板id被用了参数，则应先应用参数后再查询模板
             Object actualTemplate = templateId.get(parentArguments);
             if (actualTemplate == null) continue; // 忽略被null掉的模板
-            Object template = Optional.ofNullable(this.templates.get(Key.of(actualTemplate.toString())))
+            Object template = Optional.ofNullable(((TemplateManagerImpl) INSTANCE).templates.get(Key.of(actualTemplate.toString())))
                     .orElseThrow(() -> new LocalizedResourceConfigException("warning.config.template.invalid", actualTemplate.toString()));
             Object processedTemplate = processUnknownValue(template, arguments);
             if (processedTemplate != null) templateList.add(processedTemplate);
@@ -294,7 +295,7 @@ public class TemplateManagerImpl implements TemplateManager {
     // 合并参数
     @SuppressWarnings("unchecked")
     private Map<String, TemplateArgument> mergeArguments(@NotNull Map<ArgumentString, Object> childArguments,
-                                                         @NotNull Map<String, TemplateArgument> parentArguments) {
+                                                                @NotNull Map<String, TemplateArgument> parentArguments) {
         Map<String, TemplateArgument> result = new LinkedHashMap<>(parentArguments);
         for (Map.Entry<ArgumentString, Object> argumentEntry : childArguments.entrySet()) {
             Object placeholderObj = argumentEntry.getKey().get(result);

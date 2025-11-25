@@ -1,7 +1,9 @@
-package net.momirealms.craftengine.core.plugin.config.template;
+package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import net.momirealms.craftengine.core.plugin.config.template.ArgumentString;
+import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Locale;
@@ -11,11 +13,11 @@ import java.util.function.Function;
 
 public class ExpressionTemplateArgument implements TemplateArgument {
     public static final Factory FACTORY = new Factory();
-    private final TemplateManager.ArgumentString expression;
+    private final ArgumentString expression;
     private final ValueType valueType;
 
     protected ExpressionTemplateArgument(String expression, ValueType valueType) {
-        this.expression = TemplateManager.preParse(expression);
+        this.expression = ArgumentString.preParse(expression);
         this.valueType = valueType;
     }
 
