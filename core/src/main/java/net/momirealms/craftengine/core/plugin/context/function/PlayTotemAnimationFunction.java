@@ -7,6 +7,8 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
+import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
+import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
 import net.momirealms.craftengine.core.sound.SoundData;
@@ -25,22 +27,22 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
     private final Key item;
     @Nullable
     private final Key sound;
-    private final float volume;
-    private final float pitch;
-    private final float minVolume;
-    private final float minPitch;
-    private final boolean noSound;
+    private final NumberProvider volume;
+    private final NumberProvider pitch;
+    private final NumberProvider minVolume;
+    private final NumberProvider minPitch;
+    private final boolean silent;
 
     public PlayTotemAnimationFunction(
             List<Condition<CTX>> predicates,
             PlayerSelector<CTX> selector,
             Key item,
             @Nullable Key sound,
-            float volume,
-            float pitch,
-            float minVolume,
-            float minPitch,
-            boolean noSound
+            NumberProvider volume,
+            NumberProvider pitch,
+            NumberProvider minVolume,
+            NumberProvider minPitch,
+            boolean silent
     ) {
         super(predicates);
         this.selector = selector;
@@ -50,7 +52,7 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
         this.pitch = pitch;
         this.minVolume = minVolume;
         this.minPitch = minPitch;
-        this.noSound = noSound;
+        this.silent = silent;
     }
 
     @Override
@@ -63,8 +65,8 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
         if (this.sound != null) {
             soundData = SoundData.of(
                     this.sound,
-                    SoundData.SoundValue.ranged(this.minVolume, this.volume),
-                    SoundData.SoundValue.ranged(this.minPitch, this.pitch)
+                    SoundData.SoundValue.ranged(Math.max(this.minVolume.getFloat(ctx), 0f), Math.max(this.volume.getFloat(ctx), 0f)),
+                    SoundData.SoundValue.ranged(MiscUtils.clamp(this.minPitch.getFloat(ctx), 0f, 2f), MiscUtils.clamp(this.pitch.getFloat(ctx), 0f, 2f))
             );
         }
         for (Player player : this.selector.get(ctx)) {
@@ -72,7 +74,7 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
             if (VersionHelper.isOrAbove1_21_2()) {
                 buildItem.setJavaComponent(DataComponentKeys.DEATH_PROTECTION, Map.of());
             }
-            player.sendTotemAnimation(buildItem, soundData, this.noSound);
+            player.sendTotemAnimation(buildItem, soundData, this.silent);
         }
     }
 
@@ -92,12 +94,12 @@ public class PlayTotemAnimationFunction<CTX extends Context> extends AbstractCon
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.getOrDefault("target", "self"), conditionFactory());
             Key item = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.function.play_totem_animation.missing_item"));
             @Nullable Key sound = Optional.ofNullable(arguments.get("sound")).map(String::valueOf).map(Key::of).orElse(null);
-            float volume = Math.max(ResourceConfigUtils.getAsFloat(arguments.getOrDefault("volume", 1f), "volume"), 0f);
-            float pitch = MiscUtils.clamp(ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 1f), "pitch"), 0f, 2f);
-            float minVolume = Math.max(ResourceConfigUtils.getAsFloat(arguments.getOrDefault("min-volume", 1f), "min-volume"), 0f);
-            float minPitch = MiscUtils.clamp(ResourceConfigUtils.getAsFloat(arguments.getOrDefault("min-pitch", 1f), "min-pitch"), 0f, 2f);
-            boolean noSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("no-sound", false), "no-sound");
-            return new PlayTotemAnimationFunction<>(getPredicates(arguments), selector, item, sound, volume, pitch, minVolume, minPitch, noSound);
+            NumberProvider volume = NumberProviders.fromObject(arguments.getOrDefault("volume", 1f));
+            NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", 1f));
+            NumberProvider minVolume = NumberProviders.fromObject(arguments.getOrDefault("min-volume", 1f));
+            NumberProvider minPitch = NumberProviders.fromObject(arguments.getOrDefault("min-pitch", 1f));
+            boolean silent = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("silent", false), "silent");
+            return new PlayTotemAnimationFunction<>(getPredicates(arguments), selector, item, sound, volume, pitch, minVolume, minPitch, silent);
         }
     }
 }
