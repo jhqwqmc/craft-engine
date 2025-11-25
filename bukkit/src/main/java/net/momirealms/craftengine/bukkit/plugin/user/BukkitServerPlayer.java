@@ -34,6 +34,7 @@ import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
+import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
@@ -1277,5 +1278,10 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void setExperienceLevels(int level) {
         platformPlayer().setLevel(level);
+    }
+
+    @Override
+    public void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean removeSound) {
+        PlayerUtils.sendTotemAnimation(this, totem, sound, removeSound);
     }
 }

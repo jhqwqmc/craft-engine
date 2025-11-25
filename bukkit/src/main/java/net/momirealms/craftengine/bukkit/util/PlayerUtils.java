@@ -57,7 +57,7 @@ public final class PlayerUtils {
         }
     }
 
-    public static void sendTotemAnimation(Player player, Item<ItemStack> totem, @Nullable SoundData sound, boolean removeSound) {
+    public static void sendTotemAnimation(Player player, Item<?> totem, @Nullable SoundData sound, boolean removeSound) {
         List<Object> packets = new ArrayList<>();
         try {
             Object totemItem = totem.getLiteralObject();
