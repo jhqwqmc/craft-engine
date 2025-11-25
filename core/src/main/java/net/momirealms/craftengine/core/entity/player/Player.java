@@ -184,6 +184,18 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setSelectedLocale(@Nullable Locale locale);
 
+    public abstract void giveExperiencePoints(int xpPoints);
+
+    public abstract void giveExperienceLevels(int levels);
+
+    public abstract int getXpNeededForNextLevel();
+
+    public abstract void setExperiencePoints(int experiencePoints);
+
+    public abstract void setExperienceLevels(int level);
+
+    public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent);
+
     @Override
     public void remove() {
     }

@@ -57,7 +57,7 @@ public final class PlayerUtils {
         }
     }
 
-    public static void sendTotemAnimation(Player player, Item<ItemStack> totem, @Nullable SoundData sound, boolean removeSound) {
+    public static void sendTotemAnimation(Player player, Item<?> totem, @Nullable SoundData sound, boolean silent) {
         List<Object> packets = new ArrayList<>();
         try {
             Object totemItem = totem.getLiteralObject();
@@ -86,7 +86,7 @@ public final class PlayerUtils {
             packets.add(NetworkReflections.constructor$ClientboundSetEquipmentPacket.newInstance(
                     player.entityID(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$OFFHAND, previousOffHandItem))
             ));
-            if (sound != null || removeSound) {
+            if (sound != null || silent) {
                 packets.add(NetworkReflections.constructor$ClientboundStopSoundPacket.newInstance(
                         FastNMS.INSTANCE.method$ResourceLocation$fromNamespaceAndPath("minecraft", "item.totem.use"),
                         CoreReflections.instance$SoundSource$PLAYERS
