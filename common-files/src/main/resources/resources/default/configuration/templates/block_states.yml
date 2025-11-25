@@ -85,7 +85,11 @@ templates:
     template: default:block_state/__leaves__
     arguments:
       auto_state: leaves
-      leaves_base_model: leaves
+      leaves_base_model:
+        type: condition
+        condition: ${tintable:-false}
+        on-true: leaves
+        on-false: cube_all
   # tintable leaves block
   default:block_state/tintable_leaves:
     template: default:block_state/__leaves__
