@@ -358,6 +358,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new FinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
         registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
+        registerNMSPacketConsumer(new ClientInformationListener(), VersionHelper.isOrAbove1_20_2() ? NetworkReflections.clazz$ServerboundClientInformationPacket1 : NetworkReflections.clazz$ServerboundClientInformationPacket0);
         registerNMSPacketConsumer(new ContainerClickListener1_21_5(), VersionHelper.isOrAbove1_21_5() ? NetworkReflections.clazz$ServerboundContainerClickPacket : null);
         registerS2CGamePacketListener(new ForgetLevelChunkListener(), this.packetIds.clientboundForgetLevelChunkPacket(), "ClientboundForgetLevelChunkPacket");
         registerS2CGamePacketListener(new SetScoreListener1_20_3(), VersionHelper.isOrAbove1_20_3() ? this.packetIds.clientboundSetScorePacket() : -1, "ClientboundSetScorePacket");
@@ -1288,6 +1289,27 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
+    public static class ClientInformationListener implements NMSPacketListener {
+
+        @Override
+        public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            try {
+                if (VersionHelper.isOrAbove1_20_2()) {
+                    Object clientInfo = NetworkReflections.field$ServerboundClientInformationPacket$information.get(packet);
+                    if (clientInfo == null) return;
+                    String locale = (String) CoreReflections.field$ClientInformation$language.get(clientInfo);
+                    if (locale == null) return;
+                    ((BukkitServerPlayer) user).setClientLocale(TranslationManager.parseLocale(locale));
+                } else {
+                    String locale = (String) NetworkReflections.field$ServerboundClientInformationPacket$language.get(packet);
+                    if (locale == null) return;
+                    ((BukkitServerPlayer) user).setClientLocale(TranslationManager.parseLocale(locale));
+                }
+            } catch (ReflectiveOperationException e) {
+                CraftEngine.instance().logger().warn("Failed to handle ServerboundClientInformationPacket", e);
+            }
+        }
+    }
 
     public static class SetCreativeSlotListener implements NMSPacketListener {
 

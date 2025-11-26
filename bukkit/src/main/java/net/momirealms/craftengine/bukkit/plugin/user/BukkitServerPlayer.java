@@ -127,9 +127,11 @@ public class BukkitServerPlayer extends Player {
     private ConcurrentLong2ReferenceChainedHashTable<ChunkStatus> trackedChunks;
     // entity view
     private Map<Integer, EntityPacketHandler> entityTypeView;
-    // selected client locale
+    // 通过指令或api设定的语言
     @Nullable
     private Locale selectedLocale;
+    // 客户端选择的语言
+    private Locale clientLocale;
     // 存储客户端在发送停止破坏包前正在破坏的最后一个方块
     private BlockPos lastStopMiningPos;
     // 修复连续挖掘的标志位
@@ -1233,7 +1235,21 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public Locale locale() {
-        return this.platformPlayer().locale();
+        if (this.clientLocale != null) {
+            return this.clientLocale;
+        } else {
+            org.bukkit.entity.Player player = this.platformPlayer();
+            if (player != null) {
+                return player.locale();
+            } else {
+                return Locale.US;
+            }
+        }
+    }
+
+    @Override
+    public void setClientLocale(Locale clientLocale) {
+        this.clientLocale = clientLocale;
     }
 
     @Override
