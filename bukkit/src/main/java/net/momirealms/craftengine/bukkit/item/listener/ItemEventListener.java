@@ -426,7 +426,7 @@ public class ItemEventListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onConsumeItem(PlayerItemConsumeEvent event) {
         ItemStack consumedItem = event.getItem();
         if (ItemStackUtils.isEmpty(consumedItem)) return;
@@ -435,9 +435,11 @@ public class ItemEventListener implements Listener {
         if (optionalCustomItem.isEmpty()) {
             return;
         }
+        Player player = event.getPlayer();
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
         Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
         CustomItem<ItemStack> customItem = optionalCustomItem.get();
-        PlayerOptionalContext context = PlayerOptionalContext.of(BukkitAdaptors.adapt(event.getPlayer()), ContextHolder.builder()
+        PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
                 .withParameter(DirectContextParameters.ITEM_IN_HAND, wrapped)
                 .withParameter(DirectContextParameters.EVENT, cancellable)
                 .withParameter(DirectContextParameters.HAND, event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND)
@@ -448,11 +450,19 @@ public class ItemEventListener implements Listener {
         }
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Key replacement = customItem.settings().consumeReplacement();
-            if (replacement == null) {
-                event.setReplacement(null);
+            if (wrapped.count() == 1) {
+                if (replacement == null) {
+                    event.setReplacement(null);
+                } else {
+                    ItemStack replacementItem = this.plugin.itemManager().buildItemStack(replacement, serverPlayer);
+                    event.setReplacement(replacementItem);
+                }
             } else {
-                ItemStack replacementItem = this.plugin.itemManager().buildItemStack(replacement, BukkitAdaptors.adapt(event.getPlayer()));
-                event.setReplacement(replacementItem);
+                event.setReplacement(null);
+                Item<ItemStack> replacementItem = this.plugin.itemManager().createWrappedItem(replacement, serverPlayer);
+                if (replacementItem != null) {
+                    PlayerUtils.giveItem(serverPlayer, 1, replacementItem);
+                }
             }
         }
     }
