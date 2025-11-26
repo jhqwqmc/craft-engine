@@ -14,7 +14,6 @@ public final class BlockKeys {
     public static final Key TRIPWIRE = Key.of("minecraft:tripwire");
     public static final Key CACTUS = Key.of("minecraft:cactus");
     public static final Key POWDER_SNOW = Key.of("minecraft:powder_snow");
-    // 功能方块
     public static final Key CRAFTING_TABLE = Key.of("minecraft:crafting_table");
     public static final Key STONECUTTER = Key.of("minecraft:stonecutter");
     public static final Key CARTOGRAPHY_TABLE = Key.of("minecraft:cartography_table");
@@ -49,6 +48,7 @@ public final class BlockKeys {
     public static final Key WEEPING_VINES = Key.of("minecraft:weeping_vines");
     public static final Key TWISTING_VINES = Key.of("minecraft:twisting_vines");
     public static final Key KELP = Key.of("minecraft:kelp");
+    public static final Key CHORUS_PLANT = Key.of("minecraft:chorus_plant");
 
     public static final Key CHEST = Key.of("minecraft:chest");
     public static final Key BARREL = Key.of("minecraft:barrel");
