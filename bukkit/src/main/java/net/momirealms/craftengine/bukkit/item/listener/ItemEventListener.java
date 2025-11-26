@@ -451,14 +451,12 @@ public class ItemEventListener implements Listener {
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Key replacement = customItem.settings().consumeReplacement();
             if (wrapped.count() == 1) {
-                if (replacement == null) {
-                    event.setReplacement(null);
-                } else {
+                if (replacement != null) {
                     ItemStack replacementItem = this.plugin.itemManager().buildItemStack(replacement, serverPlayer);
                     event.setReplacement(replacementItem);
                 }
             } else {
-                event.setReplacement(null);
+                // fixme 如何取消堆叠数量>1的物品的默认replacement
                 Item<ItemStack> replacementItem = this.plugin.itemManager().createWrappedItem(replacement, serverPlayer);
                 if (replacementItem != null) {
                     PlayerUtils.giveItem(serverPlayer, 1, replacementItem);
