@@ -109,7 +109,7 @@ public class ItemSettings {
         newSettings.dyeColor = settings.dyeColor;
         newSettings.fireworkColor = settings.fireworkColor;
         newSettings.ingredientSubstitutes = settings.ingredientSubstitutes;
-        newSettings.customData = settings.customData;
+        newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
 
@@ -360,14 +360,11 @@ public class ItemSettings {
                 return settings -> settings.renameable(bool);
             }));
             registerFactory("anvil-repair-item", (value -> {
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> materials = (List<Map<String, Object>>) value;
-                List<AnvilRepairItem> anvilRepairItemList = new ArrayList<>();
-                for (Map<String, Object> material : materials) {
+                List<AnvilRepairItem> anvilRepairItemList = ResourceConfigUtils.parseConfigAsList(value, material -> {
                     int amount = ResourceConfigUtils.getAsInt(material.getOrDefault("amount", 0), "amount");
                     double percent = ResourceConfigUtils.getAsDouble(material.getOrDefault("percent", 0), "percent");
-                    anvilRepairItemList.add(new AnvilRepairItem(MiscUtils.getAsStringList(material.get("target")), amount, percent));
-                }
+                    return new AnvilRepairItem(MiscUtils.getAsStringList(material.get("target")), amount, percent);
+                });
                 return settings -> settings.repairItems(anvilRepairItemList);
             }));
             registerFactory("fuel-time", (value -> {
