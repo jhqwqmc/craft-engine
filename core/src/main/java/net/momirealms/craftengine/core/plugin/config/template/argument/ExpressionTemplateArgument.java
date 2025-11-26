@@ -40,7 +40,7 @@ public class ExpressionTemplateArgument implements TemplateArgument {
     protected enum ValueType {
         INT(e -> e.getNumberValue().intValue()),
         LONG(e -> e.getNumberValue().longValue()),
-        SHORT(e -> e.getNumberValue().shortValueExact()),
+        SHORT(e -> e.getNumberValue().shortValue()),
         DOUBLE(e -> e.getNumberValue().doubleValue()),
         FLOAT(e -> e.getNumberValue().floatValue()),
         BYTE(e -> e.getNumberValue().byteValue()),
