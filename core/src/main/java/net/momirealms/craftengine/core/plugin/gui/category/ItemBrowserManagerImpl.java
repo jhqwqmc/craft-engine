@@ -13,8 +13,12 @@ import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.Condition;
+import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
+import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
+import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.gui.*;
 import net.momirealms.craftengine.core.plugin.gui.Ingredient;
 import net.momirealms.craftengine.core.util.*;
@@ -117,8 +121,9 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             int priority = ResourceConfigUtils.getAsInt(section.getOrDefault("priority", 0), "priority");
             List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));
             boolean hidden = ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden");
-            String permission = ResourceConfigUtils.getAsStringOrNull(section.get("permission"));
-            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, permission);
+            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(section, "conditions", "condition"), EventConditions::fromMap);
+            Condition<Context> conditions = conditionList.isEmpty() ? null : conditionList.size() == 1 ? conditionList.getFirst() : new AllOfCondition<>(conditionList);
+            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, conditions);
             if (ItemBrowserManagerImpl.this.byId.containsKey(id)) {
                 ItemBrowserManagerImpl.this.byId.get(id).merge(category);
             } else {
@@ -159,7 +164,8 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         );
 
         List<ItemWithAction> iconList = this.categoryOnMainPage.stream().map(it -> {
-            if (it.permission() != null && !player.hasPermission(it.permission())) {
+            Condition<Context> condition = it.condition();
+            if (condition != null && !condition.test(PlayerOptionalContext.of(player))) {
                 return null;
             }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
@@ -250,9 +256,11 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                 if (subCategory == null) {
                     item = Objects.requireNonNull(this.plugin.itemManager().createWrappedItem(ItemKeys.BARRIER, player));
                     item.customNameJson(AdventureHelper.componentToJson(Component.text(subCategoryId).color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
-                } else if (subCategory.permission() != null && !player.hasPermission(subCategory.permission())) {
-                    return null;
                 } else {
+                    Condition<Context> condition = subCategory.condition();
+                    if (condition != null && !condition.test(PlayerOptionalContext.of(player))) {
+                        return null;
+                    }
                     item = this.plugin.itemManager().createWrappedItem(subCategory.icon(), player);
                     if (ItemUtils.isEmpty(item)) {
                         if (!subCategory.icon().equals(ItemKeys.AIR)) {
