@@ -631,7 +631,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                                         continue;
                                     }
                                     for (ImmutableBlockState possibleState : possibleStates) {
-                                        possibleState.setVanillaBlockState(appearance.blockState());
+                                        possibleState.setVisualBlockState(appearance.blockState());
                                         appearance.blockEntityRenderer().ifPresent(possibleState::setConstantRenderers);
                                     }
                                 }
@@ -650,11 +650,11 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         }
                         state.setBehavior(blockBehavior);
                         int internalId = state.customBlockState().registryId();
-                        BlockStateWrapper visualState = state.vanillaBlockState();
+                        BlockStateWrapper visualState = state.visualBlockState();
                         // 校验，为未绑定外观的强行添加外观
                         if (visualState == null) {
                             visualState = anyAppearance.blockState();
-                            state.setVanillaBlockState(visualState);
+                            state.setVisualBlockState(visualState);
                             anyAppearance.blockEntityRenderer().ifPresent(state::setConstantRenderers);
                         }
                         int appearanceId = visualState.registryId();

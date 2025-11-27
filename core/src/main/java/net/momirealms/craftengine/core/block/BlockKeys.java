@@ -49,6 +49,7 @@ public final class BlockKeys {
     public static final Key TWISTING_VINES = Key.of("minecraft:twisting_vines");
     public static final Key KELP = Key.of("minecraft:kelp");
     public static final Key CHORUS_PLANT = Key.of("minecraft:chorus_plant");
+    public static final Key BARRIER = Key.of("minecraft:barrier");
 
     public static final Key CHEST = Key.of("minecraft:chest");
     public static final Key BARREL = Key.of("minecraft:barrel");

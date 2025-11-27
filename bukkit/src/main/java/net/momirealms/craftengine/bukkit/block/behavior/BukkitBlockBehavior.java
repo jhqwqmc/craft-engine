@@ -180,7 +180,7 @@ public class BukkitBlockBehavior extends AbstractBlockBehavior {
     public boolean isPathFindable(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(args[0]);
         if (optionalCustomState.isEmpty()) return false;
-        BlockStateWrapper vanillaState = optionalCustomState.get().vanillaBlockState();
+        BlockStateWrapper vanillaState = optionalCustomState.get().visualBlockState();
         if (vanillaState == null) return false;
         return FastNMS.INSTANCE.method$BlockStateBase$isPathFindable(vanillaState.literalObject(), VersionHelper.isOrAbove1_20_5() ? null : args[1], VersionHelper.isOrAbove1_20_5() ? null : args[2], args[isPathFindable$type]);
     }

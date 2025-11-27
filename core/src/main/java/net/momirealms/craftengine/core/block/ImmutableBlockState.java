@@ -20,6 +20,7 @@ import net.momirealms.craftengine.core.world.World;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.NBT;
 import net.momirealms.sparrow.nbt.Tag;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +34,9 @@ public final class ImmutableBlockState {
 
     private CompoundTag tag;
     private BlockStateWrapper customBlockState;
-    private BlockStateWrapper vanillaBlockState;
+    private BlockStateWrapper visualBlockState;
+    // 安全的，在卸载ce后还原的方块
+    private BlockStateWrapper restoreBlockState;
     private BlockBehavior behavior;
     private BlockSettings settings;
     private BlockEntityType<? extends BlockEntity> blockEntityType;
@@ -96,16 +99,30 @@ public final class ImmutableBlockState {
         return this.customBlockState;
     }
 
+    @Deprecated
     public BlockStateWrapper vanillaBlockState() {
-        return this.vanillaBlockState;
+        return this.visualBlockState;
+    }
+
+    public BlockStateWrapper visualBlockState() {
+        return this.visualBlockState;
+    }
+
+    @ApiStatus.Internal
+    public BlockStateWrapper restoreBlockState() {
+        return this.restoreBlockState;
     }
 
     public void setCustomBlockState(@NotNull BlockStateWrapper customBlockState) {
         this.customBlockState = customBlockState;
     }
 
-    public void setVanillaBlockState(@NotNull BlockStateWrapper vanillaBlockState) {
-        this.vanillaBlockState = vanillaBlockState;
+    public void setVisualBlockState(@NotNull BlockStateWrapper visualBlockState) {
+        this.visualBlockState = visualBlockState;
+    }
+
+    public void setRestoreBlockState(BlockStateWrapper restoreBlockState) {
+        this.restoreBlockState = restoreBlockState;
     }
 
     public CompoundTag getNbtToSave() {

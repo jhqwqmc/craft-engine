@@ -223,7 +223,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     protected void applyPlatformSettings(ImmutableBlockState state) {
         DelegatingBlockState nmsState = (DelegatingBlockState) state.customBlockState().literalObject();
         nmsState.setBlockState(state);
-        Object nmsVisualState = state.vanillaBlockState().literalObject();
+        Object nmsVisualState = state.visualBlockState().literalObject();
 
         BlockSettings settings = state.settings();
         try {
@@ -291,9 +291,14 @@ public final class BukkitBlockManager extends AbstractBlockManager {
                 this.burnableBlocks.add(nmsBlock);
             }
 
-            Key vanillaBlockId = state.vanillaBlockState().ownerId();
+            Key vanillaBlockId = state.visualBlockState().ownerId();
             BlockGenerator.field$CraftEngineBlock$isNoteBlock().set(nmsBlock, vanillaBlockId.equals(BlockKeys.NOTE_BLOCK));
             BlockGenerator.field$CraftEngineBlock$isTripwire().set(nmsBlock, vanillaBlockId.equals(BlockKeys.TRIPWIRE));
+            if (vanillaBlockId.equals(BlockKeys.BARRIER)) {
+                state.setRestoreBlockState(createBlockState("minecraft:glass"));
+            } else {
+                state.setRestoreBlockState(state.visualBlockState());
+            }
         } catch (ReflectiveOperationException e) {
             this.plugin.logger().warn("Failed to apply platform block settings for block state " + state, e);
         }

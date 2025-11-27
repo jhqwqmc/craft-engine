@@ -20,7 +20,7 @@ public class BukkitCustomBlockStateWrapper extends AbstractBlockStateWrapper imp
 
     @Override
     public BlockStateWrapper visualBlockState() {
-        return getImmutableBlockState().map(ImmutableBlockState::vanillaBlockState).orElse(null);
+        return getImmutableBlockState().map(ImmutableBlockState::visualBlockState).orElse(null);
     }
 
     @Override

@@ -1096,7 +1096,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 if (player.isAdventureMode()) {
                     if (Config.simplifyAdventureBreakCheck()) {
                         ImmutableBlockState state = BukkitBlockManager.instance().getImmutableBlockStateUnsafe(stateId);
-                        if (!player.canBreak(pos, state.vanillaBlockState().literalObject())) {
+                        if (!player.canBreak(pos, state.visualBlockState().literalObject())) {
                             player.preventMiningBlock();
                             return;
                         }
@@ -1358,7 +1358,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Key itemId = state.settings().itemId();
             // no item available
             if (itemId == null) return;
-            Object vanillaBlock = FastNMS.INSTANCE.method$BlockState$getBlock(state.vanillaBlockState().literalObject());
+            Object vanillaBlock = FastNMS.INSTANCE.method$BlockState$getBlock(state.visualBlockState().literalObject());
             Object vanillaBlockItem = FastNMS.INSTANCE.method$Block$asItem(vanillaBlock);
             if (vanillaBlockItem == null) return;
             Key addItemId = KeyUtils.namespacedKey2Key(item.getType().getKey());

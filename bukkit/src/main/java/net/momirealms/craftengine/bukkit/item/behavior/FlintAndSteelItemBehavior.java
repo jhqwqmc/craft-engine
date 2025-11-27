@@ -77,10 +77,10 @@ public class FlintAndSteelItemBehavior extends ItemBehavior {
                 // 点击对象为自定义方块
                 ImmutableBlockState immutableBlockState = BukkitBlockManager.instance().getImmutableBlockStateUnsafe(stateId);
                 // 原版外观也可燃
-                if (BlockStateUtils.isBurnable(immutableBlockState.vanillaBlockState().literalObject())) {
+                if (BlockStateUtils.isBurnable(immutableBlockState.visualBlockState().literalObject())) {
                     return InteractionResult.PASS;
                 }
-                BlockData vanillaBlockState = BlockStateUtils.fromBlockData(immutableBlockState.vanillaBlockState().literalObject());
+                BlockData vanillaBlockState = BlockStateUtils.fromBlockData(immutableBlockState.visualBlockState().literalObject());
                 // 点击的是方块上面，则只需要判断shift和可交互
                 if (direction == Direction.UP) {
                     // 客户端层面必须可交互
