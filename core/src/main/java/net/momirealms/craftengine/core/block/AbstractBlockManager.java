@@ -85,6 +85,8 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
     // 临时存储哪些视觉方块被使用了
     protected final Set<BlockStateWrapper> tempVisualBlockStatesInUse = new HashSet<>();
     protected final Set<Key> tempVisualBlocksInUse = new HashSet<>();
+    // 能遮挡视线的方块
+    protected final boolean[] viewBlockingBlocks;
     // 声音映射表，和使用了哪些视觉方块有关
     protected Map<Key, Key> soundReplacements = Map.of();
     // 是否使用了透明方块模型
@@ -102,6 +104,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         this.tempVanillaBlockStateModels = new JsonElement[vanillaBlockStateCount];
         this.blockParser = new BlockParser(this.autoVisualBlockStateCandidates);
         this.blockStateMappingParser = new BlockStateMappingParser();
+        this.viewBlockingBlocks = new boolean[vanillaBlockStateCount + customBlockCount];
         Arrays.fill(this.blockStateMappings, -1);
     }
 
@@ -231,6 +234,10 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
     }
 
     public abstract BlockBehavior createBlockBehavior(CustomBlock customBlock, List<Map<String, Object>> behaviorConfig);
+
+    public boolean isViewBlockingBlock(int stateId) {
+        return this.viewBlockingBlocks[stateId];
+    }
 
     protected abstract void updateTags();
 
