@@ -7,19 +7,19 @@ public class ClientSection {
         this.storage = storage;
     }
 
-    boolean isOccluding(int x, int y, int z) {
+    public boolean isOccluding(int x, int y, int z) {
         return isOccluding((y << 4 | z) << 4 | x);
     }
 
-    boolean isOccluding(int index) {
+    public boolean isOccluding(int index) {
         return this.storage.isOccluding(index);
     }
 
-    void setOccluding(int x, int y, int z, boolean value) {
+    public void setOccluding(int x, int y, int z, boolean value) {
         this.setOccluding((y << 4 | z) << 4 | x, value);
     }
 
-    void setOccluding(int index, boolean value) {
+    public void setOccluding(int index, boolean value) {
         boolean wasOccluding = this.storage.isOccluding(index);
         if (wasOccluding != value) {
             if (this.storage instanceof PackedOcclusionStorage arrayStorage) {

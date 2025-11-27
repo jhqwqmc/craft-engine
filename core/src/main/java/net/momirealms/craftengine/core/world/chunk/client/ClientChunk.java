@@ -27,7 +27,27 @@ public class ClientChunk {
         return section.isOccluding((y & 15) << 8 | (z & 15) << 4 | x & 15);
     }
 
+    public void setOccluding(int x, int y, int z, boolean occluding) {
+        if (this.sections == null) return;
+        int index = sectionIndex(SectionPos.blockToSectionCoord(y));
+        ClientSection section = this.sections[index];
+        if (section == null) return;
+        section.setOccluding((y & 15) << 8 | (z & 15) << 4, occluding);
+    }
+
     public int sectionIndex(int sectionId) {
         return sectionId - this.worldHeight.getMinSection();
+    }
+
+    @Nullable
+    public ClientSection sectionByIndex(int sectionIndex) {
+        if (this.sections == null) return null;
+        return this.sections[sectionIndex];
+    }
+
+    @Nullable
+    public ClientSection sectionById(int sectionId) {
+        if (this.sections == null) return null;
+        return this.sections[sectionIndex(sectionId)];
     }
 }

@@ -326,8 +326,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 RegistryUtils.currentBiomeRegistrySize(),
                 occlusionPredicate
         ), this.packetIds.clientboundLevelChunkWithLightPacket(), "ClientboundLevelChunkWithLightPacket");
-        registerS2CGamePacketListener(new SectionBlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundSectionBlocksUpdatePacket(), "ClientboundSectionBlocksUpdatePacket");
-        registerS2CGamePacketListener(new BlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundBlockUpdatePacket(), "ClientboundBlockUpdatePacket");
+        registerS2CGamePacketListener(new SectionBlockUpdateListener(newMappings, newMappingsMOD, occlusionPredicate), this.packetIds.clientboundSectionBlocksUpdatePacket(), "ClientboundSectionBlocksUpdatePacket");
+        registerS2CGamePacketListener(new BlockUpdateListener(newMappings, newMappingsMOD, occlusionPredicate), this.packetIds.clientboundBlockUpdatePacket(), "ClientboundBlockUpdatePacket");
         registerS2CGamePacketListener(
                 VersionHelper.isOrAbove1_21_4() ?
                 new LevelParticleListener1_21_4(newMappings, newMappingsMOD) :
@@ -1993,10 +1993,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             this.occlusionPredicate = occlusionPredicate;
         }
 
-        public int remapBlockState(int stateId, boolean enableMod) {
-            return enableMod ? this.modBlockStateMapper[stateId] : this.blockStateMapper[stateId];
-        }
-
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             BukkitServerPlayer player = (BukkitServerPlayer) user;
@@ -2005,6 +2001,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             int chunkZ = buf.readInt();
             ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
             boolean named = !VersionHelper.isOrAbove1_20_2();
+
+            int[] remapper = user.clientModEnabled() ? this.modBlockStateMapper : this.blockStateMapper;
 
             // 读取区块数据
             int heightmapsCount = 0;
@@ -2053,7 +2051,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 if (palette.canRemap()) {
 
                     // 重定向方块
-                    if (palette.remapAndCheck(s -> remapBlockState(s, user.clientModEnabled()))) {
+                    if (palette.remapAndCheck(s -> remapper[s])) {
                         hasChangedAnyBlock = true;
                     }
 
@@ -2100,7 +2098,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                         int state = container.get(j);
 
                         // 重定向方块
-                        int newState = remapBlockState(state, user.clientModEnabled());
+                        int newState = remapper[state];
                         if (newState != state) {
                             container.set(j, newState);
                             hasChangedAnyBlock = true;
@@ -2195,63 +2193,64 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
     public static class SectionBlockUpdateListener implements ByteBufferPacketListener {
         private final int[] blockStateMapper;
         private final int[] modBlockStateMapper;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public SectionBlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper) {
+        public SectionBlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
-            if (user.clientModEnabled()) {
-                FriendlyByteBuf buf = event.getBuffer();
-                long pos = buf.readLong();
-                int blocks = buf.readVarInt();
-                short[] positions = new short[blocks];
-                int[] states = new int[blocks];
-                for (int i = 0; i < blocks; i++) {
-                    long k = buf.readVarLong();
-                    positions[i] = (short) ((int) (k & 4095L));
-                    states[i] = modBlockStateMapper[((int) (k >>> 12))];
-                }
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                buf.writeLong(pos);
-                buf.writeVarInt(blocks);
-                for (int i = 0; i < blocks; i++) {
-                    buf.writeVarLong((long) states[i] << 12 | positions[i]);
-                }
-                event.setChanged(true);
-            } else {
-                FriendlyByteBuf buf = event.getBuffer();
-                long pos = buf.readLong();
-                int blocks = buf.readVarInt();
-                short[] positions = new short[blocks];
-                int[] states = new int[blocks];
-                for (int i = 0; i < blocks; i++) {
-                    long k = buf.readVarLong();
-                    positions[i] = (short) ((int) (k & 4095L));
-                    states[i] = blockStateMapper[((int) (k >>> 12))];
-                }
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                buf.writeLong(pos);
-                buf.writeVarInt(blocks);
-                for (int i = 0; i < blocks; i++) {
-                    buf.writeVarLong((long) states[i] << 12 | positions[i]);
-                }
-                event.setChanged(true);
+            int[] remapper = user.clientModEnabled() ? this.modBlockStateMapper : this.blockStateMapper;
+            FriendlyByteBuf buf = event.getBuffer();
+            long sPos = buf.readLong();
+            int blocks = buf.readVarInt();
+            short[] positions = new short[blocks];
+            int[] states = new int[blocks];
+
+            // 获取客户端侧区域
+            ClientSection clientSection = null;
+            if (Config.enableEntityCulling()) {
+                SectionPos sectionPos = SectionPos.of(sPos);
+                ClientChunk trackedChunk = user.getTrackedChunk(sectionPos.asChunkPos().longKey);
+                clientSection = trackedChunk.sectionById(sectionPos.y);
             }
+
+            for (int i = 0; i < blocks; i++) {
+                long k = buf.readVarLong();
+                short posIndex = (short) ((int) (k & 4095L));
+                positions[i] = posIndex;
+                int beforeState = ((int) (k >>> 12));
+                states[i] = remapper[beforeState];
+                if (clientSection != null) {
+                    // 设置遮蔽状态
+                    BlockPos pos = SectionPos.unpackSectionRelativePos(posIndex);
+                    clientSection.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(beforeState));
+                }
+            }
+
+            buf.clear();
+            buf.writeVarInt(event.packetID());
+            buf.writeLong(sPos);
+            buf.writeVarInt(blocks);
+            for (int i = 0; i < blocks; i++) {
+                buf.writeVarLong((long) states[i] << 12 | positions[i]);
+            }
+            event.setChanged(true);
         }
     }
 
     public static class BlockUpdateListener implements ByteBufferPacketListener {
         private final int[] blockStateMapper;
         private final int[] modBlockStateMapper;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public BlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper) {
+        public BlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         @Override
@@ -2271,6 +2270,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             buf.writeVarInt(event.packetID());
             buf.writeBlockPos(pos);
             buf.writeVarInt(state);
+            if (Config.enableEntityCulling()) {
+                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(pos.x >> 4, pos.z >> 4));
+                if (trackedChunk != null) {
+                    trackedChunk.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(state));
+                }
+            }
         }
     }
 
