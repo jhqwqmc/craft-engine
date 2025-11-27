@@ -396,7 +396,8 @@ public final class BukkitBlockManager extends AbstractBlockManager {
         }
     }
 
-    public boolean canBlockView(BlockStateWrapper blockState) {
+    public boolean canBlockView(BlockStateWrapper wrapper) {
+        Object blockState = wrapper.literalObject();
         if (!BlockStateUtils.isOcclude(blockState)) {
             return false;
         }
