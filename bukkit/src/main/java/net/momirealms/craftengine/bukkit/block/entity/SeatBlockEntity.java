@@ -15,10 +15,12 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 
 public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     private final Seat<SeatBlockEntity>[] seats;
+    private final Property<HorizontalDirection> facing;
 
     @SuppressWarnings("unchecked")
-    public SeatBlockEntity(BlockPos pos, ImmutableBlockState blockState, SeatConfig[] seats) {
+    public SeatBlockEntity(BlockPos pos, ImmutableBlockState blockState, SeatConfig[] seats, Property<HorizontalDirection> directionProperty) {
         super(BukkitBlockEntityTypes.SEAT, pos, blockState);
+        this.facing = directionProperty;
         this.seats = new Seat[seats.length];
         for (int i = 0; i < seats.length; i++) {
             this.seats[i] = new BukkitSeat<>(this, seats[i]);
@@ -38,10 +40,9 @@ public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     }
 
     public boolean spawnSeat(Player player) {
-        Property<?> facing = super.blockState.owner().value().getProperty("facing");
         int yRot = 0;
-        if (facing != null && facing.valueClass() == HorizontalDirection.class) {
-            HorizontalDirection direction = (HorizontalDirection) super.blockState.get(facing);
+        if (this.facing != null) {
+            HorizontalDirection direction = super.blockState.get(facing);
             yRot = switch (direction) {
                 case NORTH -> 0;
                 case SOUTH -> 180;
