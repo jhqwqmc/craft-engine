@@ -498,6 +498,7 @@ warning.config.function.transform_block.missing_block: "<yellow>Issue found in f
 warning.config.function.cycle_block_property.missing_property: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'property' argument for 'cycle_block_property' function.</yellow>"
 warning.config.function.set_exp.missing_count: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'count' argument for 'set_exp' function.</yellow>"
 warning.config.function.set_level.missing_count: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'count' argument for 'set_level' function.</yellow>"
+warning.config.function.play_totem_animation.missing_item: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'item' argument for 'play_totem_animation' function.</yellow>"
 warning.config.selector.missing_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'type' argument for selector.</yellow>"
 warning.config.selector.invalid_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is using an invalid selector type '<arg:2>'.</yellow>"
 warning.config.selector.invalid_target: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is using an invalid selector target '<arg:2>'.</yellow>"

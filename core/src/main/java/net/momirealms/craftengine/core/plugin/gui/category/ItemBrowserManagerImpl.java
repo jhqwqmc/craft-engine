@@ -115,8 +115,10 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             List<String> members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));
             Key icon = Key.of(section.getOrDefault("icon", ItemKeys.STONE).toString());
             int priority = ResourceConfigUtils.getAsInt(section.getOrDefault("priority", 0), "priority");
-            Category category = new Category(id, name, MiscUtils.getAsStringList(section.getOrDefault("lore", List.of())), icon, new ArrayList<>(members), priority,
-                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden"));
+            List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));
+            boolean hidden = ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden");
+            String permission = ResourceConfigUtils.getAsStringOrNull(section.get("permission"));
+            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, permission);
             if (ItemBrowserManagerImpl.this.byId.containsKey(id)) {
                 ItemBrowserManagerImpl.this.byId.get(id).merge(category);
             } else {
@@ -157,6 +159,9 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         );
 
         List<ItemWithAction> iconList = this.categoryOnMainPage.stream().map(it -> {
+            if (it.permission() != null && !player.hasPermission(it.permission())) {
+                return null;
+            }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
             if (ItemUtils.isEmpty(item)) {
                 this.plugin.logger().warn("Can't not find item " + it.icon() + " for category icon");
@@ -245,6 +250,8 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                 if (subCategory == null) {
                     item = Objects.requireNonNull(this.plugin.itemManager().createWrappedItem(ItemKeys.BARRIER, player));
                     item.customNameJson(AdventureHelper.componentToJson(Component.text(subCategoryId).color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
+                } else if (subCategory.permission() != null && !player.hasPermission(subCategory.permission())) {
+                    return null;
                 } else {
                     item = this.plugin.itemManager().createWrappedItem(subCategory.icon(), player);
                     if (ItemUtils.isEmpty(item)) {
@@ -317,7 +324,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                     }
                 });
             }
-        }).toList();
+        }).filter(Objects::nonNull).toList();
 
         PagedGui.builder()
                 .addIngredients(itemList)

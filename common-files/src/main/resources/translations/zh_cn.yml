@@ -494,6 +494,7 @@ warning.config.function.transform_block.missing_block: "<yellow>在文件 <arg:0
 warning.config.function.cycle_block_property.missing_property: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'cycle_block_property' 函数所需的 'property' 参数</yellow>"
 warning.config.function.set_exp.missing_count: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'set_exp' 函数所需的 'count' 参数</yellow>"
 warning.config.function.set_level.missing_count: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'set_level' 函数所需的 'count' 参数</yellow>"
+warning.config.function.play_totem_animation.missing_item: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少 'play_totem_animation' 函数所需的 'item' 参数</yellow>"
 warning.config.selector.missing_type: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 缺少选择器必需的 'type' 参数</yellow>"
 warning.config.selector.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 使用了无效的选择器类型 '<arg:2>'</yellow>"
 warning.config.selector.invalid_target: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 使用了无效的选择器目标 '<arg:2>'</yellow>"
