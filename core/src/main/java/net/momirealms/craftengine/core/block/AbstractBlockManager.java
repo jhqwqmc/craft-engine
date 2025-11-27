@@ -600,7 +600,11 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                                 this.arrangeModelForStateAndVerify(visualBlockState, parseBlockModel(modelConfig));
                             }
                         }
-                        BlockStateAppearance blockStateAppearance = new BlockStateAppearance(visualBlockState, parseBlockEntityRender(appearanceSection.get("entity-renderer")));
+                        BlockStateAppearance blockStateAppearance = new BlockStateAppearance(
+                                visualBlockState,
+                                parseBlockEntityRender(appearanceSection.get("entity-renderer")),
+                                ResourceConfigUtils.getAsAABB(appearanceSection.getOrDefault("aabb", 1), "aabb")
+                        );
                         appearances.put(appearanceName, blockStateAppearance);
                         if (anyAppearance == null) {
                             anyAppearance = blockStateAppearance;
@@ -639,6 +643,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                                     }
                                     for (ImmutableBlockState possibleState : possibleStates) {
                                         possibleState.setVisualBlockState(appearance.blockState());
+                                        possibleState.setEstimatedBoundingBox(appearance.estimateAABB());
                                         appearance.blockEntityRenderer().ifPresent(possibleState::setConstantRenderers);
                                     }
                                 }
@@ -662,6 +667,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         if (visualState == null) {
                             visualState = anyAppearance.blockState();
                             state.setVisualBlockState(visualState);
+                            state.setEstimatedBoundingBox(anyAppearance.estimateAABB());
                             anyAppearance.blockEntityRenderer().ifPresent(state::setConstantRenderers);
                         }
                         int appearanceId = visualState.registryId();

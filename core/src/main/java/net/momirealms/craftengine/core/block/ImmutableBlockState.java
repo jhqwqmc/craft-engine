@@ -17,6 +17,7 @@ import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.NBT;
 import net.momirealms.sparrow.nbt.Tag;
@@ -42,6 +43,7 @@ public final class ImmutableBlockState {
     private BlockEntityType<? extends BlockEntity> blockEntityType;
     @Nullable
     private BlockEntityElementConfig<? extends BlockEntityElement>[] renderers;
+    private AABB estimatedBoundingBox;
 
     ImmutableBlockState(
             Holder.Reference<CustomBlock> owner,
@@ -85,6 +87,14 @@ public final class ImmutableBlockState {
 
     public void setConstantRenderers(BlockEntityElementConfig<? extends BlockEntityElement>[] renderers) {
         this.renderers = renderers;
+    }
+
+    public void setEstimatedBoundingBox(AABB aabb) {
+        this.estimatedBoundingBox = aabb;
+    }
+
+    public AABB estimatedBoundingBox() {
+        return estimatedBoundingBox;
     }
 
     public boolean hasBlockEntity() {

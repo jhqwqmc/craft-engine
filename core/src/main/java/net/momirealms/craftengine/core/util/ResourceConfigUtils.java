@@ -6,6 +6,7 @@ import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -340,5 +341,53 @@ public final class ResourceConfigUtils {
             exception.setNode(node);
         }
         TranslationManager.instance().log(e.node(), e.arguments());
+    }
+
+    public static AABB getAsAABB(Object o, String option) {
+        if (o == null) {
+            throw new LocalizedResourceConfigException("warning.config.type.aabb", "null", option);
+        }
+        if (o instanceof Number number) {
+            double min = -(number.doubleValue() / 2);
+            double max = number.doubleValue() / 2;
+            return new AABB(min, min, min, max, max, max);
+        } else {
+            double[] args;
+            if (o instanceof List<?> list) {
+                args = new double[list.size()];
+                for (int i = 0; i < args.length; i++) {
+                    if (list.get(i) instanceof Number number) {
+                        args[i] = number.doubleValue();
+                    } else {
+                        try {
+                            args[i] = Double.parseDouble(list.get(i).toString());
+                        } catch (NumberFormatException e) {
+                            throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
+                        }
+                    }
+                }
+            } else {
+                String[] split = o.toString().split(",");
+                args = new double[split.length];
+                for (int i = 0; i < args.length; i++) {
+                    try {
+                        args[i] = Double.parseDouble(split[i]);
+                    } catch (NumberFormatException e) {
+                        throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
+                    }
+                }
+            }
+            if (args.length == 1) {
+                return new AABB(-args[0]/2, -args[0]/2, -args[0]/2, args[0]/2, args[0]/2, args[0]/2);
+            } else if (args.length == 2) {
+                return new AABB(-args[0]/2, -args[1]/2, -args[0]/2, args[0]/2, args[1]/2, args[0]/2);
+            } else if (args.length == 3) {
+                return new AABB(-args[0]/2, -args[1]/2, -args[2]/2, args[0]/2, args[1]/2, args[2]/2);
+            } else if (args.length == 6) {
+                return new AABB(args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else {
+                throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
+            }
+        }
     }
 }

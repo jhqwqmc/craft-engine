@@ -22,6 +22,7 @@ import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.DataComponentValue;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.api.event.FurnitureAttemptBreakEvent;
@@ -90,9 +91,12 @@ import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
-import net.momirealms.craftengine.core.world.chunk.ChunkStatus;
 import net.momirealms.craftengine.core.world.chunk.Palette;
 import net.momirealms.craftengine.core.world.chunk.PalettedContainer;
+import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
+import net.momirealms.craftengine.core.world.chunk.client.ClientSection;
+import net.momirealms.craftengine.core.world.chunk.client.PackedOcclusionStorage;
+import net.momirealms.craftengine.core.world.chunk.client.SingularOcclusionStorage;
 import net.momirealms.craftengine.core.world.chunk.packet.BlockEntityData;
 import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
 import net.momirealms.sparrow.nbt.CompoundTag;
@@ -125,6 +129,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 public class BukkitNetworkManager implements NetworkManager, Listener, PluginMessageListener {
     private static BukkitNetworkManager instance;
@@ -288,7 +293,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
-    public void registerBlockStatePacketListeners(int[] blockStateMappings) {
+    public void registerBlockStatePacketListeners(int[] blockStateMappings, Predicate<Integer> occlusionPredicate) {
         int stoneId = BlockStateUtils.blockStateToId(MBlocks.STONE$defaultState);
         int vanillaBlocks = BlockStateUtils.vanillaBlockStateCount();
         int[] newMappings = new int[blockStateMappings.length];
@@ -318,7 +323,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 newMappings,
                 newMappingsMOD,
                 newMappings.length,
-                RegistryUtils.currentBiomeRegistrySize()
+                RegistryUtils.currentBiomeRegistrySize(),
+                occlusionPredicate
         ), this.packetIds.clientboundLevelChunkWithLightPacket(), "ClientboundLevelChunkWithLightPacket");
         registerS2CGamePacketListener(new SectionBlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundSectionBlocksUpdatePacket(), "ClientboundSectionBlocksUpdatePacket");
         registerS2CGamePacketListener(new BlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundBlockUpdatePacket(), "ClientboundBlockUpdatePacket");
@@ -1433,9 +1439,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Object location = FastNMS.INSTANCE.field$ResourceKey$location(dimensionKey);
             World world = Bukkit.getWorld(Objects.requireNonNull(NamespacedKey.fromString(location.toString())));
             if (world != null) {
-                int sectionCount = (world.getMaxHeight() - world.getMinHeight()) / 16;
-                player.setClientSideSectionCount(sectionCount);
-                player.setClientSideDimension(Key.of(location.toString()));
+                player.setClientSideWorld(BukkitAdaptors.adapt(world));
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundLoginPacket: World " + location + " does not exist");
             }
@@ -1463,10 +1467,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Object location = FastNMS.INSTANCE.field$ResourceKey$location(dimensionKey);
             World world = Bukkit.getWorld(Objects.requireNonNull(NamespacedKey.fromString(location.toString())));
             if (world != null) {
-                int sectionCount = (world.getMaxHeight() - world.getMinHeight()) / 16;
-                player.setClientSideSectionCount(sectionCount);
-                player.setClientSideDimension(Key.of(location.toString()));
+                player.setClientSideWorld(BukkitAdaptors.adapt(world));
                 player.clearTrackedChunks();
+                player.clearTrackedBlockEntities();
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundRespawnPacket: World " + location + " does not exist");
             }
@@ -1979,13 +1982,15 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         private final IntIdentityList biomeList;
         private final IntIdentityList blockList;
         private final boolean needsDowngrade;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public LevelChunkWithLightListener(int[] blockStateMapper, int[] modBlockStateMapper, int blockRegistrySize, int biomeRegistrySize) {
+        public LevelChunkWithLightListener(int[] blockStateMapper, int[] modBlockStateMapper, int blockRegistrySize, int biomeRegistrySize, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
             this.biomeList = new IntIdentityList(biomeRegistrySize);
             this.blockList = new IntIdentityList(blockRegistrySize);
             this.needsDowngrade = MiscUtils.ceilLog2(BlockStateUtils.vanillaBlockStateCount()) != MiscUtils.ceilLog2(blockRegistrySize);
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         public int remapBlockState(int stateId, boolean enableMod) {
@@ -2022,36 +2027,92 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             buf.readBytes(chunkDataBytes);
 
             // 客户端侧section数量很重要，不能读取此时玩家所在的真实世界，包具有滞后性
-            int count = player.clientSideSectionCount();
+            net.momirealms.craftengine.core.world.World clientSideWorld = player.clientSideWorld();
+            WorldHeight worldHeight = clientSideWorld.worldHeight();
+            int count = worldHeight.getSectionsCount();
             MCSection[] sections = new MCSection[count];
             FriendlyByteBuf chunkDataByteBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(chunkDataBytes));
 
             boolean hasChangedAnyBlock = false;
             boolean hasGlobalPalette = false;
 
+            // 创建客户端侧世界（只在开启实体情况下创建）
+            ClientSection[] clientSections = Config.enableEntityCulling() ? new ClientSection[count] : null;
+
             for (int i = 0; i < count; i++) {
                 MCSection mcSection = new MCSection(user.clientBlockList(), this.blockList, this.biomeList);
                 mcSection.readPacket(chunkDataByteBuf);
+
                 PalettedContainer<Integer> container = mcSection.blockStateContainer();
+                // 重定向生物群系
                 if (remapBiomes(user, mcSection.biomeContainer())) {
                     hasChangedAnyBlock = true;
                 }
+
                 Palette<Integer> palette = container.data().palette();
                 if (palette.canRemap()) {
+
+                    // 重定向方块
                     if (palette.remapAndCheck(s -> remapBlockState(s, user.clientModEnabled()))) {
                         hasChangedAnyBlock = true;
                     }
+
+                    // 处理客户端侧哪些方块有阻挡
+                    if (clientSections != null) {
+                        int size = palette.getSize();
+                        // 单个元素的情况下，使用优化的存储方案
+                        if (size == 1) {
+                            clientSections[i] = new ClientSection(new SingularOcclusionStorage(this.occlusionPredicate.test(palette.get(0))));
+                        } else {
+                            boolean hasOcclusions = false;
+                            boolean hasNoOcclusions = false;
+                            for (int h = 0; h < size; h++) {
+                                int entry = palette.get(h);
+                                if (this.occlusionPredicate.test(entry)) {
+                                    hasOcclusions = true;
+                                } else {
+                                    hasNoOcclusions = true;
+                                }
+                            }
+                            // 两种情况都有，那么需要一个个遍历处理视线遮挡数据
+                            if (hasOcclusions && hasNoOcclusions) {
+                                PackedOcclusionStorage storage = new PackedOcclusionStorage(false);
+                                for (int j = 0; j < 4096; j++) {
+                                    int state = container.get(j);
+                                    storage.set(j, this.occlusionPredicate.test(state));
+                                }
+                            }
+                            // 全遮蔽或全透视则使用优化存储方案
+                            else {
+                                clientSections[i] = new ClientSection(new SingularOcclusionStorage(hasOcclusions));
+                            }
+                        }
+                    }
                 } else {
                     hasGlobalPalette = true;
+
+                    PackedOcclusionStorage storage = null;
+                    if (clientSections != null) {
+                        storage = new PackedOcclusionStorage(false);
+                    }
+
                     for (int j = 0; j < 4096; j++) {
                         int state = container.get(j);
+
+                        // 重定向方块
                         int newState = remapBlockState(state, user.clientModEnabled());
                         if (newState != state) {
                             container.set(j, newState);
                             hasChangedAnyBlock = true;
                         }
+
+                        // 写入视线遮挡数据
+                        if (storage != null) {
+                            storage.set(j, this.occlusionPredicate.test(state));
+                        }
                     }
                 }
+
                 sections[i] = mcSection;
             }
 
@@ -2116,13 +2177,17 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             }
 
             // 记录加载的区块
-            player.addTrackedChunk(chunkPos.longKey, new ChunkStatus());
+            player.addTrackedChunk(chunkPos.longKey, new ClientChunk(clientSections, worldHeight));
 
             // 生成方块实体
-            CEWorld ceWorld = BukkitWorldManager.instance().getWorld(player.world().uuid());
-            CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(chunkPos.longKey);
-            if (ceChunk != null) {
-                ceChunk.spawnBlockEntities(player);
+            CEWorld ceWorld = clientSideWorld.storageWorld();
+            // 世界可能被卸载，因为包滞后
+            if (ceWorld != null) {
+                CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(chunkPos.longKey);
+                if (ceChunk != null) {
+                    // 生成方块实体
+                    ceChunk.spawnBlockEntities(player);
+                }
             }
         }
     }

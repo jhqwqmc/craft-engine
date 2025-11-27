@@ -13,6 +13,8 @@ public interface Palette<T> {
 
     boolean hasAny(Predicate<T> predicate);
 
+    boolean allMatch(Predicate<T> predicate);
+
     T get(int id);
 
     int getSize();

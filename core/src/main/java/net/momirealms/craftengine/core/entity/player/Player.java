@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.entity.player;
 
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
+import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
@@ -9,14 +10,13 @@ import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.world.BlockPos;
-import net.momirealms.craftengine.core.world.Position;
-import net.momirealms.craftengine.core.world.Vec3d;
-import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class Player extends AbstractEntity implements NetWorkUser {
     private static final Key TYPE = Key.of("minecraft:player");
@@ -34,6 +34,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     @Override
     public abstract Object serverPlayer();
+
+    public abstract void setClientSideWorld(World world);
 
     public abstract float getDestroyProgress(Object blockState, BlockPos pos);
 
@@ -197,6 +199,12 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public abstract void setExperienceLevels(int level);
 
     public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent);
+
+    public abstract void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
+
+    public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
+
+    public abstract void clearTrackedBlockEntities();
 
     @Override
     public void remove() {

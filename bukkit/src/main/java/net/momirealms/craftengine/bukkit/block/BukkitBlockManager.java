@@ -88,7 +88,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
         this.markVanillaNoteBlocks();
         this.findViewBlockingVanillaBlocks();
         Arrays.fill(this.immutableBlockStates, EmptyBlock.INSTANCE.defaultState());
-        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings); // 一定要预先初始化一次，预防id超出上限
+        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings, this::isViewBlockingBlock); // 一定要预先初始化一次，预防id超出上限
     }
 
     public static BukkitBlockManager instance() {
@@ -128,7 +128,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
 
     @Override
     public void delayedLoad() {
-        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings); // 重置方块映射表
+        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings, this::isViewBlockingBlock); // 重置方块映射表
         super.delayedLoad();
         this.cachedVisualBlockStatePacket = VisualBlockStatePacket.create();
         for (BukkitServerPlayer player : BukkitNetworkManager.instance().onlineUsers()) {

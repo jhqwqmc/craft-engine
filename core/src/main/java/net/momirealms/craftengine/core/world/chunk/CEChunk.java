@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntityRendererSerializer;
@@ -91,8 +92,12 @@ public class CEChunk {
     public void spawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.show(player);
+            if (Config.enableEntityCulling()) {
+                player.addTrackedBlockEntities(this.constantBlockEntityRenderers);
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.show(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.show(player);
@@ -105,8 +110,12 @@ public class CEChunk {
     public void despawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.hide(player);
+            if (Config.enableEntityCulling()) {
+                player.removeTrackedBlockEntities(this.constantBlockEntityRenderers.keySet());
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.hide(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.hide(player);
@@ -129,7 +138,7 @@ public class CEChunk {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
-            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements);
+            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements, state.estimatedBoundingBox().move(pos));
             World wrappedWorld = this.world.world();
             List<Player> trackedBy = getTrackedBy();
             boolean hasTrackedBy = trackedBy != null && !trackedBy.isEmpty();
@@ -439,7 +448,7 @@ public class CEChunk {
         return Collections.unmodifiableCollection(this.blockEntities.values());
     }
 
-    public List<BlockPos> constantBlockEntityRenderers() {
+    public List<BlockPos> constantBlockEntityRendererPositions() {
         try {
             this.renderLock.readLock().lock();
             return new ArrayList<>(this.constantBlockEntityRenderers.keySet());

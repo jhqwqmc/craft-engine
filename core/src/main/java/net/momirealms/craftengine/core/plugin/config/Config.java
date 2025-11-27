@@ -203,6 +203,8 @@ public class Config {
     protected boolean emoji$contexts$sign;
     protected int emoji$max_emojis_per_parse;
 
+    protected boolean client_optimization$entity_culling$enable;
+
     public Config(CraftEngine plugin) {
         this.plugin = plugin;
         this.configVersion = PluginProperties.getValue("config");
@@ -561,6 +563,9 @@ public class Config {
         emoji$contexts$book = config.getBoolean("emoji.contexts.book", true);
         emoji$contexts$sign = config.getBoolean("emoji.contexts.sign", true);
         emoji$max_emojis_per_parse = config.getInt("emoji.max-emojis-per-parse", 32);
+
+        // client optimization
+        client_optimization$entity_culling$enable = config.getBoolean("client-optimization.entity-culling.enable", false);
 
         firstTime = false;
     }
@@ -1150,6 +1155,10 @@ public class Config {
 
     public static int zopfliIterations() {
         return instance.resource_pack$optimization$texture$zopfli_iterations;
+    }
+
+    public static boolean enableEntityCulling() {
+        return instance.client_optimization$entity_culling$enable;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {

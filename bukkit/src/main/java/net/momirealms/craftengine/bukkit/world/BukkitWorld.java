@@ -24,7 +24,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class BukkitWorld implements World {
     private final WeakReference<org.bukkit.World> world;

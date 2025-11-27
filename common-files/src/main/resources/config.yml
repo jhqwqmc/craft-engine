@@ -552,11 +552,10 @@ chunk-system:
     remove: []
     convert: {}
 
-#client-optimization:
-#  # Using server-side ray tracing algorithms to hide certain entities and reduce client-side rendering pressure.
-#  entity-culling:
-#    enable: false
-#    whitelist-entities: []
+client-optimization:
+  # Using server-side ray tracing algorithms to hide certain entities and reduce client-side rendering pressure.
+  entity-culling:
+    enable: false
 
 # Enables or disables debug mode
 debug:
