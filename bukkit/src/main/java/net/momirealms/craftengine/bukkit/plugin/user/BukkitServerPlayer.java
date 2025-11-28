@@ -576,12 +576,11 @@ public class BukkitServerPlayer extends Player {
                 CullingData cullingData = cullableObject.cullable.cullingData();
                 if (cullingData != null) {
                     Vec3d vec3d = LocationUtils.toVec3d(platformPlayer().getEyeLocation());
-                    boolean visible = this.culling.isVisible(cullingData, vec3d, vec3d);
+                    boolean visible = this.culling.isVisible(cullingData, vec3d);
                     cullableObject.setShown(this, visible);
                 } else {
                     cullableObject.setShown(this, true);
                 }
-                this.culling.resetCache();
             }
             long nano2 = System.nanoTime();
 

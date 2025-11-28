@@ -17,8 +17,6 @@ public final class EntityCulling {
     private final MutableVec3d[] targetPoints = new MutableVec3d[MAX_SAMPLES];
     private final int[] lastHitBlock = new int[MAX_SAMPLES * 3];
     private final boolean[] canCheckLastHitBlock = new boolean[MAX_SAMPLES];
-    // 相机附近的点位大概率会多次重复获取
-    private final long[] occlusionCache = new long[32 * 32 * 32 / 32];
     private int hitBlockCount = 0;
     private int lastVisitChunkX = Integer.MAX_VALUE;
     private int lastVisitChunkZ = Integer.MAX_VALUE;
@@ -31,11 +29,7 @@ public final class EntityCulling {
         }
     }
 
-    public void resetCache() {
-        Arrays.fill(this.occlusionCache, 0);
-    }
-
-    public boolean isVisible(CullingData cullable, Vec3d cameraPos, Vec3d playerHeadPos) {
+    public boolean isVisible(CullingData cullable, Vec3d cameraPos) {
         // 情空标志位
         Arrays.fill(this.canCheckLastHitBlock, false);
         this.hitBlockCount = 0;
@@ -282,32 +276,6 @@ public final class EntityCulling {
         return false;
     }
 
-    // 0 = 没缓存
-    // 1 = 没遮挡
-    // 2 = 有遮挡
-    private int getCacheState(int index) {
-        int arrayIndex = index / 32; // 获取数组下标
-        int offset = (index % 32) * 2; // 每个状态占2bit，计算位偏移
-        if (arrayIndex >= 0 && arrayIndex < this.occlusionCache.length) {
-            long cacheValue = this.occlusionCache[arrayIndex];
-            // 提取2bit的状态值 (0-3)
-            return (int) ((cacheValue >> offset) & 0b11);
-        }
-        return 0; // 索引越界时返回默认状态
-    }
-
-    private void setCacheState(int index, int state) {
-        long[] cache = this.occlusionCache;
-        int arrayIndex = index / 32;
-        int offset = (index % 32) * 2;
-
-        if (arrayIndex >= 0 && arrayIndex < cache.length) {
-            long mask = ~(0b11L << offset); // 创建清除掩码
-            long newValue = (cache[arrayIndex] & mask) | ((state & 0b11L) << offset);
-            cache[arrayIndex] = newValue;
-        }
-    }
-
     private boolean stepRay(int startingX, int startingY, int startingZ,
                             double stepSizeX, double stepSizeY, double stepSizeZ,
                             int remainingSteps,
@@ -321,37 +289,12 @@ public final class EntityCulling {
         // 遍历射线路径上的所有方块（跳过最后一个目标方块）
         for (; remainingSteps > 1; remainingSteps--) {
 
-            int cacheIndex = getCacheIndex(currentBlockX, currentBlockY, currentBlockZ, startingX, startingY, startingZ);
-            if (cacheIndex != -1) {
-                int cacheState = getCacheState(cacheIndex);
-                // 没遮挡
-                if (cacheState == 1) {
-                    continue;
-                }
-                // 有遮挡
-                else if (cacheState == 2) {
-                    this.lastHitBlock[this.hitBlockCount * 3] = currentBlockX;
-                    this.lastHitBlock[this.hitBlockCount * 3 + 1] = currentBlockY;
-                    this.lastHitBlock[this.hitBlockCount * 3 + 2] = currentBlockZ;
-                    return false;
-                }
-            }
-
             // 检查当前方块是否遮挡视线
             if (isOccluding(currentBlockX, currentBlockY, currentBlockZ)) {
                 this.lastHitBlock[this.hitBlockCount * 3] = currentBlockX;
                 this.lastHitBlock[this.hitBlockCount * 3 + 1] = currentBlockY;
                 this.lastHitBlock[this.hitBlockCount * 3 + 2] = currentBlockZ;
-                // 设置缓存
-                if (cacheIndex != -1) {
-                    setCacheState(cacheIndex, 2);
-                }
                 return false; // 视线被遮挡，立即返回
-            } else {
-                // 设置缓存
-                if (cacheIndex != -1) {
-                    setCacheState(cacheIndex, 1);
-                }
             }
 
             // 基于时间参数选择下一个要遍历的方块方向
