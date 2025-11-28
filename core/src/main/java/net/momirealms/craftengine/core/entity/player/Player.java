@@ -203,7 +203,7 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
 
-    public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
+    public abstract VirtualCullableObject addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
 
     public abstract VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos);
 

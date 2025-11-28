@@ -13,11 +13,11 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.World;
-import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.NBT;
 import net.momirealms.sparrow.nbt.Tag;
@@ -43,7 +43,8 @@ public final class ImmutableBlockState {
     private BlockEntityType<? extends BlockEntity> blockEntityType;
     @Nullable
     private BlockEntityElementConfig<? extends BlockEntityElement>[] renderers;
-    private AABB estimatedBoundingBox;
+    @Nullable
+    private CullingData cullingData;
 
     ImmutableBlockState(
             Holder.Reference<CustomBlock> owner,
@@ -89,12 +90,13 @@ public final class ImmutableBlockState {
         this.renderers = renderers;
     }
 
-    public void setEstimatedBoundingBox(AABB aabb) {
-        this.estimatedBoundingBox = aabb;
+    @Nullable
+    public CullingData cullingData() {
+        return cullingData;
     }
 
-    public AABB estimatedBoundingBox() {
-        return estimatedBoundingBox;
+    public void setCullingData(@Nullable CullingData cullingData) {
+        this.cullingData = cullingData;
     }
 
     public boolean hasBlockEntity() {

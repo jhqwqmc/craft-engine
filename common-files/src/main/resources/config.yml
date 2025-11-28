@@ -553,9 +553,10 @@ chunk-system:
     convert: {}
 
 client-optimization:
-  # Using server-side ray tracing algorithms to hide certain entities and reduce client-side rendering pressure.
+  # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
   entity-culling:
-    enable: false
+    enable: true
+    view-distance: 64
 
 # Enables or disables debug mode
 debug:

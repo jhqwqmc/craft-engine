@@ -12,6 +12,7 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.tick.*;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
@@ -139,7 +140,12 @@ public class CEChunk {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
-            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements, state.estimatedBoundingBox().move(pos));
+            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(
+                    elements,
+                    Optional.ofNullable(state.cullingData())
+                            .map(data -> new CullingData(data.aabb.move(pos), data.maxDistance, data.aabbExpansion))
+                            .orElse(null)
+            );
             World wrappedWorld = this.world.world();
             List<Player> trackedBy = getTrackedBy();
             boolean hasTrackedBy = trackedBy != null && !trackedBy.isEmpty();
@@ -159,7 +165,7 @@ public class CEChunk {
                                     // 如果启用实体剔除，那么只对已经渲染的进行变换
                                     if (Config.enableEntityCulling()) {
                                         for (Player player : trackedBy) {
-                                            VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                            VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
                                             if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
                                                 element.transform(player);
                                             }
@@ -207,7 +213,7 @@ public class CEChunk {
                                         // 如果启用实体剔除，那么只对已经渲染的进行变换
                                         if (Config.enableEntityCulling()) {
                                             for (Player player : trackedBy) {
-                                                VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                                VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
                                                 if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
                                                     newElement.transform(player);
                                                 }

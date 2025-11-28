@@ -128,6 +128,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -461,6 +462,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 player.getScheduler().runAtFixedRate(plugin.javaPlugin(), (t) -> user.tick(),
                         () -> {}, 1, 1);
             }
+            // 安排异步tick任务
+            this.plugin.scheduler().asyncRepeating(t -> {
+                if (!user.isOnline()) {
+                    t.cancel();
+                    return;
+                }
+                user.asyncTick();
+            }, 50, 50, TimeUnit.MILLISECONDS);
             user.sendPacket(TotemAnimationCommand.FIX_TOTEM_SOUND_PACKET, false);
         }
     }

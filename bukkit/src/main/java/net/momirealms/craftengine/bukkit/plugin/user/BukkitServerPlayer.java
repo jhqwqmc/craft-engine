@@ -32,6 +32,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.entityculling.EntityCulling;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
@@ -157,7 +158,7 @@ public class BukkitServerPlayer extends Player {
                 }
             }
         }
-        this.culling = new EntityCulling(this, 64, 0.5);
+        this.culling = new EntityCulling(this);
     }
 
     public void setPlayer(org.bukkit.entity.Player player) {
@@ -506,6 +507,9 @@ public class BukkitServerPlayer extends Player {
         this.encoderState = encoderState;
     }
 
+    private final Queue<Long> recentDurations = new LinkedList<>();
+    private static final int SAMPLE_SIZE = 100;
+
     @Override
     public void tick() {
         // not fully online
@@ -563,14 +567,42 @@ public class BukkitServerPlayer extends Player {
                 this.predictNextBlockToMine();
             }
         }
+    }
+
+    public void asyncTick() {
         if (Config.enableEntityCulling()) {
             long nano1 = System.nanoTime();
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
-                boolean visible = this.culling.isVisible(cullableObject.cullable.aabb(), LocationUtils.toVec3d(platformPlayer().getEyeLocation()));
-                cullableObject.setShown(this, visible);
+                CullingData cullingData = cullableObject.cullable.cullingData();
+                if (cullingData != null) {
+                    Vec3d vec3d = LocationUtils.toVec3d(platformPlayer().getEyeLocation());
+                    boolean visible = this.culling.isVisible(cullingData, vec3d, vec3d);
+                    cullableObject.setShown(this, visible);
+                } else {
+                    cullableObject.setShown(this, true);
+                }
+                this.culling.resetCache();
             }
             long nano2 = System.nanoTime();
-            //CraftEngine.instance().logger().info("EntityCulling took " + (nano2 - nano1) / 1_000_000d + "ms");
+
+            long duration = nano2 - nano1;
+
+            // 添加到队列
+            recentDurations.offer(duration);
+
+            // 保持队列大小为100
+            if (recentDurations.size() > SAMPLE_SIZE) {
+                recentDurations.poll();
+            }
+
+            // 每100次输出一次平均耗时
+            if (recentDurations.size() == SAMPLE_SIZE) {
+                double averageMs = recentDurations.stream()
+                        .mapToLong(Long::longValue)
+                        .average()
+                        .orElse(0) / 1_000_000d;
+                CraftEngine.instance().logger().info("EntityCulling 最近100次平均耗时: " + averageMs + "ms");
+            }
         }
     }
 
@@ -1200,6 +1232,9 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void removeTrackedChunk(long chunkPos) {
         this.trackedChunks.remove(chunkPos);
+        if (Config.enableEntityCulling()) {
+            this.culling.removeLastVisitChunkIfMatches((int) chunkPos, (int) (chunkPos >> 32));
+        }
     }
 
     @Override
@@ -1317,8 +1352,8 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
-        this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
+    public VirtualCullableObject addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
+        return this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
     }
 
     @Override

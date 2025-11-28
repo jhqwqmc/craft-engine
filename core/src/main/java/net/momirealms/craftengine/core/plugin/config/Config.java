@@ -204,6 +204,7 @@ public class Config {
     protected int emoji$max_emojis_per_parse;
 
     protected boolean client_optimization$entity_culling$enable;
+    protected int client_optimization$entity_culling$view_distance;
 
     public Config(CraftEngine plugin) {
         this.plugin = plugin;
@@ -566,6 +567,7 @@ public class Config {
 
         // client optimization
         client_optimization$entity_culling$enable = config.getBoolean("client-optimization.entity-culling.enable", false);
+        client_optimization$entity_culling$view_distance = config.getInt("client-optimization.entity-culling.view-distance", 64);
 
         firstTime = false;
     }
@@ -1159,6 +1161,10 @@ public class Config {
 
     public static boolean enableEntityCulling() {
         return instance.client_optimization$entity_culling$enable;
+    }
+
+    public static int entityCullingViewDistance() {
+        return instance.client_optimization$entity_culling$view_distance;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {
