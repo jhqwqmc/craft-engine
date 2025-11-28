@@ -32,6 +32,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCulling;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
@@ -142,6 +143,8 @@ public class BukkitServerPlayer extends Player {
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
 
+    private final EntityCulling culling;
+
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
         this.plugin = plugin;
@@ -154,6 +157,7 @@ public class BukkitServerPlayer extends Player {
                 }
             }
         }
+        this.culling = new EntityCulling(this, 64, 0.5);
     }
 
     public void setPlayer(org.bukkit.entity.Player player) {
@@ -558,6 +562,15 @@ public class BukkitServerPlayer extends Player {
                 this.previousEyeLocation = eyeLocation;
                 this.predictNextBlockToMine();
             }
+        }
+        if (Config.enableEntityCulling()) {
+            long nano1 = System.nanoTime();
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+                boolean visible = this.culling.isVisible(cullableObject.cullable.aabb(), LocationUtils.toVec3d(platformPlayer().getEyeLocation()));
+                cullableObject.setShown(this, visible);
+            }
+            long nano2 = System.nanoTime();
+            //CraftEngine.instance().logger().info("EntityCulling took " + (nano2 - nano1) / 1_000_000d + "ms");
         }
     }
 
@@ -1301,6 +1314,16 @@ public class BukkitServerPlayer extends Player {
         for (Map.Entry<BlockPos, ConstantBlockEntityRenderer> entry : renders.entrySet()) {
             this.trackedBlockEntityRenderers.put(entry.getKey(), new VirtualCullableObject(entry.getValue()));
         }
+    }
+
+    @Override
+    public void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
+        this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
+    }
+
+    @Override
+    public VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos) {
+        return this.trackedBlockEntityRenderers.get(blockPos);
     }
 
     @Override

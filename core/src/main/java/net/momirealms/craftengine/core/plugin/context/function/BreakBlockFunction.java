@@ -28,7 +28,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
     @Override
     public void runInternal(CTX ctx) {
         Optional<Player> optionalPlayer = ctx.getOptionalParameter(DirectContextParameters.PLAYER);
-        optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.fastFloor(x.getDouble(ctx)), MiscUtils.fastFloor(y.getDouble(ctx)), MiscUtils.fastFloor(z.getDouble(ctx))));
+        optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.floor(x.getDouble(ctx)), MiscUtils.floor(y.getDouble(ctx)), MiscUtils.floor(z.getDouble(ctx))));
     }
 
     @Override

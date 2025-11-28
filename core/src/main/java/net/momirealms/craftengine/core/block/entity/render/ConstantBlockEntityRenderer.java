@@ -16,6 +16,7 @@ public class ConstantBlockEntityRenderer implements Cullable {
         this.aabb = aabb;
     }
 
+    @Override
     public void show(Player player) {
         for (BlockEntityElement element : this.elements) {
             if (element != null) {
@@ -24,6 +25,7 @@ public class ConstantBlockEntityRenderer implements Cullable {
         }
     }
 
+    @Override
     public void hide(Player player) {
         for (BlockEntityElement element : this.elements) {
             if (element != null) {

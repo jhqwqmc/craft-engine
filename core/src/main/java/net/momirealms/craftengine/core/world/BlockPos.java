@@ -23,7 +23,7 @@ public class BlockPos extends Vec3i {
     }
 
     public static BlockPos fromVec3d(Vec3d vec) {
-        return new BlockPos(MiscUtils.fastFloor(vec.x), MiscUtils.fastFloor(vec.y), MiscUtils.fastFloor(vec.z));
+        return new BlockPos(MiscUtils.floor(vec.x), MiscUtils.floor(vec.y), MiscUtils.floor(vec.z));
     }
 
     public static BlockPos of(long packedPos) {

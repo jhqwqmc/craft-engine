@@ -32,7 +32,7 @@ public class ClientChunk {
         int index = sectionIndex(SectionPos.blockToSectionCoord(y));
         ClientSection section = this.sections[index];
         if (section == null) return;
-        section.setOccluding((y & 15) << 8 | (z & 15) << 4, occluding);
+        section.setOccluding((y & 15) << 8 | (z & 15) << 4 | x & 15, occluding);
     }
 
     public int sectionIndex(int sectionId) {

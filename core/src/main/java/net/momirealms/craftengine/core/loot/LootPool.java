@@ -44,7 +44,7 @@ public class LootPool<T> {
         }
         if (this.compositeCondition.test(context)) {
             Consumer<Item<T>> consumer = LootFunction.decorate(this.compositeFunction, lootConsumer, context);
-            int i = this.rolls.getInt(context) + MiscUtils.fastFloor(this.bonusRolls.getFloat(context) * context.luck());
+            int i = this.rolls.getInt(context) + MiscUtils.floor(this.bonusRolls.getFloat(context) * context.luck());
             for (int j = 0; j < i; ++j) {
                 this.addRandomItem(createFunctionApplier(consumer, context), context);
             }

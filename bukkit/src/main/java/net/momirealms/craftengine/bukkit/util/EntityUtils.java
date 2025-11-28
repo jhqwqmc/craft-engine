@@ -60,7 +60,7 @@ public final class EntityUtils {
             Object serverLevel = BukkitAdaptors.adapt(player.getWorld()).serverWorld();
             Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
             for (Object pose : List.of(CoreReflections.instance$Pose$STANDING, CoreReflections.instance$Pose$CROUCHING, CoreReflections.instance$Pose$SWIMMING)) {
-                BlockPos pos = new BlockPos(MiscUtils.fastFloor(x), MiscUtils.fastFloor(y), MiscUtils.fastFloor(z));
+                BlockPos pos = new BlockPos(MiscUtils.floor(x), MiscUtils.floor(y), MiscUtils.floor(z));
                 try {
                     double floorHeight = (double) CoreReflections.method$BlockGetter$getBlockFloorHeight.invoke(serverLevel, LocationUtils.toBlockPos(pos));
                     if (pos.y() + floorHeight > y + 0.75 || !isBlockFloorValid(floorHeight)) {

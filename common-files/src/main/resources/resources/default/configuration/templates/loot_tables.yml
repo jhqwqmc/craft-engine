@@ -178,7 +178,7 @@ templates:
   # template: default:loot_table/ore
   # arguments:
   #   ore_block: the ore block
-  #   ore_drop: the drops of the ore
+  #   ore_drop: the drops of the ore material
   #   ore_drop_count: the amount of the ore materials
   #   exp: the exp to drop
   default:loot_table/ore:

@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.world.Cullable;
 
 public class VirtualCullableObject {
-    private final Cullable cullable;
+    public final Cullable cullable;
     private boolean isShown;
 
     public VirtualCullableObject(Cullable cullable) {
@@ -21,6 +21,7 @@ public class VirtualCullableObject {
     }
 
     public void setShown(Player player, boolean shown) {
+        if (this.isShown == shown) return;
         this.isShown = shown;
         if (shown) {
             this.cullable.show(player);

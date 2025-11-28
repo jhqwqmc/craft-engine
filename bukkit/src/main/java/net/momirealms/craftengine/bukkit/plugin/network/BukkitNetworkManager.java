@@ -2075,6 +2075,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                             // 两种情况都有，那么需要一个个遍历处理视线遮挡数据
                             if (hasOcclusions && hasNoOcclusions) {
                                 PackedOcclusionStorage storage = new PackedOcclusionStorage(false);
+                                clientSections[i] = new ClientSection(storage);
                                 for (int j = 0; j < 4096; j++) {
                                     int state = container.get(j);
                                     storage.set(j, this.occlusionPredicate.test(state));
@@ -2092,6 +2093,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     PackedOcclusionStorage storage = null;
                     if (clientSections != null) {
                         storage = new PackedOcclusionStorage(false);
+                        clientSections[i] = new ClientSection(storage);
                     }
 
                     for (int j = 0; j < 4096; j++) {
@@ -2258,6 +2260,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             FriendlyByteBuf buf = event.getBuffer();
             BlockPos pos = buf.readBlockPos();
             int before = buf.readVarInt();
+            if (Config.enableEntityCulling()) {
+                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(pos.x >> 4, pos.z >> 4));
+                if (trackedChunk != null) {
+                    trackedChunk.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(before));
+                }
+            }
             if (user.clientModEnabled() && !BlockStateUtils.isVanillaBlock(before)) {
                 return;
             }
@@ -2270,12 +2278,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             buf.writeVarInt(event.packetID());
             buf.writeBlockPos(pos);
             buf.writeVarInt(state);
-            if (Config.enableEntityCulling()) {
-                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(pos.x >> 4, pos.z >> 4));
-                if (trackedChunk != null) {
-                    trackedChunk.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(state));
-                }
-            }
         }
     }
 
@@ -2437,6 +2439,13 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             if (eventId != WorldEvents.BLOCK_BREAK_EFFECT) return;
             BlockPos blockPos = buf.readBlockPos();
             int state = buf.readInt();
+            // 移除不透明设置
+            if (Config.enableEntityCulling()) {
+                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(blockPos.x >> 4, blockPos.z >> 4));
+                if (trackedChunk != null) {
+                    trackedChunk.setOccluding(blockPos.x, blockPos.y, blockPos.z, false);
+                }
+            }
             boolean global = buf.readBoolean();
             int newState = user.clientModEnabled() ? modBlockStateMapper[state] : blockStateMapper[state];
             Object blockState = BlockStateUtils.idToBlockState(state);

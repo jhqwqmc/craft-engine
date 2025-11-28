@@ -48,7 +48,7 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
                     for (Function<CTX> function : functions) {
                         function.run(ctx);
                     }
-                }, delay, pos.world().platformWorld(), MiscUtils.fastFloor(pos.x()) >> 4, MiscUtils.fastFloor(pos.z()) >> 4);
+                }, delay, pos.world().platformWorld(), MiscUtils.floor(pos.x()) >> 4, MiscUtils.floor(pos.z()) >> 4);
             }
         }
     }

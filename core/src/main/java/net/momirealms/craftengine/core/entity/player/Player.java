@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -201,6 +202,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent);
 
     public abstract void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
+
+    public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
+
+    public abstract VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos);
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 

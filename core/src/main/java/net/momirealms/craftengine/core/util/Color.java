@@ -38,7 +38,7 @@ public class Color {
     }
 
     public static Color fromVector3f(Vector3f vec) {
-        return new Color(0 << 24 /*不可省略*/ | MiscUtils.fastFloor(vec.x) << 16 | MiscUtils.fastFloor(vec.y) << 8 | MiscUtils.fastFloor(vec.z));
+        return new Color(0 << 24 /*不可省略*/ | MiscUtils.floor(vec.x) << 16 | MiscUtils.floor(vec.y) << 8 | MiscUtils.floor(vec.z));
     }
 
     public static int opaque(int color) {
