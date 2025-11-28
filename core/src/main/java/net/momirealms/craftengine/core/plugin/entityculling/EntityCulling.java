@@ -11,22 +11,33 @@ import net.momirealms.craftengine.core.world.collision.AABB;
 import java.util.Arrays;
 
 public final class EntityCulling {
+    public static final int MAX_SAMPLES = 14;
     private final Player player;
     private final int maxDistance;
     private final double aabbExpansion;
-    private final boolean[] dotSelectors = new boolean[14];
-    private final MutableVec3d[] targetPoints = new MutableVec3d[14];
-    
+    private final boolean[] dotSelectors = new boolean[MAX_SAMPLES];
+    private final MutableVec3d[] targetPoints = new MutableVec3d[MAX_SAMPLES];
+    private final int[] lastHitBlock = new int[MAX_SAMPLES * 3];
+    private final boolean[] canCheckLastHitBlock = new boolean[MAX_SAMPLES];
+    private int hitBlockCount = 0;
+    private int lastVisitChunkX = Integer.MAX_VALUE;
+    private int lastVisitChunkZ = Integer.MAX_VALUE;
+    private ClientChunk lastVisitChunk = null;
+
     public EntityCulling(Player player, int maxDistance, double aabbExpansion) {
         this.player = player;
         this.maxDistance = maxDistance;
         this.aabbExpansion = aabbExpansion;
-        for (int i = 0; i < this.targetPoints.length; i++) {
+        for (int i = 0; i < MAX_SAMPLES; i++) {
             this.targetPoints[i] = new MutableVec3d(0,0,0);
         }
     }
 
     public boolean isVisible(AABB aabb, Vec3d cameraPos) {
+        // 情空标志位
+        Arrays.fill(this.canCheckLastHitBlock, false);
+        this.hitBlockCount = 0;
+
         // 根据AABB获取能包裹此AABB的最小长方体
         int minX = MiscUtils.floor(aabb.minX - this.aabbExpansion);
         int minY = MiscUtils.floor(aabb.minY - this.aabbExpansion);
@@ -106,23 +117,76 @@ public final class EntityCulling {
     }
 
     /**
+     * 检测射线与轴对齐边界框(AABB)是否相交
+     * 使用slab方法进行射线-AABB相交检测
+     */
+    private boolean rayIntersection(int x, int y, int z, Vec3d rayOrigin, MutableVec3d rayDirection) {
+        // 计算射线方向的倒数，避免除法运算
+        // 这对于处理射线方向分量为0的情况很重要
+        MutableVec3d inverseRayDirection = new MutableVec3d(1, 1, 1).divide(rayDirection);
+
+        // 计算射线与边界框各对面（slab）的相交参数
+        // 对于每个轴，计算射线进入和退出该轴对应两个平面的时间
+        double tMinX = (x - rayOrigin.x) * inverseRayDirection.x;
+        double tMaxX = (x + 1 - rayOrigin.x) * inverseRayDirection.x;
+        double tMinY = (y - rayOrigin.y) * inverseRayDirection.y;
+        double tMaxY = (y + 1 - rayOrigin.y) * inverseRayDirection.y;
+        double tMinZ = (z - rayOrigin.z) * inverseRayDirection.z;
+        double tMaxZ = (z + 1 - rayOrigin.z) * inverseRayDirection.z;
+
+        // 计算射线进入边界框的最大时间（最近进入点）
+        // 需要取各轴进入时间的最大值，因为射线必须进入所有轴的范围内
+        double tEntry = Math.max(Math.max(Math.min(tMinX, tMaxX), Math.min(tMinY, tMaxY)), Math.min(tMinZ, tMaxZ));
+
+        // 计算射线退出边界框的最短时间（最早退出点）
+        // 需要取各轴退出时间的最小值，因为射线一旦退出任一轴的范围就离开了边界框
+        double tExit = Math.min(Math.min(Math.max(tMinX, tMaxX), Math.max(tMinY, tMaxY)), Math.max(tMinZ, tMaxZ));
+
+        // 如果最早退出时间大于0，说明整个边界框在射线起点后面
+        // 这种情况我们视为不相交，因为通常我们只关心射线前方的相交
+        if (tExit > 0) {
+            return false;
+        }
+
+        // 如果进入时间大于退出时间，说明没有有效的相交区间
+        // 这发生在射线完全错过边界框的情况下
+        // 满足以下条件说明射线与边界框相交：
+        // 1. 进入时间 <= 退出时间（存在有效相交区间）
+        // 2. 退出时间 <= 0（边界框至少有一部分在射线起点前方或包含起点）
+        return tEntry <= tExit;
+    }
+
+    /**
      * 使用3D DDA算法检测从起点到多个目标点的视线是否通畅
      * 算法基于数字微分分析，遍历射线路径上的所有方块
      */
     private boolean isVisible(Vec3d start, MutableVec3d[] targets, int targetCount) {
+
         // 起点所在方块的整数坐标（世界坐标转换为方块坐标）
         int startBlockX = MiscUtils.floor(start.x);
         int startBlockY = MiscUtils.floor(start.y);
         int startBlockZ = MiscUtils.floor(start.z);
 
         // 遍历所有目标点进行视线检测
-        for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
+        outer: for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
             MutableVec3d currentTarget = targets[targetIndex];
 
             // 计算起点到目标的相对向量（世界坐标差）
             double deltaX = start.x - currentTarget.x;
             double deltaY = start.y - currentTarget.y;
             double deltaZ = start.z - currentTarget.z;
+
+            // 检查之前命中的方块，大概率还是命中
+            for (int i = 0; i < MAX_SAMPLES; i++) {
+                if (this.canCheckLastHitBlock[i]) {
+                    int offset = i * 3;
+                    if (rayIntersection(this.lastHitBlock[offset], this.lastHitBlock[offset + 1], this.lastHitBlock[offset + 2], start, new MutableVec3d(deltaX, deltaY, deltaZ).normalize())) {
+                        continue outer;
+                    }
+                } else {
+                    break;
+                }
+            }
 
             // 计算相对向量的绝对值，用于确定各方向上的距离
             double absDeltaX = Math.abs(deltaX);
@@ -205,6 +269,8 @@ public final class EntityCulling {
             // 如果当前目标点可见立即返回
             if (isLineOfSightClear) {
                 return true;
+            } else {
+                this.canCheckLastHitBlock[this.hitBlockCount++] = true;
             }
         }
 
@@ -222,6 +288,9 @@ public final class EntityCulling {
 
             // 检查当前方块是否遮挡视线
             if (isOccluding(currentBlockX, currentBlockY, currentBlockZ)) {
+                this.lastHitBlock[this.hitBlockCount * 3] = currentBlockX;
+                this.lastHitBlock[this.hitBlockCount * 3 + 1] = currentBlockY;
+                this.lastHitBlock[this.hitBlockCount * 3 + 2] = currentBlockZ;
                 return false; // 视线被遮挡，立即返回
             }
 
@@ -258,11 +327,28 @@ public final class EntityCulling {
     }
 
     private boolean isOccluding(int x, int y, int z) {
-        ClientChunk trackedChunk = this.player.getTrackedChunk(ChunkPos.asLong(x >> 4, z >> 4));
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+        ClientChunk trackedChunk;
+        // 使用上次记录的值，比每次走hash都更快
+        if (chunkX == this.lastVisitChunkX && chunkZ == this.lastVisitChunkZ) {
+            trackedChunk = this.lastVisitChunk;
+        } else {
+            trackedChunk = this.player.getTrackedChunk(ChunkPos.asLong(chunkX, chunkZ));
+            this.lastVisitChunk = trackedChunk;
+            this.lastVisitChunkX = chunkX;
+            this.lastVisitChunkZ = chunkZ;
+        }
         if (trackedChunk == null) {
             return false;
         }
         return trackedChunk.isOccluding(x, y, z);
+    }
+
+    public void removeLastVisitChunkIfMatches(int chunkX, int chunkZ) {
+        if (this.lastVisitChunk != null && this.lastVisitChunkX == chunkX && this.lastVisitChunkZ == chunkZ) {
+            this.lastVisitChunk = null;
+        }
     }
 
     private enum Relative {
