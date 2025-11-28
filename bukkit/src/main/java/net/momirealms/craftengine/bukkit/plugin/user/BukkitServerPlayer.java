@@ -23,6 +23,7 @@ import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
+import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
@@ -31,6 +32,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCulling;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
@@ -39,7 +41,8 @@ import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.World;
-import net.momirealms.craftengine.core.world.chunk.ChunkStatus;
+import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
+import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -85,8 +88,7 @@ public class BukkitServerPlayer extends Player {
     private Reference<org.bukkit.entity.Player> playerRef;
     private Reference<Object> serverPlayerRef;
     // client side dimension info
-    private int sectionCount;
-    private Key clientSideDimension;
+    private World clientSideWorld;
     // check main hand/offhand interaction
     private int lastSuccessfulInteraction;
     // to prevent duplicated events
@@ -124,7 +126,7 @@ public class BukkitServerPlayer extends Player {
     // cooldown data
     private CooldownData cooldownData;
     // tracked chunks
-    private ConcurrentLong2ReferenceChainedHashTable<ChunkStatus> trackedChunks;
+    private ConcurrentLong2ReferenceChainedHashTable<ClientChunk> trackedChunks;
     // entity view
     private Map<Integer, EntityPacketHandler> entityTypeView;
     // 通过指令或api设定的语言
@@ -138,6 +140,10 @@ public class BukkitServerPlayer extends Player {
     private boolean isHackedBreak;
     // 上一次停止挖掘包发出的时间
     private int lastStopMiningTick;
+    // 跟踪到的方块实体渲染器
+    private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
+
+    private final EntityCulling culling;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -151,6 +157,7 @@ public class BukkitServerPlayer extends Player {
                 }
             }
         }
+        this.culling = new EntityCulling(this, 64, 0.5);
     }
 
     public void setPlayer(org.bukkit.entity.Player player) {
@@ -477,21 +484,13 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public int clientSideSectionCount() {
-        return sectionCount;
-    }
-
-    public void setClientSideSectionCount(int sectionCount) {
-        this.sectionCount = sectionCount;
+    public World clientSideWorld() {
+        return this.clientSideWorld;
     }
 
     @Override
-    public Key clientSideDimension() {
-        return clientSideDimension;
-    }
-
-    public void setClientSideDimension(Key clientSideDimension) {
-        this.clientSideDimension = clientSideDimension;
+    public void setClientSideWorld(World world) {
+        this.clientSideWorld = world;
     }
 
     public void setConnectionState(ConnectionState connectionState) {
@@ -563,6 +562,15 @@ public class BukkitServerPlayer extends Player {
                 this.previousEyeLocation = eyeLocation;
                 this.predictNextBlockToMine();
             }
+        }
+        if (Config.enableEntityCulling()) {
+            long nano1 = System.nanoTime();
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+                boolean visible = this.culling.isVisible(cullableObject.cullable.aabb(), LocationUtils.toVec3d(platformPlayer().getEyeLocation()));
+                cullableObject.setShown(this, visible);
+            }
+            long nano2 = System.nanoTime();
+            //CraftEngine.instance().logger().info("EntityCulling took " + (nano2 - nano1) / 1_000_000d + "ms");
         }
     }
 
@@ -646,7 +654,7 @@ public class BukkitServerPlayer extends Player {
         // instant break
         boolean custom = immutableBlockState != null;
         if (custom && getDestroyProgress(state, pos) >= 1f) {
-            BlockStateWrapper vanillaBlockState = immutableBlockState.vanillaBlockState();
+            BlockStateWrapper vanillaBlockState = immutableBlockState.visualBlockState();
             // if it's not an instant break on client side, we should resend level event
             if (vanillaBlockState != null && getDestroyProgress(vanillaBlockState.literalObject(), pos) < 1f) {
                 Object levelEventPacket = FastNMS.INSTANCE.constructor$ClientboundLevelEventPacket(
@@ -811,7 +819,7 @@ public class BukkitServerPlayer extends Player {
                         // for simplified adventure break, switch mayBuild temporarily
                         if (isAdventureMode() && Config.simplifyAdventureBreakCheck()) {
                             // check the appearance state
-                            if (canBreak(hitPos, customState.vanillaBlockState().literalObject())) {
+                            if (canBreak(hitPos, customState.visualBlockState().literalObject())) {
                                 // Error might occur so we use try here
                                 try {
                                     FastNMS.INSTANCE.field$Player$mayBuild(serverPlayer, true);
@@ -1180,12 +1188,12 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public ChunkStatus getTrackedChunk(long chunkPos) {
+    public ClientChunk getTrackedChunk(long chunkPos) {
         return this.trackedChunks.get(chunkPos);
     }
 
     @Override
-    public void addTrackedChunk(long chunkPos, ChunkStatus chunkStatus) {
+    public void addTrackedChunk(long chunkPos, ClientChunk chunkStatus) {
         this.trackedChunks.put(chunkPos, chunkStatus);
     }
 
@@ -1299,5 +1307,37 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent) {
         PlayerUtils.sendTotemAnimation(this, totem, sound, silent);
+    }
+
+    @Override
+    public void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders) {
+        for (Map.Entry<BlockPos, ConstantBlockEntityRenderer> entry : renders.entrySet()) {
+            this.trackedBlockEntityRenderers.put(entry.getKey(), new VirtualCullableObject(entry.getValue()));
+        }
+    }
+
+    @Override
+    public void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
+        this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
+    }
+
+    @Override
+    public VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos) {
+        return this.trackedBlockEntityRenderers.get(blockPos);
+    }
+
+    @Override
+    public void removeTrackedBlockEntities(Collection<BlockPos> renders) {
+        for (BlockPos render : renders) {
+            VirtualCullableObject remove = this.trackedBlockEntityRenderers.remove(render);
+            if (remove != null && remove.isShown()) {
+                remove.cullable().hide(this);
+            }
+        }
+    }
+
+    @Override
+    public void clearTrackedBlockEntities() {
+        this.trackedBlockEntityRenderers.clear();
     }
 }

@@ -22,4 +22,8 @@ public final class BlockRegistryMirror {
     public static BlockStateWrapper stoneState() {
         return stoneState;
     }
+
+    public static BlockStateWrapper[] blockStates() {
+        return blockStates;
+    }
 }

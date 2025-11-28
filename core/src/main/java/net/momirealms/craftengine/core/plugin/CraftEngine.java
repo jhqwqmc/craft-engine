@@ -21,7 +21,6 @@ import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager
 import net.momirealms.craftengine.core.plugin.compatibility.PluginTaskRegistry;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
-import net.momirealms.craftengine.core.plugin.config.template.TemplateManagerImpl;
 import net.momirealms.craftengine.core.plugin.context.GlobalVariableManager;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import net.momirealms.craftengine.core.plugin.dependency.Dependency;

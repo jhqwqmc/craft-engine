@@ -67,12 +67,22 @@ public class BiMapPalette<T> implements Palette<T> {
 
     @Override
     public boolean hasAny(Predicate<T> predicate) {
-        for(int i = 0; i < this.getSize(); ++i) {
+        for (int i = 0; i < this.getSize(); ++i) {
             if (predicate.test(this.map.get(i))) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        for (int i = 0; i < this.getSize(); ++i) {
+            if (!predicate.test(this.map.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

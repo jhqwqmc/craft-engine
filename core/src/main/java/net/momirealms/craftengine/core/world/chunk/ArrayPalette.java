@@ -77,13 +77,22 @@ public class ArrayPalette<T> implements Palette<T> {
 
     @Override
     public boolean hasAny(Predicate<T> predicate) {
-        for(int i = 0; i < this.size; ++i) {
+        for (int i = 0; i < this.size; ++i) {
             if (predicate.test(this.array[i])) {
                 return true;
             }
         }
-
         return false;
+    }
+
+    @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        for (int i = 0; i < this.size; ++i) {
+            if (!predicate.test(this.array[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

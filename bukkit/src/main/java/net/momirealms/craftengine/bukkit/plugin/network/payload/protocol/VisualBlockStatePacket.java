@@ -103,7 +103,7 @@ public record VisualBlockStatePacket(int[] data) implements ModPacket {
         for (int i = 0; i < serverSideBlockCount; i++) {
             ImmutableBlockState state = BukkitBlockManager.instance().getImmutableBlockStateUnsafe(i + vanillaBlockStateCount);
             if (state.isEmpty()) continue;
-            mappings[state.customBlockState().registryId() - vanillaBlockStateCount] = state.vanillaBlockState().registryId();
+            mappings[state.customBlockState().registryId() - vanillaBlockStateCount] = state.visualBlockState().registryId();
         }
         return new VisualBlockStatePacket(mappings);
     }

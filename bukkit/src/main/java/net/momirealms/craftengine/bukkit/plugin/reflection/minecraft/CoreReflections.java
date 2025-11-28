@@ -4593,4 +4593,26 @@ public final class CoreReflections {
                     "world.level.levelgen.feature.Feature"
             )
     );
+
+    public static final Class<?> clazz$EmptyBlockGetter = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.BlockAccessAir",
+                    "world.level.EmptyBlockGetter"
+            )
+    );
+
+    public static final Method method$EmptyBlockGetter$values = requireNonNull(
+            ReflectionUtils.getStaticMethod(clazz$EmptyBlockGetter, clazz$EmptyBlockGetter.arrayType())
+    );
+
+    public static final Object instance$EmptyBlockGetter$INSTANCE;
+
+    static {
+        try {
+            Object[] values = (Object[]) method$EmptyBlockGetter$values.invoke(null);
+            instance$EmptyBlockGetter$INSTANCE = values[0];
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init EmptyBlockGetter$INSTANCE", e);
+        }
+    }
 }

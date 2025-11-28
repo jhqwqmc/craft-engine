@@ -40,9 +40,9 @@ public class UpdateBlockPropertyFunction<CTX extends Context> extends AbstractCo
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
             World world = optionalWorldPosition.get().world();
-            int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
-            int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
-            int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
+            int x = MiscUtils.floor(this.x.getDouble(ctx));
+            int y = MiscUtils.floor(this.y.getDouble(ctx));
+            int z = MiscUtils.floor(this.z.getDouble(ctx));
             ExistingBlock blockAt = world.getBlock(x, y, z);
             BlockStateWrapper wrapper = blockAt.blockState().withProperties(this.properties);
             world.setBlockState(x, y, z, wrapper, this.updateFlags.getInt(ctx));

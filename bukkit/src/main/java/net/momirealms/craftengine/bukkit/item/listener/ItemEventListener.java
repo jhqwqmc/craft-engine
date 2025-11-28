@@ -167,7 +167,7 @@ public class ItemEventListener implements Listener {
 
             // fix client side issues
             if (action.isRightClick() && hitResult != null &&
-                    InteractUtils.canPlaceVisualBlock(player, BlockStateUtils.fromBlockData(immutableBlockState.vanillaBlockState().literalObject()), hitResult, itemInHand)) {
+                    InteractUtils.canPlaceVisualBlock(player, BlockStateUtils.fromBlockData(immutableBlockState.visualBlockState().literalObject()), hitResult, itemInHand)) {
                 player.updateInventory();
             }
 
@@ -272,13 +272,13 @@ public class ItemEventListener implements Listener {
                     if (immutableBlockState != null) {
                         // client won't have sounds if the clientside block is interactable
                         // so we should check and resend sounds on BlockPlaceEvent
-                        BlockData craftBlockData = BlockStateUtils.fromBlockData(immutableBlockState.vanillaBlockState().literalObject());
+                        BlockData craftBlockData = BlockStateUtils.fromBlockData(immutableBlockState.visualBlockState().literalObject());
                         if (InteractUtils.isInteractable(player, craftBlockData, hitResult, itemInHand)) {
                             if (!serverPlayer.isSecondaryUseActive()) {
                                 serverPlayer.setResendSound();
                             }
                         } else {
-                            if (BlockStateUtils.isReplaceable(immutableBlockState.customBlockState().literalObject()) && !BlockStateUtils.isReplaceable(immutableBlockState.vanillaBlockState().literalObject())) {
+                            if (BlockStateUtils.isReplaceable(immutableBlockState.customBlockState().literalObject()) && !BlockStateUtils.isReplaceable(immutableBlockState.visualBlockState().literalObject())) {
                                 serverPlayer.setResendSwing();
                             }
                         }

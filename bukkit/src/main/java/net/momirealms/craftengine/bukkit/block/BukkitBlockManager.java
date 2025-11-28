@@ -42,6 +42,7 @@ import java.util.*;
 
 public final class BukkitBlockManager extends AbstractBlockManager {
     public static final Set<Object> CLIENT_SIDE_NOTE_BLOCKS = new HashSet<>(2048, 0.6f);
+    private static final Object BLOCK_POS$ZERO = LocationUtils.toBlockPos(0,0,0);
     private static final Object ALWAYS_FALSE = FastNMS.INSTANCE.method$StatePredicate$always(false);
     private static final Object ALWAYS_TRUE = FastNMS.INSTANCE.method$StatePredicate$always(true);
     private static BukkitBlockManager instance;
@@ -80,12 +81,14 @@ public final class BukkitBlockManager extends AbstractBlockManager {
 
     @Override
     public void init() {
+        super.init();
         this.initMirrorRegistry();
         this.initFireBlock();
         this.deceiveBukkitRegistry();
         this.markVanillaNoteBlocks();
+        this.findViewBlockingVanillaBlocks();
         Arrays.fill(this.immutableBlockStates, EmptyBlock.INSTANCE.defaultState());
-        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings); // 一定要预先初始化一次，预防id超出上限
+        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings, this::isViewBlockingBlock); // 一定要预先初始化一次，预防id超出上限
     }
 
     public static BukkitBlockManager instance() {
@@ -125,7 +128,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
 
     @Override
     public void delayedLoad() {
-        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings); // 重置方块映射表
+        this.plugin.networkManager().registerBlockStatePacketListeners(this.blockStateMappings, this::isViewBlockingBlock); // 重置方块映射表
         super.delayedLoad();
         this.cachedVisualBlockStatePacket = VisualBlockStatePacket.create();
         for (BukkitServerPlayer player : BukkitNetworkManager.instance().onlineUsers()) {
@@ -223,7 +226,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     protected void applyPlatformSettings(ImmutableBlockState state) {
         DelegatingBlockState nmsState = (DelegatingBlockState) state.customBlockState().literalObject();
         nmsState.setBlockState(state);
-        Object nmsVisualState = state.vanillaBlockState().literalObject();
+        Object nmsVisualState = state.visualBlockState().literalObject();
 
         BlockSettings settings = state.settings();
         try {
@@ -240,8 +243,15 @@ public final class BukkitBlockManager extends AbstractBlockManager {
             boolean useShapeForLightOcclusion = settings.useShapeForLightOcclusion() == Tristate.UNDEFINED ? CoreReflections.field$BlockStateBase$useShapeForLightOcclusion.getBoolean(nmsVisualState) : settings.useShapeForLightOcclusion().asBoolean();
             CoreReflections.field$BlockStateBase$useShapeForLightOcclusion.set(nmsState, useShapeForLightOcclusion);
             CoreReflections.field$BlockStateBase$isRedstoneConductor.set(nmsState, settings.isRedstoneConductor().asBoolean() ? ALWAYS_TRUE : ALWAYS_FALSE);
+
+            boolean suffocating = settings.isSuffocating() == Tristate.UNDEFINED ? (canBlockView(state.visualBlockState())) : (settings.isSuffocating().asBoolean());
+            CoreReflections.field$BlockStateBase$isSuffocating.set(nmsState, suffocating ? ALWAYS_TRUE : ALWAYS_FALSE);
             CoreReflections.field$BlockStateBase$isSuffocating.set(nmsState, settings.isSuffocating().asBoolean() ? ALWAYS_TRUE : ALWAYS_FALSE);
-            CoreReflections.field$BlockStateBase$isViewBlocking.set(nmsState, settings.isViewBlocking() == Tristate.UNDEFINED ? settings.isSuffocating().asBoolean() ? ALWAYS_TRUE : ALWAYS_FALSE : (settings.isViewBlocking().asBoolean() ? ALWAYS_TRUE : ALWAYS_FALSE));
+            CoreReflections.field$BlockStateBase$isViewBlocking.set(nmsState,
+                    settings.isViewBlocking() == Tristate.UNDEFINED ?
+                            (suffocating ? ALWAYS_TRUE : ALWAYS_FALSE) :
+                            (settings.isViewBlocking().asBoolean() ? ALWAYS_TRUE : ALWAYS_FALSE)
+            );
 
             DelegatingBlock nmsBlock = (DelegatingBlock) BlockStateUtils.getBlockOwner(nmsState);
             ObjectHolder<BlockShape> shapeHolder = nmsBlock.shapeDelegate();
@@ -291,9 +301,16 @@ public final class BukkitBlockManager extends AbstractBlockManager {
                 this.burnableBlocks.add(nmsBlock);
             }
 
-            Key vanillaBlockId = state.vanillaBlockState().ownerId();
+            Key vanillaBlockId = state.visualBlockState().ownerId();
             BlockGenerator.field$CraftEngineBlock$isNoteBlock().set(nmsBlock, vanillaBlockId.equals(BlockKeys.NOTE_BLOCK));
             BlockGenerator.field$CraftEngineBlock$isTripwire().set(nmsBlock, vanillaBlockId.equals(BlockKeys.TRIPWIRE));
+            if (vanillaBlockId.equals(BlockKeys.BARRIER)) {
+                state.setRestoreBlockState(createBlockState("minecraft:glass"));
+            } else {
+                state.setRestoreBlockState(state.visualBlockState());
+            }
+            // 根据客户端的状态决定其是否阻挡视线
+            super.viewBlockingBlocks[state.customBlockState().registryId()] = canBlockView(state.visualBlockState());
         } catch (ReflectiveOperationException e) {
             this.plugin.logger().warn("Failed to apply platform block settings for block state " + state, e);
         }
@@ -376,6 +393,23 @@ public final class BukkitBlockManager extends AbstractBlockManager {
             CLIENT_SIDE_NOTE_BLOCKS.addAll(states);
         } catch (ReflectiveOperationException e) {
             this.plugin.logger().warn("Failed to init vanilla note block", e);
+        }
+    }
+
+    public boolean canBlockView(BlockStateWrapper wrapper) {
+        Object blockState = wrapper.literalObject();
+        if (!BlockStateUtils.isOcclude(blockState)) {
+            return false;
+        }
+        return FastNMS.INSTANCE.method$BlockStateBase$isCollisionShapeFullBlock(blockState, CoreReflections.instance$EmptyBlockGetter$INSTANCE, BLOCK_POS$ZERO);
+    }
+
+    private void findViewBlockingVanillaBlocks() {
+        for (int i = 0; i < this.vanillaBlockStateCount; i++) {
+            BlockStateWrapper blockState = BlockRegistryMirror.byId(i);
+            if (canBlockView(blockState)) {
+                this.viewBlockingBlocks[i] = true;
+            }
         }
     }
 

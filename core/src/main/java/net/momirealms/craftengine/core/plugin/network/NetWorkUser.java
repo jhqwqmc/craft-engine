@@ -6,7 +6,8 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.plugin.Plugin;
 import net.momirealms.craftengine.core.util.IntIdentityList;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.world.chunk.ChunkStatus;
+import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,9 +66,7 @@ public interface NetWorkUser {
     @ApiStatus.Internal
     ConnectionState encoderState();
 
-    int clientSideSectionCount();
-
-    Key clientSideDimension();
+    World clientSideWorld();
 
     Object serverPlayer();
 
@@ -89,9 +88,9 @@ public interface NetWorkUser {
 
     boolean isChunkTracked(long chunkPos);
 
-    ChunkStatus getTrackedChunk(long chunkPos);
+    ClientChunk getTrackedChunk(long chunkPos);
 
-    void addTrackedChunk(long chunkPos, ChunkStatus chunkStatus);
+    void addTrackedChunk(long chunkPos, ClientChunk chunkStatus);
 
     void clearTrackedChunks();
 

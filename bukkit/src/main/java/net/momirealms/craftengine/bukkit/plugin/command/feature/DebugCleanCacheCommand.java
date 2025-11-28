@@ -78,7 +78,7 @@ public class DebugCleanCacheCommand extends BukkitCommandFeature<CommandSender> 
         Set<BlockStateWrapper> ids = new HashSet<>();
         for (CustomBlock customBlock : instance.loadedBlocks().values()) {
             for (ImmutableBlockState state : customBlock.variantProvider().states()) {
-                ids.add(state.vanillaBlockState());
+                ids.add(state.visualBlockState());
             }
         }
         VisualBlockStateAllocator visualBlockStateAllocator = instance.blockParser().visualBlockStateAllocator();

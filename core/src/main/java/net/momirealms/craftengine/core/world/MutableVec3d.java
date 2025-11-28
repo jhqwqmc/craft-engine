@@ -14,9 +14,9 @@ public class MutableVec3d implements Position {
     }
 
     public MutableVec3d toCenter() {
-        this.x = MiscUtils.fastFloor(x) + 0.5;
-        this.y = MiscUtils.fastFloor(y) + 0.5;
-        this.z = MiscUtils.fastFloor(z) + 0.5;
+        this.x = MiscUtils.floor(x) + 0.5;
+        this.y = MiscUtils.floor(y) + 0.5;
+        this.z = MiscUtils.floor(z) + 0.5;
         return this;
     }
 

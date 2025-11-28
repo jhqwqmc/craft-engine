@@ -3,7 +3,6 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import net.momirealms.craftengine.core.plugin.config.template.ArgumentString;
-import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Locale;

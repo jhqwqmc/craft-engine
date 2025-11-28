@@ -11,8 +11,10 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntityRendererSerializer;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntitySerializer;
 import net.momirealms.sparrow.nbt.ListTag;
@@ -91,8 +93,12 @@ public class CEChunk {
     public void spawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.show(player);
+            if (Config.enableEntityCulling()) {
+                player.addTrackedBlockEntities(this.constantBlockEntityRenderers);
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.show(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.show(player);
@@ -105,8 +111,12 @@ public class CEChunk {
     public void despawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.hide(player);
+            if (Config.enableEntityCulling()) {
+                player.removeTrackedBlockEntities(this.constantBlockEntityRenderers.keySet());
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.hide(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.hide(player);
@@ -129,7 +139,7 @@ public class CEChunk {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
-            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements);
+            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements, state.estimatedBoundingBox().move(pos));
             World wrappedWorld = this.world.world();
             List<Player> trackedBy = getTrackedBy();
             boolean hasTrackedBy = trackedBy != null && !trackedBy.isEmpty();
@@ -146,8 +156,20 @@ public class CEChunk {
                             if (element != null) {
                                 elements[0] = element;
                                 if (hasTrackedBy) {
-                                    for (Player player : trackedBy) {
-                                        element.transform(player);
+                                    // 如果启用实体剔除，那么只对已经渲染的进行变换
+                                    if (Config.enableEntityCulling()) {
+                                        for (Player player : trackedBy) {
+                                            VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                            if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
+                                                element.transform(player);
+                                            }
+                                        }
+                                    }
+                                    // 否则直接变换
+                                    else {
+                                        for (Player player : trackedBy) {
+                                            element.transform(player);
+                                        }
                                     }
                                 }
                                 break outer;
@@ -156,9 +178,18 @@ public class CEChunk {
                         BlockEntityElement element = config.create(wrappedWorld, pos);
                         elements[0] = element;
                         if (hasTrackedBy) {
-                            for (Player player : trackedBy) {
-                                previousElement.hide(player);
-                                element.show(player);
+                            // 如果启用实体剔除，那么只添加记录
+                            if (Config.enableEntityCulling()) {
+                                for (Player player : trackedBy) {
+                                    player.addTrackedBlockEntity(pos, renderer);
+                                }
+                            }
+                            // 否则直接显示
+                            else {
+                                for (Player player : trackedBy) {
+                                    previousElement.hide(player);
+                                    element.show(player);
+                                }
                             }
                         }
                     }
@@ -173,8 +204,20 @@ public class CEChunk {
                                     previousElements[j] = null;
                                     elements[i] = newElement;
                                     if (hasTrackedBy) {
-                                        for (Player player : trackedBy) {
-                                            newElement.transform(player);
+                                        // 如果启用实体剔除，那么只对已经渲染的进行变换
+                                        if (Config.enableEntityCulling()) {
+                                            for (Player player : trackedBy) {
+                                                VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                                if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
+                                                    newElement.transform(player);
+                                                }
+                                            }
+                                        }
+                                        // 否则直接变换
+                                        else {
+                                            for (Player player : trackedBy) {
+                                                newElement.transform(player);
+                                            }
                                         }
                                     }
                                     continue outer;
@@ -184,8 +227,14 @@ public class CEChunk {
                         BlockEntityElement newElement = config.create(wrappedWorld, pos);
                         elements[i] = newElement;
                         if (hasTrackedBy) {
-                            for (Player player : trackedBy) {
-                                newElement.show(player);
+                            if (Config.enableEntityCulling()) {
+                                for (Player player : trackedBy) {
+                                    player.addTrackedBlockEntity(pos, renderer);
+                                }
+                            } else {
+                                for (Player player : trackedBy) {
+                                    newElement.show(player);
+                                }
                             }
                         }
                     }
@@ -205,8 +254,14 @@ public class CEChunk {
                     elements[i] = renderers[i].create(wrappedWorld, pos);
                 }
                 if (hasTrackedBy) {
-                    for (Player player : trackedBy) {
-                        renderer.show(player);
+                    if (Config.enableEntityCulling()) {
+                        for (Player player : trackedBy) {
+                            player.addTrackedBlockEntity(pos, renderer);
+                        }
+                    } else {
+                        for (Player player : trackedBy) {
+                            renderer.show(player);
+                        }
                     }
                 }
             }
@@ -233,8 +288,14 @@ public class CEChunk {
             ConstantBlockEntityRenderer removed = this.constantBlockEntityRenderers.remove(pos);
             if (removed != null) {
                 if (hide) {
-                    for (Player player : getTrackedBy()) {
-                        removed.hide(player);
+                    if (Config.enableEntityCulling()) {
+                        for (Player player : getTrackedBy()) {
+                            player.removeTrackedBlockEntities(List.of(pos));
+                        }
+                    } else {
+                        for (Player player : getTrackedBy()) {
+                            removed.hide(player);
+                        }
                     }
                 }
             }
@@ -439,7 +500,7 @@ public class CEChunk {
         return Collections.unmodifiableCollection(this.blockEntities.values());
     }
 
-    public List<BlockPos> constantBlockEntityRenderers() {
+    public List<BlockPos> constantBlockEntityRendererPositions() {
         try {
             this.renderLock.readLock().lock();
             return new ArrayList<>(this.constantBlockEntityRenderers.keySet());

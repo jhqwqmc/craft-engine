@@ -112,7 +112,7 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
                 } else {
                     ImmutableBlockState customState = optionalCustomState.get();
                     // custom block
-                    if (!AdventureModeUtils.canPlace(context.getItem(), context.getLevel(), againstPos, Config.simplifyAdventurePlaceCheck() ? customState.vanillaBlockState().literalObject() : againstBlockState)) {
+                    if (!AdventureModeUtils.canPlace(context.getItem(), context.getLevel(), againstPos, Config.simplifyAdventurePlaceCheck() ? customState.visualBlockState().literalObject() : againstBlockState)) {
                         return InteractionResult.FAIL;
                     }
                 }

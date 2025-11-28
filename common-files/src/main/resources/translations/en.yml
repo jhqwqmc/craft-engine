@@ -87,6 +87,7 @@ warning.config.type.quaternionf: "<yellow>Issue found in file <arg:0> - Failed t
 warning.config.type.vector3f: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to Vector3f type for option '<arg:3>'.</yellow>"
 warning.config.type.vec3d: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to Vec3d type for option '<arg:3>'.</yellow>"
 warning.config.type.map: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to Map type for option '<arg:3>'.</yellow>"
+warning.config.type.aabb: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Cannot cast '<arg:2>' to AABB type for option '<arg:3>'.</yellow>"
 warning.config.type.snbt.invalid_syntax: "<yellow>Issue found in file <arg:0> - Failed to load '<arg:1>': Invalid snbt syntax '<arg:2>'.</yellow>"
 warning.config.number.missing_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is missing the required 'type' argument for number argument.</yellow>"
 warning.config.number.invalid_type: "<yellow>Issue found in file <arg:0> - The config '<arg:1>' is using an invalid number argument type '<arg:2>'.</yellow>"

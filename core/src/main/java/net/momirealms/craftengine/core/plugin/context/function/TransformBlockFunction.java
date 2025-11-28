@@ -45,9 +45,9 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
             World world = optionalWorldPosition.get().world();
-            int x = MiscUtils.fastFloor(this.x.getDouble(ctx));
-            int y = MiscUtils.fastFloor(this.y.getDouble(ctx));
-            int z = MiscUtils.fastFloor(this.z.getDouble(ctx));
+            int x = MiscUtils.floor(this.x.getDouble(ctx));
+            int y = MiscUtils.floor(this.y.getDouble(ctx));
+            int z = MiscUtils.floor(this.z.getDouble(ctx));
             BlockStateWrapper existingBlockState = world.getBlock(x, y, z).blockState().withProperties(this.properties);
             CompoundTag newProperties = new CompoundTag();
             for (String propertyName : existingBlockState.getPropertyNames()) {

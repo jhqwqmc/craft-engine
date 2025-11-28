@@ -42,7 +42,7 @@ public class MythicItemDrop extends ItemDrop implements IItemDrop {
                 context = ItemBuildContext.of(player);
             }
         }
-        int amountInt = MiscUtils.fastFloor(amount + 0.5F);
+        int amountInt = MiscUtils.floor(amount + 0.5F);
         ItemStack itemStack = this.customItem.buildItemStack(context, amountInt);
         return adapt(itemStack).amount(amountInt);
     }

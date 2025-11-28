@@ -35,6 +35,17 @@ public class AABB {
         this.maxZ = Math.max(pos1.z, pos2.z);
     }
 
+    public AABB move(BlockPos pos) {
+        return new AABB(
+                this.minX + pos.x + 0.5,
+                this.minY + pos.y + 0.5,
+                this.minZ + pos.z + 0.5,
+                this.maxX + pos.x + 0.5,
+                this.maxY + pos.y + 0.5,
+                this.maxZ + pos.z + 0.5
+        );
+    }
+
     public AABB(BlockPos pos) {
         this(pos.x(), pos.y(), pos.z(), pos.x() + 1, pos.y() + 1, pos.z() + 1);
     }
