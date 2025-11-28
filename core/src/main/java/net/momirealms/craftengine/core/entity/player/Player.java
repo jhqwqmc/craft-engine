@@ -38,6 +38,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setClientSideWorld(World world);
 
+    public abstract void entityCullingTick();
+
     public abstract float getDestroyProgress(Object blockState, BlockPos pos);
 
     public abstract void setClientSideCanBreakBlock(boolean canBreak);

@@ -557,6 +557,8 @@ client-optimization:
   entity-culling:
     enable: true
     view-distance: 64
+    # Determining the number of threads to execute these raytrace operations
+    threads: 1
 
 # Enables or disables debug mode
 debug:
@@ -565,3 +567,5 @@ debug:
   furniture: false
   item: false
   resource-pack: false
+  block: false
+  entity-culling: false

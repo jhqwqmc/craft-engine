@@ -93,24 +93,24 @@ public final class EntityCulling {
         }
 
         int size = 0;
-        if (this.dotSelectors[0]) targetPoints[size++].set(minX, minY, minZ);
-        if (this.dotSelectors[1]) targetPoints[size++].set(maxX, minY, minZ);
-        if (this.dotSelectors[2]) targetPoints[size++].set(minX, minY, maxZ);
-        if (this.dotSelectors[3]) targetPoints[size++].set(maxX, minY, maxZ);
-        if (this.dotSelectors[4]) targetPoints[size++].set(minX, maxY, minZ);
-        if (this.dotSelectors[5]) targetPoints[size++].set(maxX, maxY, minZ);
-        if (this.dotSelectors[6]) targetPoints[size++].set(minX, maxY, maxZ);
-        if (this.dotSelectors[7]) targetPoints[size++].set(maxX, maxY, maxZ);
+        if (this.dotSelectors[0]) targetPoints[size++].set(minX + 0.05, minY + 0.05, minZ + 0.05);
+        if (this.dotSelectors[1]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, minZ + 0.05);
+        if (this.dotSelectors[2]) targetPoints[size++].set(minX + 0.05, minY + 0.05, maxZ - 0.05);
+        if (this.dotSelectors[3]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, maxZ - 0.05);
+        if (this.dotSelectors[4]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, minZ + 0.05);
+        if (this.dotSelectors[5]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, minZ + 0.05);
+        if (this.dotSelectors[6]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, maxZ - 0.05);
+        if (this.dotSelectors[7]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, maxZ - 0.05);
         // 面中心点
         double averageX = (minX + maxX) / 2.0;
         double averageY = (minY + maxY) / 2.0;
         double averageZ = (minZ + maxZ) / 2.0;
-        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ);
-        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ);
-        if (this.dotSelectors[10]) targetPoints[size++].set(minX, averageY, averageZ);
-        if (this.dotSelectors[11]) targetPoints[size++].set(maxX, averageY, averageZ);
-        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY, averageZ);
-        if (this.dotSelectors[13]) targetPoints[size].set(averageX, maxY, averageZ);
+        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ + 0.05);
+        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ - 0.05);
+        if (this.dotSelectors[10]) targetPoints[size++].set(minX + 0.05, averageY, averageZ);
+        if (this.dotSelectors[11]) targetPoints[size++].set(maxX - 0.05, averageY, averageZ);
+        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY + 0.05, averageZ);
+        if (this.dotSelectors[13]) targetPoints[size].set(averageX, maxY - 0.05, averageZ);
 
         return isVisible(cameraPos, this.targetPoints, size);
     }
@@ -194,9 +194,9 @@ public final class EntityCulling {
 
             // 预计算每单位距离在各方块边界上的步进增量
             // 这些值表示射线穿过一个方块所需的时间分数
-            double stepIncrementX = 1.0 / (absDeltaX + 1e-10); // 避免除0
-            double stepIncrementY = 1.0 / (absDeltaY + 1e-10);
-            double stepIncrementZ = 1.0 / (absDeltaZ + 1e-10);
+            double stepIncrementX = 1.0 / absDeltaX;
+            double stepIncrementY = 1.0 / absDeltaY;
+            double stepIncrementZ = 1.0 / absDeltaZ;
 
             // 射线将穿过的总方块数量（包括起点和终点）
             int totalBlocksToCheck = 1;
@@ -286,8 +286,8 @@ public final class EntityCulling {
         int currentBlockY = startingY;
         int currentBlockZ = startingZ;
 
-        // 遍历射线路径上的所有方块（跳过最后一个目标方块）
-        for (; remainingSteps > 1; remainingSteps--) {
+        // 遍历射线路径上的所有方块
+        for (; remainingSteps > 0; remainingSteps--) {
 
             // 检查当前方块是否遮挡视线
             if (isOccluding(currentBlockX, currentBlockY, currentBlockZ)) {

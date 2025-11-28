@@ -507,9 +507,6 @@ public class BukkitServerPlayer extends Player {
         this.encoderState = encoderState;
     }
 
-    private final Queue<Long> recentDurations = new LinkedList<>();
-    private static final int SAMPLE_SIZE = 100;
-
     @Override
     public void tick() {
         // not fully online
@@ -569,38 +566,16 @@ public class BukkitServerPlayer extends Player {
         }
     }
 
-    public void asyncTick() {
-        if (Config.enableEntityCulling()) {
-            long nano1 = System.nanoTime();
-            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
-                CullingData cullingData = cullableObject.cullable.cullingData();
-                if (cullingData != null) {
-                    Vec3d vec3d = LocationUtils.toVec3d(platformPlayer().getEyeLocation());
-                    boolean visible = this.culling.isVisible(cullingData, vec3d);
-                    cullableObject.setShown(this, visible);
-                } else {
-                    cullableObject.setShown(this, true);
-                }
-            }
-            long nano2 = System.nanoTime();
-
-            long duration = nano2 - nano1;
-
-            // 添加到队列
-            recentDurations.offer(duration);
-
-            // 保持队列大小为100
-            if (recentDurations.size() > SAMPLE_SIZE) {
-                recentDurations.poll();
-            }
-
-            // 每100次输出一次平均耗时
-            if (recentDurations.size() == SAMPLE_SIZE) {
-                double averageMs = recentDurations.stream()
-                        .mapToLong(Long::longValue)
-                        .average()
-                        .orElse(0) / 1_000_000d;
-                CraftEngine.instance().logger().info("EntityCulling 最近100次平均耗时: " + averageMs + "ms");
+    @Override
+    public void entityCullingTick() {
+        for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+            CullingData cullingData = cullableObject.cullable.cullingData();
+            if (cullingData != null) {
+                Vec3d vec3d = LocationUtils.toVec3d(platformPlayer().getEyeLocation());
+                boolean visible = this.culling.isVisible(cullingData, vec3d);
+                cullableObject.setShown(this, visible);
+            } else {
+                cullableObject.setShown(this, true);
             }
         }
     }

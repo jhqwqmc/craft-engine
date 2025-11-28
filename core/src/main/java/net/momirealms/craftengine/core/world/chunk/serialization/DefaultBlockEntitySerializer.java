@@ -38,7 +38,7 @@ public final class DefaultBlockEntitySerializer {
             Key id = Key.of(data.getString("id"));
             BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(id);
             if (type == null) {
-                Debugger.BLOCK_ENTITY.debug(() -> "Unknown block entity type: " + id);
+                Debugger.BLOCK.debug(() -> "Unknown block entity type: " + id);
             } else {
                 BlockPos pos = BlockEntity.readPosAndVerify(data, chunk.chunkPos());
                 ImmutableBlockState blockState = chunk.getBlockState(pos);
