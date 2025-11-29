@@ -8,21 +8,11 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import net.momirealms.craftengine.core.plugin.command.FlagKeys;
 import net.momirealms.craftengine.core.plugin.locale.MessageConstants;
-import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.bukkit.parser.PlayerParser;
-import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.parser.standard.DoubleParser;
-import org.incendo.cloud.parser.standard.StringParser;
-import org.incendo.cloud.suggestion.Suggestion;
-import org.incendo.cloud.suggestion.SuggestionProvider;
-
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 public class SetEntityViewDistanceScaleCommand extends BukkitCommandFeature<CommandSender> {
 

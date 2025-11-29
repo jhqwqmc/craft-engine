@@ -143,7 +143,7 @@ public class CEChunk {
             ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(
                     elements,
                     Optional.ofNullable(state.cullingData())
-                            .map(data -> new CullingData(data.aabb.move(pos), data.maxDistance, data.aabbExpansion))
+                            .map(data -> new CullingData(data.aabb.move(pos), data.maxDistance, data.aabbExpansion, data.rayTracing))
                             .orElse(null)
             );
             World wrappedWorld = this.world.world();

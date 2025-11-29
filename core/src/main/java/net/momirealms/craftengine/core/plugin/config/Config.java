@@ -208,6 +208,7 @@ public class Config {
     protected boolean client_optimization$entity_culling$enable;
     protected int client_optimization$entity_culling$view_distance;
     protected int client_optimization$entity_culling$threads;
+    protected boolean client_optimization$entity_culling$ray_tracing;
     protected boolean client_optimization$entity_culling$rate_limiting$enable;
     protected int client_optimization$entity_culling$rate_limiting$bucket_size;
     protected int client_optimization$entity_culling$rate_limiting$restore_per_tick;
@@ -579,6 +580,7 @@ public class Config {
         }
         client_optimization$entity_culling$view_distance = config.getInt("client-optimization.entity-culling.view-distance", 64);
         client_optimization$entity_culling$threads = config.getInt("client-optimization.entity-culling.threads", 1);
+        client_optimization$entity_culling$ray_tracing = client_optimization$entity_culling$enable && config.getBoolean("client-optimization.entity-culling.ray-tracing", true);
         client_optimization$entity_culling$rate_limiting$enable = config.getBoolean("client-optimization.entity-culling.rate-limiting.enable", true);
         client_optimization$entity_culling$rate_limiting$bucket_size = config.getInt("client-optimization.entity-culling.rate-limiting.bucket-size", 300);
         client_optimization$entity_culling$rate_limiting$restore_per_tick = config.getInt("client-optimization.entity-culling.rate-limiting.restore-per-tick", 5);
@@ -1195,6 +1197,10 @@ public class Config {
 
     public static int entityCullingRateLimitingRestorePerTick() {
         return instance.client_optimization$entity_culling$rate_limiting$restore_per_tick;
+    }
+
+    public static boolean entityCullingRayTracing() {
+        return instance.client_optimization$entity_culling$ray_tracing;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {

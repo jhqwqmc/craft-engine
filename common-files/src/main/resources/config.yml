@@ -554,11 +554,13 @@ chunk-system:
 
 # [Premium Exclusive]
 client-optimization:
-  # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
   # Requires a restart to fully apply.
   entity-culling:
     enable: true
-    view-distance: 64
+    # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
+    ray-tracing: true
+    # Cull entities based on distance
+    view-distance: 64 # -1 = no limit
     # Determining the number of threads to execute these raytrace operations
     threads: 1
     # Limit the maximum number of entities with visibility changes per tick for one player

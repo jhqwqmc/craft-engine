@@ -715,13 +715,14 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                 return null;
             }
             if (!(arguments instanceof Map)) {
-                return new CullingData(DEFAULT_BLOCK_ENTITY_AABB, Config.entityCullingViewDistance(), 0.5);
+                return new CullingData(DEFAULT_BLOCK_ENTITY_AABB, Config.entityCullingViewDistance(), 0.5, true);
             }
             Map<String, Object> argumentsMap = ResourceConfigUtils.getAsMap(arguments, "entity-culling");
             return new CullingData(
                     ResourceConfigUtils.getAsAABB(argumentsMap.getOrDefault("aabb", 1), "aabb"),
                     ResourceConfigUtils.getAsInt(argumentsMap.getOrDefault("view-distance", Config.entityCullingViewDistance()), "view-distance"),
-                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.5), "aabb-expansion")
+                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.5), "aabb-expansion"),
+                    ResourceConfigUtils.getAsBoolean(argumentsMap.getOrDefault("ray-tracing", true), "ray-tracing")
             );
         }
 

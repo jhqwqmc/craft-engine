@@ -16,8 +16,8 @@ public final class EntityCulling {
     private final Player player;
     private final boolean[] dotSelectors = new boolean[MAX_SAMPLES];
     private final MutableVec3d[] targetPoints = new MutableVec3d[MAX_SAMPLES];
-    private final int[] lastHitBlock = new int[MAX_SAMPLES * 3];
-    private final boolean[] canCheckLastHitBlock = new boolean[MAX_SAMPLES];
+    private final int[] lastHitBlock = new int[3];
+    private boolean canCheckLastHitBlock = false;
     private int hitBlockCount = 0;
     private int lastVisitChunkX = Integer.MAX_VALUE;
     private int lastVisitChunkZ = Integer.MAX_VALUE;
@@ -52,9 +52,9 @@ public final class EntityCulling {
         return false;
     }
 
-    public boolean isVisible(CullingData cullable, Vec3d cameraPos) {
+    public boolean isVisible(CullingData cullable, Vec3d cameraPos, boolean rayTracing) {
         // 情空标志位
-        Arrays.fill(this.canCheckLastHitBlock, false);
+        this.canCheckLastHitBlock = false;
         this.hitBlockCount = 0;
         AABB aabb = cullable.aabb;
         double aabbExpansion = cullable.aabbExpansion;
@@ -95,6 +95,10 @@ public final class EntityCulling {
             if (distanceSq > maxDistanceSq) {
                 return false;
             }
+        }
+
+        if (!rayTracing || !cullable.rayTracing) {
+            return true;
         }
 
         // 清空之前的缓存
@@ -190,7 +194,7 @@ public final class EntityCulling {
         int startBlockZ = MiscUtils.floor(start.z);
 
         // 遍历所有目标点进行视线检测
-        outer: for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
+        for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
             MutableVec3d currentTarget = targets[targetIndex];
 
             // 计算起点到目标的相对向量（世界坐标差）
@@ -199,14 +203,9 @@ public final class EntityCulling {
             double deltaZ = start.z - currentTarget.z;
 
             // 检查之前命中的方块，大概率还是命中
-            for (int i = 0; i < MAX_SAMPLES; i++) {
-                if (this.canCheckLastHitBlock[i]) {
-                    int offset = i * 3;
-                    if (rayIntersection(this.lastHitBlock[offset], this.lastHitBlock[offset + 1], this.lastHitBlock[offset + 2], start, new MutableVec3d(deltaX, deltaY, deltaZ).normalize())) {
-                        continue outer;
-                    }
-                } else {
-                    break;
+            if (this.canCheckLastHitBlock) {
+                if (rayIntersection(this.lastHitBlock[0], this.lastHitBlock[1], this.lastHitBlock[2], start, new MutableVec3d(deltaX, deltaY, deltaZ).normalize())) {
+                    continue;
                 }
             }
 
@@ -292,7 +291,7 @@ public final class EntityCulling {
             if (isLineOfSightClear) {
                 return true;
             } else {
-                this.canCheckLastHitBlock[this.hitBlockCount++] = true;
+                this.canCheckLastHitBlock = true;
             }
         }
 

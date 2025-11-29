@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.plugin.entityculling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 
 import java.util.concurrent.Executors;
@@ -14,6 +15,7 @@ public class EntityCullingThread {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final int id;
     private final int threads;
+    private int timer;
 
     public EntityCullingThread(int id, int threads) {
         this.id = id;
@@ -35,7 +37,7 @@ public class EntityCullingThread {
         this.scheduler.execute(() -> {
             try {
                 int processed = 0;
-                long startTime = System.currentTimeMillis();
+                long startTime = System.nanoTime();
 
                 for (Player player : CraftEngine.instance().networkManager().onlineUsers()) {
                     // 使用绝对值确保非负，使用 threads 而不是 threads-1 确保均匀分布
@@ -45,10 +47,10 @@ public class EntityCullingThread {
                     }
                 }
 
-                long duration = System.currentTimeMillis() - startTime;
-                if (duration > 45) {
-                    String value = String.format("EntityCullingThread-%d processed %d players in %dms (over 45ms)",
-                            this.id, processed, duration);
+                long duration = System.nanoTime() - startTime;
+                if (Config.debugEntityCulling() && this.timer++ % 20 == 0) {
+                    String value = String.format("EntityCullingThread-%d processed %d players in %sms",
+                            this.id, processed, String.format("%.2f", duration / 1_000_000.0));
                     Debugger.ENTITY_CULLING.debug(() -> value);
                 }
             } catch (Exception e) {

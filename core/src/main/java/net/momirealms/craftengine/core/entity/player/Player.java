@@ -218,4 +218,6 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     @Override
     public void remove() {
     }
+
+    public abstract WorldPosition eyePosition();
 }
