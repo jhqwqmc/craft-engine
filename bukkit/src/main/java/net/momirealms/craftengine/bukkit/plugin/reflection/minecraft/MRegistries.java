@@ -25,6 +25,7 @@ public final class MRegistries {
     public static final Object PLACED_FEATURE;
     public static final Object TRIM_PATTERN;
     public static final Object TRIM_MATERIAL;
+    public static final Object PAINTING_VARIANT;
     @Nullable // 1.21+
     public static final Object JUKEBOX_SONG;
     @Nullable // 1.21+
@@ -50,6 +51,7 @@ public final class MRegistries {
             Object registries$Recipe  = null;
             Object registries$TrimPattern  = null;
             Object registries$TrimMaterial  = null;
+            Object registries$PaintingVariant  = null;
             for (Field field : fields) {
                 Type fieldType = field.getGenericType();
                 if (fieldType instanceof ParameterizedType paramType) {
@@ -95,6 +97,8 @@ public final class MRegistries {
                                     registries$TrimPattern = field.get(null);
                                 } else if (type == CoreReflections.clazz$TrimMaterial) {
                                     registries$TrimMaterial = field.get(null);
+                                } else if (type == CoreReflections.clazz$PaintingVariant) {
+                                    registries$PaintingVariant = field.get(null);
                                 }
                             }
                         }
@@ -116,6 +120,7 @@ public final class MRegistries {
             PLACED_FEATURE = requireNonNull(registries$PlacedFeature);
             TRIM_PATTERN = requireNonNull(registries$TrimPattern);
             TRIM_MATERIAL = requireNonNull(registries$TrimMaterial);
+            PAINTING_VARIANT = requireNonNull(registries$PaintingVariant);
             JUKEBOX_SONG = registries$JukeboxSong;
             RECIPE = registries$Recipe;
         } catch (ReflectiveOperationException e) {

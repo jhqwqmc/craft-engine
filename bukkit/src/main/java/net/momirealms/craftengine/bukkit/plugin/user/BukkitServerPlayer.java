@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.block.entity.BlockEntityHolder;
@@ -28,6 +29,7 @@ import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
@@ -145,6 +147,7 @@ public class BukkitServerPlayer extends Player {
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
     private final EntityCulling culling;
+    private Map<Integer, CustomItem<?>> paintingId2CustomItem;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1074,6 +1077,16 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void setClientBlockList(IntIdentityList blockList) {
         this.blockList = blockList;
+    }
+
+    @Override
+    public @Nullable CustomItem<?> getCustomItemByPaintingId(int paintingId) {
+        return this.paintingId2CustomItem.get(paintingId);
+    }
+
+    @Override
+    public void paintingId2CustomItem(Map<Integer, CustomItem<?>> paintingId2CustomItem) {
+        this.paintingId2CustomItem = paintingId2CustomItem;
     }
 
     @Override

@@ -1743,4 +1743,22 @@ public final class NetworkReflections {
                     BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundPlayerChatPacket")
             )
     );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ClientboundRegistryDataPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.configuration.ClientboundRegistryDataPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    // 1.20.5+
+    public static final Field field$ClientboundRegistryDataPacket$registry = Optional.ofNullable(clazz$ClientboundRegistryDataPacket)
+            .map(it -> ReflectionUtils.getDeclaredField(it, CoreReflections.clazz$ResourceKey, 0))
+            .orElse(null);
+
+    // 1.20.5+
+    public static final Field field$ClientboundRegistryDataPacket$entries = Optional.ofNullable(clazz$ClientboundRegistryDataPacket)
+            .map(it -> ReflectionUtils.getDeclaredField(it, List.class, 0))
+            .orElse(null);
 }

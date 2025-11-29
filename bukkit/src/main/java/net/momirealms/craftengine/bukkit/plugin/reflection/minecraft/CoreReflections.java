@@ -4594,4 +4594,10 @@ public final class CoreReflections {
             throw new ReflectionInitException("Failed to init EmptyBlockGetter$INSTANCE", e);
         }
     }
+
+    public static final Class<?> clazz$PaintingVariant = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.entity.decoration.PaintingVariant")
+            )
+    );
 }

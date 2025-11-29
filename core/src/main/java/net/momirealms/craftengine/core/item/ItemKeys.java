@@ -72,6 +72,7 @@ public final class ItemKeys {
     public static final Key WHEAT_SEEDS = Key.of("minecraft:wheat_seeds");
     public static final Key SWEET_BERRIES = Key.of("minecraft:sweet_berries");
     public static final Key GLOW_BERRIES = Key.of("minecraft:glow_berries");
+    public static final Key PAINTING = Key.of("minecraft:painting");
 
     public static final Key[] AXES = new Key[] {WOODEN_AXE, STONE_AXE, IRON_AXE, GOLDEN_AXE, DIAMOND_AXE, NETHERITE_AXE};
 

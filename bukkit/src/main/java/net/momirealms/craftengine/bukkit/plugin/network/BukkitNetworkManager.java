@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.DataComponentValue;
@@ -67,6 +68,7 @@ import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeHolder;
@@ -84,7 +86,6 @@ import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.plugin.entityculling.EntityCullingThread;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.*;
@@ -102,6 +103,7 @@ import net.momirealms.craftengine.core.world.chunk.packet.BlockEntityData;
 import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
+import net.momirealms.sparrow.nbt.StringTag;
 import net.momirealms.sparrow.nbt.Tag;
 import net.momirealms.sparrow.nbt.adventure.NBTDataComponentValue;
 import org.bukkit.*;
@@ -367,6 +369,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
         registerNMSPacketConsumer(new ClientInformationListener(), VersionHelper.isOrAbove1_20_2() ? NetworkReflections.clazz$ServerboundClientInformationPacket1 : NetworkReflections.clazz$ServerboundClientInformationPacket0);
         registerNMSPacketConsumer(new ContainerClickListener1_21_5(), VersionHelper.isOrAbove1_21_5() ? NetworkReflections.clazz$ServerboundContainerClickPacket : null);
+        registerNMSPacketConsumer(new RegistryDataListener(), NetworkReflections.clazz$ClientboundRegistryDataPacket);
         registerS2CGamePacketListener(new ForgetLevelChunkListener(), this.packetIds.clientboundForgetLevelChunkPacket(), "ClientboundForgetLevelChunkPacket");
         registerS2CGamePacketListener(new SetScoreListener1_20_3(), VersionHelper.isOrAbove1_20_3() ? this.packetIds.clientboundSetScorePacket() : -1, "ClientboundSetScorePacket");
         registerS2CGamePacketListener(new AddRecipeBookListener(), this.packetIds.clientboundRecipeBookAddPacket(), "ClientboundRecipeBookAddPacket");
@@ -1915,6 +1918,50 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
+    public static class RegistryDataListener implements NMSPacketListener {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            if (VersionHelper.isOrAbove1_21_5()) { // 低版本显示有问题
+                Object registry;
+                try {
+                    registry = NetworkReflections.field$ClientboundRegistryDataPacket$registry.get(packet);
+                } catch (IllegalAccessException e) {
+                    CraftEngine.instance().logger().warn("Failed to get registry from packet", e);
+                    return;
+                }
+                if (MRegistries.PAINTING_VARIANT == registry) {
+                    List<Object> entries;
+                    try {
+                        entries = (List<Object>) NetworkReflections.field$ClientboundRegistryDataPacket$entries.get(packet);
+                    } catch (IllegalAccessException e) {
+                        CraftEngine.instance().logger().warn("Failed to get entries from packet", e);
+                        return;
+                    }
+                    Map<Key, CustomItem<ItemStack>> loadedItems = BukkitItemManager.instance().loadedItems();
+                    Map<Integer, CustomItem<?>> paintingId2CustomItem = new Object2ObjectOpenHashMap<>(loadedItems.size());
+                    for (Map.Entry<Key, CustomItem<ItemStack>> entry : loadedItems.entrySet()) {
+                        Item<ItemStack> item = entry.getValue().buildItem(ItemBuildContext.of((net.momirealms.craftengine.core.entity.player.Player) user));
+                        Tag title = item.itemNameComponent().map(AdventureHelper::componentToTag).orElseGet(() -> new StringTag(entry.getKey().asString()));
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString("asset_id", "craftengine:empty");
+                        tag.putInt("height", 1);
+                        tag.putInt("width", 1);
+                        tag.put("title", title);
+                        Object registryEntry = FastNMS.INSTANCE.constructor$RegistrySynchronization$PackedRegistryEntry(
+                                KeyUtils.toResourceLocation(entry.getKey()),
+                                Optional.of(MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, tag))
+                        );
+                        entries.add(registryEntry);
+                        paintingId2CustomItem.put(entries.indexOf(registryEntry) + 1, entry.getValue());
+                    }
+                    user.paintingId2CustomItem(paintingId2CustomItem);
+                }
+            }
+        }
+    }
+
     public static class ContainerClickListener1_21_5 implements NMSPacketListener {
 
         @Override
@@ -2008,7 +2055,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             // 读取区块数据
             int heightmapsCount = 0;
             Map<Integer, long[]> heightmapsMap = null;
-            net.momirealms.sparrow.nbt.Tag heightmaps = null;
+            Tag heightmaps = null;
             if (VersionHelper.isOrAbove1_21_5()) {
                 heightmapsMap = new HashMap<>();
                 heightmapsCount = buf.readVarInt();
@@ -3627,7 +3674,42 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 itemStack = VersionHelper.isOrAbove1_20_5() ?
                         FastNMS.INSTANCE.method$FriendlyByteBuf$readUntrustedItem(friendlyBuf) : FastNMS.INSTANCE.method$FriendlyByteBuf$readItem(friendlyBuf);
             } catch (Exception e) {
-                return;
+                if (!VersionHelper.isOrAbove1_21_5()) {
+                    return;
+                }
+                try {
+                    FriendlyByteBuf paintingBuf = event.getBuffer();
+                    Object paintingFriendlyBuf = FastNMS.INSTANCE.constructor$FriendlyByteBuf(paintingBuf.source());
+                    paintingBuf.readShort(); // slotNum
+                    int itemCount = Math.min(paintingBuf.readVarInt(), 99);
+                    paintingBuf.readOptionalVarInt(); //  itemId
+                    OptionalInt addComponentsCount = paintingBuf.readOptionalVarInt();
+                    paintingBuf.readOptionalVarInt(); // remove component 数量
+                    if (addComponentsCount.isEmpty()) {
+                        return;
+                    }
+                    paintingBuf.readVarInt(); // arr length
+                    paintingBuf.readVarInt(); // component type 预期是 painting/variant
+                    int paintingId = paintingBuf.readVarInt();
+                    CustomItem<?> item = user.getCustomItemByPaintingId(paintingId);
+                    if (item == null) {
+                        return;
+                    }
+                    ItemStack stack = (ItemStack) item.buildItemStack(serverPlayer, itemCount);
+                    event.setChanged(true);
+                    paintingBuf.clear();
+                    paintingBuf.writeVarInt(event.packetID());
+                    paintingBuf.writeShort(slotNum);
+                    FastNMS.INSTANCE.method$FriendlyByteBuf$writeUntrustedItem(paintingFriendlyBuf, stack);
+                    if (slotNum >= 0) {
+                        user.sendPacket(NetworkReflections.constructor$ClientboundContainerSetSlotPacket.newInstance(
+                                0, 0, slotNum, FastNMS.INSTANCE.field$CraftItemStack$handle(stack)
+                        ), false);
+                    }
+                    return;
+                } catch (Exception ex) {
+                    return;
+                }
             }
             BukkitItemManager.instance().c2s(itemStack).ifPresent((newItemStack) -> {
                 event.setChanged(true);

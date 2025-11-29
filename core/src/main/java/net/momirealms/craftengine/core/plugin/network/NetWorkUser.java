@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.plugin.network;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.plugin.Plugin;
 import net.momirealms.craftengine.core.util.IntIdentityList;
 import net.momirealms.craftengine.core.util.Key;
@@ -100,4 +101,9 @@ public interface NetWorkUser {
     IntIdentityList clientBlockList();
 
     void setClientBlockList(IntIdentityList integers);
+
+    @Nullable
+    CustomItem<?> getCustomItemByPaintingId(int paintingId);
+
+    void paintingId2CustomItem(Map<Integer, CustomItem<?>> paintingId2CustomItem);
 }
