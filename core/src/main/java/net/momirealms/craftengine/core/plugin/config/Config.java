@@ -579,6 +579,7 @@ public class Config {
         }
         client_optimization$entity_culling$view_distance = config.getInt("client-optimization.entity-culling.view-distance", 64);
         client_optimization$entity_culling$threads = config.getInt("client-optimization.entity-culling.threads", 1);
+        client_optimization$entity_culling$rate_limiting$enable = config.getBoolean("client-optimization.entity-culling.rate-limiting.enable", true);
         client_optimization$entity_culling$rate_limiting$bucket_size = config.getInt("client-optimization.entity-culling.rate-limiting.bucket-size", 300);
         client_optimization$entity_culling$rate_limiting$restore_per_tick = config.getInt("client-optimization.entity-culling.rate-limiting.restore-per-tick", 5);
 
