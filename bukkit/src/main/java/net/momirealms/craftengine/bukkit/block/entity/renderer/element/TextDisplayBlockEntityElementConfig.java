@@ -52,11 +52,11 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
         this.billboard = billboard;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            TextDisplayEntityData.Text.addEntityDataIfNotDefaultValue(ComponentUtils.adventureToMinecraft(text(player)), dataValues);
-            TextDisplayEntityData.Scale.addEntityDataIfNotDefaultValue(this.scale, dataValues);
-            TextDisplayEntityData.RotationLeft.addEntityDataIfNotDefaultValue(this.rotation, dataValues);
-            TextDisplayEntityData.BillboardConstraints.addEntityDataIfNotDefaultValue(this.billboard.id(), dataValues);
-            TextDisplayEntityData.Translation.addEntityDataIfNotDefaultValue(this.translation, dataValues);
+            TextDisplayEntityData.Text.addEntityData(ComponentUtils.adventureToMinecraft(text(player)), dataValues);
+            TextDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
+            TextDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
+            TextDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
+            TextDisplayEntityData.Translation.addEntityData(this.translation, dataValues);
             return dataValues;
         };
     }
@@ -68,14 +68,6 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public TextDisplayBlockEntityElement create(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
-        Quaternionf previousRotation = previous.config.rotation;
-        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
-            return null;
-        }
-        Vector3f translation = previous.config.translation;
-        if (translation.x != 0 || translation.y != 0 || translation.z != 0) {
-            return null;
-        }
         return new TextDisplayBlockEntityElement(this, pos, previous.entityId,
                 previous.config.yRot != this.yRot ||
                         previous.config.xRot != this.xRot ||

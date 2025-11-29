@@ -61,14 +61,14 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         this.shadowStrength = shadowStrength;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemDisplayEntityData.DisplayedItem.addEntityDataIfNotDefaultValue(item.apply(player).getLiteralObject(), dataValues);
-            ItemDisplayEntityData.Scale.addEntityDataIfNotDefaultValue(this.scale, dataValues);
-            ItemDisplayEntityData.RotationLeft.addEntityDataIfNotDefaultValue(this.rotation, dataValues);
-            ItemDisplayEntityData.BillboardConstraints.addEntityDataIfNotDefaultValue(this.billboard.id(), dataValues);
-            ItemDisplayEntityData.Translation.addEntityDataIfNotDefaultValue(this.translation, dataValues);
-            ItemDisplayEntityData.DisplayType.addEntityDataIfNotDefaultValue(this.displayContext.id(), dataValues);
-            ItemDisplayEntityData.ShadowRadius.addEntityDataIfNotDefaultValue(this.shadowRadius, dataValues);
-            ItemDisplayEntityData.ShadowStrength.addEntityDataIfNotDefaultValue(this.shadowStrength, dataValues);
+            ItemDisplayEntityData.DisplayedItem.addEntityData(item.apply(player).getLiteralObject(), dataValues);
+            ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
+            ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
+            ItemDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
+            ItemDisplayEntityData.Translation.addEntityData(this.translation, dataValues);
+            ItemDisplayEntityData.DisplayType.addEntityData(this.displayContext.id(), dataValues);
+            ItemDisplayEntityData.ShadowRadius.addEntityData(this.shadowRadius, dataValues);
+            ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
             return dataValues;
         };
     }
@@ -80,14 +80,6 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public ItemDisplayBlockEntityElement create(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
-        Quaternionf previousRotation = previous.config.rotation;
-        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
-            return null;
-        }
-        Vector3f translation = previous.config.translation;
-        if (translation.x != 0 || translation.y != 0 || translation.z != 0) {
-            return null;
-        }
         return new ItemDisplayBlockEntityElement(this, pos, previous.entityId,
                 previous.config.yRot != this.yRot ||
                         previous.config.xRot != this.xRot ||
