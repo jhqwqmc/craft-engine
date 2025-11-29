@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin.entityculling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.MutableVec3d;
@@ -21,12 +22,34 @@ public final class EntityCulling {
     private int lastVisitChunkX = Integer.MAX_VALUE;
     private int lastVisitChunkZ = Integer.MAX_VALUE;
     private ClientChunk lastVisitChunk = null;
+    private int currentTokens = Config.entityCullingRateLimitingBucketSize();
+    private double distanceScale = 1d;
 
     public EntityCulling(Player player) {
         this.player = player;
         for (int i = 0; i < MAX_SAMPLES; i++) {
             this.targetPoints[i] = new MutableVec3d(0,0,0);
         }
+    }
+
+    public void setDistanceScale(double distanceScale) {
+        this.distanceScale = distanceScale;
+    }
+
+    public double distanceScale() {
+        return distanceScale;
+    }
+
+    public void restoreTokenOnTick() {
+        this.currentTokens = Math.min(Config.entityCullingRateLimitingBucketSize(), this.currentTokens + Config.entityCullingRateLimitingRestorePerTick());
+    }
+
+    public boolean takeToken() {
+        if (this.currentTokens > 0) {
+            this.currentTokens--;
+            return true;
+        }
+        return false;
     }
 
     public boolean isVisible(CullingData cullable, Vec3d cameraPos) {
@@ -58,7 +81,7 @@ public final class EntityCulling {
         }
 
         // 如果设置了最大距离
-        int maxDistance = cullable.maxDistance;
+        double maxDistance = cullable.maxDistance * this.distanceScale;
         if (maxDistance > 0) {
             // 计算AABB到相机的最小距离
             double distanceSq = 0.0;

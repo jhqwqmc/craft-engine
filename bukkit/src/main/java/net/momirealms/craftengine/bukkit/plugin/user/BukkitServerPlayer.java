@@ -72,6 +72,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
+    public static final Key ENTITY_CULLING_VIEW_DISTANCE_SCALE = Key.of("craftengine:entity_culling_view_distance_scale");
     private final BukkitCraftEngine plugin;
 
     // connection state
@@ -143,7 +144,6 @@ public class BukkitServerPlayer extends Player {
     private int lastStopMiningTick;
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
-
     private final EntityCulling culling;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
@@ -170,6 +170,8 @@ public class BukkitServerPlayer extends Player {
         this.isNameVerified = true;
         byte[] bytes = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(CooldownData.COOLDOWN_KEY), PersistentDataType.BYTE_ARRAY);
         String locale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY), PersistentDataType.STRING);
+        Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE);
+        this.culling.setDistanceScale(Optional.ofNullable(scale).orElse(1.0));
         this.selectedLocale = TranslationManager.parseLocale(locale);
         this.trackedChunks = ConcurrentLong2ReferenceChainedHashTable.createWithCapacity(512, 0.5f);
         this.entityTypeView = new ConcurrentHashMap<>(256);
@@ -568,12 +570,21 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public void entityCullingTick() {
+        this.culling.restoreTokenOnTick();
         for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
             CullingData cullingData = cullableObject.cullable.cullingData();
             if (cullingData != null) {
                 Vec3d vec3d = LocationUtils.toVec3d(platformPlayer().getEyeLocation());
                 boolean visible = this.culling.isVisible(cullingData, vec3d);
-                cullableObject.setShown(this, visible);
+                if (visible != cullableObject.isShown) {
+                    if (Config.enableEntityCullingRateLimiting() && visible) {
+                        if (this.culling.takeToken()) {
+                            cullableObject.setShown(this, true);
+                        }
+                    } else {
+                        cullableObject.setShown(this, visible);
+                    }
+                }
             } else {
                 cullableObject.setShown(this, true);
             }
@@ -1283,6 +1294,13 @@ public class BukkitServerPlayer extends Player {
         } else {
             platformPlayer().getPersistentDataContainer().remove(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY));
         }
+    }
+
+    @Override
+    public void setEntityCullingViewDistanceScale(double value) {
+        value = Math.min(Math.max(0.125, value), 8);
+        this.culling.setDistanceScale(value);
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE, value);
     }
 
     @Override

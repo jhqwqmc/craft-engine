@@ -208,6 +208,9 @@ public class Config {
     protected boolean client_optimization$entity_culling$enable;
     protected int client_optimization$entity_culling$view_distance;
     protected int client_optimization$entity_culling$threads;
+    protected boolean client_optimization$entity_culling$rate_limiting$enable;
+    protected int client_optimization$entity_culling$rate_limiting$bucket_size;
+    protected int client_optimization$entity_culling$rate_limiting$restore_per_tick;
 
     public Config(CraftEngine plugin) {
         this.plugin = plugin;
@@ -571,8 +574,13 @@ public class Config {
         emoji$max_emojis_per_parse = config.getInt("emoji.max-emojis-per-parse", 32);
 
         // client optimization
-        client_optimization$entity_culling$enable = config.getBoolean("client-optimization.entity-culling.enable", false);
+        if (firstTime) {
+            client_optimization$entity_culling$enable = VersionHelper.PREMIUM && config.getBoolean("client-optimization.entity-culling.enable", false);
+        }
         client_optimization$entity_culling$view_distance = config.getInt("client-optimization.entity-culling.view-distance", 64);
+        client_optimization$entity_culling$threads = config.getInt("client-optimization.entity-culling.threads", 1);
+        client_optimization$entity_culling$rate_limiting$bucket_size = config.getInt("client-optimization.entity-culling.rate-limiting.bucket-size", 300);
+        client_optimization$entity_culling$rate_limiting$restore_per_tick = config.getInt("client-optimization.entity-culling.rate-limiting.restore-per-tick", 5);
 
         firstTime = false;
     }
@@ -1174,6 +1182,18 @@ public class Config {
 
     public static int entityCullingThreads() {
         return instance.client_optimization$entity_culling$threads;
+    }
+
+    public static boolean enableEntityCullingRateLimiting() {
+        return instance.client_optimization$entity_culling$rate_limiting$enable;
+    }
+
+    public static int entityCullingRateLimitingBucketSize() {
+        return instance.client_optimization$entity_culling$rate_limiting$bucket_size;
+    }
+
+    public static int entityCullingRateLimitingRestorePerTick() {
+        return instance.client_optimization$entity_culling$rate_limiting$restore_per_tick;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {

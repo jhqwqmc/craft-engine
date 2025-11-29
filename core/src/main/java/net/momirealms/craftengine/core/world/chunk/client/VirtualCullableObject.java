@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.world.Cullable;
 
 public class VirtualCullableObject {
     public final Cullable cullable;
-    private boolean isShown;
+    public boolean isShown;
 
     public VirtualCullableObject(Cullable cullable) {
         this.cullable = cullable;

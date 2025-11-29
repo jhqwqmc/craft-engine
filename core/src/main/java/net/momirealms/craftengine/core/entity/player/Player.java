@@ -191,6 +191,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setSelectedLocale(@Nullable Locale locale);
 
+    public abstract void setEntityCullingViewDistanceScale(double value);
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);
