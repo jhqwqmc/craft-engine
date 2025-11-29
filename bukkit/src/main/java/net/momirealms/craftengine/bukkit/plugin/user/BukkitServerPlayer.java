@@ -1382,8 +1382,8 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public VirtualCullableObject addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
-        return this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
+    public void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
+        this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
     }
 
     @Override

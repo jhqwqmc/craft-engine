@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
+import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.entity.data.TextDisplayEntityData;
 import net.momirealms.craftengine.bukkit.util.ComponentUtils;
@@ -76,6 +77,14 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
     }
 
     @Override
+    public TextDisplayBlockEntityElement createExact(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
+        if (!previous.config.equals(this)) {
+            return null;
+        }
+        return new TextDisplayBlockEntityElement(this, pos, previous.entityId, false);
+    }
+
+    @Override
     public Class<TextDisplayBlockEntityElement> elementClass() {
         return TextDisplayBlockEntityElement.class;
     }
@@ -114,6 +123,16 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     public List<Object> metadataValues(Player player) {
         return this.lazyMetadataPacket.apply(player);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TextDisplayBlockEntityElementConfig that)) return false;
+        return Float.compare(xRot, that.xRot) == 0 &&
+                Float.compare(yRot, that.yRot) == 0 &&
+                Objects.equal(position, that.position) &&
+                Objects.equal(translation, that.translation) &&
+                Objects.equal(rotation, that.rotation);
     }
 
     public static class Factory implements BlockEntityElementConfigFactory {

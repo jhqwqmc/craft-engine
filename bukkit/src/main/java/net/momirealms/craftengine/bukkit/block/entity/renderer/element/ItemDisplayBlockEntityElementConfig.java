@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
+import com.google.common.base.Objects;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
@@ -88,6 +89,14 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
     }
 
     @Override
+    public ItemDisplayBlockEntityElement createExact(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
+        if (!previous.config.equals(this)) {
+            return null;
+        }
+        return new ItemDisplayBlockEntityElement(this, pos, previous.entityId, false);
+    }
+
+    @Override
     public Class<ItemDisplayBlockEntityElement> elementClass() {
         return ItemDisplayBlockEntityElement.class;
     }
@@ -138,6 +147,16 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     public List<Object> metadataValues(Player player) {
         return this.lazyMetadataPacket.apply(player);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ItemDisplayBlockEntityElementConfig that)) return false;
+        return Float.compare(xRot, that.xRot) == 0 &&
+                Float.compare(yRot, that.yRot) == 0 &&
+                Objects.equal(position, that.position) &&
+                Objects.equal(translation, that.translation) &&
+                Objects.equal(rotation, that.rotation);
     }
 
     public static class Factory implements BlockEntityElementConfigFactory {

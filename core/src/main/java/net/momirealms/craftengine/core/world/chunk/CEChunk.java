@@ -153,6 +153,12 @@ public class CEChunk {
             if (previous != null) {
                 // 由于entity-render的体量基本都很小，所以考虑一个特殊情况，即前后都是1个renderer，对此情况进行简化和优化
                 BlockEntityElement[] previousElements = previous.elements().clone();
+
+                /*
+                 *
+                 * 1 对 1，命中率最高
+                 *
+                 */
                 if (previousElements.length == 1 && renderers.length == 1) {
                     BlockEntityElement previousElement = previousElements[0];
                     BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[0];
@@ -162,18 +168,19 @@ public class CEChunk {
                             if (element != null) {
                                 elements[0] = element;
                                 if (hasTrackedBy) {
-                                    // 如果启用实体剔除，那么只对已经渲染的进行变换
-                                    if (Config.enableEntityCulling()) {
-                                        for (Player player : trackedBy) {
-                                            VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
-                                            if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
+                                    for (Player player : trackedBy) {
+                                        // 如果启用剔除，则暂时保留原先可见度，因为大概率可见度不发生变化
+                                        if (Config.enableEntityCulling()) {
+                                            VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                            if (trackedBlockEntity == null || trackedBlockEntity.isShown) {
                                                 element.transform(player);
                                             }
-                                        }
-                                    }
-                                    // 否则直接变换
-                                    else {
-                                        for (Player player : trackedBy) {
+                                            if (trackedBlockEntity != null) {
+                                                trackedBlockEntity.setCullable(renderer);
+                                            } else {
+                                                player.addTrackedBlockEntity(pos, renderer);
+                                            }
+                                        } else {
                                             element.transform(player);
                                         }
                                     }
@@ -184,47 +191,56 @@ public class CEChunk {
                         BlockEntityElement element = config.create(wrappedWorld, pos);
                         elements[0] = element;
                         if (hasTrackedBy) {
-                            // 如果启用实体剔除，那么只添加记录
-                            if (Config.enableEntityCulling()) {
-                                for (Player player : trackedBy) {
-                                    VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
-                                    if (trackedBlockEntity != null && trackedBlockEntity.isShown()) {
-                                        trackedBlockEntity.setShown(player, false);
+                            for (Player player : trackedBy) {
+                                if (Config.enableEntityCulling()) {
+                                    VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                    if (trackedBlockEntity != null) {
+                                        if (trackedBlockEntity.isShown) {
+                                            trackedBlockEntity.setShown(player, false);
+                                        }
+                                        trackedBlockEntity.setCullable(renderer);
+                                    } else {
+                                        player.addTrackedBlockEntity(pos, renderer);
                                     }
-                                }
-                            }
-                            // 否则直接显示
-                            else {
-                                for (Player player : trackedBy) {
+                                } else {
                                     previousElement.hide(player);
                                     element.show(player);
                                 }
                             }
                         }
                     }
-                } else {
+                }
+                /*
+                 *
+                 * 1 对 多, 多 对 多
+                 *
+                 */
+                else {
+
+                    VirtualCullableObject[] previousObjects = hasTrackedBy ? new VirtualCullableObject[trackedBy.size()] : null;
+                    if (hasTrackedBy) {
+                        for (int j = 0; j < previousObjects.length; j++) {
+                            previousObjects[j] = trackedBy.get(j).getTrackedBlockEntity(pos);
+                        }
+                    }
+
                     outer: for (int i = 0; i < elements.length; i++) {
                         BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[i];
+                        /*
+                         * 严格可变换部分
+                         */
                         for (int j = 0; j < previousElements.length; j++) {
                             BlockEntityElement previousElement = previousElements[j];
                             if (previousElement != null && config.elementClass().isInstance(previousElement)) {
-                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
+                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).createExact(wrappedWorld, pos, previousElement);
                                 if (newElement != null) {
                                     previousElements[j] = null;
                                     elements[i] = newElement;
                                     if (hasTrackedBy) {
-                                        // 如果启用实体剔除，那么只对已经渲染的进行变换
-                                        if (Config.enableEntityCulling()) {
-                                            for (Player player : trackedBy) {
-                                                VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
-                                                if (trackedBlockEntity == null || trackedBlockEntity.isShown()) {
-                                                    newElement.transform(player);
-                                                }
-                                            }
-                                        }
-                                        // 否则直接变换
-                                        else {
-                                            for (Player player : trackedBy) {
+                                        for (int k = 0; k < trackedBy.size(); k++) {
+                                            Player player = trackedBy.get(k);
+                                            VirtualCullableObject cullableObject = previousObjects[k];
+                                            if (cullableObject == null || cullableObject.isShown) {
                                                 newElement.transform(player);
                                             }
                                         }
@@ -233,21 +249,48 @@ public class CEChunk {
                                 }
                             }
                         }
+                        /*
+                         * 可变换部分
+                         */
+                        for (int j = 0; j < previousElements.length; j++) {
+                            BlockEntityElement previousElement = previousElements[j];
+                            if (previousElement != null && config.elementClass().isInstance(previousElement)) {
+                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).create(wrappedWorld, pos, previousElement);
+                                if (newElement != null) {
+                                    previousElements[j] = null;
+                                    elements[i] = newElement;
+                                    if (hasTrackedBy) {
+                                        for (int k = 0; k < trackedBy.size(); k++) {
+                                            Player player = trackedBy.get(k);
+                                            VirtualCullableObject cullableObject = previousObjects[k];
+                                            if (cullableObject == null || cullableObject.isShown) {
+                                                newElement.transform(player);
+                                            }
+                                        }
+                                    }
+                                    continue outer;
+                                }
+                            }
+                        }
+                        /*
+                         * 不可变换的直接生成
+                         */
                         BlockEntityElement newElement = config.create(wrappedWorld, pos);
                         elements[i] = newElement;
                         if (hasTrackedBy) {
-                            if (Config.enableEntityCulling()) {
-                                for (Player player : trackedBy) {
-                                    player.addTrackedBlockEntity(pos, renderer);
-                                }
-                            } else {
-                                for (Player player : trackedBy) {
+                            for (int k = 0; k < trackedBy.size(); k++) {
+                                Player player = trackedBy.get(k);
+                                VirtualCullableObject cullableObject = previousObjects[k];
+                                if (cullableObject == null || cullableObject.isShown) {
                                     newElement.show(player);
                                 }
                             }
                         }
                     }
                     if (hasTrackedBy) {
+                        /*
+                         * 未能完成变化的，需要直接删除
+                         */
                         for (int i = 0; i < previousElements.length; i++) {
                             BlockEntityElement previousElement = previousElements[i];
                             if (previousElement != null) {
@@ -256,19 +299,31 @@ public class CEChunk {
                                 }
                             }
                         }
+                        // 添加 track
+                        for (int i = 0; i < previousObjects.length; i++) {
+                            VirtualCullableObject previousObject = previousObjects[i];
+                            if (previousObject != null) {
+                                previousObject.setCullable(renderer);
+                            } else {
+                                trackedBy.get(i).addTrackedBlockEntity(pos, renderer);
+                            }
+                        }
                     }
                 }
             } else {
+                /*
+                 *
+                 * 全新方块实体
+                 *
+                 */
                 for (int i = 0; i < elements.length; i++) {
                     elements[i] = renderers[i].create(wrappedWorld, pos);
                 }
                 if (hasTrackedBy) {
-                    if (Config.enableEntityCulling()) {
-                        for (Player player : trackedBy) {
+                    for (Player player : trackedBy) {
+                        if (Config.enableEntityCulling()) {
                             player.addTrackedBlockEntity(pos, renderer);
-                        }
-                    } else {
-                        for (Player player : trackedBy) {
+                        } else {
                             renderer.show(player);
                         }
                     }
