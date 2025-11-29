@@ -675,7 +675,7 @@ public class BukkitServerPlayer extends Player {
 
     private void predictNextBlockToMine() {
         double range = getCachedInteractionRange() + Config.extendedInteractionRange();
-        RayTraceResult result = platformPlayer().rayTraceBlocks(range, FluidCollisionMode.NEVER);
+        RayTraceResult result = rayTrace(this.eyeLocation, range, FluidCollisionMode.NEVER);
         if (result == null) {
             if (!this.clientSideCanBreak) {
                 setClientSideCanBreakBlock(true);
