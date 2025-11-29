@@ -187,7 +187,10 @@ public class CEChunk {
                             // 如果启用实体剔除，那么只添加记录
                             if (Config.enableEntityCulling()) {
                                 for (Player player : trackedBy) {
-                                    player.addTrackedBlockEntity(pos, renderer);
+                                    VirtualCullableObject trackedBlockEntity = player.addTrackedBlockEntity(pos, renderer);
+                                    if (trackedBlockEntity != null && trackedBlockEntity.isShown()) {
+                                        trackedBlockEntity.setShown(player, false);
+                                    }
                                 }
                             }
                             // 否则直接显示
