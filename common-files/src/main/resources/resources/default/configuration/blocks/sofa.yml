@@ -93,7 +93,7 @@ items:
               state: barrier
               entity-renderer:
                 item: default:sofa
-                yaw: 90
+                rotation: 90
             facing=north,shape=straight:
               state: barrier
               entity-renderer:
@@ -102,12 +102,12 @@ items:
               state: barrier
               entity-renderer:
                 item: default:sofa
-                yaw: 180
+                rotation: 180
             facing=west,shape=straight:
               state: barrier
               entity-renderer:
                 item: default:sofa
-                yaw: 270
+                rotation: 270
             facing=east,shape=inner_left:
               state: barrier
               entity-renderer:
@@ -116,22 +116,22 @@ items:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 270
+                rotation: 270
             facing=south,shape=inner_left:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 90
+                rotation: 90
             facing=west,shape=inner_left:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 180
+                rotation: 180
             facing=east,shape=inner_right:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 90
+                rotation: 90
             facing=north,shape=inner_right:
               state: barrier
               entity-renderer:
@@ -140,12 +140,12 @@ items:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 180
+                rotation: 180
             facing=west,shape=inner_right:
               state: barrier
               entity-renderer:
                 item: default:sofa_inner
-                yaw: 270
+                rotation: 270
           variants:
             facing=east,shape=inner_left:
               appearance: facing=east,shape=inner_left

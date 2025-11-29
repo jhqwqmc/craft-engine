@@ -129,6 +129,12 @@ unset_locale:
   usage:
     - /ce feature locale unset
 
+set_entity_view_distance_scale:
+  enable: true
+  permission: ce.command.admin.set_entity_view_distance_scale
+  usage:
+    - /ce feature entity-view-distance-scale set
+
 # Debug commands
 debug_set_block:
   enable: true

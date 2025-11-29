@@ -2046,7 +2046,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             boolean hasGlobalPalette = false;
 
             // 创建客户端侧世界（只在开启实体情况下创建）
-            ClientSection[] clientSections = Config.enableEntityCulling() ? new ClientSection[count] : null;
+            ClientSection[] clientSections = Config.entityCullingRayTracing() ? new ClientSection[count] : null;
 
             for (int i = 0; i < count; i++) {
                 MCSection mcSection = new MCSection(user.clientBlockList(), this.blockList, this.biomeList);
@@ -2225,7 +2225,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
 
             // 获取客户端侧区域
             ClientSection clientSection = null;
-            if (Config.enableEntityCulling()) {
+            if (Config.entityCullingRayTracing()) {
                 SectionPos sectionPos = SectionPos.of(sPos);
                 ClientChunk trackedChunk = user.getTrackedChunk(sectionPos.asChunkPos().longKey);
                 clientSection = trackedChunk.sectionById(sectionPos.y);
@@ -2271,7 +2271,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             FriendlyByteBuf buf = event.getBuffer();
             BlockPos pos = buf.readBlockPos();
             int before = buf.readVarInt();
-            if (Config.enableEntityCulling()) {
+            if (Config.entityCullingRayTracing()) {
                 ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(pos.x >> 4, pos.z >> 4));
                 if (trackedChunk != null) {
                     trackedChunk.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(before));
@@ -2451,7 +2451,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             BlockPos blockPos = buf.readBlockPos();
             int state = buf.readInt();
             // 移除不透明设置
-            if (Config.enableEntityCulling()) {
+            if (Config.entityCullingRayTracing()) {
                 ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(blockPos.x >> 4, blockPos.z >> 4));
                 if (trackedChunk != null) {
                     trackedChunk.setOccluding(blockPos.x, blockPos.y, blockPos.z, false);

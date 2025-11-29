@@ -31,6 +31,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
@@ -38,6 +39,7 @@ import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.registry.WritableRegistry;
 import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 
 public abstract class AbstractBlockManager extends AbstractModelGenerator implements BlockManager {
     private static final JsonElement EMPTY_VARIANT_MODEL = MiscUtils.init(new JsonObject(), o -> o.addProperty("model", "minecraft:block/empty"));
+    private static final AABB DEFAULT_BLOCK_ENTITY_AABB = new AABB(-.5, -.5, -.5, .5, .5, .5);
     protected final BlockParser blockParser;
     protected final BlockStateMappingParser blockStateMappingParser;
     // 根据id获取自定义方块
@@ -603,7 +606,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         BlockStateAppearance blockStateAppearance = new BlockStateAppearance(
                                 visualBlockState,
                                 parseBlockEntityRender(appearanceSection.get("entity-renderer")),
-                                ResourceConfigUtils.getAsAABB(appearanceSection.getOrDefault("aabb", 1), "aabb")
+                                parseCullingData(appearanceSection.get("entity-culling"))
                         );
                         appearances.put(appearanceName, blockStateAppearance);
                         if (anyAppearance == null) {
@@ -643,7 +646,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                                     }
                                     for (ImmutableBlockState possibleState : possibleStates) {
                                         possibleState.setVisualBlockState(appearance.blockState());
-                                        possibleState.setEstimatedBoundingBox(appearance.estimateAABB());
+                                        possibleState.setCullingData(appearance.cullingData());
                                         appearance.blockEntityRenderer().ifPresent(possibleState::setConstantRenderers);
                                     }
                                 }
@@ -667,7 +670,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         if (visualState == null) {
                             visualState = anyAppearance.blockState();
                             state.setVisualBlockState(visualState);
-                            state.setEstimatedBoundingBox(anyAppearance.estimateAABB());
+                            state.setCullingData(anyAppearance.cullingData());
                             anyAppearance.blockEntityRenderer().ifPresent(state::setConstantRenderers);
                         }
                         int appearanceId = visualState.registryId();
@@ -705,6 +708,22 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                 // 抛出次要警告
                 eCollector1.throwIfPresent();
             }, () -> GsonHelper.get().toJson(section)));
+        }
+
+        private CullingData parseCullingData(Object arguments) {
+            if (arguments instanceof Boolean b && !b) {
+                return null;
+            }
+            if (!(arguments instanceof Map)) {
+                return new CullingData(DEFAULT_BLOCK_ENTITY_AABB, Config.entityCullingViewDistance(), 0.5, true);
+            }
+            Map<String, Object> argumentsMap = ResourceConfigUtils.getAsMap(arguments, "entity-culling");
+            return new CullingData(
+                    ResourceConfigUtils.getAsAABB(argumentsMap.getOrDefault("aabb", 1), "aabb"),
+                    ResourceConfigUtils.getAsInt(argumentsMap.getOrDefault("view-distance", Config.entityCullingViewDistance()), "view-distance"),
+                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.5), "aabb-expansion"),
+                    ResourceConfigUtils.getAsBoolean(argumentsMap.getOrDefault("ray-tracing", true), "ray-tracing")
+            );
         }
 
         @SuppressWarnings("unchecked")

@@ -38,6 +38,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setClientSideWorld(World world);
 
+    public abstract void entityCullingTick();
+
     public abstract float getDestroyProgress(Object blockState, BlockPos pos);
 
     public abstract void setClientSideCanBreakBlock(boolean canBreak);
@@ -189,6 +191,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setSelectedLocale(@Nullable Locale locale);
 
+    public abstract void setEntityCullingViewDistanceScale(double value);
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);
@@ -214,4 +218,6 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     @Override
     public void remove() {
     }
+
+    public abstract WorldPosition eyePosition();
 }

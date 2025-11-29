@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin.entityculling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.MutableVec3d;
@@ -13,38 +14,58 @@ import java.util.Arrays;
 public final class EntityCulling {
     public static final int MAX_SAMPLES = 14;
     private final Player player;
-    private final int maxDistance;
-    private final double aabbExpansion;
     private final boolean[] dotSelectors = new boolean[MAX_SAMPLES];
     private final MutableVec3d[] targetPoints = new MutableVec3d[MAX_SAMPLES];
-    private final int[] lastHitBlock = new int[MAX_SAMPLES * 3];
-    private final boolean[] canCheckLastHitBlock = new boolean[MAX_SAMPLES];
+    private final int[] lastHitBlock = new int[3];
+    private boolean canCheckLastHitBlock = false;
     private int hitBlockCount = 0;
     private int lastVisitChunkX = Integer.MAX_VALUE;
     private int lastVisitChunkZ = Integer.MAX_VALUE;
     private ClientChunk lastVisitChunk = null;
+    private int currentTokens = Config.entityCullingRateLimitingBucketSize();
+    private double distanceScale = 1d;
 
-    public EntityCulling(Player player, int maxDistance, double aabbExpansion) {
+    public EntityCulling(Player player) {
         this.player = player;
-        this.maxDistance = maxDistance;
-        this.aabbExpansion = aabbExpansion;
         for (int i = 0; i < MAX_SAMPLES; i++) {
             this.targetPoints[i] = new MutableVec3d(0,0,0);
         }
     }
 
-    public boolean isVisible(AABB aabb, Vec3d cameraPos) {
+    public void setDistanceScale(double distanceScale) {
+        this.distanceScale = distanceScale;
+    }
+
+    public double distanceScale() {
+        return distanceScale;
+    }
+
+    public void restoreTokenOnTick() {
+        this.currentTokens = Math.min(Config.entityCullingRateLimitingBucketSize(), this.currentTokens + Config.entityCullingRateLimitingRestorePerTick());
+    }
+
+    public boolean takeToken() {
+        if (this.currentTokens > 0) {
+            this.currentTokens--;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isVisible(CullingData cullable, Vec3d cameraPos, boolean rayTracing) {
         // 情空标志位
-        Arrays.fill(this.canCheckLastHitBlock, false);
+        this.canCheckLastHitBlock = false;
         this.hitBlockCount = 0;
+        AABB aabb = cullable.aabb;
+        double aabbExpansion = cullable.aabbExpansion;
 
         // 根据AABB获取能包裹此AABB的最小长方体
-        int minX = MiscUtils.floor(aabb.minX - this.aabbExpansion);
-        int minY = MiscUtils.floor(aabb.minY - this.aabbExpansion);
-        int minZ = MiscUtils.floor(aabb.minZ - this.aabbExpansion);
-        int maxX = MiscUtils.ceil(aabb.maxX + this.aabbExpansion);
-        int maxY = MiscUtils.ceil(aabb.maxY + this.aabbExpansion);
-        int maxZ = MiscUtils.ceil(aabb.maxZ + this.aabbExpansion);
+        int minX = MiscUtils.floor(aabb.minX - aabbExpansion);
+        int minY = MiscUtils.floor(aabb.minY - aabbExpansion);
+        int minZ = MiscUtils.floor(aabb.minZ - aabbExpansion);
+        int maxX = MiscUtils.ceil(aabb.maxX + aabbExpansion);
+        int maxY = MiscUtils.ceil(aabb.maxY + aabbExpansion);
+        int maxZ = MiscUtils.ceil(aabb.maxZ + aabbExpansion);
 
         double cameraX = cameraPos.x;
         double cameraY = cameraPos.y;
@@ -60,7 +81,8 @@ public final class EntityCulling {
         }
 
         // 如果设置了最大距离
-        if (this.maxDistance > 0) {
+        double maxDistance = cullable.maxDistance * this.distanceScale;
+        if (maxDistance > 0) {
             // 计算AABB到相机的最小距离
             double distanceSq = 0.0;
             // 计算XYZ轴方向的距离
@@ -68,11 +90,15 @@ public final class EntityCulling {
             distanceSq += distanceSq(minY, maxY, cameraY, relY);
             distanceSq += distanceSq(minZ, maxZ, cameraZ, relZ);
             // 检查距离是否超过最大值
-            double maxDistanceSq = this.maxDistance * this.maxDistance;
+            double maxDistanceSq = maxDistance * maxDistance;
             // 超过最大距离，剔除
             if (distanceSq > maxDistanceSq) {
                 return false;
             }
+        }
+
+        if (!rayTracing || !cullable.rayTracing) {
+            return true;
         }
 
         // 清空之前的缓存
@@ -94,24 +120,24 @@ public final class EntityCulling {
         }
 
         int size = 0;
-        if (this.dotSelectors[0]) targetPoints[size++].set(minX, minY, minZ);
-        if (this.dotSelectors[1]) targetPoints[size++].set(maxX, minY, minZ);
-        if (this.dotSelectors[2]) targetPoints[size++].set(minX, minY, maxZ);
-        if (this.dotSelectors[3]) targetPoints[size++].set(maxX, minY, maxZ);
-        if (this.dotSelectors[4]) targetPoints[size++].set(minX, maxY, minZ);
-        if (this.dotSelectors[5]) targetPoints[size++].set(maxX, maxY, minZ);
-        if (this.dotSelectors[6]) targetPoints[size++].set(minX, maxY, maxZ);
-        if (this.dotSelectors[7]) targetPoints[size++].set(maxX, maxY, maxZ);
+        if (this.dotSelectors[0]) targetPoints[size++].set(minX + 0.05, minY + 0.05, minZ + 0.05);
+        if (this.dotSelectors[1]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, minZ + 0.05);
+        if (this.dotSelectors[2]) targetPoints[size++].set(minX + 0.05, minY + 0.05, maxZ - 0.05);
+        if (this.dotSelectors[3]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, maxZ - 0.05);
+        if (this.dotSelectors[4]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, minZ + 0.05);
+        if (this.dotSelectors[5]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, minZ + 0.05);
+        if (this.dotSelectors[6]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, maxZ - 0.05);
+        if (this.dotSelectors[7]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, maxZ - 0.05);
         // 面中心点
         double averageX = (minX + maxX) / 2.0;
         double averageY = (minY + maxY) / 2.0;
         double averageZ = (minZ + maxZ) / 2.0;
-        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ);
-        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ);
-        if (this.dotSelectors[10]) targetPoints[size++].set(minX, averageY, averageZ);
-        if (this.dotSelectors[11]) targetPoints[size++].set(maxX, averageY, averageZ);
-        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY, averageZ);
-        if (this.dotSelectors[13]) targetPoints[size].set(averageX, maxY, averageZ);
+        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ + 0.05);
+        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ - 0.05);
+        if (this.dotSelectors[10]) targetPoints[size++].set(minX + 0.05, averageY, averageZ);
+        if (this.dotSelectors[11]) targetPoints[size++].set(maxX - 0.05, averageY, averageZ);
+        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY + 0.05, averageZ);
+        if (this.dotSelectors[13]) targetPoints[size].set(averageX, maxY - 0.05, averageZ);
 
         return isVisible(cameraPos, this.targetPoints, size);
     }
@@ -168,7 +194,7 @@ public final class EntityCulling {
         int startBlockZ = MiscUtils.floor(start.z);
 
         // 遍历所有目标点进行视线检测
-        outer: for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
+        for (int targetIndex = 0; targetIndex < targetCount; targetIndex++) {
             MutableVec3d currentTarget = targets[targetIndex];
 
             // 计算起点到目标的相对向量（世界坐标差）
@@ -177,14 +203,9 @@ public final class EntityCulling {
             double deltaZ = start.z - currentTarget.z;
 
             // 检查之前命中的方块，大概率还是命中
-            for (int i = 0; i < MAX_SAMPLES; i++) {
-                if (this.canCheckLastHitBlock[i]) {
-                    int offset = i * 3;
-                    if (rayIntersection(this.lastHitBlock[offset], this.lastHitBlock[offset + 1], this.lastHitBlock[offset + 2], start, new MutableVec3d(deltaX, deltaY, deltaZ).normalize())) {
-                        continue outer;
-                    }
-                } else {
-                    break;
+            if (this.canCheckLastHitBlock) {
+                if (rayIntersection(this.lastHitBlock[0], this.lastHitBlock[1], this.lastHitBlock[2], start, new MutableVec3d(deltaX, deltaY, deltaZ).normalize())) {
+                    continue;
                 }
             }
 
@@ -195,9 +216,9 @@ public final class EntityCulling {
 
             // 预计算每单位距离在各方块边界上的步进增量
             // 这些值表示射线穿过一个方块所需的时间分数
-            double stepIncrementX = 1.0 / (absDeltaX + 1e-10); // 避免除0
-            double stepIncrementY = 1.0 / (absDeltaY + 1e-10);
-            double stepIncrementZ = 1.0 / (absDeltaZ + 1e-10);
+            double stepIncrementX = 1.0 / absDeltaX;
+            double stepIncrementY = 1.0 / absDeltaY;
+            double stepIncrementZ = 1.0 / absDeltaZ;
 
             // 射线将穿过的总方块数量（包括起点和终点）
             int totalBlocksToCheck = 1;
@@ -270,21 +291,25 @@ public final class EntityCulling {
             if (isLineOfSightClear) {
                 return true;
             } else {
-                this.canCheckLastHitBlock[this.hitBlockCount++] = true;
+                this.canCheckLastHitBlock = true;
             }
         }
 
         return false;
     }
 
-    private boolean stepRay(int currentBlockX, int currentBlockY, int currentBlockZ,
+    private boolean stepRay(int startingX, int startingY, int startingZ,
                             double stepSizeX, double stepSizeY, double stepSizeZ,
-                            int remainingSteps, int stepDirectionX, int stepDirectionY,
-                            int stepDirectionZ, double nextStepTimeY, double nextStepTimeX,
-                            double nextStepTimeZ) {
+                            int remainingSteps,
+                            int stepDirectionX, int stepDirectionY, int stepDirectionZ,
+                            double nextStepTimeY, double nextStepTimeX, double nextStepTimeZ) {
 
-        // 遍历射线路径上的所有方块（跳过最后一个目标方块）
-        for (; remainingSteps > 1; remainingSteps--) {
+        int currentBlockX = startingX;
+        int currentBlockY = startingY;
+        int currentBlockZ = startingZ;
+
+        // 遍历射线路径上的所有方块
+        for (; remainingSteps > 0; remainingSteps--) {
 
             // 检查当前方块是否遮挡视线
             if (isOccluding(currentBlockX, currentBlockY, currentBlockZ)) {
@@ -313,6 +338,22 @@ public final class EntityCulling {
 
         // 成功遍历所有中间方块，视线通畅
         return true;
+    }
+
+    private int getCacheIndex(int x, int y, int z, int startX, int startY, int startZ) {
+        int deltaX = startX + 16 - x;
+        if (deltaX < 0 || deltaX >= 32) {
+            return -1;
+        }
+        int deltaY = startY + 16 - y;
+        if (deltaY < 0 || deltaY >= 32) {
+            return -1;
+        }
+        int deltaZ = startZ + 16 - z;
+        if (deltaZ < 0 || deltaZ >= 32) {
+            return -1;
+        }
+        return deltaX + 32 * deltaY + 32 * 32 * deltaZ;
     }
 
     private double distanceSq(int min, int max, double camera, Relative rel) {

@@ -54,6 +54,8 @@ public class Config {
     protected boolean debug$item;
     protected boolean debug$furniture;
     protected boolean debug$resource_pack;
+    protected boolean debug$block;
+    protected boolean debug$entity_culling;
 
     protected boolean resource_pack$remove_tinted_leaves_particle;
     protected boolean resource_pack$generate_mod_assets;
@@ -204,6 +206,12 @@ public class Config {
     protected int emoji$max_emojis_per_parse;
 
     protected boolean client_optimization$entity_culling$enable;
+    protected int client_optimization$entity_culling$view_distance;
+    protected int client_optimization$entity_culling$threads;
+    protected boolean client_optimization$entity_culling$ray_tracing;
+    protected boolean client_optimization$entity_culling$rate_limiting$enable;
+    protected int client_optimization$entity_culling$rate_limiting$bucket_size;
+    protected int client_optimization$entity_culling$rate_limiting$restore_per_tick;
 
     public Config(CraftEngine plugin) {
         this.plugin = plugin;
@@ -307,6 +315,8 @@ public class Config {
         debug$item = config.getBoolean("debug.item", false);
         debug$furniture = config.getBoolean("debug.furniture", false);
         debug$resource_pack = config.getBoolean("debug.resource-pack", false);
+        debug$block = config.getBoolean("debug.block", false);
+        debug$entity_culling = config.getBoolean("debug.entity-culling", false);
 
         // resource pack
         resource_pack$path = resolvePath(config.getString("resource-pack.path", "./generated/resource_pack.zip"));
@@ -565,7 +575,15 @@ public class Config {
         emoji$max_emojis_per_parse = config.getInt("emoji.max-emojis-per-parse", 32);
 
         // client optimization
-        client_optimization$entity_culling$enable = config.getBoolean("client-optimization.entity-culling.enable", false);
+        if (firstTime) {
+            client_optimization$entity_culling$enable = VersionHelper.PREMIUM && config.getBoolean("client-optimization.entity-culling.enable", false);
+        }
+        client_optimization$entity_culling$view_distance = config.getInt("client-optimization.entity-culling.view-distance", 64);
+        client_optimization$entity_culling$threads = config.getInt("client-optimization.entity-culling.threads", 1);
+        client_optimization$entity_culling$ray_tracing = client_optimization$entity_culling$enable && config.getBoolean("client-optimization.entity-culling.ray-tracing", true);
+        client_optimization$entity_culling$rate_limiting$enable = config.getBoolean("client-optimization.entity-culling.rate-limiting.enable", true);
+        client_optimization$entity_culling$rate_limiting$bucket_size = config.getInt("client-optimization.entity-culling.rate-limiting.bucket-size", 300);
+        client_optimization$entity_culling$rate_limiting$restore_per_tick = config.getInt("client-optimization.entity-culling.rate-limiting.restore-per-tick", 5);
 
         firstTime = false;
     }
@@ -604,12 +622,12 @@ public class Config {
         return instance.debug$item;
     }
 
-    public static boolean debugBlockEntity() {
-        return false;
+    public static boolean debugBlock() {
+        return instance.debug$block;
     }
 
-    public static boolean debugBlock() {
-        return false;
+    public static boolean debugEntityCulling() {
+        return instance.debug$entity_culling;
     }
 
     public static boolean debugFurniture() {
@@ -1159,6 +1177,30 @@ public class Config {
 
     public static boolean enableEntityCulling() {
         return instance.client_optimization$entity_culling$enable;
+    }
+
+    public static int entityCullingViewDistance() {
+        return instance.client_optimization$entity_culling$view_distance;
+    }
+
+    public static int entityCullingThreads() {
+        return instance.client_optimization$entity_culling$threads;
+    }
+
+    public static boolean enableEntityCullingRateLimiting() {
+        return instance.client_optimization$entity_culling$rate_limiting$enable;
+    }
+
+    public static int entityCullingRateLimitingBucketSize() {
+        return instance.client_optimization$entity_culling$rate_limiting$bucket_size;
+    }
+
+    public static int entityCullingRateLimitingRestorePerTick() {
+        return instance.client_optimization$entity_culling$rate_limiting$restore_per_tick;
+    }
+
+    public static boolean entityCullingRayTracing() {
+        return instance.client_optimization$entity_culling$ray_tracing;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {

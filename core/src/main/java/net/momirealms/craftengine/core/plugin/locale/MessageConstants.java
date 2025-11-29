@@ -41,4 +41,5 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_ITEM_CLEAR_FAILED_MULTIPLE = Component.translatable().key("command.item.clear.failed.multiple");
     TranslatableComponent.Builder COMMAND_ITEM_CLEAR_TEST_SINGLE = Component.translatable().key("command.item.clear.test.single");
     TranslatableComponent.Builder COMMAND_ITEM_CLEAR_TEST_MULTIPLE = Component.translatable().key("command.item.clear.test.multiple");
+    TranslatableComponent.Builder COMMAND_ENTITY_VIEW_DISTANCE_SCALE_SET_SUCCESS = Component.translatable().key("command.entity_view_distance_scale.set.success");
 }

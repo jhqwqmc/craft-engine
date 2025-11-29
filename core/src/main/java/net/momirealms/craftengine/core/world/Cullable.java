@@ -1,13 +1,15 @@
 package net.momirealms.craftengine.core.world;
 
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.world.collision.AABB;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import org.jetbrains.annotations.Nullable;
 
 public interface Cullable {
-
-    AABB aabb();
 
     void show(Player player);
 
     void hide(Player player);
+
+    @Nullable
+    CullingData cullingData();
 }

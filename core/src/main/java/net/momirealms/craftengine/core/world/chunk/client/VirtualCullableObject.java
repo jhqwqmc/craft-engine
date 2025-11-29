@@ -4,12 +4,16 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.world.Cullable;
 
 public class VirtualCullableObject {
-    public final Cullable cullable;
-    private boolean isShown;
+    public Cullable cullable;
+    public boolean isShown;
 
     public VirtualCullableObject(Cullable cullable) {
         this.cullable = cullable;
         this.isShown = false;
+    }
+
+    public void setCullable(Cullable cullable) {
+        this.cullable = cullable;
     }
 
     public Cullable cullable() {

@@ -6,6 +6,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,13 @@ public abstract class AbstractJavaScheduler<T> implements SchedulerAdapter<T> {
     public SchedulerTask asyncRepeating(Runnable task, long delay, long interval, TimeUnit unit) {
         ScheduledFuture<?> future = this.scheduler.scheduleAtFixedRate(() -> this.worker.execute(task), delay, interval, unit);
         return new AsyncTask(future);
+    }
+
+    @Override
+    public SchedulerTask asyncRepeating(Consumer<SchedulerTask> task, long delay, long interval, TimeUnit unit) {
+        LazyAsyncTask asyncTask = new LazyAsyncTask();
+        asyncTask.future = this.scheduler.scheduleAtFixedRate(() -> this.worker.execute(() -> task.accept(asyncTask)), delay, interval, unit);
+        return asyncTask;
     }
 
     @Override

@@ -2,18 +2,19 @@ package net.momirealms.craftengine.core.block.entity.render;
 
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.world.Cullable;
-import net.momirealms.craftengine.core.world.collision.AABB;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
 public class ConstantBlockEntityRenderer implements Cullable {
     private final BlockEntityElement[] elements;
-    public final AABB aabb;
+    public final CullingData cullingData;
 
-    public ConstantBlockEntityRenderer(BlockEntityElement[] elements, AABB aabb) {
+    public ConstantBlockEntityRenderer(BlockEntityElement[] elements, @Nullable CullingData cullingData) {
         this.elements = elements;
-        this.aabb = aabb;
+        this.cullingData = cullingData;
     }
 
     @Override
@@ -55,7 +56,11 @@ public class ConstantBlockEntityRenderer implements Cullable {
     }
 
     @Override
-    public AABB aabb() {
-        return this.aabb;
+    public CullingData cullingData() {
+        return this.cullingData;
+    }
+
+    public boolean canCull() {
+        return this.cullingData != null;
     }
 }
