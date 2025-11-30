@@ -24,7 +24,7 @@ import java.util.stream.LongStream;
 
 public class SnbtGrammar {
     private static final DynamicCommandExceptionType ERROR_NUMBER_PARSE_FAILURE = new LocalizedDynamicCommandExceptionType(
-            number -> new LocalizedMessage("warning.config.type.snbt.parser.number_parse_failure", String.valueOf(number))
+            message -> new LocalizedMessage("warning.config.type.snbt.parser.number_parse_failure", String.valueOf(message))
     );
     static final DynamicCommandExceptionType ERROR_EXPECTED_HEX_ESCAPE = new LocalizedDynamicCommandExceptionType(
             length -> new LocalizedMessage("warning.config.type.snbt.parser.expected_hex_escape", String.valueOf(length))
@@ -248,152 +248,151 @@ public class SnbtGrammar {
         T emptyList = ops.emptyList();
         T nullString = ops.createString("null");
         boolean isJavaType = "null".equals(nullString); // 确定是 Java 类型的
+
         Dictionary<StringReader> rules = new Dictionary<>();
+
         Atom<Sign> sign = Atom.of("sign");
         rules.put(
                 sign,
-            Term.alternative(
-                    Term.sequence(StringReaderTerms.character('+'), Term.marker(sign, Sign.PLUS)),
-                    Term.sequence(StringReaderTerms.character('-'), Term.marker(sign, Sign.MINUS))
-            ),
+                Term.alternative(
+                        Term.sequence(StringReaderTerms.character('+'), Term.marker(sign, Sign.PLUS)),
+                        Term.sequence(StringReaderTerms.character('-'), Term.marker(sign, Sign.MINUS))
+                ),
                 scope -> scope.getOrThrow(sign)
         );
+
         Atom<IntegerSuffix> integerSuffix = Atom.of("integer_suffix");
         rules.put(
                 integerSuffix,
-            Term.alternative(
-                Term.sequence(
-                    StringReaderTerms.characters('u', 'U'),
-                    Term.alternative(
+                Term.alternative(
                         Term.sequence(
-                            StringReaderTerms.characters('b', 'B'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.BYTE))
+                                StringReaderTerms.characters('u', 'U'),
+                                Term.alternative(
+                                        Term.sequence(StringReaderTerms.characters('b', 'B'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.BYTE))),
+                                        Term.sequence(StringReaderTerms.characters('s', 'S'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.SHORT))),
+                                        Term.sequence(StringReaderTerms.characters('i', 'I'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.INT))),
+                                        Term.sequence(StringReaderTerms.characters('l', 'L'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.LONG)))
+                                )
                         ),
                         Term.sequence(
-                            StringReaderTerms.characters('s', 'S'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.SHORT))
+                                StringReaderTerms.characters('s', 'S'),
+                                Term.alternative(
+                                        Term.sequence(StringReaderTerms.characters('b', 'B'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.BYTE))),
+                                        Term.sequence(StringReaderTerms.characters('s', 'S'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.SHORT))),
+                                        Term.sequence(StringReaderTerms.characters('i', 'I'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.INT))),
+                                        Term.sequence(StringReaderTerms.characters('l', 'L'), Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.LONG)))
+                                )
                         ),
-                        Term.sequence(
-                            StringReaderTerms.characters('i', 'I'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.INT))
-                        ),
-                        Term.sequence(
-                            StringReaderTerms.characters('l', 'L'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.UNSIGNED, TypeSuffix.LONG))
-                        )
-                    )
+                        Term.sequence(StringReaderTerms.characters('b', 'B'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.BYTE))),
+                        Term.sequence(StringReaderTerms.characters('s', 'S'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.SHORT))),
+                        Term.sequence(StringReaderTerms.characters('i', 'I'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.INT))),
+                        Term.sequence(StringReaderTerms.characters('l', 'L'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.LONG)))
                 ),
-                Term.sequence(
-                    StringReaderTerms.characters('s', 'S'),
-                    Term.alternative(
-                        Term.sequence(
-                            StringReaderTerms.characters('b', 'B'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.BYTE))
-                        ),
-                        Term.sequence(
-                            StringReaderTerms.characters('s', 'S'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.SHORT))
-                        ),
-                        Term.sequence(
-                            StringReaderTerms.characters('i', 'I'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.INT))
-                        ),
-                        Term.sequence(
-                            StringReaderTerms.characters('l', 'L'),
-                                Term.marker(integerSuffix, new IntegerSuffix(SignedPrefix.SIGNED, TypeSuffix.LONG))
-                        )
-                    )
-                ),
-                    Term.sequence(StringReaderTerms.characters('b', 'B'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.BYTE))),
-                    Term.sequence(StringReaderTerms.characters('s', 'S'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.SHORT))),
-                    Term.sequence(StringReaderTerms.characters('i', 'I'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.INT))),
-                    Term.sequence(StringReaderTerms.characters('l', 'L'), Term.marker(integerSuffix, new IntegerSuffix(null, TypeSuffix.LONG)))
-            ),
                 scope -> scope.getOrThrow(integerSuffix)
         );
+
         Atom<String> binaryNumeral = Atom.of("binary_numeral");
         rules.put(binaryNumeral, BINARY_NUMERAL);
+
         Atom<String> decimalNumeral = Atom.of("decimal_numeral");
         rules.put(decimalNumeral, DECIMAL_NUMERAL);
+
         Atom<String> hexNumeral = Atom.of("hex_numeral");
         rules.put(hexNumeral, HEX_NUMERAL);
+
         Atom<IntegerLiteral> integerLiteral = Atom.of("integer_literal");
         NamedRule<StringReader, IntegerLiteral> integerLiteralRule = rules.put(
                 integerLiteral,
-            Term.sequence(
-                    Term.optional(rules.named(sign)),
-                Term.alternative(
-                    Term.sequence(
-                        StringReaderTerms.character('0'),
-                        Term.cut(),
+                Term.sequence(
+                        Term.optional(rules.named(sign)),
                         Term.alternative(
-                                Term.sequence(StringReaderTerms.characters('x', 'X'), Term.cut(), rules.named(hexNumeral)),
-                                Term.sequence(StringReaderTerms.characters('b', 'B'), rules.named(binaryNumeral)),
-                                Term.sequence(rules.named(decimalNumeral), Term.cut(), Term.fail(ERROR_LEADING_ZERO_NOT_ALLOWED)),
-                                Term.marker(decimalNumeral, "0")
-                        )
-                    ),
-                        rules.named(decimalNumeral)
+                                Term.sequence(
+                                        StringReaderTerms.character('0'),
+                                        Term.cut(),
+                                        Term.alternative(
+                                                Term.sequence(StringReaderTerms.characters('x', 'X'), Term.cut(), rules.named(hexNumeral)),
+                                                Term.sequence(StringReaderTerms.characters('b', 'B'), rules.named(binaryNumeral)),
+                                                Term.sequence(rules.named(decimalNumeral), Term.cut(), Term.fail(ERROR_LEADING_ZERO_NOT_ALLOWED)),
+                                                Term.marker(decimalNumeral, "0")
+                                        )
+                                ),
+                                rules.named(decimalNumeral)
+                        ),
+                        Term.optional(rules.named(integerSuffix))
                 ),
-                    Term.optional(rules.named(integerSuffix))
-            ),
-            scope -> {
-                IntegerSuffix suffix = scope.getOrDefault(integerSuffix, IntegerSuffix.EMPTY);
-                Sign signValue = scope.getOrDefault(sign, Sign.PLUS);
-                String decimalContents = scope.get(decimalNumeral);
-                if (decimalContents != null) {
-                    return new IntegerLiteral(signValue, Base.DECIMAL, decimalContents, suffix);
+                scope -> {
+                    IntegerSuffix suffix = scope.getOrDefault(integerSuffix, IntegerSuffix.EMPTY);
+                    Sign signValue = scope.getOrDefault(sign, Sign.PLUS);
+                    String decimalContents = scope.get(decimalNumeral);
+                    if (decimalContents != null) {
+                        return new IntegerLiteral(signValue, Base.DECIMAL, decimalContents, suffix);
+                    }
+                    String hexContents = scope.get(hexNumeral);
+                    if (hexContents != null) {
+                        return new IntegerLiteral(signValue, Base.HEX, hexContents, suffix);
+                    }
+                    String binaryContents = scope.getOrThrow(binaryNumeral);
+                    return new IntegerLiteral(signValue, Base.BINARY, binaryContents, suffix);
                 }
-                String string1 = scope.get(hexNumeral);
-                if (string1 != null) {
-                    return new IntegerLiteral(signValue, Base.HEX, string1, suffix);
-                }
-                String string2 = scope.getOrThrow(binaryNumeral);
-                return new IntegerLiteral(signValue, Base.BINARY, string2, suffix);
-            }
         );
+
         Atom<TypeSuffix> floatTypeSuffix = Atom.of("float_type_suffix");
         rules.put(
                 floatTypeSuffix,
-            Term.alternative(
-                    Term.sequence(StringReaderTerms.characters('f', 'F'), Term.marker(floatTypeSuffix, TypeSuffix.FLOAT)),
-                    Term.sequence(StringReaderTerms.characters('d', 'D'), Term.marker(floatTypeSuffix, TypeSuffix.DOUBLE))
-            ),
+                Term.alternative(
+                        Term.sequence(StringReaderTerms.characters('f', 'F'), Term.marker(floatTypeSuffix, TypeSuffix.FLOAT)),
+                        Term.sequence(StringReaderTerms.characters('d', 'D'), Term.marker(floatTypeSuffix, TypeSuffix.DOUBLE))
+                ),
                 scope -> scope.getOrThrow(floatTypeSuffix)
         );
+
         Atom<Signed<String>> floatExponentPart = Atom.of("float_exponent_part");
         rules.put(
                 floatExponentPart,
-                Term.sequence(StringReaderTerms.characters('e', 'E'), Term.optional(rules.named(sign)), rules.named(decimalNumeral)),
+                Term.sequence(
+                        StringReaderTerms.characters('e', 'E'),
+                        Term.optional(rules.named(sign)),
+                        rules.named(decimalNumeral)
+                ),
                 scope -> new Signed<>(scope.getOrDefault(sign, Sign.PLUS), scope.getOrThrow(decimalNumeral))
         );
+
         Atom<String> floatWholePart = Atom.of("float_whole_part");
         Atom<String> floatFractionPart = Atom.of("float_fraction_part");
         Atom<T> floatLiteral = Atom.of("float_literal");
         rules.putComplex(
                 floatLiteral,
-            Term.sequence(
-                    Term.optional(rules.named(sign)),
-                Term.alternative(
-                    Term.sequence(
-                            rules.namedWithAlias(decimalNumeral, floatWholePart),
-                        StringReaderTerms.character('.'),
-                        Term.cut(),
-                            Term.optional(rules.namedWithAlias(decimalNumeral, floatFractionPart)),
-                            Term.optional(rules.named(floatExponentPart)),
-                            Term.optional(rules.named(floatTypeSuffix))
-                    ),
-                    Term.sequence(
-                        StringReaderTerms.character('.'),
-                        Term.cut(),
-                            rules.namedWithAlias(decimalNumeral, floatFractionPart),
-                            Term.optional(rules.named(floatExponentPart)),
-                            Term.optional(rules.named(floatTypeSuffix))
-                    ),
-                        Term.sequence(rules.namedWithAlias(decimalNumeral, floatWholePart), rules.named(floatExponentPart), Term.cut(), Term.optional(rules.named(floatTypeSuffix))),
-                        Term.sequence(rules.namedWithAlias(decimalNumeral, floatWholePart), Term.optional(rules.named(floatExponentPart)), rules.named(floatTypeSuffix))
-                )
-            ),
+                Term.sequence(
+                        Term.optional(rules.named(sign)),
+                        Term.alternative(
+                                Term.sequence(
+                                        rules.namedWithAlias(decimalNumeral, floatWholePart),
+                                        StringReaderTerms.character('.'),
+                                        Term.cut(),
+                                        Term.optional(rules.namedWithAlias(decimalNumeral, floatFractionPart)),
+                                        Term.optional(rules.named(floatExponentPart)),
+                                        Term.optional(rules.named(floatTypeSuffix))
+                                ),
+                                Term.sequence(
+                                        StringReaderTerms.character('.'),
+                                        Term.cut(),
+                                        rules.namedWithAlias(decimalNumeral, floatFractionPart),
+                                        Term.optional(rules.named(floatExponentPart)),
+                                        Term.optional(rules.named(floatTypeSuffix))
+                                ),
+                                Term.sequence(
+                                        rules.namedWithAlias(decimalNumeral, floatWholePart),
+                                        rules.named(floatExponentPart),
+                                        Term.cut(),
+                                        Term.optional(rules.named(floatTypeSuffix))
+                                ),
+                                Term.sequence(
+                                        rules.namedWithAlias(decimalNumeral, floatWholePart),
+                                        Term.optional(rules.named(floatExponentPart)),
+                                        rules.named(floatTypeSuffix)
+                                )
+                        )
+                ),
                 state -> {
                     Scope scope = state.scope();
                     Sign wholeSign = scope.getOrDefault(sign, Sign.PLUS);
@@ -402,116 +401,160 @@ public class SnbtGrammar {
                     Signed<String> exponent = scope.get(floatExponentPart);
                     TypeSuffix typeSuffix = scope.get(floatTypeSuffix);
                     return createFloat(ops, wholeSign, whole, fraction, exponent, typeSuffix, state);
-            }
+                }
         );
+
         Atom<String> stringHex2 = Atom.of("string_hex_2");
         rules.put(stringHex2, new SimpleHexLiteralParseRule(2));
+
         Atom<String> stringHex4 = Atom.of("string_hex_4");
         rules.put(stringHex4, new SimpleHexLiteralParseRule(4));
+
         Atom<String> stringHex8 = Atom.of("string_hex_8");
         rules.put(stringHex8, new SimpleHexLiteralParseRule(8));
+
         Atom<String> stringUnicodeName = Atom.of("string_unicode_name");
         rules.put(stringUnicodeName, new GreedyPatternParseRule(UNICODE_NAME, ERROR_INVALID_CHARACTER_NAME));
+
         Atom<String> stringEscapeSequence = Atom.of("string_escape_sequence");
         rules.putComplex(
                 stringEscapeSequence,
-            Term.alternative(
-                    Term.sequence(StringReaderTerms.character('b'), Term.marker(stringEscapeSequence, "\b")),
-                    Term.sequence(StringReaderTerms.character('s'), Term.marker(stringEscapeSequence, " ")),
-                    Term.sequence(StringReaderTerms.character('t'), Term.marker(stringEscapeSequence, "\t")),
-                    Term.sequence(StringReaderTerms.character('n'), Term.marker(stringEscapeSequence, "\n")),
-                    Term.sequence(StringReaderTerms.character('f'), Term.marker(stringEscapeSequence, "\f")),
-                    Term.sequence(StringReaderTerms.character('r'), Term.marker(stringEscapeSequence, "\r")),
-                    Term.sequence(StringReaderTerms.character('\\'), Term.marker(stringEscapeSequence, "\\")),
-                    Term.sequence(StringReaderTerms.character('\''), Term.marker(stringEscapeSequence, "'")),
-                    Term.sequence(StringReaderTerms.character('"'), Term.marker(stringEscapeSequence, "\"")),
-                    Term.sequence(StringReaderTerms.character('x'), rules.named(stringHex2)),
-                    Term.sequence(StringReaderTerms.character('u'), rules.named(stringHex4)),
-                    Term.sequence(StringReaderTerms.character('U'), rules.named(stringHex8)),
-                    Term.sequence(StringReaderTerms.character('N'), StringReaderTerms.character('{'), rules.named(stringUnicodeName), StringReaderTerms.character('}'))
-            ),
+                Term.alternative(
+                        Term.sequence(StringReaderTerms.character('b'), Term.marker(stringEscapeSequence, "\b")),
+                        Term.sequence(StringReaderTerms.character('s'), Term.marker(stringEscapeSequence, " ")),
+                        Term.sequence(StringReaderTerms.character('t'), Term.marker(stringEscapeSequence, "\t")),
+                        Term.sequence(StringReaderTerms.character('n'), Term.marker(stringEscapeSequence, "\n")),
+                        Term.sequence(StringReaderTerms.character('f'), Term.marker(stringEscapeSequence, "\f")),
+                        Term.sequence(StringReaderTerms.character('r'), Term.marker(stringEscapeSequence, "\r")),
+                        Term.sequence(StringReaderTerms.character('\\'), Term.marker(stringEscapeSequence, "\\")),
+                        Term.sequence(StringReaderTerms.character('\''), Term.marker(stringEscapeSequence, "'")),
+                        Term.sequence(StringReaderTerms.character('"'), Term.marker(stringEscapeSequence, "\"")),
+                        Term.sequence(StringReaderTerms.character('x'), rules.named(stringHex2)),
+                        Term.sequence(StringReaderTerms.character('u'), rules.named(stringHex4)),
+                        Term.sequence(StringReaderTerms.character('U'), rules.named(stringHex8)),
+                        Term.sequence(
+                                StringReaderTerms.character('N'),
+                                StringReaderTerms.character('{'),
+                                rules.named(stringUnicodeName),
+                                StringReaderTerms.character('}')
+                        )
+                ),
                 state -> {
                     Scope scope = state.scope();
                     String plainEscape = scope.getAny(stringEscapeSequence);
                     if (plainEscape != null) {
                         return plainEscape;
-                }
+                    }
                     String hexEscape = scope.getAny(stringHex2, stringHex4, stringHex8);
                     if (hexEscape != null) {
                         int codePoint = HexFormat.fromHexDigits(hexEscape);
                         if (!Character.isValidCodePoint(codePoint)) {
-                            state.errorCollector()
-                                    .store(state.mark(), DelayedException.create(ERROR_INVALID_CODEPOINT, String.format(Locale.ROOT, "U+%08X", codePoint)));
-                        return null;
-                    }
+                            state.errorCollector().store(state.mark(), DelayedException.create(ERROR_INVALID_CODEPOINT, String.format(Locale.ROOT, "U+%08X", codePoint)));
+                            return null;
+                        }
                         return Character.toString(codePoint);
-                }
+                    }
                     String character = scope.getOrThrow(stringUnicodeName);
 
                     int codePoint;
-                try {
-                    codePoint = Character.codePointOf(character);
-                } catch (IllegalArgumentException var12x) {
-                    state.errorCollector().store(state.mark(), ERROR_INVALID_CHARACTER_NAME);
-                    return null;
-                }
+                    try {
+                        codePoint = Character.codePointOf(character);
+                    } catch (IllegalArgumentException var12x) {
+                        state.errorCollector().store(state.mark(), ERROR_INVALID_CHARACTER_NAME);
+                        return null;
+                    }
 
                     return Character.toString(codePoint);
-            }
+                }
         );
+
         Atom<String> stringPlainContents = Atom.of("string_plain_contents");
         rules.put(stringPlainContents, PLAIN_STRING_CHUNK);
+
         Atom<List<String>> stringChunks = Atom.of("string_chunks");
         Atom<String> stringContents = Atom.of("string_contents");
         Atom<String> singleQuotedStringChunk = Atom.of("single_quoted_string_chunk");
-        NamedRule<StringReader, String> namedRule1 = rules.put(
+        NamedRule<StringReader, String> singleQuotedStringChunkRule = rules.put(
                 singleQuotedStringChunk,
-            Term.alternative(
-                    rules.namedWithAlias(stringPlainContents, stringContents),
-                    Term.sequence(StringReaderTerms.character('\\'), rules.namedWithAlias(stringEscapeSequence, stringContents)),
-                    Term.sequence(StringReaderTerms.character('"'), Term.marker(stringContents, "\""))
-            ),
+                Term.alternative(
+                        rules.namedWithAlias(stringPlainContents, stringContents),
+                        Term.sequence(StringReaderTerms.character('\\'), rules.namedWithAlias(stringEscapeSequence, stringContents)),
+                        Term.sequence(StringReaderTerms.character('"'), Term.marker(stringContents, "\""))
+                ),
                 scope -> scope.getOrThrow(stringContents)
         );
         Atom<String> singleQuotedStringContents = Atom.of("single_quoted_string_contents");
-        rules.put(singleQuotedStringContents, Term.repeated(namedRule1, stringChunks), scope -> joinList(scope.getOrThrow(stringChunks)));
+        rules.put(
+                singleQuotedStringContents,
+                Term.repeated(singleQuotedStringChunkRule, stringChunks),
+                scope -> joinList(scope.getOrThrow(stringChunks))
+        );
+
         Atom<String> doubleQuotedStringChunk = Atom.of("double_quoted_string_chunk");
-        NamedRule<StringReader, String> namedRule2 = rules.put(
+        NamedRule<StringReader, String> doubleQuotedStringChunkRule = rules.put(
                 doubleQuotedStringChunk,
-            Term.alternative(
-                    rules.namedWithAlias(stringPlainContents, stringContents),
-                    Term.sequence(StringReaderTerms.character('\\'), rules.namedWithAlias(stringEscapeSequence, stringContents)),
-                    Term.sequence(StringReaderTerms.character('\''), Term.marker(stringContents, "'"))
-            ),
+                Term.alternative(
+                        rules.namedWithAlias(stringPlainContents, stringContents),
+                        Term.sequence(StringReaderTerms.character('\\'), rules.namedWithAlias(stringEscapeSequence, stringContents)),
+                        Term.sequence(StringReaderTerms.character('\''), Term.marker(stringContents, "'"))
+                ),
                 scope -> scope.getOrThrow(stringContents)
         );
         Atom<String> doubleQuotedStringContents = Atom.of("double_quoted_string_contents");
-        rules.put(doubleQuotedStringContents, Term.repeated(namedRule2, stringChunks), scope -> joinList(scope.getOrThrow(stringChunks)));
+        rules.put(
+                doubleQuotedStringContents,
+                Term.repeated(doubleQuotedStringChunkRule, stringChunks),
+                scope -> joinList(scope.getOrThrow(stringChunks))
+        );
+
         Atom<String> quotedStringLiteral = Atom.of("quoted_string_literal");
         rules.put(
                 quotedStringLiteral,
-            Term.alternative(
-                Term.sequence(
-                        StringReaderTerms.character('"'), Term.cut(), Term.optional(rules.namedWithAlias(doubleQuotedStringContents, stringContents)), StringReaderTerms.character('"')
+                Term.alternative(
+                        Term.sequence(
+                                StringReaderTerms.character('"'),
+                                Term.cut(),
+                                Term.optional(rules.namedWithAlias(doubleQuotedStringContents, stringContents)),
+                                StringReaderTerms.character('"')
+                        ),
+                        Term.sequence(
+                                StringReaderTerms.character('\''),
+                                Term.optional(rules.namedWithAlias(singleQuotedStringContents, stringContents)),
+                                StringReaderTerms.character('\'')
+                        )
                 ),
-                    Term.sequence(StringReaderTerms.character('\''), Term.optional(rules.namedWithAlias(singleQuotedStringContents, stringContents)), StringReaderTerms.character('\''))
-            ),
                 scope -> scope.getOrThrow(stringContents)
         );
+
         Atom<String> unquotedString = Atom.of("unquoted_string");
-        rules.put(unquotedString, new UnquotedStringParseRule(1, ERROR_EXPECTED_UNQUOTED_STRING));
+        rules.put(
+                unquotedString,
+                new UnquotedStringParseRule(1, ERROR_EXPECTED_UNQUOTED_STRING)
+        );
+
         Atom<T> literal = Atom.of("literal");
         Atom<List<T>> argumentList = Atom.of("arguments");
         rules.put(
-                argumentList, Term.repeatedWithTrailingSeparator(rules.forward(literal), argumentList, StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)), scope -> scope.getOrThrow(argumentList)
+                argumentList,
+                Term.repeatedWithTrailingSeparator(
+                        rules.forward(literal),
+                        argumentList,
+                        StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)
+                ),
+                scope -> scope.getOrThrow(argumentList)
         );
+
         Atom<T> unquotedStringOrBuiltIn = Atom.of("unquoted_string_or_builtin");
         rules.putComplex(
                 unquotedStringOrBuiltIn,
-            Term.sequence(
-                    rules.named(unquotedString),
-                    Term.optional(Term.sequence(StringReaderTerms.character('('), rules.named(argumentList), StringReaderTerms.character(')')))
-            ),
+                Term.sequence(
+                        rules.named(unquotedString),
+                        Term.optional(Term.sequence(
+                                StringReaderTerms.character('('),
+                                rules.named(argumentList),
+                                StringReaderTerms.character(')')
+                        ))
+                ),
                 state -> {
                     Scope scope = state.scope();
                     String contents = scope.getOrThrow(unquotedString);
@@ -522,114 +565,192 @@ public class SnbtGrammar {
                             SnbtOperations.BuiltinOperation operation = SnbtOperations.BUILTIN_OPERATIONS.get(key);
                             if (operation != null) {
                                 return operation.run(ops, arguments, state);
-                        }
+                            }
                             state.errorCollector().store(state.mark(), DelayedException.create(ERROR_NO_SUCH_OPERATION, key.toString()));
-                        return null;
+                            return null;
                         } else if (contents.equalsIgnoreCase("true")) {
                             return trueValue;
                         } else if (contents.equalsIgnoreCase("false")) {
                             return falseValue;
                         } else if (contents.equalsIgnoreCase("null")) {
-                        return Objects.requireNonNullElseGet(ops.empty(), () -> {
-                            if (isJavaType) {
-                                return (T) CachedParseState.JAVA_NULL_VALUE_MARKER;
-                            }
-                            return nullString;
-                        });
-                    }
+                            return Objects.requireNonNullElseGet(ops.empty(), () -> {
+                                if (isJavaType) {
+                                    return (T) CachedParseState.JAVA_NULL_VALUE_MARKER;
+                                }
+                                return nullString;
+                            });
+                        }
                         return ops.createString(contents);
-                }
+                    }
                     state.errorCollector().store(state.mark(), SnbtOperations.BUILTIN_IDS, ERROR_INVALID_UNQUOTED_START);
-                return null;
-            }
+                    return null;
+                }
         );
+
         Atom<String> mapKey = Atom.of("map_key");
-        rules.put(mapKey, Term.alternative(rules.named(quotedStringLiteral), rules.named(unquotedString)), scope -> scope.getAnyOrThrow(quotedStringLiteral, unquotedString));
+        rules.put(
+                mapKey,
+                Term.alternative(
+                        rules.named(quotedStringLiteral),
+                        rules.named(unquotedString)
+                ),
+                scope -> scope.getAnyOrThrow(quotedStringLiteral, unquotedString)
+        );
+
         Atom<Entry<String, T>> mapEntry = Atom.of("map_entry");
         NamedRule<StringReader, Entry<String, T>> mapEntryRule = rules.putComplex(
-                mapEntry, Term.sequence(rules.named(mapKey), StringReaderTerms.character(TagParser.NAME_VALUE_SEPARATOR), rules.named(literal)), state -> {
+                mapEntry,
+                Term.sequence(
+                        rules.named(mapKey),
+                        StringReaderTerms.character(TagParser.NAME_VALUE_SEPARATOR),
+                        rules.named(literal)
+                ),
+                state -> {
                     Scope scope = state.scope();
                     String key = scope.getOrThrow(mapKey);
                     if (key.isEmpty()) {
                         state.errorCollector().store(state.mark(), ERROR_EMPTY_KEY);
-                    return null;
-                }
+                        return null;
+                    }
                     T value = scope.getOrThrow(literal);
                     return Map.entry(key, value);
-            }
+                }
         );
+
         Atom<List<Entry<String, T>>> mapEntries = Atom.of("map_entries");
-        rules.put(mapEntries, Term.repeatedWithTrailingSeparator(mapEntryRule, mapEntries, StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)), scope -> scope.getOrThrow(mapEntries));
+        rules.put(
+                mapEntries,
+                Term.repeatedWithTrailingSeparator(
+                        mapEntryRule,
+                        mapEntries,
+                        StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)
+                ),
+                scope -> scope.getOrThrow(mapEntries)
+        );
+
         Atom<T> mapLiteral = Atom.of("map_literal");
-        rules.put(mapLiteral, Term.sequence(StringReaderTerms.character('{'), Scope.increaseDepth(), rules.named(mapEntries), Scope.decreaseDepth(), StringReaderTerms.character('}')), scope -> {
-            List<Entry<String, T>> entries = scope.getOrThrow(mapEntries);
-            if (entries.isEmpty()) {
-                return emptyMapValue;
-            }
-            Builder<T, T> builder = ImmutableMap.builderWithExpectedSize(entries.size());
+        rules.put(
+                mapLiteral,
+                Term.sequence(
+                        StringReaderTerms.character('{'),
+                        Scope.increaseDepth(),
+                        rules.named(mapEntries),
+                        Scope.decreaseDepth(),
+                        StringReaderTerms.character('}')
+                ),
+                scope -> {
+                    List<Entry<String, T>> entries = scope.getOrThrow(mapEntries);
+                    if (entries.isEmpty()) {
+                        return emptyMapValue;
+                    }
+                    Builder<T, T> builder = ImmutableMap.builderWithExpectedSize(entries.size());
+                    for (Entry<String, T> e : entries) {
+                        builder.put(ops.createString(e.getKey()), e.getValue());
+                    }
+                    return ops.createMap(builder.buildKeepingLast());
+                }
+        );
 
-            for (Entry<String, T> e : entries) {
-                builder.put(ops.createString(e.getKey()), e.getValue());
-            }
-
-            return ops.createMap(builder.buildKeepingLast());
-        });
         Atom<List<T>> listEntries = Atom.of("list_entries");
         rules.put(
-                listEntries, Term.repeatedWithTrailingSeparator(rules.forward(literal), listEntries, StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)), scope -> scope.getOrThrow(listEntries)
+                listEntries,
+                Term.repeatedWithTrailingSeparator(
+                        rules.forward(literal),
+                        listEntries,
+                        StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)
+                ),
+                scope -> scope.getOrThrow(listEntries)
         );
+
         Atom<ArrayPrefix> arrayPrefix = Atom.of("array_prefix");
         rules.put(
                 arrayPrefix,
-            Term.alternative(
-                    Term.sequence(StringReaderTerms.character('B'), Term.marker(arrayPrefix, ArrayPrefix.BYTE)),
-                    Term.sequence(StringReaderTerms.character('L'), Term.marker(arrayPrefix, ArrayPrefix.LONG)),
-                    Term.sequence(StringReaderTerms.character('I'), Term.marker(arrayPrefix, ArrayPrefix.INT))
-            ),
+                Term.alternative(
+                        Term.sequence(StringReaderTerms.character('B'), Term.marker(arrayPrefix, ArrayPrefix.BYTE)),
+                        Term.sequence(StringReaderTerms.character('L'), Term.marker(arrayPrefix, ArrayPrefix.LONG)),
+                        Term.sequence(StringReaderTerms.character('I'), Term.marker(arrayPrefix, ArrayPrefix.INT))
+                ),
                 scope -> scope.getOrThrow(arrayPrefix)
         );
+
         Atom<List<IntegerLiteral>> intArrayEntries = Atom.of("int_array_entries");
-        rules.put(intArrayEntries, Term.repeatedWithTrailingSeparator(integerLiteralRule, intArrayEntries, StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)), scope -> scope.getOrThrow(intArrayEntries));
+        rules.put(
+                intArrayEntries,
+                Term.repeatedWithTrailingSeparator(
+                        integerLiteralRule,
+                        intArrayEntries,
+                        StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)
+                ),
+                scope -> scope.getOrThrow(intArrayEntries)
+        );
+
         Atom<T> listLiteral = Atom.of("list_literal");
         rules.putComplex(
                 listLiteral,
-            Term.sequence(
-                StringReaderTerms.character('['),
-                Scope.increaseDepth(),
-                    Term.alternative(Term.sequence(rules.named(arrayPrefix), StringReaderTerms.character(';'), rules.named(intArrayEntries)), rules.named(listEntries)),
-                Scope.decreaseDepth(),
-                StringReaderTerms.character(']')
-            ),
+                Term.sequence(
+                        StringReaderTerms.character('['),
+                        Scope.increaseDepth(),
+                        Term.alternative(
+                                Term.sequence(
+                                        rules.named(arrayPrefix),
+                                        StringReaderTerms.character(';'),
+                                        rules.named(intArrayEntries)
+                                ),
+                                rules.named(listEntries)
+                        ),
+                        Scope.decreaseDepth(),
+                        StringReaderTerms.character(']')
+                ),
                 state -> {
                     Scope scope = state.scope();
                     ArrayPrefix arrayType = scope.get(arrayPrefix);
                     if (arrayType != null) {
                         List<IntegerLiteral> entries = scope.getOrThrow(intArrayEntries);
                         return entries.isEmpty() ? arrayType.create(ops) : arrayType.create(ops, entries, state);
-                }
+                    }
                     List<T> entries = scope.getOrThrow(listEntries);
                     return entries.isEmpty() ? emptyList : ops.createList(entries.stream());
-            }
+                }
         );
+
         NamedRule<StringReader, T> literalRule = rules.putComplex(
                 literal,
-            Term.alternative(
-                    Term.sequence(Term.positiveLookahead(NUMBER_LOOKEAHEAD), Term.alternative(rules.namedWithAlias(floatLiteral, literal), rules.named(integerLiteral))),
-                    Term.sequence(Term.positiveLookahead(StringReaderTerms.characters('"', '\'')), Term.cut(), rules.named(quotedStringLiteral)),
-                    Term.sequence(Term.positiveLookahead(StringReaderTerms.character('{')), Term.cut(), rules.namedWithAlias(mapLiteral, literal)),
-                    Term.sequence(Term.positiveLookahead(StringReaderTerms.character('[')), Term.cut(), rules.namedWithAlias(listLiteral, literal)),
-                    rules.namedWithAlias(unquotedStringOrBuiltIn, literal)
-            ),
+                Term.alternative(
+                        Term.sequence(
+                                Term.positiveLookahead(NUMBER_LOOKEAHEAD),
+                                Term.alternative(
+                                        rules.namedWithAlias(floatLiteral, literal),
+                                        rules.named(integerLiteral)
+                                )
+                        ),
+                        Term.sequence(
+                                Term.positiveLookahead(StringReaderTerms.characters('"', '\'')),
+                                Term.cut(),
+                                rules.named(quotedStringLiteral)
+                        ),
+                        Term.sequence(
+                                Term.positiveLookahead(StringReaderTerms.character('{')),
+                                Term.cut(),
+                                rules.namedWithAlias(mapLiteral, literal)
+                        ),
+                        Term.sequence(
+                                Term.positiveLookahead(StringReaderTerms.character('[')),
+                                Term.cut(),
+                                rules.namedWithAlias(listLiteral, literal)
+                        ),
+                        rules.namedWithAlias(unquotedStringOrBuiltIn, literal)
+                ),
                 state -> {
                     Scope scope = state.scope();
                     String quotedString = scope.get(quotedStringLiteral);
                     if (quotedString != null) {
                         return ops.createString(quotedString);
-                }
+                    }
                     IntegerLiteral integer = scope.get(integerLiteral);
                     return integer != null ? integer.create(ops, state) : scope.getOrThrow(literal);
-            }
+                }
         );
+
         return new Grammar<>(rules, literalRule);
     }
 
@@ -646,16 +767,13 @@ public class SnbtGrammar {
             @Override
             public <T> T create(DynamicOps<T> ops, List<IntegerLiteral> entries, ParseState<?> state) {
                 ByteList result = new ByteArrayList();
-
                 for (IntegerLiteral entry : entries) {
                     Number number = this.buildNumber(entry, state);
                     if (number == null) {
                         return null;
                     }
-
                     result.add(number.byteValue());
                 }
-
                 return ops.createByteList(ByteBuffer.wrap(result.toByteArray()));
             }
         },
@@ -669,16 +787,13 @@ public class SnbtGrammar {
             @Override
             public <T> T create(DynamicOps<T> ops, List<IntegerLiteral> entries, ParseState<?> state) {
                 IntStream.Builder result = IntStream.builder();
-
                 for (IntegerLiteral entry : entries) {
                     Number parsedNumber = this.buildNumber(entry, state);
                     if (parsedNumber == null) {
                         return null;
                     }
-
                     result.add(parsedNumber.intValue());
                 }
-
                 return ops.createIntList(result.build());
             }
         },
@@ -692,16 +807,13 @@ public class SnbtGrammar {
             @Override
             public <T> T create(DynamicOps<T> ops, List<IntegerLiteral> entries, ParseState<?> state) {
                 LongStream.Builder result = LongStream.builder();
-
                 for (IntegerLiteral entry : entries) {
                     Number parsedNumber = this.buildNumber(entry, state);
                     if (parsedNumber == null) {
                         return null;
                     }
-
                     result.add(parsedNumber.longValue());
                 }
-
                 return ops.createLongList(result.build());
             }
         };
@@ -717,7 +829,6 @@ public class SnbtGrammar {
         public boolean isAllowed(TypeSuffix type) {
             return type == this.defaultType || this.additionalTypes.contains(type);
         }
-
         public abstract <T> T create(DynamicOps<T> ops);
 
         @Nullable
@@ -742,7 +853,6 @@ public class SnbtGrammar {
             return !this.isAllowed(type) ? null : type;
         }
     }
-
     enum Base {
         BINARY,
         DECIMAL,

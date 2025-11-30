@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class LocalizedCommandSyntaxException extends CommandSyntaxException {
-    public static final int CONTEXT_AMOUNT = 10;
+    public static final int CONTEXT_AMOUNT = 50;
     public static final String PARSE_ERROR_NODE = "warning.config.type.snbt.invalid_syntax.parse_error";
     public static final String HERE_NODE = "warning.config.type.snbt.invalid_syntax.here";
     private final Message message;
