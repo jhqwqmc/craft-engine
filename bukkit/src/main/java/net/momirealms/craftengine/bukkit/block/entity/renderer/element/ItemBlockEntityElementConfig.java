@@ -29,8 +29,8 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         this.position = position;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemEntityData.Item.addEntityDataIfNotDefaultValue(item.apply(player).getLiteralObject(), dataValues);
-            ItemEntityData.NoGravity.addEntityDataIfNotDefaultValue(true, dataValues);
+            ItemEntityData.Item.addEntityData(item.apply(player).getLiteralObject(), dataValues);
+            ItemEntityData.NoGravity.addEntityData(true, dataValues);
             return dataValues;
         };
     }
