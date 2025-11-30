@@ -69,7 +69,7 @@ public class SnbtGrammar {
             new LocalizedSimpleCommandExceptionType(new LocalizedMessage("warning.config.type.snbt.parser.expected_decimal_numeral"))
     );
     private static final DelayedException<CommandSyntaxException> ERROR_EXPECTED_HEX_NUMERAL = DelayedException.create(
-            new LocalizedSimpleCommandExceptionType(new LocalizedMessage("Expected a hexadecimal number"))
+            new LocalizedSimpleCommandExceptionType(new LocalizedMessage("warning.config.type.snbt.parser.expected_hex_numeral"))
     );
     private static final DelayedException<CommandSyntaxException> ERROR_EMPTY_KEY = DelayedException.create(
             new LocalizedSimpleCommandExceptionType(new LocalizedMessage("warning.config.type.snbt.parser.empty_key"))
