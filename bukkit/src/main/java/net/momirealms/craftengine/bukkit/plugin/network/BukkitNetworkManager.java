@@ -2217,7 +2217,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             if (Config.entityCullingRayTracing()) {
                 SectionPos sectionPos = SectionPos.of(sPos);
                 ClientChunk trackedChunk = user.getTrackedChunk(sectionPos.asChunkPos().longKey);
-                clientSection = trackedChunk.sectionById(sectionPos.y);
+                if (trackedChunk != null) {
+                    clientSection = trackedChunk.sectionById(sectionPos.y);
+                }
             }
 
             for (int i = 0; i < blocks; i++) {
