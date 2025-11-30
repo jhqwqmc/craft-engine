@@ -23,7 +23,7 @@ public class StringReaderParserState extends CachedParseState<StringReader> {
     }
 
     @Override
-    public void restore(int cursor) {
-        this.input.setCursor(cursor);
+    public void restore(int mark) {
+        this.input.setCursor(mark);
     }
 }

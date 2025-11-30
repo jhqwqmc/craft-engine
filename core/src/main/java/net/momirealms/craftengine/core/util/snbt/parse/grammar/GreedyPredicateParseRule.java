@@ -25,24 +25,23 @@ public abstract class GreedyPredicateParseRule implements Rule<StringReader, Str
 
     @Nullable
     @Override
-    public String parse(ParseState<StringReader> parseState) {
-        StringReader stringReader = parseState.input();
-        String string = stringReader.getString();
-        int cursor = stringReader.getCursor();
-        int i = cursor;
+    public String parse(ParseState<StringReader> state) {
+        StringReader input = state.input();
+        String fullString = input.getString();
+        int start = input.getCursor();
+        int pos = start;
 
-        while (i < string.length() && this.isAccepted(string.charAt(i)) && i - cursor < this.maxSize) {
-            i++;
+        while (pos < fullString.length() && this.isAccepted(fullString.charAt(pos)) && pos - start < this.maxSize) {
+            pos++;
         }
 
-        int i1 = i - cursor;
-        if (i1 < this.minSize) {
-            parseState.errorCollector().store(parseState.mark(), this.error);
+        int length = pos - start;
+        if (length < this.minSize) {
+            state.errorCollector().store(state.mark(), this.error);
             return null;
-        } else {
-            stringReader.setCursor(i);
-            return string.substring(cursor, i);
         }
+        input.setCursor(pos);
+        return fullString.substring(start, pos);
     }
 
     protected abstract boolean isAccepted(char c);

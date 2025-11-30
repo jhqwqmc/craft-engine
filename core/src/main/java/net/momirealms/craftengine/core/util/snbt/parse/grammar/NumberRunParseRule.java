@@ -19,28 +19,27 @@ public abstract class NumberRunParseRule implements Rule<StringReader, String> {
 
     @Nullable
     @Override
-    public String parse(ParseState<StringReader> parseState) {
-        StringReader stringReader = parseState.input();
-        stringReader.skipWhitespace();
-        String string = stringReader.getString();
-        int cursor = stringReader.getCursor();
-        int i = cursor;
+    public String parse(ParseState<StringReader> state) {
+        StringReader input = state.input();
+        input.skipWhitespace();
+        String fullString = input.getString();
+        int start = input.getCursor();
+        int pos = start;
 
-        while (i < string.length() && this.isAccepted(string.charAt(i))) {
-            i++;
+        while (pos < fullString.length() && this.isAccepted(fullString.charAt(pos))) {
+            pos++;
         }
 
-        int i1 = i - cursor;
-        if (i1 == 0) {
-            parseState.errorCollector().store(parseState.mark(), this.noValueError);
+        int length = pos - start;
+        if (length == 0) {
+            state.errorCollector().store(state.mark(), this.noValueError);
             return null;
-        } else if (string.charAt(cursor) != '_' && string.charAt(i - 1) != '_') {
-            stringReader.setCursor(i);
-            return string.substring(cursor, i);
-        } else {
-            parseState.errorCollector().store(parseState.mark(), this.underscoreNotAllowedError);
-            return null;
+        } else if (fullString.charAt(start) != '_' && fullString.charAt(pos - 1) != '_') {
+            input.setCursor(pos);
+            return fullString.substring(start, pos);
         }
+        state.errorCollector().store(state.mark(), this.underscoreNotAllowedError);
+        return null;
     }
 
     protected abstract boolean isAccepted(char c);

@@ -7,13 +7,13 @@ import net.momirealms.craftengine.core.util.snbt.parse.grammar.StringReaderTerms
 
 @FunctionalInterface
 public interface DelayedException<T extends Exception> {
-    T create(String message, int cursor);
+    T create(String contents, int position);
 
-    static DelayedException<CommandSyntaxException> create(SimpleCommandExceptionType exception) {
-        return (message, cursor) -> exception.createWithContext(StringReaderTerms.createReader(message, cursor));
+    static DelayedException<CommandSyntaxException> create(SimpleCommandExceptionType type) {
+        return (contents, position) -> type.createWithContext(StringReaderTerms.createReader(contents, position));
     }
 
-    static DelayedException<CommandSyntaxException> create(DynamicCommandExceptionType exception, String argument) {
-        return (message, cursor) -> exception.createWithContext(StringReaderTerms.createReader(message, cursor), argument);
+    static DelayedException<CommandSyntaxException> create(DynamicCommandExceptionType type, String argument) {
+        return (contents, position) -> type.createWithContext(StringReaderTerms.createReader(contents, position), argument);
     }
 }

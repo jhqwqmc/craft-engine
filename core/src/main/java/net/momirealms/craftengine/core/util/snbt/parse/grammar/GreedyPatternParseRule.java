@@ -19,16 +19,15 @@ public final class GreedyPatternParseRule implements Rule<StringReader, String> 
     }
 
     @Override
-    public String parse(ParseState<StringReader> parseState) {
-        StringReader stringReader = parseState.input();
-        String string = stringReader.getString();
-        Matcher matcher = this.pattern.matcher(string).region(stringReader.getCursor(), string.length());
+    public String parse(ParseState<StringReader> state) {
+        StringReader input = state.input();
+        String fullString = input.getString();
+        Matcher matcher = this.pattern.matcher(fullString).region(input.getCursor(), fullString.length());
         if (!matcher.lookingAt()) {
-            parseState.errorCollector().store(parseState.mark(), this.error);
+            state.errorCollector().store(state.mark(), this.error);
             return null;
-        } else {
-            stringReader.setCursor(matcher.end());
-            return matcher.group(0);
         }
+        input.setCursor(matcher.end());
+        return matcher.group(0);
     }
 }

@@ -13,41 +13,39 @@ public record Grammar<T>(Dictionary<StringReader> rules, NamedRule<StringReader,
         rules.checkAllBound();
     }
 
-    public Optional<T> parse(ParseState<StringReader> parseState) {
-        return parseState.parseTopRule(this.top);
+    public Optional<T> parse(ParseState<StringReader> state) {
+        return state.parseTopRule(this.top);
     }
 
     public T parse(StringReader reader) throws CommandSyntaxException {
-        ErrorCollector.LongestOnly<StringReader> longestOnly = new ErrorCollector.LongestOnly<>();
-        StringReaderParserState stringReaderParserState = new StringReaderParserState(longestOnly, reader);
-        Optional<T> optional = this.parse(stringReaderParserState);
-        if (optional.isPresent()) {
-            T result = optional.get();
+        ErrorCollector.LongestOnly<StringReader> errorCollector = new ErrorCollector.LongestOnly<>();
+        StringReaderParserState stringReaderParserState = new StringReaderParserState(errorCollector, reader);
+        Optional<T> optionalResult = this.parse(stringReaderParserState);
+        if (optionalResult.isPresent()) {
+            T result = optionalResult.get();
             if (CachedParseState.JAVA_NULL_VALUE_MARKER.equals(result)) {
                 result = null;
             }
             return result;
-        } else {
-            List<ErrorEntry<StringReader>> list = longestOnly.entries();
-            List<Exception> list1 = list.stream().<Exception>mapMulti((errorEntry, consumer) -> {
-                if (errorEntry.reason() instanceof DelayedException<?> delayedException) {
-                    consumer.accept(delayedException.create(reader.getString(), errorEntry.cursor()));
-                } else if (errorEntry.reason() instanceof Exception exception1) {
-                    consumer.accept(exception1);
-                }
-            }).toList();
-
-            for (Exception exception : list1) {
-                if (exception instanceof CommandSyntaxException commandSyntaxException) {
-                    throw commandSyntaxException;
-                }
+        }
+        List<ErrorEntry<StringReader>> errorEntries = errorCollector.entries();
+        List<Exception> exceptions = errorEntries.stream().<Exception>mapMulti((entry, output) -> {
+            if (entry.reason() instanceof DelayedException<?> delayedException) {
+                output.accept(delayedException.create(reader.getString(), entry.cursor()));
+            } else if (entry.reason() instanceof Exception exception1) {
+                output.accept(exception1);
             }
+        }).toList();
 
-            if (list1.size() == 1 && list1.getFirst() instanceof RuntimeException runtimeException) {
-                throw runtimeException;
-            } else {
-                throw new IllegalStateException("Failed to parse: " + list.stream().map(ErrorEntry::toString).collect(Collectors.joining(", ")));
+        for (Exception exception : exceptions) {
+            if (exception instanceof CommandSyntaxException cse) {
+                throw cse;
             }
         }
+
+        if (exceptions.size() == 1 && exceptions.getFirst() instanceof RuntimeException re) {
+            throw re;
+        }
+        throw new IllegalStateException("Failed to parse: " + errorEntries.stream().map(ErrorEntry::toString).collect(Collectors.joining(", ")));
     }
 }

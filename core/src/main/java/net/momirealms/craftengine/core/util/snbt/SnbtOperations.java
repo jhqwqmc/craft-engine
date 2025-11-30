@@ -26,44 +26,42 @@ public class SnbtOperations {
     public static final Map<BuiltinKey, BuiltinOperation> BUILTIN_OPERATIONS = Map.of(
             new BuiltinKey("bool", 1), new BuiltinOperation() {
                 @Override
-                public <T> T run(DynamicOps<T> ops, List<T> args, ParseState<StringReader> parseState) {
-                    Boolean bool = convert(ops, args.getFirst());
-                    if (bool == null) {
-                        parseState.errorCollector().store(parseState.mark(), SnbtOperations.ERROR_EXPECTED_NUMBER_OR_BOOLEAN);
+                public <T> T run(DynamicOps<T> ops, List<T> arguments, ParseState<StringReader> state) {
+                    Boolean result = convert(ops, arguments.getFirst());
+                    if (result == null) {
+                        state.errorCollector().store(state.mark(), SnbtOperations.ERROR_EXPECTED_NUMBER_OR_BOOLEAN);
                         return null;
-                    } else {
-                        return ops.createBoolean(bool);
                     }
+                    return ops.createBoolean(result);
                 }
 
                 @Nullable
-                private static <T> Boolean convert(DynamicOps<T> ops, T value) {
-                    Optional<Boolean> optional = ops.getBooleanValue(value).result();
-                    if (optional.isPresent()) {
-                        return optional.get();
+                private static <T> Boolean convert(DynamicOps<T> ops, T arg) {
+                    Optional<Boolean> asBoolean = ops.getBooleanValue(arg).result();
+                    if (asBoolean.isPresent()) {
+                        return asBoolean.get();
                     } else {
-                        Optional<Number> optional1 = ops.getNumberValue(value).result();
-                        return optional1.isPresent() ? optional1.get().doubleValue() != 0.0 : null;
+                        Optional<Number> asNumber = ops.getNumberValue(arg).result();
+                        return asNumber.isPresent() ? asNumber.get().doubleValue() != 0.0 : null;
                     }
                 }
             }, new BuiltinKey("uuid", 1), new BuiltinOperation() {
                 @Override
-                public <T> T run(DynamicOps<T> ops, List<T> args, ParseState<StringReader> parseState) {
-                    Optional<String> optional = ops.getStringValue(args.getFirst()).result();
-                    if (optional.isEmpty()) {
-                        parseState.errorCollector().store(parseState.mark(), SnbtOperations.ERROR_EXPECTED_STRING_UUID);
+                public <T> T run(DynamicOps<T> ops, List<T> arguments, ParseState<StringReader> state) {
+                    Optional<String> arg = ops.getStringValue(arguments.getFirst()).result();
+                    if (arg.isEmpty()) {
+                        state.errorCollector().store(state.mark(), SnbtOperations.ERROR_EXPECTED_STRING_UUID);
                         return null;
-                    } else {
-                        UUID uuid;
-                        try {
-                            uuid = UUID.fromString(optional.get());
-                        } catch (IllegalArgumentException var7) {
-                            parseState.errorCollector().store(parseState.mark(), SnbtOperations.ERROR_EXPECTED_STRING_UUID);
-                            return null;
-                        }
-
-                        return ops.createIntList(IntStream.of(UUIDUtil.uuidToIntArray(uuid)));
                     }
+                    UUID uuid;
+                    try {
+                        uuid = UUID.fromString(arg.get());
+                    } catch (IllegalArgumentException var7) {
+                        state.errorCollector().store(state.mark(), SnbtOperations.ERROR_EXPECTED_STRING_UUID);
+                        return null;
+                    }
+
+                    return ops.createIntList(IntStream.of(UUIDUtil.uuidToIntArray(uuid)));
                 }
             }
     );
@@ -74,7 +72,7 @@ public class SnbtOperations {
                 .collect(Collectors.toSet());
 
         @Override
-        public Stream<String> possibleValues(ParseState<StringReader> parseState) {
+        public Stream<String> possibleValues(ParseState<StringReader> state) {
             return this.keys.stream();
         }
     };
@@ -88,6 +86,6 @@ public class SnbtOperations {
 
     public interface BuiltinOperation {
         @Nullable
-        <T> T run(DynamicOps<T> ops, List<T> args, ParseState<StringReader> parseState);
+        <T> T run(DynamicOps<T> ops, List<T> arguments, ParseState<StringReader> state);
     }
 }

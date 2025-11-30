@@ -19,15 +19,14 @@ public class UnquotedStringParseRule implements Rule<StringReader, String> {
 
     @Nullable
     @Override
-    public String parse(ParseState<StringReader> parseState) {
-        parseState.input().skipWhitespace();
-        int i = parseState.mark();
-        String unquotedString = parseState.input().readUnquotedString();
-        if (unquotedString.length() < this.minSize) {
-            parseState.errorCollector().store(i, this.error);
+    public String parse(ParseState<StringReader> state) {
+        state.input().skipWhitespace();
+        int cursor = state.mark();
+        String value = state.input().readUnquotedString();
+        if (value.length() < this.minSize) {
+            state.errorCollector().store(cursor, this.error);
             return null;
-        } else {
-            return unquotedString;
         }
+        return value;
     }
 }

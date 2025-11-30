@@ -13,7 +13,7 @@ public interface ErrorCollector<S> {
         this.store(cursor, SuggestionSupplier.empty(), reason);
     }
 
-    void finish(int cursor);
+    void finish(int finalCursor);
 
     class LongestOnly<S> implements ErrorCollector<S> {
         private MutableErrorEntry<S>[] entries = new MutableErrorEntry[16];
@@ -28,8 +28,8 @@ public interface ErrorCollector<S> {
         }
 
         @Override
-        public void finish(int cursor) {
-            this.discardErrorsFromShorterParse(cursor);
+        public void finish(int finalCursor) {
+            this.discardErrorsFromShorterParse(finalCursor);
         }
 
         @Override
@@ -41,39 +41,38 @@ public interface ErrorCollector<S> {
         }
 
         private void addErrorEntry(SuggestionSupplier<S> suggestions, Object reason) {
-            int i = this.entries.length;
-            if (this.nextErrorEntry >= i) {
-                int i1 = MiscUtils.growByHalf(i, this.nextErrorEntry + 1);
-                MutableErrorEntry<S>[] mutableErrorEntrys = new MutableErrorEntry[i1];
-                System.arraycopy(this.entries, 0, mutableErrorEntrys, 0, i);
-                this.entries = mutableErrorEntrys;
+            int currentSize = this.entries.length;
+            if (this.nextErrorEntry >= currentSize) {
+                int newSize = MiscUtils.growByHalf(currentSize, this.nextErrorEntry + 1);
+                MutableErrorEntry<S>[] newEntries = new MutableErrorEntry[newSize];
+                System.arraycopy(this.entries, 0, newEntries, 0, currentSize);
+                this.entries = newEntries;
             }
 
-            int i1 = this.nextErrorEntry++;
-            MutableErrorEntry<S> mutableErrorEntry = this.entries[i1];
-            if (mutableErrorEntry == null) {
-                mutableErrorEntry = new MutableErrorEntry<>();
-                this.entries[i1] = mutableErrorEntry;
+            int entryIndex = this.nextErrorEntry++;
+            MutableErrorEntry<S> entry = this.entries[entryIndex];
+            if (entry == null) {
+                entry = new MutableErrorEntry<>();
+                this.entries[entryIndex] = entry;
             }
 
-            mutableErrorEntry.suggestions = suggestions;
-            mutableErrorEntry.reason = reason;
+            entry.suggestions = suggestions;
+            entry.reason = reason;
         }
 
         public List<ErrorEntry<S>> entries() {
-            int i = this.nextErrorEntry;
-            if (i == 0) {
+            int errorCount = this.nextErrorEntry;
+            if (errorCount == 0) {
                 return List.of();
-            } else {
-                List<ErrorEntry<S>> list = new ArrayList<>(i);
-
-                for (int i1 = 0; i1 < i; i1++) {
-                    MutableErrorEntry<S> mutableErrorEntry = this.entries[i1];
-                    list.add(new ErrorEntry<>(this.lastCursor, mutableErrorEntry.suggestions, mutableErrorEntry.reason));
-                }
-
-                return list;
             }
+            List<ErrorEntry<S>> result = new ArrayList<>(errorCount);
+
+            for (int i = 0; i < errorCount; i++) {
+                MutableErrorEntry<S> mutableErrorEntry = this.entries[i];
+                result.add(new ErrorEntry<>(this.lastCursor, mutableErrorEntry.suggestions, mutableErrorEntry.reason));
+            }
+
+            return result;
         }
 
         public int cursor() {
@@ -92,7 +91,7 @@ public interface ErrorCollector<S> {
         }
 
         @Override
-        public void finish(int cursor) {
+        public void finish(int finalCursor) {
         }
     }
 }

@@ -28,13 +28,13 @@ public final class Scope {
         this.stack[1] = null;
     }
 
-    private int valueIndex(Atom<?> name) {
+    private int valueIndex(Atom<?> atom) {
         for (int i = this.topEntryKeyIndex; i > this.topMarkerKeyIndex; i -= ENTRY_STRIDE) {
-            Object object = this.stack[i];
+            Object key = this.stack[i];
 
-            assert object instanceof Atom;
+            assert key instanceof Atom;
 
-            if (object == name) {
+            if (key == atom) {
                 return i + 1;
             }
         }
@@ -42,14 +42,14 @@ public final class Scope {
         return NOT_FOUND;
     }
 
-    public int valueIndexForAny(Atom<?>... names) {
+    public int valueIndexForAny(Atom<?>... atoms) {
         for (int i = this.topEntryKeyIndex; i > this.topMarkerKeyIndex; i -= ENTRY_STRIDE) {
-            Object object = this.stack[i];
+            Object key = this.stack[i];
 
-            assert object instanceof Atom;
+            assert key instanceof Atom;
 
-            for (Atom<?> atom : names) {
-                if (atom == object) {
+            for (Atom<?> atom : atoms) {
+                if (atom == key) {
                     return i + 1;
                 }
             }
@@ -58,15 +58,15 @@ public final class Scope {
         return NOT_FOUND;
     }
 
-    private void ensureCapacity(int requiredCapacitty) {
-        int i = this.stack.length;
-        int i1 = this.topEntryKeyIndex + 1;
-        int i2 = i1 + requiredCapacitty * 2;
-        if (i2 >= i) {
-            int i3 = MiscUtils.growByHalf(i, i2 + 1);
-            Object[] objects = new Object[i3];
-            System.arraycopy(this.stack, 0, objects, 0, i);
-            this.stack = objects;
+    private void ensureCapacity(int additionalEntryCount) {
+        int currentSize = this.stack.length;
+        int currentLastValueIndex = this.topEntryKeyIndex + 1;
+        int newLastValueIndex = currentLastValueIndex + additionalEntryCount * 2;
+        if (newLastValueIndex >= currentSize) {
+            int newSize = MiscUtils.growByHalf(currentSize, newLastValueIndex + 1);
+            Object[] newStack = new Object[newSize];
+            System.arraycopy(this.stack, 0, newStack, 0, currentSize);
+            this.stack = newStack;
         }
 
         assert this.validateStructure();
@@ -86,8 +86,8 @@ public final class Scope {
         assert this.validateStructure();
     }
 
-    private int getPreviousMarkerIndex(int markerIndex) {
-        return (Integer)this.stack[markerIndex + 1];
+    private int getPreviousMarkerIndex(int markerKeyIndex) {
+        return (Integer) this.stack[markerKeyIndex + 1];
     }
 
     public void popFrame() {
@@ -100,25 +100,25 @@ public final class Scope {
     }
 
     public void splitFrame() {
-        int i = this.topMarkerKeyIndex;
-        int i1 = (this.topEntryKeyIndex - this.topMarkerKeyIndex) / ENTRY_STRIDE;
-        this.ensureCapacity(i1 + 1);
+        int currentFrameMarkerIndex = this.topMarkerKeyIndex;
+        int nonMarkerEntriesInFrame = (this.topEntryKeyIndex - this.topMarkerKeyIndex) / ENTRY_STRIDE;
+        this.ensureCapacity(nonMarkerEntriesInFrame + 1);
         this.setupNewFrame();
-        int i2 = i + ENTRY_STRIDE;
-        int i3 = this.topEntryKeyIndex;
+        int sourceCursor = currentFrameMarkerIndex + ENTRY_STRIDE;
+        int targetCursor = this.topEntryKeyIndex;
 
-        for (int i4 = 0; i4 < i1; i4++) {
-            i3 += ENTRY_STRIDE;
-            Object object = this.stack[i2];
+        for (int i = 0; i < nonMarkerEntriesInFrame; i++) {
+            targetCursor += ENTRY_STRIDE;
+            Object key = this.stack[sourceCursor];
 
-            assert object != null;
+            assert key != null;
 
-            this.stack[i3] = object;
-            this.stack[i3 + 1] = null;
-            i2 += ENTRY_STRIDE;
+            this.stack[targetCursor] = key;
+            this.stack[targetCursor + 1] = null;
+            sourceCursor += ENTRY_STRIDE;
         }
 
-        this.topEntryKeyIndex = i3;
+        this.topEntryKeyIndex = targetCursor;
 
         assert this.validateStructure();
     }
@@ -135,40 +135,40 @@ public final class Scope {
 
     public void mergeFrame() {
         int previousMarkerIndex = this.getPreviousMarkerIndex(this.topMarkerKeyIndex);
-        int i = previousMarkerIndex;
-        int i1 = this.topMarkerKeyIndex;
+        int previousFrameCursor = previousMarkerIndex;
+        int currentFrameCursor = this.topMarkerKeyIndex;
 
-        while (i1 < this.topEntryKeyIndex) {
-            i += ENTRY_STRIDE;
-            i1 += ENTRY_STRIDE;
-            Object object = this.stack[i1];
+        while (currentFrameCursor < this.topEntryKeyIndex) {
+            previousFrameCursor += ENTRY_STRIDE;
+            currentFrameCursor += ENTRY_STRIDE;
+            Object newKey = this.stack[currentFrameCursor];
 
-            assert object instanceof Atom;
+            assert newKey instanceof Atom;
 
-            Object object1 = this.stack[i1 + 1];
-            Object object2 = this.stack[i];
-            if (object2 != object) {
-                this.stack[i] = object;
-                this.stack[i + 1] = object1;
-            } else if (object1 != null) {
-                this.stack[i + 1] = object1;
+            Object newValue = this.stack[currentFrameCursor + 1];
+            Object oldKey = this.stack[previousFrameCursor];
+            if (oldKey != newKey) {
+                this.stack[previousFrameCursor] = newKey;
+                this.stack[previousFrameCursor + 1] = newValue;
+            } else if (newValue != null) {
+                this.stack[previousFrameCursor + 1] = newValue;
             }
         }
 
-        this.topEntryKeyIndex = i;
+        this.topEntryKeyIndex = previousFrameCursor;
         this.topMarkerKeyIndex = previousMarkerIndex;
 
         assert this.validateStructure();
     }
 
-    public <T> void put(Atom<T> atom, @Nullable T value) {
-        int i = this.valueIndex(atom);
-        if (i != NOT_FOUND) {
-            this.stack[i] = value;
+    public <T> void put(Atom<T> name, @Nullable T value) {
+        int valueIndex = this.valueIndex(name);
+        if (valueIndex != NOT_FOUND) {
+            this.stack[valueIndex] = value;
         } else {
             this.ensureCapacity(1);
             this.topEntryKeyIndex += ENTRY_STRIDE;
-            this.stack[this.topEntryKeyIndex] = atom;
+            this.stack[this.topEntryKeyIndex] = name;
             this.stack[this.topEntryKeyIndex + 1] = value;
         }
 
@@ -176,77 +176,75 @@ public final class Scope {
     }
 
     @Nullable
-    public <T> T get(Atom<T> atom) {
-        int i = this.valueIndex(atom);
-        return (T)(i != NOT_FOUND ? this.stack[i] : null);
+    public <T> T get(Atom<T> name) {
+        int valueIndex = this.valueIndex(name);
+        return (T) (valueIndex != NOT_FOUND ? this.stack[valueIndex] : null);
     }
 
-    public <T> T getOrThrow(Atom<T> atom) {
-        int i = this.valueIndex(atom);
-        if (i == NOT_FOUND) {
-            throw new IllegalArgumentException("No value for atom " + atom);
-        } else {
-            return (T)this.stack[i];
+    public <T> T getOrThrow(Atom<T> name) {
+        int valueIndex = this.valueIndex(name);
+        if (valueIndex == NOT_FOUND) {
+            throw new IllegalArgumentException("No value for atom " + name);
         }
+        return (T) this.stack[valueIndex];
     }
 
-    public <T> T getOrDefault(Atom<T> atom, T defaultValue) {
-        int i = this.valueIndex(atom);
-        return (T)(i != NOT_FOUND ? this.stack[i] : defaultValue);
+    public <T> T getOrDefault(Atom<T> name, T fallback) {
+        int valueIndex = this.valueIndex(name);
+        return (T) (valueIndex != NOT_FOUND ? this.stack[valueIndex] : fallback);
     }
 
     @Nullable
     @SafeVarargs
-    public final <T> T getAny(Atom<? extends T>... atoms) {
-        int i = this.valueIndexForAny(atoms);
-        return (T)(i != NOT_FOUND ? this.stack[i] : null);
+    public final <T> T getAny(Atom<? extends T>... names) {
+        int valueIndex = this.valueIndexForAny(names);
+        return (T) (valueIndex != NOT_FOUND ? this.stack[valueIndex] : null);
     }
 
     @SafeVarargs
-    public final <T> T getAnyOrThrow(Atom<? extends T>... atoms) {
-        int i = this.valueIndexForAny(atoms);
-        if (i == NOT_FOUND) {
-            throw new IllegalArgumentException("No value for atoms " + Arrays.toString(atoms));
-        } else {
-            return (T)this.stack[i];
+    public final <T> T getAnyOrThrow(Atom<? extends T>... names) {
+        int valueIndex = this.valueIndexForAny(names);
+        if (valueIndex == NOT_FOUND) {
+            throw new IllegalArgumentException("No value for atoms " + Arrays.toString(names));
         }
+        return (T) this.stack[valueIndex];
     }
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        boolean flag = true;
+        StringBuilder result = new StringBuilder();
+        boolean afterFrame = true;
 
         for (int i = 0; i <= this.topEntryKeyIndex; i += ENTRY_STRIDE) {
-            Object object = this.stack[i];
-            Object object1 = this.stack[i + 1];
-            if (object == FRAME_START_MARKER) {
-                stringBuilder.append('|');
-                flag = true;
+            Object key = this.stack[i];
+            Object value = this.stack[i + 1];
+            if (key == FRAME_START_MARKER) {
+                result.append('|');
+                afterFrame = true;
             } else {
-                if (!flag) {
-                    stringBuilder.append(',');
+                if (!afterFrame) {
+                    result.append(',');
                 }
 
-                flag = false;
-                stringBuilder.append(object).append(':').append(object1);
+                afterFrame = false;
+                result.append(key).append(':').append(value);
             }
         }
 
-        return stringBuilder.toString();
+        return result.toString();
     }
 
     @VisibleForTesting
     public Map<Atom<?>, ?> lastFrame() {
-        HashMap<Atom<?>, Object> map = new HashMap<>();
+        HashMap<Atom<?>, Object> result = new HashMap<>();
 
         for (int i = this.topEntryKeyIndex; i > this.topMarkerKeyIndex; i -= ENTRY_STRIDE) {
-            Object object = this.stack[i];
-            Object object1 = this.stack[i + 1];
-            map.put((Atom<?>)object, object1);
+            Object key = this.stack[i];
+            Object value = this.stack[i + 1];
+            result.put((Atom<?>) key, value);
         }
 
-        return map;
+        return result;
     }
 
     public boolean hasOnlySingleFrame() {
@@ -258,9 +256,8 @@ public final class Scope {
 
         if (this.stack[0] != FRAME_START_MARKER) {
             throw new IllegalStateException("Corrupted stack");
-        } else {
-            return true;
         }
+        return true;
     }
 
     private boolean validateStructure() {
@@ -285,14 +282,15 @@ public final class Scope {
         return true;
     }
 
-    @SuppressWarnings({"unchecked","rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <S> Term<S> increaseDepth() {
         class IncreasingDepthTerm<W> implements Term<W> {
             public static final IncreasingDepthTerm INSTANCE = new IncreasingDepthTerm();
+
             @Override
-            public boolean parse(final ParseState<W> parseState, final Scope scope, final Control control) {
+            public boolean parse(final ParseState<W> state, final Scope scope, final Control control) {
                 if (++scope.depth > 512) {
-                    parseState.errorCollector().store(parseState.mark(), new IllegalStateException("Too deep"));
+                    state.errorCollector().store(state.mark(), new IllegalStateException("Too deep"));
                     return false;
                 }
                 return true;
@@ -301,12 +299,13 @@ public final class Scope {
         return (Term<S>) IncreasingDepthTerm.INSTANCE;
     }
 
-    @SuppressWarnings({"unchecked","rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <S> Term<S> decreaseDepth() {
         class DecreasingDepthTerm<W> implements Term<W> {
             public static final DecreasingDepthTerm INSTANCE = new DecreasingDepthTerm();
+
             @Override
-            public boolean parse(final ParseState<W> parseState, final Scope scope, final Control control) {
+            public boolean parse(final ParseState<W> state, final Scope scope, final Control control) {
                 scope.depth--;
                 return true;
             }

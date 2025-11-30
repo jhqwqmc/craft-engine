@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface Term<S> {
-    boolean parse(ParseState<S> parseState, Scope scope, Control control);
+    boolean parse(ParseState<S> state, Scope scope, Control control);
 
     static <S, T> Term<S> marker(Atom<T> name, T value) {
         return new Marker<>(name, value);
     }
 
     @SafeVarargs
-    static <S> Term<S> sequence(Term<S>... elements) {
-        return new Sequence<>(elements);
+    static <S> Term<S> sequence(Term<S>... terms) {
+        return new Sequence<>(terms);
     }
 
     @SafeVarargs
-    static <S> Term<S> alternative(Term<S>... elements) {
-        return new Alternative<>(elements);
+    static <S> Term<S> alternative(Term<S>... terms) {
+        return new Alternative<>(terms);
     }
 
     static <S> Term<S> optional(Term<S> term) {
@@ -32,8 +32,8 @@ public interface Term<S> {
         return new Repeated<>(element, listName, minRepetitions);
     }
 
-    static <S, T> Term<S> repeatedWithTrailingSeparator(NamedRule<S, T> element, Atom<List<T>> listName, Term<S> seperator) {
-        return repeatedWithTrailingSeparator(element, listName, seperator, 0);
+    static <S, T> Term<S> repeatedWithTrailingSeparator(NamedRule<S, T> element, Atom<List<T>> listName, Term<S> separator) {
+        return repeatedWithTrailingSeparator(element, listName, separator, 0);
     }
 
     static <S, T> Term<S> repeatedWithTrailingSeparator(NamedRule<S, T> element, Atom<List<T>> listName, Term<S> seperator, int minRepetitions) {
@@ -47,7 +47,7 @@ public interface Term<S> {
     static <S> Term<S> cut() {
         return new Term<>() {
             @Override
-            public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
+            public boolean parse(ParseState<S> state, Scope scope, Control control) {
                 control.cut();
                 return true;
             }
@@ -62,7 +62,7 @@ public interface Term<S> {
     static <S> Term<S> empty() {
         return new Term<>() {
             @Override
-            public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
+            public boolean parse(ParseState<S> state, Scope scope, Control control) {
                 return true;
             }
 
@@ -73,11 +73,11 @@ public interface Term<S> {
         };
     }
 
-    static <S> Term<S> fail(final Object reason) {
+    static <S> Term<S> fail(final Object message) {
         return new Term<>() {
             @Override
-            public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-                parseState.errorCollector().store(parseState.mark(), reason);
+            public boolean parse(ParseState<S> state, Scope scope, Control control) {
+                state.errorCollector().store(state.mark(), message);
                 return false;
             }
 
@@ -90,22 +90,22 @@ public interface Term<S> {
 
     record Alternative<S>(Term<S>[] elements) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            Control control1 = parseState.acquireControl();
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            Control controlForThis = state.acquireControl();
 
             try {
-                int i = parseState.mark();
+                int mark = state.mark();
                 scope.splitFrame();
 
-                for (Term<S> term : this.elements) {
-                    if (term.parse(parseState, scope, control1)) {
+                for (Term<S> element : this.elements) {
+                    if (element.parse(state, scope, controlForThis)) {
                         scope.mergeFrame();
                         return true;
                     }
 
                     scope.clearFrameValues();
-                    parseState.restore(i);
-                    if (control1.hasCut()) {
+                    state.restore(mark);
+                    if (controlForThis.hasCut()) {
                         break;
                     }
                 }
@@ -113,24 +113,24 @@ public interface Term<S> {
                 scope.popFrame();
                 return false;
             } finally {
-                parseState.releaseControl();
+                state.releaseControl();
             }
         }
     }
 
     record LookAhead<S>(Term<S> term, boolean positive) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            int i = parseState.mark();
-            boolean flag = this.term.parse(parseState.silent(), scope, control);
-            parseState.restore(i);
-            return this.positive == flag;
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            int mark = state.mark();
+            boolean result = this.term.parse(state.silent(), scope, control);
+            state.restore(mark);
+            return this.positive == result;
         }
     }
 
     record Marker<S, T>(Atom<T> name, T value) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
             scope.put(this.name, this.value);
             return true;
         }
@@ -138,10 +138,10 @@ public interface Term<S> {
 
     record Maybe<S>(Term<S> term) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            int i = parseState.mark();
-            if (!this.term.parse(parseState, scope, control)) {
-                parseState.restore(i);
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            int mark = state.mark();
+            if (!this.term.parse(state, scope, control)) {
+                state.restore(mark);
             }
 
             return true;
@@ -150,25 +150,24 @@ public interface Term<S> {
 
     record Repeated<S, T>(NamedRule<S, T> element, Atom<List<T>> listName, int minRepetitions) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            int i = parseState.mark();
-            List<T> list = new ArrayList<>(this.minRepetitions);
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            int mark = state.mark();
+            List<T> elements = new ArrayList<>(this.minRepetitions);
 
             while (true) {
-                int i1 = parseState.mark();
-                T object = parseState.parse(this.element);
-                if (object == null) {
-                    parseState.restore(i1);
-                    if (list.size() < this.minRepetitions) {
-                        parseState.restore(i);
+                int entryMark = state.mark();
+                T parsedElement = state.parse(this.element);
+                if (parsedElement == null) {
+                    state.restore(entryMark);
+                    if (elements.size() < this.minRepetitions) {
+                        state.restore(mark);
                         return false;
-                    } else {
-                        scope.put(this.listName, list);
-                        return true;
                     }
+                    scope.put(this.listName, elements);
+                    return true;
                 }
 
-                list.add(object);
+                elements.add(parsedElement);
             }
         }
     }
@@ -177,56 +176,55 @@ public interface Term<S> {
         NamedRule<S, T> element, Atom<List<T>> listName, Term<S> separator, int minRepetitions, boolean allowTrailingSeparator
     ) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            int i = parseState.mark();
-            List<T> list = new ArrayList<>(this.minRepetitions);
-            boolean flag = true;
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            int listMark = state.mark();
+            List<T> elements = new ArrayList<>(this.minRepetitions);
+            boolean first = true;
 
             while (true) {
-                int i1 = parseState.mark();
-                if (!flag && !this.separator.parse(parseState, scope, control)) {
-                    parseState.restore(i1);
+                int markBeforeSeparator = state.mark();
+                if (!first && !this.separator.parse(state, scope, control)) {
+                    state.restore(markBeforeSeparator);
                     break;
                 }
 
-                int i2 = parseState.mark();
-                T object = parseState.parse(this.element);
-                if (object == null) {
-                    if (flag) {
-                        parseState.restore(i2);
+                int markAfterSeparator = state.mark();
+                T parsedElement = state.parse(this.element);
+                if (parsedElement == null) {
+                    if (first) {
+                        state.restore(markAfterSeparator);
                     } else {
                         if (!this.allowTrailingSeparator) {
-                            parseState.restore(i);
+                            state.restore(listMark);
                             return false;
                         }
 
-                        parseState.restore(i2);
+                        state.restore(markAfterSeparator);
                     }
                     break;
                 }
 
-                list.add(object);
-                flag = false;
+                elements.add(parsedElement);
+                first = false;
             }
 
-            if (list.size() < this.minRepetitions) {
-                parseState.restore(i);
+            if (elements.size() < this.minRepetitions) {
+                state.restore(listMark);
                 return false;
-            } else {
-                scope.put(this.listName, list);
-                return true;
             }
+            scope.put(this.listName, elements);
+            return true;
         }
     }
 
     record Sequence<S>(Term<S>[] elements) implements Term<S> {
         @Override
-        public boolean parse(ParseState<S> parseState, Scope scope, Control control) {
-            int i = parseState.mark();
+        public boolean parse(ParseState<S> state, Scope scope, Control control) {
+            int mark = state.mark();
 
-            for (Term<S> term : this.elements) {
-                if (!term.parse(parseState, scope, control)) {
-                    parseState.restore(i);
+            for (Term<S> element : this.elements) {
+                if (!element.parse(state, scope, control)) {
+                    state.restore(mark);
                     return false;
                 }
             }

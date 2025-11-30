@@ -42,34 +42,34 @@ public class TagParser<T> {
         return new TagParser<>(ops, SnbtGrammar.createParser(ops));
     }
 
-    private static CompoundTag castToCompoundOrThrow(StringReader reader, Tag tag) throws CommandSyntaxException {
-        if (tag instanceof CompoundTag compoundTag) {
+    private static CompoundTag castToCompoundOrThrow(StringReader reader, Tag result) throws CommandSyntaxException {
+        if (result instanceof CompoundTag compoundTag) {
             return compoundTag;
         }
         throw ERROR_EXPECTED_COMPOUND.createWithContext(reader);
     }
 
-    public static CompoundTag parseCompoundFully(String data) throws CommandSyntaxException {
-        StringReader stringReader = new StringReader(data);
-        return parseCompoundAsArgument(stringReader);
+    public static CompoundTag parseCompoundFully(String input) throws CommandSyntaxException {
+        StringReader reader = new StringReader(input);
+        return parseCompoundAsArgument(reader);
     }
 
-    public static Object parseObjectFully(String data) throws CommandSyntaxException {
-        StringReader stringReader = new StringReader(data);
-        return parseObjectAsArgument(stringReader);
+    public static Object parseObjectFully(String input) throws CommandSyntaxException {
+        StringReader reader = new StringReader(input);
+        return parseObjectAsArgument(reader);
     }
 
-    public T parseFully(String text) throws CommandSyntaxException {
-        return this.parseFully(new StringReader(text));
+    public T parseFully(String input) throws CommandSyntaxException {
+        return this.parseFully(new StringReader(input));
     }
 
     public T parseFully(StringReader reader) throws CommandSyntaxException {
-        T object = this.grammar.parse(reader);
+        T result = this.grammar.parse(reader);
         reader.skipWhitespace();
         if (reader.canRead()) {
             throw ERROR_TRAILING_DATA.createWithContext(reader);
         }
-        return object;
+        return result;
     }
 
     public T parseAsArgument(StringReader reader) throws CommandSyntaxException {

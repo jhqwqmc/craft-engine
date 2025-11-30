@@ -1,7 +1,5 @@
 package net.momirealms.craftengine.core.util.snbt.parse;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import javax.annotation.Nullable;
@@ -14,7 +12,6 @@ public abstract class CachedParseState<S> implements ParseState<S> {
     private SimpleControl[] controlCache = new SimpleControl[16];
     private int nextControlToReturn;
     private final Silent silent = new Silent();
-    private final IntList markedNull = new IntArrayList();
     public static final Object JAVA_NULL_VALUE_MARKER = new Object() {
         @Override
         public String toString() {
@@ -39,11 +36,11 @@ public abstract class CachedParseState<S> implements ParseState<S> {
     @Nullable
     @Override
     public <T> T parse(NamedRule<S, T> rule) {
-        int i = this.mark();
-        PositionCache cacheForPosition = this.getCacheForPosition(i);
-        int i1 = cacheForPosition.findKeyIndex(rule.name());
-        if (i1 != -1) {
-            CacheEntry<T> value = cacheForPosition.getValue(i1);
+        int markBeforeParse = this.mark();
+        PositionCache positionCache = this.getCacheForPosition(markBeforeParse);
+        int entryIndex = positionCache.findKeyIndex(rule.name());
+        if (entryIndex != -1) {
+            CacheEntry<T> value = positionCache.getValue(entryIndex);
             if (value != null) {
                 if (value == CachedParseState.CacheEntry.NEGATIVE) {
                     return null;
@@ -52,59 +49,60 @@ public abstract class CachedParseState<S> implements ParseState<S> {
                 return value.value;
             }
         } else {
-            i1 = cacheForPosition.allocateNewEntry(rule.name());
+            entryIndex = positionCache.allocateNewEntry(rule.name());
         }
 
-        T object = rule.value().parse(this);
-        CacheEntry<T> cacheEntry;
-        if (object == null) {
-            cacheEntry = (CacheEntry<T>) CacheEntry.NEGATIVE;
+        T result = rule.value().parse(this);
+        CacheEntry<T> entry;
+        if (result == null) {
+            entry = CacheEntry.negativeEntry();
         } else {
-            cacheEntry = new CacheEntry<>(object, this.mark());
+            int markAfterParse = this.mark();
+            entry = new CacheEntry<>(result, markAfterParse);
         }
 
-        cacheForPosition.setValue(i1, cacheEntry);
-        return object;
+        positionCache.setValue(entryIndex, entry);
+        return result;
     }
 
-    private PositionCache getCacheForPosition(int position) {
-        int i = this.positionCache.length;
-        if (position >= i) {
-            int i1 = MiscUtils.growByHalf(i, position + 1);
-            PositionCache[] positionCaches = new PositionCache[i1];
-            System.arraycopy(this.positionCache, 0, positionCaches, 0, i);
-            this.positionCache = positionCaches;
+    private PositionCache getCacheForPosition(int index) {
+        int currentSize = this.positionCache.length;
+        if (index >= currentSize) {
+            int newSize = MiscUtils.growByHalf(currentSize, index + 1);
+            PositionCache[] newCache = new PositionCache[newSize];
+            System.arraycopy(this.positionCache, 0, newCache, 0, currentSize);
+            this.positionCache = newCache;
         }
 
-        PositionCache positionCache = this.positionCache[position];
-        if (positionCache == null) {
-            positionCache = new PositionCache();
-            this.positionCache[position] = positionCache;
+        PositionCache result = this.positionCache[index];
+        if (result == null) {
+            result = new PositionCache();
+            this.positionCache[index] = result;
         }
 
-        return positionCache;
+        return result;
     }
 
     @Override
     public Control acquireControl() {
-        int i = this.controlCache.length;
-        if (this.nextControlToReturn >= i) {
-            int i1 = MiscUtils.growByHalf(i, this.nextControlToReturn + 1);
-            SimpleControl[] simpleControls = new SimpleControl[i1];
-            System.arraycopy(this.controlCache, 0, simpleControls, 0, i);
-            this.controlCache = simpleControls;
+        int currentSize = this.controlCache.length;
+        if (this.nextControlToReturn >= currentSize) {
+            int newSize = MiscUtils.growByHalf(currentSize, this.nextControlToReturn + 1);
+            SimpleControl[] newControlCache = new SimpleControl[newSize];
+            System.arraycopy(this.controlCache, 0, newControlCache, 0, currentSize);
+            this.controlCache = newControlCache;
         }
 
-        int i1 = this.nextControlToReturn++;
-        SimpleControl simpleControl = this.controlCache[i1];
-        if (simpleControl == null) {
-            simpleControl = new SimpleControl();
-            this.controlCache[i1] = simpleControl;
+        int controlIndex = this.nextControlToReturn++;
+        SimpleControl entry = this.controlCache[controlIndex];
+        if (entry == null) {
+            entry = new SimpleControl();
+            this.controlCache[controlIndex] = entry;
         } else {
-            simpleControl.reset();
+            entry.reset();
         }
 
-        return simpleControl;
+        return entry;
     }
 
     @Override
@@ -117,18 +115,12 @@ public abstract class CachedParseState<S> implements ParseState<S> {
         return this.silent;
     }
 
-    @Override
-    public void markNull(int mark) {
-        this.markedNull.add(mark);
-    }
-
-    @Override
-    public boolean isNull(int mark) {
-        return this.markedNull.contains(mark);
-    }
-
     record CacheEntry<T>(@Nullable T value, int markAfterParse) {
         public static final CacheEntry<?> NEGATIVE = new CacheEntry<>(null, -1);
+
+        public static <T> CacheEntry<T> negativeEntry() {
+            return (CacheEntry<T>) NEGATIVE;
+        }
     }
 
     static class PositionCache {
@@ -137,9 +129,9 @@ public abstract class CachedParseState<S> implements ParseState<S> {
         private Object[] atomCache = new Object[16];
         private int nextKey;
 
-        public int findKeyIndex(Atom<?> atom) {
+        public int findKeyIndex(Atom<?> key) {
             for (int i = 0; i < this.nextKey; i += ENTRY_STRIDE) {
-                if (this.atomCache[i] == atom) {
+                if (this.atomCache[i] == key) {
                     return i;
                 }
             }
@@ -147,29 +139,29 @@ public abstract class CachedParseState<S> implements ParseState<S> {
             return NOT_FOUND;
         }
 
-        public int allocateNewEntry(Atom<?> entry) {
-            int i = this.nextKey;
-            this.nextKey += 2;
-            int i1 = i + 1;
-            int i2 = this.atomCache.length;
-            if (i1 >= i2) {
-                int i3 = MiscUtils.growByHalf(i2, i1 + 1);
-                Object[] objects = new Object[i3];
-                System.arraycopy(this.atomCache, 0, objects, 0, i2);
-                this.atomCache = objects;
+        public int allocateNewEntry(Atom<?> key) {
+            int newKeyIndex = this.nextKey;
+            this.nextKey += ENTRY_STRIDE;
+            int newValueIndex = newKeyIndex + 1;
+            int currentSize = this.atomCache.length;
+            if (newValueIndex >= currentSize) {
+                int newSize = MiscUtils.growByHalf(currentSize, newValueIndex + 1);
+                Object[] newCache = new Object[newSize];
+                System.arraycopy(this.atomCache, 0, newCache, 0, currentSize);
+                this.atomCache = newCache;
             }
 
-            this.atomCache[i] = entry;
-            return i;
+            this.atomCache[newKeyIndex] = key;
+            return newKeyIndex;
         }
 
         @Nullable
-        public <T> CacheEntry<T> getValue(int index) {
-            return (CacheEntry<T>)this.atomCache[index + 1];
+        public <T> CacheEntry<T> getValue(int keyIndex) {
+            return (CacheEntry<T>) this.atomCache[keyIndex + 1];
         }
 
-        public void setValue(int index, CacheEntry<?> value) {
-            this.atomCache[index + 1] = value;
+        public void setValue(int keyIndex, CacheEntry<?> entry) {
+            this.atomCache[keyIndex + 1] = entry;
         }
     }
 
@@ -203,8 +195,8 @@ public abstract class CachedParseState<S> implements ParseState<S> {
         }
 
         @Override
-        public void restore(int cursor) {
-            CachedParseState.this.restore(cursor);
+        public void restore(int mark) {
+            CachedParseState.this.restore(mark);
         }
 
         @Override
@@ -220,16 +212,6 @@ public abstract class CachedParseState<S> implements ParseState<S> {
         @Override
         public ParseState<S> silent() {
             return this;
-        }
-
-        @Override
-        public void markNull(int mark) {
-            CachedParseState.this.markNull(mark);
-        }
-
-        @Override
-        public boolean isNull(int mark) {
-            return CachedParseState.this.isNull(mark);
         }
     }
 
