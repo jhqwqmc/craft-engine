@@ -559,7 +559,7 @@ public class SnbtGrammar {
         Atom<List<Entry<String, T>>> atom30 = Atom.of("map_entries");
         dictionary.put(atom30, Term.repeatedWithTrailingSeparator(namedRule3, atom30, StringReaderTerms.character(TagParser.ELEMENT_SEPARATOR)), scope -> scope.getOrThrow(atom30));
         Atom<T> atom31 = Atom.of("map_literal");
-        dictionary.put(atom31, Term.sequence(StringReaderTerms.character('{'), Scope.increaseDepth(), dictionary.named(atom30), Scope.decreaseDepth(), StringReaderTerms.character('}')), scope -> { // Paper - track depth
+        dictionary.put(atom31, Term.sequence(StringReaderTerms.character('{'), Scope.increaseDepth(), dictionary.named(atom30), Scope.decreaseDepth(), StringReaderTerms.character('}')), scope -> {
             List<Entry<String, T>> list = scope.getOrThrow(atom30);
             if (list.isEmpty()) {
                 return object2;
