@@ -69,7 +69,7 @@ public class SelfHostHttpServer {
     private String url;
     private boolean denyNonMinecraft = true;
     private boolean useToken;
-    private boolean strictValidation = true;
+    private boolean strictValidation = false;
 
     private long globalUploadRateLimit = 0;
     private long minDownloadSpeed = 50_000;
@@ -234,7 +234,7 @@ public class SelfHostHttpServer {
                 boolean nonMinecraftClient = userAgent == null || !userAgent.startsWith("Minecraft Java/");
                 if (strictValidation && !nonMinecraftClient) {
                     String clientVersion = request.headers().get("X-Minecraft-Version");
-                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring(15));
+                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring("Minecraft Java/".length()));
                 }
                 if (nonMinecraftClient) {
                     sendError(ctx, HttpResponseStatus.FORBIDDEN, "Invalid client");

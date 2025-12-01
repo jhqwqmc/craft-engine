@@ -198,7 +198,8 @@ resource-pack:
         # Generates a single-use, time-limited download link for each player.
         one-time-token: true
         # Enhances validation for deny-non-minecraft-request and one-time-token.
-        strict-validation: true
+        # Do not enable this on an offline server
+        strict-validation: false
         rate-limiting:
           # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
           max-bandwidth-per-second: 5_000_000 # 5MB/s

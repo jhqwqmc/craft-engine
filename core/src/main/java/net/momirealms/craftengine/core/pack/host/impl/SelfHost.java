@@ -77,7 +77,7 @@ public class SelfHost implements ResourcePackHost {
             boolean oneTimeToken = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("one-time-token", true), "one-time-token");
             String protocol = arguments.getOrDefault("protocol", "http").toString();
             boolean denyNonMinecraftRequest = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deny-non-minecraft-request", true), "deny-non-minecraft-request");
-            boolean strictValidation = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("strict-validation", true), "strict-validation");
+            boolean strictValidation = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("strict-validation", false), "strict-validation");
 
             Bandwidth limit = null;
             Map<String, Object> rateLimitingSection = ResourceConfigUtils.getAsMapOrNull(arguments.get("rate-limiting"), "rate-limiting");
