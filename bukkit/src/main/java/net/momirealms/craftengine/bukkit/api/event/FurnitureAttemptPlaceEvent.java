@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.api.event;
 
 import net.momirealms.craftengine.core.entity.furniture.AnchorType;
-import net.momirealms.craftengine.core.entity.furniture.CustomFurniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureConfig;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public final class FurnitureAttemptPlaceEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
     private boolean cancelled;
-    private final CustomFurniture furniture;
+    private final FurnitureConfig furniture;
     private final Location location;
     private final AnchorType anchorType;
     private final BlockFace clickedFace;
@@ -23,7 +23,7 @@ public final class FurnitureAttemptPlaceEvent extends PlayerEvent implements Can
     private final InteractionHand hand;
 
     public FurnitureAttemptPlaceEvent(@NotNull Player player,
-                                      @NotNull CustomFurniture furniture,
+                                      @NotNull FurnitureConfig furniture,
                                       @NotNull AnchorType anchorType,
                                       @NotNull Location location,
                                       @NotNull BlockFace clickedFace,
@@ -69,7 +69,7 @@ public final class FurnitureAttemptPlaceEvent extends PlayerEvent implements Can
     }
 
     @NotNull
-    public CustomFurniture furniture() {
+    public FurnitureConfig furniture() {
         return furniture;
     }
 

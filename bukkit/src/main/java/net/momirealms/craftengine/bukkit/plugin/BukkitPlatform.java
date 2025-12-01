@@ -39,7 +39,7 @@ public class BukkitPlatform implements Platform {
             Map<String, Object> map = (Map<String, Object>) MRegistryOps.NBT.convertTo(MRegistryOps.JAVA, tag);
             return map.get("root");
         } catch (CommandSyntaxException e) {
-            throw new LocalizedResourceConfigException("warning.config.type.snbt.invalid_syntax", e, nbt);
+            throw new LocalizedResourceConfigException("warning.config.id.snbt.invalid_syntax", e, nbt);
         }
     }
 
@@ -55,7 +55,7 @@ public class BukkitPlatform implements Platform {
             CompoundTag map = (CompoundTag) MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, tag);
             return map.get("root");
         } catch (CommandSyntaxException e) {
-            throw new LocalizedResourceConfigException("warning.config.type.snbt.invalid_syntax", e, nbt);
+            throw new LocalizedResourceConfigException("warning.config.id.snbt.invalid_syntax", e, nbt);
         }
     }
 

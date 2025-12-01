@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity.furniture;
+package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.collision.AABB;

@@ -65,7 +65,7 @@ public class OpenWindowFunction<CTX extends Context> extends AbstractConditional
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             String title = Optional.ofNullable(arguments.get("title")).map(String::valueOf).orElse(null);
-            String rawType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("gui-type"), "warning.config.function.open_window.missing_gui_type");
+            String rawType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("gui-id"), "warning.config.function.open_window.missing_gui_type");
             try {
                 GuiType type = GuiType.valueOf(rawType.toUpperCase(Locale.ENGLISH));
                 return new OpenWindowFunction<>(getPredicates(arguments), PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), type, title);

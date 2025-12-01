@@ -80,7 +80,7 @@ public class ConditionProperties {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         ConditionPropertyReader reader = BuiltInRegistries.CONDITION_PROPERTY_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid condition property type: " + key);
+            throw new IllegalArgumentException("Invalid condition property id: " + key);
         }
         return reader.read(json);
     }

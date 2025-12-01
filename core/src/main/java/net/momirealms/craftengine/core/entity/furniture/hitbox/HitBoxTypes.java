@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity.furniture;
+package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
@@ -14,6 +14,7 @@ public class HitBoxTypes {
     public static final Key INTERACTION = Key.of("minecraft:interaction");
     public static final Key SHULKER = Key.of("minecraft:shulker");
     public static final Key HAPPY_GHAST = Key.of("minecraft:happy_ghast");
+    public static final Key VIRTUAL = Key.of("minecraft:virtual");
     public static final Key CUSTOM = Key.of("minecraft:custom");
 
     public static void register(Key key, HitBoxConfigFactory factory) {

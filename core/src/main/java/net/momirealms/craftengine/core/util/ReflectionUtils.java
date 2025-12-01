@@ -439,7 +439,7 @@ public class ReflectionUtils {
     public static List<Method> getMethods(@NotNull Class<?> clazz, @NotNull Class<?> returnType, @NotNull Class<?>... parameterTypes) {
         List<Method> list = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
-            if (!returnType.isAssignableFrom(method.getReturnType()) // check type
+            if (!returnType.isAssignableFrom(method.getReturnType()) // check id
                     || method.getParameterCount() != parameterTypes.length // check length
             ) continue;
             Class<?>[] types = method.getParameterTypes();

@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRen
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
+import net.momirealms.craftengine.core.entity.CustomEntity;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
@@ -18,6 +19,7 @@ import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntityRendererSerializer;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntitySerializer;
+import net.momirealms.craftengine.core.world.chunk.serialization.DefaultEntitySerializer;
 import net.momirealms.sparrow.nbt.ListTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,11 +32,12 @@ public class CEChunk {
     public final ChunkPos chunkPos;
     public final CESection[] sections;
     public final WorldHeight worldHeightAccessor;
-    public final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
-    public final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<UUID, CustomEntity> entities;  // 从区域线程上访问，安全
+    private final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
@@ -50,10 +53,11 @@ public class CEChunk {
         this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
         this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
         this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.entities = new Object2ObjectOpenHashMap<>(10, 0.5f);
         this.fillEmptySection();
     }
 
-    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag itemDisplayBlockRenders) {
+    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag blockEntityRenders, @Nullable ListTag entities) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
@@ -80,15 +84,27 @@ public class CEChunk {
         } else {
             this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
         }
-        if (itemDisplayBlockRenders != null) {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(itemDisplayBlockRenders.size(), 10), 0.5f);
-            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, itemDisplayBlockRenders);
+        if (blockEntityRenders != null) {
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(blockEntityRenders.size(), 10), 0.5f);
+            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, blockEntityRenders);
             for (BlockPos pos : blockEntityRendererPoses) {
                 this.addConstantBlockEntityRenderer(pos);
             }
         } else {
             this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
         }
+        if (entities != null) {
+            this.entities = new Object2ObjectOpenHashMap<>(Math.max(entities.size(), 10), 0.5f);
+            for (CustomEntity entity : DefaultEntitySerializer.deserialize(world, entities)) {
+                this.entities.put(entity.uuid(), entity);
+            }
+        } else {
+            this.entities = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        }
+    }
+
+    public Map<UUID, CustomEntity> entities() {
+        return Collections.unmodifiableMap(this.entities);
     }
 
     public void spawnBlockEntities(Player player) {

@@ -22,7 +22,7 @@ public record SoundData(Key id, SoundValue volume, SoundValue pitch) {
             SoundValue pitchValue = Optional.ofNullable(SoundValue.of(map.get("pitch"))).orElse(volume);
             return new SoundData(id, volumeValue, pitchValue);
         } else {
-            throw new IllegalArgumentException("Illegal object type for sound data: " + obj.getClass());
+            throw new IllegalArgumentException("Illegal object id for sound data: " + obj.getClass());
         }
     }
 

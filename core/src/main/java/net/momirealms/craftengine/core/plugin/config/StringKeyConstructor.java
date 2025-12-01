@@ -259,7 +259,7 @@ public class StringKeyConstructor extends SafeConstructor {
             if (value instanceof Number number) {
                 return number.byteValue();
             }
-            throw new RuntimeException("Unexpected type: " + value.getClass().getName());
+            throw new RuntimeException("Unexpected id: " + value.getClass().getName());
         }
     }
 
@@ -271,7 +271,7 @@ public class StringKeyConstructor extends SafeConstructor {
             if (value instanceof Number number) {
                 return number.shortValue();
             }
-            throw new RuntimeException("Unexpected type: " + value.getClass().getName());
+            throw new RuntimeException("Unexpected id: " + value.getClass().getName());
         }
     }
 
@@ -283,7 +283,7 @@ public class StringKeyConstructor extends SafeConstructor {
             if (value instanceof Number number) {
                 return number.longValue();
             }
-            throw new RuntimeException("Unexpected type: " + value.getClass().getName());
+            throw new RuntimeException("Unexpected id: " + value.getClass().getName());
         }
     }
 
@@ -295,7 +295,7 @@ public class StringKeyConstructor extends SafeConstructor {
             if (value instanceof Number number) {
                 return number.floatValue();
             }
-            throw new RuntimeException("Unexpected type: " + value.getClass().getName());
+            throw new RuntimeException("Unexpected id: " + value.getClass().getName());
         }
     }
 
@@ -307,7 +307,7 @@ public class StringKeyConstructor extends SafeConstructor {
             if (value instanceof Number number) {
                 return number.doubleValue();
             }
-            throw new RuntimeException("Unexpected type: " + value.getClass().getName());
+            throw new RuntimeException("Unexpected id: " + value.getClass().getName());
         }
     }
 }

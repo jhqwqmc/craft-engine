@@ -141,7 +141,7 @@ public class CustomSmithingTrimRecipe<T> extends AbstractRecipe<T>
         @Override
         public CustomSmithingTrimRecipe<A> readMap(Key id, Map<String, Object> arguments) {
             List<String> base = MiscUtils.getAsStringList(arguments.get("base"));
-            List<String> template = MiscUtils.getAsStringList(arguments.get("template-type"));
+            List<String> template = MiscUtils.getAsStringList(arguments.get("template-id"));
             List<String> addition = MiscUtils.getAsStringList(arguments.get("addition"));
             Key pattern = VersionHelper.isOrAbove1_21_5() ? Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("pattern"), "warning.config.recipe.smithing_trim.missing_pattern")) : null;
             return new CustomSmithingTrimRecipe<>(id,

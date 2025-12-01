@@ -1,0 +1,145 @@
+package net.momirealms.craftengine.core.entity.furniture;
+
+import com.google.common.collect.ImmutableMap;
+import net.momirealms.craftengine.core.entity.furniture.behavior.EmptyFurnitureBehavior;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
+import net.momirealms.craftengine.core.loot.LootTable;
+import net.momirealms.craftengine.core.plugin.context.Context;
+import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.function.Function;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import net.momirealms.craftengine.core.util.Key;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+class FurnitureConfigImpl implements FurnitureConfig {
+    private final Key id;
+    private final FurnitureSettings settings;
+    private final Map<String, FurnitureVariant> variants;
+    private final Map<EventTrigger, List<Function<Context>>> events;
+    private final FurnitureBehavior behavior;
+    private final CullingData cullingData;
+    @Nullable
+    private final LootTable<?> lootTable;
+
+    private FurnitureConfigImpl(@NotNull Key id,
+                                @NotNull FurnitureSettings settings,
+                                @NotNull Map<String, FurnitureVariant> variants,
+                                @NotNull Map<EventTrigger, List<Function<Context>>> events,
+                                @NotNull FurnitureBehavior behavior,
+                                @Nullable CullingData cullingData,
+                                @Nullable LootTable<?> lootTable) {
+        this.id = id;
+        this.settings = settings;
+        this.variants = ImmutableMap.copyOf(variants);
+        this.lootTable = lootTable;
+        this.behavior = behavior;
+        this.cullingData = cullingData;
+        this.events = events;
+    }
+
+    @Override
+    public void execute(Context context, EventTrigger trigger) {
+        for (Function<Context> function : Optional.ofNullable(this.events.get(trigger)).orElse(Collections.emptyList())) {
+            function.run(context);
+        }
+    }
+
+    @Override
+    public Key id() {
+        return this.id;
+    }
+
+    @Override
+    public FurnitureSettings settings() {
+        return this.settings;
+    }
+
+    @Override
+    public @Nullable LootTable<?> lootTable() {
+        return this.lootTable;
+    }
+
+    @Override
+    public Map<String, FurnitureVariant> variants() {
+        return this.variants;
+    }
+
+    @Override
+    public @NotNull FurnitureBehavior behavior() {
+        return this.behavior;
+    }
+
+    @Override
+    public CullingData cullingData() {
+        return this.cullingData;
+    }
+
+    @Nullable
+    @Override
+    public FurnitureVariant getVariant(String variantName) {
+        return this.variants.get(variantName);
+    }
+
+    public static class BuilderImpl implements Builder {
+        private Key id;
+        private Map<String, FurnitureVariant> variants;
+        private FurnitureSettings settings;
+        private Map<EventTrigger, List<Function<Context>>> events;
+        private LootTable<?> lootTable;
+        private FurnitureBehavior behavior = EmptyFurnitureBehavior.INSTANCE;
+        private CullingData cullingData;
+
+        @Override
+        public FurnitureConfig build() {
+            return new FurnitureConfigImpl(this.id, this.settings, this.variants, this.events, this.behavior, this.cullingData, this.lootTable);
+        }
+
+        @Override
+        public Builder id(Key id) {
+            this.id = id;
+            return this;
+        }
+
+        @Override
+        public Builder variants(Map<String, FurnitureVariant> variants) {
+            this.variants = variants;
+            return this;
+        }
+
+        @Override
+        public Builder settings(FurnitureSettings settings) {
+            this.settings = settings;
+            return this;
+        }
+
+        @Override
+        public Builder lootTable(LootTable<?> lootTable) {
+            this.lootTable = lootTable;
+            return this;
+        }
+
+        @Override
+        public Builder events(Map<EventTrigger, List<Function<Context>>> events) {
+            this.events = events;
+            return this;
+        }
+
+        @Override
+        public Builder cullingData(CullingData cullingData) {
+            this.cullingData = cullingData;
+            return this;
+        }
+
+        @Override
+        public Builder behavior(FurnitureBehavior behavior) {
+            this.behavior = behavior;
+            return this;
+        }
+    }
+}

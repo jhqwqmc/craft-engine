@@ -25,11 +25,11 @@ public interface FurnitureManager extends Manageable {
 
     Collection<Suggestion> cachedSuggestions();
 
-    Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureExtraData extraData, boolean playSound);
+    Furniture place(WorldPosition position, FurnitureConfig furniture, FurnitureDataAccessor extraData, boolean playSound);
 
-    Optional<CustomFurniture> furnitureById(Key id);
+    Optional<FurnitureConfig> furnitureById(Key id);
 
-    Map<Key, CustomFurniture> loadedFurniture();
+    Map<Key, FurnitureConfig> loadedFurniture();
 
     boolean isFurnitureRealEntity(int entityId);
 

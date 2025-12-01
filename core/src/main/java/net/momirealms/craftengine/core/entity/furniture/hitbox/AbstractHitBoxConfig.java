@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity.furniture;
+package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import org.joml.Vector3f;
@@ -30,16 +30,16 @@ public abstract class AbstractHitBoxConfig implements HitBoxConfig {
 
     @Override
     public boolean blocksBuilding() {
-        return blocksBuilding;
+        return this.blocksBuilding;
     }
 
     @Override
     public boolean canBeHitByProjectile() {
-        return canBeHitByProjectile;
+        return this.canBeHitByProjectile;
     }
 
     @Override
     public boolean canUseItemOn() {
-        return canUseItemOn;
+        return this.canUseItemOn;
     }
 }

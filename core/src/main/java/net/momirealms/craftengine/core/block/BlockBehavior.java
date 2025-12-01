@@ -78,7 +78,7 @@ public abstract class BlockBehavior {
         return (boolean) superMethod.call();
     }
 
-    // 1.20-1.20.4 BlockState state, BlockGetter world, BlockPos pos, PathComputationType type
+    // 1.20-1.20.4 BlockState state, BlockGetter world, BlockPos pos, PathComputationType id
     // 1.20.5+ BlockState state, PathComputationType pathComputationType
     public boolean isPathFindable(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         return (boolean) superMethod.call();

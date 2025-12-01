@@ -12,12 +12,9 @@ items:
           sounds:
             break: minecraft:block.bamboo_wood.break
             place: minecraft:block.bamboo_wood.place
-        placement:
+        variants:
           ground:
             loot-spawn-offset: 0.5,0.5,0
-            rules:
-              rotation: FOUR
-              alignment: CENTER
             elements:
               - item: default:bench
                 display-transform: NONE

@@ -61,7 +61,7 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         public TemplateArgument create(Map<String, Object> arguments) {
             return new ExpressionTemplateArgument(
                     arguments.getOrDefault("expression", "").toString(),
-                    ValueType.valueOf(arguments.getOrDefault("value-type", "double").toString().toUpperCase(Locale.ROOT))
+                    ValueType.valueOf(arguments.getOrDefault("value-id", "double").toString().toUpperCase(Locale.ROOT))
             );
         }
     }

@@ -63,7 +63,7 @@ public class ProjectilePacketHandler implements EntityPacketHandler {
 
     public void convertAddCustomProjectilePacket(FriendlyByteBuf buf, ByteBufPacketEvent event) {
         UUID uuid = buf.readUUID();
-        buf.readVarInt(); // type
+        buf.readVarInt(); // id
         double x = buf.readDouble();
         double y = buf.readDouble();
         double z = buf.readDouble();

@@ -1,8 +1,5 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
-import net.momirealms.craftengine.core.entity.furniture.AnchorType;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureExtraData;
-import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
@@ -15,7 +12,6 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final Key furnitureId;
@@ -24,7 +20,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
     private final NumberProvider z;
     private final NumberProvider pitch;
     private final NumberProvider yaw;
-    private final AnchorType anchorType;
+    private final String variant;
     private final boolean playSound;
 
     public SpawnFurnitureFunction(
@@ -34,7 +30,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             NumberProvider z,
             NumberProvider pitch,
             NumberProvider yaw,
-            AnchorType anchorType,
+            String variant,
             boolean playSound,
             List<Condition<CTX>> predicates
     ) {
@@ -45,7 +41,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
         this.z = z;
         this.pitch = pitch;
         this.yaw = yaw;
-        this.anchorType = anchorType;
+        this.variant = variant;
         this.playSound = playSound;
     }
 
@@ -59,17 +55,18 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             float pitchValue = this.pitch.getFloat(ctx);
             float yawValue = this.yaw.getFloat(ctx);
             WorldPosition position = new WorldPosition(world, xPos, yPos, zPos, pitchValue, yawValue);
-            spawnFurniture(this.furnitureId, position, this.anchorType, this.playSound);
+            // fixme api
+//            spawnFurniture(this.furnitureId, position, this.anchorType, this.playSound);
         });
     }
 
-    public static void spawnFurniture(Key furnitureId, WorldPosition position, AnchorType anchorType, boolean playSound) {
-        CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> {
-            AnchorType anchor = Optional.ofNullable(anchorType).orElse(furniture.getAnyAnchorType());
-            FurnitureExtraData extraData = FurnitureExtraData.builder().anchorType(anchor).build();
-            CraftEngine.instance().furnitureManager().place(position, furniture, extraData, playSound);
-        });
-    }
+//    public static void spawnFurniture(Key furnitureId, WorldPosition position, AnchorType anchorType, boolean playSound) {
+//        CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> {
+//            AnchorType anchor = Optional.ofNullable(anchorType).orElse(furniture.getAnyAnchorType());
+//            FurnitureDataAccessor extraData = FurnitureDataAccessor.builder().anchorType(anchor).build();
+//            CraftEngine.instance().furnitureManager().place(position, furniture, extraData, playSound);
+//        });
+//    }
 
     @Override
     public Key type() {
@@ -90,9 +87,9 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", "<arg:position.pitch>"));
             NumberProvider yaw = NumberProviders.fromObject(arguments.getOrDefault("yaw", "<arg:position.yaw>"));
-            AnchorType anchorType = ResourceConfigUtils.getAsEnum(arguments.get("anchor-type"), AnchorType.class, null);
+            String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-id"));
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
-            return new SpawnFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, anchorType, playSound, getPredicates(arguments));
+            return new SpawnFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, variant, playSound, getPredicates(arguments));
         }
     }
 }

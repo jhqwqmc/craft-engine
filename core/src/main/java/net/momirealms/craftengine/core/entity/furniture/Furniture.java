@@ -1,48 +1,28 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.entity.CustomEntity;
+import net.momirealms.craftengine.core.entity.CustomEntityType;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.sparrow.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
+public abstract class Furniture extends CustomEntity {
+    protected final FurnitureConfig config;
+    protected final FurnitureDataAccessor dataAccessor;
 
-public interface Furniture {
-    void initializeColliders();
-
-    WorldPosition position();
-
-    boolean isValid();
-
-    void destroy();
-
-    void destroyColliders();
-
-    void destroySeats();
-
-    UUID uuid();
-
-    int baseEntityId();
-
-    @Nullable
-    HitBox hitBoxByEntityId(int id);
-
-    @Nullable HitBoxPart hitBoxPartByEntityId(int id);
+    public Furniture(CustomEntityType<?> type, WorldPosition position, FurnitureConfig config, CompoundTag data) {
+        super(type, position);
+        this.dataAccessor = new FurnitureDataAccessor(data);
+        this.config = config;
+    }
 
     @NotNull
-    AnchorType anchorType();
+    public FurnitureConfig config() {
+        return this.config;
+    }
 
     @NotNull
-    Key id();
-
-    @NotNull
-    CustomFurniture config();
-
-    boolean hasExternalModel();
-
-    FurnitureExtraData extraData();
-
-    void setExtraData(FurnitureExtraData extraData);
-
-    void save();
+    public FurnitureDataAccessor dataAccessor() {
+        return this.dataAccessor;
+    }
 }

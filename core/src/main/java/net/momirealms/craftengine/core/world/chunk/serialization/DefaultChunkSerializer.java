@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.world.chunk.serialization;
 
+import net.momirealms.craftengine.core.entity.CustomEntity;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
@@ -8,6 +9,9 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.UUID;
 
 public final class DefaultChunkSerializer {
 
@@ -36,6 +40,10 @@ public final class DefaultChunkSerializer {
         if (!blockEntityRenders.isEmpty()) {
             chunkNbt.put("block_entity_renderers", blockEntityRenders);
         }
+        ListTag listTag  = new ListTag();
+        Map<UUID, CustomEntity> entities = chunk.entities();
+
+
         return chunkNbt;
     }
 
@@ -54,7 +62,8 @@ public final class DefaultChunkSerializer {
             }
         }
         ListTag blockEntities = chunkNbt.getList("block_entities");
-        ListTag itemDisplayBlockRenders = chunkNbt.getList("block_entity_renderers");
-        return new CEChunk(world, pos, sectionArray, blockEntities, itemDisplayBlockRenders);
+        ListTag blockEntityRenders = chunkNbt.getList("block_entity_renderers");
+        ListTag entities = chunkNbt.getList("entities");
+        return new CEChunk(world, pos, sectionArray, blockEntities, blockEntityRenders, entities);
     }
 }

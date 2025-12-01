@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.bukkit.parser.PlayerParser;
 import org.incendo.cloud.parser.standard.BooleanParser;
-import org.incendo.cloud.parser.standard.DoubleParser;
 
 import java.util.Optional;
 

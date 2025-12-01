@@ -71,7 +71,7 @@ public class SelectProperties {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         SelectPropertyReader reader = BuiltInRegistries.SELECT_PROPERTY_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid select property type: " + key);
+            throw new IllegalArgumentException("Invalid select property id: " + key);
         }
         return reader.read(json);
     }

@@ -711,12 +711,8 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         }
 
         private CullingData parseCullingData(Object arguments) {
-            if (arguments instanceof Boolean b && !b) {
-                return null;
-            }
-            if (!(arguments instanceof Map)) {
-                return new CullingData(DEFAULT_BLOCK_ENTITY_AABB, Config.entityCullingViewDistance(), 0.5, true);
-            }
+            if (arguments instanceof Boolean b && !b) return null;
+            if (!(arguments instanceof Map)) return new CullingData(DEFAULT_BLOCK_ENTITY_AABB, Config.entityCullingViewDistance(), 0.5, true);
             Map<String, Object> argumentsMap = ResourceConfigUtils.getAsMap(arguments, "entity-culling");
             return new CullingData(
                     ResourceConfigUtils.getAsAABB(argumentsMap.getOrDefault("aabb", 1), "aabb"),

@@ -7,6 +7,7 @@ import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.behavior.BukkitBlockBehaviors;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurnitureManager;
+import net.momirealms.craftengine.bukkit.entity.furniture.element.BukkitFurnitureElementConfigs;
 import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.BukkitHitBoxTypes;
 import net.momirealms.craftengine.bukkit.entity.projectile.BukkitProjectileManager;
 import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeatManager;
@@ -162,6 +163,7 @@ public class BukkitCraftEngine extends CraftEngine {
         BukkitItemBehaviors.init();
         BukkitHitBoxTypes.init();
         BukkitBlockEntityElementConfigs.init();
+        BukkitFurnitureElementConfigs.init();
         // 初始化 onload 阶段的兼容性
         super.compatibilityManager().onLoad();
         // 创建网络管理器

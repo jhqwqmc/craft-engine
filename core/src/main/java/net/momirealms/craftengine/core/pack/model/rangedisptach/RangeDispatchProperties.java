@@ -71,7 +71,7 @@ public class RangeDispatchProperties {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         RangeDispatchPropertyReader reader = BuiltInRegistries.RANGE_DISPATCH_PROPERTY_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid range dispatch property type: " + key);
+            throw new IllegalArgumentException("Invalid range dispatch property id: " + key);
         }
         return reader.read(json);
     }

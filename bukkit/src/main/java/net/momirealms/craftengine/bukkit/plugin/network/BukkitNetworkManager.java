@@ -59,8 +59,8 @@ import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.entity.furniture.HitBox;
-import net.momirealms.craftengine.core.entity.furniture.HitBoxPart;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBox;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.FontManager;
@@ -3711,11 +3711,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             if (actionType == 1) {
                 // ATTACK
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeBoolean(usingSecondaryAction);
                 }
@@ -3765,11 +3765,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 float z = buf.readFloat();
                 InteractionHand hand = buf.readVarInt() == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeFloat(x).writeFloat(y).writeFloat(z);
                     buf.writeVarInt(hand == InteractionHand.MAIN_HAND ? 0 : 1);
@@ -3864,11 +3864,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             } else if (actionType == 0) {
                 int hand = buf.readVarInt();
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeVarInt(hand);
                     buf.writeBoolean(usingSecondaryAction);

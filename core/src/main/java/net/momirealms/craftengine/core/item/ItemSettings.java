@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.item;
 
-import net.momirealms.craftengine.core.entity.Billboard;
-import net.momirealms.craftengine.core.entity.ItemDisplayContext;
+import net.momirealms.craftengine.core.entity.display.Billboard;
+import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
@@ -132,6 +132,12 @@ public class ItemSettings {
 
     public void clearCustomData() {
         this.customData.clear();
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T> T removeCustomData(CustomDataType<?> type) {
+        return (T) this.customData.remove(type);
     }
 
     public <T> void addCustomData(CustomDataType<T> key, T value) {

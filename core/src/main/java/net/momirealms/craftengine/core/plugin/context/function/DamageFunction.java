@@ -43,7 +43,7 @@ public class DamageFunction<CTX extends Context> extends AbstractConditionalFunc
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.getOrDefault("target", "self"), conditionFactory());
-            Key damageType = Key.of(ResourceConfigUtils.getAsStringOrNull(arguments.getOrDefault("damage-type", "generic")));
+            Key damageType = Key.of(ResourceConfigUtils.getAsStringOrNull(arguments.getOrDefault("damage-id", "generic")));
             NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 1f));
             return new DamageFunction<>(selector, damageType, amount, getPredicates(arguments));
         }

@@ -190,7 +190,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         @Override
         public CustomSmithingTransformRecipe<A> readMap(Key id, Map<String, Object> arguments) {
             List<String> base = MiscUtils.getAsStringList(arguments.get("base"));
-            List<String> template = MiscUtils.getAsStringList(arguments.get("template-type"));
+            List<String> template = MiscUtils.getAsStringList(arguments.get("template-id"));
             List<String> addition = MiscUtils.getAsStringList(arguments.get("addition"));
             boolean mergeComponents = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-components", true), "merge-components");
             boolean mergeEnchantments = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-enchantments", false), "merge-enchantments");

@@ -45,7 +45,7 @@ public class SignSpecialModel implements SpecialModel {
         @Override
         public SpecialModel create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("type").toString());
-            String woodType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("wood-type"), "warning.config.item.model.special.sign.missing_wood_type");
+            String woodType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("wood-id"), "warning.config.item.model.special.sign.missing_wood_type");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.sign.missing_texture");
             return new SignSpecialModel(type, woodType, texture);
         }

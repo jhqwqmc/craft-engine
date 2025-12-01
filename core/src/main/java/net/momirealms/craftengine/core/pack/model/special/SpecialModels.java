@@ -80,7 +80,7 @@ public class SpecialModels {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         SpecialModelReader reader = BuiltInRegistries.SPECIAL_MODEL_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid special model type: " + key);
+            throw new IllegalArgumentException("Invalid special model id: " + key);
         }
         return reader.read(json);
     }

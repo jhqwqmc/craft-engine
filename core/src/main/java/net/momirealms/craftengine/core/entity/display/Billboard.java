@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity;
+package net.momirealms.craftengine.core.entity.display;
 
 public enum Billboard {
     FIXED(0),

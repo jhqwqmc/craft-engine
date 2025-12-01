@@ -1,6 +1,6 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
-import net.momirealms.craftengine.core.entity.furniture.HitBoxTypes;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxTypes;
 
 public class BukkitHitBoxTypes extends HitBoxTypes {
 

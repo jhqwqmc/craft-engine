@@ -94,7 +94,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:furniture.z>"));
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", "<arg:furniture.pitch>"));
             NumberProvider yaw = NumberProviders.fromObject(arguments.getOrDefault("yaw", "<arg:furniture.yaw>"));
-            AnchorType anchorType = ResourceConfigUtils.getAsEnum(arguments.get("anchor-type"), AnchorType.class, null);
+            AnchorType anchorType = ResourceConfigUtils.getAsEnum(arguments.get("anchor-id"), AnchorType.class, null);
             boolean dropLoot = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("drop-loot", true), "drop-loot");
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
             return new ReplaceFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, anchorType, dropLoot, playSound, getPredicates(arguments));

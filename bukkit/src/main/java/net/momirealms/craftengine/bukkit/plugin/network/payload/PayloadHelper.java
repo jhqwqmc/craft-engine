@@ -35,7 +35,7 @@ public class PayloadHelper {
         @SuppressWarnings("unchecked")
         NetworkCodec<FriendlyByteBuf, ModPacket> codec = (NetworkCodec<FriendlyByteBuf, ModPacket>) BuiltInRegistries.MOD_PACKET.getValue(data.type());
         if (codec == null) {
-            CraftEngine.instance().logger().warn("Unknown data type class: " + data.getClass().getName());
+            CraftEngine.instance().logger().warn("Unknown data id class: " + data.getClass().getName());
             return;
         }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
@@ -65,7 +65,7 @@ public class PayloadHelper {
         @SuppressWarnings("unchecked")
         NetworkCodec<FriendlyByteBuf, ModPacket> codec = (NetworkCodec<FriendlyByteBuf, ModPacket>) BuiltInRegistries.MOD_PACKET.getValue(type);
         if (codec == null) {
-            Debugger.COMMON.debug(() -> "Unknown data type received: " + type);
+            Debugger.COMMON.debug(() -> "Unknown data id received: " + type);
             return;
         }
 

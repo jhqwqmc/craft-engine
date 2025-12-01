@@ -65,7 +65,7 @@ public class Tints {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         TintReader reader = BuiltInRegistries.TINT_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid tint type: " + type);
+            throw new IllegalArgumentException("Invalid tint id: " + type);
         }
         return reader.read(json);
     }

@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Simple implementation of {@link Sender} using a {@link SenderFactory}
  *
- * @param <T> the command sender type
+ * @param <T> the command sender id
  */
 public final class AbstractSender<T> implements Sender {
     private final Plugin plugin;
