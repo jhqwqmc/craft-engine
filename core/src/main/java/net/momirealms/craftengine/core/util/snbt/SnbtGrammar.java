@@ -10,9 +10,11 @@ import com.mojang.serialization.JavaOps;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import it.unimi.dsi.fastutil.bytes.ByteList;
 import it.unimi.dsi.fastutil.chars.CharList;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.util.snbt.parse.*;
 import net.momirealms.craftengine.core.util.snbt.parse.Dictionary;
 import net.momirealms.craftengine.core.util.snbt.parse.grammar.*;
+import net.momirealms.sparrow.nbt.codec.LegacyJavaOps;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -878,7 +880,7 @@ public class SnbtGrammar {
                 state.errorCollector().store(state.mark(), ERROR_INVALID_ARRAY_ELEMENT_TYPE);
                 return null;
             }
-            return (Number) entry.create(JavaOps.INSTANCE, actualType, state);
+            return (Number) entry.create(VersionHelper.isOrAbove1_20_5() ? JavaOps.INSTANCE : LegacyJavaOps.INSTANCE, actualType, state);
         }
 
         @Nullable
