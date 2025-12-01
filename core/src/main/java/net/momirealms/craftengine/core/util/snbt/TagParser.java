@@ -15,6 +15,7 @@ import net.momirealms.sparrow.nbt.codec.LegacyJavaOps;
 import net.momirealms.sparrow.nbt.codec.LegacyNBTOps;
 import net.momirealms.sparrow.nbt.codec.NBTOps;
 
+@SuppressWarnings("unused")
 public class TagParser<T> {
     public static final SimpleCommandExceptionType ERROR_TRAILING_DATA = new LocalizedSimpleCommandExceptionType(
             new LocalizedMessage("warning.config.type.snbt.parser.trailing")
@@ -24,8 +25,8 @@ public class TagParser<T> {
     );
     public static final char ELEMENT_SEPARATOR = ',';
     public static final char NAME_VALUE_SEPARATOR = ':';
-    private static final TagParser<Tag> NBT_OPS_PARSER = create(VersionHelper.isOrAbove1_20_5() ? NBTOps.INSTANCE : LegacyNBTOps.INSTANCE);
-    private static final TagParser<Object> JAVA_OPS_PARSER = create(VersionHelper.isOrAbove1_20_5() ? JavaOps.INSTANCE : LegacyJavaOps.INSTANCE);
+    public static final TagParser<Tag> NBT_OPS_PARSER = create(VersionHelper.isOrAbove1_20_5() ? NBTOps.INSTANCE : LegacyNBTOps.INSTANCE);
+    public static final TagParser<Object> JAVA_OPS_PARSER = create(VersionHelper.isOrAbove1_20_5() ? JavaOps.INSTANCE : LegacyJavaOps.INSTANCE);
     private final DynamicOps<T> ops;
     private final Grammar<T> grammar;
 
@@ -48,15 +49,20 @@ public class TagParser<T> {
         }
         throw ERROR_EXPECTED_COMPOUND.createWithContext(reader);
     }
-
     public static CompoundTag parseCompoundFully(String input) throws CommandSyntaxException {
         StringReader reader = new StringReader(input);
-        return parseCompoundAsArgument(reader);
+        Tag result = NBT_OPS_PARSER.parseFully(reader);
+        return castToCompoundOrThrow(reader, result);
+    }
+
+    public static Tag parseTagFully(String input) throws CommandSyntaxException {
+        StringReader reader = new StringReader(input);
+        return NBT_OPS_PARSER.parseFully(reader);
     }
 
     public static Object parseObjectFully(String input) throws CommandSyntaxException {
         StringReader reader = new StringReader(input);
-        return parseObjectAsArgument(reader);
+        return JAVA_OPS_PARSER.parseFully(reader);
     }
 
     public T parseFully(String input) throws CommandSyntaxException {
@@ -77,8 +83,12 @@ public class TagParser<T> {
     }
 
     public static CompoundTag parseCompoundAsArgument(StringReader reader) throws CommandSyntaxException {
-        Tag tag = NBT_OPS_PARSER.parseAsArgument(reader);
-        return castToCompoundOrThrow(reader, tag);
+        Tag result = parseTagAsArgument(reader);
+        return castToCompoundOrThrow(reader, result);
+    }
+
+    public static Tag parseTagAsArgument(StringReader reader) throws CommandSyntaxException {
+        return NBT_OPS_PARSER.parseAsArgument(reader);
     }
 
     public static Object parseObjectAsArgument(StringReader reader) throws CommandSyntaxException {

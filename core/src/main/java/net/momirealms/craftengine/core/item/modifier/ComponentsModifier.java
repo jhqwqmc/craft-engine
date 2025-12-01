@@ -46,7 +46,7 @@ public class ComponentsModifier<I> implements ItemDataModifier<I> {
             } else if (string.startsWith("(snbt) ")) {
                 String snbt = string.substring("(snbt) ".length());
                 try {
-                    return TagParser.parseCompoundFully(snbt);
+                    return TagParser.parseTagFully(snbt);
                 } catch (CommandSyntaxException e) {
                     throw new LocalizedResourceConfigException("warning.config.type.snbt.invalid_syntax", e.getMessage());
                 }
