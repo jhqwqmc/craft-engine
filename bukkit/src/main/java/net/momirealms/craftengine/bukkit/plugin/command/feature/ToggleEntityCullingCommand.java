@@ -14,11 +14,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.bukkit.parser.PlayerParser;
+import org.incendo.cloud.parser.standard.BooleanParser;
 import org.incendo.cloud.parser.standard.DoubleParser;
 
-public class SetEntityViewDistanceScaleCommand extends BukkitCommandFeature<CommandSender> {
+import java.util.Optional;
 
-    public SetEntityViewDistanceScaleCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
+public class ToggleEntityCullingCommand extends BukkitCommandFeature<CommandSender> {
+
+    public ToggleEntityCullingCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
         super(commandManager, plugin);
     }
 
@@ -27,26 +30,28 @@ public class SetEntityViewDistanceScaleCommand extends BukkitCommandFeature<Comm
         return builder
                 .flag(FlagKeys.SILENT_FLAG)
                 .required("player", PlayerParser.playerParser())
-                .required("scale", DoubleParser.doubleParser(0.125, 8))
+                .optional("state", BooleanParser.booleanParser())
                 .handler(context -> {
                     if (!Config.enableEntityCulling()) {
                         context.sender().sendMessage(Component.text("Entity culling is not enabled on this server").color(NamedTextColor.RED));
                         return;
                     }
-                    if (Config.entityCullingViewDistance() <= 0) {
-                        context.sender().sendMessage(Component.text("View distance is not enabled on this server").color(NamedTextColor.RED));
-                        return;
-                    }
                     Player player = context.get("player");
-                    double scale = context.get("scale");
                     BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-                    serverPlayer.setEntityCullingViewDistanceScale(scale);
-                    handleFeedback(context, MessageConstants.COMMAND_ENTITY_VIEW_DISTANCE_SCALE_SET_SUCCESS, Component.text(scale), Component.text(player.getName()));
+                    Optional<Boolean> state = context.optional("state");
+                    boolean isEnabled = serverPlayer.enableEntityCulling();
+                    if (state.isPresent()) {
+                        serverPlayer.setEnableEntityCulling(state.get());
+                        handleFeedback(context, MessageConstants.COMMAND_TOGGLE_ENTITY_CULLING_SUCCESS, Component.text(state.get()), Component.text(player.getName()));
+                    } else {
+                        serverPlayer.setEnableEntityCulling(!isEnabled);
+                        handleFeedback(context, MessageConstants.COMMAND_TOGGLE_ENTITY_CULLING_SUCCESS, Component.text(!isEnabled), Component.text(player.getName()));
+                    }
                 });
     }
 
     @Override
     public String getFeatureID() {
-        return "set_entity_view_distance_scale";
+        return "toggle_entity_culling";
     }
 }

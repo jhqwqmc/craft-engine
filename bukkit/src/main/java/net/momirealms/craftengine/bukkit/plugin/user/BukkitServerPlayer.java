@@ -74,6 +74,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
     public static final Key ENTITY_CULLING_VIEW_DISTANCE_SCALE = Key.of("craftengine:entity_culling_view_distance_scale");
+    public static final Key ENABLE_ENTITY_CULLING = Key.of("craftengine:enable_entity_culling");
     private final BukkitCraftEngine plugin;
 
     // connection state
@@ -146,6 +147,8 @@ public class BukkitServerPlayer extends Player {
     private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
+    // 是否启用实体剔除
+    private boolean enableEntityCulling;
     // 玩家眼睛所在位置
     private Location eyeLocation;
 
@@ -174,6 +177,7 @@ public class BukkitServerPlayer extends Player {
         byte[] bytes = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(CooldownData.COOLDOWN_KEY), PersistentDataType.BYTE_ARRAY);
         String locale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY), PersistentDataType.STRING);
         Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE);
+        this.enableEntityCulling = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN)).orElse(true);
         this.culling.setDistanceScale(Optional.ofNullable(scale).orElse(1.0));
         this.selectedLocale = TranslationManager.parseLocale(locale);
         this.trackedChunks = ConcurrentLong2ReferenceChainedHashTable.createWithCapacity(512, 0.5f);
@@ -597,38 +601,44 @@ public class BukkitServerPlayer extends Player {
     public void entityCullingTick() {
         this.culling.restoreTokenOnTick();
         boolean useRayTracing = Config.entityCullingRayTracing();
-        for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
-            CullingData cullingData = cullableObject.cullable.cullingData();
-            if (cullingData != null) {
-                boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
-                // 之前可见
-                if (cullableObject.isShown) {
-                    boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
-                    if (!firstPersonVisible && !thirdPersonVisible) {
-                        cullableObject.setShown(this, false);
+        if (this.enableEntityCulling) {
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+                CullingData cullingData = cullableObject.cullable.cullingData();
+                if (cullingData != null) {
+                    boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
+                    // 之前可见
+                    if (cullableObject.isShown) {
+                        boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
+                        if (!firstPersonVisible && !thirdPersonVisible) {
+                            cullableObject.setShown(this, false);
+                        }
                     }
-                }
-                // 之前不可见
-                else {
-                    // 但是第一人称可见了
-                    if (firstPersonVisible) {
-                        // 下次再说
-                        if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                    // 之前不可见
+                    else {
+                        // 但是第一人称可见了
+                        if (firstPersonVisible) {
+                            // 下次再说
+                            if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                                continue;
+                            }
+                            cullableObject.setShown(this, true);
                             continue;
                         }
-                        cullableObject.setShown(this, true);
-                        continue;
-                    }
-                    if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
-                        // 下次再说
-                        if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
-                            continue;
+                        if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
+                            // 下次再说
+                            if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                                continue;
+                            }
+                            cullableObject.setShown(this, true);
                         }
-                        cullableObject.setShown(this, true);
+                        // 仍然不可见
                     }
-                    // 仍然不可见
+                } else {
+                    cullableObject.setShown(this, true);
                 }
-            } else {
+            }
+        } else {
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullableObject.setShown(this, true);
             }
         }
@@ -1339,6 +1349,17 @@ public class BukkitServerPlayer extends Player {
         value = Math.min(Math.max(0.125, value), 8);
         this.culling.setDistanceScale(value);
         platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE, value);
+    }
+
+    @Override
+    public void setEnableEntityCulling(boolean enable) {
+        this.enableEntityCulling = enable;
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN, enable);
+    }
+
+    @Override
+    public boolean enableEntityCulling() {
+        return enableEntityCulling;
     }
 
     @Override

@@ -193,6 +193,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setEntityCullingViewDistanceScale(double value);
 
+    public abstract void setEnableEntityCulling(boolean enable);
+
+    public abstract boolean enableEntityCulling();
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);
