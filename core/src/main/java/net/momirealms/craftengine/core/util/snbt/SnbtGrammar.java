@@ -246,11 +246,12 @@ public class SnbtGrammar {
         T falseValue = ops.createBoolean(false);
         T emptyMapValue = ops.emptyMap();
         T emptyList = ops.emptyList();
-        T nullString = ops.createString("null");
-        boolean isJavaType = "null".equals(nullString); // 确定是 Java 类型的
+        T nullString = ops.createString(SnbtOperations.BUILTIN_NULL);
+        boolean isJavaType = SnbtOperations.BUILTIN_NULL.equals(nullString); // 确定是 Java 类型的
 
         Dictionary<StringReader> rules = new Dictionary<>();
 
+        // 符号解析规则
         Atom<Sign> sign = Atom.of("sign");
         rules.put(
                 sign,
@@ -261,6 +262,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(sign)
         );
 
+        // 整数后缀解析规则
         Atom<IntegerSuffix> integerSuffix = Atom.of("integer_suffix");
         rules.put(
                 integerSuffix,
@@ -291,15 +293,19 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(integerSuffix)
         );
 
+        // 二进制解析规则
         Atom<String> binaryNumeral = Atom.of("binary_numeral");
         rules.put(binaryNumeral, BINARY_NUMERAL);
 
+        // 十进制解析规则
         Atom<String> decimalNumeral = Atom.of("decimal_numeral");
         rules.put(decimalNumeral, DECIMAL_NUMERAL);
 
+        // 十六进制解析规则
         Atom<String> hexNumeral = Atom.of("hex_numeral");
         rules.put(hexNumeral, HEX_NUMERAL);
 
+        // 整数常量解析规则
         Atom<IntegerLiteral> integerLiteral = Atom.of("integer_literal");
         NamedRule<StringReader, IntegerLiteral> integerLiteralRule = rules.put(
                 integerLiteral,
@@ -336,6 +342,7 @@ public class SnbtGrammar {
                 }
         );
 
+        // 浮点型后缀解析规则
         Atom<TypeSuffix> floatTypeSuffix = Atom.of("float_type_suffix");
         rules.put(
                 floatTypeSuffix,
@@ -346,6 +353,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(floatTypeSuffix)
         );
 
+        // 浮点数指数部分解析规则
         Atom<Signed<String>> floatExponentPart = Atom.of("float_exponent_part");
         rules.put(
                 floatExponentPart,
@@ -357,8 +365,9 @@ public class SnbtGrammar {
                 scope -> new Signed<>(scope.getOrDefault(sign, Sign.PLUS), scope.getOrThrow(decimalNumeral))
         );
 
-        Atom<String> floatWholePart = Atom.of("float_whole_part");
-        Atom<String> floatFractionPart = Atom.of("float_fraction_part");
+        // 浮点数常量解析规则
+        Atom<String> floatWholePart = Atom.of("float_whole_part"); // 整数部分
+        Atom<String> floatFractionPart = Atom.of("float_fraction_part"); // 小数部分
         Atom<T> floatLiteral = Atom.of("float_literal");
         rules.putComplex(
                 floatLiteral,
@@ -404,18 +413,23 @@ public class SnbtGrammar {
                 }
         );
 
+        // 二位十六进制字符串解析规则
         Atom<String> stringHex2 = Atom.of("string_hex_2");
         rules.put(stringHex2, new SimpleHexLiteralParseRule(2));
 
+        // 四位十六进制字符串解析规则
         Atom<String> stringHex4 = Atom.of("string_hex_4");
         rules.put(stringHex4, new SimpleHexLiteralParseRule(4));
 
+        // 八位十六进制字符串解析规则
         Atom<String> stringHex8 = Atom.of("string_hex_8");
         rules.put(stringHex8, new SimpleHexLiteralParseRule(8));
 
+        // Unicode名称字符串解析规则
         Atom<String> stringUnicodeName = Atom.of("string_unicode_name");
         rules.put(stringUnicodeName, new GreedyPatternParseRule(UNICODE_NAME, ERROR_INVALID_CHARACTER_NAME));
 
+        // 字符串转义序列解析规则
         Atom<String> stringEscapeSequence = Atom.of("string_escape_sequence");
         rules.putComplex(
                 stringEscapeSequence,
@@ -468,11 +482,15 @@ public class SnbtGrammar {
                 }
         );
 
+        // 纯文本字符串解析规则
         Atom<String> stringPlainContents = Atom.of("string_plain_contents");
         rules.put(stringPlainContents, PLAIN_STRING_CHUNK);
 
-        Atom<List<String>> stringChunks = Atom.of("string_chunks");
-        Atom<String> stringContents = Atom.of("string_contents");
+        // 字符串解析规则
+        Atom<List<String>> stringChunks = Atom.of("string_chunks"); // 字符串块
+        Atom<String> stringContents = Atom.of("string_contents"); // 字符串内容
+
+        // 单引号字符串块解析规则
         Atom<String> singleQuotedStringChunk = Atom.of("single_quoted_string_chunk");
         NamedRule<StringReader, String> singleQuotedStringChunkRule = rules.put(
                 singleQuotedStringChunk,
@@ -483,6 +501,8 @@ public class SnbtGrammar {
                 ),
                 scope -> scope.getOrThrow(stringContents)
         );
+
+        // 单引号字符串内容解析规则
         Atom<String> singleQuotedStringContents = Atom.of("single_quoted_string_contents");
         rules.put(
                 singleQuotedStringContents,
@@ -490,6 +510,7 @@ public class SnbtGrammar {
                 scope -> joinList(scope.getOrThrow(stringChunks))
         );
 
+        // 双引号字符串块解析规则
         Atom<String> doubleQuotedStringChunk = Atom.of("double_quoted_string_chunk");
         NamedRule<StringReader, String> doubleQuotedStringChunkRule = rules.put(
                 doubleQuotedStringChunk,
@@ -500,6 +521,8 @@ public class SnbtGrammar {
                 ),
                 scope -> scope.getOrThrow(stringContents)
         );
+
+        // 双引号字符串内容解析规则
         Atom<String> doubleQuotedStringContents = Atom.of("double_quoted_string_contents");
         rules.put(
                 doubleQuotedStringContents,
@@ -507,6 +530,7 @@ public class SnbtGrammar {
                 scope -> joinList(scope.getOrThrow(stringChunks))
         );
 
+        // 带引号的字符串字面量解析规则
         Atom<String> quotedStringLiteral = Atom.of("quoted_string_literal");
         rules.put(
                 quotedStringLiteral,
@@ -526,14 +550,16 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(stringContents)
         );
 
+        // 不带引号的字符串解析规则
         Atom<String> unquotedString = Atom.of("unquoted_string");
         rules.put(
                 unquotedString,
                 new UnquotedStringParseRule(1, ERROR_EXPECTED_UNQUOTED_STRING)
         );
 
-        Atom<T> literal = Atom.of("literal");
-        Atom<List<T>> argumentList = Atom.of("arguments");
+        // 列表解析规则
+        Atom<T> literal = Atom.of("literal"); // 字面量
+        Atom<List<T>> argumentList = Atom.of("arguments"); // 参数
         rules.put(
                 argumentList,
                 Term.repeatedWithTrailingSeparator(
@@ -544,6 +570,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(argumentList)
         );
 
+        // 不带引号的字符串或内置表达式解析规则
         Atom<T> unquotedStringOrBuiltIn = Atom.of("unquoted_string_or_builtin");
         rules.putComplex(
                 unquotedStringOrBuiltIn,
@@ -558,9 +585,9 @@ public class SnbtGrammar {
                 state -> {
                     Scope scope = state.scope();
                     String contents = scope.getOrThrow(unquotedString);
-                    if (!contents.isEmpty() && isAllowedToStartUnquotedString(contents.charAt(0))) {
+                    if (!contents.isEmpty() && isAllowedToStartUnquotedString(contents.charAt(0))) { // 非空且是合法开头字符
                         List<T> arguments = scope.get(argumentList);
-                        if (arguments != null) {
+                        if (arguments != null) { // 带参数尝试解析内置表达式
                             SnbtOperations.BuiltinKey key = new SnbtOperations.BuiltinKey(contents, arguments.size());
                             SnbtOperations.BuiltinOperation operation = SnbtOperations.BUILTIN_OPERATIONS.get(key);
                             if (operation != null) {
@@ -568,16 +595,17 @@ public class SnbtGrammar {
                             }
                             state.errorCollector().store(state.mark(), DelayedException.create(ERROR_NO_SUCH_OPERATION, key.toString()));
                             return null;
-                        } else if (contents.equalsIgnoreCase("true")) {
+                        } else if (contents.equalsIgnoreCase(SnbtOperations.BUILTIN_TRUE)) { // 解析不带引号的 true 为布尔值
                             return trueValue;
-                        } else if (contents.equalsIgnoreCase("false")) {
+                        } else if (contents.equalsIgnoreCase(SnbtOperations.BUILTIN_FALSE)) { // 解析不带引号的 false 为布尔值
                             return falseValue;
-                        } else if (contents.equalsIgnoreCase("null")) {
-                            return Objects.requireNonNullElseGet(ops.empty(), () -> {
+                        } else if (contents.equalsIgnoreCase(SnbtOperations.BUILTIN_NULL)) { // 解析不带引号的 null 为空值，该功能并非标准 SNBT 语法
+                            return Objects.requireNonNullElseGet(ops.empty() /*一般来说这里都不会是null*/, () -> {
                                 if (isJavaType) {
+                                    // 如果是 null 一般就是使用 Object 对象的 Java 类型，可以安全的强行转换
                                     return (T) CachedParseState.JAVA_NULL_VALUE_MARKER;
                                 }
-                                return nullString;
+                                return nullString; // 意外情况保持 SNBT 默认行为
                             });
                         }
                         return ops.createString(contents);
@@ -587,6 +615,7 @@ public class SnbtGrammar {
                 }
         );
 
+        // 映射键解析规则
         Atom<String> mapKey = Atom.of("map_key");
         rules.put(
                 mapKey,
@@ -597,6 +626,7 @@ public class SnbtGrammar {
                 scope -> scope.getAnyOrThrow(quotedStringLiteral, unquotedString)
         );
 
+        // 映射条目解析规则
         Atom<Entry<String, T>> mapEntry = Atom.of("map_entry");
         NamedRule<StringReader, Entry<String, T>> mapEntryRule = rules.putComplex(
                 mapEntry,
@@ -617,6 +647,7 @@ public class SnbtGrammar {
                 }
         );
 
+        // 映射条目集合解析规则
         Atom<List<Entry<String, T>>> mapEntries = Atom.of("map_entries");
         rules.put(
                 mapEntries,
@@ -628,6 +659,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(mapEntries)
         );
 
+        // 映射字面量解析规则
         Atom<T> mapLiteral = Atom.of("map_literal");
         rules.put(
                 mapLiteral,
@@ -651,6 +683,7 @@ public class SnbtGrammar {
                 }
         );
 
+        // 列表条目集合解析规则
         Atom<List<T>> listEntries = Atom.of("list_entries");
         rules.put(
                 listEntries,
@@ -662,6 +695,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(listEntries)
         );
 
+        // 数组前缀解析规则
         Atom<ArrayPrefix> arrayPrefix = Atom.of("array_prefix");
         rules.put(
                 arrayPrefix,
@@ -673,6 +707,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(arrayPrefix)
         );
 
+        // 整数数组条目集合解析规则
         Atom<List<IntegerLiteral>> intArrayEntries = Atom.of("int_array_entries");
         rules.put(
                 intArrayEntries,
@@ -684,6 +719,7 @@ public class SnbtGrammar {
                 scope -> scope.getOrThrow(intArrayEntries)
         );
 
+        // 列表字面量解析规则
         Atom<T> listLiteral = Atom.of("list_literal");
         rules.putComplex(
                 listLiteral,
@@ -713,6 +749,7 @@ public class SnbtGrammar {
                 }
         );
 
+        // 基本规则解析规则
         NamedRule<StringReader, T> literalRule = rules.putComplex(
                 literal,
                 Term.alternative(

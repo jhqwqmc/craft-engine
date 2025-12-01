@@ -23,6 +23,7 @@ public class SnbtOperations {
     );
     public static final String BUILTIN_TRUE = "true";
     public static final String BUILTIN_FALSE = "false";
+    public static final String BUILTIN_NULL = "null";
     public static final Map<BuiltinKey, BuiltinOperation> BUILTIN_OPERATIONS = Map.of(
             new BuiltinKey("bool", 1), new BuiltinOperation() {
                 @Override
@@ -67,7 +68,7 @@ public class SnbtOperations {
     );
     public static final SuggestionSupplier<StringReader> BUILTIN_IDS = new SuggestionSupplier<>() {
         private final Set<String> keys = Stream.concat(
-                        Stream.of(BUILTIN_FALSE, BUILTIN_TRUE), SnbtOperations.BUILTIN_OPERATIONS.keySet().stream().map(BuiltinKey::id)
+                        Stream.of(BUILTIN_FALSE, BUILTIN_TRUE, BUILTIN_NULL), SnbtOperations.BUILTIN_OPERATIONS.keySet().stream().map(BuiltinKey::id)
                 )
                 .collect(Collectors.toSet());
 
