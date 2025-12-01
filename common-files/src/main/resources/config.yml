@@ -197,8 +197,7 @@ resource-pack:
         deny-non-minecraft-request: true
         # Generates a single-use, time-limited download link for each player.
         one-time-token: true
-        # Enhances validation for deny-non-minecraft-request and one-time-token.
-        # Do not enable this on an offline server
+        # Improved validation for deny-non-minecraft-request and one-time-token; do not enable on offline servers or validation will fail.
         strict-validation: false
         rate-limiting:
           # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
