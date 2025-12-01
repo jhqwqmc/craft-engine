@@ -15,12 +15,12 @@ public class InactiveCustomEntity extends CustomEntity {
     private final CompoundTag data;
 
     public InactiveCustomEntity(UUID uuid, WorldPosition position) {
-        super(CustomEntityTypes.INACTIVE, position, uuid);
+        super(CustomEntityTypes.INACTIVE, uuid, position);
         this.data = INVALID_TAG;
     }
 
     public InactiveCustomEntity(UUID uuid, WorldPosition position, CompoundTag data) {
-        super(CustomEntityTypes.INACTIVE, position, uuid);
+        super(CustomEntityTypes.INACTIVE, uuid, position);
         this.data = data;
     }
 

@@ -13,7 +13,7 @@ public abstract class CustomEntity implements Cullable {
     protected WorldPosition position;
     protected boolean valid = true;
 
-    protected CustomEntity(CustomEntityType<?> type, WorldPosition position, UUID uuid) {
+    protected CustomEntity(CustomEntityType<?> type, UUID uuid, WorldPosition position) {
         this.position = position;
         this.type = type;
         this.uuid = uuid;

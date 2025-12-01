@@ -24,7 +24,7 @@ public class FurnitureDataAccessor {
     private final CompoundTag data;
 
     public FurnitureDataAccessor(CompoundTag data) {
-        this.data = data;
+        this.data = data == null ? new CompoundTag() : data;
     }
 
     public static FurnitureDataAccessor of(CompoundTag data) {
