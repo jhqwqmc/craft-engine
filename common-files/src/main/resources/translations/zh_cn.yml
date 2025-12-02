@@ -159,6 +159,7 @@ warning.config.recipe.smithing_transform.post_processor.missing_type: "<yellow>�
 warning.config.recipe.smithing_transform.post_processor.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 锻造升级配方 '<arg:1>' 使用了无效的后处理器类型 '<arg:2>'</yellow>"
 warning.config.recipe.smithing_transform.post_processor.keep_component.missing_components: "<yellow>在文件 <arg:0> 发现问题 - 锻造升级配方 '<arg:1>' 的 'keep_components' 后处理器缺少必需的 'components' 参数</yellow>"
 warning.config.recipe.smithing_transform.post_processor.keep_component.missing_tags: "<yellow>在文件 <arg:0> 发现问题 - 锻造升级配方 '<arg:1>' 的 'keep_tags' 后处理器缺少必需的 'tags' 参数</yellow>"
+warning.config.recipe.smithing_transform.post_processor.keep_custom_data.missing_paths: "<yellow>在文件 <arg:0> 发现问题 - 锻造升级配方 '<arg:1>' 的 'keep_custom_data' 后处理器缺少必需的 'paths' 参数</yellow>"
 warning.config.recipe.smithing_transform.missing_base: "<yellow>在文件 <arg:0> 发现问题 - 锻造升级配方 '<arg:1>' 缺少必需的 'base' 参数</yellow>"
 warning.config.recipe.smithing_trim.missing_base: "<yellow>在文件 <arg:0> 发现问题 - 锻造纹饰配方 '<arg:1>' 缺少必需的 'base' 参数</yellow>"
 warning.config.recipe.smithing_trim.missing_template_type: "<yellow>在文件 <arg:0> 发现问题 - 锻造纹饰配方 '<arg:1>' 缺少必需的 'template-type' 参数</yellow>"

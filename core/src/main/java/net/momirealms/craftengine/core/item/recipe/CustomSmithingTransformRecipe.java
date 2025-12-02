@@ -155,7 +155,6 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     private T createSmithingResult(Item<T> base, T result) {
         Item<T> wrappedResult = (Item<T>) CraftEngine.instance().itemManager().wrap(result);
         Item<T> finalResult = wrappedResult;
-        Optional<Key> customId = finalResult.customId(); // 修复在保留custom_data组件的时候意外保留前物品的id
         if (this.mergeComponents) {
             finalResult = base.mergeCopy(wrappedResult);
         }
@@ -163,9 +162,6 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             for (ItemDataProcessor processor : this.processors) {
                 processor.accept(base, wrappedResult, finalResult);
             }
-        }
-        if (customId.isPresent()) {
-            finalResult.customId(customId.get());
         }
         return finalResult.getItem();
     }
@@ -233,10 +229,12 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         public static final Key KEEP_COMPONENTS = Key.of("craftengine:keep_components");
         public static final Key KEEP_TAGS = Key.of("craftengine:keep_tags");
         public static final Key MERGE_ENCHANTMENTS = Key.of("craftengine:merge_enchantments");
+        public static final Key KEEP_CUSTOM_DATA = Key.of("craftengine:keep_custom_data");
 
         static {
             if (VersionHelper.isOrAbove1_20_5()) {
                 register(KEEP_COMPONENTS, KeepComponents.FACTORY);
+                register(KEEP_CUSTOM_DATA, KeepCustomData.FACTORY);
             } else {
                 register(KEEP_TAGS, KeepTags.FACTORY);
             }
@@ -316,6 +314,42 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         }
     }
 
+    public static class KeepCustomData implements ItemDataProcessor {
+        public static final Factory FACTORY = new Factory();
+        private final List<String[]> paths;
+
+        public KeepCustomData(List<String[]> data) {
+            this.paths = data;
+        }
+
+        @Override
+        public void accept(Item<?> item1, Item<?> item2, Item<?> item3) {
+            for (String[] path : this.paths) {
+                Object dataObj = item1.getJavaTag((Object[]) path);
+                if (dataObj != null) {
+                    item3.setTag(dataObj, (Object[]) path);
+                }
+            }
+        }
+
+        @Override
+        public Key type() {
+            return ItemDataProcessors.KEEP_CUSTOM_DATA;
+        }
+
+        public static class Factory implements ProcessorFactory {
+
+            @Override
+            public ItemDataProcessor create(Map<String, Object> arguments) {
+                List<String> paths = MiscUtils.getAsStringList(ResourceConfigUtils.requireNonNullOrThrow(
+                        arguments.get("paths"),
+                        "warning.config.recipe.smithing_transform.post_processor.keep_custom_data.missing_paths")
+                );
+                return new KeepCustomData(paths.stream().map(it -> it.split("\\.")).toList());
+            }
+        }
+    }
+
     public static class KeepComponents implements ItemDataProcessor {
         public static final Factory FACTORY = new Factory();
         private final List<Key> components;
@@ -340,6 +374,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         }
 
         public static class Factory implements ProcessorFactory {
+            private static final Key CUSTOM_DATA = Key.of("minecraft", "custom_data");
 
             @Override
             public ItemDataProcessor create(Map<String, Object> arguments) {
@@ -348,7 +383,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                     throw new LocalizedResourceConfigException("warning.config.recipe.smithing_transform.post_processor.keep_component.missing_components");
                 }
                 List<String> components = MiscUtils.getAsStringList(componentsObj);
-                return new KeepComponents(components.stream().map(Key::of).toList());
+                return new KeepComponents(components.stream().map(Key::of).filter(it -> !CUSTOM_DATA.equals(it)).toList());
             }
         }
     }
