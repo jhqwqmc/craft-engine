@@ -1,6 +1,10 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
@@ -15,13 +19,12 @@ import net.momirealms.craftengine.core.world.Cullable;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public abstract class Furniture implements Cullable {
@@ -29,18 +32,20 @@ public abstract class Furniture implements Cullable {
     public final FurnitureDataAccessor dataAccessor;
     public final WeakReference<Entity> metaDataEntity;
 
+    protected CullingData cullingData;
     protected FurnitureVariant currentVariant;
     protected FurnitureElement[] elements;
     protected Collider[] colliders;
     protected FurnitureHitBox[] hitboxes;
-
     protected Int2ObjectMap<FurnitureHitBox> hitboxMap;
-    protected int[] entityIds;
+    protected int[] virtualEntityIds;
+    protected int[] colliderEntityIds;
 
     protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, FurnitureConfig config) {
         this.config = config;
         this.dataAccessor = data;
         this.metaDataEntity = new WeakReference<>(metaDataEntity);
+        this.setVariant(config.getVariant(data));
     }
 
     public WeakReference<Entity> metaDataEntity() {
@@ -48,25 +53,24 @@ public abstract class Furniture implements Cullable {
     }
 
     public FurnitureVariant getCurrentVariant() {
-        return currentVariant;
-    }
-
-    public String getCurrentVariantName() {
-        return null;
+        return this.currentVariant;
     }
 
     public void setVariant(FurnitureVariant variant) {
         this.currentVariant = variant;
-        WorldPosition position = this.position();
+        this.hitboxMap = new Int2ObjectOpenHashMap<>();
         // 初始化家具元素
+        IntList virtualEntityIds = new IntArrayList();
         FurnitureElementConfig<?>[] elementConfigs = variant.elementConfigs();
         this.elements = new FurnitureElement[elementConfigs.length];
         for (int i = 0; i < elementConfigs.length; i++) {
-            this.elements[i] = elementConfigs[i].create(this);
+            FurnitureElement element = elementConfigs[i].create(this);
+            this.elements[i] = element;
+            element.collectVirtualEntityId(virtualEntityIds::addLast);
         }
         // 初始化碰撞箱
-        FurnitureHitBoxConfig<?>[] furnitureHitBoxConfigs = variant.furnitureHitBoxConfigs();
-        List<Collider> colliders = new ArrayList<>(furnitureHitBoxConfigs.length);
+        FurnitureHitBoxConfig<?>[] furnitureHitBoxConfigs = variant.hitBoxConfigs();
+        ObjectArrayList<Collider> colliders = new ObjectArrayList<>(furnitureHitBoxConfigs.length);
         this.hitboxes = new FurnitureHitBox[furnitureHitBoxConfigs.length];
         for (int i = 0; i < furnitureHitBoxConfigs.length; i++) {
             FurnitureHitBox hitbox = furnitureHitBoxConfigs[i].create(this);
@@ -74,12 +78,23 @@ public abstract class Furniture implements Cullable {
             for (int hitboxEntityId : hitbox.virtualEntityIds()) {
                 this.hitboxMap.put(hitboxEntityId, hitbox);
             }
-            Collider collider = hitbox.collider();
-            if (collider != null) {
-                colliders.add(collider);
-            }
+            colliders.addAll(hitbox.colliders());
+            hitbox.collectVirtualEntityIds(virtualEntityIds::addLast);
         }
+        // 虚拟碰撞箱的实体id
+        this.virtualEntityIds = virtualEntityIds.toIntArray();
         this.colliders = colliders.toArray(new Collider[0]);
+        this.colliderEntityIds = colliders.stream().mapToInt(Collider::entityId).toArray();
+        this.cullingData = createCullingData(variant.cullingData());
+    }
+
+    private CullingData createCullingData(CullingData parent) {
+        if (parent == null) return null;
+        AABB aabb = parent.aabb;
+        WorldPosition position = position();
+        Vec3d pos1 = getRelativePosition(position, new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ));
+        Vec3d pos2 = getRelativePosition(position, new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ));
+        return new CullingData(new AABB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
     }
 
     @Nullable
@@ -90,15 +105,20 @@ public abstract class Furniture implements Cullable {
     @Nullable
     @Override
     public CullingData cullingData() {
-        return this.config.cullingData();
+        return this.cullingData;
     }
 
     public Key id() {
         return this.config.id();
     }
 
-    public int[] entityIds() {
-        return this.entityIds;
+    // 会发给玩家的包
+    public int[] virtualEntityIds() {
+        return this.virtualEntityIds;
+    }
+
+    public int[] colliderEntityIds() {
+        return colliderEntityIds;
     }
 
     public UUID uuid() {
@@ -146,11 +166,11 @@ public abstract class Furniture implements Cullable {
     public abstract void destroy();
 
     public FurnitureConfig config() {
-        return config;
+        return this.config;
     }
 
     public FurnitureDataAccessor dataAccessor() {
-        return dataAccessor;
+        return this.dataAccessor;
     }
 
     public Collider[] colliders() {

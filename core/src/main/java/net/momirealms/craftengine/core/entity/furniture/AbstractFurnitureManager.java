@@ -124,7 +124,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 String variantName = e0.getKey();
                 Map<String, Object> variantArguments = ResourceConfigUtils.getAsMap(e0.getValue(), variantName);
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
-                List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elementConfigs"), FurnitureElementConfigs::fromMap);
+                List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
 
                 // fixme 外部模型不应该在这
                 Optional<ExternalModel> externalModel;
@@ -141,7 +141,12 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     hitboxes = List.of(defaultHitBox());
                 }
 
+                // fixme 动态计算aabb，因为家具具有朝向
+                AABB maxAABB = new AABB(0,0,0,1,1,1);
+
                 variants.put(variantName, new FurnitureVariant(
+                    variantName,
+                    parseCullingData(section.get("entity-culling"), maxAABB),
                     elements.toArray(new FurnitureElementConfig[0]),
                     hitboxes.toArray(new FurnitureHitBoxConfig[0]),
                     externalModel,
@@ -149,15 +154,13 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 ));
             }
 
-            AABB maxAABB = null;
-
             FurnitureConfig furniture = FurnitureConfig.builder()
                     .id(id)
                     .settings(FurnitureSettings.fromMap(MiscUtils.castToMap(section.get("settings"), true)))
                     .variants(variants)
                     .events(EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event")))
                     .lootTable(LootTable.fromMap(MiscUtils.castToMap(section.get("loot"), true)))
-                    .cullingData(parseCullingData(section.get("entity-culling"), maxAABB))
+
                     .build();
             AbstractFurnitureManager.this.byId.put(id, furniture);
         }

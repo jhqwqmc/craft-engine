@@ -5,23 +5,20 @@ import net.momirealms.craftengine.bukkit.nms.CollisionEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
+import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Interaction;
-import org.bukkit.entity.ItemDisplay;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.HandlerList;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +43,8 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     private final BukkitCraftEngine plugin;
 
     private final Map<Integer, BukkitFurniture> byMetaEntityId = new ConcurrentHashMap<>(256, 0.5f);
-    private final Map<Integer, BukkitFurniture> byEntityId = new ConcurrentHashMap<>(512, 0.5f);
+    private final Map<Integer, BukkitFurniture> byVirtualEntityId = new ConcurrentHashMap<>(512, 0.5f);
+    private final Map<Integer, BukkitFurniture> byColliderEntityId = new ConcurrentHashMap<>(512, 0.5f);
     // Event listeners
     private final FurnitureEventListener furnitureEventListener;
 
@@ -63,31 +61,25 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
     @Override
     public Furniture place(WorldPosition position, FurnitureConfig furniture, FurnitureDataAccessor dataAccessor, boolean playSound) {
-//        return this.place(LocationUtils.toLocation(position), furniture, dataAccessor, playSound);
-        return null;
+        return this.place(LocationUtils.toLocation(position), furniture, dataAccessor, playSound);
     }
 
-    public BukkitFurniture place(Location location, FurnitureConfig furniture, FurnitureDataAccessor extraData, boolean playSound) {
-//        Optional<AnchorType> optionalAnchorType = extraData.anchorType();
-//        if (optionalAnchorType.isEmpty() || !furniture.isAllowedPlacement(optionalAnchorType.get())) {
-//            extraData.anchorType(furniture.getAnyAnchorType());
-//        }
-//        Entity furnitureEntity = EntityUtils.spawnEntity(location.getWorld(), location, EntityType.ITEM_DISPLAY, entity -> {
-//            ItemDisplay display = (ItemDisplay) entity;
-//            display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_KEY, PersistentDataType.STRING, furniture.id().toString());
-//            try {
-//                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, extraData.toBytes());
-//            } catch (IOException e) {
-//                this.plugin.logger().warn("Failed to set furniture PDC for " + furniture.id().toString(), e);
-//            }
-//            handleBaseEntityLoadEarly(display);
-//        });
-//        if (playSound) {
-//            SoundData data = furniture.settings().sounds().placeSound();
-//            location.getWorld().playSound(location, data.id().toString(), SoundCategory.BLOCKS, data.volume().get(), data.pitch().get());
-//        }
-//        return loadedFurnitureByRealEntityId(furnitureEntity.getEntityId());
-        return null;
+    public BukkitFurniture place(Location location, FurnitureConfig furniture, FurnitureDataAccessor data, boolean playSound) {
+        Entity furnitureEntity = EntityUtils.spawnEntity(location.getWorld(), location, EntityType.ITEM_DISPLAY, entity -> {
+            ItemDisplay display = (ItemDisplay) entity;
+            display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_KEY, PersistentDataType.STRING, furniture.id().toString());
+            try {
+                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, data.toBytes());
+            } catch (IOException e) {
+                this.plugin.logger().warn("Failed to set furniture PDC for " + furniture.id().toString(), e);
+            }
+            handleMetaEntityAfterChunkLoad(display);
+        });
+        if (playSound) {
+            SoundData sound = furniture.settings().sounds().placeSound();
+            location.getWorld().playSound(location, sound.id().toString(), SoundCategory.BLOCKS, sound.volume().get(), sound.pitch().get());
+        }
+        return loadedFurnitureByMetaEntityId(furnitureEntity.getEntityId());
     }
 
     @Override
@@ -138,43 +130,59 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     @Override
-    public boolean isFurnitureRealEntity(int entityId) {
+    public boolean isFurnitureMetaEntity(int entityId) {
         return this.byMetaEntityId.containsKey(entityId);
     }
 
     @Nullable
     @Override
-    public BukkitFurniture loadedFurnitureByRealEntityId(int entityId) {
+    public BukkitFurniture loadedFurnitureByMetaEntityId(int entityId) {
         return this.byMetaEntityId.get(entityId);
     }
 
-    @Override
     @Nullable
-    public BukkitFurniture loadedFurnitureByEntityId(int entityId) {
-        return this.byEntityId.get(entityId);
+    @Override
+    public BukkitFurniture loadedFurnitureByVirtualEntityId(int entityId) {
+        return this.byVirtualEntityId.get(entityId);
     }
 
+    @Nullable
+    @Override
+    public BukkitFurniture loadedFurnitureByColliderEntityId(int entityId) {
+        return this.byColliderEntityId.get(entityId);
+    }
+
+    // 当元数据实体被卸载了
     protected void handleMetaEntityUnload(Entity entity) {
+        // 不是持久化的
+        if (!entity.isPersistent()) {
+            return;
+        }
         int id = entity.getEntityId();
         BukkitFurniture furniture = this.byMetaEntityId.remove(id);
         if (furniture != null) {
             Location location = entity.getLocation();
-            // 区块还在加载的时候，就重复卸载了
+            // 区块还在加载的时候，就重复卸载了。为极其特殊情况
             boolean isPreventing = FastNMS.INSTANCE.method$ServerLevel$isPreventingStatusUpdates(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(location.getWorld()), location.getBlockX() >> 4, location.getBlockZ() >> 4);
             if (!isPreventing) {
                 furniture.destroySeats();
             }
-            for (int sub : furniture.entityIds()) {
-                this.byEntityId.remove(sub);
+            for (int sub : furniture.virtualEntityIds()) {
+                this.byVirtualEntityId.remove(sub);
+            }
+            for (int sub : furniture.colliderEntityIds()) {
+                this.byColliderEntityId.remove(sub);
             }
         }
     }
 
+    // 保险起见，collision实体卸载也移除一下
     protected void handleCollisionEntityUnload(Entity entity) {
         int id = entity.getEntityId();
-        this.byMetaEntityId.remove(id);
+        this.byColliderEntityId.remove(id);
     }
 
+    // 检查这个区块的实体是否已经被加载了
     private boolean isEntitiesLoaded(Location location) {
         CEWorld ceWorld = this.plugin.worldManager().getWorld(location.getWorld());
         CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
@@ -216,8 +224,8 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
         if (previous != null) return;
 
-        BukkitFurniture furniture = addNewFurniture(entity, customFurniture);
-        furniture.addCollidersToWorld();
+        // 创建新的家具
+        createFurnitureInstance(entity, customFurniture);
     }
 
     protected void handleMetaEntityAfterChunkLoad(ItemDisplay entity) {
@@ -245,8 +253,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
         if (previous != null) return;
 
-        BukkitFurniture furniture = addNewFurniture(entity, customFurniture);
-        furniture.addCollidersToWorld();
+        createFurnitureInstance(entity, customFurniture);
     }
 
     protected void handleCollisionEntityAfterChunkLoad(Entity entity) {
@@ -298,17 +305,17 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
     }
 
-    private synchronized BukkitFurniture addNewFurniture(ItemDisplay display, FurnitureConfig furniture) {
+    // 创建家具实例，并初始化碰撞实体
+    private void createFurnitureInstance(ItemDisplay display, FurnitureConfig furniture) {
         BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, getFurnitureDataAccessor(display));
         this.byMetaEntityId.put(display.getEntityId(), bukkitFurniture);
-        for (int entityId : bukkitFurniture.entityIds()) {
-            this.byEntityId.put(entityId, bukkitFurniture);
+        for (int entityId : bukkitFurniture.virtualEntityIds()) {
+            this.byVirtualEntityId.put(entityId, bukkitFurniture);
         }
         for (Collider collisionEntity : bukkitFurniture.colliders()) {
-            int collisionEntityId = FastNMS.INSTANCE.method$Entity$getId(collisionEntity.handle());
-            this.byEntityId.put(collisionEntityId, bukkitFurniture);
+            this.byColliderEntityId.put(collisionEntity.entityId(), bukkitFurniture);
         }
-        return bukkitFurniture;
+        bukkitFurniture.addCollidersToWorld();
     }
 
     @Override

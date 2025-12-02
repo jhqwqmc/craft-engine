@@ -25,7 +25,6 @@ public class BukkitFurniture extends Furniture {
         super(new BukkitEntity(metaEntity), data, config);
         this.metaEntity = new WeakReference<>(metaEntity);
         this.location = metaEntity.getLocation();
-        this.setVariant(super.config().getVariant(data));
     }
 
     @Override

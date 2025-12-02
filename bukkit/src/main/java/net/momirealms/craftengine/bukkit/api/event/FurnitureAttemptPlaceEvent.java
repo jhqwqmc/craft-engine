@@ -2,6 +2,7 @@ package net.momirealms.craftengine.bukkit.api.event;
 
 import net.momirealms.craftengine.core.entity.furniture.AnchorType;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureConfig;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -17,23 +18,20 @@ public final class FurnitureAttemptPlaceEvent extends PlayerEvent implements Can
     private boolean cancelled;
     private final FurnitureConfig furniture;
     private final Location location;
-    private final AnchorType anchorType;
-    private final BlockFace clickedFace;
+    private final FurnitureVariant variant;
     private final Block clickedBlock;
     private final InteractionHand hand;
 
     public FurnitureAttemptPlaceEvent(@NotNull Player player,
                                       @NotNull FurnitureConfig furniture,
-                                      @NotNull AnchorType anchorType,
+                                      @NotNull FurnitureVariant variant,
                                       @NotNull Location location,
-                                      @NotNull BlockFace clickedFace,
                                       @NotNull InteractionHand hand,
                                       @NotNull Block clickedBlock) {
         super(player);
         this.furniture = furniture;
         this.location = location;
-        this.anchorType = anchorType;
-        this.clickedFace = clickedFace;
+        this.variant = variant;
         this.clickedBlock = clickedBlock;
         this.hand = hand;
     }
@@ -49,18 +47,13 @@ public final class FurnitureAttemptPlaceEvent extends PlayerEvent implements Can
     }
 
     @NotNull
-    public BlockFace clickedFace() {
-        return clickedFace;
-    }
-
-    @NotNull
     public Player player() {
         return getPlayer();
     }
 
     @NotNull
-    public AnchorType anchorType() {
-        return anchorType;
+    public FurnitureVariant variant() {
+        return variant;
     }
 
     @NotNull

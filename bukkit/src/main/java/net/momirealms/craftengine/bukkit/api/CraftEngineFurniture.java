@@ -185,7 +185,7 @@ public final class CraftEngineFurniture {
      */
     @Nullable
     public static BukkitFurniture getLoadedFurnitureByBaseEntity(@NotNull Entity baseEntity) {
-        return BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(baseEntity.getEntityId());
+        return BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(baseEntity.getEntityId());
     }
 
     /**
@@ -199,7 +199,7 @@ public final class CraftEngineFurniture {
         if (isSeat(seat)) {
             CompoundTag seatExtraData = BukkitSeatManager.instance().getSeatExtraData(seat);
             int entityId = seatExtraData.getInt("entity_id");
-            BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(entityId);
+            BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entityId);
         }
         return null;
     }
@@ -212,7 +212,7 @@ public final class CraftEngineFurniture {
      */
     public static boolean remove(@NotNull Entity entity) {
         if (!isFurniture(entity)) return false;
-        BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(entity.getEntityId());
+        BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entity.getEntityId());
         if (furniture == null) return false;
         furniture.destroy();
         return true;
@@ -230,7 +230,7 @@ public final class CraftEngineFurniture {
                                  boolean dropLoot,
                                  boolean playSound) {
         if (!isFurniture(entity)) return false;
-        BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(entity.getEntityId());
+        BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entity.getEntityId());
         if (furniture == null) return false;
         remove(furniture, (net.momirealms.craftengine.core.entity.player.Player) null, dropLoot, playSound);
         return true;
@@ -250,7 +250,7 @@ public final class CraftEngineFurniture {
                                  boolean dropLoot,
                                  boolean playSound) {
         if (!isFurniture(entity)) return false;
-        Furniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(entity.getEntityId());
+        Furniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entity.getEntityId());
         if (furniture == null) return false;
         remove(furniture, player, dropLoot, playSound);
         return true;
@@ -320,7 +320,7 @@ public final class CraftEngineFurniture {
             }
         }
         if (playSound) {
-            world.playBlockSound(position, furniture.config().settings().sounds().breakSound());
+            world.playBlockSound(position, furniture.config.settings().sounds().breakSound());
         }
     }
 }

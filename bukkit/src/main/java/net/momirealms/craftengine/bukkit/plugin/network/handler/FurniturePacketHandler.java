@@ -1,22 +1,26 @@
 package net.momirealms.craftengine.bukkit.plugin.network.handler;
 
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
 import net.momirealms.craftengine.core.plugin.network.NMSPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
-import java.util.List;
-
 public class FurniturePacketHandler implements EntityPacketHandler {
-    private final List<Integer> fakeEntities;
+    private final int metaEntityId;
+    private final int[] virtualHitboxEntities;
 
-    public FurniturePacketHandler(List<Integer> fakeEntities) {
-        this.fakeEntities = fakeEntities;
+    public FurniturePacketHandler(int metaEntityId, int[] virtualHitboxEntities) {
+        this.virtualHitboxEntities = virtualHitboxEntities;
+        this.metaEntityId = metaEntityId;
     }
 
     @Override
-    public boolean handleEntitiesRemove(IntList entityIds) {
-        entityIds.addAll(this.fakeEntities);
+    public boolean handleEntitiesRemove(NetWorkUser user, IntList entityIds) {
+        ((Player) user).removeTrackedFurniture(this.metaEntityId);
+        for (int entityId : this.virtualHitboxEntities) {
+            entityIds.add(entityId);
+        }
         return true;
     }
 
@@ -27,6 +31,11 @@ public class FurniturePacketHandler implements EntityPacketHandler {
 
     @Override
     public void handleMove(NetWorkUser user, NMSPacketEvent event, Object packet) {
+        event.setCancelled(true);
+    }
+
+    @Override
+    public void handleMoveAndRotate(NetWorkUser user, NMSPacketEvent event, Object packet) {
         event.setCancelled(true);
     }
 }

@@ -25,6 +25,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -144,6 +145,7 @@ public class BukkitServerPlayer extends Player {
     private int lastStopMiningTick;
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
+    private final Map<Integer, VirtualCullableObject> trackedFurniture = new ConcurrentHashMap<>();
     private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
@@ -603,44 +605,54 @@ public class BukkitServerPlayer extends Player {
         boolean useRayTracing = Config.entityCullingRayTracing();
         if (this.enableEntityCulling) {
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
-                CullingData cullingData = cullableObject.cullable.cullingData();
-                if (cullingData != null) {
-                    boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
-                    // 之前可见
-                    if (cullableObject.isShown) {
-                        boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
-                        if (!firstPersonVisible && !thirdPersonVisible) {
-                            cullableObject.setShown(this, false);
-                        }
-                    }
-                    // 之前不可见
-                    else {
-                        // 但是第一人称可见了
-                        if (firstPersonVisible) {
-                            // 下次再说
-                            if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
-                                continue;
-                            }
-                            cullableObject.setShown(this, true);
-                            continue;
-                        }
-                        if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
-                            // 下次再说
-                            if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
-                                continue;
-                            }
-                            cullableObject.setShown(this, true);
-                        }
-                        // 仍然不可见
-                    }
-                } else {
-                    cullableObject.setShown(this, true);
-                }
+                cullEntity(useRayTracing, cullableObject);
+            }
+            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+                cullEntity(useRayTracing, cullableObject);
             }
         } else {
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullableObject.setShown(this, true);
             }
+            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+                cullableObject.setShown(this, true);
+            }
+        }
+    }
+
+    private void cullEntity(boolean useRayTracing, VirtualCullableObject cullableObject) {
+        CullingData cullingData = cullableObject.cullable.cullingData();
+        if (cullingData != null) {
+            boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
+            // 之前可见
+            if (cullableObject.isShown) {
+                boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
+                if (!firstPersonVisible && !thirdPersonVisible) {
+                    cullableObject.setShown(this, false);
+                }
+            }
+            // 之前不可见
+            else {
+                // 但是第一人称可见了
+                if (firstPersonVisible) {
+                    // 下次再说
+                    if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                        return;
+                    }
+                    cullableObject.setShown(this, true);
+                    return;
+                }
+                if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
+                    // 下次再说
+                    if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                        return;
+                    }
+                    cullableObject.setShown(this, true);
+                }
+                // 仍然不可见
+            }
+        } else {
+            cullableObject.setShown(this, true);
         }
     }
 
@@ -1425,6 +1437,24 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void clearTrackedBlockEntities() {
         this.trackedBlockEntityRenderers.clear();
+    }
+
+    @Override
+    public void addTrackedFurniture(int entityId, Furniture furniture) {
+        this.trackedFurniture.put(entityId, new VirtualCullableObject(furniture));
+    }
+
+    @Override
+    public void removeTrackedFurniture(int entityId) {
+        VirtualCullableObject remove = this.trackedFurniture.remove(entityId);
+        if (remove != null && remove.isShown()) {
+            remove.cullable().hide(this);
+        }
+    }
+
+    @Override
+    public void clearTrackedFurniture() {
+        this.trackedFurniture.clear();
     }
 
     @Override

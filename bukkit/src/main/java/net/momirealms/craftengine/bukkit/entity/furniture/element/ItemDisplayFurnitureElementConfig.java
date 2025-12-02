@@ -2,7 +2,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
-import net.momirealms.craftengine.bukkit.entity.furniture.ItemColorSource;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureColorSource;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
@@ -28,21 +28,21 @@ import java.util.function.BiFunction;
 
 public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
     public static final Factory FACTORY = new Factory();
-    private final BiFunction<Player, ItemColorSource, List<Object>> lazyMetadataPacket;
-    private final BiFunction<Player, ItemColorSource, Item<?>> item;
-    private final Vector3f scale;
-    private final Vector3f position;
-    private final Vector3f translation;
-    private final float xRot;
-    private final float yRot;
-    private final Quaternionf rotation;
-    private final ItemDisplayContext displayContext;
-    private final Billboard billboard;
-    private final float shadowRadius;
-    private final float shadowStrength;
-    private final boolean applyDyedColor;
+    public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
+    public final Key itemId;
+    public final Vector3f scale;
+    public final Vector3f position;
+    public final Vector3f translation;
+    public final float xRot;
+    public final float yRot;
+    public final Quaternionf rotation;
+    public final ItemDisplayContext displayContext;
+    public final Billboard billboard;
+    public final float shadowRadius;
+    public final float shadowStrength;
+    public final boolean applyDyedColor;
 
-    public ItemDisplayFurnitureElementConfig(BiFunction<Player, ItemColorSource, Item<?>> item,
+    public ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
                                              Vector3f position,
                                              Vector3f translation,
@@ -65,10 +65,24 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         this.shadowRadius = shadowRadius;
         this.shadowStrength = shadowStrength;
         this.applyDyedColor = applyDyedColor;
-        this.item = item;
-        this.lazyMetadataPacket = (player, source) -> {
+        this.itemId = itemId;
+        BiFunction<Player, FurnitureColorSource, Item<?>> itemFunction = (player, colorSource) -> {
+            Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
+            if (applyDyedColor && colorSource != null && wrappedItem != null) {
+                Optional.ofNullable(colorSource.dyedColor()).ifPresent(wrappedItem::dyedColor);
+                Optional.ofNullable(colorSource.fireworkColors()).ifPresent(colors -> wrappedItem.fireworkExplosion(new FireworkExplosion(
+                        FireworkExplosion.Shape.SMALL_BALL,
+                        new IntArrayList(colors),
+                        new IntArrayList(),
+                        false,
+                        false
+                )));
+            }
+            return Optional.ofNullable(wrappedItem).orElseGet(() -> BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null));
+        };
+        this.metadata = (player, source) -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemDisplayEntityData.DisplayedItem.addEntityData(item.apply(player, source).getLiteralObject(), dataValues);
+            ItemDisplayEntityData.DisplayedItem.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
             ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
             ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
             ItemDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
@@ -81,52 +95,56 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     }
 
     public Vector3f scale() {
-        return scale;
+        return this.scale;
     }
 
     public Vector3f position() {
-        return position;
+        return this.position;
     }
 
     public Vector3f translation() {
-        return translation;
+        return this.translation;
     }
 
     public float xRot() {
-        return xRot;
+        return this.xRot;
     }
 
     public float yRot() {
-        return yRot;
+        return this.yRot;
     }
 
     public Quaternionf rotation() {
-        return rotation;
+        return this.rotation;
     }
 
     public ItemDisplayContext displayContext() {
-        return displayContext;
+        return this.displayContext;
     }
 
     public Billboard billboard() {
-        return billboard;
+        return this.billboard;
     }
 
     public float shadowRadius() {
-        return shadowRadius;
+        return this.shadowRadius;
     }
 
     public float shadowStrength() {
-        return shadowStrength;
+        return this.shadowStrength;
     }
 
     public boolean applyDyedColor() {
-        return applyDyedColor;
+        return this.applyDyedColor;
+    }
+
+    public Key itemId() {
+        return this.itemId;
     }
 
     @Override
     public ItemDisplayFurnitureElement create(@NotNull Furniture furniture) {
-        return new ItemDisplayFurnitureElement(this);
+        return new ItemDisplayFurnitureElement(furniture, this);
     }
 
     public static class Factory implements FurnitureElementConfigFactory<ItemDisplayFurnitureElement> {
@@ -136,22 +154,9 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item_display.missing_item"));
             boolean applyDyedColor = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color");
             return new ItemDisplayFurnitureElementConfig(
-                    (player, colorSource) -> {
-                        Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
-                        if (applyDyedColor && colorSource != null && wrappedItem != null) {
-                            Optional.ofNullable(colorSource.dyedColor()).ifPresent(wrappedItem::dyedColor);
-                            Optional.ofNullable(colorSource.fireworkColors()).ifPresent(colors -> wrappedItem.fireworkExplosion(new FireworkExplosion(
-                                    FireworkExplosion.Shape.SMALL_BALL,
-                                    new IntArrayList(colors),
-                                    new IntArrayList(),
-                                    false,
-                                    false
-                            )));
-                        }
-                        return Optional.ofNullable(wrappedItem).orElseGet(() -> BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null));
-                    },
+                    itemId,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
-                    ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
+                    ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
                     ResourceConfigUtils.getAsVector3f(arguments.get("translation"), "translation"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 0f), "pitch"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),
@@ -163,5 +168,24 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     applyDyedColor
             );
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ItemDisplayFurnitureElementConfig{" +
+                "metadata=" + metadata +
+                ", itemId=" + itemId +
+                ", scale=" + scale +
+                ", position=" + position +
+                ", translation=" + translation +
+                ", xRot=" + xRot +
+                ", yRot=" + yRot +
+                ", rotation=" + rotation +
+                ", displayContext=" + displayContext +
+                ", billboard=" + billboard +
+                ", shadowRadius=" + shadowRadius +
+                ", shadowStrength=" + shadowStrength +
+                ", applyDyedColor=" + applyDyedColor +
+                '}';
     }
 }

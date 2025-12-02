@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.entity.furniture.Collider;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -53,5 +54,10 @@ public abstract class AbstractFurnitureHitBox implements FurnitureHitBox {
 
     protected Object createDespawnPacket(int[] entityIds) {
         return FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList(entityIds));
+    }
+
+    @Override
+    public void hide(Player player) {
+        player.sendPacket(createDespawnPacket(this.virtualEntityIds()), false);
     }
 }

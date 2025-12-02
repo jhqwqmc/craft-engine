@@ -266,6 +266,8 @@ public final class ResourceConfigUtils {
         if (o == null) return new Vector3f();
         if (o instanceof List<?> list && list.size() == 3) {
             return new Vector3f(Float.parseFloat(list.get(0).toString()), Float.parseFloat(list.get(1).toString()), Float.parseFloat(list.get(2).toString()));
+        } else if (o instanceof Number number) {
+            return new Vector3f(number.floatValue());
         } else {
             String stringFormat = o.toString();
             String[] split = stringFormat.split(",");

@@ -67,8 +67,6 @@ public interface FurnitureConfig {
 
     }
 
-    CullingData cullingData();
-
     static Builder builder() {
         return new FurnitureConfigImpl.BuilderImpl();
     }
@@ -86,8 +84,6 @@ public interface FurnitureConfig {
         Builder events(Map<EventTrigger, List<Function<Context>>> events);
 
         Builder behavior(FurnitureBehavior behavior);
-
-        Builder cullingData(CullingData cullingData);
 
         FurnitureConfig build();
     }

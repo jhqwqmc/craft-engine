@@ -23,7 +23,6 @@ class FurnitureConfigImpl implements FurnitureConfig {
     private final Map<String, FurnitureVariant> variants;
     private final Map<EventTrigger, List<Function<Context>>> events;
     private final FurnitureBehavior behavior;
-    private final CullingData cullingData;
     @Nullable
     private final LootTable<?> lootTable;
 
@@ -32,14 +31,12 @@ class FurnitureConfigImpl implements FurnitureConfig {
                                 @NotNull Map<String, FurnitureVariant> variants,
                                 @NotNull Map<EventTrigger, List<Function<Context>>> events,
                                 @NotNull FurnitureBehavior behavior,
-                                @Nullable CullingData cullingData,
                                 @Nullable LootTable<?> lootTable) {
         this.id = id;
         this.settings = settings;
         this.variants = ImmutableMap.copyOf(variants);
         this.lootTable = lootTable;
         this.behavior = behavior;
-        this.cullingData = cullingData;
         this.events = events;
     }
 
@@ -75,11 +72,6 @@ class FurnitureConfigImpl implements FurnitureConfig {
         return this.behavior;
     }
 
-    @Override
-    public CullingData cullingData() {
-        return this.cullingData;
-    }
-
     @Nullable
     @Override
     public FurnitureVariant getVariant(String variantName) {
@@ -93,11 +85,10 @@ class FurnitureConfigImpl implements FurnitureConfig {
         private Map<EventTrigger, List<Function<Context>>> events;
         private LootTable<?> lootTable;
         private FurnitureBehavior behavior = EmptyFurnitureBehavior.INSTANCE;
-        private CullingData cullingData;
 
         @Override
         public FurnitureConfig build() {
-            return new FurnitureConfigImpl(this.id, this.settings, this.variants, this.events, this.behavior, this.cullingData, this.lootTable);
+            return new FurnitureConfigImpl(this.id, this.settings, this.variants, this.events, this.behavior, this.lootTable);
         }
 
         @Override
@@ -127,12 +118,6 @@ class FurnitureConfigImpl implements FurnitureConfig {
         @Override
         public Builder events(Map<EventTrigger, List<Function<Context>>> events) {
             this.events = events;
-            return this;
-        }
-
-        @Override
-        public Builder cullingData(CullingData cullingData) {
-            this.cullingData = cullingData;
             return this;
         }
 

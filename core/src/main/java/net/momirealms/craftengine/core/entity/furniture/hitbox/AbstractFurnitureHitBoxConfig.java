@@ -10,7 +10,11 @@ public abstract class AbstractFurnitureHitBoxConfig<H extends FurnitureHitBox> i
     protected final boolean blocksBuilding;
     protected final boolean canBeHitByProjectile;
 
-    public AbstractFurnitureHitBoxConfig(SeatConfig[] seats, Vector3f position, boolean canUseItemOn, boolean blocksBuilding, boolean canBeHitByProjectile) {
+    public AbstractFurnitureHitBoxConfig(SeatConfig[] seats,
+                                         Vector3f position,
+                                         boolean canUseItemOn,
+                                         boolean blocksBuilding,
+                                         boolean canBeHitByProjectile) {
         this.seats = seats;
         this.position = position;
         this.canUseItemOn = canUseItemOn;

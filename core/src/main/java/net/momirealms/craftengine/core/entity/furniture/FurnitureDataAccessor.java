@@ -68,12 +68,20 @@ public class FurnitureDataAccessor {
         this.data.putByteArray(ITEM, item.toByteArray());
     }
 
+    public FurnitureColorSource getColorSource() {
+        return new FurnitureColorSource(dyedColor().orElse(null), fireworkExplosionColors().orElse(null));
+    }
+
     public Optional<int[]> fireworkExplosionColors() {
         if (this.data.containsKey(FIREWORK_EXPLOSION_COLORS)) return Optional.of(this.data.getIntArray(FIREWORK_EXPLOSION_COLORS));
         return Optional.empty();
     }
 
     public void setFireworkExplosionColors(int[] colors) {
+        if (colors == null) {
+            this.data.remove(FIREWORK_EXPLOSION_COLORS);
+            return;
+        }
         this.data.putIntArray(FIREWORK_EXPLOSION_COLORS, colors);
     }
 
@@ -82,7 +90,11 @@ public class FurnitureDataAccessor {
         return Optional.empty();
     }
 
-    public void setDyedColor(Color color) {
+    public void setDyedColor(@Nullable Color color) {
+        if (color == null) {
+            this.data.remove(DYED_COLOR);
+            return;
+        }
         this.data.putInt(DYED_COLOR, color.color());
     }
 

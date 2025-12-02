@@ -2,7 +2,11 @@ package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
+import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import org.joml.Vector3f;
+
+import java.util.function.Consumer;
 
 public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
 
@@ -17,4 +21,6 @@ public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
     boolean canBeHitByProjectile();
 
     boolean canUseItemOn();
+
+    void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer);
 }
