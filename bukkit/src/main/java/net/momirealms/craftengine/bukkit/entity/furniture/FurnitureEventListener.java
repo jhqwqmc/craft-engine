@@ -75,8 +75,8 @@ public class FurnitureEventListener implements Listener {
     public void onChunkUnload(ChunkUnloadEvent event) {
         Entity[] entities = event.getChunk().getEntities();
         for (Entity entity : entities) {
-            if (entity instanceof ItemDisplay) {
-                this.manager.handleMetaEntityUnload(entity);
+            if (entity instanceof ItemDisplay itemDisplay) {
+                this.manager.handleMetaEntityUnload(itemDisplay);
             } else if (BukkitFurnitureManager.COLLISION_ENTITY_CLASS.isInstance(entity)) {
                 this.manager.handleCollisionEntityUnload(entity);
             }
@@ -87,8 +87,8 @@ public class FurnitureEventListener implements Listener {
     public void onWorldUnload(WorldUnloadEvent event) {
         List<Entity> entities = event.getWorld().getEntities();
         for (Entity entity : entities) {
-            if (entity instanceof ItemDisplay) {
-                this.manager.handleMetaEntityUnload(entity);
+            if (entity instanceof ItemDisplay itemDisplay) {
+                this.manager.handleMetaEntityUnload(itemDisplay);
             } else if (BukkitFurnitureManager.COLLISION_ENTITY_CLASS.isInstance(entity)) {
                 this.manager.handleCollisionEntityUnload(entity);
             }
@@ -98,8 +98,8 @@ public class FurnitureEventListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEntityUnload(EntityRemoveFromWorldEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof ItemDisplay) {
-            this.manager.handleMetaEntityUnload(entity);
+        if (entity instanceof ItemDisplay itemDisplay) {
+            this.manager.handleMetaEntityUnload(itemDisplay);
         } else if (BukkitFurnitureManager.COLLISION_ENTITY_CLASS.isInstance(entity)) {
             this.manager.handleCollisionEntityUnload(entity);
         }

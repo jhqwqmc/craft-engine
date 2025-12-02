@@ -153,7 +153,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     // 当元数据实体被卸载了
-    protected void handleMetaEntityUnload(Entity entity) {
+    protected void handleMetaEntityUnload(ItemDisplay entity) {
         // 不是持久化的
         if (!entity.isPersistent()) {
             return;

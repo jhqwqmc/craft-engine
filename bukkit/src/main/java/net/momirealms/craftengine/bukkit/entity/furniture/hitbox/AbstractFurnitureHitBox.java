@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitCollider;
 import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeat;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
@@ -8,7 +7,6 @@ import net.momirealms.craftengine.core.entity.furniture.Collider;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
-import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -50,14 +48,5 @@ public abstract class AbstractFurnitureHitBox implements FurnitureHitBox {
     protected Collider createCollider(World world, Vec3d position, AABB ceAABB, boolean canCollide, boolean blocksBuilding, boolean canBeHitByProjectile) {
         Object nmsAABB = FastNMS.INSTANCE.constructor$AABB(ceAABB.minX, ceAABB.minY, ceAABB.minZ, ceAABB.maxX, ceAABB.maxY, ceAABB.maxZ);
         return new BukkitCollider(world.serverWorld(), nmsAABB, position.x, position.y, position.z, canBeHitByProjectile, canCollide, blocksBuilding);
-    }
-
-    protected Object createDespawnPacket(int[] entityIds) {
-        return FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList(entityIds));
-    }
-
-    @Override
-    public void hide(Player player) {
-        player.sendPacket(createDespawnPacket(this.virtualEntityIds()), false);
     }
 }

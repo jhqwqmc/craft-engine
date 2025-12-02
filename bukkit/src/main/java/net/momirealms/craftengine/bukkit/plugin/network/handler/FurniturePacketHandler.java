@@ -33,9 +33,4 @@ public class FurniturePacketHandler implements EntityPacketHandler {
     public void handleMove(NetWorkUser user, NMSPacketEvent event, Object packet) {
         event.setCancelled(true);
     }
-
-    @Override
-    public void handleMoveAndRotate(NetWorkUser user, NMSPacketEvent event, Object packet) {
-        event.setCancelled(true);
-    }
 }

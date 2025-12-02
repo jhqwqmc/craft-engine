@@ -60,6 +60,7 @@ import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.FontManager;
@@ -358,8 +359,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new EntityEventListener(), NetworkReflections.clazz$ClientboundEntityEventPacket);
         registerNMSPacketConsumer(new MovePosAndRotateEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$PosRot);
         registerNMSPacketConsumer(new MovePosEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$Pos);
-        registerNMSPacketConsumer(new RotateHeadListener(), NetworkReflections.clazz$ClientboundRotateHeadPacket);
-        registerNMSPacketConsumer(new SetEntityMotionListener(), NetworkReflections.clazz$ClientboundSetEntityMotionPacket);
         registerNMSPacketConsumer(new FinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
         registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
@@ -1761,43 +1760,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
             if (handler != null) {
                 handler.handleMove(user, event, packet);
-            }
-        }
-    }
-
-    public static class RotateHeadListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundRotateHeadPacket$entityIdGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundRotateHeadPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureMetaEntity(entityId)) {
-                System.out.println("RotateHeadListener");
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    public static class SetEntityMotionListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            if (!VersionHelper.isOrAbove1_21_6()) return;
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundSetEntityMotionPacket$idGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundSetEntityMotionPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureMetaEntity(entityId)) {
-                System.out.println("SetEntityMotionListener");
-                event.setCancelled(true);
             }
         }
     }
@@ -3726,11 +3688,13 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     // 先检查碰撞箱部分是否存在
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
                     if (hitBox == null) return;
-                    Vec3d pos = hitBox.position();
-
-                    // 检查玩家是否能破坏此点
-                    if (!serverPlayer.canInteractPoint(pos, 16d)) {
-                        return;
+                    for (FurnitureHitboxPart part : hitBox.parts()) {
+                        if (part.entityId() == entityId) {
+                            // 检查玩家是否能破坏此点
+                            if (!serverPlayer.canInteractPoint(part.pos(), 16d)) {
+                                return;
+                            }
+                        }
                     }
 
                     FurnitureAttemptBreakEvent preBreakEvent = new FurnitureAttemptBreakEvent(serverPlayer.platformPlayer(), furniture);
@@ -3787,10 +3751,18 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     // 先检查碰撞箱部分是否存在
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
                     if (hitBox == null) return;
-                    Vec3d pos = hitBox.position();
-
-                    // 检测距离
-                    if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                    FurnitureHitboxPart part = null;
+                    for (FurnitureHitboxPart p : hitBox.parts()) {
+                        if (p.entityId() == entityId) {
+                            Vec3d pos = p.pos();
+                            // 检测距离
+                            if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                                return;
+                            }
+                            part = p;
+                        }
+                    }
+                    if (part == null) {
                         return;
                     }
 
@@ -3799,7 +3771,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     Vector direction = eyeLocation.getDirection();
                     Location endLocation = eyeLocation.clone();
                     endLocation.add(direction.multiply(serverPlayer.getCachedInteractionRange()));
-                    Optional<EntityHitResult> result = hitBox.clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
+                    Optional<EntityHitResult> result = part.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
                     if (result.isEmpty()) {
                         return;
                     }

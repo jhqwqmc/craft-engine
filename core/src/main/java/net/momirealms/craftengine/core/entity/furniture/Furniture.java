@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
@@ -24,13 +25,12 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 public abstract class Furniture implements Cullable {
     public final FurnitureConfig config;
     public final FurnitureDataAccessor dataAccessor;
-    public final WeakReference<Entity> metaDataEntity;
+    public final Entity metaDataEntity;
 
     protected CullingData cullingData;
     protected FurnitureVariant currentVariant;
@@ -44,11 +44,11 @@ public abstract class Furniture implements Cullable {
     protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, FurnitureConfig config) {
         this.config = config;
         this.dataAccessor = data;
-        this.metaDataEntity = new WeakReference<>(metaDataEntity);
+        this.metaDataEntity = metaDataEntity;
         this.setVariant(config.getVariant(data));
     }
 
-    public WeakReference<Entity> metaDataEntity() {
+    public Entity metaDataEntity() {
         return this.metaDataEntity;
     }
 
@@ -75,11 +75,11 @@ public abstract class Furniture implements Cullable {
         for (int i = 0; i < furnitureHitBoxConfigs.length; i++) {
             FurnitureHitBox hitbox = furnitureHitBoxConfigs[i].create(this);
             this.hitboxes[i] = hitbox;
-            for (int hitboxEntityId : hitbox.virtualEntityIds()) {
-                this.hitboxMap.put(hitboxEntityId, hitbox);
+            for (FurnitureHitboxPart part : hitbox.parts()) {
+                this.hitboxMap.put(part.entityId(), hitbox);
+                virtualEntityIds.add(part.entityId());
             }
             colliders.addAll(hitbox.colliders());
-            hitbox.collectVirtualEntityIds(virtualEntityIds::addLast);
         }
         // 虚拟碰撞箱的实体id
         this.virtualEntityIds = virtualEntityIds.toIntArray();
@@ -122,9 +122,7 @@ public abstract class Furniture implements Cullable {
     }
 
     public UUID uuid() {
-        Entity entity = this.metaDataEntity.get();
-        if (entity == null) return null;
-        return entity.uuid();
+        return this.metaDataEntity.uuid();
     }
 
     @Override
@@ -158,9 +156,7 @@ public abstract class Furniture implements Cullable {
     }
 
     public boolean isValid() {
-        Entity entity = this.metaDataEntity.get();
-        if (entity == null) return false;
-        return entity.isValid();
+        return this.metaDataEntity.isValid();
     }
 
     public abstract void destroy();
@@ -178,15 +174,11 @@ public abstract class Furniture implements Cullable {
     }
 
     public WorldPosition position() {
-        Entity entity = this.metaDataEntity.get();
-        if (entity == null) return null;
-        return entity.position();
+        return this.metaDataEntity.position();
     }
 
     public int entityId() {
-        Entity entity = this.metaDataEntity.get();
-        if (entity == null) return -1;
-        return entity.entityID();
+        return this.metaDataEntity.entityID();
     }
 
     public Vec3d getRelativePosition(Vector3f position) {
@@ -200,8 +192,6 @@ public abstract class Furniture implements Cullable {
     }
 
     public World world() {
-        Entity entity = this.metaDataEntity.get();
-        if (entity == null) return null;
-        return entity.world();
+        return this.metaDataEntity.world();
     }
 }
