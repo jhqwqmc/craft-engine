@@ -2,8 +2,8 @@ package net.momirealms.craftengine.core.entity.furniture;
 
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxConfig;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxTypes;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
@@ -75,7 +75,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
         this.byId.clear();
     }
 
-    protected abstract HitBoxConfig defaultHitBox();
+    protected abstract FurnitureHitBoxConfig<?> defaultHitBox();
 
     public class FurnitureParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] { "furniture" };
@@ -124,7 +124,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 String variantName = e0.getKey();
                 Map<String, Object> variantArguments = ResourceConfigUtils.getAsMap(e0.getValue(), variantName);
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
-                List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
+                List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elementConfigs"), FurnitureElementConfigs::fromMap);
 
                 // fixme 外部模型不应该在这
                 Optional<ExternalModel> externalModel;
@@ -136,14 +136,14 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     externalModel = Optional.empty();
                 }
 
-                List<HitBoxConfig> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), HitBoxTypes::fromMap);
+                List<FurnitureHitBoxConfig<?>> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), FurnitureHitBoxTypes::fromMap);
                 if (hitboxes.isEmpty() && externalModel.isEmpty()) {
                     hitboxes = List.of(defaultHitBox());
                 }
 
                 variants.put(variantName, new FurnitureVariant(
                     elements.toArray(new FurnitureElementConfig[0]),
-                    hitboxes.toArray(new HitBoxConfig[0]),
+                    hitboxes.toArray(new FurnitureHitBoxConfig[0]),
                     externalModel,
                     optionalLootSpawnOffset
                 ));

@@ -1,12 +1,14 @@
 package net.momirealms.craftengine.core.world;
 
+import java.util.Objects;
+
 public class WorldPosition implements Position {
-    private final World world;
-    private final double x;
-    private final double y;
-    private final double z;
-    private final float xRot;
-    private final float yRot;
+    public final World world;
+    public final double x;
+    public final double y;
+    public final double z;
+    public final float xRot;
+    public final float yRot;
 
     public WorldPosition(World world, Position position) {
         this.x = position.x();
@@ -69,5 +71,29 @@ public class WorldPosition implements Position {
 
     public float yRot() {
         return yRot;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WorldPosition that = (WorldPosition) o;
+        return Double.compare(that.x, this.x) == 0 &&
+                Double.compare(that.y, this.y) == 0 &&
+                Double.compare(that.z, this.z) == 0 &&
+                Float.compare(that.xRot, this.xRot) == 0 &&
+                Float.compare(that.yRot, this.yRot) == 0 &&
+                Objects.equals(this.world, that.world);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(this.world);
+        result = 31 * result + Double.hashCode(this.x);
+        result = 31 * result + Double.hashCode(this.y);
+        result = 31 * result + Double.hashCode(this.z);
+        result = 31 * result + Float.floatToIntBits(this.xRot);
+        result = 31 * result + Float.floatToIntBits(this.yRot);
+        return result;
     }
 }

@@ -6,7 +6,7 @@ import net.momirealms.craftengine.bukkit.entity.furniture.ItemColorSource;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -15,7 +15,6 @@ import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.WorldPosition;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
@@ -126,18 +125,17 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     }
 
     @Override
-    public ItemDisplayFurnitureElement create(@NotNull WorldPosition position) {
+    public ItemDisplayFurnitureElement create(@NotNull Furniture furniture) {
         return new ItemDisplayFurnitureElement(this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory {
+    public static class Factory implements FurnitureElementConfigFactory<ItemDisplayFurnitureElement> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <E extends FurnitureElement> FurnitureElementConfig<E> create(Map<String, Object> arguments) {
+        public ItemDisplayFurnitureElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item_display.missing_item"));
             boolean applyDyedColor = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color");
-            return (FurnitureElementConfig<E>) new ItemDisplayFurnitureElementConfig(
+            return new ItemDisplayFurnitureElementConfig(
                     (player, colorSource) -> {
                         Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
                         if (applyDyedColor && colorSource != null && wrappedItem != null) {

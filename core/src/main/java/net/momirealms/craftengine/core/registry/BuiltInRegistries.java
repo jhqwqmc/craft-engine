@@ -5,9 +5,8 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.block.properties.PropertyFactory;
-import net.momirealms.craftengine.core.entity.CustomEntityType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxConfigFactory;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
 import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.item.equipment.EquipmentFactory;
@@ -78,7 +77,6 @@ public class BuiltInRegistries {
     public static final Registry<ConditionFactory<PathContext>> PATH_MATCHER_FACTORY = createConstantBoundRegistry(Registries.PATH_MATCHER_FACTORY, 16);
     public static final Registry<ResolutionFactory> RESOLUTION_FACTORY = createConstantBoundRegistry(Registries.RESOLUTION_FACTORY, 16);
     public static final Registry<CustomSmithingTransformRecipe.ItemDataProcessor.ProcessorFactory> SMITHING_RESULT_PROCESSOR_FACTORY = createConstantBoundRegistry(Registries.SMITHING_RESULT_PROCESSOR_FACTORY, 16);
-    public static final Registry<HitBoxConfigFactory> HITBOX_FACTORY = createConstantBoundRegistry(Registries.HITBOX_FACTORY, 16);
     public static final Registry<ResourcePackHostFactory> RESOURCE_PACK_HOST_FACTORY = createConstantBoundRegistry(Registries.RESOURCE_PACK_HOST_FACTORY, 16);
     public static final Registry<FunctionFactory<Context>> EVENT_FUNCTION_FACTORY = createConstantBoundRegistry(Registries.EVENT_FUNCTION_FACTORY, 128);
     public static final Registry<ConditionFactory<Context>> EVENT_CONDITION_FACTORY = createConstantBoundRegistry(Registries.EVENT_CONDITION_FACTORY, 128);
@@ -93,8 +91,8 @@ public class BuiltInRegistries {
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_TYPE, 64);
     public static final Registry<BlockEntityElementConfigFactory> BLOCK_ENTITY_ELEMENT_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_ELEMENT_TYPE, 16);
     public static final Registry<CraftRemainderFactory> CRAFT_REMAINDER_FACTORY = createConstantBoundRegistry(Registries.CRAFT_REMAINDER_FACTORY, 16);
-    public static final Registry<CustomEntityType<?>> ENTITY_TYPE = createConstantBoundRegistry(Registries.ENTITY_TYPE, 32);
     public static final Registry<FurnitureElementConfigFactory> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
+    public static final Registry<FurnitureHitBoxConfigFactory> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
 
     private static <T> Registry<T> createConstantBoundRegistry(ResourceKey<? extends Registry<T>> key, int expectedSize) {
         return new ConstantBoundRegistry<>(key, expectedSize);

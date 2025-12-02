@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
 import net.momirealms.craftengine.bukkit.entity.data.ItemEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -76,13 +75,12 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         return this.position.equals(that.position);
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    public static class Factory implements BlockEntityElementConfigFactory<ItemBlockEntityElement> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public ItemBlockEntityElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item_display.missing_item"));
-            return (BlockEntityElementConfig<E>) new ItemBlockEntityElementConfig(
+            return new ItemBlockEntityElementConfig(
                     player -> BukkitItemManager.instance().createWrappedItem(itemId, player),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position")
             );

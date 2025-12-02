@@ -54,7 +54,7 @@ public final class BlockEntityTickersList extends ObjectArrayList<TickingBlockEn
     }
 
     /**
-     * Removes elements that have been marked as removed.
+     * Removes elementConfigs that have been marked as removed.
      */
     public void removeMarkedEntries() {
         if (this.startSearchFromIndex == -1) // No entries in the list, skip
@@ -66,7 +66,7 @@ public final class BlockEntityTickersList extends ObjectArrayList<TickingBlockEn
     }
 
     /**
-     * Removes elements by their index.
+     * Removes elementConfigs by their index.
      */
     private void removeAllByIndex(final int startSearchFromIndex, final IntOpenHashSet c) { // can't use Set<Integer> because we want to avoid autoboxing when using contains
         final int requiredMatches = c.size();

@@ -5,9 +5,8 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.block.properties.PropertyFactory;
-import net.momirealms.craftengine.core.entity.CustomEntityType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.HitBoxConfigFactory;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
 import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.item.equipment.EquipmentFactory;
@@ -80,7 +79,6 @@ public class Registries {
     public static final ResourceKey<Registry<ConditionFactory<PathContext>>> PATH_MATCHER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("path_matcher_factory"));
     public static final ResourceKey<Registry<ResolutionFactory>> RESOLUTION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("resolution_factory"));
     public static final ResourceKey<Registry<CustomSmithingTransformRecipe.ItemDataProcessor.ProcessorFactory>> SMITHING_RESULT_PROCESSOR_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("smithing_result_processor_factory"));
-    public static final ResourceKey<Registry<HitBoxConfigFactory>> HITBOX_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("hitbox_factory"));
     public static final ResourceKey<Registry<ResourcePackHostFactory>> RESOURCE_PACK_HOST_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("resource_pack_host_factory"));
     public static final ResourceKey<Registry<FunctionFactory<Context>>> EVENT_FUNCTION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("event_function_factory"));
     public static final ResourceKey<Registry<ConditionFactory<Context>>> EVENT_CONDITION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("event_condition_factory"));
@@ -95,6 +93,6 @@ public class Registries {
     public static final ResourceKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_type"));
     public static final ResourceKey<Registry<BlockEntityElementConfigFactory>> BLOCK_ENTITY_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_element_type"));
     public static final ResourceKey<Registry<CraftRemainderFactory>> CRAFT_REMAINDER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("craft_remainder_factory"));
-    public static final ResourceKey<Registry<CustomEntityType<?>>> ENTITY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("entity_type"));
     public static final ResourceKey<Registry<FurnitureElementConfigFactory>> FURNITURE_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_element_type"));
+    public static final ResourceKey<Registry<FurnitureHitBoxConfigFactory>> FURNITURE_HITBOX_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_hitbox_type"));
 }

@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.entity.furniture.element;
 
 import java.util.Map;
 
-public interface FurnitureElementConfigFactory {
+public interface FurnitureElementConfigFactory<E extends FurnitureElement>  {
 
-    <E extends FurnitureElement> FurnitureElementConfig<E> create(Map<String, Object> args);
+    FurnitureElementConfig<E> create(Map<String, Object> args);
 }

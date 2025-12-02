@@ -224,4 +224,9 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     }
 
     public abstract WorldPosition eyePosition();
+
+    @Override
+    public boolean isValid() {
+        return this.isOnline();
+    }
 }

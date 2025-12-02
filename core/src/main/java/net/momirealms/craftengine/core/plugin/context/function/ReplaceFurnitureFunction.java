@@ -71,7 +71,8 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             RemoveFurnitureFunction.removeFurniture(ctx, oldFurniture, dropLoot, playSound);
 
             // Place the new furniture
-            SpawnFurnitureFunction.spawnFurniture(this.newFurnitureId, newPosition, this.anchorType, this.playSound);
+            // fixme function
+//            SpawnFurnitureFunction.spawnFurniture(this.newFurnitureId, newPosition, this.anchorType, this.playSound);
         }
     }
 

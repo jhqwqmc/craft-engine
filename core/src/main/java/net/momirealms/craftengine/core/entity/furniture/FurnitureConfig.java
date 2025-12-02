@@ -11,7 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 public interface FurnitureConfig {
 
@@ -39,6 +41,31 @@ public interface FurnitureConfig {
 
     @NotNull
     FurnitureBehavior behavior();
+
+    @NotNull
+    default FurnitureVariant getVariant(FurnitureDataAccessor accessor) {
+        Optional<String> optionalVariant = accessor.variant();
+        String variantName = null;
+        if (optionalVariant.isPresent()) {
+            variantName = optionalVariant.get();
+        } else {
+            Optional<AnchorType> optionalAnchorType = accessor.anchorType();
+            if (optionalAnchorType.isPresent()) {
+                variantName = optionalAnchorType.get().name().toLowerCase(Locale.ROOT);
+                accessor.setVariant(variantName);
+                accessor.removeCustomData(FurnitureDataAccessor.ANCHOR_TYPE);
+            }
+        }
+        if (variantName == null) {
+            return anyVariant();
+        }
+        FurnitureVariant variant = getVariant(variantName);
+        if (variant == null) {
+            return anyVariant();
+        }
+        return variant;
+
+    }
 
     CullingData cullingData();
 

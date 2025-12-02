@@ -1,12 +1,12 @@
 package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
-import net.momirealms.craftengine.core.util.Key;
 import org.joml.Vector3f;
 
-public interface HitBoxConfig {
+public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
 
-    Key type();
+    H create(Furniture furniture);
 
     SeatConfig[] seats();
 

@@ -10,7 +10,6 @@ import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRen
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
-import net.momirealms.craftengine.core.entity.CustomEntity;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
@@ -19,7 +18,6 @@ import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntityRendererSerializer;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntitySerializer;
-import net.momirealms.craftengine.core.world.chunk.serialization.DefaultEntitySerializer;
 import net.momirealms.sparrow.nbt.ListTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,11 +26,11 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CEChunk {
+    private static final int DEFAULT_MAP_SIZE = 8;
     public final CEWorld world;
     public final ChunkPos chunkPos;
     public final CESection[] sections;
     public final WorldHeight worldHeightAccessor;
-    private final Map<UUID, CustomEntity> entities;  // 从区域线程上访问，安全
     private final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
     private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
     private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
@@ -42,18 +40,18 @@ public class CEChunk {
     private volatile boolean dirty;
     private volatile boolean loaded;
     private volatile boolean activated;
+    private boolean isEntitiesLoaded;
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
         this.sections = new CESection[this.worldHeightAccessor.getSectionsCount()];
-        this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.entities = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         this.fillEmptySection();
     }
 
@@ -61,9 +59,9 @@ public class CEChunk {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         int sectionCount = this.worldHeightAccessor.getSectionsCount();
         this.sections = new CESection[sectionCount];
         if (sections != null) {
@@ -76,35 +74,23 @@ public class CEChunk {
         }
         this.fillEmptySection();
         if (blockEntitiesTag != null) {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), 10), 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), DEFAULT_MAP_SIZE), 0.5f);
             List<BlockEntity> blockEntities = DefaultBlockEntitySerializer.deserialize(this, blockEntitiesTag);
             for (BlockEntity blockEntity : blockEntities) {
                 this.setBlockEntity(blockEntity);
             }
         } else {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
         if (blockEntityRenders != null) {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(blockEntityRenders.size(), 10), 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(blockEntityRenders.size(), DEFAULT_MAP_SIZE), 0.5f);
             List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, blockEntityRenders);
             for (BlockPos pos : blockEntityRendererPoses) {
                 this.addConstantBlockEntityRenderer(pos);
             }
         } else {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
-        if (entities != null) {
-            this.entities = new Object2ObjectOpenHashMap<>(Math.max(entities.size(), 10), 0.5f);
-            for (CustomEntity entity : DefaultEntitySerializer.deserialize(world, entities)) {
-                this.entities.put(entity.uuid(), entity);
-            }
-        } else {
-            this.entities = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        }
-    }
-
-    public Map<UUID, CustomEntity> entities() {
-        return Collections.unmodifiableMap(this.entities);
     }
 
     public void spawnBlockEntities(Player player) {
@@ -680,6 +666,14 @@ public class CEChunk {
         return this.sections;
     }
 
+    public boolean isEntitiesLoaded() {
+        return this.isEntitiesLoaded;
+    }
+
+    public void setEntitiesLoaded(boolean entitiesLoaded) {
+        this.isEntitiesLoaded = entitiesLoaded;
+    }
+
     public boolean isLoaded() {
         return this.loaded;
     }
@@ -694,5 +688,6 @@ public class CEChunk {
         if (!this.loaded) return;
         this.world.removeLoadedChunk(this);
         this.loaded = false;
+        this.isEntitiesLoaded = false;
     }
 }

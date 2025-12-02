@@ -1,6 +1,6 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-@Deprecated(since = "0.0.66", forRemoval = true)
+@Deprecated(since = "0.0.66")
 public enum AnchorType {
     GROUND(0),
     WALL(1),

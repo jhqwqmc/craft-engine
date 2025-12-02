@@ -12,9 +12,9 @@ import java.util.function.Function;
 public class FurnitureParameterProvider implements ChainParameterProvider<Furniture> {
     private static final Map<ContextKey<?>, Function<Furniture, Object>> CONTEXT_FUNCTIONS = new HashMap<>();
     static {
-        CONTEXT_FUNCTIONS.put(DirectContextParameters.ID, Furniture::id);
+        CONTEXT_FUNCTIONS.put(DirectContextParameters.ID, f -> f.config().id());
         CONTEXT_FUNCTIONS.put(DirectContextParameters.UUID, Furniture::uuid);
-        CONTEXT_FUNCTIONS.put(DirectContextParameters.ANCHOR_TYPE, Furniture::anchorType);
+        CONTEXT_FUNCTIONS.put(DirectContextParameters.VARIANT, Furniture::getCurrentVariantName);
         CONTEXT_FUNCTIONS.put(DirectContextParameters.X, furniture -> furniture.position().x());
         CONTEXT_FUNCTIONS.put(DirectContextParameters.Y, furniture -> furniture.position().y());
         CONTEXT_FUNCTIONS.put(DirectContextParameters.Z, furniture -> furniture.position().z());
