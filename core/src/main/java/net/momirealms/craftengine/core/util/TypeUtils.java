@@ -8,18 +8,18 @@ public class TypeUtils {
     private TypeUtils() {}
 
     /**
-     * Checks if the provided object is of the specified id.
+     * Checks if the provided object is of the specified type.
      * If not, throws an IllegalArgumentException with a detailed message.
      *
      * @param object The object to check.
-     * @param expectedType The expected class id.
-     * @param <T> The id parameter for expectedType.
-     * @return The object cast to the expected id if it matches.
-     * @throws IllegalArgumentException if the object's id does not match the expected id.
+     * @param expectedType The expected class type.
+     * @param <T> The type parameter for expectedType.
+     * @return The object cast to the expected type if it matches.
+     * @throws IllegalArgumentException if the object's type does not match the expected type.
      */
     public static <T> T checkType(Object object, Class<T> expectedType) {
         if (!expectedType.isInstance(object)) {
-            throw new IllegalArgumentException("Expected id: " + expectedType.getName() +
+            throw new IllegalArgumentException("Expected type: " + expectedType.getName() +
                     ", but got: " + (object == null ? "null" : object.getClass().getName()));
         }
         return expectedType.cast(object);
@@ -48,7 +48,7 @@ public class TypeUtils {
                 }
                 yield bytes;
             }
-            default -> throw new IllegalStateException("Unsupported id: " + type.toLowerCase(Locale.ENGLISH));
+            default -> throw new IllegalStateException("Unsupported type: " + type.toLowerCase(Locale.ENGLISH));
         };
     }
 

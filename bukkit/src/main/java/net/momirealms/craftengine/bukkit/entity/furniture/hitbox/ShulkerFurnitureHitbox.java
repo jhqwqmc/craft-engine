@@ -58,7 +58,7 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
                 entityIds[1], UUID.randomUUID(), x + offset.x, processedY, z - offset.z, 0, yaw,
                 MEntityTypes.SHULKER, 0, CoreReflections.instance$Vec3$Zero, 0
         ));
-        packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[1], List.copyOf(config.cachedShulkerValues)));
+        packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[1], List.copyOf(config.cachedShulkerValues())));
         packets.add(FastNMS.INSTANCE.constructor$ClientboundSetPassengersPacket(entityIds[0], entityIds[1]));
 
         // fix some special occasions
@@ -73,16 +73,16 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
                 CraftEngine.instance().logger().warn("Failed to construct ClientboundMoveEntityPacket$Pos", e);
             }
         }
-        if (VersionHelper.isOrAbove1_20_5() && config.scale != 1) {
+        if (VersionHelper.isOrAbove1_20_5() && config.scale() != 1) {
             try {
                 Object attributeInstance = CoreReflections.constructor$AttributeInstance.newInstance(MAttributeHolders.SCALE, (Consumer<?>) (o) -> {});
-                CoreReflections.method$AttributeInstance$setBaseValue.invoke(attributeInstance, config.scale);
+                CoreReflections.method$AttributeInstance$setBaseValue.invoke(attributeInstance, config.scale());
                 packets.add(NetworkReflections.constructor$ClientboundUpdateAttributesPacket0.newInstance(entityIds[1], Collections.singletonList(attributeInstance)));
             } catch (ReflectiveOperationException e) {
                 CraftEngine.instance().logger().warn("Failed to apply scale attribute", e);
             }
         }
-        config.spawner.accept(entityIds, position.world(), x, y, z, yaw, offset, packets::add, colliders::add, parts::add);
+        config.spawner().accept(entityIds, position.world(), x, y, z, yaw, offset, packets::add, colliders::add, parts::add);
         this.parts = parts;
         this.colliders = colliders;
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
@@ -115,8 +115,8 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
     }
 
     public int[] acquireEntityIds(Supplier<Integer> entityIdSupplier) {
-        if (config.interactionEntity) {
-            if (config.direction.stepY() != 0) {
+        if (config.interactionEntity()) {
+            if (config.direction().stepY() != 0) {
                 // 展示实体                 // 潜影贝               // 交互实体
                 return new int[] {entityIdSupplier.get(), entityIdSupplier.get(), entityIdSupplier.get()};
             } else {

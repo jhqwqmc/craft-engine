@@ -87,12 +87,12 @@ public class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<
         public static Formula fromMap(Map<String, Object> map) {
             String type = (String) map.get("type");
             if (type == null) {
-                throw new NullPointerException("number id cannot be null");
+                throw new NullPointerException("number type cannot be null");
             }
             Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
             FormulaFactory factory = BuiltInRegistries.FORMULA_FACTORY.getValue(key);
             if (factory == null) {
-                throw new IllegalArgumentException("Unknown formula id: " + type);
+                throw new IllegalArgumentException("Unknown formula type: " + type);
             }
             return factory.create(map);
         }

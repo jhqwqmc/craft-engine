@@ -53,7 +53,7 @@ public class LangData {
                                         temp.put(result, entry.getValue());
                                     }
                                 },
-                                () -> CraftEngine.instance().logger().warn("Unknown lang id: " + key)
+                                () -> CraftEngine.instance().logger().warn("Unknown lang type: " + key)
                         );
             } else {
                 temp.put(key, entry.getValue());

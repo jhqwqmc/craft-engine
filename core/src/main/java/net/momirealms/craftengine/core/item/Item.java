@@ -28,7 +28,7 @@ import java.util.Optional;
  * This interface provides methods for managing item properties such as custom model data,
  * damage, display name, lore, enchantments, and tags.
  *
- * @param <I> the id of the item implementation
+ * @param <I> the type of the item implementation
  */
 public interface Item<I> {
 

@@ -446,8 +446,8 @@ public class ItemSettings {
                 Key customTridentItemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("item"), "warning.config.item.settings.projectile.missing_item"));
                 ItemDisplayContext displayType = ItemDisplayContext.valueOf(args.getOrDefault("display-transform", "NONE").toString().toUpperCase(Locale.ENGLISH));
                 Billboard billboard = Billboard.valueOf(args.getOrDefault("billboard", "FIXED").toString().toUpperCase(Locale.ENGLISH));
-                Vector3f translation = ResourceConfigUtils.getAsVector3f(args.getOrDefault("translation", "0"), "translation");
-                Vector3f scale = ResourceConfigUtils.getAsVector3f(args.getOrDefault("scale", "1"), "scale");
+                Vector3f translation = ResourceConfigUtils.getAsVector3f(args.getOrDefault("translation", 0), "translation");
+                Vector3f scale = ResourceConfigUtils.getAsVector3f(args.getOrDefault("scale", 1), "scale");
                 Quaternionf rotation = ResourceConfigUtils.getAsQuaternionf(ResourceConfigUtils.get(args, "rotation"), "rotation");
                 double range = ResourceConfigUtils.getAsDouble(args.getOrDefault("range", 1), "range");
                 return settings -> settings.projectileMeta(new ProjectileMeta(customTridentItemId, displayType, billboard, scale, translation, rotation, range));

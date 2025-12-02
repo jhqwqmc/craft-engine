@@ -91,8 +91,8 @@ public class Registries {
     public static final ResourceKey<Registry<ItemUpdaterType<?>>> ITEM_UPDATER_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_updater_type"));
     public static final ResourceKey<Registry<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>>> MOD_PACKET = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("mod_packet_type"));
     public static final ResourceKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_type"));
-    public static final ResourceKey<Registry<BlockEntityElementConfigFactory>> BLOCK_ENTITY_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_element_type"));
+    public static final ResourceKey<Registry<BlockEntityElementConfigFactory<?>>> BLOCK_ENTITY_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_element_type"));
     public static final ResourceKey<Registry<CraftRemainderFactory>> CRAFT_REMAINDER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("craft_remainder_factory"));
-    public static final ResourceKey<Registry<FurnitureElementConfigFactory>> FURNITURE_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_element_type"));
-    public static final ResourceKey<Registry<FurnitureHitBoxConfigFactory>> FURNITURE_HITBOX_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_hitbox_type"));
+    public static final ResourceKey<Registry<FurnitureElementConfigFactory<?>>> FURNITURE_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_element_type"));
+    public static final ResourceKey<Registry<FurnitureHitBoxConfigFactory<?>>> FURNITURE_HITBOX_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("furniture_hitbox_type"));
 }

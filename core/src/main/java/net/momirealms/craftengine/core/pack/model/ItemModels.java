@@ -75,7 +75,7 @@ public class ItemModels {
         Key key = Key.withDefaultNamespace(type, "minecraft");
         ItemModelReader reader = BuiltInRegistries.ITEM_MODEL_READER.getValue(key);
         if (reader == null) {
-            throw new IllegalArgumentException("Invalid item model id: " + key);
+            throw new IllegalArgumentException("Invalid item model type: " + key);
         }
         return reader.read(json);
     }

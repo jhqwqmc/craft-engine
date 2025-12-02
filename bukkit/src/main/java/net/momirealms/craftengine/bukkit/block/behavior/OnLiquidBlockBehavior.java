@@ -40,7 +40,7 @@ public class OnLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
     public static class Factory implements BlockBehaviorFactory {
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
-            List<String> liquidTypes = MiscUtils.getAsStringList(arguments.getOrDefault("liquid-id", List.of("water")));
+            List<String> liquidTypes = MiscUtils.getAsStringList(arguments.getOrDefault("liquid-type", List.of("water")));
             boolean stackable = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("stackable", false), "stackable");
             int delay = ResourceConfigUtils.getAsInt(arguments.getOrDefault("delay", 0), "delay");
             return new OnLiquidBlockBehavior(block, delay, stackable, liquidTypes.contains("water"), liquidTypes.contains("lava"));
