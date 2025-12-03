@@ -16,7 +16,7 @@ public class ExprEntityFurnitureID extends SimplePropertyExpression<Object, Stri
     @Override
     public @Nullable String convert(Object object) {
         if (object instanceof Entity entity) {
-            return Optional.ofNullable(CraftEngineFurniture.getLoadedFurnitureByBaseEntity(entity))
+            return Optional.ofNullable(CraftEngineFurniture.getLoadedFurnitureByMetaEntity(entity))
                     .map(it -> it.id().toString())
                     .orElse(null);
         }

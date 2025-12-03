@@ -31,6 +31,12 @@ public class FurnitureDataAccessor {
         return new FurnitureDataAccessor(data);
     }
 
+    public static FurnitureDataAccessor ofVariant(String variant) {
+        FurnitureDataAccessor accessor = new FurnitureDataAccessor(new CompoundTag());
+        accessor.setVariant(variant);
+        return accessor;
+    }
+
     public CompoundTag copyTag() {
         return this.data.copy();
     }
