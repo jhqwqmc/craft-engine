@@ -3,7 +3,6 @@ package net.momirealms.craftengine.core.plugin.context.parameter;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.Entity;
-import net.momirealms.craftengine.core.entity.furniture.AnchorType;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
@@ -55,7 +54,7 @@ public final class DirectContextParameters {
     public static final ContextKey<Key> ID = ContextKey.direct("id");
     public static final ContextKey<Integer> CUSTOM_MODEL_DATA = ContextKey.direct("custom_model_data");
     public static final ContextKey<Furniture> FURNITURE = ContextKey.direct("furniture");
-    public static final ContextKey<AnchorType> ANCHOR_TYPE = ContextKey.direct("anchor_type");
+    public static final ContextKey<String> VARIANT = ContextKey.direct("variant");
     public static final ContextKey<InteractionHand> HAND = ContextKey.direct("hand");
     public static final ContextKey<Cancellable> EVENT = ContextKey.direct("event");
     public static final ContextKey<Boolean> IS_SNEAKING = ContextKey.direct("is_sneaking");

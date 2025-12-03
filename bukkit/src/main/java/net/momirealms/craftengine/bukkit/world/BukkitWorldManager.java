@@ -101,6 +101,10 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 injectChunkGenerator(ceWorld);
                 for (Chunk chunk : world.getLoadedChunks()) {
                     handleChunkLoad(ceWorld, chunk, false);
+                    CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
+                    if (loadedChunk != null) {
+                        loadedChunk.setEntitiesLoaded(true);
+                    }
                 }
                 ceWorld.setTicking(true);
             } catch (Exception e) {
@@ -154,6 +158,10 @@ public class BukkitWorldManager implements WorldManager, Listener {
             CEWorld ceWorld = this.worlds.get(uuid);
             for (Chunk chunk : world.getLoadedChunks()) {
                 handleChunkLoad(ceWorld, chunk, true);
+                CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
+                if (loadedChunk != null) {
+                    loadedChunk.setEntitiesLoaded(true);
+                }
             }
             ceWorld.setTicking(true);
         } else {

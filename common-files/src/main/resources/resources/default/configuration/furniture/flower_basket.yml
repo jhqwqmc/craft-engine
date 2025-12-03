@@ -7,15 +7,28 @@ items:
     behavior:
       type: furniture_item
       furniture: default:flower_basket
+      rules:
+        ground:
+          rotation: any
+          alignment: any
+        wall:
+          rotation: any
+          alignment: any
+        ceiling:
+          rotation: any
+          alignment: any
   default:flower_basket_ground:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ground
+    item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_wall:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_wall
+    item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_ceiling:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ceiling
+    item-name: <!i><l10n:item.flower_basket>
 furniture:
   default:flower_basket:
     settings:
@@ -27,15 +40,12 @@ furniture:
       template: default:loot_table/furniture
       arguments:
         item: default:flower_basket
-    placement:
+    variants:
       ground:
-        rules:
-          rotation: ANY
-          alignment: ANY
         elements:
           - item: default:flower_basket_ground
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,0,0
             translation: 0,0.5,0
             shadow-radius: 0.5
@@ -50,12 +60,10 @@ furniture:
             height: 0.5
             interactive: true
       wall:
-        rules:
-          alignment: ANY
         elements:
           - item: default:flower_basket_wall
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,0,0.2
             translation: 0,0,0
         hitboxes:
@@ -76,13 +84,10 @@ furniture:
             height: 0.75
             interactive: true
       ceiling:
-        rules:
-          rotation: ANY
-          alignment: ANY
         elements:
           - item: default:flower_basket_ceiling
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,-0.46,0
             translation: 0,0,0
         hitboxes:

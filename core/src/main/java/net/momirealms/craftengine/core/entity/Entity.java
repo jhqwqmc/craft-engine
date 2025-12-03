@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface Entity {
     Key type();
 
+    boolean isValid();
+
     double x();
 
     double y();

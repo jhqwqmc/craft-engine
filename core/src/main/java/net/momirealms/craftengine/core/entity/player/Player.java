@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
@@ -193,6 +194,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setEntityCullingViewDistanceScale(double value);
 
+    public abstract void setEnableEntityCulling(boolean enable);
+
+    public abstract boolean enableEntityCulling();
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);
@@ -213,11 +218,22 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
+    public abstract void addTrackedFurniture(int entityId, Furniture furniture);
+
     public abstract void clearTrackedBlockEntities();
 
     @Override
     public void remove() {
     }
 
+    public abstract void removeTrackedFurniture(int entityId);
+
+    public abstract void clearTrackedFurniture();
+
     public abstract WorldPosition eyePosition();
+
+    @Override
+    public boolean isValid() {
+        return this.isOnline();
+    }
 }

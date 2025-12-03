@@ -135,6 +135,12 @@ set_entity_view_distance_scale:
   usage:
     - /ce feature entity-view-distance-scale set
 
+toggle_entity_culling:
+  enable: true
+  permission: ce.command.admin.toggle_entity_culling
+  usage:
+    - /ce feature toggle-entity-culling
+
 # Debug commands
 debug_set_block:
   enable: true

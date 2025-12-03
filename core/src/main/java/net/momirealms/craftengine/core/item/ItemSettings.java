@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.item;
 
-import net.momirealms.craftengine.core.entity.Billboard;
-import net.momirealms.craftengine.core.entity.ItemDisplayContext;
+import net.momirealms.craftengine.core.entity.display.Billboard;
+import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
@@ -132,6 +132,12 @@ public class ItemSettings {
 
     public void clearCustomData() {
         this.customData.clear();
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T> T removeCustomData(CustomDataType<?> type) {
+        return (T) this.customData.remove(type);
     }
 
     public <T> void addCustomData(CustomDataType<T> key, T value) {
@@ -440,8 +446,8 @@ public class ItemSettings {
                 Key customTridentItemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("item"), "warning.config.item.settings.projectile.missing_item"));
                 ItemDisplayContext displayType = ItemDisplayContext.valueOf(args.getOrDefault("display-transform", "NONE").toString().toUpperCase(Locale.ENGLISH));
                 Billboard billboard = Billboard.valueOf(args.getOrDefault("billboard", "FIXED").toString().toUpperCase(Locale.ENGLISH));
-                Vector3f translation = ResourceConfigUtils.getAsVector3f(args.getOrDefault("translation", "0"), "translation");
-                Vector3f scale = ResourceConfigUtils.getAsVector3f(args.getOrDefault("scale", "1"), "scale");
+                Vector3f translation = ResourceConfigUtils.getAsVector3f(args.getOrDefault("translation", 0), "translation");
+                Vector3f scale = ResourceConfigUtils.getAsVector3f(args.getOrDefault("scale", 1), "scale");
                 Quaternionf rotation = ResourceConfigUtils.getAsQuaternionf(ResourceConfigUtils.get(args, "rotation"), "rotation");
                 double range = ResourceConfigUtils.getAsDouble(args.getOrDefault("range", 1), "range");
                 return settings -> settings.projectileMeta(new ProjectileMeta(customTridentItemId, displayType, billboard, scale, translation, rotation, range));
