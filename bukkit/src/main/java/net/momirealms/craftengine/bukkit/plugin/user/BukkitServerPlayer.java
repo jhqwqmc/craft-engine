@@ -602,6 +602,9 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void entityCullingTick() {
         this.culling.restoreTokenOnTick();
+        if (this.firstPersonCameraVec3 == null || this.thirdPersonCameraVec3 == null) {
+            return;
+        }
         boolean useRayTracing = Config.entityCullingRayTracing();
         if (this.enableEntityCulling) {
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
