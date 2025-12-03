@@ -224,6 +224,11 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         Optional<FurnitureConfig> optionalFurniture = furnitureById(key);
         if (optionalFurniture.isEmpty()) return;
 
+        // 只对1.20.2及以上生效，1.20.1比较特殊
+        if (!VersionHelper.isOrAbove1_20_2()) {
+            return;
+        }
+
         // 已经在其他事件里加载过了
         FurnitureConfig customFurniture = optionalFurniture.get();
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
@@ -244,9 +249,9 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         String id = entity.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
         if (id == null) return;
 
-        // 这个区块还处于加载实体中，这个时候不处理
+        // 这个区块还处于加载实体中，这个时候不处理（1.20.1需要特殊处理）
         Location location = entity.getLocation();
-        if (!isEntitiesLoaded(location)) {
+        if (VersionHelper.isOrAbove1_20_2() && !isEntitiesLoaded(location)) {
             return;
         }
 
@@ -261,11 +266,12 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         if (previous != null) return;
 
         createFurnitureInstance(entity, customFurniture);
-        // 补发一次包
+
+        // 补发一次包，修复
         for (Player player : entity.getTrackedPlayers()) {
             BukkitAdaptors.adapt(player).sendPacket(FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
-                MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
+                    entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
+                    MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
             ), false);
         }
     }
