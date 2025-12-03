@@ -73,7 +73,7 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
     public void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer) {
         if (this.blocksBuilding) {
             Vec3d relativePosition = Furniture.getRelativePosition(targetPos, this.position);
-            aabbConsumer.accept(AABB.fromInteraction(relativePosition, size.x, size.y));
+            aabbConsumer.accept(AABB.makeBoundingBox(relativePosition, size.x, size.y));
         }
     }
 

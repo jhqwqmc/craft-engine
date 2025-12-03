@@ -27,7 +27,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
         this.config = config;
         WorldPosition position = furniture.position();
         Vec3d pos = Furniture.getRelativePosition(position, config.position());
-        AABB aabb = AABB.fromInteraction(pos, config.size().x, config.size().y);
+        AABB aabb = AABB.makeBoundingBox(pos, config.size().x, config.size().y);
         this.collider = createCollider(furniture.world(), pos, aabb, false, config.blocksBuilding(), config.canBeHitByProjectile());
         int interactionId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(List.of(

@@ -27,12 +27,11 @@ items:
                 translation: 0,0.5,0
             hitboxes:
               - position: 0,0,0
-                type: interaction
-                blocks-building: true
+                type: custom
+                entity-type: slime
                 invisible: true
-                width: 0.7
-                height: 1.2
-                interactive: true
+                can-use-item-on: true
+                blocks-building: true
                 seats:
                   - 0,0,-0.1 0
         loot:

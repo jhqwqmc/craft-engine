@@ -57,7 +57,7 @@ public class AABB {
         return x * x + y * y + z * z;
     }
 
-    public static AABB fromInteraction(Vec3d pos, double width, double height) {
+    public static AABB makeBoundingBox(Vec3d pos, double width, double height) {
         return new AABB(
             pos.x - width / 2,
             pos.y,

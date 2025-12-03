@@ -82,7 +82,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     packets.accept(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[2], List.copyOf(cachedInteractionValues)));
                     if (canUseItemOn) {
                         Vec3d vec3d = new Vec3d(x + offset.x, y + offset.y, z - offset.z);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d, interactive));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.makeBoundingBox(vec3d, scale, shulkerHeight), vec3d, interactive));
                     }
                 }
             };
@@ -102,7 +102,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     packets.accept(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[2], List.copyOf(cachedInteractionValues)));
                     if (canUseItemOn) {
                         Vec3d vec3d = new Vec3d(x + offset.x, y + offset.y - shulkerHeight + scale, z - offset.z);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d, interactive));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.makeBoundingBox(vec3d, scale, shulkerHeight), vec3d, interactive));
                     }
                 }
             };
@@ -133,8 +133,8 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     if (canUseItemOn) {
                         Vec3d vec3d1 = new Vec3d(x + offset.x, y + offset.y, z - offset.z);
                         Vec3d vec3d2 = new Vec3d(x + offset.x + shulkerDirection.stepX() * distance, y + offset.y, z - offset.z + shulkerDirection.stepZ() * distance);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d1, scale, scale), vec3d1, interactive));
-                        aabb.accept(new FurnitureHitboxPart(entityIds[3], AABB.fromInteraction(vec3d2, scale, scale), vec3d2, interactive));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.makeBoundingBox(vec3d1, scale, scale), vec3d1, interactive));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[3], AABB.makeBoundingBox(vec3d2, scale, scale), vec3d2, interactive));
                     }
                 }
             };
