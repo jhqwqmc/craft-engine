@@ -33,14 +33,14 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
                                             boolean canBeHitByProjectile,
                                             boolean invisible,
                                             Vector3f size,
-                                            boolean responsive) {
+                                            boolean interactive) {
         super(seats, position, canUseItemOn, blocksBuilding, canBeHitByProjectile);
         this.size = size;
-        this.responsive = responsive;
+        this.responsive = interactive;
         this.invisible = invisible;
         InteractionEntityData.Height.addEntityDataIfNotDefaultValue(size.y, cachedValues);
         InteractionEntityData.Width.addEntityDataIfNotDefaultValue(size.x, cachedValues);
-        InteractionEntityData.Responsive.addEntityDataIfNotDefaultValue(responsive, cachedValues);
+        InteractionEntityData.Responsive.addEntityDataIfNotDefaultValue(interactive, cachedValues);
         if (invisible) {
             BaseEntityData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, cachedValues);
         }

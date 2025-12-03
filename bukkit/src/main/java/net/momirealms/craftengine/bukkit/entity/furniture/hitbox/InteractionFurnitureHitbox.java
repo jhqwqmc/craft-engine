@@ -37,7 +37,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
                 ),
                 FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(interactionId, config.cachedValues())
         ));
-        this.part = new FurnitureHitboxPart(interactionId, aabb, pos);
+        this.part = new FurnitureHitboxPart(interactionId, aabb, pos, config.responsive());
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(interactionId); }});
     }
     

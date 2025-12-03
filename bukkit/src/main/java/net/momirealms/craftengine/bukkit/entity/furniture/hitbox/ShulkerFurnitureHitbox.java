@@ -58,7 +58,7 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
                 entityIds[1], UUID.randomUUID(), x + offset.x, processedY, z - offset.z, 0, yaw,
                 MEntityTypes.SHULKER, 0, CoreReflections.instance$Vec3$Zero, 0
         ));
-        packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[1], List.copyOf(config.cachedShulkerValues())));
+        packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[1], config.cachedShulkerValues()));
         packets.add(FastNMS.INSTANCE.constructor$ClientboundSetPassengersPacket(entityIds[0], entityIds[1]));
 
         // fix some special occasions

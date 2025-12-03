@@ -66,6 +66,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
         ShulkerData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, this.cachedShulkerValues); // Invisible
 
         List<Object> cachedInteractionValues = new ArrayList<>();
+        InteractionEntityData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, cachedInteractionValues);
         float shulkerHeight = (getPhysicalPeek(peek * 0.01F) + 1) * scale;
         if (direction == Direction.UP) {
             InteractionEntityData.Height.addEntityDataIfNotDefaultValue(shulkerHeight + 0.01f, cachedInteractionValues);
@@ -81,7 +82,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     packets.accept(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[2], List.copyOf(cachedInteractionValues)));
                     if (canUseItemOn) {
                         Vec3d vec3d = new Vec3d(x + offset.x, y + offset.y, z - offset.z);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d, interactive));
                     }
                 }
             };
@@ -101,7 +102,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     packets.accept(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityIds[2], List.copyOf(cachedInteractionValues)));
                     if (canUseItemOn) {
                         Vec3d vec3d = new Vec3d(x + offset.x, y + offset.y - shulkerHeight + scale, z - offset.z);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d, scale, shulkerHeight), vec3d, interactive));
                     }
                 }
             };
@@ -132,8 +133,8 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                     if (canUseItemOn) {
                         Vec3d vec3d1 = new Vec3d(x + offset.x, y + offset.y, z - offset.z);
                         Vec3d vec3d2 = new Vec3d(x + offset.x + shulkerDirection.stepX() * distance, y + offset.y, z - offset.z + shulkerDirection.stepZ() * distance);
-                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d1, scale, scale), vec3d1));
-                        aabb.accept(new FurnitureHitboxPart(entityIds[3], AABB.fromInteraction(vec3d2, scale, scale), vec3d2));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[2], AABB.fromInteraction(vec3d1, scale, scale), vec3d1, interactive));
+                        aabb.accept(new FurnitureHitboxPart(entityIds[3], AABB.fromInteraction(vec3d2, scale, scale), vec3d2, interactive));
                     }
                 }
             };
@@ -159,31 +160,31 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
     }
 
     public float scale() {
-        return scale;
+        return this.scale;
     }
 
     public byte peek() {
-        return peek;
+        return this.peek;
     }
 
     public boolean interactive() {
-        return interactive;
+        return this.interactive;
     }
 
     public boolean interactionEntity() {
-        return interactionEntity;
+        return this.interactionEntity;
     }
 
     public Direction direction() {
-        return direction;
+        return this.direction;
     }
 
     public DirectionalShulkerSpawner spawner() {
-        return spawner;
+        return this.spawner;
     }
 
     public List<Object> cachedShulkerValues() {
-        return cachedShulkerValues;
+        return this.cachedShulkerValues;
     }
 
     @Override
@@ -219,7 +220,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
         AABB ceAABB = createAABB(direction, offset, x, y, z);
         Object level = world.serverWorld();
         Object nmsAABB = FastNMS.INSTANCE.constructor$AABB(ceAABB.minX, ceAABB.minY, ceAABB.minZ, ceAABB.maxX, ceAABB.maxY, ceAABB.maxZ);
-        aabb.accept(new FurnitureHitboxPart(entityId, ceAABB, new Vec3d(x, y, z)));
+        aabb.accept(new FurnitureHitboxPart(entityId, ceAABB, new Vec3d(x, y, z), false));
         return new BukkitCollider(level, nmsAABB, x, y, z, this.canBeHitByProjectile(), true, this.blocksBuilding());
     }
 

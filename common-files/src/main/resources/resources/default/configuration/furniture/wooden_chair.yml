@@ -29,6 +29,7 @@ items:
               - position: 0,0,0
                 type: interaction
                 blocks-building: true
+                invisible: true
                 width: 0.7
                 height: 1.2
                 interactive: true

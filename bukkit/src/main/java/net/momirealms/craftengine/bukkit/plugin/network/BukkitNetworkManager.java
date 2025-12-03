@@ -3826,6 +3826,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                             for (Seat<FurnitureHitBox> seat : hitBox.seats()) {
                                 if (!seat.isOccupied()) {
                                     if (seat.spawnSeat(serverPlayer, furniture.position())) {
+                                        if (!part.interactive()) {
+                                            serverPlayer.swingHand(InteractionHand.MAIN_HAND);
+                                        }
                                         break;
                                     }
                                 }
