@@ -457,9 +457,11 @@ public class ItemEventListener implements Listener {
                 }
             } else {
                 // fixme 如何取消堆叠数量>1的物品的默认replacement
-                Item<ItemStack> replacementItem = this.plugin.itemManager().createWrappedItem(replacement, serverPlayer);
-                if (replacementItem != null) {
-                    PlayerUtils.giveItem(serverPlayer, 1, replacementItem);
+                if (replacement != null) {
+                    Item<ItemStack> replacementItem = this.plugin.itemManager().createWrappedItem(replacement, serverPlayer);
+                    if (replacementItem != null) {
+                        PlayerUtils.giveItem(serverPlayer, 1, replacementItem);
+                    }
                 }
             }
         }
