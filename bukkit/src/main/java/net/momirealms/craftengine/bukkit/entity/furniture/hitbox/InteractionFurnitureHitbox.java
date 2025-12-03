@@ -32,7 +32,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
         int interactionId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(List.of(
                 FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                        interactionId, UUID.randomUUID(), position.x, position.y, position.z, 0, position.yRot,
+                        interactionId, UUID.randomUUID(), pos.x, pos.y, pos.z, 0, position.yRot,
                         MEntityTypes.INTERACTION, 0, CoreReflections.instance$Vec3$Zero, 0
                 ),
                 FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(interactionId, config.cachedValues())

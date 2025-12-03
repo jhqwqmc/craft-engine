@@ -36,7 +36,7 @@ public final class ResourceConfigUtils {
             return defaultValue;
         }
         try {
-            return Enum.valueOf(clazz, o.toString().toUpperCase(Locale.ENGLISH));
+            return Enum.valueOf(clazz, o.toString().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return defaultValue;
         }

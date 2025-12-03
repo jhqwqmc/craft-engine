@@ -6,18 +6,19 @@ items:
     model: minecraft:item/custom/wooden_chair
     behavior:
       type: furniture_item
+      rules:
+        ground:
+          rotation: any
+          alignment: any
       furniture:
         settings:
           item: default:wooden_chair
           sounds:
             break: minecraft:block.bamboo_wood.break
             place: minecraft:block.bamboo_wood.place
-        placement:
+        variants:
           ground:
             loot-spawn-offset: 0,0.4,0
-            rules:
-              rotation: ANY
-              alignment: ANY
             elements:
               - item: default:wooden_chair
                 display-transform: NONE

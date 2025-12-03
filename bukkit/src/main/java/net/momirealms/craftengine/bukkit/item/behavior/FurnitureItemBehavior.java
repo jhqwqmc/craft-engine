@@ -8,9 +8,7 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureConfig;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureDataAccessor;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
+import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -26,10 +24,8 @@ import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Cancellable;
-import net.momirealms.craftengine.core.util.ItemUtils;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
@@ -38,17 +34,17 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class FurnitureItemBehavior extends ItemBehavior {
     public static final Factory FACTORY = new Factory();
+    private static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
     private final Key id;
+    private final Map<AnchorType, Rule> rules;
 
-    public FurnitureItemBehavior(Key id) {
+    public FurnitureItemBehavior(Key id, Map<AnchorType, Rule> rules) {
         this.id = id;
+        this.rules = rules;
     }
 
     public Key furnitureId() {
@@ -67,10 +63,22 @@ public class FurnitureItemBehavior extends ItemBehavior {
             return InteractionResult.FAIL;
         }
 
+        Direction clickedFace = context.getClickedFace();
+        AnchorType anchorType = switch (clickedFace) {
+            case EAST, WEST, NORTH, SOUTH -> AnchorType.WALL;
+            case UP -> AnchorType.GROUND;
+            case DOWN -> AnchorType.CEILING;
+        };
+
         FurnitureConfig customFurniture = optionalCustomFurniture.get();
-        FurnitureVariant variant = customFurniture.anyVariant();
+        FurnitureVariant variant = customFurniture.getVariant(anchorType.variantName());
         if (variant == null) {
             return InteractionResult.FAIL;
+        }
+
+        Rule rule = this.rules.get(anchorType);
+        if (rule == null) {
+            rule = Rule.DEFAULT;
         }
 
         Player player = context.getPlayer();
@@ -80,14 +88,27 @@ public class FurnitureItemBehavior extends ItemBehavior {
 
         Vec3d clickedPosition = context.getClickLocation();
 
+        // get position and rotation for placement
+        Vec3d finalPlacePosition;
+        double furnitureYaw;
+        if (anchorType == AnchorType.WALL) {
+            furnitureYaw = Direction.getYaw(clickedFace);
+            if (clickedFace == Direction.EAST || clickedFace == Direction.WEST) {
+                Pair<Double, Double> xz = rule.alignmentRule().apply(Pair.of(clickedPosition.y(), clickedPosition.z()));
+                finalPlacePosition = new Vec3d(clickedPosition.x(), xz.left(), xz.right());
+            } else {
+                Pair<Double, Double> xz = rule.alignmentRule().apply(Pair.of(clickedPosition.x(), clickedPosition.y()));
+                finalPlacePosition = new Vec3d(xz.left(), xz.right(), clickedPosition.z());
+            }
+        } else {
+            furnitureYaw = rule.rotationRule().apply(180 + (player != null ? player.yRot() : 0));
+            Pair<Double, Double> xz = rule.alignmentRule().apply(Pair.of(clickedPosition.x(), clickedPosition.z()));
+            finalPlacePosition = new Vec3d(xz.left(), clickedPosition.y(), xz.right());
+        }
+
         // trigger event
         org.bukkit.entity.Player bukkitPlayer = player != null ? (org.bukkit.entity.Player) player.platformPlayer() : null;
         World world = (World) context.getLevel().platformWorld();
-
-        // get position and rotation for placement
-        Vec3d finalPlacePosition = clickedPosition;
-        double furnitureYaw = 180 + (player != null ? player.yRot() : 0);
-
         Location furnitureLocation = new Location(world, finalPlacePosition.x(), finalPlacePosition.y(), finalPlacePosition.z(), (float) furnitureYaw, 0);
         WorldPosition furniturePos = LocationUtils.toWorldPosition(furnitureLocation);
         List<AABB> aabbs = new ArrayList<>();
@@ -162,17 +183,59 @@ public class FurnitureItemBehavior extends ItemBehavior {
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.furniture.missing_furniture", new IllegalArgumentException("Missing required parameter 'furniture' for furniture_item behavior"));
             }
+            Map<String, Object> rulesMap = ResourceConfigUtils.getAsMapOrNull(arguments.get("rules"), "rules");
+            Key furnitureId;
             if (id instanceof Map<?,?> map) {
+                Map<String, Object> furnitureSection;
                 if (map.containsKey(key.toString())) {
                     // 防呆
-                    BukkitFurnitureManager.instance().parser().addPendingConfigSection(new PendingConfigSection(pack, path, node, key, MiscUtils.castToMap(map.get(key.toString()), false)));
+                    furnitureSection = MiscUtils.castToMap(map.get(key.toString()), false);
+                    BukkitFurnitureManager.instance().parser().addPendingConfigSection(new PendingConfigSection(pack, path, node, key, furnitureSection));
                 } else {
-                    BukkitFurnitureManager.instance().parser().addPendingConfigSection(new PendingConfigSection(pack, path, node, key, MiscUtils.castToMap(map, false)));
+                    furnitureSection = MiscUtils.castToMap(map, false);
+                    BukkitFurnitureManager.instance().parser().addPendingConfigSection(new PendingConfigSection(pack, path, node, key, furnitureSection));
                 }
-                return new FurnitureItemBehavior(key);
+                furnitureId = key;
+                // 兼容老版本
+                if (rulesMap == null) {
+                    Map<String, Object> placementSection = ResourceConfigUtils.getAsMapOrNull(furnitureSection.get("placement"), "placement");
+                    if (placementSection != null) {
+                        rulesMap = new HashMap<>();
+                        for (Map.Entry<String, Object> entry : placementSection.entrySet()) {
+                            if (entry.getValue() instanceof Map<?, ?> innerMap) {
+                                if (innerMap.containsKey("rules")) {
+                                    Map<String, Object> rules = ResourceConfigUtils.getAsMap(innerMap.get("rules"), "rules");
+                                    if (ALLOWED_ANCHOR_TYPES.contains(entry.getKey())) {
+                                        rulesMap.put(entry.getKey(), rules);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
-                return new FurnitureItemBehavior(Key.of(id.toString()));
+                furnitureId = Key.of(id.toString());
             }
+            Map<AnchorType, Rule> rules = new EnumMap<>(AnchorType.class);
+            if (rulesMap != null) {
+                for (Map.Entry<String, Object> entry : rulesMap.entrySet()) {
+                    try {
+                        AnchorType type = AnchorType.valueOf(entry.getKey().toUpperCase(Locale.ROOT));
+                        Map<String, Object> ruleSection = MiscUtils.castToMap(entry.getValue(), true);
+                        rules.put(type, new Rule(
+                                ResourceConfigUtils.getAsEnum(ruleSection.get("alignment"), AlignmentRule.class, AlignmentRule.ANY),
+                                ResourceConfigUtils.getAsEnum(ruleSection.get("rotation"), RotationRule.class, RotationRule.ANY)
+                        ));
+                    } catch (IllegalArgumentException ignored) {
+                        Debugger.FURNITURE.debug(() -> "Invalid anchor type: " + entry.getKey());
+                    }
+                }
+            }
+            return new FurnitureItemBehavior(furnitureId, rules);
         }
+    }
+
+    public record Rule(AlignmentRule alignmentRule, RotationRule rotationRule) {
+        public static final Rule DEFAULT = new Rule(AlignmentRule.ANY, RotationRule.ANY);
     }
 }
