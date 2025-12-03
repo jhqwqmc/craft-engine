@@ -546,7 +546,7 @@ public class BukkitServerPlayer extends Player {
                 Object mountPos = FastNMS.INSTANCE.method$Entity$getPassengerRidingPosition(FastNMS.INSTANCE.method$CraftEntity$getHandle(vehicle), serverPlayer);
                 unsureEyeLocation.set(FastNMS.INSTANCE.field$Vec3$x(mountPos), FastNMS.INSTANCE.field$Vec3$y(mountPos) + bukkitPlayer.getEyeHeight(), FastNMS.INSTANCE.field$Vec3$z(mountPos));
             }
-            if (Config.predictBreaking() && !this.isDestroyingCustomBlock && !unsureEyeLocation.equals(this.eyeLocation)) {
+            if (Config.predictBreaking() && this.eyeLocation != null && !this.isDestroyingCustomBlock && !unsureEyeLocation.equals(this.eyeLocation)) {
                 // if it's not destroying blocks, we do predict
                 if ((gameTicks() + entityID()) % Config.predictBreakingInterval() == 0) {
                     this.predictNextBlockToMine();
