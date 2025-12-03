@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
+import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
+import net.momirealms.craftengine.bukkit.entity.data.InteractionEntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.AbstractFurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
@@ -10,16 +12,19 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<InteractionFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
-    public static final InteractionFurnitureHitboxConfig DEFAULT =  new InteractionFurnitureHitboxConfig(new SeatConfig[0], new Vector3f(), false, false, false, false, new Vector3f(1,1,1), true);
+    public static final InteractionFurnitureHitboxConfig DEFAULT = new InteractionFurnitureHitboxConfig();
 
-    public final Vector3f size;
-    public final boolean responsive;
-    public final boolean invisible;
+    private final Vector3f size;
+    private final boolean responsive;
+    private final boolean invisible;
+    private final List<Object> cachedValues = new ArrayList<>(4);
 
     public InteractionFurnitureHitboxConfig(SeatConfig[] seats,
                                             Vector3f position,
@@ -33,6 +38,19 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
         this.size = size;
         this.responsive = responsive;
         this.invisible = invisible;
+        InteractionEntityData.Height.addEntityDataIfNotDefaultValue(size.y, cachedValues);
+        InteractionEntityData.Width.addEntityDataIfNotDefaultValue(size.x, cachedValues);
+        InteractionEntityData.Responsive.addEntityDataIfNotDefaultValue(responsive, cachedValues);
+        if (invisible) {
+            BaseEntityData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, cachedValues);
+        }
+    }
+
+    private InteractionFurnitureHitboxConfig() {
+        super(new SeatConfig[0], new Vector3f(), false, false, false);
+        this.size = new Vector3f(1);
+        this.responsive = true;
+        this.invisible = false;
     }
 
     public Vector3f size() {
@@ -45,6 +63,10 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
 
     public boolean invisible() {
         return invisible;
+    }
+
+    public List<Object> cachedValues() {
+        return cachedValues;
     }
 
     @Override

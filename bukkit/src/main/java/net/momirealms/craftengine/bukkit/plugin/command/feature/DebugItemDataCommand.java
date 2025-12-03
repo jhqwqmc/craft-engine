@@ -115,7 +115,7 @@ public class DebugItemDataCommand extends BukkitCommandFeature<CommandSender> {
                     } else if (nbt instanceof short[]) {
                         value = Arrays.toString((short[]) nbt);
                     } else {
-                        value = "Unknown array id";
+                        value = "Unknown array type";
                     }
                 } else {
                     value = nbt.toString();

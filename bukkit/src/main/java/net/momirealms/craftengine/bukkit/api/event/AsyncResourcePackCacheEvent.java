@@ -49,7 +49,7 @@ public final class AsyncResourcePackCacheEvent extends Event {
      * Adds an external resource pack to the cache.
      * <p>
      * This method accepts either a .zip file or a directory path representing a resource pack.
-     * The resource pack will be added to the appropriate cache collection based on its id.
+     * The resource pack will be added to the appropriate cache collection based on its type.
      * </p>
      *
      * @param path the file system path to the resource pack. Must be either a .zip file or a directory.

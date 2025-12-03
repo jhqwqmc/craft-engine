@@ -32,14 +32,14 @@ import java.util.function.Consumer;
 
 public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<ShulkerFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
-    public final float scale;
-    public final byte peek;
-    public final boolean interactive;
-    public final boolean interactionEntity;
-    public final Direction direction;
-    public final DirectionalShulkerSpawner spawner;
-    public final List<Object> cachedShulkerValues = new ArrayList<>();
-    public final AABBCreator aabbCreator;
+    private final float scale;
+    private final byte peek;
+    private final boolean interactive;
+    private final boolean interactionEntity;
+    private final Direction direction;
+    private final DirectionalShulkerSpawner spawner;
+    private final List<Object> cachedShulkerValues = new ArrayList<>(6);
+    private final AABBCreator aabbCreator;
 
     public ShulkerFurnitureHitboxConfig(SeatConfig[] seats,
                                         Vector3f position,
@@ -178,6 +178,14 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
         return direction;
     }
 
+    public DirectionalShulkerSpawner spawner() {
+        return spawner;
+    }
+
+    public List<Object> cachedShulkerValues() {
+        return cachedShulkerValues;
+    }
+
     @Override
     public ShulkerFurnitureHitbox create(Furniture furniture) {
         return new ShulkerFurnitureHitbox(furniture, this);
@@ -297,8 +305,8 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
 
         @Override
         public ShulkerFurnitureHitboxConfig create(Map<String, Object> arguments) {
-            Vector3f position = ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", "0"), "position");
-            float scale = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("scale", "1"), "scale");
+            Vector3f position = ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0), "position");
+            float scale = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("scale", 1), "scale");
             byte peek = (byte) ResourceConfigUtils.getAsInt(arguments.getOrDefault("peek", 0), "peek");
             Direction directionEnum = ResourceConfigUtils.getAsEnum(arguments.get("direction"), Direction.class, Direction.UP);
             boolean interactive = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("interactive", true), "interactive");

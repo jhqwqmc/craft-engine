@@ -156,7 +156,7 @@ public final class SNBTReader extends DefaultStringReader {
                 // 1.21.6的SNBT原版是支持 {key:[B;1,2b,0xFF]} 这种奇葩写法的, 越界部分会被自动舍弃, 如0xff的byte值为-1.
                 // 如果需要和原版对齐, 那么只需要判断是否是数字就行了.
                 // if (!(element instanceof Number number))
-                //    throw new IllegalArgumentException("Error element id at pos " + getCursor());
+                //    throw new IllegalArgumentException("Error element type at pos " + getCursor());
                 if (!(element instanceof Number number))
                     throw new IllegalArgumentException("Error parsing number at pos " + getCursor());
 

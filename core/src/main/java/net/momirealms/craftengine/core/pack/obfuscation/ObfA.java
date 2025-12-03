@@ -36,7 +36,7 @@ public enum ObfA {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Unknown resource id: " + xclf);
+        throw new IllegalArgumentException("Unknown resource type: " + xclf);
     }
 
     public static final byte[] VALUES = new byte[] {

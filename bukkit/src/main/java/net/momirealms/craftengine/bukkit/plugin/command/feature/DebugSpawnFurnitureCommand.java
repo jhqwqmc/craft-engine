@@ -24,6 +24,7 @@ public class DebugSpawnFurnitureCommand extends BukkitCommandFeature<CommandSend
         super(commandManager, plugin);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Command.Builder<? extends CommandSender> assembleCommand(org.incendo.cloud.CommandManager<CommandSender> manager, Command.Builder<CommandSender> builder) {
         return builder
@@ -34,7 +35,7 @@ public class DebugSpawnFurnitureCommand extends BukkitCommandFeature<CommandSend
                         return CompletableFuture.completedFuture(plugin().furnitureManager().cachedSuggestions());
                     }
                 }))
-                .optional("anchor-id", EnumParser.enumParser(AnchorType.class))
+                .optional("anchor-type", EnumParser.enumParser(AnchorType.class))
                 .flag(FlagKeys.SILENT_FLAG)
                 .handler(context -> {
                     // fixme 指令
@@ -47,7 +48,7 @@ public class DebugSpawnFurnitureCommand extends BukkitCommandFeature<CommandSend
 //                    }
 //                    Location location = context.get("location");
 //                    FurnitureConfig customFurniture = optionalCustomFurniture.get();
-//                    AnchorType anchorType = (AnchorType) context.optional("anchor-id").orElse(customFurniture.getAnyAnchorType());
+//                    AnchorType anchorType = (AnchorType) context.optional("anchor-type").orElse(customFurniture.getAnyAnchorType());
 //                    boolean playSound = context.flags().hasFlag("silent");
 //                    CraftEngineFurniture.place(location, customFurniture, anchorType, playSound);
                 });

@@ -87,7 +87,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", "<arg:position.pitch>"));
             NumberProvider yaw = NumberProviders.fromObject(arguments.getOrDefault("yaw", "<arg:position.yaw>"));
-            String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-id"));
+            String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-type"));
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
             return new SpawnFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, variant, playSound, getPredicates(arguments));
         }

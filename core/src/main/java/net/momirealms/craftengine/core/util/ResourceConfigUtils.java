@@ -137,13 +137,13 @@ public final class ResourceConfigUtils {
                 try {
                     return Integer.parseInt(s.replace("_", ""));
                 } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.id.int", e, s, option);
+                    throw new LocalizedResourceConfigException("warning.config.type.int", e, s, option);
                 }
             }
             case Boolean b -> {
                 return b ? 1 : 0;
             }
-            default -> throw new LocalizedResourceConfigException("warning.config.id.int", o.toString(), option);
+            default -> throw new LocalizedResourceConfigException("warning.config.type.int", o.toString(), option);
         }
     }
 
@@ -162,11 +162,11 @@ public final class ResourceConfigUtils {
                 try {
                     return Double.parseDouble(s);
                 } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.id.double", e, s, option);
+                    throw new LocalizedResourceConfigException("warning.config.type.double", e, s, option);
                 }
             }
             default -> {
-                throw new LocalizedResourceConfigException("warning.config.id.double", o.toString(), option);
+                throw new LocalizedResourceConfigException("warning.config.type.double", o.toString(), option);
             }
         }
     }
@@ -183,14 +183,14 @@ public final class ResourceConfigUtils {
                 try {
                     return Float.parseFloat(s);
                 } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.id.float", e, s, option);
+                    throw new LocalizedResourceConfigException("warning.config.type.float", e, s, option);
                 }
             }
             case Number number -> {
                 return number.floatValue();
             }
             default -> {
-                throw new LocalizedResourceConfigException("warning.config.id.float", o.toString(), option);
+                throw new LocalizedResourceConfigException("warning.config.type.float", o.toString(), option);
             }
         }
     }
@@ -206,15 +206,15 @@ public final class ResourceConfigUtils {
             case Number n -> {
                 if (n.byteValue() == 0) return false;
                 if (n.byteValue() == 1) return true;
-                throw new LocalizedResourceConfigException("warning.config.id.boolean", String.valueOf(n), option);
+                throw new LocalizedResourceConfigException("warning.config.type.boolean", String.valueOf(n), option);
             }
             case String s -> {
                 if (s.equalsIgnoreCase("true")) return true;
                 if (s.equalsIgnoreCase("false")) return false;
-                throw new LocalizedResourceConfigException("warning.config.id.boolean", s, option);
+                throw new LocalizedResourceConfigException("warning.config.type.boolean", s, option);
             }
             default -> {
-                throw new LocalizedResourceConfigException("warning.config.id.boolean", o.toString(), option);
+                throw new LocalizedResourceConfigException("warning.config.type.boolean", o.toString(), option);
             }
         }
     }
@@ -234,11 +234,11 @@ public final class ResourceConfigUtils {
                 try {
                     return Long.parseLong(s.replace("_", ""));
                 } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.id.long", e, s, option);
+                    throw new LocalizedResourceConfigException("warning.config.type.long", e, s, option);
                 }
             }
             default -> {
-                throw new LocalizedResourceConfigException("warning.config.id.long", o.toString(), option);
+                throw new LocalizedResourceConfigException("warning.config.type.long", o.toString(), option);
             }
         }
     }
@@ -248,7 +248,7 @@ public final class ResourceConfigUtils {
         if (obj instanceof Map<?, ?> map) {
             return (Map<String, Object>) map;
         }
-        throw new LocalizedResourceConfigException("warning.config.id.map", String.valueOf(obj), option);
+        throw new LocalizedResourceConfigException("warning.config.type.map", String.valueOf(obj), option);
     }
 
     @SuppressWarnings("unchecked")
@@ -259,24 +259,30 @@ public final class ResourceConfigUtils {
         if (obj instanceof Map<?, ?> map) {
             return (Map<String, Object>) map;
         }
-        throw new LocalizedResourceConfigException("warning.config.id.map", String.valueOf(obj), option);
+        throw new LocalizedResourceConfigException("warning.config.type.map", String.valueOf(obj), option);
     }
 
     public static Vector3f getAsVector3f(Object o, String option) {
-        if (o == null) return new Vector3f();
-        if (o instanceof List<?> list && list.size() == 3) {
-            return new Vector3f(Float.parseFloat(list.get(0).toString()), Float.parseFloat(list.get(1).toString()), Float.parseFloat(list.get(2).toString()));
-        } else if (o instanceof Number number) {
-            return new Vector3f(number.floatValue());
-        } else {
-            String stringFormat = o.toString();
-            String[] split = stringFormat.split(",");
-            if (split.length == 3) {
-                return new Vector3f(Float.parseFloat(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[2]));
-            } else if (split.length == 1) {
-                return new Vector3f(Float.parseFloat(split[0]));
-            } else {
-                throw new LocalizedResourceConfigException("warning.config.id.vector3f", stringFormat, option);
+        switch (o) {
+            case null -> {
+                return new Vector3f();
+            }
+            case List<?> list when list.size() == 3 -> {
+                return new Vector3f(Float.parseFloat(list.get(0).toString()), Float.parseFloat(list.get(1).toString()), Float.parseFloat(list.get(2).toString()));
+            }
+            case Number number -> {
+                return new Vector3f(number.floatValue());
+            }
+            default -> {
+                String stringFormat = o.toString();
+                String[] split = stringFormat.split(",");
+                if (split.length == 3) {
+                    return new Vector3f(Float.parseFloat(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[2]));
+                } else if (split.length == 1) {
+                    return new Vector3f(Float.parseFloat(split[0]));
+                } else {
+                    throw new LocalizedResourceConfigException("warning.config.type.vector3f", stringFormat, option);
+                }
             }
         }
     }
@@ -295,7 +301,7 @@ public final class ResourceConfigUtils {
             } else if (split.length == 1) {
                 return QuaternionUtils.toQuaternionf(0, (float) -Math.toRadians(Float.parseFloat(split[0])), 0);
             } else {
-                throw new LocalizedResourceConfigException("warning.config.id.quaternionf", stringFormat, option);
+                throw new LocalizedResourceConfigException("warning.config.type.quaternionf", stringFormat, option);
             }
         }
     }
@@ -313,7 +319,7 @@ public final class ResourceConfigUtils {
                 double d = Double.parseDouble(split[0]);
                 return new Vec3d(d, d, d);
             } else {
-                throw new LocalizedResourceConfigException("warning.config.id.vec3d", stringFormat, option);
+                throw new LocalizedResourceConfigException("warning.config.type.vec3d", stringFormat, option);
             }
         }
     }
@@ -347,7 +353,7 @@ public final class ResourceConfigUtils {
 
     public static AABB getAsAABB(Object o, String option) {
         switch (o) {
-            case null -> throw new LocalizedResourceConfigException("warning.config.id.aabb", "null", option);
+            case null -> throw new LocalizedResourceConfigException("warning.config.type.aabb", "null", option);
             case AABB aabb -> {
                 return aabb;
             }
@@ -367,7 +373,7 @@ public final class ResourceConfigUtils {
                             try {
                                 args[i] = Double.parseDouble(list.get(i).toString());
                             } catch (NumberFormatException e) {
-                                throw new LocalizedResourceConfigException("warning.config.id.aabb", o.toString(), option);
+                                throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
                             }
                         }
                     }
@@ -378,7 +384,7 @@ public final class ResourceConfigUtils {
                         try {
                             args[i] = Double.parseDouble(split[i]);
                         } catch (NumberFormatException e) {
-                            throw new LocalizedResourceConfigException("warning.config.id.aabb", o.toString(), option);
+                            throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
                         }
                     }
                 }
@@ -391,7 +397,7 @@ public final class ResourceConfigUtils {
                 } else if (args.length == 6) {
                     return new AABB(args[0], args[1], args[2], args[3], args[4], args[5]);
                 } else {
-                    throw new LocalizedResourceConfigException("warning.config.id.aabb", o.toString(), option);
+                    throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
                 }
             }
         }

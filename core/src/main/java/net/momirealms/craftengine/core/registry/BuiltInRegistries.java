@@ -89,10 +89,10 @@ public class BuiltInRegistries {
     public static final Registry<ItemUpdaterType<?>> ITEM_UPDATER_TYPE = createConstantBoundRegistry(Registries.ITEM_UPDATER_TYPE, 16);
     public static final Registry<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>> MOD_PACKET = createConstantBoundRegistry(Registries.MOD_PACKET, 16);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_TYPE, 64);
-    public static final Registry<BlockEntityElementConfigFactory> BLOCK_ENTITY_ELEMENT_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_ELEMENT_TYPE, 16);
+    public static final Registry<BlockEntityElementConfigFactory<?>> BLOCK_ENTITY_ELEMENT_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_ELEMENT_TYPE, 16);
     public static final Registry<CraftRemainderFactory> CRAFT_REMAINDER_FACTORY = createConstantBoundRegistry(Registries.CRAFT_REMAINDER_FACTORY, 16);
-    public static final Registry<FurnitureElementConfigFactory> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
-    public static final Registry<FurnitureHitBoxConfigFactory> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
+    public static final Registry<FurnitureElementConfigFactory<?>> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
+    public static final Registry<FurnitureHitBoxConfigFactory<?>> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
 
     private static <T> Registry<T> createConstantBoundRegistry(ResourceKey<? extends Registry<T>> key, int expectedSize) {
         return new ConstantBoundRegistry<>(key, expectedSize);

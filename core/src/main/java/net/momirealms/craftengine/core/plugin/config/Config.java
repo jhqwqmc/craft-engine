@@ -448,10 +448,10 @@ public class Config {
 
         // furniture
         furniture$hide_base_entity = config.getBoolean("furniture.hide-base-entity", true);
-        furniture$collision_entity_type = ColliderType.valueOf(config.getString("furniture.collision-entity-id", "interaction").toUpperCase(Locale.ENGLISH));
+        furniture$collision_entity_type = ColliderType.valueOf(config.getString("furniture.collision-entity-type", "interaction").toUpperCase(Locale.ENGLISH));
 
         // equipment
-        equipment$sacrificed_vanilla_armor$type = config.getString("equipment.sacrificed-vanilla-armor.id", "chainmail").toLowerCase(Locale.ENGLISH);
+        equipment$sacrificed_vanilla_armor$type = config.getString("equipment.sacrificed-vanilla-armor.type", "chainmail").toLowerCase(Locale.ENGLISH);
         if (!AbstractPackManager.ALLOWED_VANILLA_EQUIPMENT.contains(equipment$sacrificed_vanilla_armor$type)) {
             TranslationManager.instance().log("warning.config.equipment.invalid_sacrificed_armor", equipment$sacrificed_vanilla_armor$type);
             equipment$sacrificed_vanilla_armor$type = "chainmail";

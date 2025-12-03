@@ -17,14 +17,15 @@ public class FurnitureHitBoxTypes {
     public static final Key VIRTUAL = Key.of("minecraft:virtual");
     public static final Key CUSTOM = Key.of("minecraft:custom");
 
-    public static void register(Key key, FurnitureHitBoxConfigFactory factory) {
-        ((WritableRegistry<FurnitureHitBoxConfigFactory>) BuiltInRegistries.FURNITURE_HITBOX_TYPE)
+    public static void register(Key key, FurnitureHitBoxConfigFactory<?> factory) {
+        ((WritableRegistry<FurnitureHitBoxConfigFactory<?>>) BuiltInRegistries.FURNITURE_HITBOX_TYPE)
                 .register(ResourceKey.create(Registries.FURNITURE_HITBOX_TYPE.location(), key), factory);
     }
 
     public static <H extends FurnitureHitBox> FurnitureHitBoxConfig<H> fromMap(Map<String, Object> arguments) {
         Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(Key::of).orElse(FurnitureHitBoxTypes.INTERACTION);
-        FurnitureHitBoxConfigFactory factory = BuiltInRegistries.FURNITURE_HITBOX_TYPE.getValue(type);
+        @SuppressWarnings("unchecked")
+        FurnitureHitBoxConfigFactory<H> factory = (FurnitureHitBoxConfigFactory<H>) BuiltInRegistries.FURNITURE_HITBOX_TYPE.getValue(type);
         if (factory == null) {
             throw new LocalizedResourceConfigException("warning.config.furniture.hitbox.invalid_type", type.toString());
         }

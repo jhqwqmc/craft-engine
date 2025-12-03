@@ -63,7 +63,7 @@ public class ToastFunction<CTX extends Context> extends AbstractConditionalFunct
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             AdvancementType advancementType;
-            String advancementName = arguments.getOrDefault("advancement-id", "goal").toString();
+            String advancementName = arguments.getOrDefault("advancement-type", "goal").toString();
             try {
                 advancementType = AdvancementType.valueOf(advancementName.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {

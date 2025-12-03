@@ -6,7 +6,7 @@ public class ItemDisplayEntityData<T> extends DisplayEntityData<T> {
     // Item display only
     public static final ItemDisplayEntityData<Object> DisplayedItem = new ItemDisplayEntityData<>(ItemDisplayEntityData.class, EntityDataValue.Serializers$ITEM_STACK, CoreReflections.instance$ItemStack$EMPTY);
     /**
-     * Display id:
+     * Display type:
      * 0 = NONE
      * 1 = THIRD_PERSON_LEFT_HAND
      * 2 = THIRD_PERSON_RIGHT_HAND

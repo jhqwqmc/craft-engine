@@ -80,7 +80,7 @@ public final class CraftEngineFurniture {
      *
      * @param location    location
      * @param furnitureId furniture to place
-     * @param anchorType  anchor id
+     * @param anchorType  anchor type
      * @return the loaded furniture
      */
     @Nullable
@@ -98,7 +98,7 @@ public final class CraftEngineFurniture {
      *
      * @param location   location
      * @param furniture  furniture to place
-     * @param anchorType anchor id
+     * @param anchorType anchor type
      * @return the loaded furniture
      */
     @NotNull
@@ -114,7 +114,7 @@ public final class CraftEngineFurniture {
      *
      * @param location    location
      * @param furnitureId furniture to place
-     * @param anchorType  anchor id
+     * @param anchorType  anchor type
      * @param playSound   whether to play place sounds
      * @return the loaded furniture
      */
@@ -133,7 +133,7 @@ public final class CraftEngineFurniture {
      *
      * @param location   location
      * @param furniture  furniture to place
-     * @param anchorType anchor id
+     * @param anchorType anchor type
      * @param playSound  whether to play place sounds
      * @return the loaded furniture
      */

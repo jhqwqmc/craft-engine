@@ -48,6 +48,7 @@ public interface FurnitureConfig {
         if (optionalVariant.isPresent()) {
             variantName = optionalVariant.get();
         } else {
+            @SuppressWarnings("deprecation")
             Optional<AnchorType> optionalAnchorType = accessor.anchorType();
             if (optionalAnchorType.isPresent()) {
                 variantName = optionalAnchorType.get().name().toLowerCase(Locale.ROOT);

@@ -58,7 +58,7 @@ public class TemplateArguments {
             Key key = Key.withDefaultNamespace(type0, Key.DEFAULT_NAMESPACE);
             TemplateArgumentFactory factory = BuiltInRegistries.TEMPLATE_ARGUMENT_FACTORY.getValue(key);
             if (factory == null) {
-                throw new IllegalArgumentException("Unknown argument id: " + type);
+                throw new IllegalArgumentException("Unknown argument type: " + type);
             }
             return factory.create(map);
         }
