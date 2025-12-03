@@ -5,6 +5,7 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.EntityHitResult;
 import net.momirealms.craftengine.core.world.Vec3d;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.Optional;
 
@@ -65,6 +66,17 @@ public class AABB {
             pos.x + width / 2,
             pos.y + height,
             pos.z + width / 2
+        );
+    }
+
+    public static AABB makeBoundingBox(Vector3f pos, double width, double height) {
+        return new AABB(
+                pos.x - width / 2,
+                pos.y,
+                pos.z - width / 2,
+                pos.x + width / 2,
+                pos.y + height,
+                pos.z + width / 2
         );
     }
 

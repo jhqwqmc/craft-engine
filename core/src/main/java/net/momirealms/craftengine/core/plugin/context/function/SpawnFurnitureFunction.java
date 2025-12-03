@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
+import net.momirealms.craftengine.core.entity.furniture.FurnitureDataAccessor;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
@@ -55,18 +57,13 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             float pitchValue = this.pitch.getFloat(ctx);
             float yawValue = this.yaw.getFloat(ctx);
             WorldPosition position = new WorldPosition(world, xPos, yPos, zPos, pitchValue, yawValue);
-            // fixme api
-//            spawnFurniture(this.furnitureId, position, this.anchorType, this.playSound);
+            spawnFurniture(this.furnitureId, position, this.variant, this.playSound);
         });
     }
 
-//    public static void spawnFurniture(Key furnitureId, WorldPosition position, AnchorType anchorType, boolean playSound) {
-//        CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> {
-//            AnchorType anchor = Optional.ofNullable(anchorType).orElse(furniture.getAnyAnchorType());
-//            FurnitureDataAccessor extraData = FurnitureDataAccessor.builder().anchorType(anchor).build();
-//            CraftEngine.instance().furnitureManager().place(position, furniture, extraData, playSound);
-//        });
-//    }
+    public static void spawnFurniture(Key furnitureId, WorldPosition position, String variant, boolean playSound) {
+        CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> CraftEngine.instance().furnitureManager().place(position, furniture, FurnitureDataAccessor.ofVariant(variant), playSound));
+    }
 
     @Override
     public Key type() {
