@@ -47,6 +47,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final Key SURFACE_SPREADING_BLOCK = Key.from("craftengine:surface_spreading_block");
     public static final Key SNOWY_BLOCK = Key.from("craftengine:snowy_block");
     public static final Key HANGABLE_BLOCK = Key.from("craftengine:hangable_block");
+    public static final Key DROP_EXPERIENCE_BLOCK = Key.from("craftengine:drop_experience_block");
 
     public static void init() {
         register(EMPTY, (block, args) -> EmptyBlockBehavior.INSTANCE);
@@ -92,5 +93,6 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
         register(SURFACE_SPREADING_BLOCK, SurfaceSpreadingBlockBehavior.FACTORY);
         register(SNOWY_BLOCK, SnowyBlockBehavior.FACTORY);
         register(HANGABLE_BLOCK, HangableBlockBehavior.FACTORY);
+        register(DROP_EXPERIENCE_BLOCK, DropExperienceBlockBehavior.FACTORY);
     }
 }

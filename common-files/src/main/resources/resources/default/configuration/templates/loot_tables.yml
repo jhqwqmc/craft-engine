@@ -180,7 +180,6 @@ templates:
   #   ore_block: the ore block
   #   ore_drop: the drops of the ore material
   #   ore_drop_count: the amount of the ore materials
-  #   exp: the exp to drop
   default:loot_table/ore:
     pools:
       - rolls: 1
@@ -203,8 +202,6 @@ templates:
                     formula:
                       type: ore_drops
                   - type: explosion_decay
-                  - type: drop_exp
-                    count: ${exp:-2~4}
 
   # Using Silk Touch or shears will cause the leaves block itself to drop.
   # Using Fortune, however, increases the drop rates of sticks and saplings.
