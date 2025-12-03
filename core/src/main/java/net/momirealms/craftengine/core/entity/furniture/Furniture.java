@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
@@ -13,6 +14,7 @@ import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxCo
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.entity.seat.Seat;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class Furniture implements Cullable {
@@ -40,6 +43,8 @@ public abstract class Furniture implements Cullable {
     protected Int2ObjectMap<FurnitureHitBox> hitboxMap;
     protected int[] virtualEntityIds;
     protected int[] colliderEntityIds;
+
+    private boolean hasExternalModel;
 
     protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, FurnitureConfig config) {
         this.config = config;
@@ -77,8 +82,8 @@ public abstract class Furniture implements Cullable {
             this.hitboxes[i] = hitbox;
             for (FurnitureHitboxPart part : hitbox.parts()) {
                 this.hitboxMap.put(part.entityId(), hitbox);
-                virtualEntityIds.add(part.entityId());
             }
+            hitbox.collectVirtualEntityId(virtualEntityIds::addLast);
             colliders.addAll(hitbox.colliders());
         }
         // 虚拟碰撞箱的实体id
@@ -86,6 +91,18 @@ public abstract class Furniture implements Cullable {
         this.colliders = colliders.toArray(new Collider[0]);
         this.colliderEntityIds = colliders.stream().mapToInt(Collider::entityId).toArray();
         this.cullingData = createCullingData(variant.cullingData());
+        // 外部模型
+        Optional<ExternalModel> externalModel = variant.externalModel();
+        if (externalModel.isPresent()) {
+            this.hasExternalModel = true;
+            try {
+                externalModel.get().bindModel((AbstractEntity) this.metaDataEntity);
+            } catch (Exception e) {
+                CraftEngine.instance().logger().warn("Failed to load external model for furniture " + id(), e);
+            }
+        } else {
+            this.hasExternalModel = false;
+        }
     }
 
     private CullingData createCullingData(CullingData parent) {
@@ -179,6 +196,10 @@ public abstract class Furniture implements Cullable {
 
     public int entityId() {
         return this.metaDataEntity.entityID();
+    }
+
+    public boolean hasExternalModel() {
+        return hasExternalModel;
     }
 
     public Vec3d getRelativePosition(Vector3f position) {

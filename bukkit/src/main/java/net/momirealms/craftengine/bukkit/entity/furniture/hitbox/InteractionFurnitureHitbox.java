@@ -14,6 +14,7 @@ import net.momirealms.craftengine.core.world.collision.AABB;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
     private final InteractionFurnitureHitboxConfig config;
@@ -21,6 +22,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
     private final Object spawnPacket;
     private final Object despawnPacket;
     private final FurnitureHitboxPart part;
+    private final int entityId;
 
     public InteractionFurnitureHitbox(Furniture furniture, InteractionFurnitureHitboxConfig config) {
         super(furniture, config);
@@ -39,6 +41,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
         ));
         this.part = new FurnitureHitboxPart(interactionId, aabb, pos, config.responsive());
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(interactionId); }});
+        this.entityId = interactionId;
     }
     
     @Override
@@ -54,6 +57,11 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
     @Override
     public InteractionFurnitureHitboxConfig config() {
         return this.config;
+    }
+
+    @Override
+    public void collectVirtualEntityId(Consumer<Integer> collector) {
+        collector.accept(this.entityId);
     }
 
     @Override

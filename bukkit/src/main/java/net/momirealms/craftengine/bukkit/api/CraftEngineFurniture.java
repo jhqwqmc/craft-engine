@@ -330,7 +330,7 @@ public final class CraftEngineFurniture {
     public static BukkitFurniture getLoadedFurnitureByCollider(@NotNull Entity collider) {
         Object nmsEntity = FastNMS.INSTANCE.method$CraftEntity$getHandle(collider);
         if (nmsEntity instanceof CollisionEntity collisionEntity) {
-            return BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(collisionEntity.getId());
+            return BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(collisionEntity.getEntityId());
         }
         return null;
     }

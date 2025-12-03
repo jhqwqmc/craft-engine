@@ -84,6 +84,11 @@ public class HappyGhastFurnitureHitbox extends AbstractFurnitureHitBox {
     }
 
     @Override
+    public void collectVirtualEntityId(Consumer<Integer> collector) {
+        collector.accept(this.entityId);
+    }
+
+    @Override
     public HappyGhastFurnitureHitboxConfig config() {
         return this.config;
     }

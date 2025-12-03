@@ -17,10 +17,7 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -30,11 +27,12 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
     private final List<Collider> colliders;
     private final Object spawnPacket;
     private final Object despawnPacket;
+    private final int[] entityIds;
 
     public ShulkerFurnitureHitbox(Furniture furniture, ShulkerFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
-        int[] entityIds = acquireEntityIds(CoreReflections.instance$Entity$ENTITY_COUNTER::incrementAndGet);
+        this.entityIds = acquireEntityIds(CoreReflections.instance$Entity$ENTITY_COUNTER::incrementAndGet);
         WorldPosition position = furniture.position();
         Quaternionf conjugated = QuaternionUtils.toQuaternionf(0f, (float) Math.toRadians(180 - position.yRot()), 0f).conjugate();
         Vector3f offset = conjugated.transform(new Vector3f(config.position()));
@@ -97,6 +95,13 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
     @Override
     public List<FurnitureHitboxPart> parts() {
         return this.parts;
+    }
+
+    @Override
+    public void collectVirtualEntityId(Consumer<Integer> collector) {
+        for (int entityId : entityIds) {
+            collector.accept(entityId);
+        }
     }
 
     @Override

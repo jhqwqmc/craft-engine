@@ -31,10 +31,12 @@ public class BukkitFurniture extends Furniture {
     public void addCollidersToWorld() {
         Object world = FastNMS.INSTANCE.field$CraftWorld$ServerLevel(this.location.getWorld());
         for (Collider entity : super.colliders) {
-            FastNMS.INSTANCE.method$LevelWriter$addFreshEntity(world, entity.handle());
             Entity bukkitEntity = FastNMS.INSTANCE.method$Entity$getBukkitEntity(entity.handle());
             bukkitEntity.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_COLLISION, PersistentDataType.BYTE, (byte) 1);
             bukkitEntity.setPersistent(false);
+            if (!bukkitEntity.isValid()) {
+                FastNMS.INSTANCE.method$LevelWriter$addFreshEntity(world, entity.handle());
+            }
         }
     }
 

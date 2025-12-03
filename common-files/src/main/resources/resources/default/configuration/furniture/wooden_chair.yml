@@ -27,14 +27,25 @@ items:
                 billboard: FIXED
                 translation: 0,0.5,0
             hitboxes:
-              - position: 0,0,0
-                type: custom
-                entity-type: slime
-                invisible: true
-                can-use-item-on: true
-                blocks-building: true
-                seats:
-                  - 0,0,-0.1 0
+              $$>=1.20.5:
+                - position: 0,0,0
+                  type: custom
+                  entity-type: slime
+                  invisible: true
+                  can-use-item-on: true
+                  blocks-building: true
+                  seats:
+                    - 0,0,-0.1 0
+              $$fallback:
+                - position: 0,0,0
+                  type: interaction
+                  blocks-building: true
+                  invisible: true
+                  width: 0.7
+                  height: 1.2
+                  interactive: true
+                  seats:
+                    - 0,0,-0.1 0
         loot:
           template: default:loot_table/furniture
           arguments:

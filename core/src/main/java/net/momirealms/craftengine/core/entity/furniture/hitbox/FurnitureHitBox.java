@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.world.Vec3d;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface FurnitureHitBox extends SeatOwner {
 
@@ -23,6 +24,8 @@ public interface FurnitureHitBox extends SeatOwner {
     void hide(Player player);
 
     FurnitureHitBoxConfig<?> config();
+
+    void collectVirtualEntityId(Consumer<Integer> collector);
 
     default Optional<EntityHitResult> clip(Vec3d min, Vec3d max) {
         for (FurnitureHitboxPart value : parts()) {

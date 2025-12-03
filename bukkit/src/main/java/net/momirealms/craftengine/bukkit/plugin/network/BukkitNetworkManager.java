@@ -3954,14 +3954,16 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
                 BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(id);
                 if (furniture != null) {
-                    serverPlayer.entityPacketHandlers().put(id, new FurniturePacketHandler(id, furniture.virtualEntityIds()));
+                    EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, new FurniturePacketHandler(id, furniture.virtualEntityIds()));
                     if (Config.enableEntityCulling()) {
                         serverPlayer.addTrackedFurniture(id, furniture);
                     } else {
-                        furniture.show(serverPlayer);
+                        // 修复addEntityToWorld，包比事件先发的问题 (WE)
+                        if (previous == null || previous instanceof ItemDisplayPacketHandler) {
+                            furniture.show(serverPlayer);
+                        }
                     }
-                    // fixme 外部模型
-                    if (Config.hideBaseEntity() && true) {
+                    if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {
                         event.setCancelled(true);
                     }
                 } else {

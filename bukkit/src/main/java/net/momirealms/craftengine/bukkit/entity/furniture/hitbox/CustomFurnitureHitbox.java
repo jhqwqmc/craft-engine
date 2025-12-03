@@ -27,6 +27,7 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     private final Object spawnPacket;
     private final Object despawnPacket;
     private final FurnitureHitboxPart part;
+    private final int entityId;
 
     public CustomFurnitureHitbox(Furniture furniture, CustomFurnitureHitboxConfig config) {
         super(furniture, config);
@@ -54,6 +55,7 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
         this.part = new FurnitureHitboxPart(entityId, aabb, pos, false);
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(entityId); }});
+        this.entityId = entityId;
     }
 
     @Override
@@ -74,6 +76,11 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     @Override
     public void hide(Player player) {
         player.sendPacket(this.despawnPacket, false);
+    }
+
+    @Override
+    public void collectVirtualEntityId(Consumer<Integer> collector) {
+        collector.accept(this.entityId);
     }
 
     @Override
