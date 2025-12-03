@@ -11,7 +11,7 @@ public class BBModel {
     private String model_identifier;
     @SerializedName("visible_box")
     private int[] visible_box;
-    @SerializedName("elementConfigs")
+    @SerializedName("elements")
     private Element[] elements;
     @SerializedName("outliner")
     private OutLiner[] outliner;
