@@ -270,6 +270,13 @@ debug_generate_internal_assets:
     - /craftengine debug generate-internal-assets
     - /ce debug generate-internal-assets
 
+debug_furniture:
+  enable: true
+  permission: ce.command.debug.furniture
+  usage:
+    - /craftengine debug furniture
+    - /ce debug furniture
+
 debug_test:
   enable: true
   permission: ce.command.debug.test

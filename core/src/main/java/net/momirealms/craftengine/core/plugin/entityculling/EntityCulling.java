@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.plugin.entityculling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.MutableVec3d;
@@ -94,10 +93,6 @@ public final class EntityCulling {
             // 超过最大距离，剔除
             if (distanceSq > maxDistanceSq) {
                 return false;
-            }
-            // 太近了，不剔除
-            else if (distanceSq < 1) {
-                return true;
             }
         }
 

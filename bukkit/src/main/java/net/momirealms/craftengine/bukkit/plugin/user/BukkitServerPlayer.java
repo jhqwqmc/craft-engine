@@ -7,7 +7,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
+import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.block.entity.BlockEntityHolder;
+import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -26,6 +28,8 @@ import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -156,6 +160,10 @@ public class BukkitServerPlayer extends Player {
     private Location eyeLocation;
     // 是否启用家具调试
     private boolean enableFurnitureDebug;
+    // 上一次对准的家具
+    private BukkitFurniture lastHitFurniture;
+    // 缓存的tick
+    private int lastHitFurnitureTick;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -540,6 +548,33 @@ public class BukkitServerPlayer extends Player {
         }
         if (this.gameTicks % 20 == 0) {
             this.updateGUI();
+        }
+
+        if (this.enableFurnitureDebug) {
+            BukkitFurniture furniture = CraftEngineFurniture.rayTrace(platformPlayer());
+            boolean forceShow = furniture != this.lastHitFurniture;
+            if (forceShow) {
+                this.lastHitFurnitureTick = 0;
+            } else {
+                this.lastHitFurnitureTick++;
+                if (this.lastHitFurnitureTick % 30 == 0) {
+                    forceShow = true;
+                }
+            }
+            this.lastHitFurniture = furniture;
+            if (furniture != null && forceShow) {
+                FurnitureVariant currentVariant = furniture.getCurrentVariant();
+                List<AABB> aabbs = new ArrayList<>();
+                for (FurnitureHitBoxConfig<?> config : currentVariant.hitBoxConfigs()) {
+                    config.prepareForPlacement(furniture.position(), aabbs::add);
+                }
+                Key endRod = Key.of("end_rod");
+                for (AABB aabb : aabbs) {
+                    for (Vec3d point : aabb.getEdgePoints(0.125)) {
+                        this.playParticle(endRod, point.x, point.y, point.z);
+                    }
+                }
+            }
         }
 
         // 更新眼睛位置

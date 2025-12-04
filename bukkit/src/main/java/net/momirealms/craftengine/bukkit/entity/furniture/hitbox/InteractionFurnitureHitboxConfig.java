@@ -78,11 +78,6 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
     }
 
     @Override
-    public void collectBoundingBox(Consumer<AABB> aabbConsumer) {
-        aabbConsumer.accept(AABB.makeBoundingBox(this.position, size.x, size.y));
-    }
-
-    @Override
     public InteractionFurnitureHitbox create(Furniture furniture) {
         return new InteractionFurnitureHitbox(furniture, this);
     }

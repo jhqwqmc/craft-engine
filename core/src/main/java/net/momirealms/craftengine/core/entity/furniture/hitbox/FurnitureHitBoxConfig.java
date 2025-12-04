@@ -24,5 +24,4 @@ public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
 
     void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer);
 
-    void collectBoundingBox(Consumer<AABB> aabbConsumer);
 }

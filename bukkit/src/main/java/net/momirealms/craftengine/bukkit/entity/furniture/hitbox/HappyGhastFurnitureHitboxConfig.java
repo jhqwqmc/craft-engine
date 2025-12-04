@@ -63,11 +63,6 @@ public class HappyGhastFurnitureHitboxConfig extends AbstractFurnitureHitBoxConf
         }
     }
 
-    @Override
-    public void collectBoundingBox(Consumer<AABB> aabbConsumer) {
-        aabbConsumer.accept(AABB.makeBoundingBox(this.position, 4 * this.scale, 4 * this.scale));
-    }
-
     public static class Factory implements FurnitureHitBoxConfigFactory<HappyGhastFurnitureHitbox> {
 
         @Override

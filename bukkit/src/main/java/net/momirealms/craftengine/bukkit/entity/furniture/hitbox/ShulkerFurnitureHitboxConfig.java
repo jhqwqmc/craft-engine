@@ -153,11 +153,6 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
         }
     }
 
-    @Override
-    public void collectBoundingBox(Consumer<AABB> aabbConsumer) {
-        aabbConsumer.accept(this.aabbCreator.create(position.x, position.y, position.z, 180, new Vector3f(0)));
-    }
-
     public float scale() {
         return this.scale;
     }

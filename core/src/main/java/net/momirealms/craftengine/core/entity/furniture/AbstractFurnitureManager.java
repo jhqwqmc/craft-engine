@@ -18,7 +18,6 @@ import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.collision.AABB;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.joml.Vector3f;
 
@@ -165,8 +164,6 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     .build();
             AbstractFurnitureManager.this.byId.put(id, furniture);
         }
-
-
 
         private CullingData parseCullingData(Object arguments) {
             if (arguments instanceof Boolean b && !b)
