@@ -90,7 +90,7 @@ public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
-            NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 0));
+            NumberProvider amount = NumberProviders.fromObject(ResourceConfigUtils.get(arguments, "amount", "count"));
             Condition<Context> conditions = null;
             List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "conditions", "condition"), EventConditions::fromMap);
             if (conditionList.size() == 1) {

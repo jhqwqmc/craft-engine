@@ -48,6 +48,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final Key SNOWY_BLOCK = Key.from("craftengine:snowy_block");
     public static final Key HANGABLE_BLOCK = Key.from("craftengine:hangable_block");
     public static final Key DROP_EXPERIENCE_BLOCK = Key.from("craftengine:drop_experience_block");
+    public static final Key DROP_EXP_BLOCK = Key.from("craftengine:drop_exp_block");
 
     public static void init() {
         register(EMPTY, (block, args) -> EmptyBlockBehavior.INSTANCE);
@@ -94,5 +95,6 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
         register(SNOWY_BLOCK, SnowyBlockBehavior.FACTORY);
         register(HANGABLE_BLOCK, HangableBlockBehavior.FACTORY);
         register(DROP_EXPERIENCE_BLOCK, DropExperienceBlockBehavior.FACTORY);
+        register(DROP_EXP_BLOCK, DropExperienceBlockBehavior.FACTORY);
     }
 }
