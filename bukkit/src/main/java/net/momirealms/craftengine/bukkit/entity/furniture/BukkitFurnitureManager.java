@@ -1,22 +1,24 @@
 package net.momirealms.craftengine.bukkit.entity.furniture;
 
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
-import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.InteractionHitBoxConfig;
+import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.InteractionFurnitureHitboxConfig;
 import net.momirealms.craftengine.bukkit.nms.CollisionEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.bukkit.plugin.network.handler.FurniturePacketHandler;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
-import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.chunk.CEChunk;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.HandlerList;
@@ -34,13 +36,17 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     public static final NamespacedKey FURNITURE_KEY = KeyUtils.toNamespacedKey(FurnitureManager.FURNITURE_KEY);
     public static final NamespacedKey FURNITURE_EXTRA_DATA_KEY = KeyUtils.toNamespacedKey(FurnitureManager.FURNITURE_EXTRA_DATA_KEY);
     public static final NamespacedKey FURNITURE_COLLISION = KeyUtils.toNamespacedKey(FurnitureManager.FURNITURE_COLLISION);
+    private static BukkitFurnitureManager instance;
+
     public static Class<?> COLLISION_ENTITY_CLASS = Interaction.class;
     public static Object NMS_COLLISION_ENTITY_TYPE = MEntityTypes.INTERACTION;
     public static ColliderType COLLISION_ENTITY_TYPE = ColliderType.INTERACTION;
-    private static BukkitFurnitureManager instance;
+
     private final BukkitCraftEngine plugin;
-    private final Map<Integer, BukkitFurniture> furnitureByRealEntityId = new ConcurrentHashMap<>(256, 0.5f);
-    private final Map<Integer, BukkitFurniture> furnitureByEntityId = new ConcurrentHashMap<>(512, 0.5f);
+
+    private final Map<Integer, BukkitFurniture> byMetaEntityId = new ConcurrentHashMap<>(256, 0.5f);
+    private final Map<Integer, BukkitFurniture> byVirtualEntityId = new ConcurrentHashMap<>(512, 0.5f);
+    private final Map<Integer, BukkitFurniture> byColliderEntityId = new ConcurrentHashMap<>(512, 0.5f);
     // Event listeners
     private final FurnitureEventListener furnitureEventListener;
 
@@ -52,53 +58,54 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         super(plugin);
         instance = this;
         this.plugin = plugin;
-        this.furnitureEventListener = new FurnitureEventListener(this);
+        this.furnitureEventListener = new FurnitureEventListener(this, plugin.worldManager());
     }
 
     @Override
-    public Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureExtraData extraData, boolean playSound) {
-        return this.place(LocationUtils.toLocation(position), furniture, extraData, playSound);
+    public Furniture place(WorldPosition position, FurnitureConfig furniture, FurnitureDataAccessor dataAccessor, boolean playSound) {
+        return this.place(LocationUtils.toLocation(position), furniture, dataAccessor, playSound);
     }
 
-    public BukkitFurniture place(Location location, CustomFurniture furniture, FurnitureExtraData extraData, boolean playSound) {
-        Optional<AnchorType> optionalAnchorType = extraData.anchorType();
-        if (optionalAnchorType.isEmpty() || !furniture.isAllowedPlacement(optionalAnchorType.get())) {
-            extraData.anchorType(furniture.getAnyAnchorType());
-        }
+    public BukkitFurniture place(Location location, FurnitureConfig furniture, FurnitureDataAccessor data, boolean playSound) {
         Entity furnitureEntity = EntityUtils.spawnEntity(location.getWorld(), location, EntityType.ITEM_DISPLAY, entity -> {
             ItemDisplay display = (ItemDisplay) entity;
             display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_KEY, PersistentDataType.STRING, furniture.id().toString());
             try {
-                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, extraData.toBytes());
+                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, data.toBytes());
             } catch (IOException e) {
                 this.plugin.logger().warn("Failed to set furniture PDC for " + furniture.id().toString(), e);
             }
-            handleBaseEntityLoadEarly(display);
+            handleMetaEntityDuringChunkLoad(display);
         });
         if (playSound) {
-            SoundData data = furniture.settings().sounds().placeSound();
-            location.getWorld().playSound(location, data.id().toString(), SoundCategory.BLOCKS, data.volume().get(), data.pitch().get());
+            SoundData sound = furniture.settings().sounds().placeSound();
+            location.getWorld().playSound(location, sound.id().toString(), SoundCategory.BLOCKS, sound.volume().get(), sound.pitch().get());
         }
-        return loadedFurnitureByRealEntityId(furnitureEntity.getEntityId());
+        return loadedFurnitureByMetaEntityId(furnitureEntity.getEntityId());
     }
 
     @Override
     public void delayedInit() {
+        // 确定碰撞箱实体类型
+        COLLISION_ENTITY_TYPE = Config.colliderType();
         COLLISION_ENTITY_CLASS = Config.colliderType() == ColliderType.INTERACTION ? Interaction.class : Boat.class;
         NMS_COLLISION_ENTITY_TYPE = Config.colliderType() == ColliderType.INTERACTION ? MEntityTypes.INTERACTION : MEntityTypes.OAK_BOAT;
-        COLLISION_ENTITY_TYPE = Config.colliderType();
+
+        // 注册事件
         Bukkit.getPluginManager().registerEvents(this.furnitureEventListener, this.plugin.javaPlugin());
+
+        // 对世界上已有实体的记录
         if (VersionHelper.isFolia()) {
             BiConsumer<Entity, Runnable> taskExecutor = (entity, runnable) -> entity.getScheduler().run(this.plugin.javaPlugin(), (t) -> runnable.run(), () -> {});
             for (World world : Bukkit.getWorlds()) {
                 List<Entity> entities = world.getEntities();
                 for (Entity entity : entities) {
                     if (entity instanceof ItemDisplay display) {
-                        taskExecutor.accept(entity, () -> handleBaseEntityLoadEarly(display));
+                        taskExecutor.accept(entity, () -> handleMetaEntityDuringChunkLoad(display));
                     } else if (entity instanceof Interaction interaction) {
-                        taskExecutor.accept(entity, () -> handleCollisionEntityLoadOnEntitiesLoad(interaction));
+                        taskExecutor.accept(entity, () -> handleCollisionEntityDuringChunkLoad(interaction));
                     } else if (entity instanceof Boat boat) {
-                        taskExecutor.accept(entity, () -> handleCollisionEntityLoadOnEntitiesLoad(boat));
+                        taskExecutor.accept(entity, () -> handleCollisionEntityDuringChunkLoad(boat));
                     }
                 }
             }
@@ -107,11 +114,11 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
                 List<Entity> entities = world.getEntities();
                 for (Entity entity : entities) {
                     if (entity instanceof ItemDisplay display) {
-                        handleBaseEntityLoadEarly(display);
+                        handleMetaEntityDuringChunkLoad(display);
                     } else if (entity instanceof Interaction interaction) {
-                        handleCollisionEntityLoadOnEntitiesLoad(interaction);
+                        handleCollisionEntityDuringChunkLoad(interaction);
                     } else if (entity instanceof Boat boat) {
-                        handleCollisionEntityLoadOnEntitiesLoad(boat);
+                        handleCollisionEntityDuringChunkLoad(boat);
                     }
                 }
             }
@@ -125,150 +132,168 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     @Override
-    public boolean isFurnitureRealEntity(int entityId) {
-        return this.furnitureByRealEntityId.containsKey(entityId);
+    public boolean isFurnitureMetaEntity(int entityId) {
+        return this.byMetaEntityId.containsKey(entityId);
     }
 
     @Nullable
     @Override
-    public BukkitFurniture loadedFurnitureByRealEntityId(int entityId) {
-        return this.furnitureByRealEntityId.get(entityId);
+    public BukkitFurniture loadedFurnitureByMetaEntityId(int entityId) {
+        return this.byMetaEntityId.get(entityId);
     }
 
-    @Override
     @Nullable
-    public BukkitFurniture loadedFurnitureByEntityId(int entityId) {
-        return this.furnitureByEntityId.get(entityId);
-    }
-
     @Override
-    protected CustomFurniture.Builder furnitureBuilder() {
-        return BukkitCustomFurniture.builder();
+    public BukkitFurniture loadedFurnitureByVirtualEntityId(int entityId) {
+        return this.byVirtualEntityId.get(entityId);
     }
 
+    @Nullable
     @Override
-    protected FurnitureElement.Builder furnitureElementBuilder() {
-        return BukkitFurnitureElement.builder();
+    public BukkitFurniture loadedFurnitureByColliderEntityId(int entityId) {
+        return this.byColliderEntityId.get(entityId);
     }
 
-    protected void handleBaseEntityUnload(Entity entity) {
+    // 当元数据实体被卸载了
+    protected void handleMetaEntityUnload(ItemDisplay entity) {
+        // 不是持久化的
+        if (!entity.isPersistent()) {
+            return;
+        }
         int id = entity.getEntityId();
-        BukkitFurniture furniture = this.furnitureByRealEntityId.remove(id);
+        BukkitFurniture furniture = this.byMetaEntityId.remove(id);
         if (furniture != null) {
             Location location = entity.getLocation();
+            // 区块还在加载的时候，就重复卸载了。为极其特殊情况
             boolean isPreventing = FastNMS.INSTANCE.method$ServerLevel$isPreventingStatusUpdates(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(location.getWorld()), location.getBlockX() >> 4, location.getBlockZ() >> 4);
             if (!isPreventing) {
                 furniture.destroySeats();
             }
-            for (int sub : furniture.entityIds()) {
-                this.furnitureByEntityId.remove(sub);
+            for (int sub : furniture.virtualEntityIds()) {
+                this.byVirtualEntityId.remove(sub);
+            }
+            for (int sub : furniture.colliderEntityIds()) {
+                this.byColliderEntityId.remove(sub);
             }
         }
     }
 
+    // 保险起见，collision实体卸载也移除一下
     protected void handleCollisionEntityUnload(Entity entity) {
         int id = entity.getEntityId();
-        this.furnitureByRealEntityId.remove(id);
+        this.byColliderEntityId.remove(id);
     }
 
-    @SuppressWarnings("deprecation") // just a misleading name `getTrackedPlayers`
-    protected void handleBaseEntityLoadLate(ItemDisplay display, int depth) {
-        // must be a furniture item
-        String id = display.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
+    // 检查这个区块的实体是否已经被加载了
+    private boolean isEntitiesLoaded(Location location) {
+        CEWorld ceWorld = this.plugin.worldManager().getWorld(location.getWorld());
+        CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
+        if (ceChunk == null) return false;
+        return ceChunk.isEntitiesLoaded();
+    }
+
+    protected void handleMetaEntityDuringChunkLoad(ItemDisplay entity) {
+        // 实体可能不是持久的
+        if (!entity.isPersistent()) {
+            return;
+        }
+
+        // 获取家具pdc
+        String id = entity.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
         if (id == null) return;
 
-        Key key = Key.of(id);
-        Optional<CustomFurniture> optionalFurniture = furnitureById(key);
-        if (optionalFurniture.isEmpty()) return;
-
-        CustomFurniture customFurniture = optionalFurniture.get();
-        BukkitFurniture previous = this.furnitureByRealEntityId.get(display.getEntityId());
-        if (previous != null) return;
-
-        Location location = display.getLocation();
-        boolean above1_20_1 = VersionHelper.isOrAbove1_20_2();
-        boolean preventChange = FastNMS.INSTANCE.method$ServerLevel$isPreventingStatusUpdates(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(location.getWorld()), location.getBlockX() >> 4, location.getBlockZ() >> 4);
-        if (above1_20_1) {
-            if (!preventChange) {
-                BukkitFurniture furniture = addNewFurniture(display, customFurniture);
-                furniture.initializeColliders();
-                for (Player player : display.getTrackedPlayers()) {
-                    BukkitAdaptors.adapt(player).entityPacketHandlers().computeIfAbsent(furniture.baseEntityId(), k -> new FurniturePacketHandler(furniture.fakeEntityIds()));
-                    this.plugin.networkManager().sendPacket(BukkitAdaptors.adapt(player), furniture.spawnPacket(player));
-                }
-            }
-        } else {
-            BukkitFurniture furniture = addNewFurniture(display, customFurniture);
-            for (Player player : display.getTrackedPlayers()) {
-                BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-                serverPlayer.entityPacketHandlers().computeIfAbsent(furniture.baseEntityId(), k -> new FurniturePacketHandler(furniture.fakeEntityIds()));
-                this.plugin.networkManager().sendPacket(serverPlayer, furniture.spawnPacket(player));
-            }
-            if (preventChange) {
-                this.plugin.scheduler().sync().runLater(furniture::initializeColliders, 1, location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
-            } else {
-                furniture.initializeColliders();
-            }
-        }
-        if (depth > 2) return;
-        this.plugin.scheduler().sync().runLater(() -> handleBaseEntityLoadLate(display, depth + 1), 1, location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
-    }
-
-    protected void handleCollisionEntityLoadLate(Entity entity, int depth) {
-        // remove the entity if it's not a collision entity, it might be wrongly copied by WorldEdit
-        if (FastNMS.INSTANCE.method$CraftEntity$getHandle(entity) instanceof CollisionEntity) {
-            return;
-        }
-        // not a collision entity
-        Byte flag = entity.getPersistentDataContainer().get(FURNITURE_COLLISION, PersistentDataType.BYTE);
-        if (flag == null || flag != 1) {
-            return;
-        }
-
-        Location location = entity.getLocation();
-        World world = location.getWorld();
-        int chunkX = location.getBlockX() >> 4;
-        int chunkZ = location.getBlockZ() >> 4;
-        if (!FastNMS.INSTANCE.method$ServerLevel$isPreventingStatusUpdates(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(world), chunkX, chunkZ)) {
-            entity.remove();
-            return;
-        }
-
-        if (depth > 2) return;
-        plugin.scheduler().sync().runLater(() -> {
-            handleCollisionEntityLoadLate(entity, depth + 1);
-        }, 1, world, chunkX, chunkZ);
-    }
-
-    public void handleBaseEntityLoadEarly(ItemDisplay display) {
-        String id = display.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
-        if (id == null) return;
-        // Remove the entity if it's not a valid furniture
+        // 处理无效的家具
         if (Config.handleInvalidFurniture()) {
             String mapped = Config.furnitureMappings().get(id);
             if (mapped != null) {
                 if (mapped.isEmpty()) {
-                    display.remove();
+                    entity.remove();
                     return;
                 } else {
                     id = mapped;
-                    display.getPersistentDataContainer().set(FURNITURE_KEY, PersistentDataType.STRING, id);
+                    entity.getPersistentDataContainer().set(FURNITURE_KEY, PersistentDataType.STRING, id);
                 }
             }
         }
 
+        // 获取家具配置
         Key key = Key.of(id);
-        Optional<CustomFurniture> optionalFurniture = furnitureById(key);
-        if (optionalFurniture.isPresent()) {
-            CustomFurniture customFurniture = optionalFurniture.get();
-            BukkitFurniture previous = this.furnitureByRealEntityId.get(display.getEntityId());
-            if (previous != null) return;
-            BukkitFurniture furniture = addNewFurniture(display, customFurniture);
-            furniture.initializeColliders(); // safely do it here
+        Optional<FurnitureConfig> optionalFurniture = furnitureById(key);
+        if (optionalFurniture.isEmpty()) return;
+
+        // 只对1.20.2及以上生效，1.20.1比较特殊
+        if (!VersionHelper.isOrAbove1_20_2()) {
+            return;
+        }
+
+        // 已经在其他事件里加载过了
+        FurnitureConfig customFurniture = optionalFurniture.get();
+        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
+        if (previous != null) return;
+
+        // 创建新的家具
+        createFurnitureInstance(entity, customFurniture);
+    }
+
+    @SuppressWarnings("deprecation")
+    protected void handleMetaEntityAfterChunkLoad(ItemDisplay entity) {
+        // 实体可能不是持久的
+        if (!entity.isPersistent()) {
+            return;
+        }
+
+        // 获取家具pdc
+        String id = entity.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
+        if (id == null) return;
+
+        // 这个区块还处于加载实体中，这个时候不处理（1.20.1需要特殊处理）
+        Location location = entity.getLocation();
+        if (VersionHelper.isOrAbove1_20_2() && !isEntitiesLoaded(location)) {
+            return;
+        }
+
+        // 获取家具配置
+        Key key = Key.of(id);
+        Optional<FurnitureConfig> optionalFurniture = furnitureById(key);
+        if (optionalFurniture.isEmpty()) return;
+
+        // 已经在其他事件里加载过了
+        FurnitureConfig customFurniture = optionalFurniture.get();
+        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
+        if (previous != null) return;
+
+        createFurnitureInstance(entity, customFurniture);
+
+        // 补发一次包，修复
+        for (Player player : entity.getTrackedPlayers()) {
+            BukkitAdaptors.adapt(player).sendPacket(FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
+                    entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
+                    MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
+            ), false);
         }
     }
 
-    public void handleCollisionEntityLoadOnEntitiesLoad(Entity collisionEntity) {
+    protected void handleCollisionEntityAfterChunkLoad(Entity entity) {
+        // 如果是碰撞实体，那么就忽略
+        if (FastNMS.INSTANCE.method$CraftEntity$getHandle(entity) instanceof CollisionEntity) {
+            return;
+        }
+        // 看看有没有碰撞实体的pdc
+        Byte flag = entity.getPersistentDataContainer().get(FURNITURE_COLLISION, PersistentDataType.BYTE);
+        if (flag == null || flag != 1) {
+            return;
+        }
+        // 实体未加载
+        Location location = entity.getLocation();
+        if (!isEntitiesLoaded(location)) {
+            return;
+        }
+
+        // 移除被WorldEdit错误复制的碰撞实体
+        runSafeEntityOperation(location, entity::remove);
+    }
+
+    public void handleCollisionEntityDuringChunkLoad(Entity collisionEntity) {
         // faster
         if (FastNMS.INSTANCE.method$CraftEntity$getHandle(collisionEntity) instanceof CollisionEntity) {
             collisionEntity.remove();
@@ -284,34 +309,43 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         collisionEntity.remove();
     }
 
-    private FurnitureExtraData getFurnitureExtraData(Entity baseEntity) throws IOException {
+    private FurnitureDataAccessor getFurnitureDataAccessor(Entity baseEntity) {
         byte[] extraData = baseEntity.getPersistentDataContainer().get(FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY);
-        if (extraData == null) return FurnitureExtraData.builder().build();
-        return FurnitureExtraData.fromBytes(extraData);
+        if (extraData == null) return new FurnitureDataAccessor(null);
+        try {
+            return FurnitureDataAccessor.fromBytes(extraData);
+        } catch (IOException e) {
+            // 损坏了？一般不会
+            return new FurnitureDataAccessor(null);
+        }
     }
 
-    private synchronized BukkitFurniture addNewFurniture(ItemDisplay display, CustomFurniture furniture) {
-        FurnitureExtraData extraData;
-        try {
-            extraData = getFurnitureExtraData(display);
-        } catch (IOException e) {
-            extraData = FurnitureExtraData.builder().build();
-            plugin.logger().warn("Furniture extra data could not be loaded", e);
+    // 创建家具实例，并初始化碰撞实体
+    private BukkitFurniture createFurnitureInstance(ItemDisplay display, FurnitureConfig furniture) {
+        BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, getFurnitureDataAccessor(display));
+        this.byMetaEntityId.put(display.getEntityId(), bukkitFurniture);
+        for (int entityId : bukkitFurniture.virtualEntityIds()) {
+            this.byVirtualEntityId.put(entityId, bukkitFurniture);
         }
-        BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, extraData);
-        this.furnitureByRealEntityId.put(bukkitFurniture.baseEntityId(), bukkitFurniture);
-        for (int entityId : bukkitFurniture.entityIds()) {
-            this.furnitureByEntityId.put(entityId, bukkitFurniture);
+        for (Collider collisionEntity : bukkitFurniture.colliders()) {
+            this.byColliderEntityId.put(collisionEntity.entityId(), bukkitFurniture);
         }
-        for (Collider collisionEntity : bukkitFurniture.collisionEntities()) {
-            int collisionEntityId = FastNMS.INSTANCE.method$Entity$getId(collisionEntity.handle());
-            this.furnitureByRealEntityId.put(collisionEntityId, bukkitFurniture);
-        }
+        Location location = display.getLocation();
+        runSafeEntityOperation(location, bukkitFurniture::addCollidersToWorld);
         return bukkitFurniture;
     }
 
+    private void runSafeEntityOperation(Location location, Runnable action) {
+        boolean preventChange = FastNMS.INSTANCE.method$ServerLevel$isPreventingStatusUpdates(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(location.getWorld()), location.getBlockX() >> 4, location.getBlockZ() >> 4);
+        if (preventChange) {
+            this.plugin.scheduler().sync().runLater(action, 1, location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
+        } else {
+            action.run();
+        }
+    }
+
     @Override
-    protected HitBoxConfig defaultHitBox() {
-        return InteractionHitBoxConfig.DEFAULT;
+    protected FurnitureHitBoxConfig<?> defaultHitBox() {
+        return InteractionFurnitureHitboxConfig.DEFAULT;
     }
 }

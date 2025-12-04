@@ -21,6 +21,7 @@ import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
+import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Cancellable;
 import net.momirealms.craftengine.core.util.ItemUtils;
@@ -38,6 +39,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.world.GenericGameEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -233,12 +235,14 @@ public final class BlockEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onStep(GenericGameEvent event) {
-        if (event.getEvent() != GameEvent.STEP) return;
+        GameEvent gameEvent = event.getEvent();
+        // 只处理落地和走路
+        if (gameEvent != GameEvent.STEP) return;
         Entity entity = event.getEntity();
         if (!(entity instanceof Player player)) return;
         BlockPos pos = EntityUtils.getOnPos(player);
         Block block = player.getWorld().getBlockAt(pos.x(), pos.y(), pos.z());
-        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(block.getWorld()), LocationUtils.toBlockPos(block.getX(), block.getY(), block.getZ()));
+        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(player.getWorld()), LocationUtils.toBlockPos(pos));
         Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(blockState);
         if (optionalCustomState.isPresent()) {
             Location location = player.getLocation();
@@ -253,13 +257,40 @@ public final class BlockEventListener implements Listener {
             if (cancellable.isCancelled() && !Config.processCancelledStep()) {
                 return;
             }
-            player.playSound(location, state.settings().sounds().stepSound().id().toString(), SoundCategory.BLOCKS, state.settings().sounds().stepSound().volume().get(), state.settings().sounds().stepSound().pitch().get());
+            SoundData soundData = state.settings().sounds().stepSound();
+            player.playSound(location, soundData.id().toString(), SoundCategory.BLOCKS, soundData.volume().get(), soundData.pitch().get());
         } else if (Config.enableSoundSystem()) {
             if (event.isCancelled() && !Config.processCancelledStep()) {
                 return;
             }
             Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(blockState);
             Object soundEvent = FastNMS.INSTANCE.field$SoundType$stepSound(soundType);
+            Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
+            if (this.manager.isStepSoundMissing(soundId)) {
+                player.playSound(player.getLocation(), soundId.toString(), SoundCategory.BLOCKS, 0.15f, 1f);
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onFall(EntityDamageEvent event) {
+        if (event.getCause() != EntityDamageEvent.DamageCause.FALL)
+            return;
+        if (!(event.getEntity() instanceof Player player)) return;
+        BlockPos pos = EntityUtils.getOnPos(player);
+        Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(FastNMS.INSTANCE.field$CraftWorld$ServerLevel(player.getWorld()), LocationUtils.toBlockPos(pos));
+        Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(blockState);
+        if (optionalCustomState.isPresent()) {
+            Location location = player.getLocation();
+            ImmutableBlockState state = optionalCustomState.get();
+            SoundData soundData = state.settings().sounds().fallSound();
+            player.playSound(location, soundData.id().toString(), SoundCategory.BLOCKS, soundData.volume().get(), soundData.pitch().get());
+        } else if (Config.enableSoundSystem()) {
+            if (event.isCancelled() && !Config.processCancelledStep()) {
+                return;
+            }
+            Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(blockState);
+            Object soundEvent = FastNMS.INSTANCE.field$SoundType$fallSound(soundType);
             Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
             if (this.manager.isStepSoundMissing(soundId)) {
                 player.playSound(player.getLocation(), soundId.toString(), SoundCategory.BLOCKS, 0.15f, 1f);

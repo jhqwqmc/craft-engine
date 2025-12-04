@@ -26,6 +26,8 @@ import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import net.momirealms.craftengine.core.plugin.dependency.Dependency;
 import net.momirealms.craftengine.core.plugin.dependency.DependencyManager;
 import net.momirealms.craftengine.core.plugin.dependency.DependencyManagerImpl;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCullingManager;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCullingManagerImpl;
 import net.momirealms.craftengine.core.plugin.gui.GuiManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManagerImpl;
@@ -79,6 +81,7 @@ public abstract class CraftEngine implements Plugin {
     protected GlobalVariableManager globalVariableManager;
     protected ProjectileManager projectileManager;
     protected SeatManager seatManager;
+    protected EntityCullingManager entityCullingManager;
 
     private final PluginTaskRegistry beforeEnableTaskRegistry = new PluginTaskRegistry();
     private final PluginTaskRegistry afterEnableTaskRegistry = new PluginTaskRegistry();
@@ -118,6 +121,8 @@ public abstract class CraftEngine implements Plugin {
         this.globalVariableManager = new GlobalVariableManager();
         // 初始化物品浏览器
         this.itemBrowserManager = new ItemBrowserManagerImpl(this);
+        // 初始化实体剔除器
+        this.entityCullingManager = new EntityCullingManagerImpl();
     }
 
     public void setUpConfigAndLocale() {
@@ -158,6 +163,7 @@ public abstract class CraftEngine implements Plugin {
         this.advancementManager.reload();
         this.projectileManager.reload();
         this.seatManager.reload();
+        this.entityCullingManager.reload();
     }
 
     private void runDelayTasks(boolean reloadRecipe) {
@@ -349,6 +355,7 @@ public abstract class CraftEngine implements Plugin {
         if (this.translationManager != null) this.translationManager.disable();
         if (this.globalVariableManager != null) this.globalVariableManager.disable();
         if (this.projectileManager != null) this.projectileManager.disable();
+        if (this.entityCullingManager != null) this.entityCullingManager.disable();
         if (this.scheduler != null) this.scheduler.shutdownScheduler();
         if (this.scheduler != null) this.scheduler.shutdownExecutor();
         if (this.commandManager != null) this.commandManager.unregisterFeatures();

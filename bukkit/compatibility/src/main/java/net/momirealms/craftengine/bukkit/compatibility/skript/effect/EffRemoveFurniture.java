@@ -22,7 +22,7 @@ public class EffRemoveFurniture extends Effect {
     @Override
     protected void execute(Event e) {
         for (Entity entity : entities.getArray(e)) {
-            Furniture bukkitFurniture = CraftEngineFurniture.getLoadedFurnitureByBaseEntity(entity);
+            Furniture bukkitFurniture = CraftEngineFurniture.getLoadedFurnitureByMetaEntity(entity);
             if (bukkitFurniture != null) {
                 bukkitFurniture.destroy();
             }

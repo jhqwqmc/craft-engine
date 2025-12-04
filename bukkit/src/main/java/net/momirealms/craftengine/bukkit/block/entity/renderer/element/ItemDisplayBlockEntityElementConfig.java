@@ -1,12 +1,12 @@
 package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
+import com.google.common.base.Objects;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
-import net.momirealms.craftengine.core.entity.Billboard;
-import net.momirealms.craftengine.core.entity.ItemDisplayContext;
+import net.momirealms.craftengine.core.entity.display.Billboard;
+import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.util.Key;
@@ -18,7 +18,6 @@ import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -61,14 +60,14 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         this.shadowStrength = shadowStrength;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemDisplayEntityData.DisplayedItem.addEntityDataIfNotDefaultValue(item.apply(player).getLiteralObject(), dataValues);
-            ItemDisplayEntityData.Scale.addEntityDataIfNotDefaultValue(this.scale, dataValues);
-            ItemDisplayEntityData.RotationLeft.addEntityDataIfNotDefaultValue(this.rotation, dataValues);
-            ItemDisplayEntityData.BillboardConstraints.addEntityDataIfNotDefaultValue(this.billboard.id(), dataValues);
-            ItemDisplayEntityData.Translation.addEntityDataIfNotDefaultValue(this.translation, dataValues);
-            ItemDisplayEntityData.DisplayType.addEntityDataIfNotDefaultValue(this.displayContext.id(), dataValues);
-            ItemDisplayEntityData.ShadowRadius.addEntityDataIfNotDefaultValue(this.shadowRadius, dataValues);
-            ItemDisplayEntityData.ShadowStrength.addEntityDataIfNotDefaultValue(this.shadowStrength, dataValues);
+            ItemDisplayEntityData.DisplayedItem.addEntityData(item.apply(player).getLiteralObject(), dataValues);
+            ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
+            ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
+            ItemDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
+            ItemDisplayEntityData.Translation.addEntityData(this.translation, dataValues);
+            ItemDisplayEntityData.DisplayType.addEntityData(this.displayContext.id(), dataValues);
+            ItemDisplayEntityData.ShadowRadius.addEntityData(this.shadowRadius, dataValues);
+            ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
             return dataValues;
         };
     }
@@ -80,19 +79,19 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public ItemDisplayBlockEntityElement create(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
-        Quaternionf previousRotation = previous.config.rotation;
-        if (previousRotation.x != 0 || previousRotation.y != 0 || previousRotation.z != 0 || previousRotation.w != 1) {
-            return null;
-        }
-        Vector3f translation = previous.config.translation;
-        if (translation.x != 0 || translation.y != 0 || translation.z != 0) {
-            return null;
-        }
         return new ItemDisplayBlockEntityElement(this, pos, previous.entityId,
                 previous.config.yRot != this.yRot ||
                         previous.config.xRot != this.xRot ||
                         !previous.config.position.equals(this.position)
         );
+    }
+
+    @Override
+    public ItemDisplayBlockEntityElement createExact(World world, BlockPos pos, ItemDisplayBlockEntityElement previous) {
+        if (!previous.config.equals(this)) {
+            return null;
+        }
+        return new ItemDisplayBlockEntityElement(this, pos, previous.entityId, false);
     }
 
     @Override
@@ -148,13 +147,22 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         return this.lazyMetadataPacket.apply(player);
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ItemDisplayBlockEntityElementConfig that)) return false;
+        return Float.compare(xRot, that.xRot) == 0 &&
+                Float.compare(yRot, that.yRot) == 0 &&
+                Objects.equal(position, that.position) &&
+                Objects.equal(translation, that.translation) &&
+                Objects.equal(rotation, that.rotation);
+    }
 
-        @SuppressWarnings("unchecked")
+    public static class Factory implements BlockEntityElementConfigFactory<ItemDisplayBlockEntityElement> {
+
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public ItemDisplayBlockEntityElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item_display.missing_item"));
-            return (BlockEntityElementConfig<E>) new ItemDisplayBlockEntityElementConfig(
+            return new ItemDisplayBlockEntityElementConfig(
                     player -> BukkitItemManager.instance().createWrappedItem(itemId, player),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
@@ -162,8 +170,8 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("pitch", 0f), "pitch"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),
                     ResourceConfigUtils.getAsQuaternionf(arguments.getOrDefault("rotation", 0f), "rotation"),
-                    ItemDisplayContext.valueOf(arguments.getOrDefault("display-context", "none").toString().toUpperCase(Locale.ROOT)),
-                    Billboard.valueOf(arguments.getOrDefault("billboard", "fixed").toString().toUpperCase(Locale.ROOT)),
+                    ResourceConfigUtils.getAsEnum(ResourceConfigUtils.get(arguments, "display-context", "display-transform"), ItemDisplayContext.class, ItemDisplayContext.NONE),
+                    ResourceConfigUtils.getAsEnum(arguments.get("billboard"), Billboard.class, Billboard.FIXED),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength")
             );

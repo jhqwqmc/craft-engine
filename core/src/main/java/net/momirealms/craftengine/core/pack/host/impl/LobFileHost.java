@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -70,7 +71,7 @@ public class LobFileHost implements ResourcePackHost {
             if (uuidString != null && !uuidString.isEmpty()) {
                 this.uuid = UUID.fromString(uuidString);
             }
-            CraftEngine.instance().logger().info("[LobFile] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "LobFile"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn(
                     "[LobFile] Failed to read cache file: " + e.getMessage());

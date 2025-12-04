@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.plugin.context.parameter;
 
 import net.momirealms.craftengine.core.entity.Entity;
-import net.momirealms.craftengine.core.entity.ItemEntity;
+import net.momirealms.craftengine.core.entity.item.ItemEntity;
 import net.momirealms.craftengine.core.plugin.context.ChainParameterProvider;
 import net.momirealms.craftengine.core.plugin.context.ContextKey;
 import net.momirealms.craftengine.core.util.MiscUtils;

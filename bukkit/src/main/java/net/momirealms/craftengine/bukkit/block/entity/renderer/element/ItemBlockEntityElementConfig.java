@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
 import net.momirealms.craftengine.bukkit.entity.data.ItemEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -29,8 +28,8 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         this.position = position;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemEntityData.Item.addEntityDataIfNotDefaultValue(item.apply(player).getLiteralObject(), dataValues);
-            ItemEntityData.NoGravity.addEntityDataIfNotDefaultValue(true, dataValues);
+            ItemEntityData.Item.addEntityData(item.apply(player).getLiteralObject(), dataValues);
+            ItemEntityData.NoGravity.addEntityData(true, dataValues);
             return dataValues;
         };
     }
@@ -43,6 +42,14 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
     @Override
     public ItemBlockEntityElement create(World world, BlockPos pos, ItemBlockEntityElement previous) {
         return new ItemBlockEntityElement(this, pos, previous.entityId1, previous.entityId2, !previous.config.position.equals(this.position));
+    }
+
+    @Override
+    public ItemBlockEntityElement createExact(World world, BlockPos pos, ItemBlockEntityElement previous) {
+        if (!previous.config.equals(this)) {
+            return null;
+        }
+        return new ItemBlockEntityElement(this, pos, previous.entityId1, previous.entityId2, false);
     }
 
     @Override
@@ -62,13 +69,18 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         return this.lazyMetadataPacket.apply(player);
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ItemBlockEntityElementConfig that)) return false;
+        return this.position.equals(that.position);
+    }
 
-        @SuppressWarnings("unchecked")
+    public static class Factory implements BlockEntityElementConfigFactory<ItemBlockEntityElement> {
+
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public ItemBlockEntityElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item_display.missing_item"));
-            return (BlockEntityElementConfig<E>) new ItemBlockEntityElementConfig(
+            return new ItemBlockEntityElementConfig(
                     player -> BukkitItemManager.instance().createWrappedItem(itemId, player),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position")
             );

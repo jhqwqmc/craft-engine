@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
-import net.momirealms.craftengine.core.entity.furniture.AnchorType;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
@@ -22,7 +21,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
     private final NumberProvider z;
     private final NumberProvider pitch;
     private final NumberProvider yaw;
-    private final AnchorType anchorType;
+    private final String variant;
     private final boolean dropLoot;
     private final boolean playSound;
 
@@ -33,7 +32,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             NumberProvider z,
             NumberProvider pitch,
             NumberProvider yaw,
-            AnchorType anchorType,
+            String variant,
             boolean dropLoot,
             boolean playSound,
             List<Condition<CTX>> predicates
@@ -45,7 +44,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
         this.z = z;
         this.pitch = pitch;
         this.yaw = yaw;
-        this.anchorType = anchorType;
+        this.variant = variant;
         this.dropLoot = dropLoot;
         this.playSound = playSound;
     }
@@ -71,7 +70,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             RemoveFurnitureFunction.removeFurniture(ctx, oldFurniture, dropLoot, playSound);
 
             // Place the new furniture
-            SpawnFurnitureFunction.spawnFurniture(this.newFurnitureId, newPosition, this.anchorType, this.playSound);
+            SpawnFurnitureFunction.spawnFurniture(this.newFurnitureId, newPosition, this.variant, this.playSound);
         }
     }
 
@@ -94,10 +93,10 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:furniture.z>"));
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", "<arg:furniture.pitch>"));
             NumberProvider yaw = NumberProviders.fromObject(arguments.getOrDefault("yaw", "<arg:furniture.yaw>"));
-            AnchorType anchorType = ResourceConfigUtils.getAsEnum(arguments.get("anchor-type"), AnchorType.class, null);
+            String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-type"));
             boolean dropLoot = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("drop-loot", true), "drop-loot");
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
-            return new ReplaceFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, anchorType, dropLoot, playSound, getPredicates(arguments));
+            return new ReplaceFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, variant, dropLoot, playSound, getPredicates(arguments));
         }
     }
 }

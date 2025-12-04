@@ -28,7 +28,7 @@ public class SelfHost implements ResourcePackHost {
 
     @Override
     public CompletableFuture<List<ResourcePackDownloadData>> requestResourcePackDownloadLink(UUID player) {
-        ResourcePackDownloadData data = SelfHostHttpServer.instance().generateOneTimeUrl();
+        ResourcePackDownloadData data = SelfHostHttpServer.instance().generateOneTimeUrl(player);
         if (data == null) return CompletableFuture.completedFuture(List.of());
         return CompletableFuture.completedFuture(List.of(data));
     }
@@ -77,7 +77,7 @@ public class SelfHost implements ResourcePackHost {
             boolean oneTimeToken = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("one-time-token", true), "one-time-token");
             String protocol = arguments.getOrDefault("protocol", "http").toString();
             boolean denyNonMinecraftRequest = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deny-non-minecraft-request", true), "deny-non-minecraft-request");
-
+            boolean strictValidation = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("strict-validation", false), "strict-validation");
 
             Bandwidth limit = null;
             Map<String, Object> rateLimitingSection = ResourceConfigUtils.getAsMapOrNull(arguments.get("rate-limiting"), "rate-limiting");
@@ -98,7 +98,7 @@ public class SelfHost implements ResourcePackHost {
                 maxBandwidthUsage = ResourceConfigUtils.getAsLong(rateLimitingSection.getOrDefault("max-bandwidth-per-second", 0), "max-bandwidth");
                 minDownloadSpeed = ResourceConfigUtils.getAsLong(rateLimitingSection.getOrDefault("min-download-speed-per-player", 50_000), "min-download-speed-per-player");
             }
-            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, oneTimeToken, maxBandwidthUsage, minDownloadSpeed);
+            selfHostHttpServer.updateProperties(ip, port, url, denyNonMinecraftRequest, protocol, limit, oneTimeToken, maxBandwidthUsage, minDownloadSpeed, strictValidation);
             return INSTANCE;
         }
     }

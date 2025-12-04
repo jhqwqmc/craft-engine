@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
 
 import java.io.FileNotFoundException;
@@ -76,7 +77,7 @@ public class OneDriveHost implements ResourcePackHost {
             this.sha1 = cache.get("sha1");
             this.fileId = cache.get("file-id");
 
-            CraftEngine.instance().logger().info("[OneDrive] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "OneDrive"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn(
                     "[OneDrive] Failed to load cache" + cachePath, e);

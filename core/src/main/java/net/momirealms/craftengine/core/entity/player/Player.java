@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
@@ -37,6 +38,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public abstract Object serverPlayer();
 
     public abstract void setClientSideWorld(World world);
+
+    public abstract void entityCullingTick();
 
     public abstract float getDestroyProgress(Object blockState, BlockPos pos);
 
@@ -189,6 +192,16 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setSelectedLocale(@Nullable Locale locale);
 
+    public abstract void setEntityCullingViewDistanceScale(double value);
+
+    public abstract void setEnableEntityCulling(boolean enable);
+
+    public abstract boolean enableEntityCulling();
+
+    public abstract boolean enableFurnitureDebug();
+
+    public abstract void setEnableFurnitureDebug(boolean enableFurnitureDebug);
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);
@@ -209,9 +222,24 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
+    public abstract void addTrackedFurniture(int entityId, Furniture furniture);
+
     public abstract void clearTrackedBlockEntities();
 
     @Override
     public void remove() {
+    }
+
+    public abstract void playParticle(Key particleId, double x, double y, double z);
+
+    public abstract void removeTrackedFurniture(int entityId);
+
+    public abstract void clearTrackedFurniture();
+
+    public abstract WorldPosition eyePosition();
+
+    @Override
+    public boolean isValid() {
+        return this.isOnline();
     }
 }

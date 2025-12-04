@@ -36,7 +36,7 @@ public final class ResourceConfigUtils {
             return defaultValue;
         }
         try {
-            return Enum.valueOf(clazz, o.toString().toUpperCase(Locale.ENGLISH));
+            return Enum.valueOf(clazz, o.toString().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return defaultValue;
         }
@@ -263,18 +263,26 @@ public final class ResourceConfigUtils {
     }
 
     public static Vector3f getAsVector3f(Object o, String option) {
-        if (o == null) return new Vector3f();
-        if (o instanceof List<?> list && list.size() == 3) {
-            return new Vector3f(Float.parseFloat(list.get(0).toString()), Float.parseFloat(list.get(1).toString()), Float.parseFloat(list.get(2).toString()));
-        } else {
-            String stringFormat = o.toString();
-            String[] split = stringFormat.split(",");
-            if (split.length == 3) {
-                return new Vector3f(Float.parseFloat(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[2]));
-            } else if (split.length == 1) {
-                return new Vector3f(Float.parseFloat(split[0]));
-            } else {
-                throw new LocalizedResourceConfigException("warning.config.type.vector3f", stringFormat, option);
+        switch (o) {
+            case null -> {
+                return new Vector3f();
+            }
+            case List<?> list when list.size() == 3 -> {
+                return new Vector3f(Float.parseFloat(list.get(0).toString()), Float.parseFloat(list.get(1).toString()), Float.parseFloat(list.get(2).toString()));
+            }
+            case Number number -> {
+                return new Vector3f(number.floatValue());
+            }
+            default -> {
+                String stringFormat = o.toString();
+                String[] split = stringFormat.split(",");
+                if (split.length == 3) {
+                    return new Vector3f(Float.parseFloat(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[2]));
+                } else if (split.length == 1) {
+                    return new Vector3f(Float.parseFloat(split[0]));
+                } else {
+                    throw new LocalizedResourceConfigException("warning.config.type.vector3f", stringFormat, option);
+                }
             }
         }
     }
@@ -344,49 +352,53 @@ public final class ResourceConfigUtils {
     }
 
     public static AABB getAsAABB(Object o, String option) {
-        if (o == null) {
-            throw new LocalizedResourceConfigException("warning.config.type.aabb", "null", option);
-        }
-        if (o instanceof Number number) {
-            double min = -(number.doubleValue() / 2);
-            double max = number.doubleValue() / 2;
-            return new AABB(min, min, min, max, max, max);
-        } else {
-            double[] args;
-            if (o instanceof List<?> list) {
-                args = new double[list.size()];
-                for (int i = 0; i < args.length; i++) {
-                    if (list.get(i) instanceof Number number) {
-                        args[i] = number.doubleValue();
-                    } else {
+        switch (o) {
+            case null -> throw new LocalizedResourceConfigException("warning.config.type.aabb", "null", option);
+            case AABB aabb -> {
+                return aabb;
+            }
+            case Number number -> {
+                double min = -(number.doubleValue() / 2);
+                double max = number.doubleValue() / 2;
+                return new AABB(min, min, min, max, max, max);
+            }
+            default -> {
+                double[] args;
+                if (o instanceof List<?> list) {
+                    args = new double[list.size()];
+                    for (int i = 0; i < args.length; i++) {
+                        if (list.get(i) instanceof Number number) {
+                            args[i] = number.doubleValue();
+                        } else {
+                            try {
+                                args[i] = Double.parseDouble(list.get(i).toString());
+                            } catch (NumberFormatException e) {
+                                throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
+                            }
+                        }
+                    }
+                } else {
+                    String[] split = o.toString().split(",");
+                    args = new double[split.length];
+                    for (int i = 0; i < args.length; i++) {
                         try {
-                            args[i] = Double.parseDouble(list.get(i).toString());
+                            args[i] = Double.parseDouble(split[i]);
                         } catch (NumberFormatException e) {
                             throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
                         }
                     }
                 }
-            } else {
-                String[] split = o.toString().split(",");
-                args = new double[split.length];
-                for (int i = 0; i < args.length; i++) {
-                    try {
-                        args[i] = Double.parseDouble(split[i]);
-                    } catch (NumberFormatException e) {
-                        throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
-                    }
+                if (args.length == 1) {
+                    return new AABB(-args[0] / 2, -args[0] / 2, -args[0] / 2, args[0] / 2, args[0] / 2, args[0] / 2);
+                } else if (args.length == 2) {
+                    return new AABB(-args[0] / 2, -args[1] / 2, -args[0] / 2, args[0] / 2, args[1] / 2, args[0] / 2);
+                } else if (args.length == 3) {
+                    return new AABB(-args[0] / 2, -args[1] / 2, -args[2] / 2, args[0] / 2, args[1] / 2, args[2] / 2);
+                } else if (args.length == 6) {
+                    return new AABB(args[0], args[1], args[2], args[3], args[4], args[5]);
+                } else {
+                    throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
                 }
-            }
-            if (args.length == 1) {
-                return new AABB(-args[0]/2, -args[0]/2, -args[0]/2, args[0]/2, args[0]/2, args[0]/2);
-            } else if (args.length == 2) {
-                return new AABB(-args[0]/2, -args[1]/2, -args[0]/2, args[0]/2, args[1]/2, args[0]/2);
-            } else if (args.length == 3) {
-                return new AABB(-args[0]/2, -args[1]/2, -args[2]/2, args[0]/2, args[1]/2, args[2]/2);
-            } else if (args.length == 6) {
-                return new AABB(args[0], args[1], args[2], args[3], args[4], args[5]);
-            } else {
-                throw new LocalizedResourceConfigException("warning.config.type.aabb", o.toString(), option);
             }
         }
     }

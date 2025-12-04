@@ -15,14 +15,15 @@ public abstract class BlockEntityElementConfigs {
     public static final Key TEXT_DISPLAY = Key.of("craftengine:text_display");
     public static final Key ITEM = Key.of("craftengine:item");
 
-    public static void register(Key key, BlockEntityElementConfigFactory type) {
-        ((WritableRegistry<BlockEntityElementConfigFactory>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE)
+    public static void register(Key key, BlockEntityElementConfigFactory<?> type) {
+        ((WritableRegistry<BlockEntityElementConfigFactory<?>>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE)
                 .register(ResourceKey.create(Registries.BLOCK_ENTITY_ELEMENT_TYPE.location(), key), type);
     }
 
     public static <E extends BlockEntityElement> BlockEntityElementConfig<E> fromMap(Map<String, Object> arguments) {
         Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(it -> Key.withDefaultNamespace(it, "craftengine")).orElse(ITEM_DISPLAY);
-        BlockEntityElementConfigFactory factory = BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE.getValue(type);
+        @SuppressWarnings("unchecked")
+        BlockEntityElementConfigFactory<E> factory = (BlockEntityElementConfigFactory<E>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE.getValue(type);
         if (factory == null) {
             throw new LocalizedResourceConfigException("warning.config.block.state.entity_renderer.invalid_type", type.toString());
         }

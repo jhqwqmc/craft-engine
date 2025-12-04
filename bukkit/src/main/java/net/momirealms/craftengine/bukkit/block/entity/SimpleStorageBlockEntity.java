@@ -172,8 +172,10 @@ public class SimpleStorageBlockEntity extends BlockEntity {
 
     public void updateOpenBlockState(boolean open) {
         ImmutableBlockState state = super.world.getBlockStateAtIfLoaded(this.pos);
-        if (state == null || state.behavior() != this.behavior) return;
-        Property<Boolean> property = this.behavior.openProperty();
+        if (state == null) return;
+        SimpleStorageBlockBehavior behavior = state.behavior().getAs(SimpleStorageBlockBehavior.class).orElse(null);
+        if (behavior == null) return;
+        Property<Boolean> property = behavior.openProperty();
         if (property == null) return;
         super.world.world().setBlockState(this.pos.x(), this.pos.y(), this.pos.z(), state.with(property, open), UpdateOption.UPDATE_ALL.flags());
     }

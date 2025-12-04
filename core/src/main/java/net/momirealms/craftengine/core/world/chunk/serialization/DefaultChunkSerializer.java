@@ -54,7 +54,7 @@ public final class DefaultChunkSerializer {
             }
         }
         ListTag blockEntities = chunkNbt.getList("block_entities");
-        ListTag itemDisplayBlockRenders = chunkNbt.getList("block_entity_renderers");
-        return new CEChunk(world, pos, sectionArray, blockEntities, itemDisplayBlockRenders);
+        ListTag blockEntityRenders = chunkNbt.getList("block_entity_renderers");
+        return new CEChunk(world, pos, sectionArray, blockEntities, blockEntityRenders, null);
     }
 }

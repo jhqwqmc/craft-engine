@@ -41,6 +41,7 @@ public class BlockSettings {
     float friction = 0.6f;
     float speedFactor = 1f;
     float jumpFactor = 1f;
+    Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private BlockSettings() {}
 
@@ -107,7 +108,27 @@ public class BlockSettings {
         newSettings.speedFactor = settings.speedFactor;
         newSettings.jumpFactor = settings.jumpFactor;
         newSettings.friction = settings.friction;
+        newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomData(CustomDataType<T> type) {
+        return (T) this.customData.get(type);
+    }
+
+    public void clearCustomData() {
+        this.customData.clear();
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T> T removeCustomData(CustomDataType<?> type) {
+        return (T) this.customData.remove(type);
+    }
+
+    public <T> void addCustomData(CustomDataType<T> key, T value) {
+        this.customData.put(key, value);
     }
 
     public Set<Key> tags() {
@@ -542,7 +563,7 @@ public class BlockSettings {
             }));
         }
 
-        private static void registerFactory(String id, Modifier.Factory factory) {
+        public static void registerFactory(String id, Modifier.Factory factory) {
             FACTORIES.put(id, factory);
         }
     }
