@@ -67,6 +67,7 @@ import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeHolder;
@@ -3801,6 +3802,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     );
                     furniture.config().execute(context, EventTrigger.RIGHT_CLICK);
                     if (cancellable.isCancelled()) {
+                        return;
+                    }
+
+                    // 不处理调试棒
+                    if (itemInHand.vanillaId().equals(ItemKeys.DEBUG_STICK)) {
                         return;
                     }
 

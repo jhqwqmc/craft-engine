@@ -323,16 +323,30 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     // 创建家具实例，并初始化碰撞实体
     private BukkitFurniture createFurnitureInstance(ItemDisplay display, FurnitureConfig furniture) {
         BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, getFurnitureDataAccessor(display));
-        this.byMetaEntityId.put(display.getEntityId(), bukkitFurniture);
-        for (int entityId : bukkitFurniture.virtualEntityIds()) {
-            this.byVirtualEntityId.put(entityId, bukkitFurniture);
-        }
-        for (Collider collisionEntity : bukkitFurniture.colliders()) {
-            this.byColliderEntityId.put(collisionEntity.entityId(), bukkitFurniture);
-        }
+        initFurniture(bukkitFurniture);
         Location location = display.getLocation();
         runSafeEntityOperation(location, bukkitFurniture::addCollidersToWorld);
         return bukkitFurniture;
+    }
+
+    protected void initFurniture(BukkitFurniture furniture) {
+        this.byMetaEntityId.put(furniture.entityId(), furniture);
+        for (int entityId : furniture.virtualEntityIds()) {
+            this.byVirtualEntityId.put(entityId, furniture);
+        }
+        for (Collider collisionEntity : furniture.colliders()) {
+            this.byColliderEntityId.put(collisionEntity.entityId(), furniture);
+        }
+    }
+
+    protected void invalidateFurniture(BukkitFurniture furniture) {
+        this.byMetaEntityId.remove(furniture.entityId());
+        for (int entityId : furniture.virtualEntityIds()) {
+            this.byVirtualEntityId.remove(entityId);
+        }
+        for (Collider collisionEntity : furniture.colliders()) {
+            this.byColliderEntityId.remove(collisionEntity.entityId());
+        }
     }
 
     private void runSafeEntityOperation(Location location, Runnable action) {

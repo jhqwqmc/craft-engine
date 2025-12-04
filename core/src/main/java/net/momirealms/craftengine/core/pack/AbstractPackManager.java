@@ -471,6 +471,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/configuration/templates/loot_tables.yml");
         plugin.saveResource("resources/default/configuration/templates/recipes.yml");
         plugin.saveResource("resources/default/configuration/templates/tool_levels.yml");
+        plugin.saveResource("resources/default/configuration/templates/events.yml");
         plugin.saveResource("resources/default/configuration/categories.yml");
         plugin.saveResource("resources/default/configuration/emoji.yml");
         plugin.saveResource("resources/default/configuration/translations.yml");

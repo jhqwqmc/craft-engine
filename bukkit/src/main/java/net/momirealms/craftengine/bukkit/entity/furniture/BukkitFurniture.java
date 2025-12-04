@@ -1,21 +1,34 @@
 package net.momirealms.craftengine.bukkit.entity.furniture;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.core.entity.furniture.Collider;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureConfig;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureDataAccessor;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
+import net.momirealms.craftengine.core.entity.furniture.*;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.player.InteractionResult;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
+import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class BukkitFurniture extends Furniture {
     private final WeakReference<ItemDisplay> metaEntity;
@@ -37,6 +50,76 @@ public class BukkitFurniture extends Furniture {
             if (!bukkitEntity.isValid()) {
                 FastNMS.INSTANCE.method$LevelWriter$addFreshEntity(world, entity.handle());
             }
+        }
+    }
+
+    @Override
+    public boolean setVariant(String variantName) {
+        FurnitureVariant variant = this.config.getVariant(variantName);
+        if (variant == null) return false;
+        if (this.currentVariant == variant) return false;
+        BukkitFurnitureManager.instance().invalidateFurniture(this);
+        super.clearColliders();
+        super.setVariantInternal(variant);
+        BukkitFurnitureManager.instance().initFurniture(this);
+        this.addCollidersToWorld();
+        this.refresh();
+        return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public CompletableFuture<Boolean> moveTo(WorldPosition position) {
+        ItemDisplay itemDisplay = this.metaEntity.get();
+        if (itemDisplay == null) return CompletableFuture.completedFuture(false);
+        // 检查新位置是否可用
+        List<AABB> aabbs = new ArrayList<>();
+        for (FurnitureHitBoxConfig<?> hitBoxConfig : getCurrentVariant().hitBoxConfigs()) {
+            hitBoxConfig.prepareForPlacement(position, aabbs::add);
+        }
+        if (!aabbs.isEmpty()) {
+            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList())) {
+                return CompletableFuture.completedFuture(false);
+            }
+        }
+        // 准备传送
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        BukkitFurnitureManager.instance().invalidateFurniture(this);
+        super.clearColliders();
+        this.location = LocationUtils.toLocation(position);
+        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(itemDisplay.getEntityId()); }});
+        for (Player player : itemDisplay.getTrackedPlayers()) {
+            BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
+        }
+        itemDisplay.teleportAsync(this.location).thenAccept(result -> {
+            if (result) {
+                super.setVariantInternal(getCurrentVariant());
+                BukkitFurnitureManager.instance().initFurniture(this);
+                this.addCollidersToWorld();
+                Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
+                        itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
+                for (Player player : itemDisplay.getTrackedPlayers()) {
+                    BukkitAdaptors.adapt(player).sendPacket(addPacket, false);
+                }
+                future.complete(true);
+            } else {
+                future.complete(false);
+            }
+        });
+        return future;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected void refresh() {
+        ItemDisplay itemDisplay = this.metaEntity.get();
+        if (itemDisplay == null) return;
+        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(itemDisplay.getEntityId()); }});
+        Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
+                itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
+        for (Player player : itemDisplay.getTrackedPlayers()) {
+            BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
+            BukkitAdaptors.adapt(player).sendPacket(addPacket, false);
         }
     }
 

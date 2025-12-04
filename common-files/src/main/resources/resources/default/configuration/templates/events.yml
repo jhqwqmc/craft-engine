@@ -1,0 +1,31 @@
+templates:
+  default:rotatable_block:
+    on: right_click
+    conditions:
+      - type: expression
+        expression: <arg:player.is_sneaking>
+    functions:
+      - type: update_interaction_tick
+      - type: play_sound
+        sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+      - type: swing_hand
+      - type: cycle_block_property
+        property: facing
+        rules:
+          north: east
+          east: south
+          south: west
+          west: north
+  default:rotatable_furniture:
+    on: right_click
+    conditions:
+      - type: expression
+        expression: <arg:player.is_sneaking>
+    functions:
+      - type: rotate_furniture
+        degree: 90
+        on-success:
+          - type: swing_hand
+          - type: play_sound
+            sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+        on-failure: []
