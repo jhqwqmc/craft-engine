@@ -18,7 +18,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
     private final NumberProvider y;
     private final NumberProvider z;
 
-    public BreakBlockFunction(NumberProvider x, NumberProvider y, NumberProvider z, List<Condition<CTX>> predicates) {
+    public BreakBlockFunction(List<Condition<CTX>> predicates, NumberProvider y, NumberProvider z, NumberProvider x) {
         super(predicates);
         this.x = x;
         this.y = y;
@@ -47,7 +47,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
             NumberProvider x = NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>"));
             NumberProvider y = NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>"));
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));
-            return new BreakBlockFunction<>(x, y, z, getPredicates(arguments));
+            return new BreakBlockFunction<>(getPredicates(arguments), y, z, x);
         }
     }
 }

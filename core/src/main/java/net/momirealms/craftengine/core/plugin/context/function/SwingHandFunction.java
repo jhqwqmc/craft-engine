@@ -15,7 +15,7 @@ import java.util.Optional;
 public class SwingHandFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final Optional<InteractionHand> hand;
 
-    public SwingHandFunction(Optional<InteractionHand> hand, List<Condition<CTX>> predicates) {
+    public SwingHandFunction(List<Condition<CTX>> predicates, Optional<InteractionHand> hand) {
         super(predicates);
         this.hand = hand;
     }
@@ -46,7 +46,7 @@ public class SwingHandFunction<CTX extends Context> extends AbstractConditionalF
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             Optional<InteractionHand> optionalHand = Optional.ofNullable(arguments.get("hand")).map(it -> InteractionHand.valueOf(it.toString().toUpperCase(Locale.ENGLISH)));
-            return new SwingHandFunction<>(optionalHand, getPredicates(arguments));
+            return new SwingHandFunction<>(getPredicates(arguments), optionalHand);
         }
     }
 }

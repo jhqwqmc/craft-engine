@@ -31,15 +31,7 @@ public class PlaySoundFunction<CTX extends Context> extends AbstractConditionalF
     private final PlayerSelector<CTX> selector;
 
     public PlaySoundFunction(
-            Key soundEvent,
-            NumberProvider x,
-            NumberProvider y,
-            NumberProvider z,
-            NumberProvider volume,
-            NumberProvider pitch,
-            SoundSource source,
-            PlayerSelector<CTX> selector,
-            List<Condition<CTX>> predicates
+            List<Condition<CTX>> predicates, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider volume, NumberProvider pitch, SoundSource source, PlayerSelector<CTX> selector, Key soundEvent
     ) {
         super(predicates);
         this.soundEvent = soundEvent;
@@ -89,7 +81,7 @@ public class PlaySoundFunction<CTX extends Context> extends AbstractConditionalF
             NumberProvider pitch = NumberProviders.fromObject(arguments.getOrDefault("pitch", 1));
             SoundSource source = Optional.ofNullable(arguments.get("source")).map(String::valueOf).map(it -> SoundSource.valueOf(it.toUpperCase(Locale.ENGLISH))).orElse(SoundSource.MASTER);
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.get("target"), conditionFactory());
-            return new PlaySoundFunction<>(soundEvent, x, y, z, volume, pitch, source, selector, getPredicates(arguments));
+            return new PlaySoundFunction<>(getPredicates(arguments), x, y, z, volume, pitch, source, selector, soundEvent);
         }
     }
 }

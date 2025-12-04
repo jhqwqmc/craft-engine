@@ -19,7 +19,7 @@ public class SetSaturationFunction<CTX extends Context> extends AbstractConditio
     private final NumberProvider count;
     private final boolean add;
 
-    public SetSaturationFunction(NumberProvider count, boolean add, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public SetSaturationFunction(List<Condition<CTX>> predicates, boolean add, PlayerSelector<CTX> selector, NumberProvider count) {
         super(predicates);
         this.count = count;
         this.add = add;
@@ -54,7 +54,7 @@ public class SetSaturationFunction<CTX extends Context> extends AbstractConditio
         public Function<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("saturation"), "warning.config.function.set_saturation.missing_saturation");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
-            return new SetSaturationFunction<>(NumberProviders.fromObject(value), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+            return new SetSaturationFunction<>(getPredicates(arguments), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(value));
         }
     }
 }

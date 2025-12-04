@@ -21,7 +21,7 @@ public class PotionEffectFunction<CTX extends Context> extends AbstractCondition
     private final boolean ambient;
     private final boolean particles;
 
-    public PotionEffectFunction(Key potionEffectType, NumberProvider duration, NumberProvider amplifier, boolean ambient, boolean particles, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public PotionEffectFunction(List<Condition<CTX>> predicates, NumberProvider duration, NumberProvider amplifier, boolean ambient, boolean particles, PlayerSelector<CTX> selector, Key potionEffectType) {
         super(predicates);
         this.potionEffectType = potionEffectType;
         this.duration = duration;
@@ -63,7 +63,7 @@ public class PotionEffectFunction<CTX extends Context> extends AbstractCondition
             NumberProvider amplifier = NumberProviders.fromObject(arguments.getOrDefault("amplifier", 0));
             boolean ambient = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("ambient", false), "ambient");
             boolean particles = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("particles", true), "particles");
-            return new PotionEffectFunction<>(effectType, duration, amplifier, ambient, particles, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+            return new PotionEffectFunction<>(getPredicates(arguments), duration, amplifier, ambient, particles, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), effectType);
         }
     }
 }

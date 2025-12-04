@@ -21,7 +21,7 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
     private final List<Function<CTX>> functions;
     private final NumberProvider delay;
 
-    public RunFunction(List<Function<CTX>> functions, NumberProvider delay, List<Condition<CTX>> predicates) {
+    public RunFunction(List<Condition<CTX>> predicates, NumberProvider delay, List<Function<CTX>> functions) {
         super(predicates);
         this.functions = functions;
         this.delay = delay;
@@ -75,7 +75,7 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
             for (Map<String, Object> function : functions) {
                 fun.add(this.functionFactory.apply(function));
             }
-            return new RunFunction<>(fun, delay, getPredicates(arguments));
+            return new RunFunction<>(getPredicates(arguments), delay, fun);
         }
     }
 }

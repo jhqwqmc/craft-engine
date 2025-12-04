@@ -17,7 +17,7 @@ public class RemovePotionEffectFunction<CTX extends Context> extends AbstractCon
     private final Key potionEffectType;
     private final boolean all;
 
-    public RemovePotionEffectFunction(Key potionEffectType, boolean all, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public RemovePotionEffectFunction(List<Condition<CTX>> predicates, boolean all, PlayerSelector<CTX> selector, Key potionEffectType) {
         super(predicates);
         this.potionEffectType = potionEffectType;
         this.selector = selector;
@@ -54,10 +54,10 @@ public class RemovePotionEffectFunction<CTX extends Context> extends AbstractCon
         public Function<CTX> create(Map<String, Object> arguments) {
             boolean all = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("all", false), "all");
             if (all) {
-                return new RemovePotionEffectFunction<>(null, true, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+                return new RemovePotionEffectFunction<>(getPredicates(arguments), true, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), null);
             } else {
                 Key effectType = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("potion-effect"), "warning.config.function.remove_potion_effect.missing_potion_effect"));
-                return new RemovePotionEffectFunction<>(effectType, false, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+                return new RemovePotionEffectFunction<>(getPredicates(arguments), false, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), effectType);
             }
         }
     }

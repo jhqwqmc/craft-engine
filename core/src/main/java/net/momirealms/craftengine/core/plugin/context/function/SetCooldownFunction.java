@@ -21,7 +21,7 @@ public class SetCooldownFunction<CTX extends Context> extends AbstractConditiona
     private final String id;
     private final boolean add;
 
-    public SetCooldownFunction(TextProvider time, String id, boolean add, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public SetCooldownFunction(List<Condition<CTX>> predicates, String id, boolean add, PlayerSelector<CTX> selector, TextProvider time) {
         super(predicates);
         this.time = time;
         this.add = add;
@@ -66,7 +66,7 @@ public class SetCooldownFunction<CTX extends Context> extends AbstractConditiona
             String id = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("id"), "warning.config.function.set_cooldown.missing_id");
             String time = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("time"), "warning.config.function.set_cooldown.missing_time");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
-            return new SetCooldownFunction<>(TextProviders.fromString(time), id, add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+            return new SetCooldownFunction<>(getPredicates(arguments), id, add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), TextProviders.fromString(time));
         }
     }
 }

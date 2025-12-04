@@ -26,7 +26,7 @@ public class UpdateBlockPropertyFunction<CTX extends Context> extends AbstractCo
     private final NumberProvider z;
     private final NumberProvider updateFlags;
 
-    public UpdateBlockPropertyFunction(CompoundTag properties, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, List<Condition<CTX>> predicates) {
+    public UpdateBlockPropertyFunction(List<Condition<CTX>> predicates, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, CompoundTag properties) {
         super(predicates);
         this.properties = properties;
         this.x = x;
@@ -67,12 +67,8 @@ public class UpdateBlockPropertyFunction<CTX extends Context> extends AbstractCo
             for (Map.Entry<String, Object> entry : state.entrySet()) {
                 properties.putString(entry.getKey(), String.valueOf(entry.getValue()));
             }
-            return new UpdateBlockPropertyFunction<>(properties,
-                    NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")),
-                    Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())),
-                    getPredicates(arguments));
+            return new UpdateBlockPropertyFunction<>(getPredicates(arguments), NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")), NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")), NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")), Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())), properties
+            );
         }
     }
 }

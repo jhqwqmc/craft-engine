@@ -30,7 +30,7 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
     private final NumberProvider z;
     private final NumberProvider updateFlags;
 
-    public TransformBlockFunction(LazyReference<BlockStateWrapper> lazyBlockState, CompoundTag properties, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, List<Condition<CTX>> predicates) {
+    public TransformBlockFunction(List<Condition<CTX>> predicates, CompoundTag properties, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, LazyReference<BlockStateWrapper> lazyBlockState) {
         super(predicates);
         this.properties = properties;
         this.x = x;
@@ -84,13 +84,8 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
                 }
             }
             return new TransformBlockFunction<>(
-                    LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(block)),
-                    properties,
-                    NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")),
-                    Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())),
-                    getPredicates(arguments));
+                    getPredicates(arguments), properties, NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")), NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")), NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")), Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())), LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(block))
+            );
         }
     }
 }

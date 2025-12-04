@@ -19,7 +19,7 @@ public class SetFoodFunction<CTX extends Context> extends AbstractConditionalFun
     private final NumberProvider count;
     private final boolean add;
 
-    public SetFoodFunction(NumberProvider count, boolean add, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public SetFoodFunction(List<Condition<CTX>> predicates, boolean add, PlayerSelector<CTX> selector, NumberProvider count) {
         super(predicates);
         this.count = count;
         this.add = add;
@@ -54,7 +54,7 @@ public class SetFoodFunction<CTX extends Context> extends AbstractConditionalFun
         public Function<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("food"), "warning.config.function.set_food.missing_food");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
-            return new SetFoodFunction<>(NumberProviders.fromObject(value), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+            return new SetFoodFunction<>(getPredicates(arguments), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(value));
         }
     }
 }

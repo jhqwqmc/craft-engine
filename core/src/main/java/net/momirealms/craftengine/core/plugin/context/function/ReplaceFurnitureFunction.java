@@ -26,16 +26,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
     private final boolean playSound;
 
     public ReplaceFurnitureFunction(
-            Key newFurnitureId,
-            NumberProvider x,
-            NumberProvider y,
-            NumberProvider z,
-            NumberProvider pitch,
-            NumberProvider yaw,
-            String variant,
-            boolean dropLoot,
-            boolean playSound,
-            List<Condition<CTX>> predicates
+            List<Condition<CTX>> predicates, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider pitch, NumberProvider yaw, String variant, boolean dropLoot, boolean playSound, Key newFurnitureId
     ) {
         super(predicates);
         this.newFurnitureId = newFurnitureId;
@@ -96,7 +87,7 @@ public class ReplaceFurnitureFunction<CTX extends Context> extends AbstractCondi
             String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-type"));
             boolean dropLoot = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("drop-loot", true), "drop-loot");
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
-            return new ReplaceFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, variant, dropLoot, playSound, getPredicates(arguments));
+            return new ReplaceFurnitureFunction<>(getPredicates(arguments), x, y, z, pitch, yaw, variant, dropLoot, playSound, furnitureId);
         }
     }
 }
