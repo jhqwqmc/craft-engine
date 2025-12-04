@@ -26,13 +26,9 @@ public final class EntityUtils {
     }
 
     public static BlockPos getOnPos(Player player) {
-        try {
-            Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
-            Object blockPos = CoreReflections.method$Entity$getOnPos.invoke(serverPlayer, 1.0E-5F);
-            return LocationUtils.fromBlockPos(blockPos);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+        Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
+        Object blockPos = FastNMS.INSTANCE.method$Entity$getOnPos(serverPlayer);
+        return LocationUtils.fromBlockPos(blockPos);
     }
 
     public static Entity spawnEntity(World world, Location loc, EntityType type, Consumer<Entity> function) {
