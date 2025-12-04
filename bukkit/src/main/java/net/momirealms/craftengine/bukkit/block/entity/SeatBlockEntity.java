@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
+import net.momirealms.craftengine.bukkit.block.behavior.SeatBlockBehavior;
 import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeat;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
@@ -13,14 +14,14 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.sparrow.nbt.CompoundTag;
 
+import java.util.Optional;
+
 public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     private final Seat<SeatBlockEntity>[] seats;
-    private final Property<HorizontalDirection> facing;
 
     @SuppressWarnings("unchecked")
-    public SeatBlockEntity(BlockPos pos, ImmutableBlockState blockState, SeatConfig[] seats, Property<HorizontalDirection> directionProperty) {
+    public SeatBlockEntity(BlockPos pos, ImmutableBlockState blockState, SeatConfig[] seats) {
         super(BukkitBlockEntityTypes.SEAT, pos, blockState);
-        this.facing = directionProperty;
         this.seats = new Seat[seats.length];
         for (int i = 0; i < seats.length; i++) {
             this.seats[i] = new BukkitSeat<>(this, seats[i]);
@@ -41,7 +42,10 @@ public class SeatBlockEntity extends BlockEntity implements SeatOwner {
 
     public boolean spawnSeat(Player player) {
         int yRot = 0;
-        if (this.facing != null) {
+        Optional<SeatBlockBehavior> behavior = super.blockState.behavior().getAs(SeatBlockBehavior.class);
+        if (behavior.isEmpty()) return false;
+        Property<HorizontalDirection> facing = behavior.get().directionProperty();
+        if (facing != null) {
             HorizontalDirection direction = super.blockState.get(facing);
             yRot = switch (direction) {
                 case NORTH -> 0;

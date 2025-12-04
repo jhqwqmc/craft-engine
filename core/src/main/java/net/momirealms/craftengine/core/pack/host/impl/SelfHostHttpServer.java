@@ -21,6 +21,7 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -33,6 +34,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SelfHostHttpServer {
     private static SelfHostHttpServer instance;
-    private final Cache<String, Boolean> oneTimePackUrls = Caffeine.newBuilder()
+    private final Cache<String, String> oneTimePackUrls = Caffeine.newBuilder()
             .maximumSize(1024)
             .scheduler(Scheduler.systemScheduler())
             .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -67,6 +70,7 @@ public class SelfHostHttpServer {
     private String url;
     private boolean denyNonMinecraft = true;
     private boolean useToken;
+    private boolean strictValidation = false;
 
     private long globalUploadRateLimit = 0;
     private long minDownloadSpeed = 50_000;
@@ -97,13 +101,15 @@ public class SelfHostHttpServer {
                                  Bandwidth limitPerIp,
                                  boolean token,
                                  long globalUploadRateLimit,
-                                 long minDownloadSpeed) {
+                                 long minDownloadSpeed,
+                                 boolean strictValidation) {
         this.ip = ip;
         this.url = url;
         this.denyNonMinecraft = denyNonMinecraft;
         this.protocol = protocol;
         this.limitPerIp = limitPerIp;
         this.useToken = token;
+        this.strictValidation = strictValidation;
         if (this.globalUploadRateLimit != globalUploadRateLimit || this.minDownloadSpeed != minDownloadSpeed) {
             this.globalUploadRateLimit = globalUploadRateLimit;
             this.minDownloadSpeed = minDownloadSpeed;
@@ -161,7 +167,7 @@ public class SelfHostHttpServer {
                 });
         try {
             serverChannel = b.bind(port).sync().channel();
-            CraftEngine.instance().logger().info("Netty HTTP server started on port: " + port);
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.self.netty_server", String.valueOf(port)));
         } catch (InterruptedException e) {
             CraftEngine.instance().logger().warn("Failed to start Netty server", e);
             Thread.currentThread().interrupt();
@@ -214,8 +220,9 @@ public class SelfHostHttpServer {
         private void handleDownload(ChannelHandlerContext ctx, FullHttpRequest request, QueryStringDecoder queryDecoder) {
             // 使用一次性token
             if (useToken) {
-                String token = queryDecoder.parameters().getOrDefault("token", java.util.Collections.emptyList()).stream().findFirst().orElse(null);
-                if (!validateToken(token)) {
+                String token = queryDecoder.parameters().getOrDefault("token", Collections.emptyList()).stream().findFirst().orElse(null);
+                String clientUUID = strictValidation ? request.headers().get("X-Minecraft-UUID") : null;
+                if (!validateToken(token, clientUUID)) {
                     sendError(ctx, HttpResponseStatus.FORBIDDEN, "Invalid token");
                     blockedRequests.incrementAndGet();
                     return;
@@ -225,7 +232,12 @@ public class SelfHostHttpServer {
             // 不是Minecraft客户端
             if (denyNonMinecraft) {
                 String userAgent = request.headers().get(HttpHeaderNames.USER_AGENT);
-                if (userAgent == null || !userAgent.startsWith("Minecraft Java/")) {
+                boolean nonMinecraftClient = userAgent == null || !userAgent.startsWith("Minecraft Java/");
+                if (strictValidation && !nonMinecraftClient) {
+                    String clientVersion = request.headers().get("X-Minecraft-Version");
+                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring("Minecraft Java/".length()));
+                }
+                if (nonMinecraftClient) {
                     sendError(ctx, HttpResponseStatus.FORBIDDEN, "Invalid client");
                     blockedRequests.incrementAndGet();
                     return;
@@ -300,10 +312,11 @@ public class SelfHostHttpServer {
             return rateLimiter.tryConsume(1);
         }
 
-        private boolean validateToken(String token) {
+        private boolean validateToken(String token, String clientUUID) {
             if (token == null || token.length() != 36) return false;
-            Boolean valid = oneTimePackUrls.getIfPresent(token);
-            if (valid != null) {
+            String valid = oneTimePackUrls.getIfPresent(token);
+            boolean isValid = strictValidation ? Objects.equals(valid, clientUUID) : valid != null;
+            if (isValid) {
                 oneTimePackUrls.invalidate(token);
                 return true;
             }
@@ -348,7 +361,7 @@ public class SelfHostHttpServer {
     }
 
     @Nullable
-    public ResourcePackDownloadData generateOneTimeUrl() {
+    public ResourcePackDownloadData generateOneTimeUrl(UUID user) {
         if (this.resourcePackBytes == null) return null;
 
         if (!this.useToken) {
@@ -356,7 +369,7 @@ public class SelfHostHttpServer {
         }
 
         String token = UUID.randomUUID().toString();
-        oneTimePackUrls.put(token, true);
+        oneTimePackUrls.put(token, strictValidation ? user.toString().replace("-", "") : "");
         return new ResourcePackDownloadData(
                 url() + "download?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8),
                 packUUID,

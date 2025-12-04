@@ -197,6 +197,8 @@ resource-pack:
         deny-non-minecraft-request: true
         # Generates a single-use, time-limited download link for each player.
         one-time-token: true
+        # Improved validation for deny-non-minecraft-request and one-time-token; do not enable on offline servers or validation will fail.
+        strict-validation: false
         rate-limiting:
           # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
           max-bandwidth-per-second: 5_000_000 # 5MB/s
@@ -556,7 +558,7 @@ chunk-system:
 client-optimization:
   # Requires a restart to fully apply.
   entity-culling:
-    enable: true
+    enable: false
     # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
     ray-tracing: true
     # Cull entities based on distance

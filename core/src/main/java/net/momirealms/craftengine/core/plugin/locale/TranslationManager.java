@@ -4,13 +4,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.Translator;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
+import net.momirealms.craftengine.core.plugin.text.minimessage.IndexedArgumentTag;
+import net.momirealms.craftengine.core.util.AdventureHelper;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface TranslationManager extends Manageable {
@@ -72,6 +71,15 @@ public interface TranslationManager extends Manageable {
         } else {
             return language + "_" + country;
         }
+    }
+
+    default String translateLog(String id, String... arguments) {
+        String translation = miniMessageTranslation(id);
+        if (translation == null) {
+            return id;
+        }
+        Component deserialize = AdventureHelper.customMiniMessage().deserialize(translation, new IndexedArgumentTag(Arrays.stream(arguments).map(Component::text).toList()));
+        return AdventureHelper.plainTextContent(deserialize);
     }
 
     Set<String> translationKeys();

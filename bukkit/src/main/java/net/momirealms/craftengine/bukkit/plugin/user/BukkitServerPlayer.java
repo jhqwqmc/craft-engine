@@ -7,7 +7,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
+import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.block.entity.BlockEntityHolder;
+import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -25,6 +27,9 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.GameMode;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -74,6 +79,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
     public static final Key ENTITY_CULLING_VIEW_DISTANCE_SCALE = Key.of("craftengine:entity_culling_view_distance_scale");
+    public static final Key ENABLE_ENTITY_CULLING = Key.of("craftengine:enable_entity_culling");
+    public static final Key ENABLE_FURNITURE_DEBUG = Key.of("craftengine:enable_furniture_debug");
     private final BukkitCraftEngine plugin;
 
     // connection state
@@ -143,11 +150,20 @@ public class BukkitServerPlayer extends Player {
     private int lastStopMiningTick;
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
+    private final Map<Integer, VirtualCullableObject> trackedFurniture = new ConcurrentHashMap<>();
     private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
+    // 是否启用实体剔除
+    private boolean enableEntityCulling;
     // 玩家眼睛所在位置
     private Location eyeLocation;
+    // 是否启用家具调试
+    private boolean enableFurnitureDebug;
+    // 上一次对准的家具
+    private BukkitFurniture lastHitFurniture;
+    // 缓存的tick
+    private int lastHitFurnitureTick;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -174,6 +190,8 @@ public class BukkitServerPlayer extends Player {
         byte[] bytes = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(CooldownData.COOLDOWN_KEY), PersistentDataType.BYTE_ARRAY);
         String locale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY), PersistentDataType.STRING);
         Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE);
+        this.enableEntityCulling = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN)).orElse(true);
+        this.enableFurnitureDebug = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN)).orElse(false);
         this.culling.setDistanceScale(Optional.ofNullable(scale).orElse(1.0));
         this.selectedLocale = TranslationManager.parseLocale(locale);
         this.trackedChunks = ConcurrentLong2ReferenceChainedHashTable.createWithCapacity(512, 0.5f);
@@ -532,6 +550,33 @@ public class BukkitServerPlayer extends Player {
             this.updateGUI();
         }
 
+        if (this.enableFurnitureDebug) {
+            BukkitFurniture furniture = CraftEngineFurniture.rayTrace(platformPlayer());
+            boolean forceShow = furniture != this.lastHitFurniture;
+            if (forceShow) {
+                this.lastHitFurnitureTick = 0;
+            } else {
+                this.lastHitFurnitureTick++;
+                if (this.lastHitFurnitureTick % 30 == 0) {
+                    forceShow = true;
+                }
+            }
+            this.lastHitFurniture = furniture;
+            if (furniture != null && forceShow) {
+                FurnitureVariant currentVariant = furniture.getCurrentVariant();
+                List<AABB> aabbs = new ArrayList<>();
+                for (FurnitureHitBoxConfig<?> config : currentVariant.hitBoxConfigs()) {
+                    config.prepareForPlacement(furniture.position(), aabbs::add);
+                }
+                Key endRod = Key.of("soul_fire_flame");
+                for (AABB aabb : aabbs) {
+                    for (Vec3d point : aabb.getEdgePoints(0.125)) {
+                        this.playParticle(endRod, point.x, point.y, point.z);
+                    }
+                }
+            }
+        }
+
         // 更新眼睛位置
         {
             Location unsureEyeLocation = bukkitPlayer.getEyeLocation();
@@ -540,7 +585,7 @@ public class BukkitServerPlayer extends Player {
                 Object mountPos = FastNMS.INSTANCE.method$Entity$getPassengerRidingPosition(FastNMS.INSTANCE.method$CraftEntity$getHandle(vehicle), serverPlayer);
                 unsureEyeLocation.set(FastNMS.INSTANCE.field$Vec3$x(mountPos), FastNMS.INSTANCE.field$Vec3$y(mountPos) + bukkitPlayer.getEyeHeight(), FastNMS.INSTANCE.field$Vec3$z(mountPos));
             }
-            if (Config.predictBreaking() && !this.isDestroyingCustomBlock && !unsureEyeLocation.equals(this.eyeLocation)) {
+            if (Config.predictBreaking() && this.eyeLocation != null && !this.isDestroyingCustomBlock && !unsureEyeLocation.equals(this.eyeLocation)) {
                 // if it's not destroying blocks, we do predict
                 if ((gameTicks() + entityID()) % Config.predictBreakingInterval() == 0) {
                     this.predictNextBlockToMine();
@@ -596,41 +641,60 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void entityCullingTick() {
         this.culling.restoreTokenOnTick();
+        if (this.firstPersonCameraVec3 == null || this.thirdPersonCameraVec3 == null) {
+            return;
+        }
         boolean useRayTracing = Config.entityCullingRayTracing();
-        for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
-            CullingData cullingData = cullableObject.cullable.cullingData();
-            if (cullingData != null) {
-                boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
-                // 之前可见
-                if (cullableObject.isShown) {
-                    boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
-                    if (!firstPersonVisible && !thirdPersonVisible) {
-                        cullableObject.setShown(this, false);
-                    }
-                }
-                // 之前不可见
-                else {
-                    // 但是第一人称可见了
-                    if (firstPersonVisible) {
-                        // 下次再说
-                        if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
-                            continue;
-                        }
-                        cullableObject.setShown(this, true);
-                        continue;
-                    }
-                    if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
-                        // 下次再说
-                        if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
-                            continue;
-                        }
-                        cullableObject.setShown(this, true);
-                    }
-                    // 仍然不可见
-                }
-            } else {
+        if (this.enableEntityCulling) {
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+                cullEntity(useRayTracing, cullableObject);
+            }
+            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+                cullEntity(useRayTracing, cullableObject);
+            }
+        } else {
+            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullableObject.setShown(this, true);
             }
+            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+                cullableObject.setShown(this, true);
+            }
+        }
+    }
+
+    private void cullEntity(boolean useRayTracing, VirtualCullableObject cullableObject) {
+        CullingData cullingData = cullableObject.cullable.cullingData();
+        if (cullingData != null) {
+            boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
+            // 之前可见
+            if (cullableObject.isShown) {
+                boolean thirdPersonVisible = this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing);
+                if (!firstPersonVisible && !thirdPersonVisible) {
+                    cullableObject.setShown(this, false);
+                }
+            }
+            // 之前不可见
+            else {
+                // 但是第一人称可见了
+                if (firstPersonVisible) {
+                    // 下次再说
+                    if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                        return;
+                    }
+                    cullableObject.setShown(this, true);
+                    return;
+                }
+                if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
+                    // 下次再说
+                    if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                        return;
+                    }
+                    cullableObject.setShown(this, true);
+                }
+                // 仍然不可见
+            }
+        } else {
+            cullableObject.setShown(this, true);
         }
     }
 
@@ -1342,6 +1406,28 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public void setEnableEntityCulling(boolean enable) {
+        this.enableEntityCulling = enable;
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN, enable);
+    }
+
+    @Override
+    public boolean enableEntityCulling() {
+        return this.enableEntityCulling;
+    }
+
+    @Override
+    public void setEnableFurnitureDebug(boolean enable) {
+        this.enableFurnitureDebug = enable;
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN, enable);
+    }
+
+    @Override
+    public boolean enableFurnitureDebug() {
+        return enableFurnitureDebug;
+    }
+
+    @Override
     public void giveExperiencePoints(int xpPoints) {
         platformPlayer().giveExp(xpPoints);
     }
@@ -1407,8 +1493,34 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public void addTrackedFurniture(int entityId, Furniture furniture) {
+        this.trackedFurniture.put(entityId, new VirtualCullableObject(furniture));
+    }
+
+    @Override
+    public void removeTrackedFurniture(int entityId) {
+        VirtualCullableObject remove = this.trackedFurniture.remove(entityId);
+        if (remove != null && remove.isShown()) {
+            remove.cullable().hide(this);
+        }
+    }
+
+    @Override
+    public void clearTrackedFurniture() {
+        this.trackedFurniture.clear();
+    }
+
+    @Override
     public WorldPosition eyePosition() {
         return LocationUtils.toWorldPosition(this.getEyeLocation());
+    }
+
+    @Override
+    public void playParticle(Key particleId, double x, double y, double z) {
+        Particle particle = Registry.PARTICLE_TYPE.get(KeyUtils.toNamespacedKey(particleId));
+        if (particle != null) {
+            platformPlayer().getWorld().spawnParticle(particle, List.of(platformPlayer()), null, x, y, z, 1, 0, 0,0, 0, null, false);
+        }
     }
 
     public Location getEyeLocation() {

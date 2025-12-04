@@ -4,6 +4,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
+import net.momirealms.craftengine.core.block.entity.InactiveBlockEntity;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.util.Key;
@@ -37,11 +38,13 @@ public final class DefaultBlockEntitySerializer {
             CompoundTag data = tag.getCompound(i);
             Key id = Key.of(data.getString("id"));
             BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(id);
+            BlockPos pos = BlockEntity.readPosAndVerify(data, chunk.chunkPos());
+            ImmutableBlockState blockState = chunk.getBlockState(pos);
             if (type == null) {
                 Debugger.BLOCK.debug(() -> "Unknown block entity type: " + id);
+                BlockEntity blockEntity = new InactiveBlockEntity(pos, blockState, data);
+                blockEntities.add(blockEntity);
             } else {
-                BlockPos pos = BlockEntity.readPosAndVerify(data, chunk.chunkPos());
-                ImmutableBlockState blockState = chunk.getBlockState(pos);
                 if (blockState.blockEntityType() == type) {
                     Optional<EntityBlockBehavior> entityBlockBehavior = blockState.behavior().getAs(EntityBlockBehavior.class);
                     if (entityBlockBehavior.isPresent()) {

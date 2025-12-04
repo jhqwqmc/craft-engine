@@ -24,7 +24,7 @@ public abstract class BlockEntity {
         this.type = type;
     }
 
-    public final CompoundTag saveAsTag() {
+    public CompoundTag saveAsTag() {
         CompoundTag tag = new CompoundTag();
         this.saveId(tag);
         this.savePos(tag);

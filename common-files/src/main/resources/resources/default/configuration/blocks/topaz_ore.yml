@@ -27,13 +27,17 @@ items:
     texture: minecraft:item/custom/topaz
 blocks:
   default:topaz_ore:
+    behavior:
+      type: drop_experience_block
+      amount: 3~7
+      condition:
+        type: enchantment
+        predicate: minecraft:silk_touch<=0
     loot:
       template: default:loot_table/ore
       arguments:
         ore_drop: default:topaz
         ore_block: default:topaz_ore
-        min_exp: 3
-        max_exp: 7
     settings:
       template: default:settings/ore
       arguments:
@@ -45,13 +49,17 @@ blocks:
         arguments:
           path: minecraft:block/custom/topaz_ore
   default:deepslate_topaz_ore:
+    behavior:
+      type: drop_experience_block
+      amount: 3~7
+      condition:
+        type: enchantment
+        predicate: minecraft:silk_touch<=0
     loot:
       template: default:loot_table/ore
       arguments:
         ore_drop: default:topaz
         ore_block: default:deepslate_topaz_ore
-        min_exp: 3
-        max_exp: 7
     settings:
       template: default:settings/deepslate_ore
       arguments:

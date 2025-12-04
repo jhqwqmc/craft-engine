@@ -65,6 +65,7 @@ public final class ItemKeys {
     public static final Key PURPLE_DYE = Key.of("minecraft:purple_dye");
     public static final Key MAGENTA_DYE = Key.of("minecraft:magenta_dye");
     public static final Key PINK_DYE = Key.of("minecraft:pink_dye");
+    public static final Key DEBUG_STICK = Key.of("minecraft:debug_stick");
 
     public static final Key CARROT = Key.of("minecraft:carrot");
     public static final Key POTATO = Key.of("minecraft:potato");

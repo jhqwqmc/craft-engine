@@ -351,6 +351,11 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                     .toList();
             registerArmorTrimPattern(trims);
         }
+
+        @Override
+        public int count() {
+            return AbstractItemManager.this.equipments.size();
+        }
     }
 
     public void addOrMergeEquipment(ComponentBasedEquipment equipment) {
@@ -367,6 +372,11 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     public class ItemParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] {"items", "item"};
         private final Map<Key, IdAllocator> idAllocators = new HashMap<>();
+
+        @Override
+        public int count() {
+            return AbstractItemManager.this.customItemsById.size();
+        }
 
         private boolean isModernFormatRequired() {
             return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4);

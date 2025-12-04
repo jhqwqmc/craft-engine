@@ -33,7 +33,7 @@ public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBloc
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, ImmutableBlockState state) {
-        return new SeatBlockEntity(pos, state, this.seats, this.directionProperty);
+        return new SeatBlockEntity(pos, state, this.seats);
     }
 
     @Override

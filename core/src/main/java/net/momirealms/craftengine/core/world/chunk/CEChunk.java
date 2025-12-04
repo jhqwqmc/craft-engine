@@ -26,40 +26,42 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CEChunk {
+    private static final int DEFAULT_MAP_SIZE = 8;
     public final CEWorld world;
     public final ChunkPos chunkPos;
     public final CESection[] sections;
     public final WorldHeight worldHeightAccessor;
-    public final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
-    public final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
     private volatile boolean activated;
+    private boolean isEntitiesLoaded;
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
         this.sections = new CESection[this.worldHeightAccessor.getSectionsCount()];
-        this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         this.fillEmptySection();
     }
 
-    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag itemDisplayBlockRenders) {
+    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag blockEntityRenders, @Nullable ListTag entities) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         int sectionCount = this.worldHeightAccessor.getSectionsCount();
         this.sections = new CESection[sectionCount];
         if (sections != null) {
@@ -72,22 +74,22 @@ public class CEChunk {
         }
         this.fillEmptySection();
         if (blockEntitiesTag != null) {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), 10), 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), DEFAULT_MAP_SIZE), 0.5f);
             List<BlockEntity> blockEntities = DefaultBlockEntitySerializer.deserialize(this, blockEntitiesTag);
             for (BlockEntity blockEntity : blockEntities) {
                 this.setBlockEntity(blockEntity);
             }
         } else {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
-        if (itemDisplayBlockRenders != null) {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(itemDisplayBlockRenders.size(), 10), 0.5f);
-            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, itemDisplayBlockRenders);
+        if (blockEntityRenders != null) {
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(blockEntityRenders.size(), DEFAULT_MAP_SIZE), 0.5f);
+            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, blockEntityRenders);
             for (BlockPos pos : blockEntityRendererPoses) {
                 this.addConstantBlockEntityRenderer(pos);
             }
         } else {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
     }
 
@@ -664,6 +666,14 @@ public class CEChunk {
         return this.sections;
     }
 
+    public boolean isEntitiesLoaded() {
+        return this.isEntitiesLoaded;
+    }
+
+    public void setEntitiesLoaded(boolean entitiesLoaded) {
+        this.isEntitiesLoaded = entitiesLoaded;
+    }
+
     public boolean isLoaded() {
         return this.loaded;
     }
@@ -678,5 +688,6 @@ public class CEChunk {
         if (!this.loaded) return;
         this.world.removeLoadedChunk(this);
         this.loaded = false;
+        this.isEntitiesLoaded = false;
     }
 }

@@ -4615,4 +4615,27 @@ public final class CoreReflections {
             throw new ReflectionInitException("Failed to init EmptyBlockGetter$INSTANCE", e);
         }
     }
+
+    public static final Class<?> clazz$EntityDimensions = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.entity.EntitySize",
+                    "world.entity.EntityDimensions"
+            )
+    );
+
+    public static final Field field$EntityType$dimensions = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityType, clazz$EntityDimensions, 0)
+    );
+
+    public static final Field field$EntityDimensions$width = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, float.class, 0)
+    );
+
+    public static final Field field$EntityDimensions$height = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, float.class, 1)
+    );
+
+    public static final Field field$EntityDimensions$fixed = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, boolean.class, 0)
+    );
 }

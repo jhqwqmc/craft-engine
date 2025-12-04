@@ -93,6 +93,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
 
     public class VanillaLootParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] {"vanilla-loots", "vanilla-loot"};
+        private int count;
 
         @Override
         public int loadingSequence() {
@@ -102,6 +103,16 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
         @Override
         public String[] sectionId() {
             return CONFIG_SECTION_NAME;
+        }
+
+        @Override
+        public int count() {
+            return this.count;
+        }
+
+        @Override
+        public void preProcess() {
+            this.count = 0;
         }
 
         @Override
@@ -147,6 +158,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
                     }
                 }
             }
+            this.count++;
         }
     }
 }

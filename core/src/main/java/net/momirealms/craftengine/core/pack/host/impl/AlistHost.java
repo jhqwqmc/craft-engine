@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +86,7 @@ public class AlistHost implements ResourcePackHost {
                     new TypeToken<Map<String, String>>(){}.getType()
             );
             this.cachedSha1 = cache.get("sha1");
-            CraftEngine.instance().logger().info("[Alist] Loaded cached resource pack metadata");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "Alist"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("[Alist] Failed to load cache " + cachePath, e);
         }

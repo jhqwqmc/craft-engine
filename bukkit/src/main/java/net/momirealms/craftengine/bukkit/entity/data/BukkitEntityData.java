@@ -39,7 +39,7 @@ public class BukkitEntityData<T> implements EntityData<T> {
     }
 
     @Override
-    public Object create(Object entityDataAccessor, Object value) {
+    public Object create(Object entityDataAccessor, T value) {
         return EntityDataValue.create(entityDataAccessor, value);
     }
 }

@@ -114,6 +114,11 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         }
 
         @Override
+        public int count() {
+            return ItemBrowserManagerImpl.this.byId.size();
+        }
+
+        @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             String name = section.getOrDefault("name", id).toString();
             List<String> members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));

@@ -25,4 +25,12 @@ public interface ConfigParser extends Comparable<ConfigParser> {
     void loadAll();
 
     void clear();
+
+    default int count() {
+        return -1;
+    }
+
+    default boolean silentIfNotExists() {
+        return true;
+    }
 }

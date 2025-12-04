@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.compatibility.model.modelengine;
 
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -49,13 +48,12 @@ public class ModelEngineBlockEntityElementConfig implements BlockEntityElementCo
         return ModelEngineBlockEntityElement.class;
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    public static class Factory implements BlockEntityElementConfigFactory<ModelEngineBlockEntityElement> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public ModelEngineBlockEntityElementConfig create(Map<String, Object> arguments) {
             String model = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("model"), "warning.config.block.state.entity_renderer.model_engine.missing_model");
-            return (BlockEntityElementConfig<E>) new ModelEngineBlockEntityElementConfig(
+            return new ModelEngineBlockEntityElementConfig(
                     model,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),

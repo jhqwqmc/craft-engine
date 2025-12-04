@@ -50,6 +50,11 @@ public class GlobalVariableManager implements Manageable {
         }
 
         @Override
+        public int count() {
+            return GlobalVariableManager.this.globalVariables.size();
+        }
+
+        @Override
         public void parseObject(Pack pack, Path path, String node, Key id, Object object) throws LocalizedException {
             if (object != null) {
                 GlobalVariableManager.this.globalVariables.put(id.value(), object.toString());
