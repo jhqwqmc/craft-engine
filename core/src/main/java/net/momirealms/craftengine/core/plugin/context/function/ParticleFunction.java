@@ -17,7 +17,7 @@ import java.util.Optional;
 public class ParticleFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final ParticleConfig config;
 
-    public ParticleFunction(ParticleConfig config, List<Condition<CTX>> predicates) {
+    public ParticleFunction(List<Condition<CTX>> predicates, ParticleConfig config) {
         super(predicates);
         this.config = config;
     }
@@ -45,7 +45,7 @@ public class ParticleFunction<CTX extends Context> extends AbstractConditionalFu
 
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
-            return new ParticleFunction<>(ParticleConfig.fromMap$function(arguments), getPredicates(arguments));
+            return new ParticleFunction<>(getPredicates(arguments), ParticleConfig.fromMap$function(arguments));
         }
     }
 }

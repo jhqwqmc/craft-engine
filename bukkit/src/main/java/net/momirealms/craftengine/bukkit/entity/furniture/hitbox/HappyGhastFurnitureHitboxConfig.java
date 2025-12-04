@@ -56,8 +56,8 @@ public class HappyGhastFurnitureHitboxConfig extends AbstractFurnitureHitBoxConf
     }
 
     @Override
-    public void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer) {
-        if (this.blocksBuilding) {
+    public void prepareBoundingBox(WorldPosition targetPos, Consumer<AABB> aabbConsumer, boolean ignoreBlocksBuilding) {
+        if (this.blocksBuilding || ignoreBlocksBuilding) {
             Vec3d relativePosition = Furniture.getRelativePosition(targetPos, this.position);
             aabbConsumer.accept(AABB.makeBoundingBox(relativePosition, 4 * this.scale, 4 * this.scale));
         }

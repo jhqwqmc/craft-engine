@@ -17,7 +17,7 @@ import java.util.Map;
 public class DamageItemFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final NumberProvider amount;
 
-    public DamageItemFunction(NumberProvider amount, List<Condition<CTX>> predicates) {
+    public DamageItemFunction(List<Condition<CTX>> predicates, NumberProvider amount) {
         super(predicates);
         this.amount = amount;
     }
@@ -51,7 +51,7 @@ public class DamageItemFunction<CTX extends Context> extends AbstractConditional
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 1));
-            return new DamageItemFunction<>(amount, getPredicates(arguments));
+            return new DamageItemFunction<>(getPredicates(arguments), amount);
         }
     }
 }

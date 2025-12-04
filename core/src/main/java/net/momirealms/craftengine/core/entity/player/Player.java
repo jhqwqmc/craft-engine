@@ -226,6 +226,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void clearTrackedBlockEntities();
 
+    public abstract int clearOrCountMatchingInventoryItems(Key itemId, int count);
+
     @Override
     public void remove() {
     }

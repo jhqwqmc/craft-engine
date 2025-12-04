@@ -43,6 +43,7 @@ public class EventFunctions {
         register(CommonFunctions.SPAWN_FURNITURE, new SpawnFurnitureFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.REMOVE_FURNITURE, new RemoveFurnitureFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.REPLACE_FURNITURE, new ReplaceFurnitureFunction.FactoryImpl<>(EventConditions::fromMap));
+        register(CommonFunctions.ROTATE_FURNITURE, new RotateFurnitureFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.MYTHIC_MOBS_SKILL, new MythicMobsSkillFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.TELEPORT, new TeleportFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.SET_VARIABLE, new SetVariableFunction.FactoryImpl<>(EventConditions::fromMap));
@@ -58,6 +59,8 @@ public class EventFunctions {
         register(CommonFunctions.SET_EXP, new SetExpFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.SET_LEVEL, new SetLevelFunction.FactoryImpl<>(EventConditions::fromMap));
         register(CommonFunctions.PLAY_TOTEM_ANIMATION, new PlayTotemAnimationFunction.FactoryImpl<>(EventConditions::fromMap));
+        register(CommonFunctions.CLOSE_INVENTORY, new CloseInventoryFunction.FactoryImpl<>(EventConditions::fromMap));
+        register(CommonFunctions.CLEAR_ITEM, new ClearItemFunction.FactoryImpl<>(EventConditions::fromMap));
     }
 
     public static void register(Key key, FunctionFactory<Context> factory) {

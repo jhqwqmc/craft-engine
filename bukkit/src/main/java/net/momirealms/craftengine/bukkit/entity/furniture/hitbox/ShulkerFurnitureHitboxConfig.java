@@ -145,8 +145,8 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
     }
 
     @Override
-    public void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer) {
-        if (this.blocksBuilding) {
+    public void prepareBoundingBox(WorldPosition targetPos, Consumer<AABB> aabbConsumer, boolean ignoreBlocksBuilding) {
+        if (this.blocksBuilding || ignoreBlocksBuilding) {
             Quaternionf conjugated = QuaternionUtils.toQuaternionf(0f, (float) Math.toRadians(180 - targetPos.yRot()), 0f).conjugate();
             Vector3f offset = conjugated.transform(new Vector3f(position()));
             aabbConsumer.accept(this.aabbCreator.create(targetPos.x, targetPos.y, targetPos.z, targetPos.yRot, offset));

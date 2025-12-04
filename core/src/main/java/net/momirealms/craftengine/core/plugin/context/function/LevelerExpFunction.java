@@ -20,7 +20,7 @@ public class LevelerExpFunction<CTX extends Context> extends AbstractConditional
     private final String leveler;
     private final String plugin;
 
-    public LevelerExpFunction(NumberProvider count, String leveler, String plugin, PlayerSelector<CTX> selector, List<Condition<CTX>> predicates) {
+    public LevelerExpFunction(List<Condition<CTX>> predicates, String leveler, String plugin, PlayerSelector<CTX> selector, NumberProvider count) {
         super(predicates);
         this.count = count;
         this.leveler = leveler;
@@ -58,7 +58,7 @@ public class LevelerExpFunction<CTX extends Context> extends AbstractConditional
             Object count = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.leveler_exp.missing_count");
             String leveler = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("leveler"), "warning.config.function.leveler_exp.missing_leveler");
             String plugin = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("plugin"), "warning.config.function.leveler_exp.missing_plugin");
-            return new LevelerExpFunction<>(NumberProviders.fromObject(count), leveler, plugin, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), getPredicates(arguments));
+            return new LevelerExpFunction<>(getPredicates(arguments), leveler, plugin, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(count));
         }
     }
 }

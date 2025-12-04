@@ -31,4 +31,5 @@ public final class CommonConditions {
     public static final Key IS_NULL = Key.from("craftengine:is_null");
     public static final Key HAND = Key.from("craftengine:hand");
     public static final Key HAS_PLAYER = Key.from("craftengine:has_player");
+    public static final Key INVENTORY_HAS_ITEM = Key.from("craftengine:inventory_has_item");
 }

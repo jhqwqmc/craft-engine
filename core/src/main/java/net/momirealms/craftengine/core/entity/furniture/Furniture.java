@@ -130,7 +130,7 @@ public abstract class Furniture implements Cullable {
         if (aabb == null) {
             List<AABB> aabbs = new ArrayList<>();
             for (FurnitureHitBoxConfig<?> hitBoxConfig : this.currentVariant.hitBoxConfigs()) {
-                hitBoxConfig.prepareForPlacement(position, aabbs::add);
+                hitBoxConfig.prepareBoundingBox(position, aabbs::add, true);
             }
             return new CullingData(getMaxAABB(aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         } else {

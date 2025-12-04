@@ -14,7 +14,7 @@ public class MythicMobsSkillFunction<CTX extends Context> extends AbstractCondit
     private final String skill;
     private final float power;
 
-    public MythicMobsSkillFunction(String skill, float power, List<Condition<CTX>> predicates) {
+    public MythicMobsSkillFunction(List<Condition<CTX>> predicates, float power, String skill) {
         super(predicates);
         this.skill = skill;
         this.power = power;
@@ -42,7 +42,7 @@ public class MythicMobsSkillFunction<CTX extends Context> extends AbstractCondit
         public Function<CTX> create(Map<String, Object> args) {
             String skill = ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("skill"), "warning.config.function.mythic_mobs_skill.missing_skill");
             float power = ResourceConfigUtils.getAsFloat(args.getOrDefault("power", 1.0), "power");
-            return new MythicMobsSkillFunction<>(skill, power, getPredicates(args));
+            return new MythicMobsSkillFunction<>(getPredicates(args), power, skill);
         }
     }
 }

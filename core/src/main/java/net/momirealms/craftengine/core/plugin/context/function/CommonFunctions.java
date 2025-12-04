@@ -32,6 +32,7 @@ public final class CommonFunctions {
     public static final Key SPAWN_FURNITURE = Key.of("craftengine:spawn_furniture");
     public static final Key REMOVE_FURNITURE = Key.of("craftengine:remove_furniture");
     public static final Key REPLACE_FURNITURE = Key.of("craftengine:replace_furniture");
+    public static final Key ROTATE_FURNITURE = Key.of("craftengine:rotate_furniture");
     public static final Key MYTHIC_MOBS_SKILL = Key.of("craftengine:mythic_mobs_skill");
     public static final Key TELEPORT = Key.of("craftengine:teleport");
     public static final Key TOAST = Key.of("craftengine:toast");
@@ -49,4 +50,6 @@ public final class CommonFunctions {
     public static final Key SET_EXP = Key.of("craftengine:set_exp");
     public static final Key SET_LEVEL = Key.of("craftengine:set_level");
     public static final Key PLAY_TOTEM_ANIMATION = Key.of("craftengine:play_totem_animation");
+    public static final Key CLOSE_INVENTORY = Key.of("craftengine:close_inventory");
+    public static final Key CLEAR_ITEM = Key.of("craftengine:clear_item");
 }

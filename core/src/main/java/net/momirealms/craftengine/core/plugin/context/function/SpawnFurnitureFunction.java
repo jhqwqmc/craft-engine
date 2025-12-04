@@ -26,15 +26,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
     private final boolean playSound;
 
     public SpawnFurnitureFunction(
-            Key furnitureId,
-            NumberProvider x,
-            NumberProvider y,
-            NumberProvider z,
-            NumberProvider pitch,
-            NumberProvider yaw,
-            String variant,
-            boolean playSound,
-            List<Condition<CTX>> predicates
+            List<Condition<CTX>> predicates, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider pitch, NumberProvider yaw, String variant, boolean playSound, Key furnitureId
     ) {
         super(predicates);
         this.furnitureId = furnitureId;
@@ -86,7 +78,7 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
             NumberProvider yaw = NumberProviders.fromObject(arguments.getOrDefault("yaw", "<arg:position.yaw>"));
             String variant = ResourceConfigUtils.getAsStringOrNull(ResourceConfigUtils.get(arguments, "variant", "anchor-type"));
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
-            return new SpawnFurnitureFunction<>(furnitureId, x, y, z, pitch, yaw, variant, playSound, getPredicates(arguments));
+            return new SpawnFurnitureFunction<>(getPredicates(arguments), x, y, z, pitch, yaw, variant, playSound, furnitureId);
         }
     }
 }

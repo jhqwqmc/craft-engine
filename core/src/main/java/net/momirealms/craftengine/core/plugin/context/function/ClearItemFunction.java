@@ -7,33 +7,35 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BreakBlockFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
-    private final NumberProvider x;
-    private final NumberProvider y;
-    private final NumberProvider z;
+public class ClearItemFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
+    private final Key itemId;
+    private final NumberProvider count;
 
-    public BreakBlockFunction(List<Condition<CTX>> predicates, NumberProvider y, NumberProvider z, NumberProvider x) {
+    public ClearItemFunction(List<Condition<CTX>> predicates, Key itemId, NumberProvider count) {
         super(predicates);
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.itemId = itemId;
+        this.count = count;
     }
 
     @Override
-    public void runInternal(CTX ctx) {
+    protected void runInternal(CTX ctx) {
         Optional<Player> optionalPlayer = ctx.getOptionalParameter(DirectContextParameters.PLAYER);
-        optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.floor(x.getDouble(ctx)), MiscUtils.floor(y.getDouble(ctx)), MiscUtils.floor(z.getDouble(ctx))));
+        if (optionalPlayer.isEmpty()) {
+            return;
+        }
+        Player player = optionalPlayer.get();
+        player.clearOrCountMatchingInventoryItems(itemId, count.getInt(ctx));
     }
 
     @Override
     public Key type() {
-        return CommonFunctions.BREAK_BLOCK;
+        return CommonFunctions.CLEAR_ITEM;
     }
 
     public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
@@ -44,10 +46,9 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
 
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
-            NumberProvider x = NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>"));
-            NumberProvider y = NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>"));
-            NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));
-            return new BreakBlockFunction<>(getPredicates(arguments), y, z, x);
+            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.function.clear_item.missing_id"));
+            NumberProvider count = NumberProviders.fromObject(arguments.getOrDefault("count", 1));
+            return new ClearItemFunction<>(getPredicates(arguments), itemId, count);
         }
     }
 }

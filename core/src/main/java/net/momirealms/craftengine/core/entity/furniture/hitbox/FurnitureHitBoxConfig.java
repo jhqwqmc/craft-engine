@@ -22,6 +22,6 @@ public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
 
     boolean canUseItemOn();
 
-    void prepareForPlacement(WorldPosition targetPos, Consumer<AABB> aabbConsumer);
+    void prepareBoundingBox(WorldPosition targetPos, Consumer<AABB> aabbConsumer, boolean ignoreBlocksBuilding);
 
 }

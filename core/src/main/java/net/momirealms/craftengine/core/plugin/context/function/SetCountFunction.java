@@ -17,7 +17,7 @@ public class SetCountFunction<CTX extends Context> extends AbstractConditionalFu
     private final NumberProvider count;
     private final boolean add;
 
-    public SetCountFunction(NumberProvider count, boolean add, List<Condition<CTX>> predicates) {
+    public SetCountFunction(List<Condition<CTX>> predicates, boolean add, NumberProvider count) {
         super(predicates);
         this.count = count;
         this.add = add;
@@ -51,7 +51,7 @@ public class SetCountFunction<CTX extends Context> extends AbstractConditionalFu
         public Function<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.set_count.missing_count");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
-            return new SetCountFunction<>(NumberProviders.fromObject(value), add, getPredicates(arguments));
+            return new SetCountFunction<>(getPredicates(arguments), add, NumberProviders.fromObject(value));
         }
     }
 }
