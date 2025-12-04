@@ -261,6 +261,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
 
     public class BlockStateMappingParser extends SectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[]{"block-state-mappings", "block-state-mapping"};
+        private int count;
 
         @Override
         public String[] sectionId() {
@@ -270,6 +271,16 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         @Override
         public int loadingSequence() {
             return LoadingSequence.BLOCK_STATE_MAPPING;
+        }
+
+        @Override
+        public int count() {
+            return this.count;
+        }
+
+        @Override
+        public void preProcess() {
+            this.count = 0;
         }
 
         @Override
@@ -302,6 +313,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                 List<BlockStateWrapper> blockStateWrappers = AbstractBlockManager.this.blockStateArranger.computeIfAbsent(blockOwnerId, k -> new ArrayList<>());
                 blockStateWrappers.add(beforeState);
                 AbstractBlockManager.this.autoVisualBlockStateCandidates[beforeState.registryId()] = createVisualBlockCandidate(beforeState);
+                this.count++;
             }
             exceptionCollector.throwIfPresent();
         }
@@ -329,6 +341,11 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         public BlockParser(BlockStateCandidate[] candidates) {
             this.internalIdAllocator = new IdAllocator(AbstractBlockManager.this.plugin.dataFolderPath().resolve("cache").resolve("custom-block-states.json"));
             this.visualBlockStateAllocator = new VisualBlockStateAllocator(AbstractBlockManager.this.plugin.dataFolderPath().resolve("cache").resolve("visual-block-states.json"), candidates, AbstractBlockManager.this::createVanillaBlockState);
+        }
+
+        @Override
+        public int count() {
+            return AbstractBlockManager.this.byId.size();
         }
 
         public void addPendingConfigSection(PendingConfigSection section) {

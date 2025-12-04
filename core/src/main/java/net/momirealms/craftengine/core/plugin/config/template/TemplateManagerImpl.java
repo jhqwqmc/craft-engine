@@ -52,6 +52,11 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
         @Override
+        public int count() {
+            return TemplateManagerImpl.this.templates.size();
+        }
+
+        @Override
         public void parseObject(Pack pack, Path path, String node, Key id, Object obj) {
             if (TemplateManagerImpl.this.templates.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.template.duplicate");

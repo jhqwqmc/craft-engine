@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class DropboxHost implements ResourcePackHost {
             this.refreshToken = getString(cache, "refresh_token");
             this.accessToken = getString(cache, "access_token");
             this.expiresAt = getLong(cache, "expires_at");
-            CraftEngine.instance().logger().info("[Dropbox] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "Dropbox"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("[Dropbox] Failed to load cache " + cachePath, e);
         }

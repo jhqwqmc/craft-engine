@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.entity.furniture;
 
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
 import net.momirealms.craftengine.core.loot.LootTable;
@@ -107,6 +106,11 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
         @Override
         public int loadingSequence() {
             return LoadingSequence.FURNITURE;
+        }
+
+        @Override
+        public int count() {
+            return AbstractFurnitureManager.this.byId.size();
         }
 
         @Override

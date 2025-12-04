@@ -135,6 +135,11 @@ public abstract class AbstractRecipeManager<T> implements RecipeManager<T> {
         }
 
         @Override
+        public int count() {
+            return Math.max(0, AbstractRecipeManager.this.byId.size() - AbstractRecipeManager.this.dataPackRecipes.size());
+        }
+
+        @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             if (!Config.enableRecipeSystem()) return;
             if (AbstractRecipeManager.this.byId.containsKey(id)) {

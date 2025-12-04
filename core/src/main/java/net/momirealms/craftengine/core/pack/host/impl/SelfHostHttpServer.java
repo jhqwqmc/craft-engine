@@ -21,6 +21,7 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -166,7 +167,7 @@ public class SelfHostHttpServer {
                 });
         try {
             serverChannel = b.bind(port).sync().channel();
-            CraftEngine.instance().logger().info("Netty HTTP server started on port: " + port);
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.self.netty_server", String.valueOf(port)));
         } catch (InterruptedException e) {
             CraftEngine.instance().logger().warn("Failed to start Netty server", e);
             Thread.currentThread().interrupt();
