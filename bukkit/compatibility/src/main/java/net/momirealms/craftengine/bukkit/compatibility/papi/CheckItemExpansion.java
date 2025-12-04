@@ -108,11 +108,6 @@ public class CheckItemExpansion extends PlaceholderExpansion {
     }
 
     private int getItemCount(BukkitServerPlayer player, String[] param) {
-        Key itemId = Key.of(param[0], param[1]);
-        Predicate<Object> predicate = nmsStack -> this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
-        Object inventory = FastNMS.INSTANCE.method$Player$getInventory(player.serverPlayer());
-        Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(player.serverPlayer());
-        Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
-        return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, predicate, 0, craftSlots);
+        return player.clearOrCountMatchingInventoryItems(Key.of(param[0], param[1]), 0);
     }
 }
