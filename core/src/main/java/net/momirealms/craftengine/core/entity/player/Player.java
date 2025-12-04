@@ -198,6 +198,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract boolean enableEntityCulling();
 
+    public abstract boolean enableFurnitureDebug();
+
+    public abstract void setEnableFurnitureDebug(boolean enableFurnitureDebug);
+
     public abstract void giveExperiencePoints(int xpPoints);
 
     public abstract void giveExperienceLevels(int levels);

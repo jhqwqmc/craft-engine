@@ -76,6 +76,7 @@ public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
     public static final Key ENTITY_CULLING_VIEW_DISTANCE_SCALE = Key.of("craftengine:entity_culling_view_distance_scale");
     public static final Key ENABLE_ENTITY_CULLING = Key.of("craftengine:enable_entity_culling");
+    public static final Key ENABLE_FURNITURE_DEBUG = Key.of("craftengine:enable_furniture_debug");
     private final BukkitCraftEngine plugin;
 
     // connection state
@@ -153,6 +154,8 @@ public class BukkitServerPlayer extends Player {
     private boolean enableEntityCulling;
     // 玩家眼睛所在位置
     private Location eyeLocation;
+    // 是否启用家具调试
+    private boolean enableFurnitureDebug;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -180,6 +183,7 @@ public class BukkitServerPlayer extends Player {
         String locale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY), PersistentDataType.STRING);
         Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE);
         this.enableEntityCulling = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN)).orElse(true);
+        this.enableFurnitureDebug = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN)).orElse(false);
         this.culling.setDistanceScale(Optional.ofNullable(scale).orElse(1.0));
         this.selectedLocale = TranslationManager.parseLocale(locale);
         this.trackedChunks = ConcurrentLong2ReferenceChainedHashTable.createWithCapacity(512, 0.5f);
@@ -1374,7 +1378,18 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public boolean enableEntityCulling() {
-        return enableEntityCulling;
+        return this.enableEntityCulling;
+    }
+
+    @Override
+    public void setEnableFurnitureDebug(boolean enable) {
+        this.enableFurnitureDebug = enable;
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN, enable);
+    }
+
+    @Override
+    public boolean enableFurnitureDebug() {
+        return enableFurnitureDebug;
     }
 
     @Override
