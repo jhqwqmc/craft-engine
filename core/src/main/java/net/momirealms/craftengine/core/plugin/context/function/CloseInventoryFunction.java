@@ -33,7 +33,7 @@ public class CloseInventoryFunction<CTX extends Context> extends AbstractConditi
 
     @Override
     public Key type() {
-        return CommonFunctions.TITLE;
+        return CommonFunctions.CLOSE_INVENTORY;
     }
 
     public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
