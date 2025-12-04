@@ -568,7 +568,7 @@ public class BukkitServerPlayer extends Player {
                 for (FurnitureHitBoxConfig<?> config : currentVariant.hitBoxConfigs()) {
                     config.prepareForPlacement(furniture.position(), aabbs::add);
                 }
-                Key endRod = Key.of("end_rod");
+                Key endRod = Key.of("soul_fire_flame");
                 for (AABB aabb : aabbs) {
                     for (Vec3d point : aabb.getEdgePoints(0.125)) {
                         this.playParticle(endRod, point.x, point.y, point.z);

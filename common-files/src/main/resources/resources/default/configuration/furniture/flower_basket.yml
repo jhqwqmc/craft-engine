@@ -59,6 +59,7 @@ furniture:
             width: 0.7
             height: 0.5
             interactive: true
+            invisible: true
       wall:
         elements:
           - item: default:flower_basket_wall
@@ -75,6 +76,7 @@ furniture:
             width: 0.46
             height: 0.75
             interactive: true
+            invisible: true
           - type: interaction
             can-use-item-on: true
             can-be-hit-by-projectile: true
@@ -83,6 +85,7 @@ furniture:
             width: 0.46
             height: 0.75
             interactive: true
+            invisible: true
       ceiling:
         elements:
           - item: default:flower_basket_ceiling
@@ -99,3 +102,4 @@ furniture:
             width: 0.7
             height: 0.7
             interactive: true
+            invisible: true
