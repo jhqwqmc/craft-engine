@@ -525,7 +525,7 @@ items#fence:
       block: default:palm_fence
   default:palm_fence_post:
     material: nether_brick
-    data::item-name: <!i><l10n:item.palm_fence_gate>
+    data::item-name: <!i><l10n:item.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_post
@@ -535,7 +535,7 @@ items#fence:
           texture: minecraft:block/custom/palm_planks
   default:palm_fence_side:
     material: nether_brick
-    data::item-name: <!i><l10n:item.palm_fence_gate>
+    data::item-name: <!i><l10n:item.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_side
