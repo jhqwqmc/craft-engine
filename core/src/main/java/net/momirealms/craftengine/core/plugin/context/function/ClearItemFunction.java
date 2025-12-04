@@ -46,7 +46,7 @@ public class ClearItemFunction<CTX extends Context> extends AbstractConditionalF
 
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
-            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.function.clear_item.missing_item_id"));
+            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.function.clear_item.missing_id"));
             NumberProvider count = NumberProviders.fromObject(arguments.getOrDefault("count", 1));
             return new ClearItemFunction<>(getPredicates(arguments), itemId, count);
         }

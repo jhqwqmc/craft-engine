@@ -43,7 +43,7 @@ public class InventoryHasItemCondition<CTX extends Context> implements Condition
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {
-            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.condition.inventory_has_item.missing_item_id"));
+            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.condition.inventory_has_item.missing_id"));
             NumberProvider count = NumberProviders.fromObject(arguments.getOrDefault("count", 1));
             return new InventoryHasItemCondition<>(itemId, count);
         }
