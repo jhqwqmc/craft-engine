@@ -23,10 +23,13 @@ import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -109,9 +112,62 @@ public abstract class Furniture implements Cullable {
         if (parent == null) return null;
         AABB aabb = parent.aabb;
         WorldPosition position = position();
-        Vec3d pos1 = getRelativePosition(position, new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ));
-        Vec3d pos2 = getRelativePosition(position, new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ));
-        return new CullingData(new AABB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
+        if (aabb == null) {
+            List<AABB> aabbs = new ArrayList<>();
+            for (FurnitureHitBoxConfig<?> hitBoxConfig : this.currentVariant.hitBoxConfigs()) {
+                hitBoxConfig.prepareForPlacement(position, aabbs::add);
+            }
+            return new CullingData(getMaxAABB(aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
+        } else {
+            Vector3f[] vertices = new Vector3f[] {
+                    // 底面两个对角点
+                    new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ),
+                    new Vector3f((float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ),
+                    // 顶面两个对角点
+                    new Vector3f((float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ),
+                    new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ)
+            };
+            double minX = Double.MAX_VALUE, minY = aabb.minY; // Y方向不变
+            double maxX = -Double.MAX_VALUE, maxY = aabb.maxY; // Y方向不变
+            double minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
+            for (Vector3f vertex : vertices) {
+                Vec3d rotatedPos = getRelativePosition(position, vertex);
+                minX = Math.min(minX, rotatedPos.x);
+                minZ = Math.min(minZ, rotatedPos.z);
+                maxX = Math.max(maxX, rotatedPos.x);
+                maxZ = Math.max(maxZ, rotatedPos.z);
+            }
+            return new CullingData(new AABB(minX, minY, minZ, maxX, maxY, maxZ),
+                    parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
+        }
+    }
+
+    private static @NotNull AABB getMaxAABB(List<AABB> aabbs) {
+        double minX = 0;
+        double minY = 0;
+        double minZ = 0;
+        double maxX = 0;
+        double maxY = 0;
+        double maxZ = 0;
+        for (int i = 0; i < aabbs.size(); i++) {
+            AABB aabb = aabbs.get(i);
+            if (i == 0) {
+                minX = aabb.minX;
+                minY = aabb.minY;
+                minZ = aabb.minZ;
+                maxX = aabb.maxX;
+                maxY = aabb.maxY;
+                maxZ = aabb.maxZ;
+            } else {
+                minX = Math.min(minX, aabb.minX);
+                minY = Math.min(minY, aabb.minY);
+                minZ = Math.min(minZ, aabb.minZ);
+                maxX = Math.max(maxX, aabb.maxX);
+                maxY = Math.max(maxY, aabb.maxY);
+                maxZ = Math.max(maxZ, aabb.maxZ);
+            }
+        }
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Nullable

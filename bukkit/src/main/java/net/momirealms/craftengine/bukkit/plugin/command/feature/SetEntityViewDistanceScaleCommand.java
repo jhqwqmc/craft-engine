@@ -30,11 +30,11 @@ public class SetEntityViewDistanceScaleCommand extends BukkitCommandFeature<Comm
                 .required("scale", DoubleParser.doubleParser(0.125, 8))
                 .handler(context -> {
                     if (!Config.enableEntityCulling()) {
-                        context.sender().sendMessage(Component.text("Entity culling is not enabled on this server").color(NamedTextColor.RED));
+                        plugin().senderFactory().wrap(context.sender()).sendMessage(Component.text("Entity culling is not enabled on this server").color(NamedTextColor.RED));
                         return;
                     }
                     if (Config.entityCullingViewDistance() <= 0) {
-                        context.sender().sendMessage(Component.text("View distance is not enabled on this server").color(NamedTextColor.RED));
+                        plugin().senderFactory().wrap(context.sender()).sendMessage(Component.text("View distance is not enabled on this server").color(NamedTextColor.RED));
                         return;
                     }
                     Player player = context.get("player");

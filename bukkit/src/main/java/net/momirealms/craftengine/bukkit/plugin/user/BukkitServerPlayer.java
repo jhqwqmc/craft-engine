@@ -1480,6 +1480,14 @@ public class BukkitServerPlayer extends Player {
         return LocationUtils.toWorldPosition(this.getEyeLocation());
     }
 
+    @Override
+    public void playParticle(Key particleId, double x, double y, double z) {
+        Particle particle = Registry.PARTICLE_TYPE.get(KeyUtils.toNamespacedKey(particleId));
+        if (particle != null) {
+            platformPlayer().getWorld().spawnParticle(particle, List.of(platformPlayer()), null, x, y, z, 1, 0, 0,0, 0, null, false);
+        }
+    }
+
     public Location getEyeLocation() {
         org.bukkit.entity.Player player = platformPlayer();
         Location eyeLocation = player.getEyeLocation();

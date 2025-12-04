@@ -230,6 +230,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public void remove() {
     }
 
+    public abstract void playParticle(Key particleId, double x, double y, double z);
+
     public abstract void removeTrackedFurniture(int entityId);
 
     public abstract void clearTrackedFurniture();

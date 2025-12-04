@@ -146,28 +146,9 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     hitboxes = List.of(defaultHitBox());
                 }
 
-                List<AABB> aabbs = new ArrayList<>();
-                for (FurnitureHitBoxConfig<?> hitBox : hitboxes) {
-                    hitBox.collectBoundingBox(aabbs::add);
-                }
-                double minX = 0;
-                double minY = 0;
-                double minZ = 0;
-                double maxX = 0;
-                double maxY = 0;
-                double maxZ = 0;
-                for (AABB aabb : aabbs) {
-                    minX = Math.min(minX, aabb.minX);
-                    minY = Math.min(minY, aabb.minY);
-                    minZ = Math.min(minZ, aabb.minZ);
-                    maxX = Math.max(maxX, aabb.maxX);
-                    maxY = Math.max(maxY, aabb.maxY);
-                    maxZ = Math.max(maxZ, aabb.maxZ);
-                }
-                AABB maxAABB = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
                 variants.put(variantName, new FurnitureVariant(
                     variantName,
-                    parseCullingData(section.get("entity-culling"), maxAABB),
+                    parseCullingData(section.get("entity-culling")),
                     elements.toArray(new FurnitureElementConfig[0]),
                     hitboxes.toArray(new FurnitureHitBoxConfig[0]),
                     externalModel,
@@ -185,16 +166,18 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
             AbstractFurnitureManager.this.byId.put(id, furniture);
         }
 
-        private CullingData parseCullingData(Object arguments, AABB maxHitbox) {
+
+
+        private CullingData parseCullingData(Object arguments) {
             if (arguments instanceof Boolean b && !b)
                 return null;
             if (!(arguments instanceof Map))
-                return new CullingData(maxHitbox, Config.entityCullingViewDistance(), 0.5, true);
+                return new CullingData(null, Config.entityCullingViewDistance(), 0.25, true);
             Map<String, Object> argumentsMap = ResourceConfigUtils.getAsMap(arguments, "entity-culling");
             return new CullingData(
-                    ResourceConfigUtils.getAsAABB(argumentsMap.getOrDefault("aabb", maxHitbox), "aabb"),
+                    ResourceConfigUtils.getOrDefault(argumentsMap.get("aabb"), it -> ResourceConfigUtils.getAsAABB(it, "aabb"), null),
                     ResourceConfigUtils.getAsInt(argumentsMap.getOrDefault("view-distance", Config.entityCullingViewDistance()), "view-distance"),
-                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.5), "aabb-expansion"),
+                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.25), "aabb-expansion"),
                     ResourceConfigUtils.getAsBoolean(argumentsMap.getOrDefault("ray-tracing", true), "ray-tracing")
             );
         }

@@ -32,7 +32,7 @@ public class ToggleEntityCullingCommand extends BukkitCommandFeature<CommandSend
                 .optional("state", BooleanParser.booleanParser())
                 .handler(context -> {
                     if (!Config.enableEntityCulling()) {
-                        context.sender().sendMessage(Component.text("Entity culling is not enabled on this server").color(NamedTextColor.RED));
+                        plugin().senderFactory().wrap(context.sender()).sendMessage(Component.text("Entity culling is not enabled on this server").color(NamedTextColor.RED));
                         return;
                     }
                     Player player = context.get("player");

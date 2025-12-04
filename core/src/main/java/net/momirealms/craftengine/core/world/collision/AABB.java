@@ -7,6 +7,8 @@ import net.momirealms.craftengine.core.world.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class AABB {
@@ -157,6 +159,78 @@ public class AABB {
 
     private static boolean isWithinBounds(double value, double min, double max) {
         return (value >= min - EPSILON) && (value <= max + EPSILON);
+    }
+
+    public List<Vec3d> getEdgePoints(double interval) {
+        List<Vec3d> points = new ArrayList<>();
+
+        // AABB的8个顶点
+        Vec3d[] vertices = {
+                new Vec3d(minX, minY, minZ), // 0
+                new Vec3d(maxX, minY, minZ), // 1
+                new Vec3d(minX, maxY, minZ), // 2
+                new Vec3d(maxX, maxY, minZ), // 3
+                new Vec3d(minX, minY, maxZ), // 4
+                new Vec3d(maxX, minY, maxZ), // 5
+                new Vec3d(minX, maxY, maxZ), // 6
+                new Vec3d(maxX, maxY, maxZ)  // 7
+        };
+
+        // 12条边的定义（连接哪两个顶点）
+        int[][] edges = {
+                {0, 1}, // 底部X边（前）
+                {1, 3}, // 底部Y边（右）
+                {3, 2}, // 底部X边（后）
+                {2, 0}, // 底部Y边（左）
+
+                {4, 5}, // 顶部X边（前）
+                {5, 7}, // 顶部Y边（右）
+                {7, 6}, // 顶部X边（后）
+                {6, 4}, // 顶部Y边（左）
+
+                {0, 4}, // Z边（左下前）
+                {1, 5}, // Z边（右下前）
+                {2, 6}, // Z边（左后上）
+                {3, 7}  // Z边（右后上）
+        };
+
+        for (int[] edge : edges) {
+            Vec3d start = vertices[edge[0]];
+            Vec3d end = vertices[edge[1]];
+            points.addAll(sampleLine(start, end, interval));
+        }
+
+        return points;
+    }
+
+    private List<Vec3d> sampleLine(Vec3d start, Vec3d end, double interval) {
+        List<Vec3d> points = new ArrayList<>();
+
+        // 计算线段长度
+        double dx = end.x - start.x;
+        double dy = end.y - start.y;
+        double dz = end.z - start.z;
+        double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // 计算采样点数（去掉终点避免重复）
+        int numPoints = (int) Math.floor(length / interval);
+
+        // 如果线段太短，至少返回起点
+        if (numPoints <= 0) {
+            points.add(start);
+            return points;
+        }
+
+        // 按间隔采样
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
+            double x = start.x + dx * t;
+            double y = start.y + dy * t;
+            double z = start.z + dz * t;
+            points.add(new Vec3d(x, y, z));
+        }
+
+        return points;
     }
 
     @Override

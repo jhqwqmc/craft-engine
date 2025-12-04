@@ -31,6 +31,7 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
 
 import java.nio.file.Path;
@@ -119,6 +120,9 @@ public class FurnitureItemBehavior extends ItemBehavior {
         // 检查方块、实体阻挡
         if (!aabbs.isEmpty()) {
             if (!FastNMS.INSTANCE.checkEntityCollision(context.getLevel().serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList())) {
+                if (player != null && player.enableFurnitureDebug() && VersionHelper.isPaper()) {
+//                    bukkitPlayer.getWorld().spawnParticle(Particle.FLAME, , List.of(bukkitPlayer), );
+                }
                 return InteractionResult.FAIL;
             }
         }

@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.plugin.entityculling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.MutableVec3d;
@@ -59,13 +60,12 @@ public final class EntityCulling {
         AABB aabb = cullable.aabb;
         double aabbExpansion = cullable.aabbExpansion;
 
-        // 根据AABB获取能包裹此AABB的最小长方体
-        int minX = MiscUtils.floor(aabb.minX - aabbExpansion);
-        int minY = MiscUtils.floor(aabb.minY - aabbExpansion);
-        int minZ = MiscUtils.floor(aabb.minZ - aabbExpansion);
-        int maxX = MiscUtils.ceil(aabb.maxX + aabbExpansion);
-        int maxY = MiscUtils.ceil(aabb.maxY + aabbExpansion);
-        int maxZ = MiscUtils.ceil(aabb.maxZ + aabbExpansion);
+        double minX = aabb.minX - aabbExpansion;
+        double minY = aabb.minY - aabbExpansion;
+        double minZ = aabb.minZ - aabbExpansion;
+        double maxX = aabb.maxX + aabbExpansion;
+        double maxY = aabb.maxY + aabbExpansion;
+        double maxZ = aabb.maxZ + aabbExpansion;
 
         double cameraX = cameraPos.x;
         double cameraY = cameraPos.y;
@@ -95,6 +95,10 @@ public final class EntityCulling {
             if (distanceSq > maxDistanceSq) {
                 return false;
             }
+            // 太近了，不剔除
+            else if (distanceSq < 1) {
+                return true;
+            }
         }
 
         if (!rayTracing || !cullable.rayTracing) {
@@ -120,25 +124,31 @@ public final class EntityCulling {
         }
 
         int size = 0;
-        if (this.dotSelectors[0]) targetPoints[size++].set(minX + 0.05, minY + 0.05, minZ + 0.05);
-        if (this.dotSelectors[1]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, minZ + 0.05);
-        if (this.dotSelectors[2]) targetPoints[size++].set(minX + 0.05, minY + 0.05, maxZ - 0.05);
-        if (this.dotSelectors[3]) targetPoints[size++].set(maxX - 0.05, minY + 0.05, maxZ - 0.05);
-        if (this.dotSelectors[4]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, minZ + 0.05);
-        if (this.dotSelectors[5]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, minZ + 0.05);
-        if (this.dotSelectors[6]) targetPoints[size++].set(minX + 0.05, maxY - 0.05, maxZ - 0.05);
-        if (this.dotSelectors[7]) targetPoints[size++].set(maxX - 0.05, maxY - 0.05, maxZ - 0.05);
+        if (this.dotSelectors[0]) targetPoints[size++].set(minX, minY, minZ);
+        if (this.dotSelectors[1]) targetPoints[size++].set(maxX, minY, minZ);
+        if (this.dotSelectors[2]) targetPoints[size++].set(minX, minY, maxZ);
+        if (this.dotSelectors[3]) targetPoints[size++].set(maxX, minY, maxZ);
+        if (this.dotSelectors[4]) targetPoints[size++].set(minX, maxY, minZ);
+        if (this.dotSelectors[5]) targetPoints[size++].set(maxX, maxY, minZ);
+        if (this.dotSelectors[6]) targetPoints[size++].set(minX, maxY, maxZ);
+        if (this.dotSelectors[7]) targetPoints[size++].set(maxX, maxY, maxZ);
         // 面中心点
         double averageX = (minX + maxX) / 2.0;
         double averageY = (minY + maxY) / 2.0;
         double averageZ = (minZ + maxZ) / 2.0;
-        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ + 0.05);
-        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ - 0.05);
-        if (this.dotSelectors[10]) targetPoints[size++].set(minX + 0.05, averageY, averageZ);
-        if (this.dotSelectors[11]) targetPoints[size++].set(maxX - 0.05, averageY, averageZ);
-        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY + 0.05, averageZ);
-        if (this.dotSelectors[13]) targetPoints[size].set(averageX, maxY - 0.05, averageZ);
+        if (this.dotSelectors[8]) targetPoints[size++].set(averageX, averageY, minZ);
+        if (this.dotSelectors[9]) targetPoints[size++].set(averageX, averageY, maxZ);
+        if (this.dotSelectors[10]) targetPoints[size++].set(minX, averageY, averageZ);
+        if (this.dotSelectors[11]) targetPoints[size++].set(maxX, averageY, averageZ);
+        if (this.dotSelectors[12]) targetPoints[size++].set(averageX, minY, averageZ);
+        if (this.dotSelectors[13]) targetPoints[size++].set(averageX, maxY, averageZ);
 
+//        if (Config.debugEntityCulling()) {
+//            for (int i = 0; i < size; i++) {
+//                MutableVec3d targetPoint = this.targetPoints[i];
+//                this.player.playParticle(Key.of("flame"), targetPoint.x, targetPoint.y, targetPoint.z);
+//            }
+//        }
         return isVisible(cameraPos, this.targetPoints, size);
     }
 
@@ -356,7 +366,7 @@ public final class EntityCulling {
         return deltaX + 32 * deltaY + 32 * 32 * deltaZ;
     }
 
-    private double distanceSq(int min, int max, double camera, Relative rel) {
+    private double distanceSq(double min, double max, double camera, Relative rel) {
         if (rel == Relative.NEGATIVE) {
             double dx = camera - max;
             return dx * dx;
@@ -394,7 +404,7 @@ public final class EntityCulling {
 
     private enum Relative {
         INSIDE, POSITIVE, NEGATIVE;
-        public static Relative from(int min, int max, double pos) {
+        public static Relative from(double min, double max, double pos) {
             if (min > pos) return POSITIVE;
             else if (max < pos) return NEGATIVE;
             return INSIDE;
