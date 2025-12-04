@@ -12,6 +12,7 @@ translations:
     internal.cooking_info: Recipe Information
     internal.cooking_info.0: 'Time: <arg:cooking_time>ticks'
     internal.cooking_info.1: 'Experience: <arg:cooking_experience>'
+    category.all.name: 'All Items'
   zh_cn:
     internal.next_page: 下一页
     internal.previous_page: 上一页
@@ -25,6 +26,7 @@ translations:
     internal.cooking_info: 配方信息
     internal.cooking_info.0: '时间: <arg:cooking_time>刻'
     internal.cooking_info.1: '经验: <arg:cooking_experience>'
+    category.all.name: '全部物品'
   de:
     internal.next_page: Nächste Seite
     internal.previous_page: Vorherige Seite

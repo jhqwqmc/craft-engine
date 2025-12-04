@@ -509,11 +509,10 @@ items:
               textures:
                 texture: minecraft:block/custom/palm_planks
 
-items#pfence:
+items#fence:
   default:palm_fence:
     material: nether_brick
-    data:
-      item-name: <!i><l10n:item.palm_fence>
+    data::item-name: <!i><l10n:item.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:item/custom/palm_fence_inventory
@@ -526,6 +525,7 @@ items#pfence:
       block: default:palm_fence
   default:palm_fence_post:
     material: nether_brick
+    data::item-name: <!i><l10n:item.palm_fence_gate>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_post
@@ -535,6 +535,7 @@ items#pfence:
           texture: minecraft:block/custom/palm_planks
   default:palm_fence_side:
     material: nether_brick
+    data::item-name: <!i><l10n:item.palm_fence_gate>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_side
@@ -593,6 +594,7 @@ items#button:
       block: default:palm_button
   default:palm_button_pressed:
     material: nether_brick
+    data::item-name: <!i><l10n:item.palm_button>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_button_pressed
@@ -602,6 +604,7 @@ items#button:
           texture: minecraft:block/custom/palm_planks
   default:palm_button_not_pressed:
     material: nether_brick
+    data::item-name: <!i><l10n:item.palm_button>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_button_not_pressed

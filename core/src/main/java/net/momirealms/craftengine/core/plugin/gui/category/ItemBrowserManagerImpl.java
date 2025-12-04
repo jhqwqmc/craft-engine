@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemKeys;
+import net.momirealms.craftengine.core.item.ItemManager;
 import net.momirealms.craftengine.core.item.recipe.*;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
@@ -24,6 +25,7 @@ import net.momirealms.craftengine.core.util.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("DuplicatedCode")
 public class ItemBrowserManagerImpl implements ItemBrowserManager {
@@ -120,7 +122,13 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             String name = section.getOrDefault("name", id).toString();
-            List<String> members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));
+            List<String> members;
+            if (ResourceConfigUtils.getAsBoolean(section.get("all-items"), "all-items")) {
+                ItemManager<?> itemManager = ItemBrowserManagerImpl.this.plugin.itemManager();
+                members = itemManager.loadedItems().keySet().stream().filter(it -> !itemManager.isVanillaItem(it)).map(Key::asString).collect(Collectors.toList());
+            } else {
+                members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));
+            }
             Key icon = Key.of(section.getOrDefault("icon", ItemKeys.STONE).toString());
             int priority = ResourceConfigUtils.getAsInt(section.getOrDefault("priority", 0), "priority");
             List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));

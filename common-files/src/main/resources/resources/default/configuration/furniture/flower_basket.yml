@@ -20,15 +20,15 @@ items:
   default:flower_basket_ground:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ground
-    item-name: <!i><l10n:item.flower_basket>
+    data::item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_wall:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_wall
-    item-name: <!i><l10n:item.flower_basket>
+    data::item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_ceiling:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ceiling
-    item-name: <!i><l10n:item.flower_basket>
+    data::item-name: <!i><l10n:item.flower_basket>
 furniture:
   default:flower_basket:
     events:

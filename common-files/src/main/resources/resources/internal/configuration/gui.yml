@@ -1,3 +1,12 @@
+categories:
+  craftengine:all:
+    priority: -1000
+    name: <!i><white><l10n:category.all.name></white>
+    icon: minecraft:command_block
+    conditions:
+      - type: permission
+        permission: craftengine.admin
+    all-items: true
 images:
   internal:item_browser:
     height: 140
