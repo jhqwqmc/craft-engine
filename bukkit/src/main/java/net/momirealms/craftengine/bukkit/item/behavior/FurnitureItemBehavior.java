@@ -114,7 +114,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
         List<AABB> aabbs = new ArrayList<>();
         // 收集阻挡的碰撞箱
         for (FurnitureHitBoxConfig<?> hitBoxConfig : variant.hitBoxConfigs()) {
-            hitBoxConfig.prepareForPlacement(furniturePos, aabbs::add);
+            hitBoxConfig.prepareBoundingBox(furniturePos, aabbs::add, false);
         }
         // 检查方块、实体阻挡
         if (!aabbs.isEmpty()) {

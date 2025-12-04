@@ -123,7 +123,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 throw new LocalizedResourceConfigException("warning.config.furniture.missing_variants");
             }
 
-            Map<String, FurnitureVariant> variants = new HashMap<>();
+            Map<String, FurnitureVariant> variants = new LinkedHashMap<>();
             for (Map.Entry<String, Object> e0 : variantsMap.entrySet()) {
                 String variantName = e0.getKey();
                 Map<String, Object> variantArguments = ResourceConfigUtils.getAsMap(e0.getValue(), variantName);

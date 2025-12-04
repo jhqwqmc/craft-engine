@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class Furniture implements Cullable {
     public final FurnitureConfig config;
@@ -53,7 +54,7 @@ public abstract class Furniture implements Cullable {
         this.config = config;
         this.dataAccessor = data;
         this.metaDataEntity = metaDataEntity;
-        this.setVariant(config.getVariant(data));
+        this.setVariantInternal(config.getVariant(data));
     }
 
     public Entity metaDataEntity() {
@@ -64,7 +65,21 @@ public abstract class Furniture implements Cullable {
         return this.currentVariant;
     }
 
-    public void setVariant(FurnitureVariant variant) {
+    public abstract boolean setVariant(String variantName);
+
+    public abstract CompletableFuture<Boolean> moveTo(WorldPosition position);
+
+    protected abstract void refresh();
+
+    protected void clearColliders() {
+        if (this.colliders != null) {
+            for (Collider collider : this.colliders) {
+                collider.destroy();
+            }
+        }
+    }
+
+    protected void setVariantInternal(FurnitureVariant variant) {
         this.currentVariant = variant;
         this.hitboxMap = new Int2ObjectOpenHashMap<>();
         // 初始化家具元素
@@ -115,7 +130,7 @@ public abstract class Furniture implements Cullable {
         if (aabb == null) {
             List<AABB> aabbs = new ArrayList<>();
             for (FurnitureHitBoxConfig<?> hitBoxConfig : this.currentVariant.hitBoxConfigs()) {
-                hitBoxConfig.prepareForPlacement(position, aabbs::add);
+                hitBoxConfig.prepareBoundingBox(position, aabbs::add, true);
             }
             return new CullingData(getMaxAABB(aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         } else {
@@ -201,20 +216,28 @@ public abstract class Furniture implements Cullable {
     @Override
     public void show(Player player) {
         for (FurnitureElement element : this.elements) {
-            element.show(player);
+            if (element != null) {
+                element.show(player);
+            }
         }
         for (FurnitureHitBox hitbox : this.hitboxes) {
-            hitbox.show(player);
+            if (hitbox != null) {
+                hitbox.show(player);
+            }
         }
     }
 
     @Override
     public void hide(Player player) {
         for (FurnitureElement element : this.elements) {
-            element.hide(player);
+            if (element != null) {
+                element.hide(player);
+            }
         }
         for (FurnitureHitBox hitbox : this.hitboxes) {
-            hitbox.hide(player);
+            if (hitbox != null) {
+                hitbox.hide(player);
+            }
         }
     }
 

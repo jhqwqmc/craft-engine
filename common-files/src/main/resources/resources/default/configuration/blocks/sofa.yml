@@ -53,6 +53,8 @@ items:
     behavior:
       type: block_item
       block:
+        events:
+          - template: default:rotatable_block
         loot:
           template: default:loot_table/self
         settings:

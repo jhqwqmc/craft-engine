@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import net.momirealms.craftengine.core.entity.furniture.behavior.EmptyFurnitureBehavior;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
 import net.momirealms.craftengine.core.loot.LootTable;
@@ -33,7 +34,7 @@ class FurnitureConfigImpl implements FurnitureConfig {
                                 @Nullable LootTable<?> lootTable) {
         this.id = id;
         this.settings = settings;
-        this.variants = ImmutableMap.copyOf(variants);
+        this.variants = ImmutableSortedMap.copyOf(variants);
         this.lootTable = lootTable;
         this.behavior = behavior;
         this.events = events;

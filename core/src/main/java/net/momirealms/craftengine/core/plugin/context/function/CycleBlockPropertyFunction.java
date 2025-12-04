@@ -16,6 +16,7 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,7 +72,7 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         if (value == null) {
             return wrapper.cycleProperty(this.property, inverse);
         }
-        String mapValue = this.rules.get(value.toString());
+        String mapValue = this.rules.get(value.toString().toLowerCase(Locale.ROOT));
         if (mapValue == null) {
             return wrapper.cycleProperty(this.property, inverse);
         }

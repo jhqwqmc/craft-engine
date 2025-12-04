@@ -19,6 +19,7 @@ import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemEx
 import net.momirealms.craftengine.bukkit.compatibility.region.WorldGuardRegionCondition;
 import net.momirealms.craftengine.bukkit.compatibility.skript.SkriptHook;
 import net.momirealms.craftengine.bukkit.compatibility.slimeworld.SlimeFormatStorageAdaptor;
+import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateHatSettings;
 import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateProviders;
 import net.momirealms.craftengine.bukkit.compatibility.viaversion.ViaVersionUtils;
 import net.momirealms.craftengine.bukkit.compatibility.worldedit.WorldEditBlockRegister;
@@ -97,6 +98,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             registerTagResolverProvider(new CustomNameplateProviders.Background());
             registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
             registerTagResolverProvider(new CustomNameplateProviders.Bubble());
+            new CustomNameplateHatSettings().register();
             logHook("CustomNameplates");
         }
         Key worldGuardRegion = Key.of("worldguard:region");
