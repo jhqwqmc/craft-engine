@@ -59,8 +59,8 @@ import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.entity.furniture.HitBox;
-import net.momirealms.craftengine.core.entity.furniture.HitBoxPart;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.FontManager;
@@ -359,8 +359,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new EntityEventListener(), NetworkReflections.clazz$ClientboundEntityEventPacket);
         registerNMSPacketConsumer(new MovePosAndRotateEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$PosRot);
         registerNMSPacketConsumer(new MovePosEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$Pos);
-        registerNMSPacketConsumer(new RotateHeadListener(), NetworkReflections.clazz$ClientboundRotateHeadPacket);
-        registerNMSPacketConsumer(new SetEntityMotionListener(), NetworkReflections.clazz$ClientboundSetEntityMotionPacket);
         registerNMSPacketConsumer(new FinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
         registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
@@ -1248,7 +1246,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 CraftEngine.instance().logger().warn("Failed to get entityId from ServerboundPickItemFromEntityPacket", e);
                 return;
             }
-            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByEntityId(entityId);
+            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
             if (furniture == null) return;
             Player player = (Player) user.platformPlayer();
             if (player == null) return;
@@ -1274,7 +1272,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         private static void handlePickItemFromEntityOnMainThread(Player player, BukkitFurniture furniture) throws Throwable {
             Key itemId = furniture.config().settings().itemId();
             if (itemId == null) return;
-            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.baseEntity()));
+            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.getBukkitEntity()));
         }
     }
 
@@ -1470,6 +1468,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 player.setClientSideWorld(BukkitAdaptors.adapt(world));
                 player.clearTrackedChunks();
                 player.clearTrackedBlockEntities();
+                player.clearTrackedFurniture();
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundRespawnPacket: World " + location + " does not exist");
             }
@@ -1746,9 +1745,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
             int entityId = ProtectedFieldVisitor.get().field$ClientboundMoveEntityPacket$entityId(packet);
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
-            }
             EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
             if (handler != null) {
                 handler.handleMoveAndRotate(user, event, packet);
@@ -1764,41 +1760,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
             if (handler != null) {
                 handler.handleMove(user, event, packet);
-            }
-        }
-    }
-
-    public static class RotateHeadListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundRotateHeadPacket$entityIdGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundRotateHeadPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    public static class SetEntityMotionListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            if (!VersionHelper.isOrAbove1_21_6()) return;
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundSetEntityMotionPacket$idGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundSetEntityMotionPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
             }
         }
     }
@@ -3352,7 +3313,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             for (int i = 0, size = intList.size(); i < size; i++) {
                 int entityId = intList.getInt(i);
                 EntityPacketHandler handler = user.entityPacketHandlers().remove(entityId);
-                if (handler != null && handler.handleEntitiesRemove(intList)) {
+                if (handler != null && handler.handleEntitiesRemove(user, intList)) {
                     changed = true;
                 }
             }
@@ -3701,35 +3662,41 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
             FriendlyByteBuf buf = event.getBuffer();
             int entityId = hasModelEngine() ? plugin.compatibilityManager().interactionToBaseEntity(buf.readVarInt()) : buf.readVarInt();
-            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByEntityId(entityId);
+            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
             if (furniture == null) return;
             int actionType = buf.readVarInt();
             BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
             if (serverPlayer.isSpectatorMode()) return;
             Player platformPlayer = serverPlayer.platformPlayer();
-            Location location = furniture.baseEntity().getLocation();
+            Location location = furniture.location();
 
             Runnable mainThreadTask;
             if (actionType == 1) {
                 // ATTACK
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeBoolean(usingSecondaryAction);
                 }
 
                 mainThreadTask = () -> {
                     // todo 冒险模式破坏工具白名单
-                    if (serverPlayer.isAdventureMode() ||
-                            !furniture.isValid()) return;
+                    if (serverPlayer.isAdventureMode() || !furniture.isValid()) return;
 
-                    // todo 重构家具时候注意，需要准备加载好的hitbox类，以获取hitbox坐标
-                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
-                        return;
+                    // 先检查碰撞箱部分是否存在
+                    FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
+                    if (hitBox == null) return;
+                    for (FurnitureHitboxPart part : hitBox.parts()) {
+                        if (part.entityId() == entityId) {
+                            // 检查玩家是否能破坏此点
+                            if (!serverPlayer.canInteractPoint(part.pos(), 16d)) {
+                                return;
+                            }
+                        }
                     }
 
                     FurnitureAttemptBreakEvent preBreakEvent = new FurnitureAttemptBreakEvent(serverPlayer.platformPlayer(), furniture);
@@ -3767,11 +3734,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 float z = buf.readFloat();
                 InteractionHand hand = buf.readVarInt() == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeFloat(x).writeFloat(y).writeFloat(z);
                     buf.writeVarInt(hand == InteractionHand.MAIN_HAND ? 0 : 1);
@@ -3784,34 +3751,39 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     }
 
                     // 先检查碰撞箱部分是否存在
-                    HitBoxPart hitBoxPart = furniture.hitBoxPartByEntityId(entityId);
-                    if (hitBoxPart == null) return;
-                    Vec3d pos = hitBoxPart.pos();
-                    // 检测距离
-                    if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                    FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
+                    if (hitBox == null) return;
+                    FurnitureHitboxPart part = null;
+                    for (FurnitureHitboxPart p : hitBox.parts()) {
+                        if (p.entityId() == entityId) {
+                            Vec3d pos = p.pos();
+                            // 检测距离
+                            if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                                return;
+                            }
+                            part = p;
+                        }
+                    }
+                    if (part == null) {
                         return;
                     }
-                    // 检测
+
+                    // 检测能否交互碰撞箱
                     Location eyeLocation = platformPlayer.getEyeLocation();
                     Vector direction = eyeLocation.getDirection();
                     Location endLocation = eyeLocation.clone();
                     endLocation.add(direction.multiply(serverPlayer.getCachedInteractionRange()));
-                    Optional<EntityHitResult> result = hitBoxPart.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
+                    Optional<EntityHitResult> result = part.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
                     if (result.isEmpty()) {
                         return;
                     }
                     EntityHitResult hitResult = result.get();
                     Vec3d hitLocation = hitResult.hitLocation();
+
                     // 获取正确的交互点
                     Location interactionPoint = new Location(platformPlayer.getWorld(), hitLocation.x, hitLocation.y, hitLocation.z);
-
-                    HitBox hitbox = furniture.hitBoxByEntityId(entityId);
-                    if (hitbox == null) {
-                        return;
-                    }
-
                     // 触发事件
-                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitbox);
+                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitBox);
                     if (EventUtils.fireAndCheckCancel(interactEvent)) {
                         return;
                     }
@@ -3833,7 +3805,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     }
 
                     // 必须从网络包层面处理，否则无法获取交互的具体实体
-                    if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitbox.config().canUseItemOn()) {
+                    if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitBox.config().canUseItemOn()) {
                         Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
                         if (optionalCustomItem.isPresent() && !optionalCustomItem.get().behaviors().isEmpty()) {
                             for (ItemBehavior behavior : optionalCustomItem.get().behaviors()) {
@@ -3853,9 +3825,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                         );
                     } else {
                         if (!serverPlayer.isSecondaryUseActive()) {
-                            for (Seat<HitBox> seat : hitbox.seats()) {
+                            for (Seat<FurnitureHitBox> seat : hitBox.seats()) {
                                 if (!seat.isOccupied()) {
                                     if (seat.spawnSeat(serverPlayer, furniture.position())) {
+                                        if (!part.interactive()) {
+                                            serverPlayer.swingHand(InteractionHand.MAIN_HAND);
+                                        }
                                         break;
                                     }
                                 }
@@ -3866,11 +3841,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             } else if (actionType == 0) {
                 int hand = buf.readVarInt();
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeVarInt(hand);
                     buf.writeBoolean(usingSecondaryAction);
@@ -3978,10 +3953,18 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             this.handlers[MEntityTypes.ITEM_DISPLAY$registryId] = (user, event) -> {
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(id);
                 if (furniture != null) {
-                    user.entityPacketHandlers().put(id, new FurniturePacketHandler(furniture.fakeEntityIds()));
-                    user.sendPacket(furniture.spawnPacket((Player) user.platformPlayer()), false);
+                    EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, new FurniturePacketHandler(id, furniture.virtualEntityIds()));
+                    if (Config.enableEntityCulling()) {
+                        serverPlayer.addTrackedFurniture(id, furniture);
+                    } else {
+                        // 修复addEntityToWorld，包比事件先发的问题 (WE)
+                        if (previous == null || previous instanceof ItemDisplayPacketHandler) {
+                            furniture.show(serverPlayer);
+                        }
+                    }
                     if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {
                         event.setCancelled(true);
                     }
@@ -3994,7 +3977,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
                 // Cancel collider entity packet
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
                 if (furniture != null) {
                     event.setCancelled(true);
                     user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);
@@ -4005,7 +3988,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
                 // Cancel collider entity packet
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
                 if (furniture != null) {
                     event.setCancelled(true);
                     user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);

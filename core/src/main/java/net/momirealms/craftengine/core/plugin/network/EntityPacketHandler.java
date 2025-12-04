@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.entity.player.Player;
 
 public interface EntityPacketHandler {
 
-    default boolean handleEntitiesRemove(IntList entityIds) {
+    default boolean handleEntitiesRemove(NetWorkUser user, IntList entityIds) {
         return false;
     }
 

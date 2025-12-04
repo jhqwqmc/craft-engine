@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.compatibility.model.bettermodel;
 
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -59,13 +58,12 @@ public class BetterModelBlockEntityElementConfig implements BlockEntityElementCo
         return BetterModelBlockEntityElement.class;
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    public static class Factory implements BlockEntityElementConfigFactory<BetterModelBlockEntityElement> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public BetterModelBlockEntityElementConfig create(Map<String, Object> arguments) {
             String model = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("model"), "warning.config.block.state.entity_renderer.better_model.missing_model");
-            return (BlockEntityElementConfig<E>) new BetterModelBlockEntityElementConfig(
+            return new BetterModelBlockEntityElementConfig(
                     model,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("yaw", 0f), "yaw"),

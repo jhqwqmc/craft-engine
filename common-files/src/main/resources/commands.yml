@@ -135,6 +135,12 @@ set_entity_view_distance_scale:
   usage:
     - /ce feature entity-view-distance-scale set
 
+toggle_entity_culling:
+  enable: true
+  permission: ce.command.admin.toggle_entity_culling
+  usage:
+    - /ce feature toggle-entity-culling
+
 # Debug commands
 debug_set_block:
   enable: true
@@ -263,6 +269,13 @@ debug_generate_internal_assets:
   usage:
     - /craftengine debug generate-internal-assets
     - /ce debug generate-internal-assets
+
+debug_furniture:
+  enable: true
+  permission: ce.command.debug.furniture
+  usage:
+    - /craftengine debug furniture
+    - /ce debug furniture
 
 debug_test:
   enable: true

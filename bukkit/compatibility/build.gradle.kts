@@ -41,8 +41,8 @@ dependencies {
     compileOnly("io.github.toxicity188:bettermodel:1.14.0")
     compileOnly("com.mojang:authlib:${rootProject.properties["authlib_version"]}")
     // MMOItems
-    compileOnly("net.Indyuce:MMOItems-API:6.10-SNAPSHOT")
-    compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
+    compileOnly("net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT")
+    compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
     // Nexo
     compileOnly("com.nexomc:nexo:1.13.0")
     // LuckPerms
@@ -62,7 +62,7 @@ dependencies {
     // McMMO
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.038")
     // MMOCore
-    compileOnly("net.Indyuce:MMOCore-API:1.12.1-SNAPSHOT")
+    compileOnly("net.Indyuce:MMOCore-API:1.13.1-SNAPSHOT")
     // JobsReborn
     compileOnly("com.github.Zrips:Jobs:v5.2.2.3")
     // CustomFishing

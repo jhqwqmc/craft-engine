@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity;
+package net.momirealms.craftengine.core.entity.item;
 
 import net.momirealms.craftengine.core.item.Item;
 

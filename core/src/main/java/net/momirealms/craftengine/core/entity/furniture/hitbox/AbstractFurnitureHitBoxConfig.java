@@ -1,16 +1,20 @@
-package net.momirealms.craftengine.core.entity.furniture;
+package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import org.joml.Vector3f;
 
-public abstract class AbstractHitBoxConfig implements HitBoxConfig {
+public abstract class AbstractFurnitureHitBoxConfig<H extends FurnitureHitBox> implements FurnitureHitBoxConfig<H> {
     protected final SeatConfig[] seats;
     protected final Vector3f position;
     protected final boolean canUseItemOn;
     protected final boolean blocksBuilding;
     protected final boolean canBeHitByProjectile;
 
-    public AbstractHitBoxConfig(SeatConfig[] seats, Vector3f position, boolean canUseItemOn, boolean blocksBuilding, boolean canBeHitByProjectile) {
+    public AbstractFurnitureHitBoxConfig(SeatConfig[] seats,
+                                         Vector3f position,
+                                         boolean canUseItemOn,
+                                         boolean blocksBuilding,
+                                         boolean canBeHitByProjectile) {
         this.seats = seats;
         this.position = position;
         this.canUseItemOn = canUseItemOn;
@@ -30,16 +34,16 @@ public abstract class AbstractHitBoxConfig implements HitBoxConfig {
 
     @Override
     public boolean blocksBuilding() {
-        return blocksBuilding;
+        return this.blocksBuilding;
     }
 
     @Override
     public boolean canBeHitByProjectile() {
-        return canBeHitByProjectile;
+        return this.canBeHitByProjectile;
     }
 
     @Override
     public boolean canUseItemOn() {
-        return canUseItemOn;
+        return this.canUseItemOn;
     }
 }

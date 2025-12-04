@@ -25,7 +25,7 @@ public class CondIsFurniture extends Condition {
     @Override
     public boolean check(Event event) {
         return entities.check(event, entity -> {
-            BukkitFurniture baseEntity = CraftEngineFurniture.getLoadedFurnitureByBaseEntity(entity);
+            BukkitFurniture baseEntity = CraftEngineFurniture.getLoadedFurnitureByMetaEntity(entity);
             return baseEntity != null;
         }, isNegated());
     }

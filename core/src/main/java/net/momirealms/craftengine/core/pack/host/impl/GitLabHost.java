@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class GitLabHost implements ResourcePackHost {
             if (uuidString != null && !uuidString.isEmpty()) {
                 this.uuid = UUID.fromString(uuidString);
             }
-            CraftEngine.instance().logger().info("[GitLab] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "GitLab"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn(
                     "[GitLab] Failed to read cache file: " + cachePath, e);

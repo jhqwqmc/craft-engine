@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.entity.furniture;
+package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
@@ -10,20 +10,22 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 import java.util.Optional;
 
-public class HitBoxTypes {
+public class FurnitureHitBoxTypes {
     public static final Key INTERACTION = Key.of("minecraft:interaction");
     public static final Key SHULKER = Key.of("minecraft:shulker");
     public static final Key HAPPY_GHAST = Key.of("minecraft:happy_ghast");
+    public static final Key VIRTUAL = Key.of("minecraft:virtual");
     public static final Key CUSTOM = Key.of("minecraft:custom");
 
-    public static void register(Key key, HitBoxConfigFactory factory) {
-        ((WritableRegistry<HitBoxConfigFactory>) BuiltInRegistries.HITBOX_FACTORY)
-                .register(ResourceKey.create(Registries.HITBOX_FACTORY.location(), key), factory);
+    public static void register(Key key, FurnitureHitBoxConfigFactory<?> factory) {
+        ((WritableRegistry<FurnitureHitBoxConfigFactory<?>>) BuiltInRegistries.FURNITURE_HITBOX_TYPE)
+                .register(ResourceKey.create(Registries.FURNITURE_HITBOX_TYPE.location(), key), factory);
     }
 
-    public static HitBoxConfig fromMap(Map<String, Object> arguments) {
-        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(Key::of).orElse(HitBoxTypes.INTERACTION);
-        HitBoxConfigFactory factory = BuiltInRegistries.HITBOX_FACTORY.getValue(type);
+    public static <H extends FurnitureHitBox> FurnitureHitBoxConfig<H> fromMap(Map<String, Object> arguments) {
+        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(Key::of).orElse(FurnitureHitBoxTypes.INTERACTION);
+        @SuppressWarnings("unchecked")
+        FurnitureHitBoxConfigFactory<H> factory = (FurnitureHitBoxConfigFactory<H>) BuiltInRegistries.FURNITURE_HITBOX_TYPE.getValue(type);
         if (factory == null) {
             throw new LocalizedResourceConfigException("warning.config.furniture.hitbox.invalid_type", type.toString());
         }

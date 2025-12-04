@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.block.entity.render.element;
 import java.util.Map;
 
 @FunctionalInterface
-public interface BlockEntityElementConfigFactory {
+public interface BlockEntityElementConfigFactory<E extends BlockEntityElement> {
 
-    <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> args);
+    BlockEntityElementConfig<E> create(Map<String, Object> args);
 }

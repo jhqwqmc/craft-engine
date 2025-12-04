@@ -21,6 +21,7 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -69,7 +70,7 @@ public class SelfHostHttpServer {
     private String url;
     private boolean denyNonMinecraft = true;
     private boolean useToken;
-    private boolean strictValidation = true;
+    private boolean strictValidation = false;
 
     private long globalUploadRateLimit = 0;
     private long minDownloadSpeed = 50_000;
@@ -166,7 +167,7 @@ public class SelfHostHttpServer {
                 });
         try {
             serverChannel = b.bind(port).sync().channel();
-            CraftEngine.instance().logger().info("Netty HTTP server started on port: " + port);
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.self.netty_server", String.valueOf(port)));
         } catch (InterruptedException e) {
             CraftEngine.instance().logger().warn("Failed to start Netty server", e);
             Thread.currentThread().interrupt();
@@ -234,7 +235,7 @@ public class SelfHostHttpServer {
                 boolean nonMinecraftClient = userAgent == null || !userAgent.startsWith("Minecraft Java/");
                 if (strictValidation && !nonMinecraftClient) {
                     String clientVersion = request.headers().get("X-Minecraft-Version");
-                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring(15));
+                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring("Minecraft Java/".length()));
                 }
                 if (nonMinecraftClient) {
                     sendError(ctx, HttpResponseStatus.FORBIDDEN, "Invalid client");

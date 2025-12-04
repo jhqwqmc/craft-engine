@@ -1,11 +1,13 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class FurnitureSettings {
@@ -13,6 +15,7 @@ public class FurnitureSettings {
     FurnitureSounds sounds = FurnitureSounds.EMPTY;
     @Nullable
     Key itemId;
+    Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private FurnitureSettings() {}
 
@@ -29,6 +32,7 @@ public class FurnitureSettings {
         newSettings.sounds = settings.sounds;
         newSettings.itemId = settings.itemId;
         newSettings.minimized = settings.minimized;
+        newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
 
@@ -43,6 +47,25 @@ public class FurnitureSettings {
             }
         }
         return settings;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomData(CustomDataType<T> type) {
+        return (T) this.customData.get(type);
+    }
+
+    public void clearCustomData() {
+        this.customData.clear();
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T> T removeCustomData(CustomDataType<?> type) {
+        return (T) this.customData.remove(type);
+    }
+
+    public <T> void addCustomData(CustomDataType<T> key, T value) {
+        this.customData.put(key, value);
     }
 
     public FurnitureSounds sounds() {
@@ -103,7 +126,7 @@ public class FurnitureSettings {
             }));
         }
 
-        private static void registerFactory(String id, FurnitureSettings.Modifier.Factory factory) {
+        public static void registerFactory(String id, FurnitureSettings.Modifier.Factory factory) {
             FACTORIES.put(id, factory);
         }
     }

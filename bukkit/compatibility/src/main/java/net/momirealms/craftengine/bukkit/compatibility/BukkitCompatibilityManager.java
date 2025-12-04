@@ -37,6 +37,7 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AlwaysFalseCondition;
 import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -181,7 +182,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     }
 
     private void logHook(String plugin) {
-        this.plugin.logger().info("[Compatibility] " + plugin + " hooked");
+        this.plugin.logger().info(TranslationManager.instance().translateLog("info.compatibility", plugin));
     }
 
     @Override
@@ -252,8 +253,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             if (VersionHelper.isOrAbove1_20_3()) {
                 this.plugin.logger().severe("");
                 if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
-                    this.plugin.logger().severe("[Compatibility] 插件需要更新 FastAsyncWorldEdit 到 2.13.0 或更高版本，以获得更好的兼容性。(当前版本: " + version + ")");
-                    this.plugin.logger().severe("[Compatibility] 请前往 https://ci.athion.net/job/FastAsyncWorldEdit/ 下载最新版本");
+                    this.plugin.logger().severe("[兼容性] 插件需要更新 FastAsyncWorldEdit 到 2.13.0 或更高版本，以获得更好的兼容性。(当前版本: " + version + ")");
+                    this.plugin.logger().severe("[兼容性] 请前往 https://ci.athion.net/job/FastAsyncWorldEdit/ 下载最新版本");
                 } else {
                     this.plugin.logger().severe("[Compatibility] Update FastAsyncWorldEdit to v2.13.0+ for better compatibility (Current: " + version + ")");
                     this.plugin.logger().severe("[Compatibility] Download latest version: https://ci.athion.net/job/FastAsyncWorldEdit/");

@@ -4,10 +4,9 @@ import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.entity.data.TextDisplayEntityData;
 import net.momirealms.craftengine.bukkit.util.ComponentUtils;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
-import net.momirealms.craftengine.core.entity.Billboard;
+import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.util.AdventureHelper;
@@ -135,13 +134,12 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
                 Objects.equal(rotation, that.rotation);
     }
 
-    public static class Factory implements BlockEntityElementConfigFactory {
+    public static class Factory implements BlockEntityElementConfigFactory<TextDisplayBlockEntityElement> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <E extends BlockEntityElement> BlockEntityElementConfig<E> create(Map<String, Object> arguments) {
+        public TextDisplayBlockEntityElementConfig create(Map<String, Object> arguments) {
             String text = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("text"), "warning.config.block.state.entity_renderer.text_display.missing_text");
-            return (BlockEntityElementConfig<E>) new TextDisplayBlockEntityElementConfig(
+            return new TextDisplayBlockEntityElementConfig(
                     text,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position"),
