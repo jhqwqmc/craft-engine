@@ -75,6 +75,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
@@ -1490,6 +1491,15 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void clearTrackedBlockEntities() {
         this.trackedBlockEntityRenderers.clear();
+    }
+
+    @Override
+    public int clearOrCountMatchingInventoryItems(Key itemId, int count) {
+        Predicate<Object> predicate = nmsStack -> this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
+        Object inventory = FastNMS.INSTANCE.method$Player$getInventory(serverPlayer());
+        Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(serverPlayer());
+        Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
+        return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, predicate, count, craftSlots);
     }
 
     @Override

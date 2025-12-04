@@ -49,4 +49,5 @@ public final class CommonFunctions {
     public static final Key SET_EXP = Key.of("craftengine:set_exp");
     public static final Key SET_LEVEL = Key.of("craftengine:set_level");
     public static final Key PLAY_TOTEM_ANIMATION = Key.of("craftengine:play_totem_animation");
+    public static final Key CLEAR_ITEM = Key.of("craftengine:clear_item");
 }
