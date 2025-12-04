@@ -31,6 +31,11 @@ items:
     item-name: <!i><l10n:item.flower_basket>
 furniture:
   default:flower_basket:
+    events:
+      - template: default:rotatable_furniture_8
+        arguments:
+          blacklist_variants:
+            - wall
     settings:
       item: default:flower_basket
       sounds:

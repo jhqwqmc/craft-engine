@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.util.snbt;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.DynamicOps;
 import net.momirealms.craftengine.core.util.snbt.parse.*;
 import net.momirealms.sparrow.nbt.util.UUIDUtil;

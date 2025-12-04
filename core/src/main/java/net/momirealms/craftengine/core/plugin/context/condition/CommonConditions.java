@@ -15,6 +15,7 @@ public final class CommonConditions {
     public static final Key MATCH_ENTITY = Key.of("craftengine:match_entity");
     public static final Key MATCH_BLOCK = Key.of("craftengine:match_block");
     public static final Key MATCH_BLOCK_PROPERTY = Key.from("craftengine:match_block_property");
+    public static final Key MATCH_FURNITURE_VARIANT = Key.from("craftengine:match_furniture_variant");
     public static final Key TABLE_BONUS = Key.from("craftengine:table_bonus");
     public static final Key SURVIVES_EXPLOSION = Key.from("craftengine:survives_explosion");
     public static final Key RANDOM = Key.from("craftengine:random");

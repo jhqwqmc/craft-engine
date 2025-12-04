@@ -16,7 +16,7 @@ templates:
           east: south
           south: west
           west: north
-  default:rotatable_furniture:
+  default:rotatable_furniture_4:
     on: right_click
     conditions:
       - type: expression
@@ -28,4 +28,45 @@ templates:
           - type: swing_hand
           - type: play_sound
             sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
-        on-failure: []
+        on-failure:
+          - type: rotate_furniture
+            degree: 180
+            on-success:
+              - type: swing_hand
+              - type: play_sound
+                sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+            on-failure:
+              - type: rotate_furniture
+                degree: 270
+                on-success:
+                  - type: swing_hand
+                  - type: play_sound
+                    sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+  default:rotatable_furniture_8:
+    on: right_click
+    conditions:
+      - type: expression
+        expression: <arg:player.is_sneaking>
+      - type: "!match_furniture_variant"
+        variants: ${blacklist_variants:-null}
+    functions:
+      - type: rotate_furniture
+        degree: 45
+        on-success:
+          - type: swing_hand
+          - type: play_sound
+            sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+        on-failure:
+          - type: rotate_furniture
+            degree: 90
+            on-success:
+              - type: swing_hand
+              - type: play_sound
+                sound: ${rotate_sound:-'minecraft:block.bamboo.place'}
+            on-failure:
+              - type: rotate_furniture
+                degree: 135
+                on-success:
+                  - type: swing_hand
+                  - type: play_sound
+                    sound: ${rotate_sound:-'minecraft:block.bamboo.place'}

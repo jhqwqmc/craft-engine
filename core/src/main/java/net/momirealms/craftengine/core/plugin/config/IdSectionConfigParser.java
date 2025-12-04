@@ -29,13 +29,21 @@ public abstract class IdSectionConfigParser extends AbstractConfigParser {
                 continue;
             }
             Map<String, Object> config = castToMap(section, false);
+            String node = cached.prefix() + "." + key;
             if ((boolean) config.getOrDefault("debug", false)) {
-                CraftEngine.instance().logger().info(GsonHelper.get().toJson(CraftEngine.instance().templateManager().applyTemplates(id, config)));
+                if (!ResourceConfigUtils.runCatching(
+                        cached.filePath(),
+                        node,
+                        () -> CraftEngine.instance().logger().info(GsonHelper.get().toJson(CraftEngine.instance().templateManager().applyTemplates(id, config))),
+                        () -> GsonHelper.get().toJson(section)
+                )) {
+                    // 发生异常
+                    continue;
+                }
             }
             if (!(boolean) config.getOrDefault("enable", true)) {
                 continue;
             }
-            String node = cached.prefix() + "." + key;
             ResourceConfigUtils.runCatching(
                     cached.filePath(),
                     node,

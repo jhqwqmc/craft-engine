@@ -324,17 +324,20 @@ public final class ResourceConfigUtils {
         }
     }
 
-    public static void runCatching(Path configPath, String node, Runnable runnable, Supplier<String> config) {
+    public static boolean runCatching(Path configPath, String node, Runnable runnable, Supplier<String> config) {
         try {
             runnable.run();
+            return true;
         } catch (LocalizedException e) {
             printWarningRecursively(e, configPath, node);
+            return false;
         } catch (Exception e) {
             String message = "Unexpected error loading file " + configPath + " - '" + node + "'.";
             if (config != null) {
                 message += " Configuration details: " + config.get();
             }
             CraftEngine.instance().logger().warn(message, e);
+            return false;
         }
     }
 

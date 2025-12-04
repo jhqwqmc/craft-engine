@@ -35,20 +35,37 @@ import org.bukkit.World;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class FurnitureItemBehavior extends ItemBehavior {
     public static final Factory FACTORY = new Factory();
     private static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
     private final Key id;
     private final Map<AnchorType, Rule> rules;
+    private final boolean ignorePlacer;
+    private final boolean ignoreEntities;
 
-    public FurnitureItemBehavior(Key id, Map<AnchorType, Rule> rules) {
+    public FurnitureItemBehavior(Key id, Map<AnchorType, Rule> rules, boolean ignorePlacer, boolean ignoreEntities) {
         this.id = id;
         this.rules = rules;
+        this.ignorePlacer = ignorePlacer;
+        this.ignoreEntities = ignoreEntities;
     }
 
     public Key furnitureId() {
         return this.id;
+    }
+
+    public Map<AnchorType, Rule> rules() {
+        return this.rules;
+    }
+
+    public boolean ignorePlacer() {
+        return this.ignorePlacer;
+    }
+
+    public boolean ignoreEntities() {
+        return this.ignoreEntities;
     }
 
     @Override
@@ -118,7 +135,15 @@ public class FurnitureItemBehavior extends ItemBehavior {
         }
         // 检查方块、实体阻挡
         if (!aabbs.isEmpty()) {
-            if (!FastNMS.INSTANCE.checkEntityCollision(context.getLevel().serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList())) {
+            Predicate<Object> entityPredicate;
+            if (this.ignoreEntities) {
+                entityPredicate = (o) -> false;
+            } else if (this.ignorePlacer) {
+                entityPredicate = player != null ? (o) -> o != player.serverPlayer() : (o) -> true;
+            } else {
+                entityPredicate = (o) -> true;
+            }
+            if (!FastNMS.INSTANCE.checkEntityCollision(context.getLevel().serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(), entityPredicate)) {
                 if (player != null && player.enableFurnitureDebug() && VersionHelper.isPaper()) {
                     player.playSound(Key.of("minecraft:entity.villager.no"));
                     Key flame = Key.of("flame");
@@ -241,7 +266,10 @@ public class FurnitureItemBehavior extends ItemBehavior {
                     }
                 }
             }
-            return new FurnitureItemBehavior(furnitureId, rules);
+            return new FurnitureItemBehavior(furnitureId, rules,
+                    ResourceConfigUtils.getAsBoolean(arguments.get("ignore-placer"), "ignore-placer"),
+                    ResourceConfigUtils.getAsBoolean(arguments.get("ignore-entities"), "ignore-entities")
+            );
         }
     }
 

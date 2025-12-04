@@ -1,28 +1,18 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
-import net.momirealms.craftengine.core.entity.player.InteractionHand;
-import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class RotateFurnitureFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
     private final NumberProvider degree;
@@ -64,7 +54,7 @@ public class RotateFurnitureFunction<CTX extends Context> extends AbstractCondit
     }
 
     public NumberProvider degree() {
-        return degree;
+        return this.degree;
     }
 
     public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {

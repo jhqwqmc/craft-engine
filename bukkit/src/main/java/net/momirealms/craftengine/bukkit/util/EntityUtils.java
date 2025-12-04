@@ -73,7 +73,7 @@ public final class EntityUtils {
                     if (!canDismount) {
                         continue;
                     }
-                    if (!FastNMS.INSTANCE.checkEntityCollision(serverLevel, List.of(newAABB))) {
+                    if (!FastNMS.INSTANCE.checkEntityCollision(serverLevel, List.of(newAABB), o -> true)) {
                         continue;
                     }
                     if (VersionHelper.isFolia()) {

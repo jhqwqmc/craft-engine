@@ -54,6 +54,8 @@ public class BukkitFurniture extends Furniture {
         FurnitureVariant variant = this.config.getVariant(variantName);
         if (variant == null) return false;
         if (this.currentVariant == variant) return false;
+        // 删除椅子
+        super.destroySeats();
         BukkitFurnitureManager.instance().invalidateFurniture(this);
         super.clearColliders();
         super.setVariantInternal(variant);
@@ -74,10 +76,20 @@ public class BukkitFurniture extends Furniture {
             hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
         }
         if (!aabbs.isEmpty()) {
-            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList())) {
+            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
+                    o -> {
+                        for (Collider collider : super.colliders) {
+                            if (o == collider.handle()) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })) {
                 return CompletableFuture.completedFuture(false);
             }
         }
+        // 删除椅子
+        super.destroySeats();
         // 准备传送
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         BukkitFurnitureManager.instance().invalidateFurniture(this);

@@ -11,6 +11,8 @@ items:
           rotation: four
           alignment: center
       furniture:
+        events:
+          - template: default:rotatable_furniture_4
         settings:
           item: default:bench
           sounds:

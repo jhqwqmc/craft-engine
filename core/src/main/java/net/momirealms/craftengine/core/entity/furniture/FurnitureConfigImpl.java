@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import net.momirealms.craftengine.core.entity.furniture.behavior.EmptyFurnitureBehavior;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
