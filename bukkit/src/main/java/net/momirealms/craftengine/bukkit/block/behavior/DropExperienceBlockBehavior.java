@@ -15,11 +15,11 @@ import net.momirealms.craftengine.core.loot.LootContext;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
-import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
 import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -30,16 +30,17 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
     public static final Factory FACTORY = new Factory();
     private final NumberProvider amount;
-    private final Condition<Context> conditions;
+    private final Predicate<Context> condition;
 
-    public DropExperienceBlockBehavior(CustomBlock customBlock, NumberProvider amount, Condition<Context> conditions) {
+    public DropExperienceBlockBehavior(CustomBlock customBlock, NumberProvider amount, Predicate<Context> condition) {
         super(customBlock);
         this.amount = amount;
-        this.conditions = conditions;
+        this.condition = condition;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
                 .withParameter(DirectContextParameters.ITEM_IN_HAND, item)
                 .build();
         LootContext context = new LootContext(world, null, 1.0f, holder);
-        if (this.conditions != null && !this.conditions.test(context)) {
+        if (!this.condition.test(context)) {
             return;
         }
         int finalAmount = this.amount.getInt(context);
@@ -91,14 +92,8 @@ public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             NumberProvider amount = NumberProviders.fromObject(ResourceConfigUtils.get(arguments, "amount", "count"));
-            Condition<Context> conditions = null;
             List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "conditions", "condition"), EventConditions::fromMap);
-            if (conditionList.size() == 1) {
-                conditions = conditionList.getFirst();
-            } else if (!conditionList.isEmpty()) {
-                conditions = new AllOfCondition<>(conditionList);
-            }
-            return new DropExperienceBlockBehavior(block, amount, conditions);
+            return new DropExperienceBlockBehavior(block, amount, MiscUtils.allOf(conditionList));
         }
     }
 }

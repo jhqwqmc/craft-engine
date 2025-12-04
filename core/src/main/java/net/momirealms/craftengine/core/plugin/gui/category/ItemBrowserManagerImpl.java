@@ -17,7 +17,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
 import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.gui.*;
 import net.momirealms.craftengine.core.plugin.gui.Ingredient;
@@ -127,8 +126,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));
             boolean hidden = ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden");
             List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(section, "conditions", "condition"), EventConditions::fromMap);
-            Condition<Context> conditions = conditionList.isEmpty() ? null : conditionList.size() == 1 ? conditionList.getFirst() : new AllOfCondition<>(conditionList);
-            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, conditions);
+            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, MiscUtils.allOf(conditionList));
             if (ItemBrowserManagerImpl.this.byId.containsKey(id)) {
                 ItemBrowserManagerImpl.this.byId.get(id).merge(category);
             } else {
@@ -169,8 +167,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         );
 
         List<ItemWithAction> iconList = this.categoryOnMainPage.stream().map(it -> {
-            Condition<Context> condition = it.condition();
-            if (condition != null && !condition.test(PlayerOptionalContext.of(player))) {
+            if (!it.condition().test(PlayerOptionalContext.of(player))) {
                 return null;
             }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
@@ -262,8 +259,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                     item = Objects.requireNonNull(this.plugin.itemManager().createWrappedItem(ItemKeys.BARRIER, player));
                     item.customNameJson(AdventureHelper.componentToJson(Component.text(subCategoryId).color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
                 } else {
-                    Condition<Context> condition = subCategory.condition();
-                    if (condition != null && !condition.test(PlayerOptionalContext.of(player))) {
+                    if (!subCategory.condition().test(PlayerOptionalContext.of(player))) {
                         return null;
                     }
                     item = this.plugin.itemManager().createWrappedItem(subCategory.icon(), player);
