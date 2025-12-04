@@ -566,7 +566,7 @@ public class BukkitServerPlayer extends Player {
                 FurnitureVariant currentVariant = furniture.getCurrentVariant();
                 List<AABB> aabbs = new ArrayList<>();
                 for (FurnitureHitBoxConfig<?> config : currentVariant.hitBoxConfigs()) {
-                    config.prepareForPlacement(furniture.position(), aabbs::add);
+                    config.prepareBoundingBox(furniture.position(), aabbs::add, true);
                 }
                 Key endRod = Key.of("soul_fire_flame");
                 for (AABB aabb : aabbs) {

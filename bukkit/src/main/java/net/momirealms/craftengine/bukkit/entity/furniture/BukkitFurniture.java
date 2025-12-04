@@ -9,11 +9,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityType
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
-import net.momirealms.craftengine.core.entity.player.InteractionResult;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import org.bukkit.Location;
@@ -75,7 +71,7 @@ public class BukkitFurniture extends Furniture {
         // 检查新位置是否可用
         List<AABB> aabbs = new ArrayList<>();
         for (FurnitureHitBoxConfig<?> hitBoxConfig : getCurrentVariant().hitBoxConfigs()) {
-            hitBoxConfig.prepareForPlacement(position, aabbs::add);
+            hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
         }
         if (!aabbs.isEmpty()) {
             if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList())) {
