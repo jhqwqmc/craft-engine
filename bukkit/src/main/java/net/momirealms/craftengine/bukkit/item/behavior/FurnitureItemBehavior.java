@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 
 public class FurnitureItemBehavior extends ItemBehavior {
     public static final Factory FACTORY = new Factory();
-    private static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
+    protected static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
     private final Key id;
     private final Map<AnchorType, Rule> rules;
     private final boolean ignorePlacer;
