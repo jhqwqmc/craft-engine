@@ -14,6 +14,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -129,6 +130,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -1767,6 +1769,15 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
 
     public static class FinishConfigurationListener implements NMSPacketListener {
 
+        private void returnToWorld(NetWorkUser user, Queue<Object> configurationTasks, Object packetListener) {
+            configurationTasks.add(CoreReflections.instance$JoinWorldTask);
+            try {
+                CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$startNextTask.invokeExact(packetListener);
+            } catch (Throwable e) {
+                CraftEngine.instance().logger().warn("Cannot return to world for " + user.name(), e);
+            }
+        }
+
         @SuppressWarnings("unchecked")
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1817,15 +1828,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             // 请求资源包
             ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
             host.requestResourcePackDownloadLink(user.uuid()).whenComplete((dataList, t) -> {
-                if (t != null) {
-                    CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
-                    FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
-                    return;
-                }
-                if (dataList.isEmpty()) {
-                    FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
-                    return;
-                }
                 Queue<Object> configurationTasks;
                 try {
                     configurationTasks = (Queue<Object>) CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$configurationTasksGetter.invokeExact(packetListener);
@@ -1834,13 +1836,22 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
                     return;
                 }
+                if (t != null) {
+                    CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
+                if (dataList.isEmpty()) {
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
                 // 向配置阶段连接的任务重加入资源包的任务
                 for (ResourcePackDownloadData data : dataList) {
                     configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
                     user.addResourcePackUUID(data.uuid());
                 }
                 // 最后再加入一个 JoinWorldTask 并开始资源包任务
-                FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
+                returnToWorld(user, configurationTasks, packetListener);
             });
         }
     }
