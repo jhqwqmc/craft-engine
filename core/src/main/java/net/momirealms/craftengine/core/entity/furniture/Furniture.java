@@ -35,7 +35,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class Furniture implements Cullable {
-    public final FurnitureConfig config;
+    public final CustomFurniture config;
     public final FurnitureDataAccessor dataAccessor;
     public final Entity metaDataEntity;
 
@@ -50,7 +50,7 @@ public abstract class Furniture implements Cullable {
 
     private boolean hasExternalModel;
 
-    protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, FurnitureConfig config) {
+    protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, CustomFurniture config) {
         this.config = config;
         this.dataAccessor = data;
         this.metaDataEntity = metaDataEntity;
@@ -257,7 +257,7 @@ public abstract class Furniture implements Cullable {
 
     public abstract void destroy();
 
-    public FurnitureConfig config() {
+    public CustomFurniture config() {
         return this.config;
     }
 

@@ -74,7 +74,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
     }
 
     public InteractionResult place(UseOnContext context) {
-        Optional<FurnitureConfig> optionalCustomFurniture = BukkitFurnitureManager.instance().furnitureById(this.id);
+        Optional<CustomFurniture> optionalCustomFurniture = BukkitFurnitureManager.instance().furnitureById(this.id);
         if (optionalCustomFurniture.isEmpty()) {
             CraftEngine.instance().logger().warn("Furniture " + this.id + " not found");
             return InteractionResult.FAIL;
@@ -87,7 +87,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
             case DOWN -> AnchorType.CEILING;
         };
 
-        FurnitureConfig customFurniture = optionalCustomFurniture.get();
+        CustomFurniture customFurniture = optionalCustomFurniture.get();
         FurnitureVariant variant = customFurniture.getVariant(anchorType.variantName());
         if (variant == null) {
             return InteractionResult.FAIL;

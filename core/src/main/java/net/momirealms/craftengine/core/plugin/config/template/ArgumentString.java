@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.plugin.config.template;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgument;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.TagParser;

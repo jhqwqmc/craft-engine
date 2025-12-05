@@ -30,7 +30,7 @@ public class BukkitFurniture extends Furniture {
     private final WeakReference<ItemDisplay> metaEntity;
     private Location location;
 
-    public BukkitFurniture(ItemDisplay metaEntity, FurnitureConfig config, FurnitureDataAccessor data) {
+    public BukkitFurniture(ItemDisplay metaEntity, CustomFurniture config, FurnitureDataAccessor data) {
         super(new BukkitEntity(metaEntity), data, config);
         this.metaEntity = new WeakReference<>(metaEntity);
         this.location = metaEntity.getLocation();

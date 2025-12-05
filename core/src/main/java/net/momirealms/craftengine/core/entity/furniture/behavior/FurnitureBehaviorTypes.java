@@ -1,0 +1,34 @@
+package net.momirealms.craftengine.core.entity.furniture.behavior;
+
+import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.registry.BuiltInRegistries;
+import net.momirealms.craftengine.core.registry.Registries;
+import net.momirealms.craftengine.core.registry.WritableRegistry;
+import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.ResourceKey;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+
+public class FurnitureBehaviorTypes {
+    public static final Key EMPTY = Key.from("craftengine:empty");
+
+    public static FurnitureBehavior fromMap(@Nullable Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return EmptyFurnitureBehavior.INSTANCE;
+        String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.furniture.behavior.missing_type");
+        Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
+        FurnitureBehaviorType<?> furnitureBehaviorType = BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE.getValue(key);
+        if (furnitureBehaviorType == null) {
+            throw new LocalizedResourceConfigException("warning.config.furniture.behavior.invalid_type", type);
+        }
+        return furnitureBehaviorType.factory().create(map);
+    }
+
+    public static <T extends FurnitureBehavior> FurnitureBehaviorType<T> register(Key id, FurnitureBehaviorFactory<T> factory) {
+        FurnitureBehaviorType<T> type = new FurnitureBehaviorType<>(id, factory);
+        ((WritableRegistry<FurnitureBehaviorType<?>>) BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE)
+                .register(ResourceKey.create(Registries.BLOCK_BEHAVIOR_FACTORY.location(), id), type);
+        return type;
+    }
+}

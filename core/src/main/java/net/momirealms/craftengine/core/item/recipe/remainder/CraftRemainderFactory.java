@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.item.recipe.remainder;
 
 import java.util.Map;
 
-public interface CraftRemainderFactory {
+public interface CraftRemainderFactory<T extends CraftRemainder> {
 
-    CraftRemainder create(Map<String, Object> args);
+    T create(Map<String, Object> args);
 }

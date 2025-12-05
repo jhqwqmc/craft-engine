@@ -112,7 +112,6 @@ public class FurnitureDataAccessor {
         this.data.putString(VARIANT, variant);
     }
 
-    @SuppressWarnings("deprecation")
     @ApiStatus.Obsolete
     public Optional<AnchorType> anchorType() {
         if (this.data.containsKey(ANCHOR_TYPE)) return Optional.of(AnchorType.byId(this.data.getInt(ANCHOR_TYPE)));
@@ -120,7 +119,7 @@ public class FurnitureDataAccessor {
     }
 
     @ApiStatus.Obsolete
-    public FurnitureDataAccessor anchorType(@SuppressWarnings("deprecation") AnchorType type) {
+    public FurnitureDataAccessor anchorType(AnchorType type) {
         this.data.putInt(ANCHOR_TYPE, type.getId());
         return this;
     }

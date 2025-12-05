@@ -5,6 +5,7 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.block.properties.PropertyFactory;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
 import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
@@ -90,9 +91,10 @@ public class BuiltInRegistries {
     public static final Registry<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>> MOD_PACKET = createConstantBoundRegistry(Registries.MOD_PACKET, 16);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_TYPE, 64);
     public static final Registry<BlockEntityElementConfigFactory<?>> BLOCK_ENTITY_ELEMENT_TYPE = createConstantBoundRegistry(Registries.BLOCK_ENTITY_ELEMENT_TYPE, 16);
-    public static final Registry<CraftRemainderFactory> CRAFT_REMAINDER_FACTORY = createConstantBoundRegistry(Registries.CRAFT_REMAINDER_FACTORY, 16);
+    public static final Registry<CraftRemainderFactory<?>> CRAFT_REMAINDER_FACTORY = createConstantBoundRegistry(Registries.CRAFT_REMAINDER_FACTORY, 16);
     public static final Registry<FurnitureElementConfigFactory<?>> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
     public static final Registry<FurnitureHitBoxConfigFactory<?>> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
+    public static final Registry<FurnitureBehaviorType<?>> FURNITURE_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.FURNITURE_BEHAVIOR_TYPE, 32);
 
     private static <T> Registry<T> createConstantBoundRegistry(ResourceKey<? extends Registry<T>> key, int expectedSize) {
         return new ConstantBoundRegistry<>(key, expectedSize);

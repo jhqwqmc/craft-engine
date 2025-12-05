@@ -4,7 +4,7 @@ import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurnitureManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureConfig;
+import net.momirealms.craftengine.core.entity.furniture.CustomFurniture;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import net.momirealms.craftengine.core.plugin.command.FlagKeys;
@@ -48,7 +48,7 @@ public class DebugSpawnFurnitureCommand extends BukkitCommandFeature<CommandSend
                         NamespacedKey namespacedKey = context.get("id");
                         Key id = KeyUtils.namespacedKey2Key(namespacedKey);
                         BukkitFurnitureManager furnitureManager = BukkitFurnitureManager.instance();
-                        Optional<FurnitureConfig> optionalCustomFurniture = furnitureManager.furnitureById(id);
+                        Optional<CustomFurniture> optionalCustomFurniture = furnitureManager.furnitureById(id);
                         return optionalCustomFurniture.<CompletableFuture<? extends Iterable<? extends Suggestion>>>map(config -> CompletableFuture.completedFuture(config.variants().keySet().stream().map(Suggestion::suggestion).toList())).orElseGet(() -> CompletableFuture.completedFuture(List.of()));
                     }
                 }))
@@ -57,12 +57,12 @@ public class DebugSpawnFurnitureCommand extends BukkitCommandFeature<CommandSend
                     NamespacedKey namespacedKey = context.get("id");
                     Key id = KeyUtils.namespacedKey2Key(namespacedKey);
                     BukkitFurnitureManager furnitureManager = BukkitFurnitureManager.instance();
-                    Optional<FurnitureConfig> optionalCustomFurniture = furnitureManager.furnitureById(id);
+                    Optional<CustomFurniture> optionalCustomFurniture = furnitureManager.furnitureById(id);
                     if (optionalCustomFurniture.isEmpty()) {
                         return;
                     }
                     Location location = context.get("location");
-                    FurnitureConfig customFurniture = optionalCustomFurniture.get();
+                    CustomFurniture customFurniture = optionalCustomFurniture.get();
                     String variant = (String) context.optional("variant").orElse(customFurniture.anyVariantName());
                     boolean playSound = context.flags().hasFlag("silent");
                     CraftEngineFurniture.place(location, customFurniture, variant, playSound);

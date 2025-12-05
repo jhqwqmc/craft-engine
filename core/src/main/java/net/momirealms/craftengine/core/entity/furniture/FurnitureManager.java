@@ -16,19 +16,17 @@ public interface FurnitureManager extends Manageable {
     Key FURNITURE_EXTRA_DATA_KEY = Key.of("craftengine:furniture_extra_data");
     Key FURNITURE_COLLISION = Key.of("craftengine:collision");
 
-    String FURNITURE_ADMIN_NODE = "craftengine.furniture.admin";
-
     ConfigParser parser();
 
     void initSuggestions();
 
     Collection<Suggestion> cachedSuggestions();
 
-    Furniture place(WorldPosition position, FurnitureConfig furniture, FurnitureDataAccessor extraData, boolean playSound);
+    Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureDataAccessor extraData, boolean playSound);
 
-    Optional<FurnitureConfig> furnitureById(Key id);
+    Optional<CustomFurniture> furnitureById(Key id);
 
-    Map<Key, FurnitureConfig> loadedFurniture();
+    Map<Key, CustomFurniture> loadedFurniture();
 
     boolean isFurnitureMetaEntity(int entityId);
 

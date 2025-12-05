@@ -62,11 +62,11 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     @Override
-    public Furniture place(WorldPosition position, FurnitureConfig furniture, FurnitureDataAccessor dataAccessor, boolean playSound) {
+    public Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureDataAccessor dataAccessor, boolean playSound) {
         return this.place(LocationUtils.toLocation(position), furniture, dataAccessor, playSound);
     }
 
-    public BukkitFurniture place(Location location, FurnitureConfig furniture, FurnitureDataAccessor data, boolean playSound) {
+    public BukkitFurniture place(Location location, CustomFurniture furniture, FurnitureDataAccessor data, boolean playSound) {
         Entity furnitureEntity = EntityUtils.spawnEntity(location.getWorld(), location, EntityType.ITEM_DISPLAY, entity -> {
             ItemDisplay display = (ItemDisplay) entity;
             display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_KEY, PersistentDataType.STRING, furniture.id().toString());
@@ -218,7 +218,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
         // 获取家具配置
         Key key = Key.of(id);
-        Optional<FurnitureConfig> optionalFurniture = furnitureById(key);
+        Optional<CustomFurniture> optionalFurniture = furnitureById(key);
         if (optionalFurniture.isEmpty()) return;
 
         // 只对1.20.2及以上生效，1.20.1比较特殊
@@ -227,7 +227,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
 
         // 已经在其他事件里加载过了
-        FurnitureConfig customFurniture = optionalFurniture.get();
+        CustomFurniture customFurniture = optionalFurniture.get();
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
         if (previous != null) return;
 
@@ -254,11 +254,11 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
         // 获取家具配置
         Key key = Key.of(id);
-        Optional<FurnitureConfig> optionalFurniture = furnitureById(key);
+        Optional<CustomFurniture> optionalFurniture = furnitureById(key);
         if (optionalFurniture.isEmpty()) return;
 
         // 已经在其他事件里加载过了
-        FurnitureConfig customFurniture = optionalFurniture.get();
+        CustomFurniture customFurniture = optionalFurniture.get();
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
         if (previous != null) return;
 
@@ -321,7 +321,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     // 创建家具实例，并初始化碰撞实体
-    private BukkitFurniture createFurnitureInstance(ItemDisplay display, FurnitureConfig furniture) {
+    private BukkitFurniture createFurnitureInstance(ItemDisplay display, CustomFurniture furniture) {
         BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, getFurnitureDataAccessor(display));
         initFurniture(bukkitFurniture);
         Location location = display.getLocation();

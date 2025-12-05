@@ -30,10 +30,10 @@ public class RecipeBasedCraftRemainder implements CraftRemainder {
         return this.fallback != null ? this.fallback.remainder(recipeId, item) : null;
     }
 
-    public static class Factory implements CraftRemainderFactory {
+    public static class Factory implements CraftRemainderFactory<RecipeBasedCraftRemainder> {
 
         @Override
-        public CraftRemainder create(Map<String, Object> args) {
+        public RecipeBasedCraftRemainder create(Map<String, Object> args) {
             Map<Key, CraftRemainder> remainders = new HashMap<>();
             List<GroupedRemainder> remainderList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.requireNonNullOrThrow(args.get("terms"), "warning.config.item.settings.craft_remainder.recipe_based.missing_terms"), map -> {
                 List<Key> recipes = MiscUtils.getAsStringList(map.get("recipes")).stream().map(Key::of).toList();

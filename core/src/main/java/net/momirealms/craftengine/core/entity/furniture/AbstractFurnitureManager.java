@@ -25,7 +25,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public abstract class AbstractFurnitureManager implements FurnitureManager {
-    protected final Map<Key, FurnitureConfig> byId = new HashMap<>();
+    protected final Map<Key, CustomFurniture> byId = new HashMap<>();
     private final CraftEngine plugin;
     private final FurnitureParser furnitureParser;
     // Cached command suggestions
@@ -60,12 +60,12 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
     }
 
     @Override
-    public Optional<FurnitureConfig> furnitureById(Key id) {
+    public Optional<CustomFurniture> furnitureById(Key id) {
         return Optional.ofNullable(this.byId.get(id));
     }
 
     @Override
-    public Map<Key, FurnitureConfig> loadedFurniture() {
+    public Map<Key, CustomFurniture> loadedFurniture() {
         return Collections.unmodifiableMap(this.byId);
     }
 
@@ -130,7 +130,6 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
                 List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
 
-                // fixme 外部模型不应该在这
                 Optional<ExternalModel> externalModel;
                 if (variantArguments.containsKey("model-engine")) {
                     externalModel = Optional.of(plugin.compatibilityManager().createModel("ModelEngine", variantArguments.get("model-engine").toString()));
@@ -155,7 +154,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 ));
             }
 
-            FurnitureConfig furniture = FurnitureConfig.builder()
+            CustomFurniture furniture = CustomFurniture.builder()
                     .id(id)
                     .settings(FurnitureSettings.fromMap(MiscUtils.castToMap(section.get("settings"), true)))
                     .variants(variants)

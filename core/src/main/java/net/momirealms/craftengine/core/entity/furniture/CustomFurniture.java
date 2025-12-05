@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public interface FurnitureConfig {
+public interface CustomFurniture {
 
     void execute(Context context, EventTrigger trigger);
 
@@ -68,7 +68,7 @@ public interface FurnitureConfig {
     }
 
     static Builder builder() {
-        return new FurnitureConfigImpl.BuilderImpl();
+        return new CustomFurnitureImpl.BuilderImpl();
     }
 
     interface Builder {
@@ -85,6 +85,6 @@ public interface FurnitureConfig {
 
         Builder behavior(FurnitureBehavior behavior);
 
-        FurnitureConfig build();
+        CustomFurniture build();
     }
 }
