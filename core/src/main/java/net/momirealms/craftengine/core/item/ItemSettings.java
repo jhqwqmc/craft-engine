@@ -47,6 +47,8 @@ public class ItemSettings {
     Color dyeColor;
     @Nullable
     Color fireworkColor;
+    float keepOnDeathChance = 0f;
+    float destroyOnDeathChance = 0f;
     Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private ItemSettings() {}
@@ -109,6 +111,8 @@ public class ItemSettings {
         newSettings.dyeColor = settings.dyeColor;
         newSettings.fireworkColor = settings.fireworkColor;
         newSettings.ingredientSubstitutes = settings.ingredientSubstitutes;
+        newSettings.keepOnDeathChance = settings.keepOnDeathChance;
+        newSettings.destroyOnDeathChance = settings.destroyOnDeathChance;
         newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
@@ -231,6 +235,14 @@ public class ItemSettings {
         return this.compostProbability;
     }
 
+    public float keepOnDeathChance() {
+        return this.keepOnDeathChance;
+    }
+
+    public float destroyOnDeathChance() {
+        return this.destroyOnDeathChance;
+    }
+
     public ItemSettings fireworkColor(Color color) {
         this.fireworkColor = color;
         return this;
@@ -331,6 +343,16 @@ public class ItemSettings {
         return this;
     }
 
+    public ItemSettings keepOnDeathChance(float keepChance) {
+        this.keepOnDeathChance = keepChance;
+        return this;
+    }
+
+    public ItemSettings destroyOnDeathChance(float destroyChance) {
+        this.destroyOnDeathChance = destroyChance;
+        return this;
+    }
+
     @FunctionalInterface
     public interface Modifier {
 
@@ -360,6 +382,14 @@ public class ItemSettings {
             registerFactory("enchantable", (value -> {
                 boolean bool = ResourceConfigUtils.getAsBoolean(value, "enchantable");
                 return settings -> settings.canEnchant(bool);
+            }));
+            registerFactory("keep-on-death-chance", (value -> {
+                float chance = ResourceConfigUtils.getAsFloat(value, "keep-on-death-chance");
+                return settings -> settings.keepOnDeathChance(MiscUtils.clamp(chance, 0, 1));
+            }));
+            registerFactory("destroy-on-death-chance", (value -> {
+                float chance = ResourceConfigUtils.getAsFloat(value, "destroy-on-death-chance");
+                return settings -> settings.destroyOnDeathChance(MiscUtils.clamp(chance, 0, 1));
             }));
             registerFactory("renameable", (value -> {
                 boolean bool = ResourceConfigUtils.getAsBoolean(value, "renameable");

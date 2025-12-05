@@ -21,6 +21,7 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
+import net.momirealms.craftengine.core.item.ItemSettings;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
@@ -54,20 +55,16 @@ import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.EnchantingInventory;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ItemEventListener implements Listener {
     private final BukkitCraftEngine plugin;
@@ -629,5 +626,115 @@ public class ItemEventListener implements Listener {
            return;
         }
         event.setCurrentItem((ItemStack) result.finalItem().getItem());
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        BukkitItemManager instance = BukkitItemManager.instance();
+
+        // 处理损毁物品
+        if (event.getKeepInventory()) {
+            if (!instance.featureFlag$destroyOnDeathChance()) return;
+
+            Random random = ThreadLocalRandom.current();
+            PlayerInventory inventory = event.getPlayer().getInventory();
+            for (ItemStack item : inventory.getContents()) {
+                if (item == null) continue;
+
+                Optional<CustomItem<ItemStack>> optional = instance.wrap(item).getCustomItem();
+                if (optional.isEmpty()) continue;
+
+                CustomItem<ItemStack> customItem = optional.get();
+                ItemSettings settings = customItem.settings();
+                float destroyChance = settings.destroyOnDeathChance();
+                if (destroyChance <= 0f) continue;
+
+                int totalAmount = item.getAmount();
+                int destroyCount = 0;
+
+                for (int i = 0; i < totalAmount; i++) {
+                    float rand = random.nextFloat();
+                    // 判断是否损毁
+                    if (destroyChance > 0f && rand < destroyChance) {
+                        destroyCount++;
+                    }
+                }
+                if (destroyCount != 0) {
+                    item.setAmount(totalAmount - destroyCount);
+                }
+            }
+        }
+        // 处理保留 + 损毁物品
+        else {
+            if (!instance.featureFlag$keepOnDeathChance() && !instance.featureFlag$destroyOnDeathChance()) return;
+            Random random = ThreadLocalRandom.current();
+
+            List<ItemStack> itemsToKeep = event.getItemsToKeep();
+            List<ItemStack> itemsToDrop = event.getDrops();
+
+            Iterator<ItemStack> iterator = itemsToDrop.iterator();
+
+            while (iterator.hasNext()) {
+                ItemStack item = iterator.next();
+                Optional<CustomItem<ItemStack>> optional = instance.wrap(item).getCustomItem();
+                if (optional.isEmpty()) continue;
+
+                CustomItem<ItemStack> customItem = optional.get();
+                ItemSettings settings = customItem.settings();
+
+                float destroyChance = settings.destroyOnDeathChance();
+                float keepChance = settings.keepOnDeathChance();
+
+                // 如果没有效果，跳过
+                if (destroyChance <= 0f && keepChance <= 0f) continue;
+
+                int totalAmount = item.getAmount();
+
+                int keepCount = 0;
+                int destroyCount = 0;
+                int dropCount = 0;
+
+                for (int i = 0; i < totalAmount; i++) {
+                    float rand = random.nextFloat();
+
+                    // 先判断是否损毁
+                    if (destroyChance > 0f && rand < destroyChance) {
+                        destroyCount++;
+                    }
+                    // 然后判断是否保留（在未损毁的物品中）
+                    else if (keepChance > 0f && rand < (destroyChance + keepChance)) {
+                        keepCount++;
+                    }
+                    // 否则掉落
+                    else {
+                        dropCount++;
+                    }
+                }
+
+                // 处理结果
+                if (destroyCount == totalAmount) {
+                    iterator.remove();
+                    continue;
+                }
+
+                if (keepCount == 0 && dropCount == 0) {
+                    // 实际上不会发生这种情况
+                    continue;
+                }
+
+                if (keepCount > 0) {
+                    ItemStack keepItem = item.clone();
+                    keepItem.setAmount(keepCount);
+                    itemsToKeep.add(keepItem);
+                }
+
+                if (dropCount > 0) {
+                    item.setAmount(dropCount);
+                } else {
+                    iterator.remove();
+                }
+            }
+        }
     }
 }

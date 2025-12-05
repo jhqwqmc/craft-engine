@@ -31,7 +31,7 @@ public class ComponentsModifier<I> implements ItemDataModifier<I> {
     }
 
     public List<Pair<Key, Tag>> components() {
-        return arguments;
+        return this.arguments;
     }
 
     private Tag parseValue(Object value) {
