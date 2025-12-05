@@ -576,6 +576,11 @@ client-optimization:
       bucket-size: 1000
       restore-per-tick: 25
 
+# [Premium Exclusive]
+bedrock-edition-support:
+  enable: false
+  player-prefix: "!"
+
 # Enables or disables debug mode
 debug:
   common: false
