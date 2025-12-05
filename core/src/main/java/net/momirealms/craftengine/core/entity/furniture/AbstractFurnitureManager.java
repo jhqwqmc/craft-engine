@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.momirealms.craftengine.core.block.entity.tick.TickingBlockEntity;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTypes;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;

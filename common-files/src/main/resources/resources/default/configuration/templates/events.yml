@@ -21,7 +21,9 @@ templates:
     conditions:
       - type: expression
         expression: <arg:player.is_sneaking>
+      - type: "!has_item"
     functions:
+      - type: update_interaction_tick
       - type: rotate_furniture
         degree: 90
         on-success:
@@ -47,9 +49,11 @@ templates:
     conditions:
       - type: expression
         expression: <arg:player.is_sneaking>
+      - type: "!has_item"
       - type: "!match_furniture_variant"
         variants: ${blacklist_variants:-null}
     functions:
+      - type: update_interaction_tick
       - type: rotate_furniture
         degree: 45
         on-success:

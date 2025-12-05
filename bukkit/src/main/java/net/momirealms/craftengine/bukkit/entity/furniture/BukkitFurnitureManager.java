@@ -13,7 +13,6 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.tick.FurnitureTicker;
-import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurniture;
 import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurnitureImpl;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.sound.SoundData;

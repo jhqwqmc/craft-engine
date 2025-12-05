@@ -3813,12 +3813,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     if (cancellable.isCancelled()) {
                         return;
                     }
-
                     // 不处理调试棒
                     if (itemInHand.vanillaId().equals(ItemKeys.DEBUG_STICK)) {
                         return;
                     }
-
+                    // 已经有过交互了
+                    if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+                        return;
+                    }
                     // 必须从网络包层面处理，否则无法获取交互的具体实体
                     if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitBox.config().canUseItemOn()) {
                         Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
