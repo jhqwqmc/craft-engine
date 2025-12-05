@@ -28,11 +28,11 @@ public interface CustomFurniture {
     Map<String, FurnitureVariant> variants();
 
     default FurnitureVariant anyVariant() {
-        return variants().values().stream().findFirst().get();
+        return variants().values().iterator().next();
     }
 
     default String anyVariantName() {
-        return variants().keySet().stream().findFirst().get();
+        return variants().keySet().iterator().next();
     }
 
     @Nullable
