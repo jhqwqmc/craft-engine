@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +38,12 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
     }
 
     public PlacementInfo<T> placementInfo() {
-        return placementInfo;
+        return this.placementInfo;
     }
 
     @Override
     public List<Ingredient<T>> ingredientsInUse() {
-        return ingredients;
+        return this.ingredients;
     }
 
     @SuppressWarnings("unchecked")

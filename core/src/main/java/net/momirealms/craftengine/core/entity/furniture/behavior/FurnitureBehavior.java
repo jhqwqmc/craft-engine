@@ -2,7 +2,9 @@ package net.momirealms.craftengine.core.entity.furniture.behavior;
 
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.tick.FurnitureTicker;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Experimental
 public interface FurnitureBehavior {
 
     default <T extends Furniture> FurnitureTicker<T> createSyncFurnitureTicker(T furniture) {

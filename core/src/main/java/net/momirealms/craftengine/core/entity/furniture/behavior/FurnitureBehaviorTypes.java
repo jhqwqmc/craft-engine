@@ -7,12 +7,13 @@ import net.momirealms.craftengine.core.registry.WritableRegistry;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.ResourceKey;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
+@ApiStatus.Experimental
 public class FurnitureBehaviorTypes {
-    public static final Key EMPTY = Key.from("craftengine:empty");
 
     public static FurnitureBehavior fromMap(@Nullable Map<String, Object> map) {
         if (map == null || map.isEmpty()) return EmptyFurnitureBehavior.INSTANCE;

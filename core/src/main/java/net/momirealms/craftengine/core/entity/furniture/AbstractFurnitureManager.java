@@ -1,9 +1,13 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.momirealms.craftengine.core.block.entity.tick.TickingBlockEntity;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTypes;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
+import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurniture;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
@@ -14,10 +18,8 @@ import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
+import net.momirealms.craftengine.core.util.*;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.joml.Vector3f;
 
@@ -30,6 +32,18 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
     private final FurnitureParser furnitureParser;
     // Cached command suggestions
     private final List<Suggestion> cachedSuggestions = new ArrayList<>();
+
+    protected final Int2ObjectOpenHashMap<TickingFurniture> syncTickers = new Int2ObjectOpenHashMap<>(256, 0.5f);
+    protected final Int2ObjectOpenHashMap<TickingFurniture> asyncTickers = new Int2ObjectOpenHashMap<>(256, 0.5f);
+    protected final TickersList<TickingFurniture> syncTickingFurniture = new TickersList<>();
+    protected final List<TickingFurniture> pendingSyncTickingFurniture = new ArrayList<>();
+    protected final TickersList<TickingFurniture> asyncTickingFurniture = new TickersList<>();
+    protected final List<TickingFurniture> pendingAsyncTickingFurniture = new ArrayList<>();
+    private boolean isTickingSyncFurniture = false;
+    private boolean isTickingAsyncFurniture = false;
+
+    protected SchedulerTask syncTickTask;
+    protected SchedulerTask asyncTickTask;
 
     public AbstractFurnitureManager(CraftEngine plugin) {
         this.plugin = plugin;
@@ -67,6 +81,82 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
     @Override
     public Map<Key, CustomFurniture> loadedFurniture() {
         return Collections.unmodifiableMap(this.byId);
+    }
+
+    private void syncTick() {
+        this.isTickingSyncFurniture = true;
+        if (!this.pendingSyncTickingFurniture.isEmpty()) {
+            this.syncTickingFurniture.addAll(this.pendingSyncTickingFurniture);
+            this.pendingSyncTickingFurniture.clear();
+        }
+        if (!this.syncTickingFurniture.isEmpty()) {
+            Object[] entities = this.syncTickingFurniture.elements();
+            for (int i = 0, size = this.syncTickingFurniture.size(); i < size; i++) {
+                TickingFurniture entity = (TickingFurniture) entities[i];
+                if (entity.isValid()) {
+                    entity.tick();
+                } else {
+                    this.syncTickingFurniture.markAsRemoved(i);
+                    this.syncTickers.remove(entity.entityId());
+                }
+            }
+            this.syncTickingFurniture.removeMarkedEntries();
+        }
+        this.isTickingSyncFurniture = false;
+    }
+
+    private void asyncTick() {
+        this.isTickingAsyncFurniture = true;
+        if (!this.pendingAsyncTickingFurniture.isEmpty()) {
+            this.asyncTickingFurniture.addAll(this.pendingAsyncTickingFurniture);
+            this.pendingAsyncTickingFurniture.clear();
+        }
+        if (!this.asyncTickingFurniture.isEmpty()) {
+            Object[] entities = this.asyncTickingFurniture.elements();
+            for (int i = 0, size = this.asyncTickingFurniture.size(); i < size; i++) {
+                TickingFurniture entity = (TickingFurniture) entities[i];
+                if (entity.isValid()) {
+                    entity.tick();
+                } else {
+                    this.asyncTickingFurniture.markAsRemoved(i);
+                    this.asyncTickers.remove(entity.entityId());
+                }
+            }
+            this.asyncTickingFurniture.removeMarkedEntries();
+        }
+        this.isTickingAsyncFurniture = false;
+    }
+
+    public synchronized void addSyncFurnitureTicker(TickingFurniture ticker) {
+        if (this.isTickingSyncFurniture) {
+            this.pendingSyncTickingFurniture.add(ticker);
+        } else {
+            this.syncTickingFurniture.add(ticker);
+        }
+    }
+
+    public synchronized void addAsyncFurnitureTicker(TickingFurniture ticker) {
+        if (this.isTickingAsyncFurniture) {
+            this.pendingAsyncTickingFurniture.add(ticker);
+        } else {
+            this.asyncTickingFurniture.add(ticker);
+        }
+    }
+
+    @Override
+    public void delayedInit() {
+        if (this.syncTickTask == null || this.syncTickTask.cancelled())
+            this.syncTickTask = CraftEngine.instance().scheduler().sync().runRepeating(this::syncTick, 1, 1);
+        if (this.asyncTickTask == null || this.asyncTickTask.cancelled())
+            this.asyncTickTask = CraftEngine.instance().scheduler().sync().runAsyncRepeating(this::asyncTick, 1, 1);
+    }
+
+    @Override
+    public void disable() {
+        if (this.syncTickTask != null && !this.syncTickTask.cancelled())
+            this.syncTickTask.cancel();
+        if (this.asyncTickTask != null && !this.asyncTickTask.cancelled())
+            this.asyncTickTask.cancel();
     }
 
     @Override
@@ -160,6 +250,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     .variants(variants)
                     .events(EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event")))
                     .lootTable(LootTable.fromMap(MiscUtils.castToMap(section.get("loot"), true)))
+                    .behavior(FurnitureBehaviorTypes.fromMap(ResourceConfigUtils.getAsMapOrNull(ResourceConfigUtils.get(section, "behaviors", "behavior"), "behavior")))
                     .build();
             AbstractFurnitureManager.this.byId.put(id, furniture);
         }

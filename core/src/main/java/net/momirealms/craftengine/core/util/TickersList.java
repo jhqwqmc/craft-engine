@@ -6,10 +6,8 @@ package net.momirealms.craftengine.core.util;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.momirealms.craftengine.core.block.entity.tick.TickingBlockEntity;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A list for ServerLevel's blockEntityTickers
@@ -20,24 +18,15 @@ import java.util.Collection;
  * This is faster than using removeAll, since we don't need to compare the identity of each block entity, and faster than looping thru each index manually and deleting with remove,
  * since we don't need to resize the array every single remove.
  */
-public final class BlockEntityTickersList extends ObjectArrayList<TickingBlockEntity> {
+public final class TickersList<T> extends ObjectArrayList<T> {
     private final IntOpenHashSet toRemove = new IntOpenHashSet();
     private int startSearchFromIndex = -1;
 
     /**
      * Creates a new array list with {@link #DEFAULT_INITIAL_CAPACITY} capacity.
      */
-    public BlockEntityTickersList() {
+    public TickersList() {
         super();
-    }
-
-    /**
-     * Creates a new array list and fills it with a given collection.
-     *
-     * @param c a collection that will be used to fill the array list.
-     */
-    public BlockEntityTickersList(final Collection<? extends TickingBlockEntity> c) {
-        super(c);
     }
 
     /**

@@ -12,6 +12,9 @@ import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.furniture.tick.FurnitureTicker;
+import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurniture;
+import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurnitureImpl;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Key;
@@ -86,6 +89,8 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
     @Override
     public void delayedInit() {
+        super.delayedInit();
+
         // 确定碰撞箱实体类型
         COLLISION_ENTITY_TYPE = Config.colliderType();
         COLLISION_ENTITY_CLASS = Config.colliderType() == ColliderType.INTERACTION ? Interaction.class : Boat.class;
@@ -127,6 +132,7 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
     @Override
     public void disable() {
+        super.disable();
         HandlerList.unregisterAll(this.furnitureEventListener);
         unload();
     }
@@ -330,19 +336,38 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     protected void initFurniture(BukkitFurniture furniture) {
-        this.byMetaEntityId.put(furniture.entityId(), furniture);
-        for (int entityId : furniture.virtualEntityIds()) {
-            this.byVirtualEntityId.put(entityId, furniture);
+        int entityId = furniture.entityId();
+        this.byMetaEntityId.put(entityId, furniture);
+        for (int id : furniture.virtualEntityIds()) {
+            this.byVirtualEntityId.put(id, furniture);
         }
         for (Collider collisionEntity : furniture.colliders()) {
             this.byColliderEntityId.put(collisionEntity.entityId(), furniture);
         }
+        if (!this.syncTickers.containsKey(entityId)) {
+            FurnitureTicker<BukkitFurniture> ticker = furniture.config.behavior().createSyncFurnitureTicker(furniture);
+            if (ticker != null) {
+                TickingFurnitureImpl<BukkitFurniture> tickingFurniture = new TickingFurnitureImpl<>(furniture, ticker);
+                this.syncTickers.put(entityId, tickingFurniture);
+                this.addSyncFurnitureTicker(tickingFurniture);
+            }
+        }
+        if (!this.asyncTickers.containsKey(entityId)) {
+            FurnitureTicker<BukkitFurniture> ticker = furniture.config.behavior().createAsyncBlockEntityTicker(furniture);
+            if (ticker != null) {
+                TickingFurnitureImpl<BukkitFurniture> tickingFurniture = new TickingFurnitureImpl<>(furniture, ticker);
+                this.asyncTickers.put(entityId, tickingFurniture);
+                this.addAsyncFurnitureTicker(tickingFurniture);
+            }
+        }
     }
 
     protected void invalidateFurniture(BukkitFurniture furniture) {
-        this.byMetaEntityId.remove(furniture.entityId());
-        for (int entityId : furniture.virtualEntityIds()) {
-            this.byVirtualEntityId.remove(entityId);
+        int entityId = furniture.entityId();
+        // 移除entity id映射
+        this.byMetaEntityId.remove(entityId);
+        for (int id : furniture.virtualEntityIds()) {
+            this.byVirtualEntityId.remove(id);
         }
         for (Collider collisionEntity : furniture.colliders()) {
             this.byColliderEntityId.remove(collisionEntity.entityId());

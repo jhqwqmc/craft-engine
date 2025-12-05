@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("DuplicatedCode")
 public class BukkitFurniture extends Furniture {
     private final WeakReference<ItemDisplay> metaEntity;
     private Location location;
@@ -54,6 +55,25 @@ public class BukkitFurniture extends Furniture {
         FurnitureVariant variant = this.config.getVariant(variantName);
         if (variant == null) return false;
         if (this.currentVariant == variant) return false;
+        // 检查新位置是否可用
+        List<AABB> aabbs = new ArrayList<>();
+        WorldPosition position = position();
+        for (FurnitureHitBoxConfig<?> hitBoxConfig : variant.hitBoxConfigs()) {
+            hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
+        }
+        if (!aabbs.isEmpty()) {
+            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
+                    o -> {
+                        for (Collider collider : super.colliders) {
+                            if (o == collider.handle()) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })) {
+                return false;
+            }
+        }
         // 删除椅子
         super.destroySeats();
         BukkitFurnitureManager.instance().invalidateFurniture(this);

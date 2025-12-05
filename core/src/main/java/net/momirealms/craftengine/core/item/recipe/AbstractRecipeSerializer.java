@@ -133,12 +133,12 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         return new CustomRecipeResult<>(CloneableConstantItem.of(result), recipeResult.count(), null);
     }
 
-    @Nullable
+    @NotNull
     protected Ingredient<T> toIngredient(String item) {
         return toIngredient(List.of(item));
     }
 
-    @Nullable
+    @NotNull
     protected Ingredient<T> toIngredient(List<String> items) {
         Set<UniqueKey> itemIds = new HashSet<>();
         Set<UniqueKey> minecraftItemIds = new HashSet<>();
@@ -149,6 +149,9 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
                 Key tag = Key.of(item.substring(1));
                 elements.add(new IngredientElement.Tag(tag));
                 List<UniqueKey> uniqueKeys = itemManager.itemIdsByTag(tag);
+                if (uniqueKeys.isEmpty()) {
+                    throw new LocalizedResourceConfigException("warning.config.recipe.invalid_ingredient", item);
+                }
                 itemIds.addAll(uniqueKeys);
                 for (UniqueKey uniqueKey : uniqueKeys) {
                     List<UniqueKey> ingredientSubstitutes = itemManager.getIngredientSubstitutes(uniqueKey.key());
