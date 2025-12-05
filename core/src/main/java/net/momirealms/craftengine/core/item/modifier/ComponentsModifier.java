@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.item.modifier;
 
 import com.google.gson.JsonElement;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
