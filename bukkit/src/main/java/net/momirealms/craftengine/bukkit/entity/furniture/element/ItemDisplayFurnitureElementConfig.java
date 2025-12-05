@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.core.entity.Glowing;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
@@ -15,8 +14,8 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
+import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement>, Glowing {
+public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
     public static final Factory FACTORY = new Factory();
     public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
     public final Key itemId;
@@ -45,7 +44,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final float shadowRadius;
     public final float shadowStrength;
     public final boolean applyDyedColor;
-    public final LegacyChatFormatter glowColor;
+    public final Color glowColor;
 
     public ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
@@ -59,7 +58,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                                              float shadowRadius,
                                              float shadowStrength,
                                              boolean applyDyedColor,
-                                             @Nullable LegacyChatFormatter glowColor) {
+                                             @Nullable Color glowColor) {
         this.scale = scale;
         this.position = position;
         this.translation = translation;
@@ -91,6 +90,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
             List<Object> dataValues = new ArrayList<>();
             if (glowColor != null) {
                 BaseEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+                ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
             }
             ItemDisplayEntityData.DisplayedItem.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
             ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
@@ -153,8 +153,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     }
 
     @Nullable
-    @Override
-    public LegacyChatFormatter glowColor() {
+    public Color glowColor() {
         return this.glowColor;
     }
 
@@ -182,7 +181,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength"),
                     applyDyedColor,
-                    ResourceConfigUtils.getAsEnum(arguments.get("glow-color"), LegacyChatFormatter.class, null)
+                    Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null)
             );
         }
     }

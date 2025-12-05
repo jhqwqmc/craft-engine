@@ -23,7 +23,7 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
     private final int entityId;
     private final Object despawnPacket;
     private final FurnitureColorSource colorSource;
-    private final LegacyChatFormatter glowColor;
+    private final UUID uuid = UUID.randomUUID();
 
     public ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config) {
         this.config = config;
@@ -33,26 +33,18 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
         this.position = new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot, furniturePos.yRot);
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(entityId); }});
         this.colorSource = furniture.dataAccessor.getColorSource();
-        this.glowColor = config.glowColor;
     }
 
     @Override
     public void show(Player player) {
-        UUID uuid = UUID.randomUUID();
         player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundBundlePacket(List.of(
                 FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                        this.entityId, uuid,
+                        this.entityId, this.uuid,
                         this.position.x, this.position.y, this.position.z, 0, this.position.yRot,
                         MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
                 ),
                 FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata.apply(player, this.colorSource))
         )), false);
-        if (this.glowColor != null) {
-            Object team = BukkitTeamManager.instance().getTeamByColor(this.glowColor);
-            if (team != null) {
-                FastNMS.INSTANCE.method$ClientboundSetPlayerTeamPacket$createMultiplePlayerPacket(team, List.of(uuid.toString()), true);
-            }
-        }
     }
 
     @Override
