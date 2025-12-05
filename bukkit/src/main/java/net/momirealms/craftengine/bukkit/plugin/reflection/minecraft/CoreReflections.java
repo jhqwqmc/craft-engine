@@ -4638,4 +4638,11 @@ public final class CoreReflections {
     public static final Field field$EntityDimensions$fixed = requireNonNull(
             ReflectionUtils.getDeclaredField(clazz$EntityDimensions, boolean.class, 0)
     );
+
+    public static final Class<?> clazz$PlayerTeam = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.scores.ScoreboardTeam",
+                    "world.scores.PlayerTeam"
+            )
+    );
 }

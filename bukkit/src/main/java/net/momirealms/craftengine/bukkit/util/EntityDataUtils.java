@@ -10,6 +10,7 @@ public final class EntityDataUtils {
     private static final int LEFT_ALIGNMENT = 0x08; // 8
     private static final int RIGHT_ALIGNMENT = 0x10; // 16
     public static final int UNSAFE_ITEM_DATA_ID = 8; // 正常来说应该通过定义 Data 获取 id 这样的做法未经验证可能不安全
+    public static final int SHARED_FLAGS_ID = 0; // 正常来说应该通过定义 Data 获取 id 这样的做法未经验证可能不安全
 
     public static byte encodeTextDisplayMask(boolean hasShadow, boolean isSeeThrough, boolean useDefaultBackground, int alignment) {
         int bitMask = 0;

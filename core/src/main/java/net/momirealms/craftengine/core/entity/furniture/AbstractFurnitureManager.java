@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.momirealms.craftengine.core.entity.Glowing;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTypes;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
@@ -219,6 +220,14 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
                 List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
 
+                // 收集发光颜色类型
+                for (FurnitureElementConfig<?> element : elements) {
+                    if (element instanceof Glowing glowing) {
+                        Optional.ofNullable(glowing.glowColor()).ifPresent(color -> AbstractFurnitureManager.this.plugin.teamManager().setColorInUse(color));
+                    }
+                }
+
+                // 外部模型
                 Optional<ExternalModel> externalModel;
                 if (variantArguments.containsKey("model-engine")) {
                     externalModel = Optional.of(plugin.compatibilityManager().createModel("ModelEngine", variantArguments.get("model-engine").toString()));
@@ -228,6 +237,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     externalModel = Optional.empty();
                 }
 
+                // 碰撞箱配置
                 List<FurnitureHitBoxConfig<?>> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), FurnitureHitBoxTypes::fromMap);
                 if (hitboxes.isEmpty() && externalModel.isEmpty()) {
                     hitboxes = List.of(defaultHitBox());

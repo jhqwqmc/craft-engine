@@ -1,8 +1,10 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
+import net.momirealms.craftengine.core.entity.Glowing;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
@@ -14,9 +16,11 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -26,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
+public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement>, Glowing {
     public static final Factory FACTORY = new Factory();
     public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
     public final Key itemId;
@@ -41,6 +45,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final float shadowRadius;
     public final float shadowStrength;
     public final boolean applyDyedColor;
+    public final LegacyChatFormatter glowColor;
 
     public ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
@@ -53,7 +58,8 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                                              Billboard billboard,
                                              float shadowRadius,
                                              float shadowStrength,
-                                             boolean applyDyedColor) {
+                                             boolean applyDyedColor,
+                                             @Nullable LegacyChatFormatter glowColor) {
         this.scale = scale;
         this.position = position;
         this.translation = translation;
@@ -66,6 +72,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         this.shadowStrength = shadowStrength;
         this.applyDyedColor = applyDyedColor;
         this.itemId = itemId;
+        this.glowColor = glowColor;
         BiFunction<Player, FurnitureColorSource, Item<?>> itemFunction = (player, colorSource) -> {
             Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
             if (applyDyedColor && colorSource != null && wrappedItem != null) {
@@ -82,6 +89,9 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         };
         this.metadata = (player, source) -> {
             List<Object> dataValues = new ArrayList<>();
+            if (glowColor != null) {
+                BaseEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+            }
             ItemDisplayEntityData.DisplayedItem.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
             ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
             ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
@@ -142,6 +152,12 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         return this.itemId;
     }
 
+    @Nullable
+    @Override
+    public LegacyChatFormatter glowColor() {
+        return this.glowColor;
+    }
+
     @Override
     public ItemDisplayFurnitureElement create(@NotNull Furniture furniture) {
         return new ItemDisplayFurnitureElement(furniture, this);
@@ -165,7 +181,8 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsEnum(arguments.get("billboard"), Billboard.class, Billboard.FIXED),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength"),
-                    applyDyedColor
+                    applyDyedColor,
+                    ResourceConfigUtils.getAsEnum(arguments.get("glow-color"), LegacyChatFormatter.class, null)
             );
         }
     }

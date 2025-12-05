@@ -41,6 +41,7 @@ import net.momirealms.craftengine.core.plugin.scheduler.SchedulerAdapter;
 import net.momirealms.craftengine.core.sound.SoundManager;
 import net.momirealms.craftengine.core.util.CompletableFutures;
 import net.momirealms.craftengine.core.world.WorldManager;
+import net.momirealms.craftengine.core.world.score.TeamManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -82,6 +83,7 @@ public abstract class CraftEngine implements Plugin {
     protected ProjectileManager projectileManager;
     protected SeatManager seatManager;
     protected EntityCullingManager entityCullingManager;
+    protected TeamManager teamManager;
 
     private final PluginTaskRegistry beforeEnableTaskRegistry = new PluginTaskRegistry();
     private final PluginTaskRegistry afterEnableTaskRegistry = new PluginTaskRegistry();
@@ -164,6 +166,7 @@ public abstract class CraftEngine implements Plugin {
         this.projectileManager.reload();
         this.seatManager.reload();
         this.entityCullingManager.reload();
+        this.teamManager.reload();
     }
 
     private void runDelayTasks(boolean reloadRecipe) {
@@ -236,6 +239,8 @@ public abstract class CraftEngine implements Plugin {
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
+                        // 同步修改队伍
+                        this.teamManager.runDelayedSyncTasks();
                         long time4 = System.currentTimeMillis();
                         long syncTime = time4 - time3;
                         this.reloadEventDispatcher.accept(this);
@@ -567,6 +572,21 @@ public abstract class CraftEngine implements Plugin {
     @Override
     public ProjectileManager projectileManager() {
         return projectileManager;
+    }
+
+    @Override
+    public EntityCullingManager entityCullingManager() {
+        return entityCullingManager;
+    }
+
+    @Override
+    public TeamManager teamManager() {
+        return teamManager;
+    }
+
+    @Override
+    public SeatManager seatManager() {
+        return seatManager;
     }
 
     @Override

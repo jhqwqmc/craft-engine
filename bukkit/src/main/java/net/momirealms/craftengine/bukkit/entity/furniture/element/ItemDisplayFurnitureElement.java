@@ -4,10 +4,12 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
+import net.momirealms.craftengine.bukkit.world.score.BukkitTeamManager;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureColorSource;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 
@@ -21,6 +23,7 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
     private final int entityId;
     private final Object despawnPacket;
     private final FurnitureColorSource colorSource;
+    private final LegacyChatFormatter glowColor;
 
     public ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config) {
         this.config = config;
@@ -30,18 +33,26 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
         this.position = new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot, furniturePos.yRot);
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(entityId); }});
         this.colorSource = furniture.dataAccessor.getColorSource();
+        this.glowColor = config.glowColor;
     }
 
     @Override
     public void show(Player player) {
+        UUID uuid = UUID.randomUUID();
         player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundBundlePacket(List.of(
                 FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                        this.entityId, UUID.randomUUID(),
+                        this.entityId, uuid,
                         this.position.x, this.position.y, this.position.z, 0, this.position.yRot,
                         MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
                 ),
                 FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata.apply(player, this.colorSource))
         )), false);
+        if (this.glowColor != null) {
+            Object team = BukkitTeamManager.instance().getTeamByColor(this.glowColor);
+            if (team != null) {
+                FastNMS.INSTANCE.method$ClientboundSetPlayerTeamPacket$createMultiplePlayerPacket(team, List.of(uuid.toString()), true);
+            }
+        }
     }
 
     @Override
