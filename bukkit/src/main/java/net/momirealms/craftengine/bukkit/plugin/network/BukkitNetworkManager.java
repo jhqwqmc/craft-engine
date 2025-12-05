@@ -3900,7 +3900,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             this.handlers[MEntityTypes.BLOCK_DISPLAY$registryId] = simpleAddEntityHandler(BlockDisplayPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.TEXT_DISPLAY$registryId] = simpleAddEntityHandler(TextDisplayPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ARMOR_STAND$registryId] = simpleAddEntityHandler(ArmorStandPacketHandler.INSTANCE);
-            this.handlers[MEntityTypes.ITEM$registryId] = simpleAddEntityHandler(CommonItemPacketHandler.INSTANCE);
+            this.handlers[MEntityTypes.ITEM$registryId] = simpleAddEntityHandler(ItemPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ITEM_FRAME$registryId] = simpleAddEntityHandler(ItemFramePacketHandler.INSTANCE);
             this.handlers[MEntityTypes.GLOW_ITEM_FRAME$registryId] = simpleAddEntityHandler(ItemFramePacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ENDERMAN$registryId] = simpleAddEntityHandler(EndermanPacketHandler.INSTANCE);
@@ -3927,7 +3927,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 this.handlers[MEntityTypes.TNT$registryId] = simpleAddEntityHandler(PrimedTNTPacketHandler.INSTANCE);
             }
             if (VersionHelper.isOrAbove1_20_5()) {
-                this.handlers[MEntityTypes.OMINOUS_ITEM_SPAWNER$registryId] = simpleAddEntityHandler(CommonItemPacketHandler.INSTANCE);
+                this.handlers[MEntityTypes.OMINOUS_ITEM_SPAWNER$registryId] = simpleAddEntityHandler(ItemPacketHandler.INSTANCE);
             }
             this.handlers[MEntityTypes.FALLING_BLOCK$registryId] = (user, event) -> {
                 FriendlyByteBuf buf = event.getBuffer();
