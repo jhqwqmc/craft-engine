@@ -9,7 +9,7 @@ import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.snbt.TagParser;
+import net.momirealms.craftengine.core.util.TagParser;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 
@@ -47,7 +47,7 @@ public class ComponentsModifier<I> implements ItemDataModifier<I> {
                 String snbt = string.substring("(snbt) ".length());
                 try {
                     return TagParser.parseTagFully(snbt);
-                } catch (CommandSyntaxException e) {
+                } catch (Exception e) {
                     throw new LocalizedResourceConfigException("warning.config.type.snbt.invalid_syntax", e.getMessage());
                 }
             }

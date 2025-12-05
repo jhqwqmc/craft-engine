@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.plugin.config.template;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgument;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.snbt.TagParser;
+import net.momirealms.craftengine.core.util.TagParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public interface ArgumentString {
                 Object parsed;
                 try {
                     parsed = TagParser.parseObjectFully(defaultValueString);
-                } catch (CommandSyntaxException e) {
+                } catch (Exception e) {
                     throw new LocalizedResourceConfigException("warning.config.type.snbt.invalid_syntax", e.getMessage());
                 }
                 try {
