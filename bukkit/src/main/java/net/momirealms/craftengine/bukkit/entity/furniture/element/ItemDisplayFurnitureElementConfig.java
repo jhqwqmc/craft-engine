@@ -45,6 +45,9 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final float shadowStrength;
     public final boolean applyDyedColor;
     public final Color glowColor;
+    public final int blockLight;
+    public final int skyLight;
+    public final float viewRange;
 
     public ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
@@ -58,7 +61,10 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                                              float shadowRadius,
                                              float shadowStrength,
                                              boolean applyDyedColor,
-                                             @Nullable Color glowColor) {
+                                             @Nullable Color glowColor,
+                                             int blockLight,
+                                             int skyLight,
+                                             float viewRange) {
         this.scale = scale;
         this.position = position;
         this.translation = translation;
@@ -72,6 +78,9 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         this.applyDyedColor = applyDyedColor;
         this.itemId = itemId;
         this.glowColor = glowColor;
+        this.blockLight = blockLight;
+        this.skyLight = skyLight;
+        this.viewRange = viewRange;
         BiFunction<Player, FurnitureColorSource, Item<?>> itemFunction = (player, colorSource) -> {
             Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
             if (applyDyedColor && colorSource != null && wrappedItem != null) {
@@ -89,7 +98,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         this.metadata = (player, source) -> {
             List<Object> dataValues = new ArrayList<>();
             if (glowColor != null) {
-                BaseEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+                ItemDisplayEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
                 ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
             }
             ItemDisplayEntityData.DisplayedItem.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
@@ -100,6 +109,10 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
             ItemDisplayEntityData.DisplayType.addEntityData(this.displayContext.id(), dataValues);
             ItemDisplayEntityData.ShadowRadius.addEntityData(this.shadowRadius, dataValues);
             ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
+            if (this.blockLight != -1 && this.skyLight != -1) {
+                ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+            }
+            ItemDisplayEntityData.ViewRange.addEntityData(this.viewRange, dataValues);
             return dataValues;
         };
     }
@@ -157,6 +170,18 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         return this.glowColor;
     }
 
+    public int blockLight() {
+        return this.blockLight;
+    }
+
+    public int skyLight() {
+        return this.skyLight;
+    }
+
+    public float viewRange() {
+        return this.viewRange;
+    }
+
     @Override
     public ItemDisplayFurnitureElement create(@NotNull Furniture furniture) {
         return new ItemDisplayFurnitureElement(furniture, this);
@@ -168,6 +193,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         public ItemDisplayFurnitureElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item_display.missing_item"));
             boolean applyDyedColor = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color");
+            Map<String, Object> brightness = ResourceConfigUtils.getAsMap(arguments.getOrDefault("brightness", Map.of()), "brightness");
             return new ItemDisplayFurnitureElementConfig(
                     itemId,
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
@@ -181,7 +207,10 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength"),
                     applyDyedColor,
-                    Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null)
+                    Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null),
+                    ResourceConfigUtils.getAsInt(brightness.getOrDefault("block-light", -1), "block-light"),
+                    ResourceConfigUtils.getAsInt(brightness.getOrDefault("sky-light", -1), "sky-light"),
+                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", 1f), "view-range")
             );
         }
     }
