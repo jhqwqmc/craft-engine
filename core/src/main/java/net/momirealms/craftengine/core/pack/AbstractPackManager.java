@@ -1419,6 +1419,10 @@ public abstract class AbstractPackManager implements PackManager {
                                                 oggToSoundEvents.put(Key.of(primitive.getAsString()), soundKey);
                                             }
                                         } else if (sound instanceof JsonObject soundObj && soundObj.has("name")) {
+                                            if (soundObj.has("type")) {
+                                                String type = soundObj.get("type").getAsString();
+                                                if (!type.equals("file")) continue;
+                                            }
                                             String name = soundObj.get("name").getAsString();
                                             oggToSoundEvents.put(Key.of(name), soundKey);
                                         }
