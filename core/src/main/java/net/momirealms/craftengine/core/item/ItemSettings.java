@@ -49,6 +49,10 @@ public class ItemSettings {
     Color fireworkColor;
     float keepOnDeathChance = 0f;
     float destroyOnDeathChance = 0f;
+    @Nullable
+    String dropDisplay = Config.defaultDropDisplayFormat();
+    @Nullable
+    LegacyChatFormatter glowColor = null;
     Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private ItemSettings() {}
@@ -113,6 +117,8 @@ public class ItemSettings {
         newSettings.ingredientSubstitutes = settings.ingredientSubstitutes;
         newSettings.keepOnDeathChance = settings.keepOnDeathChance;
         newSettings.destroyOnDeathChance = settings.destroyOnDeathChance;
+        newSettings.glowColor = settings.glowColor;
+        newSettings.dropDisplay = settings.dropDisplay;
         newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
@@ -243,6 +249,16 @@ public class ItemSettings {
         return this.destroyOnDeathChance;
     }
 
+    @Nullable
+    public LegacyChatFormatter glowColor() {
+        return this.glowColor;
+    }
+
+    @Nullable
+    public String dropDisplay() {
+        return this.dropDisplay;
+    }
+
     public ItemSettings fireworkColor(Color color) {
         this.fireworkColor = color;
         return this;
@@ -290,6 +306,11 @@ public class ItemSettings {
 
     public ItemSettings renameable(boolean renameable) {
         this.renameable = renameable;
+        return this;
+    }
+
+    public ItemSettings dropDisplay(String showName) {
+        this.dropDisplay = showName;
         return this;
     }
 
@@ -353,6 +374,11 @@ public class ItemSettings {
         return this;
     }
 
+    public ItemSettings glowColor(LegacyChatFormatter chatFormatter) {
+        this.glowColor = chatFormatter;
+        return this;
+    }
+
     @FunctionalInterface
     public interface Modifier {
 
@@ -394,6 +420,18 @@ public class ItemSettings {
             registerFactory("renameable", (value -> {
                 boolean bool = ResourceConfigUtils.getAsBoolean(value, "renameable");
                 return settings -> settings.renameable(bool);
+            }));
+            registerFactory("drop-display", (value -> {
+                if (value instanceof String name) {
+                    return settings -> settings.dropDisplay(name);
+                } else {
+                    boolean bool = ResourceConfigUtils.getAsBoolean(value, "drop-display");
+                    return settings -> settings.dropDisplay(bool ? "" : null);
+                }
+            }));
+            registerFactory("glow-color", (value -> {
+                LegacyChatFormatter chatFormatter = ResourceConfigUtils.getAsEnum(value, LegacyChatFormatter.class, LegacyChatFormatter.WHITE);
+                return settings -> settings.glowColor(chatFormatter);
             }));
             registerFactory("anvil-repair-item", (value -> {
                 List<AnvilRepairItem> anvilRepairItemList = ResourceConfigUtils.parseConfigAsList(value, material -> {

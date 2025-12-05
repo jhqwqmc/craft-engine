@@ -1,19 +1,33 @@
 package net.momirealms.craftengine.bukkit.plugin.network.handler;
 
+import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.bukkit.entity.data.ItemEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
+import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.bukkit.util.EntityDataUtils;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.CustomItem;
+import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.context.ContextHolder;
+import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
+import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
+import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.network.ByteBufPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
+import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
+import net.momirealms.craftengine.core.plugin.text.minimessage.CustomTagResolver;
+import net.momirealms.craftengine.core.util.AdventureHelper;
+import net.momirealms.craftengine.core.util.ArrayUtils;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class CommonItemPacketHandler implements EntityPacketHandler {
@@ -27,11 +41,14 @@ public class CommonItemPacketHandler implements EntityPacketHandler {
         int id = buf.readVarInt();
         boolean changed = false;
         List<Object> packedItems = FastNMS.INSTANCE.method$ClientboundSetEntityDataPacket$unpack(buf);
+        Component nameToShow = null;
         for (int i = 0; i < packedItems.size(); i++) {
             Object packedItem = packedItems.get(i);
             int entityDataId = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$id(packedItem);
             if (entityDataId != EntityDataUtils.UNSAFE_ITEM_DATA_ID) continue;
             Object nmsItemStack = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$value(packedItem);
+
+            // 可能是其他插件导致的问题
             if (!CoreReflections.clazz$ItemStack.isInstance(nmsItemStack)) {
                 long time = System.currentTimeMillis();
                 if (time - lastWarningTime > 5000) {
@@ -42,14 +59,63 @@ public class CommonItemPacketHandler implements EntityPacketHandler {
                 }
                 continue;
             }
+
+            // 处理 drop-display 物品设置
             ItemStack itemStack = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsItemStack);
+            Item<ItemStack> wrappedItem = BukkitItemManager.instance().wrap(itemStack);
+            Optional<CustomItem<ItemStack>> optionalCustomItem = wrappedItem.getCustomItem();
+            String showName = null;
+            if (optionalCustomItem.isPresent()) {
+                showName = optionalCustomItem.get().settings().dropDisplay();
+            } else if (Config.enableDefaultDropDisplay()) {
+                showName = Config.defaultDropDisplayFormat();
+            }
+
+            // 如果设定了自定义展示名
+            if (showName != null) {
+                PlayerOptionalContext context = NetworkTextReplaceContext.of(user, ContextHolder.builder()
+                        .withParameter(DirectContextParameters.COUNT, itemStack.getAmount()));
+                Optional<Component> optionalHoverComponent = wrappedItem.hoverNameComponent();
+                Component hoverComponent;
+                if (optionalHoverComponent.isPresent()) {
+                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(AdventureHelper.componentToNbt(optionalHoverComponent.get()));
+                    if (tokens.isEmpty()) {
+                        hoverComponent = optionalHoverComponent.get();
+                    } else {
+                        hoverComponent = AdventureHelper.replaceText(optionalHoverComponent.get(), tokens, context);
+                    }
+                } else {
+                    hoverComponent = Component.translatable(itemStack.translationKey());
+                }
+                // 展示名称为空，则显示其hover name
+                if (showName.isEmpty()) {
+                    nameToShow = hoverComponent;
+                }
+                // 显示自定义格式的名字
+                else {
+                    nameToShow = AdventureHelper.miniMessage().deserialize(
+                            showName,
+                            ArrayUtils.appendElementToArrayTail(context.tagResolvers(), new CustomTagResolver("name", hoverComponent))
+                    );
+                }
+            }
+
+            // 转换为客户端侧物品
             Optional<ItemStack> optional = BukkitItemManager.instance().s2c(itemStack, user);
-            if (optional.isEmpty()) continue;
+            if (optional.isEmpty()) {
+                break;
+            }
             changed = true;
             itemStack = optional.get();
             Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);
             packedItems.set(i, FastNMS.INSTANCE.constructor$SynchedEntityData$DataValue(entityDataId, serializer, FastNMS.INSTANCE.method$CraftItemStack$asNMSCopy(itemStack)));
             break;
+        }
+        // 添加自定义显示名
+        if (nameToShow != null) {
+            changed = true;
+            packedItems.add(ItemEntityData.CustomNameVisible.createEntityData(true));
+            packedItems.add(ItemEntityData.CustomName.createEntityData(Optional.of(ComponentUtils.adventureToMinecraft(nameToShow))));
         }
         if (changed) {
             event.setChanged(true);

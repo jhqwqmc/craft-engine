@@ -193,6 +193,8 @@ public class Config {
     protected Map<Key, Integer> item$custom_model_data_starting_value$overrides;
     protected boolean item$always_use_item_model;
     protected String item$default_material = "";
+    protected boolean item$default_drop_display$enable = false;
+    protected String item$default_drop_display$format = null;
 
     protected String equipment$sacrificed_vanilla_armor$type;
     protected Key equipment$sacrificed_vanilla_armor$asset_id;
@@ -471,6 +473,8 @@ public class Config {
         item$custom_model_data_starting_value$default = config.getInt("item.custom-model-data-starting-value.default", 10000);
         item$always_use_item_model = config.getBoolean("item.always-use-item-model", true) && VersionHelper.isOrAbove1_21_2();
         item$default_material = config.getString("item.default-material", "");
+        item$default_drop_display$enable = config.getBoolean("item.default-drop-display.enable", false);
+        item$default_drop_display$format = item$default_drop_display$enable ? config.getString("item.default-drop-display.format", "<arg:count>x <name>"): null;
 
         Section customModelDataOverridesSection = config.getSection("item.custom-model-data-starting-value.overrides");
         if (customModelDataOverridesSection != null) {
@@ -1173,6 +1177,14 @@ public class Config {
 
     public static int zopfliIterations() {
         return instance.resource_pack$optimization$texture$zopfli_iterations;
+    }
+
+    public static boolean enableDefaultDropDisplay() {
+        return instance.item$default_drop_display$enable;
+    }
+
+    public static String defaultDropDisplayFormat() {
+        return instance.item$default_drop_display$format;
     }
 
     public static boolean enableEntityCulling() {

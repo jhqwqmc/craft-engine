@@ -250,6 +250,10 @@ item:
     default: 10000
     overrides:
       paper: 20000
+  # Toggle whether to display the names of dropped items by default and configure the display format. This setting can be overridden for individual items.
+  default-drop-display:
+    enable: false
+    format: "<arg:count>x <name>"
 
 equipment:
   # The sacrificed-vanilla-armor argument determines which vanilla armor gets completely removed (loses all its trims)
