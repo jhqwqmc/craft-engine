@@ -22,6 +22,7 @@ public class ClientChunk {
     public boolean isOccluding(int x, int y, int z) {
         if (this.sections == null) return false;
         int index = sectionIndex(SectionPos.blockToSectionCoord(y));
+        if (index < 0 || index >= this.sections.length) return false;
         ClientSection section = this.sections[index];
         if (section == null) return false;
         return section.isOccluding((y & 15) << 8 | (z & 15) << 4 | x & 15);
@@ -30,6 +31,7 @@ public class ClientChunk {
     public void setOccluding(int x, int y, int z, boolean occluding) {
         if (this.sections == null) return;
         int index = sectionIndex(SectionPos.blockToSectionCoord(y));
+        if (index < 0 || index >= this.sections.length) return;
         ClientSection section = this.sections[index];
         if (section == null) return;
         section.setOccluding((y & 15) << 8 | (z & 15) << 4 | x & 15, occluding);
