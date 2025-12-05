@@ -60,8 +60,19 @@ public class CommonItemPacketHandler implements EntityPacketHandler {
                 continue;
             }
 
-            // 处理 drop-display 物品设置
             ItemStack itemStack = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsItemStack);
+
+            // 转换为客户端侧物品
+            Optional<ItemStack> optional = BukkitItemManager.instance().s2c(itemStack, user);
+            if (optional.isPresent()) {
+                changed = true;
+                itemStack = optional.get();
+                Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);
+                packedItems.set(i, FastNMS.INSTANCE.constructor$SynchedEntityData$DataValue(entityDataId, serializer, FastNMS.INSTANCE.method$CraftItemStack$asNMSCopy(itemStack)));
+            }
+
+            // 处理 drop-display 物品设置
+            // 一定要处理经历过客户端侧组件修改的物品
             Item<ItemStack> wrappedItem = BukkitItemManager.instance().wrap(itemStack);
             Optional<CustomItem<ItemStack>> optionalCustomItem = wrappedItem.getCustomItem();
             String showName = null;
@@ -78,12 +89,7 @@ public class CommonItemPacketHandler implements EntityPacketHandler {
                 Optional<Component> optionalHoverComponent = wrappedItem.hoverNameComponent();
                 Component hoverComponent;
                 if (optionalHoverComponent.isPresent()) {
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(AdventureHelper.componentToNbt(optionalHoverComponent.get()));
-                    if (tokens.isEmpty()) {
-                        hoverComponent = optionalHoverComponent.get();
-                    } else {
-                        hoverComponent = AdventureHelper.replaceText(optionalHoverComponent.get(), tokens, context);
-                    }
+                    hoverComponent = optionalHoverComponent.get();
                 } else {
                     hoverComponent = Component.translatable(itemStack.translationKey());
                 }
@@ -100,15 +106,6 @@ public class CommonItemPacketHandler implements EntityPacketHandler {
                 }
             }
 
-            // 转换为客户端侧物品
-            Optional<ItemStack> optional = BukkitItemManager.instance().s2c(itemStack, user);
-            if (optional.isEmpty()) {
-                break;
-            }
-            changed = true;
-            itemStack = optional.get();
-            Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);
-            packedItems.set(i, FastNMS.INSTANCE.constructor$SynchedEntityData$DataValue(entityDataId, serializer, FastNMS.INSTANCE.method$CraftItemStack$asNMSCopy(itemStack)));
             break;
         }
         // 添加自定义显示名
