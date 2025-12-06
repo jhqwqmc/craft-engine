@@ -46,7 +46,7 @@ public class BukkitEntity extends AbstractEntity {
     }
 
     @Override
-    public int entityID() {
+    public int entityId() {
         return platformEntity().getEntityId();
     }
 

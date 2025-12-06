@@ -71,20 +71,20 @@ public final class PlayerUtils {
             Object previousOffHandItem = player.getItemInHand(InteractionHand.OFF_HAND).getLiteralObject();
             if (isMainHandTotem) {
                 packets.add(NetworkReflections.constructor$ClientboundSetEquipmentPacket.newInstance(
-                        player.entityID(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$MAINHAND, BukkitItemManager.instance().uniqueEmptyItem().item().getLiteralObject()))
+                        player.entityId(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$MAINHAND, BukkitItemManager.instance().uniqueEmptyItem().item().getLiteralObject()))
                 ));
             }
             packets.add(NetworkReflections.constructor$ClientboundSetEquipmentPacket.newInstance(
-                    player.entityID(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$OFFHAND, totemItem))
+                    player.entityId(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$OFFHAND, totemItem))
             ));
             packets.add(NetworkReflections.constructor$ClientboundEntityEventPacket.newInstance(player.serverPlayer(), (byte) 35));
             if (isMainHandTotem) {
                 packets.add(NetworkReflections.constructor$ClientboundSetEquipmentPacket.newInstance(
-                        player.entityID(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$MAINHAND, previousMainHandItem.getLiteralObject()))
+                        player.entityId(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$MAINHAND, previousMainHandItem.getLiteralObject()))
                 ));
             }
             packets.add(NetworkReflections.constructor$ClientboundSetEquipmentPacket.newInstance(
-                    player.entityID(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$OFFHAND, previousOffHandItem))
+                    player.entityId(), List.of(Pair.of(CoreReflections.instance$EquipmentSlot$OFFHAND, previousOffHandItem))
             ));
             if (sound != null || silent) {
                 packets.add(NetworkReflections.constructor$ClientboundStopSoundPacket.newInstance(

@@ -152,7 +152,7 @@ public interface ArgumentString {
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof Complex that)) return false;
+            if (!(o instanceof Complex2 that)) return false;
             return this.rawText.equals(that.rawText);
         }
 

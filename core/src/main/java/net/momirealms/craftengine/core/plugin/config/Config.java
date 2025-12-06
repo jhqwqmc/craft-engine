@@ -215,6 +215,9 @@ public class Config {
     protected int client_optimization$entity_culling$rate_limiting$bucket_size;
     protected int client_optimization$entity_culling$rate_limiting$restore_per_tick;
 
+    protected boolean bedrock_edition_support$enable;
+    protected String bedrock_edition_support$player_prefix;
+
     public Config(CraftEngine plugin) {
         this.plugin = plugin;
         this.configVersion = PluginProperties.getValue("config");
@@ -588,6 +591,10 @@ public class Config {
         client_optimization$entity_culling$rate_limiting$enable = config.getBoolean("client-optimization.entity-culling.rate-limiting.enable", true);
         client_optimization$entity_culling$rate_limiting$bucket_size = config.getInt("client-optimization.entity-culling.rate-limiting.bucket-size", 300);
         client_optimization$entity_culling$rate_limiting$restore_per_tick = config.getInt("client-optimization.entity-culling.rate-limiting.restore-per-tick", 5);
+
+        // bedrock support
+        bedrock_edition_support$enable = config.getBoolean("bedrock-edition-support.enable", true);
+        bedrock_edition_support$player_prefix = config.getString("bedrock-edition-support.player-prefix", "!");
 
         firstTime = false;
     }

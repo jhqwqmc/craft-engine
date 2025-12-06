@@ -274,7 +274,7 @@ public abstract class Furniture implements Cullable {
     }
 
     public int entityId() {
-        return this.metaDataEntity.entityID();
+        return this.metaDataEntity.entityId();
     }
 
     public boolean hasExternalModel() {

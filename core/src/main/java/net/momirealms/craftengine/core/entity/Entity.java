@@ -27,7 +27,7 @@ public interface Entity {
 
     float yRot();
 
-    int entityID();
+    int entityId();
 
     World world();
 
