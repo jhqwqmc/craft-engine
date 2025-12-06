@@ -175,7 +175,7 @@ publishing {
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleaseRepository")
+    dependsOn("publishMavenJavaPublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {
