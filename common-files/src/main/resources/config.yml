@@ -562,7 +562,7 @@ chunk-system:
 client-optimization:
   # Requires a restart to fully apply.
   entity-culling:
-    enable: false
+    enable: true
     # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
     ray-tracing: true
     # Cull entities based on distance
