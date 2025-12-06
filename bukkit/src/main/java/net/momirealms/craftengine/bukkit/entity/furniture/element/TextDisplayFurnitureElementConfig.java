@@ -221,10 +221,9 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
 
         @Override
         public TextDisplayFurnitureElementConfig create(Map<String, Object> arguments) {
-            String text = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("text"), "warning.config.furniture.element.text_display.missing_text");
             Map<String, Object> brightness = ResourceConfigUtils.getAsMap(arguments.getOrDefault("brightness", Map.of()), "brightness");
             return new TextDisplayFurnitureElementConfig(
-                    text,
+                    ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("text"), "warning.config.furniture.element.text_display.missing_text"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
                     ResourceConfigUtils.getAsVector3f(arguments.get("translation"), "translation"),

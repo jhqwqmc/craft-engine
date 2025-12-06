@@ -6,29 +6,36 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.World;
+import org.bukkit.inventory.ItemStack;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<ItemBlockEntityElement> {
     public static final Factory FACTORY = new Factory();
     private final Function<Player, List<Object>> lazyMetadataPacket;
-    private final Function<Player, Item<?>> item;
+    private final Key itemId;
     private final Vector3f position;
 
-    public ItemBlockEntityElementConfig(Function<Player, Item<?>> item, Vector3f position) {
-        this.item = item;
+    public ItemBlockEntityElementConfig(Key itemId, Vector3f position) {
+        this.itemId = itemId;
         this.position = position;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
-            ItemEntityData.Item.addEntityData(item.apply(player).getLiteralObject(), dataValues);
+            Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
+            if (wrappedItem == null) {
+                wrappedItem = Objects.requireNonNull(BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, player));
+            }
+            ItemEntityData.Item.addEntityData(wrappedItem.getLiteralObject(), dataValues);
             ItemEntityData.NoGravity.addEntityData(true, dataValues);
             return dataValues;
         };
@@ -61,8 +68,8 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         return position;
     }
 
-    public Item<?> item(Player player) {
-        return this.item.apply(player);
+    public Key itemId() {
+        return itemId;
     }
 
     public List<Object> metadataValues(Player player) {
@@ -77,9 +84,8 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
 
         @Override
         public ItemBlockEntityElementConfig create(Map<String, Object> arguments) {
-            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item_display.missing_item"));
             return new ItemBlockEntityElementConfig(
-                    player -> BukkitItemManager.instance().createWrappedItem(itemId, player),
+                    Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item.missing_item")),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0.5f), "position")
             );
         }

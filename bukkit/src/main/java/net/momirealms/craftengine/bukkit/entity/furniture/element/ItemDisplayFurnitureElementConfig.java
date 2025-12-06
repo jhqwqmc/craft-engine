@@ -194,11 +194,9 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
 
         @Override
         public ItemDisplayFurnitureElementConfig create(Map<String, Object> arguments) {
-            Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item_display.missing_item"));
-            boolean applyDyedColor = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color");
             Map<String, Object> brightness = ResourceConfigUtils.getAsMap(arguments.getOrDefault("brightness", Map.of()), "brightness");
             return new ItemDisplayFurnitureElementConfig(
-                    itemId,
+                    Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item_display.missing_item")),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
                     ResourceConfigUtils.getAsVector3f(arguments.get("translation"), "translation"),
@@ -209,7 +207,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsEnum(arguments.get("billboard"), Billboard.class, Billboard.FIXED),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength"),
-                    applyDyedColor,
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color"),
                     Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null),
                     ResourceConfigUtils.getAsInt(brightness.getOrDefault("block-light", -1), "block-light"),
                     ResourceConfigUtils.getAsInt(brightness.getOrDefault("sky-light", -1), "sky-light"),

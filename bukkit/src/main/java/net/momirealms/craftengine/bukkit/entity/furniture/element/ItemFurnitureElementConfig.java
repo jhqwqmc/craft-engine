@@ -1,0 +1,93 @@
+package net.momirealms.craftengine.bukkit.entity.furniture.element;
+
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.momirealms.craftengine.bukkit.entity.data.ItemEntityData;
+import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureColorSource;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
+import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemKeys;
+import net.momirealms.craftengine.core.item.data.FireworkExplosion;
+import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+
+public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFurnitureElement> {
+    public static final Factory FACTORY = new Factory();
+    public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
+    public final Key itemId;
+    public final boolean applyDyedColor;
+    public final Vector3f position;
+
+    public ItemFurnitureElementConfig(Key itemId,
+                                      Vector3f position,
+                                      boolean applyDyedColor) {
+        this.position = position;
+        this.applyDyedColor = applyDyedColor;
+        this.itemId = itemId;
+        BiFunction<Player, FurnitureColorSource, Item<?>> itemFunction = (player, colorSource) -> {
+            Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
+            if (applyDyedColor && colorSource != null && wrappedItem != null) {
+                Optional.ofNullable(colorSource.dyedColor()).ifPresent(wrappedItem::dyedColor);
+                Optional.ofNullable(colorSource.fireworkColors()).ifPresent(colors -> wrappedItem.fireworkExplosion(new FireworkExplosion(
+                        FireworkExplosion.Shape.SMALL_BALL,
+                        new IntArrayList(colors),
+                        new IntArrayList(),
+                        false,
+                        false
+                )));
+            }
+            return Optional.ofNullable(wrappedItem).orElseGet(() -> BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null));
+        };
+        this.metadata = (player, source) -> {
+            List<Object> dataValues = new ArrayList<>();
+            ItemEntityData.Item.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
+            ItemEntityData.NoGravity.addEntityData(true, dataValues);
+            return dataValues;
+        };
+    }
+
+    public Vector3f position() {
+        return this.position;
+    }
+
+    public boolean applyDyedColor() {
+        return this.applyDyedColor;
+    }
+
+    public BiFunction<Player, FurnitureColorSource, List<Object>> metadata() {
+        return this.metadata;
+    }
+
+    public Key itemId() {
+        return this.itemId;
+    }
+
+    @Override
+    public ItemFurnitureElement create(@NotNull Furniture furniture) {
+        return new ItemFurnitureElement(furniture, this);
+    }
+
+    public static class Factory implements FurnitureElementConfigFactory<ItemFurnitureElement> {
+
+        @Override
+        public ItemFurnitureElementConfig create(Map<String, Object> arguments) {
+            return new ItemFurnitureElementConfig(
+                    Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item.missing_item")),
+                    ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color")
+            );
+        }
+    }
+}
