@@ -156,7 +156,13 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(xRot, yRot, position, translation, rotation);
+        int result = 17;
+        result = 31 * result + Double.hashCode(xRot);
+        result = 31 * result + Double.hashCode(yRot);
+        result = 31 * result + (position != null ? position.hashCode() : 0);
+        result = 31 * result + (translation != null ? translation.hashCode() : 0);
+        result = 31 * result + (rotation != null ? rotation.hashCode() : 0);
+        return result;
     }
 
     public static class Factory implements BlockEntityElementConfigFactory<TextDisplayBlockEntityElement> {

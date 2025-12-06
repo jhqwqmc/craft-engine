@@ -181,7 +181,7 @@ public final class BlockStateGenerator {
             if (state == null) return thisObj;
             Property<Boolean> waterloggedProperty = (Property<Boolean>) state.owner().value().getProperty("waterlogged");
             if (waterloggedProperty == null) return thisObj;
-            return state.with(waterloggedProperty, (Boolean) args[1]).customBlockState().literalObject();
+            return state.with(waterloggedProperty, (boolean) args[1]).customBlockState().literalObject();
         }
     }
 

@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class SelfHostHttpServer {
-    private static volatile SelfHostHttpServer instance;
+    private static SelfHostHttpServer instance;
     private final Cache<String, String> oneTimePackUrls = Caffeine.newBuilder()
             .maximumSize(1024)
             .scheduler(Scheduler.systemScheduler())
@@ -94,11 +94,7 @@ public final class SelfHostHttpServer {
 
     public static SelfHostHttpServer instance() {
         if (instance == null) {
-            synchronized (SelfHostHttpServer.class) {
-                if (instance == null) {
-                    instance = new SelfHostHttpServer();
-                }
-            }
+            instance = new SelfHostHttpServer();
         }
         return instance;
     }
