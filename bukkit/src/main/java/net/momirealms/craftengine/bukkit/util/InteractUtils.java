@@ -38,15 +38,13 @@ import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.*;
+import org.bukkit.block.data.type.Observer;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class InteractUtils {
     private static final Map<Key, QuadFunction<Player, Item<ItemStack>, BlockData, BlockHitResult, Boolean>> INTERACTIONS = new HashMap<>();
@@ -806,7 +804,7 @@ public final class InteractUtils {
             if (entity instanceof Sheep sheep && sheep.readyToBeSheared() && ArrayUtils.contains(ItemKeys.DYES, item)) {
                 DyeColor sheepColor = sheep.getColor();
                 if (sheepColor != null) {
-                    String color = sheepColor.name().toLowerCase();
+                    String color = sheepColor.name().toLowerCase(Locale.ROOT);
                     return !Key.of(color + "_dye").equals(id);
                 }
             }

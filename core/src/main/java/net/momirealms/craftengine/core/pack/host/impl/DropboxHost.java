@@ -219,7 +219,7 @@ public class DropboxHost implements ResourcePackHost {
             }
 
             String credentials = this.appKey + ":" + this.appSecret;
-            String authHeader = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+            String authHeader = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 
             try (HttpClient client = HttpClient.newBuilder().proxy(this.proxy).build()) {
                 HttpRequest request = HttpRequest.newBuilder()

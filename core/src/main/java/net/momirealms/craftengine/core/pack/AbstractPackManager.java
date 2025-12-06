@@ -167,7 +167,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
         this.initInternalData();
         try (InputStream inputStream = plugin.resourceStream("internal/atlases/blocks.json")) {
-            this.vanillaAtlas = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+            this.vanillaAtlas = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read internal/atlases/blocks.json", e);
         }
@@ -221,7 +221,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadModernItemModel(String path, BiConsumer<Key, ModernItemModel> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : allModelsItems.entrySet()) {
                     if (entry.getValue() instanceof JsonObject modelJson) {
                         callback.accept(Key.of(entry.getKey()), ModernItemModel.fromJson(modelJson));
@@ -236,7 +236,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadInternalData(String path, BiConsumer<Key, JsonObject> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : allModelsItems.entrySet()) {
                     if (entry.getValue() instanceof JsonObject modelJson) {
                         callback.accept(Key.of(entry.getKey()), modelJson);
@@ -251,7 +251,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadInternalList(String path, Consumer<Key> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonArray listJson = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonArray();
+                JsonArray listJson = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonArray();
                 for (JsonElement element : listJson) {
                     if (element instanceof JsonPrimitive primitiveJson) {
                         callback.accept(Key.of("minecraft", primitiveJson.getAsString()));
@@ -1777,7 +1777,7 @@ public abstract class AbstractPackManager implements PackManager {
             if (Files.exists(atlasPath) && Files.isRegularFile(atlasPath)) {
                 try {
                     previousAtlasSources = GsonHelper.readJsonFile(atlasPath).getAsJsonObject().getAsJsonArray("sources");
-                } catch (Exception ignored) {
+                } catch (ClassCastException | IllegalStateException | IOException | JsonParseException ignored) {
                 }
             }
 
@@ -2241,7 +2241,7 @@ public abstract class AbstractPackManager implements PackManager {
                 plugin.logger().warn("Failed to load internal/sounds.json");
                 return;
             }
-            soundTemplate = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+            soundTemplate = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (IOException e) {
             plugin.logger().warn("Failed to load internal/sounds.json", e);
             return;

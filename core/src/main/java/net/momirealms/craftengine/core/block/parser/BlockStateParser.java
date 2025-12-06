@@ -10,10 +10,7 @@ import net.momirealms.craftengine.core.util.StringReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public final class BlockStateParser {
     private static final char START = '[';
@@ -33,7 +30,7 @@ public final class BlockStateParser {
     private Property<?> property;
 
     public BlockStateParser(String data, int cursor) {
-        this.reader = StringReader.simple(data.toLowerCase());
+        this.reader = StringReader.simple(data.toLowerCase(Locale.ROOT));
         this.reader.setCursor(cursor);
         this.cursor = cursor;
         this.replaceCursor = cursor;
@@ -116,7 +113,7 @@ public final class BlockStateParser {
                 suggestPropertyName();
                 return;
             }
-            if (used.contains(property.name().toLowerCase())) return;
+            if (used.contains(property.name().toLowerCase(Locale.ROOT))) return;
             used.add(input);
 
             reader.skipWhitespace();
@@ -159,7 +156,7 @@ public final class BlockStateParser {
         if (!reader.getRemaining().isEmpty()) return;
         String front = readPrefix();
         for (Property<?> p : properties) {
-            if (!used.contains(p.name().toLowerCase()) && p.name().toLowerCase().startsWith(input)) {
+            if (!used.contains(p.name().toLowerCase(Locale.ROOT)) && p.name().toLowerCase(Locale.ROOT).startsWith(input)) {
                 this.suggestions.add(front + p.name() + EQUAL);
             }
         }
@@ -172,7 +169,7 @@ public final class BlockStateParser {
 
     private void suggestValue() {
         for (Object val : property.possibleValues()) {
-            this.suggestions.add(readPrefix() + val.toString().toLowerCase());
+            this.suggestions.add(readPrefix() + val.toString().toLowerCase(Locale.ROOT));
         }
     }
 

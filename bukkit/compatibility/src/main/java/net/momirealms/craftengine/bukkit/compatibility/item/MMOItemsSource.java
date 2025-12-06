@@ -9,6 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 import static java.util.Objects.requireNonNull;
 
 public class MMOItemsSource implements ExternalItemSource<ItemStack> {
@@ -25,7 +27,9 @@ public class MMOItemsSource implements ExternalItemSource<ItemStack> {
             split = split[0].split("_", 2);
         }
         if (split.length == 1) return new ItemStack(Material.AIR);
-        MMOItem mmoItem = MMOItems.plugin.getMMOItem(Type.get(split[0]), split[1].toUpperCase());
+        // 这里与使用和mmoitems相同的转换id方法
+        String mmoItemId = split[1].toUpperCase().replace("-", "_").replace(" ", "_");
+        MMOItem mmoItem = MMOItems.plugin.getMMOItem(Type.get(split[0]), mmoItemId);
         return mmoItem == null ? new ItemStack(Material.AIR) : requireNonNull(mmoItem.newBuilder().build());
     }
 

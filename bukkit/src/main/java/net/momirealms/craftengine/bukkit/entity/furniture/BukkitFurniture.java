@@ -9,6 +9,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityType
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
@@ -115,7 +116,7 @@ public class BukkitFurniture extends Furniture {
         BukkitFurnitureManager.instance().invalidateFurniture(this);
         super.clearColliders();
         this.location = LocationUtils.toLocation(position);
-        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(itemDisplay.getEntityId()); }});
+        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(itemDisplay.getEntityId())));
         for (Player player : itemDisplay.getTrackedPlayers()) {
             BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
         }
@@ -142,7 +143,7 @@ public class BukkitFurniture extends Furniture {
     protected void refresh() {
         ItemDisplay itemDisplay = this.metaEntity.get();
         if (itemDisplay == null) return;
-        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(itemDisplay.getEntityId()); }});
+        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(itemDisplay.getEntityId())));
         Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
                 itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
         for (Player player : itemDisplay.getTrackedPlayers()) {

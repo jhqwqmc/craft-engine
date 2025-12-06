@@ -75,6 +75,11 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         return this.position.equals(that.position);
     }
 
+    @Override
+    public int hashCode() {
+        return this.position.hashCode();
+    }
+
     public static class Factory implements BlockEntityElementConfigFactory<ItemBlockEntityElement> {
 
         @Override

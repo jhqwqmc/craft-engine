@@ -161,6 +161,10 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         return this.applyDyedColor;
     }
 
+    public BiFunction<Player, FurnitureColorSource, List<Object>> metadata() {
+        return this.metadata;
+    }
+
     public Key itemId() {
         return this.itemId;
     }

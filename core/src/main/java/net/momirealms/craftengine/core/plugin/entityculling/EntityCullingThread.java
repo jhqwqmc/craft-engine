@@ -40,8 +40,8 @@ public class EntityCullingThread {
                 long startTime = System.nanoTime();
 
                 for (Player player : CraftEngine.instance().networkManager().onlineUsers()) {
-                    // 使用绝对值确保非负，使用 threads 而不是 threads-1 确保均匀分布
-                    if (Math.abs(player.uuid().hashCode()) % this.threads == this.id) {
+                    // 使用位运算确保非负，使用 threads 而不是 threads-1 确保均匀分布
+                    if ((player.uuid().hashCode() & 0x7FFFFFFF) % this.threads == this.id) {
                         player.entityCullingTick();
                         processed++;
                     }

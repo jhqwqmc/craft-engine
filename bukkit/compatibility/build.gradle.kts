@@ -18,6 +18,7 @@ repositories {
     maven("https://jitpack.io") // sxitem slimefun
     maven("https://repo.codemc.io/repository/maven-public/") // quickshop
     maven("https://repo.nexomc.com/releases/") // nexo
+    maven("https://repo.opencollab.dev/main/") // geyser
 }
 
 dependencies {
@@ -88,6 +89,10 @@ dependencies {
     compileOnly("io.github.Slimefun:Slimefun4:RC-32")
     // QuickShop
     compileOnly("com.ghostchu:quickshop-api:6.2.0.10")
+    // Geyser
+    compileOnly("org.geysermc.geyser:api:2.9.0-SNAPSHOT")
+    // Floodgate
+    compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
 }
 
 java {
