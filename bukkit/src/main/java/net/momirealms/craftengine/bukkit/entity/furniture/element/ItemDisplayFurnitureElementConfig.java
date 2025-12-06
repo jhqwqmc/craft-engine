@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.core.entity.display.Billboard;
@@ -112,7 +111,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
             if (this.blockLight != -1 && this.skyLight != -1) {
                 ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
             }
-            ItemDisplayEntityData.ViewRange.addEntityData(this.viewRange, dataValues);
+            ItemDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
             return dataValues;
         };
     }

@@ -1222,6 +1222,14 @@ public class Config {
         return instance.client_optimization$entity_culling$ray_tracing;
     }
 
+    public static boolean enableBedrockEditionSupport() {
+        return instance.bedrock_edition_support$enable;
+    }
+
+    public static String bedrockEditionPlayerPrefix() {
+        return instance.bedrock_edition_support$player_prefix;
+    }
+
     public YamlDocument loadOrCreateYamlData(String fileName) {
         Path path = this.plugin.dataFolderPath().resolve(fileName);
         if (!Files.exists(path)) {

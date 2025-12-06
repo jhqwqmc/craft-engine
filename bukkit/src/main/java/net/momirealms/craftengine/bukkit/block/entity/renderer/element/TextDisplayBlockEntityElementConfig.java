@@ -76,7 +76,7 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
             if (this.blockLight != -1 && this.skyLight != -1) {
                 ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
             }
-            ItemDisplayEntityData.ViewRange.addEntityData(this.viewRange, dataValues);
+            ItemDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
             return dataValues;
         };
     }
@@ -97,7 +97,7 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
 
     @Override
     public TextDisplayBlockEntityElement createExact(World world, BlockPos pos, TextDisplayBlockEntityElement previous) {
-        if (!previous.config.equals(this)) {
+        if (!previous.config.isSamePosition(this)) {
             return null;
         }
         return new TextDisplayBlockEntityElement(this, pos, previous.entityId, false);
@@ -144,25 +144,12 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
         return this.lazyMetadataPacket.apply(player);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof TextDisplayBlockEntityElementConfig that)) return false;
+    public boolean isSamePosition(TextDisplayBlockEntityElementConfig that) {
         return Float.compare(xRot, that.xRot) == 0 &&
                 Float.compare(yRot, that.yRot) == 0 &&
                 Objects.equal(position, that.position) &&
                 Objects.equal(translation, that.translation) &&
                 Objects.equal(rotation, that.rotation);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + Double.hashCode(xRot);
-        result = 31 * result + Double.hashCode(yRot);
-        result = 31 * result + (position != null ? position.hashCode() : 0);
-        result = 31 * result + (translation != null ? translation.hashCode() : 0);
-        result = 31 * result + (rotation != null ? rotation.hashCode() : 0);
-        return result;
     }
 
     public static class Factory implements BlockEntityElementConfigFactory<TextDisplayBlockEntityElement> {

@@ -46,7 +46,7 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
 
     @Override
     public ItemBlockEntityElement createExact(World world, BlockPos pos, ItemBlockEntityElement previous) {
-        if (!previous.config.equals(this)) {
+        if (!previous.config.isSamePosition(this)) {
             return null;
         }
         return new ItemBlockEntityElement(this, pos, previous.entityId1, previous.entityId2, false);
@@ -69,15 +69,8 @@ public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<It
         return this.lazyMetadataPacket.apply(player);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ItemBlockEntityElementConfig that)) return false;
+    public boolean isSamePosition(ItemBlockEntityElementConfig that) {
         return this.position.equals(that.position);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.position.hashCode();
     }
 
     public static class Factory implements BlockEntityElementConfigFactory<ItemBlockEntityElement> {

@@ -79,7 +79,8 @@ import java.util.function.Predicate;
 
 public class BukkitServerPlayer extends Player {
     public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
-    public static final Key ENTITY_CULLING_VIEW_DISTANCE_SCALE = Key.of("craftengine:entity_culling_view_distance_scale");
+    public static final Key ENTITY_CULLING_DISTANCE_SCALE = Key.of("craftengine:entity_culling_distance_scale");
+    public static final Key DISPLAY_ENTITY_VIEW_DISTANCE_SCALE = Key.of("craftengine:display_entity_view_distance_scale");
     public static final Key ENABLE_ENTITY_CULLING = Key.of("craftengine:enable_entity_culling");
     public static final Key ENABLE_FURNITURE_DEBUG = Key.of("craftengine:enable_furniture_debug");
     private final BukkitCraftEngine plugin;
@@ -165,6 +166,8 @@ public class BukkitServerPlayer extends Player {
     private BukkitFurniture lastHitFurniture;
     // 缓存的tick
     private int lastHitFurnitureTick;
+    // 控制展示实体可见距离
+    private double displayEntityViewDistance;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -190,7 +193,8 @@ public class BukkitServerPlayer extends Player {
         this.isNameVerified = true;
         byte[] bytes = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(CooldownData.COOLDOWN_KEY), PersistentDataType.BYTE_ARRAY);
         String locale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(SELECTED_LOCALE_KEY), PersistentDataType.STRING);
-        Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE);
+        Double scale = player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENTITY_CULLING_DISTANCE_SCALE), PersistentDataType.DOUBLE);
+        this.displayEntityViewDistance = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(DISPLAY_ENTITY_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE)).orElse(1d);
         this.enableEntityCulling = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_ENTITY_CULLING), PersistentDataType.BOOLEAN)).orElse(true);
         this.enableFurnitureDebug = Optional.ofNullable(player.getPersistentDataContainer().get(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN)).orElse(false);
         this.culling.setDistanceScale(Optional.ofNullable(scale).orElse(1.0));
@@ -1400,10 +1404,22 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public void setEntityCullingViewDistanceScale(double value) {
+    public void setEntityCullingDistanceScale(double value) {
         value = Math.min(Math.max(0.125, value), 8);
         this.culling.setDistanceScale(value);
-        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENTITY_CULLING_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE, value);
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENTITY_CULLING_DISTANCE_SCALE), PersistentDataType.DOUBLE, value);
+    }
+
+    @Override
+    public void setDisplayEntityViewDistanceScale(double value) {
+        value = Math.min(Math.max(0.125, value), 8);
+        this.displayEntityViewDistance = value;
+        platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(DISPLAY_ENTITY_VIEW_DISTANCE_SCALE), PersistentDataType.DOUBLE, value);
+    }
+
+    @Override
+    public double displayEntityViewDistance() {
+        return this.displayEntityViewDistance;
     }
 
     @Override
