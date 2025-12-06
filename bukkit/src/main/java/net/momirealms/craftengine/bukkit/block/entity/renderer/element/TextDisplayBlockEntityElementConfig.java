@@ -24,15 +24,15 @@ import java.util.function.Function;
 
 public class TextDisplayBlockEntityElementConfig implements BlockEntityElementConfig<TextDisplayBlockEntityElement> {
     public static final Factory FACTORY = new Factory();
-    private final Function<Player, List<Object>> lazyMetadataPacket;
-    private final String text;
-    private final Vector3f scale;
-    private final Vector3f position;
-    private final Vector3f translation;
-    private final float xRot;
-    private final float yRot;
-    private final Quaternionf rotation;
-    private final Billboard billboard;
+    public final Function<Player, List<Object>> lazyMetadataPacket;
+    public final String text;
+    public final Vector3f scale;
+    public final Vector3f position;
+    public final Vector3f translation;
+    public final float xRot;
+    public final float yRot;
+    public final Quaternionf rotation;
+    public final Billboard billboard;
     public final Color glowColor;
     public final int blockLight;
     public final int skyLight;

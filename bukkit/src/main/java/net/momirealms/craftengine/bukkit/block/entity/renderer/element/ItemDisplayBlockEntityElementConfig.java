@@ -28,22 +28,22 @@ import java.util.function.Function;
 
 public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementConfig<ItemDisplayBlockEntityElement> {
     public static final Factory FACTORY = new Factory();
-    private final Function<Player, List<Object>> lazyMetadataPacket;
-    private final Key itemId;
-    private final Vector3f scale;
-    private final Vector3f position;
-    private final Vector3f translation;
-    private final float xRot;
-    private final float yRot;
-    private final Quaternionf rotation;
-    private final ItemDisplayContext displayContext;
-    private final Billboard billboard;
-    private final float shadowRadius;
-    private final float shadowStrength;
-    private final Color glowColor;
-    private final int blockLight;
-    private final int skyLight;
-    private final float viewRange;
+    public final Function<Player, List<Object>> lazyMetadataPacket;
+    public final Key itemId;
+    public final Vector3f scale;
+    public final Vector3f position;
+    public final Vector3f translation;
+    public final float xRot;
+    public final float yRot;
+    public final Quaternionf rotation;
+    public final ItemDisplayContext displayContext;
+    public final Billboard billboard;
+    public final float shadowRadius;
+    public final float shadowStrength;
+    public final Color glowColor;
+    public final int blockLight;
+    public final int skyLight;
+    public final float viewRange;
 
     public ItemDisplayBlockEntityElementConfig(Key itemId,
                                                Vector3f scale,

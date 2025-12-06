@@ -811,8 +811,7 @@ public class BukkitServerPlayer extends Player {
                 if (VersionHelper.isOrAbove1_20_5()) {
                     Object serverPlayer = serverPlayer();
                     Object attributeInstance = CoreReflections.methodHandle$ServerPlayer$getAttributeMethod.invokeExact(serverPlayer, MAttributeHolders.BLOCK_BREAK_SPEED);
-                    Object newPacket = NetworkReflections.methodHandle$ClientboundUpdateAttributesPacket0Constructor.invokeExact(entityId(), (List<?>) Lists.newArrayList(attributeInstance));
-                    sendPacket(newPacket, true);
+                    sendPacket(FastNMS.INSTANCE.constructor$ClientboundUpdateAttributesPacket(entityId(), Lists.newArrayList(attributeInstance)), true);
                 } else {
                     resetEffect(MMobEffects.MINING_FATIGUE);
                     resetEffect(MMobEffects.HASTE);

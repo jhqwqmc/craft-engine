@@ -4,12 +4,10 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MAttributeHolders;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkReflections;
 import net.momirealms.craftengine.core.entity.furniture.Collider;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -45,13 +43,9 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
         ));
         packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityId, config.cachedValues()));
         if (VersionHelper.isOrAbove1_20_5()) {
-            try {
-                Object attributeInstance = CoreReflections.constructor$AttributeInstance.newInstance(MAttributeHolders.SCALE, (Consumer<?>) (o) -> {});
-                CoreReflections.method$AttributeInstance$setBaseValue.invoke(attributeInstance, config.scale());
-                packets.add(NetworkReflections.constructor$ClientboundUpdateAttributesPacket0.newInstance(entityId, Collections.singletonList(attributeInstance)));
-            } catch (ReflectiveOperationException e) {
-                CraftEngine.instance().logger().warn("Failed to apply scale attribute", e);
-            }
+            Object attributeIns = FastNMS.INSTANCE.constructor$AttributeInstance(MAttributeHolders.SCALE, (Consumer<?>) (o) -> {});
+            FastNMS.INSTANCE.method$AttributeInstance$setBaseValue(attributeIns, config.scale());
+            packets.add(FastNMS.INSTANCE.constructor$ClientboundUpdateAttributesPacket(entityId, Collections.singletonList(attributeIns)));
         }
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
         this.part = new FurnitureHitboxPart(entityId, aabb, pos, false);

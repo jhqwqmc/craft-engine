@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
 import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.world.Glowing;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.joml.Vector3f;
 
@@ -218,6 +219,13 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 Map<String, Object> variantArguments = ResourceConfigUtils.getAsMap(e0.getValue(), variantName);
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
                 List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
+
+                // 收集颜色
+                for (FurnitureElementConfig<?> element : elements) {
+                    if (element instanceof Glowing glowing && glowing.glowColor() != null) {
+                        AbstractFurnitureManager.this.plugin.teamManager().setColorInUse(glowing.glowColor());
+                    }
+                }
 
                 // 外部模型
                 Optional<ExternalModel> externalModel;

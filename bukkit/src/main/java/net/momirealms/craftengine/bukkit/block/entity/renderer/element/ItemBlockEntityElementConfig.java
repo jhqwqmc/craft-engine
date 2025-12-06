@@ -22,9 +22,9 @@ import java.util.function.Function;
 
 public class ItemBlockEntityElementConfig implements BlockEntityElementConfig<ItemBlockEntityElement> {
     public static final Factory FACTORY = new Factory();
-    private final Function<Player, List<Object>> lazyMetadataPacket;
-    private final Key itemId;
-    private final Vector3f position;
+    public final Function<Player, List<Object>> lazyMetadataPacket;
+    public final Key itemId;
+    public final Vector3f position;
 
     public ItemBlockEntityElementConfig(Key itemId, Vector3f position) {
         this.itemId = itemId;

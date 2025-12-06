@@ -13,9 +13,12 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.world.Glowing;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -24,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement> {
+public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement>, Glowing {
     public static final Factory FACTORY = new Factory();
     public final Function<Player, List<Object>> metadata;
     public final Key itemId;
@@ -32,23 +35,31 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
     public final boolean applyDyedColor;
     public final Vector3f position;
     public final boolean small;
+    public final LegacyChatFormatter glowColor;
 
     public ArmorStandFurnitureElementConfig(Key itemId,
                                             float scale,
                                             Vector3f position,
                                             boolean applyDyedColor,
-                                            boolean small) {
+                                            boolean small,
+                                            LegacyChatFormatter glowColor) {
         this.position = position;
         this.applyDyedColor = applyDyedColor;
         this.small = small;
         this.scale = scale;
         this.itemId = itemId;
+        this.glowColor = glowColor;
         this.metadata = (player) -> {
             List<Object> dataValues = new ArrayList<>(2);
-            BaseEntityData.SharedFlags.addEntityData((byte) 0x20, dataValues);
+            if (glowColor != null) {
+                BaseEntityData.SharedFlags.addEntityData((byte) 0x60, dataValues);
+            } else {
+                BaseEntityData.SharedFlags.addEntityData((byte) 0x20, dataValues);
+            }
             if (small) {
                 ArmorStandData.ArmorStandFlags.addEntityData((byte) 0x01, dataValues);
             }
+
             return dataValues;
         };
     }
@@ -66,6 +77,12 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
             )));
         }
         return Optional.ofNullable(wrappedItem).orElseGet(() -> BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null));
+    }
+
+    @Nullable
+    @Override
+    public LegacyChatFormatter glowColor() {
+        return this.glowColor;
     }
 
     public float scale() {
@@ -102,7 +119,8 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("small", false), "small")
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("small", false), "small"),
+                    ResourceConfigUtils.getAsEnum(arguments.get("glow-color"), LegacyChatFormatter.class, null)
             );
         }
     }

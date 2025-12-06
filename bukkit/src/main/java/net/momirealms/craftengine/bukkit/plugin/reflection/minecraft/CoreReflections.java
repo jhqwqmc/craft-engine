@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -2863,12 +2862,12 @@ public final class CoreReflections {
     );
 
     // 1.20.5+
-    public static final Constructor<?> constructor$AttributeInstance =
-            ReflectionUtils.getConstructor(clazz$AttributeInstance, clazz$Holder, Consumer.class);
+//    public static final Constructor<?> constructor$AttributeInstance =
+//            ReflectionUtils.getConstructor(clazz$AttributeInstance, clazz$Holder, Consumer.class);
 
-    public static final Method method$AttributeInstance$setBaseValue = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AttributeInstance, void.class, double.class)
-    );
+//    public static final Method method$AttributeInstance$setBaseValue = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AttributeInstance, void.class, double.class)
+//    );
 
     public static final Class<?> clazz$Rotation = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
