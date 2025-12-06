@@ -2,6 +2,7 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer.element;
 
 import com.google.common.base.Objects;
 import net.momirealms.craftengine.bukkit.entity.data.ItemDisplayEntityData;
+import net.momirealms.craftengine.bukkit.entity.data.TextDisplayEntityData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
@@ -78,6 +79,9 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
             if (glowColor != null) {
                 ItemDisplayEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
                 ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+            } else {
+                ItemDisplayEntityData.SharedFlags.addEntityData((byte) 0x0, dataValues);
+                ItemDisplayEntityData.GlowColorOverride.addEntityData(-1, dataValues);
             }
             ItemDisplayEntityData.DisplayedItem.addEntityData(item.apply(player).getLiteralObject(), dataValues);
             ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
@@ -89,6 +93,8 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
             ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
             if (this.blockLight != -1 && this.skyLight != -1) {
                 ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+            } else {
+                ItemDisplayEntityData.BrightnessOverride.addEntityData(-1, dataValues);
             }
             ItemDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
             return dataValues;

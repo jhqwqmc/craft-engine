@@ -22,7 +22,14 @@ public abstract class BlockEntityElementConfigs {
     }
 
     public static <E extends BlockEntityElement> BlockEntityElementConfig<E> fromMap(Map<String, Object> arguments) {
-        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(it -> Key.withDefaultNamespace(it, "craftengine")).orElse(ITEM_DISPLAY);
+        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(it -> Key.withDefaultNamespace(it, "craftengine")).orElse(null);
+        if (type == null) {
+            if (arguments.containsKey("text")) {
+                type = TEXT_DISPLAY;
+            } else {
+                type = ITEM_DISPLAY;
+            }
+        }
         @SuppressWarnings("unchecked")
         BlockEntityElementConfigFactory<E> factory = (BlockEntityElementConfigFactory<E>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE.getValue(type);
         if (factory == null) {

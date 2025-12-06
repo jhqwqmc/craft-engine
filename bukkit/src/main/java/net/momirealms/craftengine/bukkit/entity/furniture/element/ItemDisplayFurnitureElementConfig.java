@@ -101,17 +101,17 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                 ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
             }
             ItemDisplayEntityData.DisplayedItem.addEntityData(itemFunction.apply(player, source).getLiteralObject(), dataValues);
-            ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
-            ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
-            ItemDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
-            ItemDisplayEntityData.Translation.addEntityData(this.translation, dataValues);
-            ItemDisplayEntityData.DisplayType.addEntityData(this.displayContext.id(), dataValues);
-            ItemDisplayEntityData.ShadowRadius.addEntityData(this.shadowRadius, dataValues);
-            ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
+            ItemDisplayEntityData.Scale.addEntityDataIfNotDefaultValue(this.scale, dataValues);
+            ItemDisplayEntityData.RotationLeft.addEntityDataIfNotDefaultValue(this.rotation, dataValues);
+            ItemDisplayEntityData.BillboardConstraints.addEntityDataIfNotDefaultValue(this.billboard.id(), dataValues);
+            ItemDisplayEntityData.Translation.addEntityDataIfNotDefaultValue(this.translation, dataValues);
+            ItemDisplayEntityData.DisplayType.addEntityDataIfNotDefaultValue(this.displayContext.id(), dataValues);
+            ItemDisplayEntityData.ShadowRadius.addEntityDataIfNotDefaultValue(this.shadowRadius, dataValues);
+            ItemDisplayEntityData.ShadowStrength.addEntityDataIfNotDefaultValue(this.shadowStrength, dataValues);
             if (this.blockLight != -1 && this.skyLight != -1) {
                 ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
             }
-            ItemDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
+            ItemDisplayEntityData.ViewRange.addEntityDataIfNotDefaultValue((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
             return dataValues;
         };
     }
@@ -216,24 +216,5 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", 1f), "view-range")
             );
         }
-    }
-
-    @Override
-    public String toString() {
-        return "ItemDisplayFurnitureElementConfig{" +
-                "metadata=" + metadata +
-                ", itemId=" + itemId +
-                ", scale=" + scale +
-                ", position=" + position +
-                ", translation=" + translation +
-                ", xRot=" + xRot +
-                ", yRot=" + yRot +
-                ", rotation=" + rotation +
-                ", displayContext=" + displayContext +
-                ", billboard=" + billboard +
-                ", shadowRadius=" + shadowRadius +
-                ", shadowStrength=" + shadowStrength +
-                ", applyDyedColor=" + applyDyedColor +
-                '}';
     }
 }

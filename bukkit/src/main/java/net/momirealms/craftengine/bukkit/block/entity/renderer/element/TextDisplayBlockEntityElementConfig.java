@@ -8,6 +8,7 @@ import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.display.Billboard;
+import net.momirealms.craftengine.core.entity.display.TextDisplayAlignment;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.util.AdventureHelper;
@@ -37,6 +38,13 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
     public final int blockLight;
     public final int skyLight;
     public final float viewRange;
+    public final int lineWidth;
+    public final int backgroundColor;
+    public final byte opacity;
+    public final boolean hasShadow;
+    public final boolean isSeeThrough;
+    public final boolean useDefaultBackgroundColor;
+    public final TextDisplayAlignment alignment;
 
     public TextDisplayBlockEntityElementConfig(String text,
                                                Vector3f scale,
@@ -49,7 +57,14 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
                                                @Nullable Color glowColor,
                                                int blockLight,
                                                int skyLight,
-                                               float viewRange) {
+                                               float viewRange,
+                                               int lineWidth,
+                                               int backgroundColor,
+                                               byte opacity,
+                                               boolean hasShadow,
+                                               boolean isSeeThrough,
+                                               boolean useDefaultBackgroundColor,
+                                               TextDisplayAlignment alignment) {
         this.text = text;
         this.scale = scale;
         this.position = position;
@@ -62,21 +77,37 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
         this.blockLight = blockLight;
         this.skyLight = skyLight;
         this.viewRange = viewRange;
+        this.lineWidth = lineWidth;
+        this.backgroundColor = backgroundColor;
+        this.opacity = opacity;
+        this.hasShadow = hasShadow;
+        this.useDefaultBackgroundColor = useDefaultBackgroundColor;
+        this.alignment = alignment;
+        this.isSeeThrough = isSeeThrough;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
             if (glowColor != null) {
-                ItemDisplayEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
-                ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+                TextDisplayEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+                TextDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+            } else {
+                TextDisplayEntityData.SharedFlags.addEntityData((byte) 0x0, dataValues);
+                TextDisplayEntityData.GlowColorOverride.addEntityData(-1, dataValues);
             }
             TextDisplayEntityData.Text.addEntityData(ComponentUtils.adventureToMinecraft(text(player)), dataValues);
             TextDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
             TextDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
             TextDisplayEntityData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues);
             TextDisplayEntityData.Translation.addEntityData(this.translation, dataValues);
+            TextDisplayEntityData.LineWidth.addEntityData(this.lineWidth, dataValues);
+            TextDisplayEntityData.BackgroundColor.addEntityData(this.backgroundColor, dataValues);
+            TextDisplayEntityData.TextOpacity.addEntityData(this.opacity, dataValues);
+            TextDisplayEntityData.TextDisplayMasks.addEntityData(TextDisplayEntityData.encodeMask(this.hasShadow, this.isSeeThrough, this.useDefaultBackgroundColor, this.alignment), dataValues);
             if (this.blockLight != -1 && this.skyLight != -1) {
-                ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+                TextDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+            } else {
+                TextDisplayEntityData.BrightnessOverride.addEntityData(-1, dataValues);
             }
-            ItemDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
+            TextDisplayEntityData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues);
             return dataValues;
         };
     }
@@ -170,7 +201,14 @@ public class TextDisplayBlockEntityElementConfig implements BlockEntityElementCo
                     Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null),
                     ResourceConfigUtils.getAsInt(brightness.getOrDefault("block-light", -1), "block-light"),
                     ResourceConfigUtils.getAsInt(brightness.getOrDefault("sky-light", -1), "sky-light"),
-                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", 1f), "view-range")
+                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", 1f), "view-range"),
+                    ResourceConfigUtils.getAsInt(arguments.getOrDefault("line-width", 200), "line-width"),
+                    ResourceConfigUtils.getOrDefault(arguments.get("background-color"), o -> Color.fromStrings(o.toString().split(",")).color(), 0x40000000),
+                    (byte) ResourceConfigUtils.getAsInt(arguments.getOrDefault("text-opacity", -1), "text-opacity"),
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("has-shadow", false), "has-shadow"),
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-see-through", false), "is-see-through"),
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-default-background-color", false), "use-default-background-color"),
+                    ResourceConfigUtils.getAsEnum(arguments.get("alignment"), TextDisplayAlignment.class, TextDisplayAlignment.CENTER)
             );
         }
     }

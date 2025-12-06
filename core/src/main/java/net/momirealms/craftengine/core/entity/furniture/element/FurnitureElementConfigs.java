@@ -14,6 +14,7 @@ public class FurnitureElementConfigs {
     public static final Key ITEM_DISPLAY = Key.of("craftengine:item_display");
     public static final Key TEXT_DISPLAY = Key.of("craftengine:text_display");
     public static final Key ITEM = Key.of("craftengine:item");
+    public static final Key ARMOR_STAND = Key.of("craftengine:armor_stand");
 
     public static void register(Key key, FurnitureElementConfigFactory<?> type) {
         ((WritableRegistry<FurnitureElementConfigFactory<?>>) BuiltInRegistries.FURNITURE_ELEMENT_TYPE)
@@ -21,7 +22,14 @@ public class FurnitureElementConfigs {
     }
 
     public static <E extends FurnitureElement> FurnitureElementConfig<E> fromMap(Map<String, Object> arguments) {
-        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(it -> Key.withDefaultNamespace(it, "craftengine")).orElse(ITEM_DISPLAY);
+        Key type = Optional.ofNullable(arguments.get("type")).map(String::valueOf).map(it -> Key.withDefaultNamespace(it, "craftengine")).orElse(null);
+        if (type == null) {
+            if (arguments.containsKey("text")) {
+                type = TEXT_DISPLAY;
+            } else {
+                type = ITEM_DISPLAY;
+            }
+        }
         @SuppressWarnings("unchecked")
         FurnitureElementConfigFactory<E> factory = (FurnitureElementConfigFactory<E>) BuiltInRegistries.FURNITURE_ELEMENT_TYPE.getValue(type);
         if (factory == null) {

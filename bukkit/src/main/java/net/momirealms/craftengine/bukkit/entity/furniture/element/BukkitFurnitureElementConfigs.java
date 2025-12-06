@@ -6,6 +6,7 @@ public class BukkitFurnitureElementConfigs extends FurnitureElementConfigs {
 
     static {
         register(ITEM_DISPLAY, ItemDisplayFurnitureElementConfig.FACTORY);
+        register(TEXT_DISPLAY, TextDisplayFurnitureElementConfig.FACTORY);
     }
 
     private BukkitFurnitureElementConfigs() {}

@@ -236,6 +236,7 @@ warning.config.furniture.duplicate: "<yellow>Issue found in file <arg:0> - Dupli
 warning.config.furniture.missing_variants: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is missing the required 'variants' argument.</yellow>"
 warning.config.furniture.element.invalid_type: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is using an invalid element type '<arg:2>'.</yellow>"
 warning.config.furniture.element.item_display.missing_item: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is missing the required 'item' argument for 'item_display' element.</yellow>"
+warning.config.furniture.element.text_display.missing_text: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is missing the required 'text' argument for 'text_display' element.</yellow>"
 warning.config.furniture.settings.unknown: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is using an unknown setting type '<arg:2>'.</yellow>"
 warning.config.furniture.hitbox.invalid_type: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is using an invalid hitbox type '<arg:2>'.</yellow>"
 warning.config.furniture.hitbox.custom.invalid_entity: "<yellow>Issue found in file <arg:0> - The furniture '<arg:1>' is using a custom hitbox with invalid entity type '<arg:2>'.</yellow>"

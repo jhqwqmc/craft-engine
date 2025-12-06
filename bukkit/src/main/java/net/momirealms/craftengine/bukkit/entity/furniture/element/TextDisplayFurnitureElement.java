@@ -16,22 +16,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ItemDisplayFurnitureElement implements FurnitureElement {
-    private final ItemDisplayFurnitureElementConfig config;
+public class TextDisplayFurnitureElement implements FurnitureElement {
+    private final TextDisplayFurnitureElementConfig config;
     private final WorldPosition position;
     private final int entityId;
     private final Object despawnPacket;
-    private final FurnitureColorSource colorSource;
     private final UUID uuid = UUID.randomUUID();
 
-    public ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config) {
+    public TextDisplayFurnitureElement(Furniture furniture, TextDisplayFurnitureElementConfig config) {
         this.config = config;
         this.entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         WorldPosition furniturePos = furniture.position();
         Vec3d position = Furniture.getRelativePosition(furniturePos, config.position());
         this.position = new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot, furniturePos.yRot);
         this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), a -> a.add(entityId)));
-        this.colorSource = furniture.dataAccessor.getColorSource();
     }
 
     @Override
@@ -40,9 +38,9 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
                 FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                         this.entityId, this.uuid,
                         this.position.x, this.position.y, this.position.z, 0, this.position.yRot,
-                        MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
+                        MEntityTypes.TEXT_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
                 ),
-                FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata.apply(player, this.colorSource))
+                FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata.apply(player))
         )), false);
     }
 

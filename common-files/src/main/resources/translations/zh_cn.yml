@@ -236,6 +236,7 @@ warning.config.furniture.duplicate: "<yellow>在文件 <arg:0> 发现问题 - �
 warning.config.furniture.missing_variants: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 缺少必需的 'variants' 参数</yellow>"
 warning.config.furniture.element.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 使用了无效的元素类型 '<arg:2>'</yellow>"
 warning.config.furniture.element.item_display.missing_item: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 的 'item_display' 元素缺少必需的 'item' 参数</yellow>"
+warning.config.furniture.element.text_display.missing_text: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 的 'text_display' 元素缺少必需的 'text' 参数</yellow>"
 warning.config.furniture.settings.unknown: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 使用了未知的设置类型 '<arg:2>'</yellow>"
 warning.config.furniture.hitbox.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 使用了无效的碰撞箱类型 '<arg:2>'</yellow>"
 warning.config.furniture.hitbox.custom.invalid_entity: "<yellow>在文件 <arg:0> 发现问题 - 家具 '<arg:1>' 的自定义碰撞箱使用了无效的实体类型 '<arg:2>'</yellow>"
