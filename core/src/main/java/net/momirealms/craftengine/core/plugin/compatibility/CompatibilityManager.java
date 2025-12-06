@@ -42,4 +42,6 @@ public interface CompatibilityManager {
     void executeMMSkill(String skill, float power, Player player);
 
     TagResolver[] createExternalTagResolvers(Context context);
+
+    boolean isBedrockPlayer(Player player);
 }

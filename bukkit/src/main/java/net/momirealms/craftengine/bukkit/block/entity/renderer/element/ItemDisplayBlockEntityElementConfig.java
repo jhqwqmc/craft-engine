@@ -9,16 +9,19 @@ import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementConfig<ItemDisplayBlockEntityElement> {
@@ -35,6 +38,10 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
     private final Billboard billboard;
     private final float shadowRadius;
     private final float shadowStrength;
+    private final Color glowColor;
+    private final int blockLight;
+    private final int skyLight;
+    private final float viewRange;
 
     public ItemDisplayBlockEntityElementConfig(Function<Player, Item<?>> item,
                                                Vector3f scale,
@@ -46,7 +53,11 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
                                                ItemDisplayContext displayContext,
                                                Billboard billboard,
                                                float shadowRadius,
-                                               float shadowStrength) {
+                                               float shadowStrength,
+                                               @Nullable Color glowColor,
+                                               int blockLight,
+                                               int skyLight,
+                                               float viewRange) {
         this.item = item;
         this.scale = scale;
         this.position = position;
@@ -58,8 +69,16 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
         this.billboard = billboard;
         this.shadowRadius = shadowRadius;
         this.shadowStrength = shadowStrength;
+        this.glowColor = glowColor;
+        this.blockLight = blockLight;
+        this.skyLight = skyLight;
+        this.viewRange = viewRange;
         this.lazyMetadataPacket = player -> {
             List<Object> dataValues = new ArrayList<>();
+            if (glowColor != null) {
+                ItemDisplayEntityData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+                ItemDisplayEntityData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+            }
             ItemDisplayEntityData.DisplayedItem.addEntityData(item.apply(player).getLiteralObject(), dataValues);
             ItemDisplayEntityData.Scale.addEntityData(this.scale, dataValues);
             ItemDisplayEntityData.RotationLeft.addEntityData(this.rotation, dataValues);
@@ -68,6 +87,10 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
             ItemDisplayEntityData.DisplayType.addEntityData(this.displayContext.id(), dataValues);
             ItemDisplayEntityData.ShadowRadius.addEntityData(this.shadowRadius, dataValues);
             ItemDisplayEntityData.ShadowStrength.addEntityData(this.shadowStrength, dataValues);
+            if (this.blockLight != -1 && this.skyLight != -1) {
+                ItemDisplayEntityData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+            }
+            ItemDisplayEntityData.ViewRange.addEntityData(this.viewRange, dataValues);
             return dataValues;
         };
     }
@@ -157,11 +180,17 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
                 Objects.equal(rotation, that.rotation);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(xRot, yRot, position, translation, rotation);
+    }
+
     public static class Factory implements BlockEntityElementConfigFactory<ItemDisplayBlockEntityElement> {
 
         @Override
         public ItemDisplayBlockEntityElementConfig create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.block.state.entity_renderer.item_display.missing_item"));
+            Map<String, Object> brightness = ResourceConfigUtils.getAsMap(arguments.getOrDefault("brightness", Map.of()), "brightness");
             return new ItemDisplayBlockEntityElementConfig(
                     player -> BukkitItemManager.instance().createWrappedItem(itemId, player),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
@@ -173,7 +202,11 @@ public class ItemDisplayBlockEntityElementConfig implements BlockEntityElementCo
                     ResourceConfigUtils.getAsEnum(ResourceConfigUtils.get(arguments, "display-context", "display-transform"), ItemDisplayContext.class, ItemDisplayContext.NONE),
                     ResourceConfigUtils.getAsEnum(arguments.get("billboard"), Billboard.class, Billboard.FIXED),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-radius", 0f), "shadow-radius"),
-                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength")
+                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("shadow-strength", 1f), "shadow-strength"),
+                    Optional.ofNullable(arguments.get("glow-color")).map(it -> Color.fromStrings(it.toString().split(","))).orElse(null),
+                    ResourceConfigUtils.getAsInt(brightness.getOrDefault("block-light", -1), "block-light"),
+                    ResourceConfigUtils.getAsInt(brightness.getOrDefault("sky-light", -1), "sky-light"),
+                    ResourceConfigUtils.getAsFloat(arguments.getOrDefault("view-range", 1f), "view-range")
             );
         }
     }

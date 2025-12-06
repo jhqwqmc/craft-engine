@@ -42,8 +42,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SelfHostHttpServer {
-    private static SelfHostHttpServer instance;
+public final class SelfHostHttpServer {
+    private static volatile SelfHostHttpServer instance;
     private final Cache<String, String> oneTimePackUrls = Caffeine.newBuilder()
             .maximumSize(1024)
             .scheduler(Scheduler.systemScheduler())
@@ -86,9 +86,19 @@ public class SelfHostHttpServer {
     private EventLoopGroup workerGroup;
     private Channel serverChannel;
 
+    private SelfHostHttpServer() {
+        if (instance != null) {
+            throw new IllegalStateException("SelfHostHttpServer is already initialized.");
+        }
+    }
+
     public static SelfHostHttpServer instance() {
         if (instance == null) {
-            instance = new SelfHostHttpServer();
+            synchronized (SelfHostHttpServer.class) {
+                if (instance == null) {
+                    instance = new SelfHostHttpServer();
+                }
+            }
         }
         return instance;
     }

@@ -16,6 +16,7 @@ import net.momirealms.craftengine.core.util.ReflectionUtils;
 import org.bukkit.Material;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -63,7 +64,7 @@ public class WorldEditBlockRegister {
             }
 
             if (!input.contains(":")) {
-                String lowerSearch = input.toLowerCase();
+                String lowerSearch = input.toLowerCase(Locale.ROOT);
                 return Stream.concat(
                         namespacesInUse.stream().filter(n -> n.startsWith(lowerSearch)).map(n -> n + ":"),
                         BlockStateParser.fillSuggestions(input).stream()

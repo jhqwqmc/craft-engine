@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.entity.furniture.Collider;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
@@ -40,7 +41,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
                 FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(interactionId, config.cachedValues())
         ));
         this.part = new FurnitureHitboxPart(interactionId, aabb, pos, config.responsive());
-        this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(interactionId); }});
+        this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(interactionId)));
         this.entityId = interactionId;
     }
     

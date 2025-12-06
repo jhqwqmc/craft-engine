@@ -3,6 +3,8 @@ package net.momirealms.craftengine.bukkit.compatibility;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
+import net.momirealms.craftengine.bukkit.compatibility.bedrock.FloodgateUtils;
+import net.momirealms.craftengine.bukkit.compatibility.bedrock.GeyserUtils;
 import net.momirealms.craftengine.bukkit.compatibility.item.*;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
 import net.momirealms.craftengine.bukkit.compatibility.leveler.*;
@@ -55,6 +57,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     private final Map<String, TagResolverProvider> tagResolverProviders;
     private TagResolverProvider[] tagResolverProviderArray = null;
     private boolean hasPlaceholderAPI;
+    private boolean hasGeyser;
+    private boolean hasFloodgate;
 
     public BukkitCompatibilityManager(BukkitCraftEngine plugin) {
         this.plugin = plugin;
@@ -109,6 +113,12 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         } else {
             EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
             LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+        }
+        if (this.isPluginEnabled("Geyser-Spigot")) {
+            this.hasGeyser = true;
+        }
+        if (this.isPluginEnabled("floodgate")) {
+            this.hasFloodgate = true;
         }
     }
 
@@ -367,5 +377,17 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             resolvers[i] = this.tagResolverProviderArray[i].getTagResolver(context);
         }
         return resolvers;
+    }
+
+    @Override
+    public boolean isBedrockPlayer(Player player) {
+        UUID uuid = player.uuid();
+        if (this.hasFloodgate) {
+            return FloodgateUtils.isFloodgatePlayer(uuid);
+        }
+        if (this.hasGeyser) {
+            return GeyserUtils.isGeyserPlayer(uuid);
+        }
+        return uuid.version() == 0;
     }
 }

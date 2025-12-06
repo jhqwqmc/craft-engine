@@ -13,6 +13,7 @@ import org.incendo.cloud.parser.standard.StringParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -139,7 +140,7 @@ public class DebugGenerateInternalAssetsCommand extends BukkitCommandFeature<Com
     private void collectListJson(Path folder, String prefix, Consumer<String> callback) {
         try (InputStream inputStream = Files.newInputStream(folder.resolve("_list.json"))) {
             String s = prefix.isEmpty() ? "" : (prefix + "/");
-            JsonObject listJson = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+            JsonObject listJson = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
             JsonArray fileList = listJson.getAsJsonArray("files");
             for (JsonElement element : fileList) {
                 if (element instanceof JsonPrimitive primitive) {

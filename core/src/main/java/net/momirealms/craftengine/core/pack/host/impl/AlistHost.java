@@ -82,7 +82,7 @@ public class AlistHost implements ResourcePackHost {
         if (!Files.exists(cachePath) || !Files.isRegularFile(cachePath)) return;
         try (InputStream is = Files.newInputStream(cachePath)) {
             Map<String, String> cache = GsonHelper.get().fromJson(
-                    new InputStreamReader(is),
+                    new InputStreamReader(is, StandardCharsets.UTF_8),
                     new TypeToken<Map<String, String>>(){}.getType()
             );
             this.cachedSha1 = cache.get("sha1");

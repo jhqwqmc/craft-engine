@@ -43,7 +43,7 @@ public class ItemDisplayFurnitureElement implements FurnitureElement {
                         this.position.x, this.position.y, this.position.z, 0, this.position.yRot,
                         MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
                 ),
-                FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata.apply(player, this.colorSource))
+                FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.config.metadata().apply(player, this.colorSource))
         )), false);
     }
 

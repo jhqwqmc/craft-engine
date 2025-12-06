@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.util.Key;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class ExternalHost implements ResourcePackHost {
             }
             String uuid = Optional.ofNullable(arguments.get("uuid")).map(String::valueOf).orElse(null);
             if (uuid == null || uuid.isEmpty()) {
-                uuid = UUID.nameUUIDFromBytes(url.getBytes()).toString();
+                uuid = UUID.nameUUIDFromBytes(url.getBytes(StandardCharsets.UTF_8)).toString();
             }
             UUID hostUUID = UUID.fromString(uuid);
             String sha1 = arguments.getOrDefault("sha1", "").toString();

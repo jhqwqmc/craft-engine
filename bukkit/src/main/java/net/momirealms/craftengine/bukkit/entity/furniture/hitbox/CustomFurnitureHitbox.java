@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
@@ -54,7 +55,7 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
         }
         this.spawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
         this.part = new FurnitureHitboxPart(entityId, aabb, pos, false);
-        this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(new IntArrayList() {{ add(entityId); }});
+        this.despawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(entityId)));
         this.entityId = entityId;
     }
 
