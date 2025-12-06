@@ -28,11 +28,11 @@ public interface CustomFurniture {
     Map<String, FurnitureVariant> variants();
 
     default FurnitureVariant anyVariant() {
-        return variants().values().stream().findFirst().get();
+        return variants().values().iterator().next();
     }
 
     default String anyVariantName() {
-        return variants().keySet().stream().findFirst().get();
+        return variants().keySet().iterator().next();
     }
 
     @Nullable
@@ -48,7 +48,6 @@ public interface CustomFurniture {
         if (optionalVariant.isPresent()) {
             variantName = optionalVariant.get();
         } else {
-            @SuppressWarnings("deprecation")
             Optional<AnchorType> optionalAnchorType = accessor.anchorType();
             if (optionalAnchorType.isPresent()) {
                 variantName = optionalAnchorType.get().name().toLowerCase(Locale.ROOT);
