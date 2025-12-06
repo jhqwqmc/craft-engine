@@ -18,7 +18,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
     private final NumberProvider y;
     private final NumberProvider z;
 
-    public BreakBlockFunction(NumberProvider x, NumberProvider y, NumberProvider z, List<Condition<CTX>> predicates) {
+    public BreakBlockFunction(List<Condition<CTX>> predicates, NumberProvider y, NumberProvider z, NumberProvider x) {
         super(predicates);
         this.x = x;
         this.y = y;
@@ -28,7 +28,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
     @Override
     public void runInternal(CTX ctx) {
         Optional<Player> optionalPlayer = ctx.getOptionalParameter(DirectContextParameters.PLAYER);
-        optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.fastFloor(x.getDouble(ctx)), MiscUtils.fastFloor(y.getDouble(ctx)), MiscUtils.fastFloor(z.getDouble(ctx))));
+        optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.floor(x.getDouble(ctx)), MiscUtils.floor(y.getDouble(ctx)), MiscUtils.floor(z.getDouble(ctx))));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
             NumberProvider x = NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>"));
             NumberProvider y = NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>"));
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));
-            return new BreakBlockFunction<>(x, y, z, getPredicates(arguments));
+            return new BreakBlockFunction<>(getPredicates(arguments), y, z, x);
         }
     }
 }

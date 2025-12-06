@@ -443,8 +443,13 @@ public abstract class AbstractFontManager implements FontManager {
         }
 
         @Override
+        public int count() {
+            return AbstractFontManager.this.emojis.size();
+        }
+
+        @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
-            if (emojis.containsKey(id)) {
+            if (AbstractFontManager.this.emojis.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.emoji.duplicate");
             }
             String permission = (String) section.get("permission");
@@ -508,6 +513,11 @@ public abstract class AbstractFontManager implements FontManager {
         @Override
         public int loadingSequence() {
             return LoadingSequence.IMAGE;
+        }
+
+        @Override
+        public int count() {
+            return AbstractFontManager.this.images.size();
         }
 
         @Override

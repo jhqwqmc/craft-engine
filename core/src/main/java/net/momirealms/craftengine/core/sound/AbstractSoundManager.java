@@ -98,6 +98,11 @@ public abstract class AbstractSoundManager implements SoundManager {
         }
 
         @Override
+        public int count() {
+            return AbstractSoundManager.this.songs.size();
+        }
+
+        @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             if (AbstractSoundManager.this.songs.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.jukebox_song.duplicate");
@@ -122,6 +127,11 @@ public abstract class AbstractSoundManager implements SoundManager {
         @Override
         public String[] sectionId() {
             return CONFIG_SECTION_NAME;
+        }
+
+        @Override
+        public int count() {
+            return AbstractSoundManager.this.byId.size();
         }
 
         @Override

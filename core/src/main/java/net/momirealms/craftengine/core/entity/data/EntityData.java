@@ -12,14 +12,14 @@ public interface EntityData<T> {
 
     Object entityDataAccessor();
 
-    Object create(Object entityDataAccessor, Object value);
+    Object create(Object entityDataAccessor, T value);
 
     default Object createEntityDataIfNotDefaultValue(T value) {
         if (defaultValue().equals(value)) return null;
         return create(entityDataAccessor(), value);
     }
 
-    default Object createEntityData(Object value) {
+    default Object createEntityData(T value) {
         return create(entityDataAccessor(), value);
     }
 

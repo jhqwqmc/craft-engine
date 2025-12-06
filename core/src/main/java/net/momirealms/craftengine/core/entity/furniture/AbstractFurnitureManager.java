@@ -1,19 +1,25 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-import net.momirealms.craftengine.core.entity.Billboard;
-import net.momirealms.craftengine.core.entity.ItemDisplayContext;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTypes;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
+import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurniture;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.pack.PendingConfigSection;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
+import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.world.Glowing;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.joml.Vector3f;
 
@@ -26,6 +32,18 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
     private final FurnitureParser furnitureParser;
     // Cached command suggestions
     private final List<Suggestion> cachedSuggestions = new ArrayList<>();
+
+    protected final Int2ObjectOpenHashMap<TickingFurniture> syncTickers = new Int2ObjectOpenHashMap<>(256, 0.5f);
+    protected final Int2ObjectOpenHashMap<TickingFurniture> asyncTickers = new Int2ObjectOpenHashMap<>(256, 0.5f);
+    protected final TickersList<TickingFurniture> syncTickingFurniture = new TickersList<>();
+    protected final List<TickingFurniture> pendingSyncTickingFurniture = new ArrayList<>();
+    protected final TickersList<TickingFurniture> asyncTickingFurniture = new TickersList<>();
+    protected final List<TickingFurniture> pendingAsyncTickingFurniture = new ArrayList<>();
+    private boolean isTickingSyncFurniture = false;
+    private boolean isTickingAsyncFurniture = false;
+
+    protected SchedulerTask syncTickTask;
+    protected SchedulerTask asyncTickTask;
 
     public AbstractFurnitureManager(CraftEngine plugin) {
         this.plugin = plugin;
@@ -65,16 +83,88 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
         return Collections.unmodifiableMap(this.byId);
     }
 
+    private void syncTick() {
+        this.isTickingSyncFurniture = true;
+        if (!this.pendingSyncTickingFurniture.isEmpty()) {
+            this.syncTickingFurniture.addAll(this.pendingSyncTickingFurniture);
+            this.pendingSyncTickingFurniture.clear();
+        }
+        if (!this.syncTickingFurniture.isEmpty()) {
+            Object[] entities = this.syncTickingFurniture.elements();
+            for (int i = 0, size = this.syncTickingFurniture.size(); i < size; i++) {
+                TickingFurniture entity = (TickingFurniture) entities[i];
+                if (entity.isValid()) {
+                    entity.tick();
+                } else {
+                    this.syncTickingFurniture.markAsRemoved(i);
+                    this.syncTickers.remove(entity.entityId());
+                }
+            }
+            this.syncTickingFurniture.removeMarkedEntries();
+        }
+        this.isTickingSyncFurniture = false;
+    }
+
+    private void asyncTick() {
+        this.isTickingAsyncFurniture = true;
+        if (!this.pendingAsyncTickingFurniture.isEmpty()) {
+            this.asyncTickingFurniture.addAll(this.pendingAsyncTickingFurniture);
+            this.pendingAsyncTickingFurniture.clear();
+        }
+        if (!this.asyncTickingFurniture.isEmpty()) {
+            Object[] entities = this.asyncTickingFurniture.elements();
+            for (int i = 0, size = this.asyncTickingFurniture.size(); i < size; i++) {
+                TickingFurniture entity = (TickingFurniture) entities[i];
+                if (entity.isValid()) {
+                    entity.tick();
+                } else {
+                    this.asyncTickingFurniture.markAsRemoved(i);
+                    this.asyncTickers.remove(entity.entityId());
+                }
+            }
+            this.asyncTickingFurniture.removeMarkedEntries();
+        }
+        this.isTickingAsyncFurniture = false;
+    }
+
+    public synchronized void addSyncFurnitureTicker(TickingFurniture ticker) {
+        if (this.isTickingSyncFurniture) {
+            this.pendingSyncTickingFurniture.add(ticker);
+        } else {
+            this.syncTickingFurniture.add(ticker);
+        }
+    }
+
+    public synchronized void addAsyncFurnitureTicker(TickingFurniture ticker) {
+        if (this.isTickingAsyncFurniture) {
+            this.pendingAsyncTickingFurniture.add(ticker);
+        } else {
+            this.asyncTickingFurniture.add(ticker);
+        }
+    }
+
+    @Override
+    public void delayedInit() {
+        if (this.syncTickTask == null || this.syncTickTask.cancelled())
+            this.syncTickTask = CraftEngine.instance().scheduler().sync().runRepeating(this::syncTick, 1, 1);
+        if (this.asyncTickTask == null || this.asyncTickTask.cancelled())
+            this.asyncTickTask = CraftEngine.instance().scheduler().sync().runAsyncRepeating(this::asyncTick, 1, 1);
+    }
+
+    @Override
+    public void disable() {
+        if (this.syncTickTask != null && !this.syncTickTask.cancelled())
+            this.syncTickTask.cancel();
+        if (this.asyncTickTask != null && !this.asyncTickTask.cancelled())
+            this.asyncTickTask.cancel();
+    }
+
     @Override
     public void unload() {
         this.byId.clear();
     }
 
-    protected abstract HitBoxConfig defaultHitBox();
-
-    protected abstract FurnitureElement.Builder furnitureElementBuilder();
-
-    protected abstract CustomFurniture.Builder furnitureBuilder();
+    protected abstract FurnitureHitBoxConfig<?> defaultHitBox();
 
     public class FurnitureParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] { "furniture" };
@@ -107,91 +197,85 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
             return LoadingSequence.FURNITURE;
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+        public int count() {
+            return AbstractFurnitureManager.this.byId.size();
+        }
+
         @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             if (AbstractFurnitureManager.this.byId.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.furniture.duplicate");
             }
-            EnumMap<AnchorType, CustomFurniture.Placement> placements = new EnumMap<>(AnchorType.class);
-            Object placementObj = section.get("placement");
-            Map<String, Object> placementMap = MiscUtils.castToMap(ResourceConfigUtils.requireNonNullOrThrow(placementObj, "warning.config.furniture.missing_placement"), false);
-            if (placementMap.isEmpty()) {
-                throw new LocalizedResourceConfigException("warning.config.furniture.missing_placement");
+
+            Map<String, Object> variantsMap = ResourceConfigUtils.getAsMap(ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(section, "variants", "placement", "variant"), "warning.config.furniture.missing_variants"), "variants");
+            if (variantsMap.isEmpty()) {
+                throw new LocalizedResourceConfigException("warning.config.furniture.missing_variants");
             }
-            for (Map.Entry<String, Object> entry : placementMap.entrySet()) {
-                // anchor type
-                AnchorType anchorType = AnchorType.valueOf(entry.getKey().toUpperCase(Locale.ENGLISH));
-                Map<String, Object> placementArguments = MiscUtils.castToMap(entry.getValue(), false);
-                Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(placementArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
-                // furniture display elements
-                List<FurnitureElement> elements = new ArrayList<>();
-                List<Map<String, Object>> elementConfigs = (List<Map<String, Object>>) placementArguments.getOrDefault("elements", List.of());
-                for (Map<String, Object> element : elementConfigs) {
-                    FurnitureElement furnitureElement = furnitureElementBuilder()
-                            .item(Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(element.get("item"), "warning.config.furniture.element.missing_item")))
-                            .applyDyedColor(ResourceConfigUtils.getAsBoolean(element.getOrDefault("apply-dyed-color", true), "apply-dyed-color"))
-                            .billboard(ResourceConfigUtils.getOrDefault(element.get("billboard"), o -> Billboard.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), Billboard.FIXED))
-                            .transform(ResourceConfigUtils.getOrDefault(ResourceConfigUtils.get(element, "transform", "display-transform"), o -> ItemDisplayContext.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), ItemDisplayContext.NONE))
-                            .scale(ResourceConfigUtils.getAsVector3f(element.getOrDefault("scale", "1"), "scale"))
-                            .position(ResourceConfigUtils.getAsVector3f(element.getOrDefault("position", "0"), "position"))
-                            .translation(ResourceConfigUtils.getAsVector3f(element.getOrDefault("translation", "0"), "translation"))
-                            .rotation(ResourceConfigUtils.getAsQuaternionf(element.getOrDefault("rotation", "0"), "rotation"))
-                            .shadowRadius(ResourceConfigUtils.getAsFloat(element.getOrDefault("shadow-radius", 0f), "shadow-radius"))
-                            .shadowStrength(ResourceConfigUtils.getAsFloat(element.getOrDefault("shadow-strength", 1f), "shadow-strength"))
-                            .build();
-                    elements.add(furnitureElement);
+
+            Map<String, FurnitureVariant> variants = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> e0 : variantsMap.entrySet()) {
+                String variantName = e0.getKey();
+                Map<String, Object> variantArguments = ResourceConfigUtils.getAsMap(e0.getValue(), variantName);
+                Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
+                List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
+
+                // 收集颜色
+                for (FurnitureElementConfig<?> element : elements) {
+                    if (element instanceof Glowing glowing && glowing.glowColor() != null) {
+                        AbstractFurnitureManager.this.plugin.teamManager().setColorInUse(glowing.glowColor());
+                    }
                 }
 
-                // external model providers
+                // 外部模型
                 Optional<ExternalModel> externalModel;
-                if (placementArguments.containsKey("model-engine")) {
-                    externalModel = Optional.of(plugin.compatibilityManager().createModel("ModelEngine", placementArguments.get("model-engine").toString()));
-                } else if (placementArguments.containsKey("better-model")) {
-                    externalModel = Optional.of(plugin.compatibilityManager().createModel("BetterModel", placementArguments.get("better-model").toString()));
+                if (variantArguments.containsKey("model-engine")) {
+                    externalModel = Optional.of(plugin.compatibilityManager().createModel("ModelEngine", variantArguments.get("model-engine").toString()));
+                } else if (variantArguments.containsKey("better-model")) {
+                    externalModel = Optional.of(plugin.compatibilityManager().createModel("BetterModel", variantArguments.get("better-model").toString()));
                 } else {
                     externalModel = Optional.empty();
                 }
 
-                // add hitboxes
-                List<HitBoxConfig> hitboxes = ResourceConfigUtils.parseConfigAsList(placementArguments.get("hitboxes"), HitBoxTypes::fromMap);
+                // 碰撞箱配置
+                List<FurnitureHitBoxConfig<?>> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), FurnitureHitBoxTypes::fromMap);
                 if (hitboxes.isEmpty() && externalModel.isEmpty()) {
                     hitboxes = List.of(defaultHitBox());
                 }
 
-                // rules
-                Map<String, Object> ruleSection = MiscUtils.castToMap(placementArguments.get("rules"), true);
-                if (ruleSection != null) {
-                    placements.put(anchorType, new CustomFurniture.Placement(
-                            anchorType,
-                            elements.toArray(new FurnitureElement[0]),
-                            hitboxes.toArray(new HitBoxConfig[0]),
-                            ResourceConfigUtils.getOrDefault(ruleSection.get("rotation"), o -> RotationRule.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), RotationRule.ANY),
-                            ResourceConfigUtils.getOrDefault(ruleSection.get("alignment"), o -> AlignmentRule.valueOf(o.toString().toUpperCase(Locale.ENGLISH)), AlignmentRule.CENTER),
-                            externalModel,
-                            optionalLootSpawnOffset
-                    ));
-                } else {
-                    placements.put(anchorType, new CustomFurniture.Placement(
-                            anchorType,
-                            elements.toArray(new FurnitureElement[0]),
-                            hitboxes.toArray(new HitBoxConfig[0]),
-                            RotationRule.ANY,
-                            AlignmentRule.CENTER,
-                            externalModel,
-                            optionalLootSpawnOffset
-                    ));
-                }
+                variants.put(variantName, new FurnitureVariant(
+                    variantName,
+                    parseCullingData(section.get("entity-culling")),
+                    elements.toArray(new FurnitureElementConfig[0]),
+                    hitboxes.toArray(new FurnitureHitBoxConfig[0]),
+                    externalModel,
+                    optionalLootSpawnOffset
+                ));
             }
 
-            CustomFurniture furniture = furnitureBuilder()
+            CustomFurniture furniture = CustomFurniture.builder()
                     .id(id)
                     .settings(FurnitureSettings.fromMap(MiscUtils.castToMap(section.get("settings"), true)))
-                    .placement(placements)
+                    .variants(variants)
                     .events(EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event")))
                     .lootTable(LootTable.fromMap(MiscUtils.castToMap(section.get("loot"), true)))
+                    .behavior(FurnitureBehaviorTypes.fromMap(ResourceConfigUtils.getAsMapOrNull(ResourceConfigUtils.get(section, "behaviors", "behavior"), "behavior")))
                     .build();
             AbstractFurnitureManager.this.byId.put(id, furniture);
+        }
+
+        private CullingData parseCullingData(Object arguments) {
+            if (arguments instanceof Boolean b && !b)
+                return null;
+            if (!(arguments instanceof Map))
+                return new CullingData(null, Config.entityCullingViewDistance(), 0.25, true);
+            Map<String, Object> argumentsMap = ResourceConfigUtils.getAsMap(arguments, "entity-culling");
+            return new CullingData(
+                    ResourceConfigUtils.getOrDefault(argumentsMap.get("aabb"), it -> ResourceConfigUtils.getAsAABB(it, "aabb"), null),
+                    ResourceConfigUtils.getAsInt(argumentsMap.getOrDefault("view-distance", Config.entityCullingViewDistance()), "view-distance"),
+                    ResourceConfigUtils.getAsDouble(argumentsMap.getOrDefault("aabb-expansion", 0.25), "aabb-expansion"),
+                    ResourceConfigUtils.getAsBoolean(argumentsMap.getOrDefault("ray-tracing", true), "ray-tracing")
+            );
         }
     }
 }

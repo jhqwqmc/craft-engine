@@ -392,4 +392,12 @@ public final class CraftBukkitReflections {
     public static final Field field$MinecraftMerchant$title = requireNonNull(
             ReflectionUtils.getDeclaredField(clazz$CraftMerchantCustom$MinecraftMerchant, CoreReflections.clazz$Component, 0)
     );
+
+    public static final Class<?> clazz$CraftTeam = requireNonNull(
+            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleCBClass("scoreboard.CraftTeam"))
+    );
+
+    public static final Field field$CraftTeam$team = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$CraftTeam, CoreReflections.clazz$PlayerTeam, 0)
+    );
 }

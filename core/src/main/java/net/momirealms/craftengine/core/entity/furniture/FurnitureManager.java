@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.util.Key;
@@ -17,30 +16,26 @@ public interface FurnitureManager extends Manageable {
     Key FURNITURE_EXTRA_DATA_KEY = Key.of("craftengine:furniture_extra_data");
     Key FURNITURE_COLLISION = Key.of("craftengine:collision");
 
-    String FURNITURE_ADMIN_NODE = "craftengine.furniture.admin";
-
     ConfigParser parser();
 
     void initSuggestions();
 
     Collection<Suggestion> cachedSuggestions();
 
-    Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureExtraData extraData, boolean playSound);
+    Furniture place(WorldPosition position, CustomFurniture furniture, FurnitureDataAccessor extraData, boolean playSound);
 
     Optional<CustomFurniture> furnitureById(Key id);
 
     Map<Key, CustomFurniture> loadedFurniture();
 
-    boolean isFurnitureRealEntity(int entityId);
+    boolean isFurnitureMetaEntity(int entityId);
 
     @Nullable
-    Furniture loadedFurnitureByRealEntityId(int entityId);
+    Furniture loadedFurnitureByMetaEntityId(int entityId);
 
     @Nullable
-    default Furniture loadedFurnitureByRealEntity(AbstractEntity entity) {
-        return loadedFurnitureByRealEntityId(entity.entityID());
-    }
+    Furniture loadedFurnitureByVirtualEntityId(int entityId);
 
     @Nullable
-    Furniture loadedFurnitureByEntityId(int entityId);
+    Furniture loadedFurnitureByColliderEntityId(int entityId);
 }

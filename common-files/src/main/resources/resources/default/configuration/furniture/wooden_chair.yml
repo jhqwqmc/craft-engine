@@ -6,18 +6,21 @@ items:
     model: minecraft:item/custom/wooden_chair
     behavior:
       type: furniture_item
+      rules:
+        ground:
+          rotation: any
+          alignment: any
       furniture:
+        events:
+          - template: default:rotatable_furniture_8
         settings:
           item: default:wooden_chair
           sounds:
             break: minecraft:block.bamboo_wood.break
             place: minecraft:block.bamboo_wood.place
-        placement:
+        variants:
           ground:
             loot-spawn-offset: 0,0.4,0
-            rules:
-              rotation: ANY
-              alignment: ANY
             elements:
               - item: default:wooden_chair
                 display-transform: NONE
@@ -29,6 +32,7 @@ items:
               - position: 0,0,0
                 type: interaction
                 blocks-building: true
+                invisible: true
                 width: 0.7
                 height: 1.2
                 interactive: true

@@ -32,7 +32,7 @@ public class TickingBlockEntityImpl<T extends BlockEntity> implements TickingBlo
         // 不是合法方块
         if (!this.blockEntity.isValidBlockState(state)) {
             this.chunk.removeBlockEntity(pos);
-            Debugger.BLOCK_ENTITY.warn(() -> "Invalid block entity(" + this.blockEntity.getClass().getSimpleName() + ") with state " + state + " found at world " + this.chunk.world().name() + " " + pos, null);
+            Debugger.BLOCK.warn(() -> "Invalid block entity(" + this.blockEntity.getClass().getSimpleName() + ") with state " + state + " found at world " + this.chunk.world().name() + " " + pos, null);
             return;
         }
         try {

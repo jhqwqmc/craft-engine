@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.pack;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 
 public class CachedConfigSection {
     private final Pack pack;
@@ -10,10 +11,10 @@ public class CachedConfigSection {
     private final Map<String, Object> config;
 
     public CachedConfigSection(String prefix, Map<String, Object> config, Path filePath, Pack pack) {
-        this.config = config;
-        this.filePath = filePath;
-        this.pack = pack;
-        this.prefix = prefix;
+        this.config = Objects.requireNonNull(config);
+        this.filePath = Objects.requireNonNull(filePath);
+        this.pack = Objects.requireNonNull(pack);
+        this.prefix = Objects.requireNonNull(prefix);
     }
 
     public Map<String, Object> config() {

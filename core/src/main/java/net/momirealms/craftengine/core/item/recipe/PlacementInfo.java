@@ -19,7 +19,7 @@ public class PlacementInfo<T> {
         IntList intList = new IntArrayList(i);
         for (int j = 0; j < i; j++) {
             Ingredient<T> ingredient = ingredients.get(j);
-            if (ingredient.isEmpty()) {
+            if (ingredient == null || ingredient.isEmpty()) {
                 return new PlacementInfo<>(List.of(), IntList.of());
             }
             intList.add(j);

@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -2863,12 +2862,12 @@ public final class CoreReflections {
     );
 
     // 1.20.5+
-    public static final Constructor<?> constructor$AttributeInstance =
-            ReflectionUtils.getConstructor(clazz$AttributeInstance, clazz$Holder, Consumer.class);
+//    public static final Constructor<?> constructor$AttributeInstance =
+//            ReflectionUtils.getConstructor(clazz$AttributeInstance, clazz$Holder, Consumer.class);
 
-    public static final Method method$AttributeInstance$setBaseValue = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AttributeInstance, void.class, double.class)
-    );
+//    public static final Method method$AttributeInstance$setBaseValue = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AttributeInstance, void.class, double.class)
+//    );
 
     public static final Class<?> clazz$Rotation = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
@@ -3958,6 +3957,27 @@ public final class CoreReflections {
         }
     }
 
+    // 1.20.2+
+    public static final Method method$ServerConfigurationPacketListenerImpl$startNextTask = Optional.ofNullable(clazz$ServerConfigurationPacketListenerImpl)
+            .map(it -> ReflectionUtils.getDeclaredMethod(it, void.class, VersionHelper.isOrAbove1_20_5() ? new String[]{"startNextTask", "o"} : new String[]{"startNextTask", "p"}))
+            .orElse(null);
+
+    public static final MethodHandle methodHandle$ServerConfigurationPacketListenerImpl$startNextTask;
+
+    static {
+        try {
+            if (VersionHelper.isOrAbove1_20_2()) {
+                methodHandle$ServerConfigurationPacketListenerImpl$startNextTask =
+                        ReflectionUtils.unreflectMethod(method$ServerConfigurationPacketListenerImpl$startNextTask)
+                                .asType(MethodType.methodType(void.class, Object.class));
+            } else {
+                methodHandle$ServerConfigurationPacketListenerImpl$startNextTask = null;
+            }
+        } catch (IllegalAccessException e) {
+            throw new ReflectionInitException("Failed to initialize reflection", e);
+        }
+    }
+
     public static final Class<?> clazz$JoinWorldTask = MiscUtils.requireNonNullIf(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("server.network.config.JoinWorldTask")
@@ -4570,6 +4590,58 @@ public final class CoreReflections {
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "world.level.levelgen.feature.WorldGenerator",
                     "world.level.levelgen.feature.Feature"
+            )
+    );
+
+    public static final Class<?> clazz$EmptyBlockGetter = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.BlockAccessAir",
+                    "world.level.EmptyBlockGetter"
+            )
+    );
+
+    public static final Method method$EmptyBlockGetter$values = requireNonNull(
+            ReflectionUtils.getStaticMethod(clazz$EmptyBlockGetter, clazz$EmptyBlockGetter.arrayType())
+    );
+
+    public static final Object instance$EmptyBlockGetter$INSTANCE;
+
+    static {
+        try {
+            Object[] values = (Object[]) method$EmptyBlockGetter$values.invoke(null);
+            instance$EmptyBlockGetter$INSTANCE = values[0];
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init EmptyBlockGetter$INSTANCE", e);
+        }
+    }
+
+    public static final Class<?> clazz$EntityDimensions = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.entity.EntitySize",
+                    "world.entity.EntityDimensions"
+            )
+    );
+
+    public static final Field field$EntityType$dimensions = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityType, clazz$EntityDimensions, 0)
+    );
+
+    public static final Field field$EntityDimensions$width = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, float.class, 0)
+    );
+
+    public static final Field field$EntityDimensions$height = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, float.class, 1)
+    );
+
+    public static final Field field$EntityDimensions$fixed = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$EntityDimensions, boolean.class, 0)
+    );
+
+    public static final Class<?> clazz$PlayerTeam = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.scores.ScoreboardTeam",
+                    "world.scores.PlayerTeam"
             )
     );
 }

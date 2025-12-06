@@ -21,10 +21,10 @@ public class FixedCraftRemainder implements CraftRemainder {
         return (Item<T>) CraftEngine.instance().itemManager().createWrappedItem(this.item, null);
     }
 
-    public static class Factory implements CraftRemainderFactory {
+    public static class Factory implements CraftRemainderFactory<FixedCraftRemainder> {
 
         @Override
-        public CraftRemainder create(Map<String, Object> args) {
+        public FixedCraftRemainder create(Map<String, Object> args) {
             Key item = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("item"), "warning.config.item.settings.craft_remainder.fixed.missing_item"));
             return new FixedCraftRemainder(item);
         }

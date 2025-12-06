@@ -15,7 +15,7 @@ public class Vec3d implements Position {
     }
 
     public Vec3d toCenter() {
-        return new Vec3d(MiscUtils.fastFloor(x) + 0.5, MiscUtils.fastFloor(y) + 0.5, MiscUtils.fastFloor(z) + 0.5);
+        return new Vec3d(MiscUtils.floor(x) + 0.5, MiscUtils.floor(y) + 0.5, MiscUtils.floor(z) + 0.5);
     }
 
     public Vec3d add(Vec3d vec) {

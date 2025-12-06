@@ -1,10 +1,8 @@
 package net.momirealms.craftengine.bukkit.compatibility.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
-import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -12,8 +10,6 @@ import net.momirealms.craftengine.core.util.Key;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Predicate;
 
 public class CheckItemExpansion extends PlaceholderExpansion {
     private final CraftEngine plugin;
@@ -108,11 +104,6 @@ public class CheckItemExpansion extends PlaceholderExpansion {
     }
 
     private int getItemCount(BukkitServerPlayer player, String[] param) {
-        Key itemId = Key.of(param[0], param[1]);
-        Predicate<Object> predicate = nmsStack -> this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
-        Object inventory = FastNMS.INSTANCE.method$Player$getInventory(player.serverPlayer());
-        Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(player.serverPlayer());
-        Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
-        return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, predicate, 0, craftSlots);
+        return player.clearOrCountMatchingInventoryItems(Key.of(param[0], param[1]), 0);
     }
 }

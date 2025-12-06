@@ -23,15 +23,15 @@ public class CraftRemainders {
         register(HURT_AND_BREAK, HurtAndBreakRemainder.FACTORY);
     }
 
-    public static void register(Key key, CraftRemainderFactory factory) {
-        ((WritableRegistry<CraftRemainderFactory>) BuiltInRegistries.CRAFT_REMAINDER_FACTORY)
+    public static void register(Key key, CraftRemainderFactory<?> factory) {
+        ((WritableRegistry<CraftRemainderFactory<?>>) BuiltInRegistries.CRAFT_REMAINDER_FACTORY)
                 .register(ResourceKey.create(Registries.CRAFT_REMAINDER_FACTORY.location(), key), factory);
     }
 
     public static CraftRemainder fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.settings.craft_remainder.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        CraftRemainderFactory factory = BuiltInRegistries.CRAFT_REMAINDER_FACTORY.getValue(key);
+        CraftRemainderFactory<?> factory = BuiltInRegistries.CRAFT_REMAINDER_FACTORY.getValue(key);
         if (factory == null) {
             throw new LocalizedResourceConfigException("warning.config.item.settings.craft_remainder.invalid_type", type);
         }

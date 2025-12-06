@@ -11,5 +11,9 @@ public interface BlockEntityElementConfig<E extends BlockEntityElement> {
         return null;
     }
 
+    default E createExact(World world, BlockPos pos, E previous) {
+        return null;
+    }
+
     Class<E> elementClass();
 }

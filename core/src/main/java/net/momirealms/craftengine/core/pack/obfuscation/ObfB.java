@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -81,7 +82,7 @@ public final class ObfB {
     }
 
     private static String 雷雷宝宝打肚肚(String input) {
-        return input.replace('\\', '/').toLowerCase();
+        return input.replace('\\', '/').toLowerCase(Locale.ROOT);
     }
 
     private static String[] 因为都叫你小学生(String path) {

@@ -37,12 +37,12 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
     }
 
     public PlacementInfo<T> placementInfo() {
-        return placementInfo;
+        return this.placementInfo;
     }
 
     @Override
     public List<Ingredient<T>> ingredientsInUse() {
-        return ingredients;
+        return this.ingredients;
     }
 
     @SuppressWarnings("unchecked")

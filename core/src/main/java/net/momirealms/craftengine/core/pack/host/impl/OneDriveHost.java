@@ -8,7 +8,9 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,7 +35,7 @@ public class OneDriveHost implements ResourcePackHost {
     private final String clientSecret;
     private final ProxySelector proxy;
     private final String uploadPath;
-    private Tuple<String, String, Date> refreshToken;
+    private Tuple<@NotNull String, @NotNull String, @NotNull Date> refreshToken;
     private String sha1;
     private String fileId;
 
@@ -65,18 +67,18 @@ public class OneDriveHost implements ResourcePackHost {
         if (!Files.exists(cachePath) || !Files.isRegularFile(cachePath)) return;
         try (InputStream is = Files.newInputStream(cachePath)) {
             Map<String, String> cache = GsonHelper.get().fromJson(
-                    new InputStreamReader(is),
+                    new InputStreamReader(is, StandardCharsets.UTF_8),
                     new TypeToken<Map<String, String>>(){}.getType()
             );
 
             this.refreshToken = Tuple.of(
-                    cache.get("refresh-token"),
-                    cache.get("access-token"),
+                    Objects.requireNonNull(cache.get("refresh-token")),
+                    Objects.requireNonNull(cache.get("access-token")),
                     new Date(Long.parseLong(cache.get("refresh-token-expires-in"))));
             this.sha1 = cache.get("sha1");
             this.fileId = cache.get("file-id");
 
-            CraftEngine.instance().logger().info("[OneDrive] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "OneDrive"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn(
                     "[OneDrive] Failed to load cache" + cachePath, e);
@@ -187,7 +189,7 @@ public class OneDriveHost implements ResourcePackHost {
         if (this.refreshToken == null || this.refreshToken.mid().isEmpty() || this.refreshToken.right().before(new Date())) {
             try (HttpClient client = HttpClient.newBuilder().proxy(this.proxy).build()) {
                 String formData = "client_id=" + URLEncoder.encode(this.clientId, StandardCharsets.UTF_8) +
-                        "&client_secret=" + URLEncoder.encode(this.clientSecret, StandardCharsets.UTF_8) +
+                        "&client_secret=" + URLEncoder.encode(Objects.requireNonNull(this.clientSecret), StandardCharsets.UTF_8) +
                         "&refresh_token=" + URLEncoder.encode(this.refreshToken.left(), StandardCharsets.UTF_8) +
                         "&grant_type=refresh_token" +
                         "&scope=Files.ReadWrite.All+offline_access";

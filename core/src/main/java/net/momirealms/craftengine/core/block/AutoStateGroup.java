@@ -10,21 +10,21 @@ import java.util.function.Predicate;
 
 public enum AutoStateGroup {
     NON_TINTABLE_LEAVES(List.of("no_tint_leaves", "leaves_no_tint", "non_tintable_leaves"),
-            Set.of(BlockKeys.AZALEA_LEAVES, BlockKeys.FLOWERING_AZALEA_LEAVES, BlockKeys.CHERRY_LEAVES, BlockKeys.PALE_OAK_LEAVES),
+            Set.of(BlockKeys.AZALEA_LEAVES, BlockKeys.FLOWERING_AZALEA_LEAVES, BlockKeys.CHERRY_LEAVES, BlockKeys.PALE_OAK_LEAVES, BlockKeys.SPRUCE_LEAVES, BlockKeys.BIRCH_LEAVES),
             (w) -> !(boolean) w.getProperty("waterlogged")
     ),
     WATERLOGGED_NON_TINTABLE_LEAVES(
             List.of("waterlogged_no_tint_leaves", "waterlogged_leaves_no_tint", "waterlogged_non_tintable_leaves"),
-            Set.of(BlockKeys.AZALEA_LEAVES, BlockKeys.FLOWERING_AZALEA_LEAVES, BlockKeys.CHERRY_LEAVES, BlockKeys.PALE_OAK_LEAVES),
+            Set.of(BlockKeys.AZALEA_LEAVES, BlockKeys.FLOWERING_AZALEA_LEAVES, BlockKeys.CHERRY_LEAVES, BlockKeys.PALE_OAK_LEAVES, BlockKeys.SPRUCE_LEAVES, BlockKeys.BIRCH_LEAVES),
             (w) -> w.getProperty("waterlogged")
     ),
     TINTABLE_LEAVES("tintable_leaves",
-            Set.of(BlockKeys.OAK_LEAVES, BlockKeys.SPRUCE_LEAVES, BlockKeys.BIRCH_LEAVES, BlockKeys.JUNGLE_LEAVES, BlockKeys.ACACIA_LEAVES, BlockKeys.DARK_OAK_LEAVES, BlockKeys.MANGROVE_LEAVES),
+            Set.of(BlockKeys.OAK_LEAVES, BlockKeys.JUNGLE_LEAVES, BlockKeys.ACACIA_LEAVES, BlockKeys.DARK_OAK_LEAVES, BlockKeys.MANGROVE_LEAVES),
             (w) -> !(boolean) w.getProperty("waterlogged")
     ),
     WATERLOGGED_TINTABLE_LEAVES(
             "waterlogged_tintable_leaves",
-            Set.of(BlockKeys.OAK_LEAVES, BlockKeys.SPRUCE_LEAVES, BlockKeys.BIRCH_LEAVES, BlockKeys.JUNGLE_LEAVES, BlockKeys.ACACIA_LEAVES, BlockKeys.DARK_OAK_LEAVES, BlockKeys.MANGROVE_LEAVES),
+            Set.of(BlockKeys.OAK_LEAVES, BlockKeys.JUNGLE_LEAVES, BlockKeys.ACACIA_LEAVES, BlockKeys.DARK_OAK_LEAVES, BlockKeys.MANGROVE_LEAVES),
             (w) -> w.getProperty("waterlogged")
     ),
     LEAVES("leaves",
@@ -51,6 +51,7 @@ public enum AutoStateGroup {
     WEEPING_VINES(List.of("weeping_vines", "weeping_vine"), Set.of(BlockKeys.WEEPING_VINES), (w) -> true),
     TWISTING_VINES(List.of("twisting_vines", "twisting_vine"), Set.of(BlockKeys.TWISTING_VINES), (w) -> true),
     KELP("kelp", Set.of(BlockKeys.KELP), (w) -> true),
+    CHORUS("chorus", Set.of(BlockKeys.CHORUS_PLANT), (w) -> true),
     PRESSURE_PLATE("pressure_plate", Set.of(BlockKeys.LIGHT_WEIGHTED_PRESSURE_PLATE, BlockKeys.HEAVY_WEIGHTED_PRESSURE_PLATE), (w) -> true),
     SAPLING("sapling", Set.of(BlockKeys.OAK_SAPLING, BlockKeys.SPRUCE_SAPLING, BlockKeys.BIRCH_SAPLING, BlockKeys.JUNGLE_SAPLING, BlockKeys.ACACIA_SAPLING, BlockKeys.DARK_OAK_SAPLING, BlockKeys.CHERRY_SAPLING, BlockKeys.PALE_OAK_SAPLING), (w) -> true),
     MUSHROOM("mushroom", Set.of(BlockKeys.BROWN_MUSHROOM_BLOCK, BlockKeys.RED_MUSHROOM_BLOCK, BlockKeys.MUSHROOM_STEM), (w) -> true),

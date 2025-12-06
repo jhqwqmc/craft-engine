@@ -3,6 +3,8 @@ package net.momirealms.craftengine.bukkit.compatibility;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
+import net.momirealms.craftengine.bukkit.compatibility.bedrock.FloodgateUtils;
+import net.momirealms.craftengine.bukkit.compatibility.bedrock.GeyserUtils;
 import net.momirealms.craftengine.bukkit.compatibility.item.*;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
 import net.momirealms.craftengine.bukkit.compatibility.leveler.*;
@@ -19,6 +21,7 @@ import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemEx
 import net.momirealms.craftengine.bukkit.compatibility.region.WorldGuardRegionCondition;
 import net.momirealms.craftengine.bukkit.compatibility.skript.SkriptHook;
 import net.momirealms.craftengine.bukkit.compatibility.slimeworld.SlimeFormatStorageAdaptor;
+import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateHatSettings;
 import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateProviders;
 import net.momirealms.craftengine.bukkit.compatibility.viaversion.ViaVersionUtils;
 import net.momirealms.craftengine.bukkit.compatibility.worldedit.WorldEditBlockRegister;
@@ -37,6 +40,7 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AlwaysFalseCondition;
 import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -53,6 +57,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     private final Map<String, TagResolverProvider> tagResolverProviders;
     private TagResolverProvider[] tagResolverProviderArray = null;
     private boolean hasPlaceholderAPI;
+    private boolean hasGeyser;
+    private boolean hasFloodgate;
 
     public BukkitCompatibilityManager(BukkitCraftEngine plugin) {
         this.plugin = plugin;
@@ -96,6 +102,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             registerTagResolverProvider(new CustomNameplateProviders.Background());
             registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
             registerTagResolverProvider(new CustomNameplateProviders.Bubble());
+            new CustomNameplateHatSettings().register();
             logHook("CustomNameplates");
         }
         Key worldGuardRegion = Key.of("worldguard:region");
@@ -106,6 +113,12 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         } else {
             EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
             LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+        }
+        if (this.isPluginEnabled("Geyser-Spigot")) {
+            this.hasGeyser = true;
+        }
+        if (this.isPluginEnabled("floodgate")) {
+            this.hasFloodgate = true;
         }
     }
 
@@ -181,7 +194,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     }
 
     private void logHook(String plugin) {
-        this.plugin.logger().info("[Compatibility] " + plugin + " hooked");
+        this.plugin.logger().info(TranslationManager.instance().translateLog("info.compatibility", plugin));
     }
 
     @Override
@@ -252,8 +265,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             if (VersionHelper.isOrAbove1_20_3()) {
                 this.plugin.logger().severe("");
                 if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
-                    this.plugin.logger().severe("[Compatibility] 插件需要更新 FastAsyncWorldEdit 到 2.13.0 或更高版本，以获得更好的兼容性。(当前版本: " + version + ")");
-                    this.plugin.logger().severe("[Compatibility] 请前往 https://ci.athion.net/job/FastAsyncWorldEdit/ 下载最新版本");
+                    this.plugin.logger().severe("[兼容性] 插件需要更新 FastAsyncWorldEdit 到 2.13.0 或更高版本，以获得更好的兼容性。(当前版本: " + version + ")");
+                    this.plugin.logger().severe("[兼容性] 请前往 https://ci.athion.net/job/FastAsyncWorldEdit/ 下载最新版本");
                 } else {
                     this.plugin.logger().severe("[Compatibility] Update FastAsyncWorldEdit to v2.13.0+ for better compatibility (Current: " + version + ")");
                     this.plugin.logger().severe("[Compatibility] Download latest version: https://ci.athion.net/job/FastAsyncWorldEdit/");
@@ -364,5 +377,17 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             resolvers[i] = this.tagResolverProviderArray[i].getTagResolver(context);
         }
         return resolvers;
+    }
+
+    @Override
+    public boolean isBedrockPlayer(Player player) {
+        UUID uuid = player.uuid();
+        if (this.hasFloodgate) {
+            return FloodgateUtils.isFloodgatePlayer(uuid);
+        }
+        if (this.hasGeyser) {
+            return GeyserUtils.isGeyserPlayer(uuid);
+        }
+        return uuid.version() == 0;
     }
 }

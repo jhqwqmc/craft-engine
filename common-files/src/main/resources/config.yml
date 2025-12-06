@@ -197,6 +197,8 @@ resource-pack:
         deny-non-minecraft-request: true
         # Generates a single-use, time-limited download link for each player.
         one-time-token: true
+        # Improved validation for deny-non-minecraft-request and one-time-token; do not enable on offline servers or validation will fail.
+        strict-validation: false
         rate-limiting:
           # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
           max-bandwidth-per-second: 5_000_000 # 5MB/s
@@ -248,6 +250,10 @@ item:
     default: 10000
     overrides:
       paper: 20000
+  # Toggle whether to display the names of dropped items by default and configure the display format. This setting can be overridden for individual items.
+  default-drop-display:
+    enable: false
+    format: "<arg:count>x <name>"
 
 equipment:
   # The sacrificed-vanilla-armor argument determines which vanilla armor gets completely removed (loses all its trims)
@@ -552,11 +558,23 @@ chunk-system:
     remove: []
     convert: {}
 
-#client-optimization:
-#  # Using server-side ray tracing algorithms to hide certain entities and reduce client-side rendering pressure.
-#  entity-culling:
-#    enable: false
-#    whitelist-entities: []
+# [Premium Exclusive]
+client-optimization:
+  # Requires a restart to fully apply.
+  entity-culling:
+    enable: false
+    # Using server-side ray tracing algorithms to hide block entities/furniture and reduce client-side rendering pressure.
+    ray-tracing: true
+    # Cull entities based on distance
+    view-distance: 64 # -1 = no limit
+    # Determining the number of threads to execute these raytrace operations
+    threads: 1
+    # Limit the maximum number of entities with visibility changes per tick for one player
+    # This helps mitigate client-side performance impacts and server-side bandwidth spikes caused by a large number of entities appearing.
+    rate-limiting:
+      enable: true
+      bucket-size: 1000
+      restore-per-tick: 25
 
 # Enables or disables debug mode
 debug:
@@ -565,3 +583,5 @@ debug:
   furniture: false
   item: false
   resource-pack: false
+  block: false
+  entity-culling: false

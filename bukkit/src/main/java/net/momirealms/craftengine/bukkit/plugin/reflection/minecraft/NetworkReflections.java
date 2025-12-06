@@ -1087,20 +1087,31 @@ public final class NetworkReflections {
             ReflectionUtils.getDeclaredConstructor(clazz$ClientboundMoveEntityPacket$Pos, int.class, short.class, short.class, short.class, boolean.class)
     );
 
-    // 1.20.2+
-    public static final Class<?> clazz$ServerboundClientInformationPacket =
-            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("network.protocol.common.ServerboundClientInformationPacket"));
+    // 1.20.1
+    public static final Class<?> clazz$ServerboundClientInformationPacket0 =
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "network.protocol.game.PacketPlayInSettings",
+                    "network.protocol.game.ServerboundClientInformationPacket"
+            );
+
+    // 1.20.1
+    public static final Field field$ServerboundClientInformationPacket$language = MiscUtils.requireNonNullIf(Optional.ofNullable(clazz$ServerboundClientInformationPacket0)
+            .map(it -> ReflectionUtils.getDeclaredField(it, String.class, 0))
+            .orElse(null), !VersionHelper.isOrAbove1_20_2());
 
     // 1.20.2+
-    public static final Constructor<?> constructor$ServerboundClientInformationPacket = Optional.ofNullable(clazz$ServerboundClientInformationPacket)
-            .map(it -> ReflectionUtils.getConstructor(it, 1))
-            .orElse(null);
+    public static final Class<?> clazz$ServerboundClientInformationPacket1 = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("network.protocol.common.ServerboundClientInformationPacket")),
+            VersionHelper.isOrAbove1_20_2()
+    );
 
     // 1.20.2+
-    public static final Field field$ServerboundClientInformationPacket$information = Optional.ofNullable(clazz$ServerboundClientInformationPacket)
-            .map(it -> ReflectionUtils.getDeclaredField(it, 0))
-            .orElse(null);
-
+    public static final Field field$ServerboundClientInformationPacket$information = MiscUtils.requireNonNullIf(
+            Optional.ofNullable(clazz$ServerboundClientInformationPacket1)
+                .map(it -> ReflectionUtils.getDeclaredField(it, CoreReflections.clazz$ClientInformation, 0))
+                .orElse(null),
+            VersionHelper.isOrAbove1_20_2()
+    );
 
     public static final Class<?> clazz$ClientboundSetTitleTextPacket = requireNonNull(
             ReflectionUtils.getClazz(

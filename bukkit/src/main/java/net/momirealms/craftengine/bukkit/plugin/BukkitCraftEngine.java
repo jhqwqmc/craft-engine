@@ -7,7 +7,8 @@ import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.behavior.BukkitBlockBehaviors;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurnitureManager;
-import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.BukkitHitBoxTypes;
+import net.momirealms.craftengine.bukkit.entity.furniture.element.BukkitFurnitureElementConfigs;
+import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.BukkitFurnitureHitboxTypes;
 import net.momirealms.craftengine.bukkit.entity.projectile.BukkitProjectileManager;
 import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeatManager;
 import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
@@ -26,6 +27,7 @@ import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.sound.BukkitSoundManager;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
+import net.momirealms.craftengine.bukkit.world.score.BukkitTeamManager;
 import net.momirealms.craftengine.core.item.ItemManager;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.classpath.ClassPathAppender;
@@ -160,8 +162,9 @@ public class BukkitCraftEngine extends CraftEngine {
         super.onPluginLoad();
         BukkitBlockBehaviors.init();
         BukkitItemBehaviors.init();
-        BukkitHitBoxTypes.init();
+        BukkitFurnitureHitboxTypes.init();
         BukkitBlockEntityElementConfigs.init();
+        BukkitFurnitureElementConfigs.init();
         // 初始化 onload 阶段的兼容性
         super.compatibilityManager().onLoad();
         // 创建网络管理器
@@ -190,6 +193,8 @@ public class BukkitCraftEngine extends CraftEngine {
         super.seatManager = new BukkitSeatManager(this);
         // 初始化家具管理器
         super.furnitureManager = new BukkitFurnitureManager(this);
+        // 初始化队伍管理器
+        super.teamManager = new BukkitTeamManager(this);
         // 注册默认的parser
         this.registerDefaultParsers();
         // 完成加载
@@ -367,6 +372,11 @@ public class BukkitCraftEngine extends CraftEngine {
     @Override
     public BukkitFontManager fontManager() {
         return (BukkitFontManager) fontManager;
+    }
+
+    @Override
+    public BukkitWorldManager worldManager() {
+        return (BukkitWorldManager) worldManager;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

@@ -39,6 +39,9 @@ public class LootConditions {
         register(CommonConditions.EXPRESSION, new ExpressionCondition.FactoryImpl<>());
         register(CommonConditions.IS_NULL, new IsNullCondition.FactoryImpl<>());
         register(CommonConditions.HAND, new HandCondition.FactoryImpl<>());
+        register(CommonConditions.ON_COOLDOWN, new OnCooldownCondition.FactoryImpl<>());
+        register(CommonConditions.INVENTORY_HAS_ITEM, new InventoryHasItemCondition.FactoryImpl<>());
+        register(CommonConditions.MATCH_FURNITURE_VARIANT, new MatchFurnitureVariantCondition.FactoryImpl<>());
     }
 
     public static void register(Key key, ConditionFactory<LootContext> factory) {

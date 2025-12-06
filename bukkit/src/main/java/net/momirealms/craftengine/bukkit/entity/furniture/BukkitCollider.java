@@ -21,7 +21,7 @@ public class BukkitCollider implements Collider {
 
     @Override
     public int entityId() {
-        return this.collisionEntity.getId();
+        return this.collisionEntity.getEntityId();
     }
 
     @Override

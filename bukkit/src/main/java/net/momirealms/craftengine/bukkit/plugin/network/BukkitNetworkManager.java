@@ -22,6 +22,7 @@ import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.DataComponentValue;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.api.event.FurnitureAttemptBreakEvent;
@@ -58,14 +59,15 @@ import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.entity.furniture.HitBox;
-import net.momirealms.craftengine.core.entity.furniture.HitBoxPart;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeHolder;
@@ -90,9 +92,12 @@ import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
-import net.momirealms.craftengine.core.world.chunk.ChunkStatus;
 import net.momirealms.craftengine.core.world.chunk.Palette;
 import net.momirealms.craftengine.core.world.chunk.PalettedContainer;
+import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
+import net.momirealms.craftengine.core.world.chunk.client.ClientSection;
+import net.momirealms.craftengine.core.world.chunk.client.PackedOcclusionStorage;
+import net.momirealms.craftengine.core.world.chunk.client.SingularOcclusionStorage;
 import net.momirealms.craftengine.core.world.chunk.packet.BlockEntityData;
 import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
 import net.momirealms.sparrow.nbt.CompoundTag;
@@ -125,6 +130,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 public class BukkitNetworkManager implements NetworkManager, Listener, PluginMessageListener {
     private static BukkitNetworkManager instance;
@@ -288,7 +294,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
-    public void registerBlockStatePacketListeners(int[] blockStateMappings) {
+    public void registerBlockStatePacketListeners(int[] blockStateMappings, Predicate<Integer> occlusionPredicate) {
         int stoneId = BlockStateUtils.blockStateToId(MBlocks.STONE$defaultState);
         int vanillaBlocks = BlockStateUtils.vanillaBlockStateCount();
         int[] newMappings = new int[blockStateMappings.length];
@@ -318,10 +324,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 newMappings,
                 newMappingsMOD,
                 newMappings.length,
-                RegistryUtils.currentBiomeRegistrySize()
+                RegistryUtils.currentBiomeRegistrySize(),
+                occlusionPredicate
         ), this.packetIds.clientboundLevelChunkWithLightPacket(), "ClientboundLevelChunkWithLightPacket");
-        registerS2CGamePacketListener(new SectionBlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundSectionBlocksUpdatePacket(), "ClientboundSectionBlocksUpdatePacket");
-        registerS2CGamePacketListener(new BlockUpdateListener(newMappings, newMappingsMOD), this.packetIds.clientboundBlockUpdatePacket(), "ClientboundBlockUpdatePacket");
+        registerS2CGamePacketListener(new SectionBlockUpdateListener(newMappings, newMappingsMOD, occlusionPredicate), this.packetIds.clientboundSectionBlocksUpdatePacket(), "ClientboundSectionBlocksUpdatePacket");
+        registerS2CGamePacketListener(new BlockUpdateListener(newMappings, newMappingsMOD, occlusionPredicate), this.packetIds.clientboundBlockUpdatePacket(), "ClientboundBlockUpdatePacket");
         registerS2CGamePacketListener(
                 VersionHelper.isOrAbove1_21_4() ?
                 new LevelParticleListener1_21_4(newMappings, newMappingsMOD) :
@@ -353,11 +360,10 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new EntityEventListener(), NetworkReflections.clazz$ClientboundEntityEventPacket);
         registerNMSPacketConsumer(new MovePosAndRotateEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$PosRot);
         registerNMSPacketConsumer(new MovePosEntityListener(), NetworkReflections.clazz$ClientboundMoveEntityPacket$Pos);
-        registerNMSPacketConsumer(new RotateHeadListener(), NetworkReflections.clazz$ClientboundRotateHeadPacket);
-        registerNMSPacketConsumer(new SetEntityMotionListener(), NetworkReflections.clazz$ClientboundSetEntityMotionPacket);
         registerNMSPacketConsumer(new FinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
         registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
+        registerNMSPacketConsumer(new ClientInformationListener(), VersionHelper.isOrAbove1_20_2() ? NetworkReflections.clazz$ServerboundClientInformationPacket1 : NetworkReflections.clazz$ServerboundClientInformationPacket0);
         registerNMSPacketConsumer(new ContainerClickListener1_21_5(), VersionHelper.isOrAbove1_21_5() ? NetworkReflections.clazz$ServerboundContainerClickPacket : null);
         registerS2CGamePacketListener(new ForgetLevelChunkListener(), this.packetIds.clientboundForgetLevelChunkPacket(), "ClientboundForgetLevelChunkPacket");
         registerS2CGamePacketListener(new SetScoreListener1_20_3(), VersionHelper.isOrAbove1_20_3() ? this.packetIds.clientboundSetScorePacket() : -1, "ClientboundSetScorePacket");
@@ -1095,7 +1101,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 if (player.isAdventureMode()) {
                     if (Config.simplifyAdventureBreakCheck()) {
                         ImmutableBlockState state = BukkitBlockManager.instance().getImmutableBlockStateUnsafe(stateId);
-                        if (!player.canBreak(pos, state.vanillaBlockState().literalObject())) {
+                        if (!player.canBreak(pos, state.visualBlockState().literalObject())) {
                             player.preventMiningBlock();
                             return;
                         }
@@ -1241,7 +1247,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 CraftEngine.instance().logger().warn("Failed to get entityId from ServerboundPickItemFromEntityPacket", e);
                 return;
             }
-            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByEntityId(entityId);
+            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
             if (furniture == null) return;
             Player player = (Player) user.platformPlayer();
             if (player == null) return;
@@ -1267,7 +1273,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         private static void handlePickItemFromEntityOnMainThread(Player player, BukkitFurniture furniture) throws Throwable {
             Key itemId = furniture.config().settings().itemId();
             if (itemId == null) return;
-            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.baseEntity()));
+            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.getBukkitEntity()));
         }
     }
 
@@ -1288,6 +1294,27 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
+    public static class ClientInformationListener implements NMSPacketListener {
+
+        @Override
+        public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            try {
+                if (VersionHelper.isOrAbove1_20_2()) {
+                    Object clientInfo = NetworkReflections.field$ServerboundClientInformationPacket$information.get(packet);
+                    if (clientInfo == null) return;
+                    String locale = (String) CoreReflections.field$ClientInformation$language.get(clientInfo);
+                    if (locale == null) return;
+                    ((BukkitServerPlayer) user).setClientLocale(TranslationManager.parseLocale(locale));
+                } else {
+                    String locale = (String) NetworkReflections.field$ServerboundClientInformationPacket$language.get(packet);
+                    if (locale == null) return;
+                    ((BukkitServerPlayer) user).setClientLocale(TranslationManager.parseLocale(locale));
+                }
+            } catch (ReflectiveOperationException e) {
+                CraftEngine.instance().logger().warn("Failed to handle ServerboundClientInformationPacket", e);
+            }
+        }
+    }
 
     public static class SetCreativeSlotListener implements NMSPacketListener {
 
@@ -1336,7 +1363,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Key itemId = state.settings().itemId();
             // no item available
             if (itemId == null) return;
-            Object vanillaBlock = FastNMS.INSTANCE.method$BlockState$getBlock(state.vanillaBlockState().literalObject());
+            Object vanillaBlock = FastNMS.INSTANCE.method$BlockState$getBlock(state.visualBlockState().literalObject());
             Object vanillaBlockItem = FastNMS.INSTANCE.method$Block$asItem(vanillaBlock);
             if (vanillaBlockItem == null) return;
             Key addItemId = KeyUtils.namespacedKey2Key(item.getType().getKey());
@@ -1411,9 +1438,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Object location = FastNMS.INSTANCE.field$ResourceKey$location(dimensionKey);
             World world = Bukkit.getWorld(Objects.requireNonNull(NamespacedKey.fromString(location.toString())));
             if (world != null) {
-                int sectionCount = (world.getMaxHeight() - world.getMinHeight()) / 16;
-                player.setClientSideSectionCount(sectionCount);
-                player.setClientSideDimension(Key.of(location.toString()));
+                player.setClientSideWorld(BukkitAdaptors.adapt(world));
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundLoginPacket: World " + location + " does not exist");
             }
@@ -1441,10 +1466,10 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             Object location = FastNMS.INSTANCE.field$ResourceKey$location(dimensionKey);
             World world = Bukkit.getWorld(Objects.requireNonNull(NamespacedKey.fromString(location.toString())));
             if (world != null) {
-                int sectionCount = (world.getMaxHeight() - world.getMinHeight()) / 16;
-                player.setClientSideSectionCount(sectionCount);
-                player.setClientSideDimension(Key.of(location.toString()));
+                player.setClientSideWorld(BukkitAdaptors.adapt(world));
                 player.clearTrackedChunks();
+                player.clearTrackedBlockEntities();
+                player.clearTrackedFurniture();
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundRespawnPacket: World " + location + " does not exist");
             }
@@ -1721,9 +1746,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
             int entityId = ProtectedFieldVisitor.get().field$ClientboundMoveEntityPacket$entityId(packet);
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
-            }
             EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
             if (handler != null) {
                 handler.handleMoveAndRotate(user, event, packet);
@@ -1743,42 +1765,16 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
-    public static class RotateHeadListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundRotateHeadPacket$entityIdGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundRotateHeadPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    public static class SetEntityMotionListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            if (!VersionHelper.isOrAbove1_21_6()) return;
-            int entityId;
-            try {
-                entityId = (int) NetworkReflections.methodHandle$ClientboundSetEntityMotionPacket$idGetter.invokeExact(packet);
-            } catch (Throwable t) {
-                CraftEngine.instance().logger().warn("Failed to get entity id from ClientboundSetEntityMotionPacket", t);
-                return;
-            }
-            if (BukkitFurnitureManager.instance().isFurnitureRealEntity(entityId)) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
     public static class FinishConfigurationListener implements NMSPacketListener {
+
+        private void returnToWorld(NetWorkUser user, Queue<Object> configurationTasks, Object packetListener) {
+            configurationTasks.add(CoreReflections.instance$JoinWorldTask);
+            try {
+                CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$startNextTask.invokeExact(packetListener);
+            } catch (Throwable e) {
+                CraftEngine.instance().logger().warn("Cannot return to world for " + user.name(), e);
+            }
+        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -1830,15 +1826,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             // 请求资源包
             ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
             host.requestResourcePackDownloadLink(user.uuid()).whenComplete((dataList, t) -> {
-                if (t != null) {
-                    CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
-                    FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
-                    return;
-                }
-                if (dataList.isEmpty()) {
-                    FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
-                    return;
-                }
                 Queue<Object> configurationTasks;
                 try {
                     configurationTasks = (Queue<Object>) CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$configurationTasksGetter.invokeExact(packetListener);
@@ -1847,13 +1834,22 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
                     return;
                 }
+                if (t != null) {
+                    CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
+                if (dataList.isEmpty()) {
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
                 // 向配置阶段连接的任务重加入资源包的任务
                 for (ResourcePackDownloadData data : dataList) {
                     configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
                     user.addResourcePackUUID(data.uuid());
                 }
                 // 最后再加入一个 JoinWorldTask 并开始资源包任务
-                FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
+                returnToWorld(user, configurationTasks, packetListener);
             });
         }
     }
@@ -1957,17 +1953,15 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         private final IntIdentityList biomeList;
         private final IntIdentityList blockList;
         private final boolean needsDowngrade;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public LevelChunkWithLightListener(int[] blockStateMapper, int[] modBlockStateMapper, int blockRegistrySize, int biomeRegistrySize) {
+        public LevelChunkWithLightListener(int[] blockStateMapper, int[] modBlockStateMapper, int blockRegistrySize, int biomeRegistrySize, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
             this.biomeList = new IntIdentityList(biomeRegistrySize);
             this.blockList = new IntIdentityList(blockRegistrySize);
             this.needsDowngrade = MiscUtils.ceilLog2(BlockStateUtils.vanillaBlockStateCount()) != MiscUtils.ceilLog2(blockRegistrySize);
-        }
-
-        public int remapBlockState(int stateId, boolean enableMod) {
-            return enableMod ? this.modBlockStateMapper[stateId] : this.blockStateMapper[stateId];
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         @Override
@@ -1978,6 +1972,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             int chunkZ = buf.readInt();
             ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
             boolean named = !VersionHelper.isOrAbove1_20_2();
+
+            int[] remapper = user.clientModEnabled() ? this.modBlockStateMapper : this.blockStateMapper;
 
             // 读取区块数据
             int heightmapsCount = 0;
@@ -2000,36 +1996,94 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             buf.readBytes(chunkDataBytes);
 
             // 客户端侧section数量很重要，不能读取此时玩家所在的真实世界，包具有滞后性
-            int count = player.clientSideSectionCount();
+            net.momirealms.craftengine.core.world.World clientSideWorld = player.clientSideWorld();
+            WorldHeight worldHeight = clientSideWorld.worldHeight();
+            int count = worldHeight.getSectionsCount();
             MCSection[] sections = new MCSection[count];
             FriendlyByteBuf chunkDataByteBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(chunkDataBytes));
 
             boolean hasChangedAnyBlock = false;
             boolean hasGlobalPalette = false;
 
+            // 创建客户端侧世界（只在开启实体情况下创建）
+            ClientSection[] clientSections = Config.entityCullingRayTracing() ? new ClientSection[count] : null;
+
             for (int i = 0; i < count; i++) {
                 MCSection mcSection = new MCSection(user.clientBlockList(), this.blockList, this.biomeList);
                 mcSection.readPacket(chunkDataByteBuf);
+
                 PalettedContainer<Integer> container = mcSection.blockStateContainer();
+                // 重定向生物群系
                 if (remapBiomes(user, mcSection.biomeContainer())) {
                     hasChangedAnyBlock = true;
                 }
+
                 Palette<Integer> palette = container.data().palette();
                 if (palette.canRemap()) {
-                    if (palette.remapAndCheck(s -> remapBlockState(s, user.clientModEnabled()))) {
+
+                    // 重定向方块
+                    if (palette.remapAndCheck(s -> remapper[s])) {
                         hasChangedAnyBlock = true;
+                    }
+
+                    // 处理客户端侧哪些方块有阻挡
+                    if (clientSections != null) {
+                        int size = palette.getSize();
+                        // 单个元素的情况下，使用优化的存储方案
+                        if (size == 1) {
+                            clientSections[i] = new ClientSection(new SingularOcclusionStorage(this.occlusionPredicate.test(palette.get(0))));
+                        } else {
+                            boolean hasOcclusions = false;
+                            boolean hasNoOcclusions = false;
+                            for (int h = 0; h < size; h++) {
+                                int entry = palette.get(h);
+                                if (this.occlusionPredicate.test(entry)) {
+                                    hasOcclusions = true;
+                                } else {
+                                    hasNoOcclusions = true;
+                                }
+                            }
+                            // 两种情况都有，那么需要一个个遍历处理视线遮挡数据
+                            if (hasOcclusions && hasNoOcclusions) {
+                                PackedOcclusionStorage storage = new PackedOcclusionStorage(false);
+                                clientSections[i] = new ClientSection(storage);
+                                for (int j = 0; j < 4096; j++) {
+                                    int state = container.get(j);
+                                    storage.set(j, this.occlusionPredicate.test(state));
+                                }
+                            }
+                            // 全遮蔽或全透视则使用优化存储方案
+                            else {
+                                clientSections[i] = new ClientSection(new SingularOcclusionStorage(hasOcclusions));
+                            }
+                        }
                     }
                 } else {
                     hasGlobalPalette = true;
+
+                    PackedOcclusionStorage storage = null;
+                    if (clientSections != null) {
+                        storage = new PackedOcclusionStorage(false);
+                        clientSections[i] = new ClientSection(storage);
+                    }
+
                     for (int j = 0; j < 4096; j++) {
                         int state = container.get(j);
-                        int newState = remapBlockState(state, user.clientModEnabled());
+
+                        // 重定向方块
+                        int newState = remapper[state];
                         if (newState != state) {
                             container.set(j, newState);
                             hasChangedAnyBlock = true;
                         }
+
+                        // 写入视线遮挡数据
+                        if (storage != null) {
+                            storage.set(j, this.occlusionPredicate.test(state));
+                        }
                     }
                 }
+
                 sections[i] = mcSection;
             }
 
@@ -2094,13 +2148,17 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             }
 
             // 记录加载的区块
-            player.addTrackedChunk(chunkPos.longKey, new ChunkStatus());
+            player.addTrackedChunk(chunkPos.longKey, new ClientChunk(clientSections, worldHeight));
 
             // 生成方块实体
-            CEWorld ceWorld = BukkitWorldManager.instance().getWorld(player.world().uuid());
-            CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(chunkPos.longKey);
-            if (ceChunk != null) {
-                ceChunk.spawnBlockEntities(player);
+            CEWorld ceWorld = clientSideWorld.storageWorld();
+            // 世界可能被卸载，因为包滞后
+            if (ceWorld != null) {
+                CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(chunkPos.longKey);
+                if (ceChunk != null) {
+                    // 生成方块实体
+                    ceChunk.spawnBlockEntities(player);
+                }
             }
         }
     }
@@ -2108,63 +2166,66 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
     public static class SectionBlockUpdateListener implements ByteBufferPacketListener {
         private final int[] blockStateMapper;
         private final int[] modBlockStateMapper;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public SectionBlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper) {
+        public SectionBlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
-            if (user.clientModEnabled()) {
-                FriendlyByteBuf buf = event.getBuffer();
-                long pos = buf.readLong();
-                int blocks = buf.readVarInt();
-                short[] positions = new short[blocks];
-                int[] states = new int[blocks];
-                for (int i = 0; i < blocks; i++) {
-                    long k = buf.readVarLong();
-                    positions[i] = (short) ((int) (k & 4095L));
-                    states[i] = modBlockStateMapper[((int) (k >>> 12))];
+            int[] remapper = user.clientModEnabled() ? this.modBlockStateMapper : this.blockStateMapper;
+            FriendlyByteBuf buf = event.getBuffer();
+            long sPos = buf.readLong();
+            int blocks = buf.readVarInt();
+            short[] positions = new short[blocks];
+            int[] states = new int[blocks];
+
+            // 获取客户端侧区域
+            ClientSection clientSection = null;
+            if (Config.entityCullingRayTracing()) {
+                SectionPos sectionPos = SectionPos.of(sPos);
+                ClientChunk trackedChunk = user.getTrackedChunk(sectionPos.asChunkPos().longKey);
+                if (trackedChunk != null) {
+                    clientSection = trackedChunk.sectionById(sectionPos.y);
                 }
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                buf.writeLong(pos);
-                buf.writeVarInt(blocks);
-                for (int i = 0; i < blocks; i++) {
-                    buf.writeVarLong((long) states[i] << 12 | positions[i]);
-                }
-                event.setChanged(true);
-            } else {
-                FriendlyByteBuf buf = event.getBuffer();
-                long pos = buf.readLong();
-                int blocks = buf.readVarInt();
-                short[] positions = new short[blocks];
-                int[] states = new int[blocks];
-                for (int i = 0; i < blocks; i++) {
-                    long k = buf.readVarLong();
-                    positions[i] = (short) ((int) (k & 4095L));
-                    states[i] = blockStateMapper[((int) (k >>> 12))];
-                }
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                buf.writeLong(pos);
-                buf.writeVarInt(blocks);
-                for (int i = 0; i < blocks; i++) {
-                    buf.writeVarLong((long) states[i] << 12 | positions[i]);
-                }
-                event.setChanged(true);
             }
+
+            for (int i = 0; i < blocks; i++) {
+                long k = buf.readVarLong();
+                short posIndex = (short) ((int) (k & 4095L));
+                positions[i] = posIndex;
+                int beforeState = ((int) (k >>> 12));
+                states[i] = remapper[beforeState];
+                if (clientSection != null) {
+                    // 设置遮蔽状态
+                    BlockPos pos = SectionPos.unpackSectionRelativePos(posIndex);
+                    clientSection.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(beforeState));
+                }
+            }
+
+            buf.clear();
+            buf.writeVarInt(event.packetID());
+            buf.writeLong(sPos);
+            buf.writeVarInt(blocks);
+            for (int i = 0; i < blocks; i++) {
+                buf.writeVarLong((long) states[i] << 12 | positions[i]);
+            }
+            event.setChanged(true);
         }
     }
 
     public static class BlockUpdateListener implements ByteBufferPacketListener {
         private final int[] blockStateMapper;
         private final int[] modBlockStateMapper;
+        private final Predicate<Integer> occlusionPredicate;
 
-        public BlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper) {
+        public BlockUpdateListener(int[] blockStateMapper, int[] modBlockStateMapper, Predicate<Integer> occlusionPredicate) {
             this.blockStateMapper = blockStateMapper;
             this.modBlockStateMapper = modBlockStateMapper;
+            this.occlusionPredicate = occlusionPredicate;
         }
 
         @Override
@@ -2172,6 +2233,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             FriendlyByteBuf buf = event.getBuffer();
             BlockPos pos = buf.readBlockPos();
             int before = buf.readVarInt();
+            if (Config.entityCullingRayTracing()) {
+                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(pos.x >> 4, pos.z >> 4));
+                if (trackedChunk != null) {
+                    trackedChunk.setOccluding(pos.x, pos.y, pos.z, this.occlusionPredicate.test(before));
+                }
+            }
             if (user.clientModEnabled() && !BlockStateUtils.isVanillaBlock(before)) {
                 return;
             }
@@ -2345,6 +2412,13 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             if (eventId != WorldEvents.BLOCK_BREAK_EFFECT) return;
             BlockPos blockPos = buf.readBlockPos();
             int state = buf.readInt();
+            // 移除不透明设置
+            if (Config.entityCullingRayTracing()) {
+                ClientChunk trackedChunk = user.getTrackedChunk(ChunkPos.asLong(blockPos.x >> 4, blockPos.z >> 4));
+                if (trackedChunk != null) {
+                    trackedChunk.setOccluding(blockPos.x, blockPos.y, blockPos.z, false);
+                }
+            }
             boolean global = buf.readBoolean();
             int newState = user.clientModEnabled() ? modBlockStateMapper[state] : blockStateMapper[state];
             Object blockState = BlockStateUtils.idToBlockState(state);
@@ -3249,7 +3323,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             for (int i = 0, size = intList.size(); i < size; i++) {
                 int entityId = intList.getInt(i);
                 EntityPacketHandler handler = user.entityPacketHandlers().remove(entityId);
-                if (handler != null && handler.handleEntitiesRemove(intList)) {
+                if (handler != null && handler.handleEntitiesRemove(user, intList)) {
                     changed = true;
                 }
             }
@@ -3598,35 +3672,41 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
             FriendlyByteBuf buf = event.getBuffer();
             int entityId = hasModelEngine() ? plugin.compatibilityManager().interactionToBaseEntity(buf.readVarInt()) : buf.readVarInt();
-            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByEntityId(entityId);
+            BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
             if (furniture == null) return;
             int actionType = buf.readVarInt();
             BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
             if (serverPlayer.isSpectatorMode()) return;
             Player platformPlayer = serverPlayer.platformPlayer();
-            Location location = furniture.baseEntity().getLocation();
+            Location location = furniture.location();
 
             Runnable mainThreadTask;
             if (actionType == 1) {
                 // ATTACK
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeBoolean(usingSecondaryAction);
                 }
 
                 mainThreadTask = () -> {
                     // todo 冒险模式破坏工具白名单
-                    if (serverPlayer.isAdventureMode() ||
-                            !furniture.isValid()) return;
+                    if (serverPlayer.isAdventureMode() || !furniture.isValid()) return;
 
-                    // todo 重构家具时候注意，需要准备加载好的hitbox类，以获取hitbox坐标
-                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
-                        return;
+                    // 先检查碰撞箱部分是否存在
+                    FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
+                    if (hitBox == null) return;
+                    for (FurnitureHitboxPart part : hitBox.parts()) {
+                        if (part.entityId() == entityId) {
+                            // 检查玩家是否能破坏此点
+                            if (!serverPlayer.canInteractPoint(part.pos(), 16d)) {
+                                return;
+                            }
+                        }
                     }
 
                     FurnitureAttemptBreakEvent preBreakEvent = new FurnitureAttemptBreakEvent(serverPlayer.platformPlayer(), furniture);
@@ -3664,11 +3744,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 float z = buf.readFloat();
                 InteractionHand hand = buf.readVarInt() == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeFloat(x).writeFloat(y).writeFloat(z);
                     buf.writeVarInt(hand == InteractionHand.MAIN_HAND ? 0 : 1);
@@ -3681,34 +3761,39 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     }
 
                     // 先检查碰撞箱部分是否存在
-                    HitBoxPart hitBoxPart = furniture.hitBoxPartByEntityId(entityId);
-                    if (hitBoxPart == null) return;
-                    Vec3d pos = hitBoxPart.pos();
-                    // 检测距离
-                    if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                    FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
+                    if (hitBox == null) return;
+                    FurnitureHitboxPart part = null;
+                    for (FurnitureHitboxPart p : hitBox.parts()) {
+                        if (p.entityId() == entityId) {
+                            Vec3d pos = p.pos();
+                            // 检测距离
+                            if (!serverPlayer.canInteractPoint(pos, 16d)) {
+                                return;
+                            }
+                            part = p;
+                        }
+                    }
+                    if (part == null) {
                         return;
                     }
-                    // 检测
+
+                    // 检测能否交互碰撞箱
                     Location eyeLocation = platformPlayer.getEyeLocation();
                     Vector direction = eyeLocation.getDirection();
                     Location endLocation = eyeLocation.clone();
                     endLocation.add(direction.multiply(serverPlayer.getCachedInteractionRange()));
-                    Optional<EntityHitResult> result = hitBoxPart.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
+                    Optional<EntityHitResult> result = part.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
                     if (result.isEmpty()) {
                         return;
                     }
                     EntityHitResult hitResult = result.get();
                     Vec3d hitLocation = hitResult.hitLocation();
+
                     // 获取正确的交互点
                     Location interactionPoint = new Location(platformPlayer.getWorld(), hitLocation.x, hitLocation.y, hitLocation.z);
-
-                    HitBox hitbox = furniture.hitBoxByEntityId(entityId);
-                    if (hitbox == null) {
-                        return;
-                    }
-
                     // 触发事件
-                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitbox);
+                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitBox);
                     if (EventUtils.fireAndCheckCancel(interactEvent)) {
                         return;
                     }
@@ -3728,9 +3813,16 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                     if (cancellable.isCancelled()) {
                         return;
                     }
-
+                    // 不处理调试棒
+                    if (itemInHand.vanillaId().equals(ItemKeys.DEBUG_STICK)) {
+                        return;
+                    }
+                    // 已经有过交互了
+                    if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+                        return;
+                    }
                     // 必须从网络包层面处理，否则无法获取交互的具体实体
-                    if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitbox.config().canUseItemOn()) {
+                    if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitBox.config().canUseItemOn()) {
                         Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
                         if (optionalCustomItem.isPresent() && !optionalCustomItem.get().behaviors().isEmpty()) {
                             for (ItemBehavior behavior : optionalCustomItem.get().behaviors()) {
@@ -3750,9 +3842,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                         );
                     } else {
                         if (!serverPlayer.isSecondaryUseActive()) {
-                            for (Seat<HitBox> seat : hitbox.seats()) {
+                            for (Seat<FurnitureHitBox> seat : hitBox.seats()) {
                                 if (!seat.isOccupied()) {
                                     if (seat.spawnSeat(serverPlayer, furniture.position())) {
+                                        if (!part.interactive()) {
+                                            serverPlayer.swingHand(InteractionHand.MAIN_HAND);
+                                        }
                                         break;
                                     }
                                 }
@@ -3763,11 +3858,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             } else if (actionType == 0) {
                 int hand = buf.readVarInt();
                 boolean usingSecondaryAction = buf.readBoolean();
-                if (entityId != furniture.baseEntityId()) {
+                if (entityId != furniture.entityId()) {
                     event.setChanged(true);
                     buf.clear();
                     buf.writeVarInt(event.packetID());
-                    buf.writeVarInt(furniture.baseEntityId());
+                    buf.writeVarInt(furniture.entityId());
                     buf.writeVarInt(actionType);
                     buf.writeVarInt(hand);
                     buf.writeBoolean(usingSecondaryAction);
@@ -3805,7 +3900,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             this.handlers[MEntityTypes.BLOCK_DISPLAY$registryId] = simpleAddEntityHandler(BlockDisplayPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.TEXT_DISPLAY$registryId] = simpleAddEntityHandler(TextDisplayPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ARMOR_STAND$registryId] = simpleAddEntityHandler(ArmorStandPacketHandler.INSTANCE);
-            this.handlers[MEntityTypes.ITEM$registryId] = simpleAddEntityHandler(CommonItemPacketHandler.INSTANCE);
+            this.handlers[MEntityTypes.ITEM$registryId] = simpleAddEntityHandler(ItemPacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ITEM_FRAME$registryId] = simpleAddEntityHandler(ItemFramePacketHandler.INSTANCE);
             this.handlers[MEntityTypes.GLOW_ITEM_FRAME$registryId] = simpleAddEntityHandler(ItemFramePacketHandler.INSTANCE);
             this.handlers[MEntityTypes.ENDERMAN$registryId] = simpleAddEntityHandler(EndermanPacketHandler.INSTANCE);
@@ -3832,7 +3927,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 this.handlers[MEntityTypes.TNT$registryId] = simpleAddEntityHandler(PrimedTNTPacketHandler.INSTANCE);
             }
             if (VersionHelper.isOrAbove1_20_5()) {
-                this.handlers[MEntityTypes.OMINOUS_ITEM_SPAWNER$registryId] = simpleAddEntityHandler(CommonItemPacketHandler.INSTANCE);
+                this.handlers[MEntityTypes.OMINOUS_ITEM_SPAWNER$registryId] = simpleAddEntityHandler(ItemPacketHandler.INSTANCE);
             }
             this.handlers[MEntityTypes.FALLING_BLOCK$registryId] = (user, event) -> {
                 FriendlyByteBuf buf = event.getBuffer();
@@ -3875,10 +3970,18 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
             this.handlers[MEntityTypes.ITEM_DISPLAY$registryId] = (user, event) -> {
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(id);
                 if (furniture != null) {
-                    user.entityPacketHandlers().put(id, new FurniturePacketHandler(furniture.fakeEntityIds()));
-                    user.sendPacket(furniture.spawnPacket((Player) user.platformPlayer()), false);
+                    EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, new FurniturePacketHandler(id, furniture.virtualEntityIds()));
+                    if (Config.enableEntityCulling()) {
+                        serverPlayer.addTrackedFurniture(id, furniture);
+                    } else {
+                        // 修复addEntityToWorld，包比事件先发的问题 (WE)
+                        if (previous == null || previous instanceof ItemDisplayPacketHandler) {
+                            furniture.show(serverPlayer);
+                        }
+                    }
                     if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {
                         event.setCancelled(true);
                     }
@@ -3891,7 +3994,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
                 // Cancel collider entity packet
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
                 if (furniture != null) {
                     event.setCancelled(true);
                     user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);
@@ -3902,7 +4005,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 FriendlyByteBuf buf = event.getBuffer();
                 int id = buf.readVarInt();
                 // Cancel collider entity packet
-                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByRealEntityId(id);
+                BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
                 if (furniture != null) {
                     event.setCancelled(true);
                     user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);

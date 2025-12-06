@@ -30,6 +30,11 @@ public class IdListPalette<T> implements Palette<T> {
     }
 
     @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        return true;
+    }
+
+    @Override
     public T get(int id) {
         T object = this.idList.get(id);
         if (object == null) {

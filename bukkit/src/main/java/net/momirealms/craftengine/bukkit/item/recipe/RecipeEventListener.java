@@ -407,8 +407,12 @@ public class RecipeEventListener implements Listener {
         }
 
         boolean hasResult = true;
-
+        
         int realDurabilityPerItem = (int) (repairItem.amount() + repairItem.percent() * maxDamage);
+        if (realDurabilityPerItem == 0) {
+            return;
+        }
+
         int consumeMaxAmount = damage / realDurabilityPerItem + 1;
         int actualConsumedAmount = Math.min(consumeMaxAmount, wrappedSecond.count());
         int actualRepairAmount = actualConsumedAmount * realDurabilityPerItem;

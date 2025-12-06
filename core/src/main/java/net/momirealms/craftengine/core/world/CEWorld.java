@@ -7,7 +7,7 @@ import net.momirealms.craftengine.core.block.entity.tick.TickingBlockEntity;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
-import net.momirealms.craftengine.core.util.BlockEntityTickersList;
+import net.momirealms.craftengine.core.util.TickersList;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
 import net.momirealms.craftengine.core.world.chunk.storage.StorageAdaptor;
 import net.momirealms.craftengine.core.world.chunk.storage.WorldDataStorage;
@@ -25,9 +25,9 @@ public abstract class CEWorld {
     protected final WorldHeight worldHeightAccessor;
     protected List<SectionPos> pendingLightSections = new ArrayList<>();
     protected final Set<SectionPos> lightSections = ConcurrentHashMap.newKeySet(128);
-    protected final BlockEntityTickersList tickingSyncBlockEntities = new BlockEntityTickersList();
+    protected final TickersList<TickingBlockEntity> syncTickingBlockEntities = new TickersList<>();
     protected final List<TickingBlockEntity> pendingSyncTickingBlockEntities = new ArrayList<>();
-    protected final BlockEntityTickersList tickingAsyncBlockEntities = new BlockEntityTickersList();
+    protected final TickersList<TickingBlockEntity> asyncTickingBlockEntities = new TickersList<>();
     protected final List<TickingBlockEntity> pendingAsyncTickingBlockEntities = new ArrayList<>();
     protected volatile boolean isTickingSyncBlockEntities = false;
     protected volatile boolean isTickingAsyncBlockEntities = false;
@@ -51,19 +51,15 @@ public abstract class CEWorld {
 
     public void setTicking(boolean ticking) {
         if (ticking) {
-            if (this.syncTickTask == null || this.syncTickTask.cancelled()) {
+            if (this.syncTickTask == null || this.syncTickTask.cancelled())
                 this.syncTickTask = CraftEngine.instance().scheduler().sync().runRepeating(this::syncTick, 1, 1);
-            }
-            if (this.asyncTickTask == null || this.asyncTickTask.cancelled()) {
+            if (this.asyncTickTask == null || this.asyncTickTask.cancelled())
                 this.asyncTickTask = CraftEngine.instance().scheduler().sync().runAsyncRepeating(this::asyncTick, 1, 1);
-            }
         } else {
-            if (this.syncTickTask != null && !this.syncTickTask.cancelled()) {
+            if (this.syncTickTask != null && !this.syncTickTask.cancelled())
                 this.syncTickTask.cancel();
-            }
-            if (this.asyncTickTask != null && !this.asyncTickTask.cancelled()) {
+            if (this.asyncTickTask != null && !this.asyncTickTask.cancelled())
                 this.asyncTickTask.cancel();
-            }
         }
     }
 
@@ -194,39 +190,39 @@ public abstract class CEWorld {
 
     public abstract void updateLight();
 
-    public void addSyncBlockEntityTicker(TickingBlockEntity ticker) {
+    public synchronized void addSyncBlockEntityTicker(TickingBlockEntity ticker) {
         if (this.isTickingSyncBlockEntities) {
             this.pendingSyncTickingBlockEntities.add(ticker);
         } else {
-            this.tickingSyncBlockEntities.add(ticker);
+            this.syncTickingBlockEntities.add(ticker);
         }
     }
 
-    public void addAsyncBlockEntityTicker(TickingBlockEntity ticker) {
+    public synchronized void addAsyncBlockEntityTicker(TickingBlockEntity ticker) {
         if (this.isTickingAsyncBlockEntities) {
             this.pendingAsyncTickingBlockEntities.add(ticker);
         } else {
-            this.tickingAsyncBlockEntities.add(ticker);
+            this.asyncTickingBlockEntities.add(ticker);
         }
     }
 
     protected void tickSyncBlockEntities() {
         this.isTickingSyncBlockEntities = true;
         if (!this.pendingSyncTickingBlockEntities.isEmpty()) {
-            this.tickingSyncBlockEntities.addAll(this.pendingSyncTickingBlockEntities);
+            this.syncTickingBlockEntities.addAll(this.pendingSyncTickingBlockEntities);
             this.pendingSyncTickingBlockEntities.clear();
         }
-        if (!this.tickingSyncBlockEntities.isEmpty()) {
-            Object[] entities = this.tickingSyncBlockEntities.elements();
-            for (int i = 0, size = this.tickingSyncBlockEntities.size(); i < size; i++) {
+        if (!this.syncTickingBlockEntities.isEmpty()) {
+            Object[] entities = this.syncTickingBlockEntities.elements();
+            for (int i = 0, size = this.syncTickingBlockEntities.size(); i < size; i++) {
                 TickingBlockEntity entity = (TickingBlockEntity) entities[i];
                 if (entity.isValid()) {
                     entity.tick();
                 } else {
-                    this.tickingSyncBlockEntities.markAsRemoved(i);
+                    this.syncTickingBlockEntities.markAsRemoved(i);
                 }
             }
-            this.tickingSyncBlockEntities.removeMarkedEntries();
+            this.syncTickingBlockEntities.removeMarkedEntries();
         }
         this.isTickingSyncBlockEntities = false;
     }
@@ -234,20 +230,20 @@ public abstract class CEWorld {
     protected void tickAsyncBlockEntities() {
         this.isTickingAsyncBlockEntities = true;
         if (!this.pendingAsyncTickingBlockEntities.isEmpty()) {
-            this.tickingAsyncBlockEntities.addAll(this.pendingAsyncTickingBlockEntities);
+            this.asyncTickingBlockEntities.addAll(this.pendingAsyncTickingBlockEntities);
             this.pendingAsyncTickingBlockEntities.clear();
         }
-        if (!this.tickingAsyncBlockEntities.isEmpty()) {
-            Object[] entities = this.tickingAsyncBlockEntities.elements();
-            for (int i = 0, size = this.tickingAsyncBlockEntities.size(); i < size; i++) {
+        if (!this.asyncTickingBlockEntities.isEmpty()) {
+            Object[] entities = this.asyncTickingBlockEntities.elements();
+            for (int i = 0, size = this.asyncTickingBlockEntities.size(); i < size; i++) {
                 TickingBlockEntity entity = (TickingBlockEntity) entities[i];
                 if (entity.isValid()) {
                     entity.tick();
                 } else {
-                    this.tickingAsyncBlockEntities.markAsRemoved(i);
+                    this.asyncTickingBlockEntities.markAsRemoved(i);
                 }
             }
-            this.tickingAsyncBlockEntities.removeMarkedEntries();
+            this.asyncTickingBlockEntities.removeMarkedEntries();
         }
         this.isTickingAsyncBlockEntities = false;
     }

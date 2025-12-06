@@ -12,7 +12,7 @@ public enum Debugger {
     RESOURCE_PACK(Config::debugResourcePack),
     ITEM(Config::debugItem),
     BLOCK(Config::debugBlock),
-    BLOCK_ENTITY(Config::debugBlockEntity);
+    ENTITY_CULLING(Config::debugEntityCulling);
 
     private final Supplier<Boolean> condition;
 

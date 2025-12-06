@@ -61,6 +61,7 @@ public class BukkitSeatManager implements SeatManager, Listener {
     @Override
     public void delayedInit() {
         Bukkit.getPluginManager().registerEvents(this.dismountListener, this.plugin.javaPlugin());
+        Bukkit.getPluginManager().registerEvents(this, this.plugin.javaPlugin());
     }
 
     @Override

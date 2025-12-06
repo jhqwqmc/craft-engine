@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.util.*;
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class GitLabHost implements ResourcePackHost {
         if (!Files.exists(cachePath) || !Files.isRegularFile(cachePath)) return;
         try (InputStream is = Files.newInputStream(cachePath)) {
             Map<String, String> cache = GsonHelper.get().fromJson(
-                    new InputStreamReader(is),
+                    new InputStreamReader(is, StandardCharsets.UTF_8),
                     new TypeToken<Map<String, String>>(){}.getType()
             );
             this.url = cache.get("url");
@@ -58,7 +59,7 @@ public class GitLabHost implements ResourcePackHost {
             if (uuidString != null && !uuidString.isEmpty()) {
                 this.uuid = UUID.fromString(uuidString);
             }
-            CraftEngine.instance().logger().info("[GitLab] Loaded cached resource pack info");
+            CraftEngine.instance().logger().info(TranslationManager.instance().translateLog("info.host.cache.load", "GitLab"));
         } catch (Exception e) {
             CraftEngine.instance().logger().warn(
                     "[GitLab] Failed to read cache file: " + cachePath, e);
@@ -154,13 +155,13 @@ public class GitLabHost implements ResourcePackHost {
         String filePartHeader = "--" + boundary + "\r\n" +
                 "Content-Disposition: form-data; name=\"file\"; filename=\"" + filePath.getFileName() + "\"\r\n" +
                 "Content-Type: application/octet-stream\r\n\r\n";
-        parts.add(filePartHeader.getBytes());
+        parts.add(filePartHeader.getBytes(StandardCharsets.UTF_8));
 
         parts.add(Files.readAllBytes(filePath));
-        parts.add("\r\n".getBytes());
+        parts.add("\r\n".getBytes(StandardCharsets.UTF_8));
 
         String endBoundary = "--" + boundary + "--\r\n";
-        parts.add(endBoundary.getBytes());
+        parts.add(endBoundary.getBytes(StandardCharsets.UTF_8));
 
         return HttpRequest.BodyPublishers.ofByteArrays(parts);
     }

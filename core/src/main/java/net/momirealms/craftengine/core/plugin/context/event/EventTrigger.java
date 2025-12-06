@@ -11,7 +11,8 @@ public enum EventTrigger {
     BREAK("break", "dig"),
     PLACE("place", "build"),
     PICK_UP("pick_up", "pick"),
-    STEP("step"),;
+    STEP("step"),
+    FALL("fall"),;
 
     public static final Map<String, EventTrigger> BY_NAME = new HashMap<>();
     private final String[] names;

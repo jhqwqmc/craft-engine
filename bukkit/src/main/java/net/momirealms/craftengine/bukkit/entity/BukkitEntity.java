@@ -2,12 +2,14 @@ package net.momirealms.craftengine.bukkit.entity;
 
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.WorldPosition;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -39,7 +41,12 @@ public class BukkitEntity extends AbstractEntity {
     }
 
     @Override
-    public int entityID() {
+    public WorldPosition position() {
+        return LocationUtils.toWorldPosition(platformEntity().getLocation());
+    }
+
+    @Override
+    public int entityId() {
         return platformEntity().getEntityId();
     }
 
@@ -76,6 +83,11 @@ public class BukkitEntity extends AbstractEntity {
     @Override
     public Key type() {
         return EntityUtils.getEntityType(platformEntity());
+    }
+
+    @Override
+    public boolean isValid() {
+        return platformEntity().isValid();
     }
 
     @Override

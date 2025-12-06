@@ -28,10 +28,10 @@ public class HurtAndBreakRemainder implements CraftRemainder {
         }
     }
 
-    public static class Factory implements CraftRemainderFactory {
+    public static class Factory implements CraftRemainderFactory<HurtAndBreakRemainder> {
 
         @Override
-        public CraftRemainder create(Map<String, Object> args) {
+        public HurtAndBreakRemainder create(Map<String, Object> args) {
             int damage = ResourceConfigUtils.getAsInt(args.getOrDefault("damage", 1), "damage");
             return new HurtAndBreakRemainder(damage);
         }

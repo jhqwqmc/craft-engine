@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.entity;
 
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.core.entity.ItemEntity;
+import net.momirealms.craftengine.core.entity.item.ItemEntity;
 import org.bukkit.entity.Item;
 
 public class BukkitItemEntity extends BukkitEntity implements ItemEntity {

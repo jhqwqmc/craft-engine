@@ -26,13 +26,9 @@ public final class EntityUtils {
     }
 
     public static BlockPos getOnPos(Player player) {
-        try {
-            Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
-            Object blockPos = CoreReflections.method$Entity$getOnPos.invoke(serverPlayer, 1.0E-5F);
-            return LocationUtils.fromBlockPos(blockPos);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+        Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
+        Object blockPos = FastNMS.INSTANCE.method$Entity$getOnPos(serverPlayer);
+        return LocationUtils.fromBlockPos(blockPos);
     }
 
     public static Entity spawnEntity(World world, Location loc, EntityType type, Consumer<Entity> function) {
@@ -60,7 +56,7 @@ public final class EntityUtils {
             Object serverLevel = BukkitAdaptors.adapt(player.getWorld()).serverWorld();
             Object serverPlayer = FastNMS.INSTANCE.method$CraftPlayer$getHandle(player);
             for (Object pose : List.of(CoreReflections.instance$Pose$STANDING, CoreReflections.instance$Pose$CROUCHING, CoreReflections.instance$Pose$SWIMMING)) {
-                BlockPos pos = new BlockPos(MiscUtils.fastFloor(x), MiscUtils.fastFloor(y), MiscUtils.fastFloor(z));
+                BlockPos pos = new BlockPos(MiscUtils.floor(x), MiscUtils.floor(y), MiscUtils.floor(z));
                 try {
                     double floorHeight = (double) CoreReflections.method$BlockGetter$getBlockFloorHeight.invoke(serverLevel, LocationUtils.toBlockPos(pos));
                     if (pos.y() + floorHeight > y + 0.75 || !isBlockFloorValid(floorHeight)) {
@@ -77,7 +73,7 @@ public final class EntityUtils {
                     if (!canDismount) {
                         continue;
                     }
-                    if (!FastNMS.INSTANCE.checkEntityCollision(serverLevel, List.of(newAABB))) {
+                    if (!FastNMS.INSTANCE.checkEntityCollision(serverLevel, List.of(newAABB), o -> true)) {
                         continue;
                     }
                     if (VersionHelper.isFolia()) {

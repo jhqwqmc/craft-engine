@@ -167,7 +167,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
         this.initInternalData();
         try (InputStream inputStream = plugin.resourceStream("internal/atlases/blocks.json")) {
-            this.vanillaAtlas = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+            this.vanillaAtlas = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read internal/atlases/blocks.json", e);
         }
@@ -221,7 +221,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadModernItemModel(String path, BiConsumer<Key, ModernItemModel> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : allModelsItems.entrySet()) {
                     if (entry.getValue() instanceof JsonObject modelJson) {
                         callback.accept(Key.of(entry.getKey()), ModernItemModel.fromJson(modelJson));
@@ -236,7 +236,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadInternalData(String path, BiConsumer<Key, JsonObject> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+                JsonObject allModelsItems = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : allModelsItems.entrySet()) {
                     if (entry.getValue() instanceof JsonObject modelJson) {
                         callback.accept(Key.of(entry.getKey()), modelJson);
@@ -251,7 +251,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void loadInternalList(String path, Consumer<Key> callback) {
         try (InputStream inputStream = this.plugin.resourceStream(path)) {
             if (inputStream != null) {
-                JsonArray listJson = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonArray();
+                JsonArray listJson = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonArray();
                 for (JsonElement element : listJson) {
                     if (element instanceof JsonPrimitive primitiveJson) {
                         callback.accept(Key.of("minecraft", primitiveJson.getAsString()));
@@ -407,7 +407,7 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                     Pack pack = new Pack(path, new PackMeta(author, description, version, namespace), enable);
                     this.loadedPacks.put(path.getFileName().toString(), pack);
-                    this.plugin.logger().info("Loaded pack: " + pack.folder().getFileName() + ". Default namespace: " + namespace);
+                    this.plugin.logger().info(TranslationManager.instance().translateLog("info.pack.load", pack.folder().getFileName().toString(), namespace));
                 }
             }
         } catch (IOException e) {
@@ -471,6 +471,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/configuration/templates/loot_tables.yml");
         plugin.saveResource("resources/default/configuration/templates/recipes.yml");
         plugin.saveResource("resources/default/configuration/templates/tool_levels.yml");
+        plugin.saveResource("resources/default/configuration/templates/events.yml");
         plugin.saveResource("resources/default/configuration/categories.yml");
         plugin.saveResource("resources/default/configuration/emoji.yml");
         plugin.saveResource("resources/default/configuration/translations.yml");
@@ -695,7 +696,12 @@ public abstract class AbstractPackManager implements PackManager {
             parser.loadAll();
             parser.postProcess();
             long t2 = System.nanoTime();
-            this.plugin.logger().info("Loaded " + parser.sectionId()[0] + " in " + String.format("%.2f", ((t2 - t1) / 1_000_000.0)) + " ms");
+            int count = parser.count();
+            if (parser.silentIfNotExists() && count == 0) {
+               continue;
+            }
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource.load",
+                    parser.sectionId()[0], String.format("%.2f", ((t2 - t1) / 1_000_000.0)), String.valueOf(count)));
         }
     }
 
@@ -720,7 +726,7 @@ public abstract class AbstractPackManager implements PackManager {
 
     @Override
     public void generateResourcePack() throws IOException {
-        this.plugin.logger().info("Generating resource pack...");
+        this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.start"));
         long time1 = System.currentTimeMillis();
 
         // Create cache data
@@ -768,17 +774,17 @@ public abstract class AbstractPackManager implements PackManager {
                 this.removeAllShaders(generatedPackPath);
             }
             long time2 = System.currentTimeMillis();
-            this.plugin.logger().info("Generated resource pack in " + (time2 - time1) + "ms");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.generate", String.valueOf(time2 - time1)));
             if (Config.validateResourcePack()) {
                 this.validateResourcePack(generatedPackPath);
             }
             long time3 = System.currentTimeMillis();
-            this.plugin.logger().info("Validated resource pack in " + (time3 - time2) + "ms");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.validate", String.valueOf(time3 - time2)));
             if (Config.optimizeResourcePack()) {
                 this.optimizeResourcePack(generatedPackPath);
             }
             long time4 = System.currentTimeMillis();
-            this.plugin.logger().info("Optimized resource pack in " + (time4 - time3) + "ms");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.optimize", String.valueOf(time4 - time3)));
             Path finalPath = resourcePackPath();
             Files.createDirectories(finalPath.getParent());
             try {
@@ -787,7 +793,7 @@ public abstract class AbstractPackManager implements PackManager {
                 this.plugin.logger().severe("Error zipping resource pack", e);
             }
             long time5 = System.currentTimeMillis();
-            this.plugin.logger().info("Created resource pack zip file in " + (time5 - time4) + "ms");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.create", String.valueOf(time5 - time4)));
             this.generationEventDispatcher.accept(generatedPackPath, finalPath);
         }
     }
@@ -1042,7 +1048,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
 
         if (Config.optimizeJson()) {
-            this.plugin.logger().info("> Optimizing json files...");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.optimize.json"));
             AtomicLong previousBytes = new AtomicLong(0L);
             AtomicLong afterBytes = new AtomicLong(0L);
             List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -1109,11 +1115,11 @@ public abstract class AbstractPackManager implements PackManager {
             long originalSize = previousBytes.get();
             long optimizedSize = afterBytes.get();
             double compressionRatio = ((double) optimizedSize / originalSize) * 100;
-            this.plugin.logger().info("□ Before/After/Ratio: " + formatSize(originalSize) + "/" + formatSize(optimizedSize) + "/" + String.format("%.2f%%", compressionRatio));
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.optimize.result", formatSize(originalSize), formatSize(optimizedSize), String.format("%.2f%%", compressionRatio)));
         }
 
         if (Config.optimizeTexture()) {
-            this.plugin.logger().info("> Optimizing textures...");
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.optimize.texture"));
             AtomicLong previousBytes = new AtomicLong(0L);
             AtomicLong afterBytes = new AtomicLong(0L);
             List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -1155,7 +1161,7 @@ public abstract class AbstractPackManager implements PackManager {
             long originalSize = previousBytes.get();
             long optimizedSize = afterBytes.get();
             double compressionRatio = ((double) optimizedSize / originalSize) * 100;
-            this.plugin.logger().info("□ Before/After/Ratio: " + formatSize(originalSize) + "/" + formatSize(optimizedSize) + "/" + String.format("%.2f%%", compressionRatio));
+            this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.optimize.result", formatSize(originalSize), formatSize(optimizedSize), String.format("%.2f%%", compressionRatio)));
         }
     }
 
@@ -1170,7 +1176,7 @@ public abstract class AbstractPackManager implements PackManager {
                 " ".repeat(Math.max(0, emptyLength)) +
                 "]";
         return String.format(
-                "%s %d/%d (%.1f%%) | Time: %ss",
+                "%s %d/%d (%.1f%%) | %ss",
                 progressBar,
                 current,
                 total,
@@ -1413,6 +1419,10 @@ public abstract class AbstractPackManager implements PackManager {
                                                 oggToSoundEvents.put(Key.of(primitive.getAsString()), soundKey);
                                             }
                                         } else if (sound instanceof JsonObject soundObj && soundObj.has("name")) {
+                                            if (soundObj.has("type")) {
+                                                String type = soundObj.get("type").getAsString();
+                                                if (!type.equals("file")) continue;
+                                            }
                                             String name = soundObj.get("name").getAsString();
                                             oggToSoundEvents.put(Key.of(name), soundKey);
                                         }
@@ -1767,7 +1777,7 @@ public abstract class AbstractPackManager implements PackManager {
             if (Files.exists(atlasPath) && Files.isRegularFile(atlasPath)) {
                 try {
                     previousAtlasSources = GsonHelper.readJsonFile(atlasPath).getAsJsonObject().getAsJsonArray("sources");
-                } catch (Exception ignored) {
+                } catch (ClassCastException | IllegalStateException | IOException | JsonParseException ignored) {
                 }
             }
 
@@ -2231,7 +2241,7 @@ public abstract class AbstractPackManager implements PackManager {
                 plugin.logger().warn("Failed to load internal/sounds.json");
                 return;
             }
-            soundTemplate = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+            soundTemplate = JsonParser.parseReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (IOException e) {
             plugin.logger().warn("Failed to load internal/sounds.json", e);
             return;
@@ -2852,6 +2862,11 @@ public abstract class AbstractPackManager implements PackManager {
         public void clearCache() {
             this.excludeTexture.clear();
             this.excludeJson.clear();
+        }
+
+        @Override
+        public int count() {
+            return this.excludeJson.size() + this.excludeTexture.size();
         }
 
         public Set<String> excludeTexture() {

@@ -13,6 +13,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
 public class BukkitBlockBehavior extends AbstractBlockBehavior {
-    private static final Map<String, BiConsumer<BukkitBlockBehavior, Property<?>>> HARD_CODED_PROPERTY_DATA = new HashMap<>();
+    private static final Map<String, BiConsumer<@NotNull BukkitBlockBehavior, Property<?>>> HARD_CODED_PROPERTY_DATA = new HashMap<>();
     static {
         HARD_CODED_PROPERTY_DATA.put("axis", (behavior, property) -> {
             @SuppressWarnings("unchecked")
@@ -180,7 +181,7 @@ public class BukkitBlockBehavior extends AbstractBlockBehavior {
     public boolean isPathFindable(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(args[0]);
         if (optionalCustomState.isEmpty()) return false;
-        BlockStateWrapper vanillaState = optionalCustomState.get().vanillaBlockState();
+        BlockStateWrapper vanillaState = optionalCustomState.get().visualBlockState();
         if (vanillaState == null) return false;
         return FastNMS.INSTANCE.method$BlockStateBase$isPathFindable(vanillaState.literalObject(), VersionHelper.isOrAbove1_20_5() ? null : args[1], VersionHelper.isOrAbove1_20_5() ? null : args[2], args[isPathFindable$type]);
     }

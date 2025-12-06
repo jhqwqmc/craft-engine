@@ -1,44 +1,80 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.util.Key;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-// TODO 家具的设计存在问题。家具也应该存在不同的状态，而不是根据放置规则直接决定状态类型
 public interface CustomFurniture {
 
     void execute(Context context, EventTrigger trigger);
 
     Key id();
 
-    Map<AnchorType, Placement> placements();
-
     FurnitureSettings settings();
 
     @Nullable
     LootTable<?> lootTable();
 
-    AnchorType getAnyAnchorType();
+    Map<String, FurnitureVariant> variants();
 
-    boolean isAllowedPlacement(AnchorType anchorType);
+    default FurnitureVariant anyVariant() {
+        return variants().values().iterator().next();
+    }
 
-    Placement getPlacement(AnchorType anchorType);
+    default String anyVariantName() {
+        return variants().keySet().iterator().next();
+    }
 
-    Placement getValidPlacement(AnchorType anchorType);
+    @Nullable
+    FurnitureVariant getVariant(String variantName);
+
+    @NotNull
+    FurnitureBehavior behavior();
+
+    @NotNull
+    default FurnitureVariant getVariant(FurnitureDataAccessor accessor) {
+        Optional<String> optionalVariant = accessor.variant();
+        String variantName = null;
+        if (optionalVariant.isPresent()) {
+            variantName = optionalVariant.get();
+        } else {
+            Optional<AnchorType> optionalAnchorType = accessor.anchorType();
+            if (optionalAnchorType.isPresent()) {
+                variantName = optionalAnchorType.get().name().toLowerCase(Locale.ROOT);
+                accessor.setVariant(variantName);
+                accessor.removeCustomData(FurnitureDataAccessor.ANCHOR_TYPE);
+            }
+        }
+        if (variantName == null) {
+            return anyVariant();
+        }
+        FurnitureVariant variant = getVariant(variantName);
+        if (variant == null) {
+            return anyVariant();
+        }
+        return variant;
+
+    }
+
+    static Builder builder() {
+        return new CustomFurnitureImpl.BuilderImpl();
+    }
 
     interface Builder {
 
         Builder id(Key id);
 
-        Builder placement(Map<AnchorType, Placement> placements);
+        Builder variants(Map<String, FurnitureVariant> variants);
 
         Builder settings(FurnitureSettings settings);
 
@@ -46,15 +82,8 @@ public interface CustomFurniture {
 
         Builder events(Map<EventTrigger, List<Function<Context>>> events);
 
-        CustomFurniture build();
-    }
+        Builder behavior(FurnitureBehavior behavior);
 
-    record Placement(AnchorType anchorType,
-                     FurnitureElement[] elements,
-                     HitBoxConfig[] hitBoxConfigs,
-                     RotationRule rotationRule,
-                     AlignmentRule alignmentRule,
-                     Optional<ExternalModel> externalModel,
-                     Optional<Vector3f> dropOffset) {
+        CustomFurniture build();
     }
 }

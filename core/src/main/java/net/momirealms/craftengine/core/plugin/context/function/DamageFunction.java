@@ -17,7 +17,7 @@ public class DamageFunction<CTX extends Context> extends AbstractConditionalFunc
     private final Key damageType;
     private final NumberProvider amount;
 
-    public DamageFunction(PlayerSelector<CTX> selector, Key damageType, NumberProvider amount, List<Condition<CTX>> predicates) {
+    public DamageFunction(List<Condition<CTX>> predicates, Key damageType, NumberProvider amount, PlayerSelector<CTX> selector) {
         super(predicates);
         this.selector = selector;
         this.damageType = damageType;
@@ -45,7 +45,7 @@ public class DamageFunction<CTX extends Context> extends AbstractConditionalFunc
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.getOrDefault("target", "self"), conditionFactory());
             Key damageType = Key.of(ResourceConfigUtils.getAsStringOrNull(arguments.getOrDefault("damage-type", "generic")));
             NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 1f));
-            return new DamageFunction<>(selector, damageType, amount, getPredicates(arguments));
+            return new DamageFunction<>(getPredicates(arguments), damageType, amount, selector);
         }
     }
 }

@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface Entity {
     Key type();
 
+    boolean isValid();
+
     double x();
 
     double y();
@@ -25,7 +27,7 @@ public interface Entity {
 
     float yRot();
 
-    int entityID();
+    int entityId();
 
     World world();
 

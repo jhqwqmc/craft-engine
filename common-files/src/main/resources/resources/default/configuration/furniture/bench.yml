@@ -6,22 +6,25 @@ items:
     model: minecraft:item/custom/bench
     behavior:
       type: furniture_item
+      rules:
+        ground:
+          rotation: four
+          alignment: center
       furniture:
+        events:
+          - template: default:rotatable_furniture_4
         settings:
           item: default:bench
           sounds:
             break: minecraft:block.bamboo_wood.break
             place: minecraft:block.bamboo_wood.place
-        placement:
+        variants:
           ground:
             loot-spawn-offset: 0.5,0.5,0
-            rules:
-              rotation: FOUR
-              alignment: CENTER
             elements:
               - item: default:bench
-                display-transform: NONE
-                billboard: FIXED
+                display-transform: none
+                billboard: fixed
                 position: 0.5,0,0
                 translation: 0,0.5,0
                 shadow-radius: 1

@@ -24,7 +24,7 @@ public class RemoveFurnitureFunction<CTX extends Context> extends AbstractCondit
     private final boolean dropLoot;
     private final boolean playSound;
 
-    public RemoveFurnitureFunction(boolean dropLoot, boolean playSound, List<Condition<CTX>> predicates) {
+    public RemoveFurnitureFunction(List<Condition<CTX>> predicates, boolean playSound, boolean dropLoot) {
         super(predicates);
         this.dropLoot = dropLoot;
         this.playSound = playSound;
@@ -41,12 +41,12 @@ public class RemoveFurnitureFunction<CTX extends Context> extends AbstractCondit
         WorldPosition position = furniture.position();
         World world = position.world();
         furniture.destroy();
-        LootTable lootTable = furniture.config().lootTable();
+        LootTable lootTable = furniture.config.lootTable();
         if (dropLoot && lootTable != null) {
             ContextHolder.Builder builder = ContextHolder.builder()
                     .withParameter(DirectContextParameters.POSITION, position)
                     .withParameter(DirectContextParameters.FURNITURE, furniture)
-                    .withOptionalParameter(DirectContextParameters.FURNITURE_ITEM, furniture.extraData().item().orElse(null));
+                    .withOptionalParameter(DirectContextParameters.FURNITURE_ITEM, furniture.dataAccessor.item().orElse(null));
             Optional<Player> optionalPlayer = ctx.getOptionalParameter(DirectContextParameters.PLAYER);
             Player player = optionalPlayer.orElse(null);
             if (player != null) {
@@ -80,7 +80,7 @@ public class RemoveFurnitureFunction<CTX extends Context> extends AbstractCondit
         public Function<CTX> create(Map<String, Object> arguments) {
             boolean dropLoot = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("drop-loot", true), "drop-loot");
             boolean playSound = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("play-sound", true), "play-sound");
-            return new RemoveFurnitureFunction<>(dropLoot, playSound, getPredicates(arguments));
+            return new RemoveFurnitureFunction<>(getPredicates(arguments), playSound, dropLoot);
         }
     }
 }

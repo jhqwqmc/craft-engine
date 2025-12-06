@@ -26,7 +26,7 @@ public class PlaceBlockFunction<CTX extends Context> extends AbstractConditional
     private final NumberProvider z;
     private final NumberProvider updateFlags;
 
-    public PlaceBlockFunction(LazyReference<BlockStateWrapper> lazyBlockState, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, List<Condition<CTX>> predicates) {
+    public PlaceBlockFunction(List<Condition<CTX>> predicates, NumberProvider x, NumberProvider y, NumberProvider z, NumberProvider updateFlags, LazyReference<BlockStateWrapper> lazyBlockState) {
         super(predicates);
         this.lazyBlockState = lazyBlockState;
         this.x = x;
@@ -40,7 +40,7 @@ public class PlaceBlockFunction<CTX extends Context> extends AbstractConditional
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
             World world = optionalWorldPosition.get().world();
-            world.setBlockState(MiscUtils.fastFloor(this.x.getDouble(ctx)), MiscUtils.fastFloor(this.y.getDouble(ctx)), MiscUtils.fastFloor(this.z.getDouble(ctx)), this.lazyBlockState.get(), this.updateFlags.getInt(ctx));
+            world.setBlockState(MiscUtils.floor(this.x.getDouble(ctx)), MiscUtils.floor(this.y.getDouble(ctx)), MiscUtils.floor(this.z.getDouble(ctx)), this.lazyBlockState.get(), this.updateFlags.getInt(ctx));
         }
     }
 
@@ -58,12 +58,7 @@ public class PlaceBlockFunction<CTX extends Context> extends AbstractConditional
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             String state = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("block-state"), "warning.config.function.place_block.missing_block_state");
-            return new PlaceBlockFunction<>(LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(state)),
-                    NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")),
-                    NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")),
-                    Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())),
-                    getPredicates(arguments));
+            return new PlaceBlockFunction<>(getPredicates(arguments), NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>")), NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>")), NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>")), Optional.ofNullable(arguments.get("update-flags")).map(NumberProviders::fromObject).orElse(NumberProviders.direct(UpdateOption.UPDATE_ALL.flags())), LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(state)));
         }
     }
 }

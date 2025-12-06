@@ -7,17 +7,35 @@ items:
     behavior:
       type: furniture_item
       furniture: default:flower_basket
+      rules:
+        ground:
+          rotation: any
+          alignment: any
+        wall:
+          rotation: any
+          alignment: any
+        ceiling:
+          rotation: any
+          alignment: any
   default:flower_basket_ground:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ground
+    data::item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_wall:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_wall
+    data::item-name: <!i><l10n:item.flower_basket>
   default:flower_basket_ceiling:
     material: nether_brick
     model: minecraft:item/custom/flower_basket_ceiling
+    data::item-name: <!i><l10n:item.flower_basket>
 furniture:
   default:flower_basket:
+    events:
+      - template: default:rotatable_furniture_8
+        arguments:
+          blacklist_variants:
+            - wall
     settings:
       item: default:flower_basket
       sounds:
@@ -27,15 +45,12 @@ furniture:
       template: default:loot_table/furniture
       arguments:
         item: default:flower_basket
-    placement:
+    variants:
       ground:
-        rules:
-          rotation: ANY
-          alignment: ANY
         elements:
           - item: default:flower_basket_ground
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,0,0
             translation: 0,0.5,0
             shadow-radius: 0.5
@@ -49,13 +64,12 @@ furniture:
             width: 0.7
             height: 0.5
             interactive: true
+            invisible: true
       wall:
-        rules:
-          alignment: ANY
         elements:
           - item: default:flower_basket_wall
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,0,0.2
             translation: 0,0,0
         hitboxes:
@@ -67,6 +81,7 @@ furniture:
             width: 0.46
             height: 0.75
             interactive: true
+            invisible: true
           - type: interaction
             can-use-item-on: true
             can-be-hit-by-projectile: true
@@ -75,14 +90,12 @@ furniture:
             width: 0.46
             height: 0.75
             interactive: true
+            invisible: true
       ceiling:
-        rules:
-          rotation: ANY
-          alignment: ANY
         elements:
           - item: default:flower_basket_ceiling
-            display-transform: NONE
-            billboard: FIXED
+            display-transform: none
+            billboard: fixed
             position: 0,-0.46,0
             translation: 0,0,0
         hitboxes:
@@ -94,3 +107,4 @@ furniture:
             width: 0.7
             height: 0.7
             interactive: true
+            invisible: true

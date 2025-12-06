@@ -21,12 +21,13 @@ import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager
 import net.momirealms.craftengine.core.plugin.compatibility.PluginTaskRegistry;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
-import net.momirealms.craftengine.core.plugin.config.template.TemplateManagerImpl;
 import net.momirealms.craftengine.core.plugin.context.GlobalVariableManager;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import net.momirealms.craftengine.core.plugin.dependency.Dependency;
 import net.momirealms.craftengine.core.plugin.dependency.DependencyManager;
 import net.momirealms.craftengine.core.plugin.dependency.DependencyManagerImpl;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCullingManager;
+import net.momirealms.craftengine.core.plugin.entityculling.EntityCullingManagerImpl;
 import net.momirealms.craftengine.core.plugin.gui.GuiManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManagerImpl;
@@ -40,6 +41,7 @@ import net.momirealms.craftengine.core.plugin.scheduler.SchedulerAdapter;
 import net.momirealms.craftengine.core.sound.SoundManager;
 import net.momirealms.craftengine.core.util.CompletableFutures;
 import net.momirealms.craftengine.core.world.WorldManager;
+import net.momirealms.craftengine.core.world.score.TeamManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -80,6 +82,8 @@ public abstract class CraftEngine implements Plugin {
     protected GlobalVariableManager globalVariableManager;
     protected ProjectileManager projectileManager;
     protected SeatManager seatManager;
+    protected EntityCullingManager entityCullingManager;
+    protected TeamManager teamManager;
 
     private final PluginTaskRegistry beforeEnableTaskRegistry = new PluginTaskRegistry();
     private final PluginTaskRegistry afterEnableTaskRegistry = new PluginTaskRegistry();
@@ -114,11 +118,13 @@ public abstract class CraftEngine implements Plugin {
         LegacyRecipeTypes.init();
 
         // 初始化模板管理器
-        this.templateManager = new TemplateManagerImpl();
+        this.templateManager = TemplateManager.INSTANCE;
         // 初始化全局变量管理器
         this.globalVariableManager = new GlobalVariableManager();
         // 初始化物品浏览器
         this.itemBrowserManager = new ItemBrowserManagerImpl(this);
+        // 初始化实体剔除器
+        this.entityCullingManager = new EntityCullingManagerImpl();
     }
 
     public void setUpConfigAndLocale() {
@@ -159,6 +165,8 @@ public abstract class CraftEngine implements Plugin {
         this.advancementManager.reload();
         this.projectileManager.reload();
         this.seatManager.reload();
+        this.entityCullingManager.reload();
+        this.teamManager.reload();
     }
 
     private void runDelayTasks(boolean reloadRecipe) {
@@ -231,6 +239,8 @@ public abstract class CraftEngine implements Plugin {
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
+                        // 同步修改队伍
+                        this.teamManager.runDelayedSyncTasks();
                         long time4 = System.currentTimeMillis();
                         long syncTime = time4 - time3;
                         this.reloadEventDispatcher.accept(this);
@@ -350,6 +360,7 @@ public abstract class CraftEngine implements Plugin {
         if (this.translationManager != null) this.translationManager.disable();
         if (this.globalVariableManager != null) this.globalVariableManager.disable();
         if (this.projectileManager != null) this.projectileManager.disable();
+        if (this.entityCullingManager != null) this.entityCullingManager.disable();
         if (this.scheduler != null) this.scheduler.shutdownScheduler();
         if (this.scheduler != null) this.scheduler.shutdownExecutor();
         if (this.commandManager != null) this.commandManager.unregisterFeatures();
@@ -561,6 +572,21 @@ public abstract class CraftEngine implements Plugin {
     @Override
     public ProjectileManager projectileManager() {
         return projectileManager;
+    }
+
+    @Override
+    public EntityCullingManager entityCullingManager() {
+        return entityCullingManager;
+    }
+
+    @Override
+    public TeamManager teamManager() {
+        return teamManager;
+    }
+
+    @Override
+    public SeatManager seatManager() {
+        return seatManager;
     }
 
     @Override

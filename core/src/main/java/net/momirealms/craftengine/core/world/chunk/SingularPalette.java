@@ -46,6 +46,15 @@ public class SingularPalette<T> implements Palette<T> {
     }
 
     @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        if (this.entry == null) {
+            throw new IllegalStateException("Use of an uninitialized palette");
+        } else {
+            return predicate.test(this.entry);
+        }
+    }
+
+    @Override
     public T get(int id) {
         if (this.entry != null && id == 0) {
             return this.entry;

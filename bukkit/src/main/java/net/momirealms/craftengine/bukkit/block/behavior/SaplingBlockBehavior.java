@@ -115,7 +115,7 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
         }
         ImmutableBlockState customState = optionalCustomState.get();
         boolean sendParticles = false;
-        Object visualState = customState.vanillaBlockState().literalObject();
+        Object visualState = customState.visualBlockState().literalObject();
         Object visualStateBlock = BlockStateUtils.getBlockOwner(visualState);
         if (CoreReflections.clazz$BonemealableBlock.isInstance(visualStateBlock)) {
             boolean is = FastNMS.INSTANCE.method$BonemealableBlock$isValidBonemealTarget(visualStateBlock, level, blockPos, visualState);
@@ -153,7 +153,7 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
         if (ItemUtils.isEmpty(item) || !item.vanillaId().equals(ItemKeys.BONE_MEAL) || player == null || player.isAdventureMode())
             return InteractionResult.PASS;
         boolean sendSwing = false;
-        Object visualState = state.vanillaBlockState().literalObject();
+        Object visualState = state.visualBlockState().literalObject();
         Object visualStateBlock = BlockStateUtils.getBlockOwner(visualState);
         if (CoreReflections.clazz$BonemealableBlock.isInstance(visualStateBlock)) {
             boolean is = FastNMS.INSTANCE.method$BonemealableBlock$isValidBonemealTarget(visualStateBlock, context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos()), visualState);

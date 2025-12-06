@@ -77,6 +77,10 @@ paper {
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
 
+        // Geyser
+        register("Geyser-Spigot") { required = false }
+        register("floodgate") { required = false }
+
         // AdvancedSlimePaper
         register("SlimeWorldPlugin") { required = false }
         register("SlimeWorldManager") { required = false }

@@ -101,7 +101,7 @@ public class AxeItemBehavior extends ItemBehavior {
 
             // resend swing if it's not interactable on client side
             if (!InteractUtils.isInteractable(
-                    bukkitPlayer, BlockStateUtils.fromBlockData(customState.vanillaBlockState().literalObject()),
+                    bukkitPlayer, BlockStateUtils.fromBlockData(customState.visualBlockState().literalObject()),
                     context.getHitResult(), item
             ) || player.isSecondaryUseActive()) {
                 player.swingHand(context.getHand());

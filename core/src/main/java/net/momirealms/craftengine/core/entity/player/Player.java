@@ -2,21 +2,23 @@ package net.momirealms.craftengine.core.entity.player;
 
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
+import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.world.BlockPos;
-import net.momirealms.craftengine.core.world.Position;
-import net.momirealms.craftengine.core.world.Vec3d;
-import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class Player extends AbstractEntity implements NetWorkUser {
     private static final Key TYPE = Key.of("minecraft:player");
@@ -34,6 +36,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     @Override
     public abstract Object serverPlayer();
+
+    public abstract void setClientSideWorld(World world);
+
+    public abstract void entityCullingTick();
 
     public abstract float getDestroyProgress(Object blockState, BlockPos pos);
 
@@ -180,11 +186,66 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract Locale locale();
 
+    public abstract void setClientLocale(Locale clientLocale);
+
     public abstract Locale selectedLocale();
 
     public abstract void setSelectedLocale(@Nullable Locale locale);
 
+    public abstract void setEntityCullingDistanceScale(double value);
+
+    public abstract void setDisplayEntityViewDistanceScale(double value);
+
+    public abstract double displayEntityViewDistance();
+
+    public abstract void setEnableEntityCulling(boolean enable);
+
+    public abstract boolean enableEntityCulling();
+
+    public abstract boolean enableFurnitureDebug();
+
+    public abstract void setEnableFurnitureDebug(boolean enableFurnitureDebug);
+
+    public abstract void giveExperiencePoints(int xpPoints);
+
+    public abstract void giveExperienceLevels(int levels);
+
+    public abstract int getXpNeededForNextLevel();
+
+    public abstract void setExperiencePoints(int experiencePoints);
+
+    public abstract void setExperienceLevels(int level);
+
+    public abstract void sendTotemAnimation(Item<?> totem, @Nullable SoundData sound, boolean silent);
+
+    public abstract void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
+
+    public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
+
+    public abstract VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos);
+
+    public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
+
+    public abstract void addTrackedFurniture(int entityId, Furniture furniture);
+
+    public abstract void clearTrackedBlockEntities();
+
+    public abstract int clearOrCountMatchingInventoryItems(Key itemId, int count);
+
     @Override
     public void remove() {
+    }
+
+    public abstract void playParticle(Key particleId, double x, double y, double z);
+
+    public abstract void removeTrackedFurniture(int entityId);
+
+    public abstract void clearTrackedFurniture();
+
+    public abstract WorldPosition eyePosition();
+
+    @Override
+    public boolean isValid() {
+        return this.isOnline();
     }
 }

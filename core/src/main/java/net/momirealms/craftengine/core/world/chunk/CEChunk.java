@@ -11,8 +11,11 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntityRendererSerializer;
 import net.momirealms.craftengine.core.world.chunk.serialization.DefaultBlockEntitySerializer;
 import net.momirealms.sparrow.nbt.ListTag;
@@ -23,40 +26,42 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CEChunk {
+    private static final int DEFAULT_MAP_SIZE = 8;
     public final CEWorld world;
     public final ChunkPos chunkPos;
     public final CESection[] sections;
     public final WorldHeight worldHeightAccessor;
-    public final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
-    public final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
-    public final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<BlockPos, BlockEntity> blockEntities;  // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingSyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ReplaceableTickingBlockEntity> tickingAsyncBlockEntitiesByPos; // 从区域线程上访问，安全
+    private final Map<BlockPos, ConstantBlockEntityRenderer> constantBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
+    private final Map<BlockPos, DynamicBlockEntityRenderer> dynamicBlockEntityRenderers; // 会从区域线程上读写，netty线程上读取
     private final ReentrantReadWriteLock renderLock = new ReentrantReadWriteLock();
     private volatile boolean dirty;
     private volatile boolean loaded;
     private volatile boolean activated;
+    private boolean isEntitiesLoaded;
 
     public CEChunk(CEWorld world, ChunkPos chunkPos) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
         this.sections = new CESection[this.worldHeightAccessor.getSectionsCount()];
-        this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         this.fillEmptySection();
     }
 
-    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag itemDisplayBlockRenders) {
+    public CEChunk(CEWorld world, ChunkPos chunkPos, CESection[] sections, @Nullable ListTag blockEntitiesTag, @Nullable ListTag blockEntityRenders, @Nullable ListTag entities) {
         this.world = world;
         this.chunkPos = chunkPos;
         this.worldHeightAccessor = world.worldHeight();
-        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
-        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(10, 0.5f);
+        this.dynamicBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingSyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
+        this.tickingAsyncBlockEntitiesByPos = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         int sectionCount = this.worldHeightAccessor.getSectionsCount();
         this.sections = new CESection[sectionCount];
         if (sections != null) {
@@ -69,30 +74,34 @@ public class CEChunk {
         }
         this.fillEmptySection();
         if (blockEntitiesTag != null) {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), 10), 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(Math.max(blockEntitiesTag.size(), DEFAULT_MAP_SIZE), 0.5f);
             List<BlockEntity> blockEntities = DefaultBlockEntitySerializer.deserialize(this, blockEntitiesTag);
             for (BlockEntity blockEntity : blockEntities) {
                 this.setBlockEntity(blockEntity);
             }
         } else {
-            this.blockEntities = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.blockEntities = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
-        if (itemDisplayBlockRenders != null) {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(itemDisplayBlockRenders.size(), 10), 0.5f);
-            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, itemDisplayBlockRenders);
+        if (blockEntityRenders != null) {
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(Math.max(blockEntityRenders.size(), DEFAULT_MAP_SIZE), 0.5f);
+            List<BlockPos> blockEntityRendererPoses = DefaultBlockEntityRendererSerializer.deserialize(this.chunkPos, blockEntityRenders);
             for (BlockPos pos : blockEntityRendererPoses) {
                 this.addConstantBlockEntityRenderer(pos);
             }
         } else {
-            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(10, 0.5f);
+            this.constantBlockEntityRenderers = new Object2ObjectOpenHashMap<>(DEFAULT_MAP_SIZE, 0.5f);
         }
     }
 
     public void spawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.show(player);
+            if (Config.enableEntityCulling()) {
+                player.addTrackedBlockEntities(this.constantBlockEntityRenderers);
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.show(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.show(player);
@@ -105,8 +114,12 @@ public class CEChunk {
     public void despawnBlockEntities(Player player) {
         try {
             this.renderLock.readLock().lock();
-            for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
-                renderer.hide(player);
+            if (Config.enableEntityCulling()) {
+                player.removeTrackedBlockEntities(this.constantBlockEntityRenderers.keySet());
+            } else {
+                for (ConstantBlockEntityRenderer renderer : this.constantBlockEntityRenderers.values()) {
+                    renderer.hide(player);
+                }
             }
             for (DynamicBlockEntityRenderer renderer : this.dynamicBlockEntityRenderers.values()) {
                 renderer.hide(player);
@@ -129,7 +142,12 @@ public class CEChunk {
         BlockEntityElementConfig<? extends BlockEntityElement>[] renderers = state.constantRenderers();
         if (renderers != null && renderers.length > 0) {
             BlockEntityElement[] elements = new BlockEntityElement[renderers.length];
-            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(elements);
+            ConstantBlockEntityRenderer renderer = new ConstantBlockEntityRenderer(
+                    elements,
+                    Optional.ofNullable(state.cullingData())
+                            .map(data -> new CullingData(data.aabb.move(pos), data.maxDistance, data.aabbExpansion, data.rayTracing))
+                            .orElse(null)
+            );
             World wrappedWorld = this.world.world();
             List<Player> trackedBy = getTrackedBy();
             boolean hasTrackedBy = trackedBy != null && !trackedBy.isEmpty();
@@ -137,6 +155,12 @@ public class CEChunk {
             if (previous != null) {
                 // 由于entity-render的体量基本都很小，所以考虑一个特殊情况，即前后都是1个renderer，对此情况进行简化和优化
                 BlockEntityElement[] previousElements = previous.elements().clone();
+
+                /*
+                 *
+                 * 1 对 1，命中率最高
+                 *
+                 */
                 if (previousElements.length == 1 && renderers.length == 1) {
                     BlockEntityElement previousElement = previousElements[0];
                     BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[0];
@@ -147,7 +171,20 @@ public class CEChunk {
                                 elements[0] = element;
                                 if (hasTrackedBy) {
                                     for (Player player : trackedBy) {
-                                        element.transform(player);
+                                        // 如果启用剔除，则暂时保留原先可见度，因为大概率可见度不发生变化
+                                        if (Config.enableEntityCulling()) {
+                                            VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                            if (trackedBlockEntity == null || trackedBlockEntity.isShown) {
+                                                element.transform(player);
+                                            }
+                                            if (trackedBlockEntity != null) {
+                                                trackedBlockEntity.setCullable(renderer);
+                                            } else {
+                                                player.addTrackedBlockEntity(pos, renderer);
+                                            }
+                                        } else {
+                                            element.transform(player);
+                                        }
                                     }
                                 }
                                 break outer;
@@ -157,14 +194,66 @@ public class CEChunk {
                         elements[0] = element;
                         if (hasTrackedBy) {
                             for (Player player : trackedBy) {
-                                previousElement.hide(player);
-                                element.show(player);
+                                if (Config.enableEntityCulling()) {
+                                    VirtualCullableObject trackedBlockEntity = player.getTrackedBlockEntity(pos);
+                                    if (trackedBlockEntity != null) {
+                                        if (trackedBlockEntity.isShown) {
+                                            trackedBlockEntity.setShown(player, false);
+                                        }
+                                        trackedBlockEntity.setCullable(renderer);
+                                    } else {
+                                        player.addTrackedBlockEntity(pos, renderer);
+                                    }
+                                } else {
+                                    previousElement.hide(player);
+                                    element.show(player);
+                                }
                             }
                         }
                     }
-                } else {
+                }
+                /*
+                 *
+                 * 1 对 多, 多 对 多
+                 *
+                 */
+                else {
+
+                    VirtualCullableObject[] previousObjects = hasTrackedBy ? new VirtualCullableObject[trackedBy.size()] : null;
+                    if (hasTrackedBy) {
+                        for (int j = 0; j < previousObjects.length; j++) {
+                            previousObjects[j] = trackedBy.get(j).getTrackedBlockEntity(pos);
+                        }
+                    }
+
                     outer: for (int i = 0; i < elements.length; i++) {
                         BlockEntityElementConfig<? extends BlockEntityElement> config = renderers[i];
+                        /*
+                         * 严格可变换部分
+                         */
+                        for (int j = 0; j < previousElements.length; j++) {
+                            BlockEntityElement previousElement = previousElements[j];
+                            if (previousElement != null && config.elementClass().isInstance(previousElement)) {
+                                BlockEntityElement newElement = ((BlockEntityElementConfig) config).createExact(wrappedWorld, pos, previousElement);
+                                if (newElement != null) {
+                                    previousElements[j] = null;
+                                    elements[i] = newElement;
+                                    if (hasTrackedBy) {
+                                        for (int k = 0; k < trackedBy.size(); k++) {
+                                            Player player = trackedBy.get(k);
+                                            VirtualCullableObject cullableObject = previousObjects[k];
+                                            if (cullableObject == null || cullableObject.isShown) {
+                                                newElement.transform(player);
+                                            }
+                                        }
+                                    }
+                                    continue outer;
+                                }
+                            }
+                        }
+                        /*
+                         * 可变换部分
+                         */
                         for (int j = 0; j < previousElements.length; j++) {
                             BlockEntityElement previousElement = previousElements[j];
                             if (previousElement != null && config.elementClass().isInstance(previousElement)) {
@@ -173,23 +262,37 @@ public class CEChunk {
                                     previousElements[j] = null;
                                     elements[i] = newElement;
                                     if (hasTrackedBy) {
-                                        for (Player player : trackedBy) {
-                                            newElement.transform(player);
+                                        for (int k = 0; k < trackedBy.size(); k++) {
+                                            Player player = trackedBy.get(k);
+                                            VirtualCullableObject cullableObject = previousObjects[k];
+                                            if (cullableObject == null || cullableObject.isShown) {
+                                                newElement.transform(player);
+                                            }
                                         }
                                     }
                                     continue outer;
                                 }
                             }
                         }
+                        /*
+                         * 不可变换的直接生成
+                         */
                         BlockEntityElement newElement = config.create(wrappedWorld, pos);
                         elements[i] = newElement;
                         if (hasTrackedBy) {
-                            for (Player player : trackedBy) {
-                                newElement.show(player);
+                            for (int k = 0; k < trackedBy.size(); k++) {
+                                Player player = trackedBy.get(k);
+                                VirtualCullableObject cullableObject = previousObjects[k];
+                                if (cullableObject == null || cullableObject.isShown) {
+                                    newElement.show(player);
+                                }
                             }
                         }
                     }
                     if (hasTrackedBy) {
+                        /*
+                         * 未能完成变化的，需要直接删除
+                         */
                         for (int i = 0; i < previousElements.length; i++) {
                             BlockEntityElement previousElement = previousElements[i];
                             if (previousElement != null) {
@@ -198,15 +301,33 @@ public class CEChunk {
                                 }
                             }
                         }
+                        // 添加 track
+                        for (int i = 0; i < previousObjects.length; i++) {
+                            VirtualCullableObject previousObject = previousObjects[i];
+                            if (previousObject != null) {
+                                previousObject.setCullable(renderer);
+                            } else {
+                                trackedBy.get(i).addTrackedBlockEntity(pos, renderer);
+                            }
+                        }
                     }
                 }
             } else {
+                /*
+                 *
+                 * 全新方块实体
+                 *
+                 */
                 for (int i = 0; i < elements.length; i++) {
                     elements[i] = renderers[i].create(wrappedWorld, pos);
                 }
                 if (hasTrackedBy) {
                     for (Player player : trackedBy) {
-                        renderer.show(player);
+                        if (Config.enableEntityCulling()) {
+                            player.addTrackedBlockEntity(pos, renderer);
+                        } else {
+                            renderer.show(player);
+                        }
                     }
                 }
             }
@@ -233,8 +354,14 @@ public class CEChunk {
             ConstantBlockEntityRenderer removed = this.constantBlockEntityRenderers.remove(pos);
             if (removed != null) {
                 if (hide) {
-                    for (Player player : getTrackedBy()) {
-                        removed.hide(player);
+                    if (Config.enableEntityCulling()) {
+                        for (Player player : getTrackedBy()) {
+                            player.removeTrackedBlockEntities(List.of(pos));
+                        }
+                    } else {
+                        for (Player player : getTrackedBy()) {
+                            removed.hide(player);
+                        }
                     }
                 }
             }
@@ -395,7 +522,7 @@ public class CEChunk {
         BlockPos pos = blockEntity.pos();
         ImmutableBlockState blockState = this.getBlockState(pos);
         if (!blockState.hasBlockEntity()) {
-            Debugger.BLOCK_ENTITY.debug(() -> "Failed to add invalid block entity " + blockEntity.saveAsTag() + " at " + pos);
+            Debugger.BLOCK.debug(() -> "Failed to add invalid block entity " + blockEntity.saveAsTag() + " at " + pos);
             return;
         }
         // 设置方块实体所在世界
@@ -439,7 +566,7 @@ public class CEChunk {
         return Collections.unmodifiableCollection(this.blockEntities.values());
     }
 
-    public List<BlockPos> constantBlockEntityRenderers() {
+    public List<BlockPos> constantBlockEntityRendererPositions() {
         try {
             this.renderLock.readLock().lock();
             return new ArrayList<>(this.constantBlockEntityRenderers.keySet());
@@ -539,6 +666,14 @@ public class CEChunk {
         return this.sections;
     }
 
+    public boolean isEntitiesLoaded() {
+        return this.isEntitiesLoaded;
+    }
+
+    public void setEntitiesLoaded(boolean entitiesLoaded) {
+        this.isEntitiesLoaded = entitiesLoaded;
+    }
+
     public boolean isLoaded() {
         return this.loaded;
     }
@@ -553,5 +688,6 @@ public class CEChunk {
         if (!this.loaded) return;
         this.world.removeLoadedChunk(this);
         this.loaded = false;
+        this.isEntitiesLoaded = false;
     }
 }

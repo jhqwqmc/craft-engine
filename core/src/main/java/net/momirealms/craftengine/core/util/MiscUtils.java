@@ -21,19 +21,19 @@ public class MiscUtils {
         }
     });
 
-    public static int fastFloor(double value) {
+    public static int floor(double value) {
         int truncated = (int) value;
         return value < (double) truncated ? truncated - 1 : truncated;
     }
 
-    public static int fastFloor(float value) {
+    public static int floor(float value) {
         int truncated = (int) value;
         return value < (double) truncated ? truncated - 1 : truncated;
     }
 
     public static int lerpDiscrete(float delta, int start, int end) {
         int i = end - start;
-        return start + fastFloor(delta * (float) (i - 1)) + (delta > 0.0F ? 1 : 0);
+        return start + floor(delta * (float) (i - 1)) + (delta > 0.0F ? 1 : 0);
     }
 
     public static int murmurHash3Mixer(int value) {
@@ -270,7 +270,7 @@ public class MiscUtils {
     }
 
     public static byte packDegrees(float degrees) {
-        return (byte) fastFloor(degrees * 256.0F / 360.0F);
+        return (byte) floor(degrees * 256.0F / 360.0F);
     }
 
     public static float unpackDegrees(byte degrees) {
@@ -414,5 +414,9 @@ public class MiscUtils {
             return ids.contains(id);
         }
         return false;
+    }
+
+    public static int growByHalf(int value, int minValue) {
+        return (int) Math.max(Math.min((long) value + (value >> 1), 2147483639L), minValue);
     }
 }

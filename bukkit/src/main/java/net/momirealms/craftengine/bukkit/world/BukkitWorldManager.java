@@ -6,6 +6,7 @@ import net.momirealms.craftengine.bukkit.plugin.injector.WorldStorageInjector;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
+import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
@@ -100,6 +101,10 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 injectChunkGenerator(ceWorld);
                 for (Chunk chunk : world.getLoadedChunks()) {
                     handleChunkLoad(ceWorld, chunk, false);
+                    CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
+                    if (loadedChunk != null) {
+                        loadedChunk.setEntitiesLoaded(true);
+                    }
                 }
                 ceWorld.setTicking(true);
             } catch (Exception e) {
@@ -153,6 +158,10 @@ public class BukkitWorldManager implements WorldManager, Listener {
             CEWorld ceWorld = this.worlds.get(uuid);
             for (Chunk chunk : world.getLoadedChunks()) {
                 handleChunkLoad(ceWorld, chunk, true);
+                CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
+                if (loadedChunk != null) {
+                    loadedChunk.setEntitiesLoaded(true);
+                }
             }
             ceWorld.setTicking(true);
         } else {
@@ -296,9 +305,12 @@ public class BukkitWorldManager implements WorldManager, Listener {
                             for (int z = 0; z < 16; z++) {
                                 for (int y = 0; y < 16; y++) {
                                     ImmutableBlockState customState = ceSection.getBlockState(x, y, z);
-                                    if (!customState.isEmpty() && customState.vanillaBlockState() != null) {
-                                        FastNMS.INSTANCE.method$LevelChunkSection$setBlockState(section, x, y, z, customState.vanillaBlockState().literalObject(), false);
-                                        unsaved = true;
+                                    if (!customState.isEmpty()) {
+                                        BlockStateWrapper wrapper = customState.restoreBlockState();
+                                        if (wrapper != null) {
+                                            FastNMS.INSTANCE.method$LevelChunkSection$setBlockState(section, x, y, z, wrapper.literalObject(), false);
+                                            unsaved = true;
+                                        }
                                     }
                                 }
                             }

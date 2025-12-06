@@ -7,20 +7,25 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemKeys;
+import net.momirealms.craftengine.core.item.ItemManager;
 import net.momirealms.craftengine.core.item.recipe.*;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.Condition;
+import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
+import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.gui.*;
 import net.momirealms.craftengine.core.plugin.gui.Ingredient;
 import net.momirealms.craftengine.core.util.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("DuplicatedCode")
 public class ItemBrowserManagerImpl implements ItemBrowserManager {
@@ -110,13 +115,26 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         }
 
         @Override
+        public int count() {
+            return ItemBrowserManagerImpl.this.byId.size();
+        }
+
+        @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
             String name = section.getOrDefault("name", id).toString();
-            List<String> members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));
+            List<String> members;
+            if (ResourceConfigUtils.getAsBoolean(section.get("all-items"), "all-items")) {
+                ItemManager<?> itemManager = ItemBrowserManagerImpl.this.plugin.itemManager();
+                members = itemManager.loadedItems().keySet().stream().filter(it -> !itemManager.isVanillaItem(it)).map(Key::asString).collect(Collectors.toList());
+            } else {
+                members = MiscUtils.getAsStringList(section.getOrDefault("list", List.of()));
+            }
             Key icon = Key.of(section.getOrDefault("icon", ItemKeys.STONE).toString());
             int priority = ResourceConfigUtils.getAsInt(section.getOrDefault("priority", 0), "priority");
-            Category category = new Category(id, name, MiscUtils.getAsStringList(section.getOrDefault("lore", List.of())), icon, new ArrayList<>(members), priority,
-                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden"));
+            List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));
+            boolean hidden = ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden");
+            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(section, "conditions", "condition"), EventConditions::fromMap);
+            Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, MiscUtils.allOf(conditionList));
             if (ItemBrowserManagerImpl.this.byId.containsKey(id)) {
                 ItemBrowserManagerImpl.this.byId.get(id).merge(category);
             } else {
@@ -157,6 +175,9 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         );
 
         List<ItemWithAction> iconList = this.categoryOnMainPage.stream().map(it -> {
+            if (!it.condition().test(PlayerOptionalContext.of(player))) {
+                return null;
+            }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
             if (ItemUtils.isEmpty(item)) {
                 this.plugin.logger().warn("Can't not find item " + it.icon() + " for category icon");
@@ -246,6 +267,9 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                     item = Objects.requireNonNull(this.plugin.itemManager().createWrappedItem(ItemKeys.BARRIER, player));
                     item.customNameJson(AdventureHelper.componentToJson(Component.text(subCategoryId).color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
                 } else {
+                    if (!subCategory.condition().test(PlayerOptionalContext.of(player))) {
+                        return null;
+                    }
                     item = this.plugin.itemManager().createWrappedItem(subCategory.icon(), player);
                     if (ItemUtils.isEmpty(item)) {
                         if (!subCategory.icon().equals(ItemKeys.AIR)) {
@@ -317,7 +341,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                     }
                 });
             }
-        }).toList();
+        }).filter(Objects::nonNull).toList();
 
         PagedGui.builder()
                 .addIngredients(itemList)

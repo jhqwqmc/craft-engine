@@ -54,7 +54,7 @@ public class ShulkerBoxSpecialModel implements SpecialModel {
         public SpecialModel create(Map<String, Object> arguments) {
             float openness = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("openness", 0), "openness");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.shulker_box.missing_texture");
-            Direction orientation = Optional.ofNullable(arguments.get("orientation")).map(String::valueOf).map(String::toUpperCase).map(Direction::valueOf).orElse(null);
+            Direction orientation = Optional.ofNullable(arguments.get("orientation")).map(String::valueOf).map(s -> s.toUpperCase(Locale.ROOT)).map(Direction::valueOf).orElse(null);
             if (openness > 1 || openness < 0) {
                 throw new LocalizedResourceConfigException("warning.config.item.model.special.shulker_box.invalid_openness", String.valueOf(openness));
             }

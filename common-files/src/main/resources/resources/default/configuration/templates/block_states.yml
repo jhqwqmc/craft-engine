@@ -1,5 +1,5 @@
 templates:
-  # pillar/log blocks
+  # axis based blocks
   default:block_state/pillar:
     properties:
       axis:
@@ -85,7 +85,11 @@ templates:
     template: default:block_state/__leaves__
     arguments:
       auto_state: leaves
-      leaves_base_model: leaves
+      leaves_base_model:
+        type: condition
+        condition: ${tintable:-false}
+        on-true: leaves
+        on-false: cube_all
   # tintable leaves block
   default:block_state/tintable_leaves:
     template: default:block_state/__leaves__
@@ -1830,354 +1834,354 @@ templates:
         state: ${base_block}[east=false,north=false,south=false,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
       east=true,north=false,south=false,waterlogged=false,west=false:
         state: ${base_block}[east=true,north=false,south=false,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=false,waterlogged=false,west=false:
         state: ${base_block}[east=false,north=true,south=false,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=false,south=true,waterlogged=false,west=false:
         state: ${base_block}[east=false,north=false,south=true,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
       east=false,north=false,south=false,waterlogged=false,west=true:
         state: ${base_block}[east=false,north=false,south=false,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
       east=true,north=true,south=false,waterlogged=false,west=false:
         state: ${base_block}[east=true,north=true,south=false,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=true,waterlogged=false,west=false:
         state: ${base_block}[east=true,north=false,south=true,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=false,waterlogged=false,west=true:
         state: ${base_block}[east=true,north=false,south=false,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=true,waterlogged=false,west=false:
         state: ${base_block}[east=false,north=true,south=true,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=true,south=false,waterlogged=false,west=true:
         state: ${base_block}[east=false,north=true,south=false,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=false,south=true,waterlogged=false,west=true:
         state: ${base_block}[east=false,north=false,south=true,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
       east=true,north=true,south=true,waterlogged=false,west=false:
         state: ${base_block}[east=true,north=true,south=true,waterlogged=false,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=true,south=false,waterlogged=false,west=true:
         state: ${base_block}[east=true,north=true,south=false,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=true,waterlogged=false,west=true:
         state: ${base_block}[east=true,north=false,south=true,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=true,waterlogged=false,west=true:
         state: ${base_block}[east=false,north=true,south=true,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=true,north=true,south=true,waterlogged=false,west=true:
         state: ${base_block}[east=true,north=true,south=true,waterlogged=false,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=false,south=false,waterlogged=true,west=false:
         state: ${base_block}[east=false,north=false,south=false,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
       east=true,north=false,south=false,waterlogged=true,west=false:
         state: ${base_block}[east=true,north=false,south=false,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=false,waterlogged=true,west=false:
         state: ${base_block}[east=false,north=true,south=false,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=false,south=true,waterlogged=true,west=false:
         state: ${base_block}[east=false,north=false,south=true,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
       east=false,north=false,south=false,waterlogged=true,west=true:
         state: ${base_block}[east=false,north=false,south=false,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
       east=true,north=true,south=false,waterlogged=true,west=false:
         state: ${base_block}[east=true,north=true,south=false,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=true,waterlogged=true,west=false:
         state: ${base_block}[east=true,north=false,south=true,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=false,waterlogged=true,west=true:
         state: ${base_block}[east=true,north=false,south=false,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=true,waterlogged=true,west=false:
         state: ${base_block}[east=false,north=true,south=true,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=true,south=false,waterlogged=true,west=true:
         state: ${base_block}[east=false,north=true,south=false,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=false,north=false,south=true,waterlogged=true,west=true:
         state: ${base_block}[east=false,north=false,south=true,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
       east=true,north=true,south=true,waterlogged=true,west=false:
         state: ${base_block}[east=true,north=true,south=true,waterlogged=true,west=false]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=true,south=false,waterlogged=true,west=true:
         state: ${base_block}[east=true,north=true,south=false,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=true,north=false,south=true,waterlogged=true,west=true:
         state: ${base_block}[east=true,north=false,south=true,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
       east=false,north=true,south=true,waterlogged=true,west=true:
         state: ${base_block}[east=false,north=true,south=true,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
       east=true,north=true,south=true,waterlogged=true,west=true:
         state: ${base_block}[east=true,north=true,south=true,waterlogged=true,west=true]
         entity-renderer:
           - item: ${fence_post_item}
-            yaw: 180
+            rotation: 180
             scale: 1.0003
             translation: 0,0.0001,0
           - item: ${fence_side_item}
-            yaw: 0
+            rotation: 0
           - item: ${fence_side_item}
-            yaw: 90
+            rotation: 90
           - item: ${fence_side_item}
-            yaw: 180
+            rotation: 180
           - item: ${fence_side_item}
-            yaw: 270
+            rotation: 270
     variants:
       waterlogged=true:
         settings:

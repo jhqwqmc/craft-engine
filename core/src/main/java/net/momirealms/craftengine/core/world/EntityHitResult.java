@@ -23,9 +23,9 @@ public class EntityHitResult {
     }
 
     private BlockPos getBlockPos() {
-        int x = MiscUtils.fastFloor(this.position.x);
-        int y = MiscUtils.fastFloor(this.position.y);
-        int z = MiscUtils.fastFloor(this.position.z);
+        int x = MiscUtils.floor(this.position.x);
+        int y = MiscUtils.floor(this.position.y);
+        int z = MiscUtils.floor(this.position.z);
         if (this.direction == Direction.UP) {
             if (this.position.y % 1 == 0) {
                 y--;

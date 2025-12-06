@@ -51,7 +51,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     private final ItemParser itemParser;
     private final EquipmentParser equipmentParser;
     protected final Map<String, ExternalItemSource<I>> externalItemSources = new HashMap<>();
-    protected final Map<Key, CustomItem<I>> customItemsById = new HashMap<>();
+    protected final Map<Key, CustomItem<I>> customItemsById = new LinkedHashMap<>();
     protected final Map<String, CustomItem<I>> customItemsByPath = new HashMap<>();
     protected final Map<Key, List<UniqueKey>> customItemTags = new HashMap<>();
     protected final Map<Key, ModernItemModel> modernItemModels1_21_4 = new HashMap<>();
@@ -66,6 +66,9 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     protected final List<Suggestion> cachedTotemSuggestions = new ArrayList<>();
     // 替代配方材料
     protected final Map<Key, List<UniqueKey>> ingredientSubstitutes = new HashMap<>();
+
+    protected boolean featureFlag$keepOnDeathChance = false;
+    protected boolean featureFlag$destroyOnDeathChance = false;
 
     protected AbstractItemManager(CraftEngine plugin) {
         super(plugin);
@@ -133,6 +136,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     @Override
     public void unload() {
         super.clearModelsToGenerate();
+        this.clearFeatureFlags();
         this.customItemsById.clear();
         this.customItemsByPath.clear();
         this.cachedCustomItemSuggestions.clear();
@@ -145,6 +149,11 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         this.modernItemModels1_21_4.clear();
         this.modernItemModels1_21_2.clear();
         this.ingredientSubstitutes.clear();
+    }
+
+    private void clearFeatureFlags() {
+        this.featureFlag$keepOnDeathChance = false;
+        this.featureFlag$destroyOnDeathChance = false;
     }
 
     @Override
@@ -205,18 +214,28 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 this.cachedTotemSuggestions.add(Suggestion.suggestion(id.toString()));
             }
             // tags
-            Set<Key> tags = customItem.settings().tags();
+            ItemSettings settings = customItem.settings();
+            Set<Key> tags = settings.tags();
             for (Key tag : tags) {
                 this.customItemTags.computeIfAbsent(tag, k -> new ArrayList<>()).add(customItem.uniqueId());
             }
             // ingredient substitutes
-            List<Key> substitutes = customItem.settings().ingredientSubstitutes();
+            List<Key> substitutes = settings.ingredientSubstitutes();
             if (!substitutes.isEmpty()) {
                 for (Key key : substitutes) {
                     if (VANILLA_ITEMS.contains(key)) {
                         AbstractItemManager.this.ingredientSubstitutes.computeIfAbsent(key, k -> new ArrayList<>()).add(customItem.uniqueId());
                     }
                 }
+            }
+            if (settings.keepOnDeathChance != 0) {
+                this.featureFlag$keepOnDeathChance = true;
+            }
+            if (settings.destroyOnDeathChance != 0) {
+                this.featureFlag$destroyOnDeathChance = true;
+            }
+            if (settings.glowColor != null) {
+                this.plugin.teamManager().setColorInUse(settings.glowColor);
             }
         }
         return true;
@@ -317,6 +336,14 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         return VANILLA_ITEMS.contains(item);
     }
 
+    public boolean featureFlag$keepOnDeathChance() {
+        return featureFlag$keepOnDeathChance;
+    }
+
+    public boolean featureFlag$destroyOnDeathChance() {
+        return featureFlag$destroyOnDeathChance;
+    }
+
     protected abstract CustomItem.Builder<I> createPlatformItemBuilder(UniqueKey id, Key material, Key clientBoundMaterial);
 
     protected abstract void registerArmorTrimPattern(Collection<Key> equipments);
@@ -351,6 +378,11 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                     .toList();
             registerArmorTrimPattern(trims);
         }
+
+        @Override
+        public int count() {
+            return AbstractItemManager.this.equipments.size();
+        }
     }
 
     public void addOrMergeEquipment(ComponentBasedEquipment equipment) {
@@ -367,6 +399,11 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     public class ItemParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] {"items", "item"};
         private final Map<Key, IdAllocator> idAllocators = new HashMap<>();
+
+        @Override
+        public int count() {
+            return AbstractItemManager.this.customItemsById.size();
+        }
 
         private boolean isModernFormatRequired() {
             return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4);
