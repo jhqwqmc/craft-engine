@@ -168,6 +168,8 @@ public class BukkitServerPlayer extends Player {
     private int lastHitFurnitureTick;
     // 控制展示实体可见距离
     private double displayEntityViewDistance;
+    // 是否是基岩版
+    private Tristate isBedrock = Tristate.UNDEFINED;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1515,6 +1517,14 @@ public class BukkitServerPlayer extends Player {
         Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(serverPlayer());
         Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
         return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, predicate, count, craftSlots);
+    }
+
+    @Override
+    public boolean isBedrock() {
+        if (this.isBedrock == Tristate.UNDEFINED) {
+            this.isBedrock = Tristate.of(this.plugin.compatibilityManager().isBedrockPlayer(this));
+        }
+        return this.isBedrock.asBoolean();
     }
 
     @Override

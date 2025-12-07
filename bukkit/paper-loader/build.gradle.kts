@@ -217,6 +217,9 @@ fun registerPaperTask(
                 languageVersion = JavaLanguageVersion.of(javaVersion)
             }
             systemProperties["com.mojang.eula.agree"] = true
+            systemProperties["net.momirealms.craftengine.dev"] = true
+            jvmArgs("-Dsun.stdout.encoding=UTF-8")
+            jvmArgs("-Dsun.stderr.encoding=UTF-8")
             jvmArgs("-Ddisable.watchdog=true")
             jvmArgs("-Xlog:redefine+class*=info")
             jvmArgs("-XX:+AllowEnhancedClassRedefinition")
