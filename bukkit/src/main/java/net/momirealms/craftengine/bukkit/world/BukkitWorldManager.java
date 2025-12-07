@@ -295,21 +295,23 @@ public class BukkitWorldManager implements WorldManager, Listener {
             Object chunkSource = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(worldServer);
             Object levelChunk = FastNMS.INSTANCE.method$ServerChunkCache$getChunkAtIfLoadedMainThread(chunkSource, chunk.getX(), chunk.getZ());
             Object[] sections = FastNMS.INSTANCE.method$ChunkAccess$getSections(levelChunk);
-            for (int i = 0; i < ceSections.length; i++) {
-                CESection ceSection = ceSections[i];
-                Object section = sections[i];
-                WorldStorageInjector.uninjectLevelChunkSection(section);
-                if (Config.restoreVanillaBlocks()) {
-                    if (!ceSection.statesContainer().isEmpty()) {
-                        for (int x = 0; x < 16; x++) {
-                            for (int z = 0; z < 16; z++) {
-                                for (int y = 0; y < 16; y++) {
-                                    ImmutableBlockState customState = ceSection.getBlockState(x, y, z);
-                                    if (!customState.isEmpty()) {
-                                        BlockStateWrapper wrapper = customState.restoreBlockState();
-                                        if (wrapper != null) {
-                                            FastNMS.INSTANCE.method$LevelChunkSection$setBlockState(section, x, y, z, wrapper.literalObject(), false);
-                                            unsaved = true;
+            synchronized (sections) {
+                for (int i = 0; i < ceSections.length; i++) {
+                    CESection ceSection = ceSections[i];
+                    Object section = sections[i];
+                    WorldStorageInjector.uninjectLevelChunkSection(section);
+                    if (Config.restoreVanillaBlocks()) {
+                        if (!ceSection.statesContainer().isEmpty()) {
+                            for (int x = 0; x < 16; x++) {
+                                for (int z = 0; z < 16; z++) {
+                                    for (int y = 0; y < 16; y++) {
+                                        ImmutableBlockState customState = ceSection.getBlockState(x, y, z);
+                                        if (!customState.isEmpty()) {
+                                            BlockStateWrapper wrapper = customState.restoreBlockState();
+                                            if (wrapper != null) {
+                                                FastNMS.INSTANCE.method$LevelChunkSection$setBlockState(section, x, y, z, wrapper.literalObject(), false);
+                                                unsaved = true;
+                                            }
                                         }
                                     }
                                 }
