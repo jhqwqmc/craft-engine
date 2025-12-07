@@ -232,6 +232,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract int clearOrCountMatchingInventoryItems(Key itemId, int count);
 
+    public abstract boolean isBedrock();
+
     @Override
     public void remove() {
     }
