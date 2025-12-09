@@ -19,6 +19,8 @@ public class BukkitCraftEnginePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         this.plugin.onPluginEnable();
+        this.plugin.logger().warn("You're using the CraftEngine Community Edition.");
+        this.plugin.logger().warn("Please consider purchasing the premium version to support CraftEngine's development.");
     }
 
     @Override
