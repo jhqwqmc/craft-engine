@@ -152,7 +152,7 @@ tasks {
         manifest {
             attributes["paperweight-mappings-namespace"] = "mojang"
         }
-        archiveFileName = "${rootProject.name}-${rootProject.properties["project_version"]}-community-paper.jar"
+        archiveFileName = "${rootProject.name}-paper-plugin-${rootProject.properties["project_version"]}.jar"
         destinationDirectory.set(file("$rootDir/target"))
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")

@@ -18,8 +18,6 @@ public final class PaperCraftEnginePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         this.bootstrap.plugin.onPluginEnable();
-        this.bootstrap.plugin.logger().warn("You're using the CraftEngine Community Edition.");
-        this.bootstrap.plugin.logger().warn("Please consider purchasing the premium version to support CraftEngine's development.");
     }
 
     @Override
