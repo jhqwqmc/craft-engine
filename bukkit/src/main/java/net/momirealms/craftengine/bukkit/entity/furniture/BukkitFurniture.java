@@ -178,4 +178,12 @@ public class BukkitFurniture extends Furniture {
     public Entity getBukkitEntity() {
         return this.metaEntity.get();
     }
+
+    /**
+     * Use {@link #getBukkitEntity()} instead
+     */
+    @Deprecated
+    public Entity baseEntity() {
+        return getBukkitEntity();
+    }
 }

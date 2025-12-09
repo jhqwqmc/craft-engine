@@ -1,5 +1,5 @@
 plugins {
-    id("com.gradleup.shadow") version "9.2.2"
+    id("com.gradleup.shadow") version "9.3.0"
     id("maven-publish")
 }
 
@@ -170,7 +170,7 @@ publishing {
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleaseRepository")
+    dependsOn("publishMavenJavaPublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {

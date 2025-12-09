@@ -283,6 +283,13 @@ debug_furniture:
     - /craftengine debug furniture
     - /ce debug furniture
 
+debug_optimize_furniture_structure:
+  enable: true
+  permission: ce.command.debug.optimize_furniture_structure
+  usage:
+    - /craftengine debug optimize-furniture-structure
+    - /ce debug optimize-furniture-structure
+
 debug_test:
   enable: true
   permission: ce.command.debug.test
