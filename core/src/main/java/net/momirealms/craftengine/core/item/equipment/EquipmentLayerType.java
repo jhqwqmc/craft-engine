@@ -13,9 +13,11 @@ public enum EquipmentLayerType {
     PIG_SADDLE("pig_saddle"),
     STRIDER_SADDLE("strider_saddle"),
     CAMEL_SADDLE("camel_saddle"),
+    CAMEL_HUSK_SADDLE("camel_husk_saddle"),
     HORSE_SADDLE("horse_saddle"),
     DONKEY_SADDLE("donkey_saddle"),
     MULE_SADDLE("mule_saddle"),
+    NAUTILUS_BODY("nautilus_body"),
     SKELETON_HORSE_SADDLE("skeleton_horse_saddle"),
     ZOMBIE_HORSE_SADDLE("zombie_horse_saddle"),
     HAPPY_GHAST_BODY("happy_ghast_body");
