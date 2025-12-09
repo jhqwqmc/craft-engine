@@ -2545,6 +2545,7 @@ public abstract class AbstractPackManager implements PackManager {
 
             boolean handAnimationOnSwap = originalItemModel.handAnimationOnSwap();
             boolean oversizedInGui = originalItemModel.oversizedInGui();
+            float swapAnimationScale = originalItemModel.swapAnimationScale();
 
             Map<Float, ItemModel> entries = new TreeMap<>();
             for (Map.Entry<Integer, ModernItemModel> modelWithDataEntry : entry.getValue().entrySet()) {
@@ -2565,7 +2566,7 @@ public abstract class AbstractPackManager implements PackManager {
                     entries
             );
 
-            ModernItemModel newItemModel = new ModernItemModel(rangeDispatch, handAnimationOnSwap, oversizedInGui);
+            ModernItemModel newItemModel = new ModernItemModel(rangeDispatch, handAnimationOnSwap, oversizedInGui, swapAnimationScale);
             try {
                 Files.createDirectories(overridedItemPath.getParent());
             } catch (IOException e) {

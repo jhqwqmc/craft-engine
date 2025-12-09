@@ -787,7 +787,8 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                             map.put(customModelData, new ModernItemModel(
                                     modernModel,
                                     ResourceConfigUtils.getAsBoolean(section.getOrDefault("oversized-in-gui", true), "oversized-in-gui"),
-                                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap")
+                                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap"),
+                                    ResourceConfigUtils.getAsFloat(section.getOrDefault("swap-animation-scale", 1f), "swap-animation-scale")
                             ));
                         }
                         // 添加旧版 overrides
@@ -805,7 +806,8 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                             AbstractItemManager.this.modernItemModels1_21_4.put(itemModel, new ModernItemModel(
                                     modernModel,
                                     ResourceConfigUtils.getAsBoolean(section.getOrDefault("oversized-in-gui", true), "oversized-in-gui"),
-                                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap")
+                                    ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap"),
+                                    ResourceConfigUtils.getAsFloat(section.getOrDefault("swap-animation-scale", 1f), "swap-animation-scale")
                             ));
                         }
                         if (needsItemModelCompatibility() && needsLegacyCompatibility() && hasLegacyModel) {
@@ -819,7 +821,8 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                         AbstractItemManager.this.modernItemModels1_21_4.put(id, new ModernItemModel(
                                 modernModel,
                                 ResourceConfigUtils.getAsBoolean(section.getOrDefault("oversized-in-gui", true), "oversized-in-gui"),
-                                ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap")
+                                ResourceConfigUtils.getAsBoolean(section.getOrDefault("hand-animation-on-swap", true), "hand-animation-on-swap"),
+                                ResourceConfigUtils.getAsFloat(section.getOrDefault("swap-animation-scale", 1f), "swap-animation-scale")
                         ));
                     }
                 }

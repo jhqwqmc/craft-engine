@@ -25,6 +25,7 @@ public final class DataComponentKeys {
     public static final Key CUSTOM_MODEL_DATA = Key.of("minecraft", "custom_model_data");
     public static final Key CUSTOM_NAME = Key.of("minecraft", "custom_name");
     public static final Key DAMAGE = Key.of("minecraft", "damage");
+    public static final Key DAMAGE_TYPE = Key.of("minecraft", "damage_type");
     public static final Key DAMAGE_RESISTANT = Key.of("minecraft", "damage_resistant");
     public static final Key DEBUG_STICK_STATE = Key.of("minecraft", "debug_stick_state");
     public static final Key DEATH_PROTECTION = Key.of("minecraft", "death_protection");
@@ -43,6 +44,7 @@ public final class DataComponentKeys {
     public static final Key ITEM_MODEL = Key.of("minecraft", "item_model");
     public static final Key ITEM_NAME = Key.of("minecraft", "item_name");
     public static final Key JUKEBOX_PLAYABLE = Key.of("minecraft", "jukebox_playable");
+    public static final Key KINETIC_WEAPON = Key.of("minecraft", "kinetic_weapon");
     public static final Key LOCK = Key.of("minecraft", "lock");
     public static final Key LODESTONE_TRACKER = Key.of("minecraft", "lodestone_tracker");
     public static final Key LORE = Key.of("minecraft", "lore");
@@ -51,8 +53,10 @@ public final class DataComponentKeys {
     public static final Key MAP_ID = Key.of("minecraft", "map_id");
     public static final Key MAX_DAMAGE = Key.of("minecraft", "max_damage");
     public static final Key MAX_STACK_SIZE = Key.of("minecraft", "max_stack_size");
+    public static final Key MINIUM_ATTACK_CHARGE = Key.of("minecraft", "minimum_attack_charge");
     public static final Key NOTE_BLOCK_SOUND = Key.of("minecraft", "note_block_sound");
     public static final Key OMINOUS_BOTTLE_AMPLIFIER = Key.of("minecraft", "ominous_bottle_amplifier");
+    public static final Key PIERCING_WEAPON = Key.of("minecraft", "piercing_weapon");
     public static final Key POT_DECORATIONS = Key.of("minecraft", "pot_decorations");
     public static final Key POTION_CONTENTS = Key.of("minecraft", "potion_contents");
     public static final Key POTION_DURATION_SCALE = Key.of("minecraft", "potion_duration_scale");
@@ -65,12 +69,14 @@ public final class DataComponentKeys {
     public static final Key REPAIR_COST = Key.of("minecraft", "repair_cost");
     public static final Key STORED_ENCHANTMENTS = Key.of("minecraft", "stored_enchantments");
     public static final Key SUSPICIOUS_STEW_EFFECTS = Key.of("minecraft", "suspicious_stew_effects");
+    public static final Key SWING_ANIMATION = Key.of("minecraft", "swing_animation");
     public static final Key TOOL = Key.of("minecraft", "tool");
     public static final Key TOOLTIP_DISPLAY = Key.of("minecraft", "tooltip_display");
     public static final Key TOOLTIP_STYLE = Key.of("minecraft", "tooltip_style");
     public static final Key TRIM = Key.of("minecraft", "trim");
     public static final Key UNBREAKABLE = Key.of("minecraft", "unbreakable");
     public static final Key USE_COOLDOWN = Key.of("minecraft", "use_cooldown");
+    public static final Key USE_EFFECTS = Key.of("minecraft", "use_effects");
     public static final Key USE_REMAINDER = Key.of("minecraft", "use_remainder");
     public static final Key WEAPON = Key.of("minecraft", "weapon");
     public static final Key WRITABLE_BOOK_CONTENT = Key.of("minecraft", "writable_book_content");

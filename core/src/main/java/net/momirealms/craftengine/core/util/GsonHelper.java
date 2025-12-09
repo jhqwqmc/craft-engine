@@ -122,4 +122,76 @@ public final class GsonHelper {
             return ja;
         }
     }
+
+    public static float getAsFloat(JsonElement json, float defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsFloat();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static double getAsDouble(JsonElement json, double defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsDouble();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static int getAsInt(JsonElement json, int defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsInt();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static long getAsLong(JsonElement json, long defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsLong();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static short getAsShort(JsonElement json, short defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsShort();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static byte getAsByte(JsonElement json, byte defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsByte();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static boolean getAsBoolean(JsonElement json, boolean defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsBoolean();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public static String getAsString(JsonElement json, String defaultValue) {
+        if (json == null || json.isJsonNull()) return defaultValue;
+        try {
+            return json.getAsString();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
 }
