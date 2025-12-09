@@ -114,10 +114,10 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
             LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
         }
-        if (this.isPluginEnabled("Geyser-Spigot")) {
+        if (this.hasPlugin("Geyser-Spigot")) {
             this.hasGeyser = true;
         }
-        if (this.isPluginEnabled("floodgate")) {
+        if (this.hasPlugin("floodgate")) {
             this.hasFloodgate = true;
         }
     }
