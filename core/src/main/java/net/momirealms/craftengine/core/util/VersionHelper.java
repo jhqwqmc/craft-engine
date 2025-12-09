@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class VersionHelper {
     public static final boolean IS_RUNNING_IN_DEV = Boolean.getBoolean("net.momirealms.craftengine.dev");
-    public static final boolean PREMIUM = false;
+    public static final boolean PREMIUM = true;
     public static final MinecraftVersion MINECRAFT_VERSION;
     public static final boolean COMPONENT_RELEASE;
     private static final int version;
