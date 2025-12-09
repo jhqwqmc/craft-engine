@@ -69,14 +69,14 @@ public final class DataComponentKeys {
     public static final Key REPAIR_COST = Key.of("minecraft", "repair_cost");
     public static final Key STORED_ENCHANTMENTS = Key.of("minecraft", "stored_enchantments");
     public static final Key SUSPICIOUS_STEW_EFFECTS = Key.of("minecraft", "suspicious_stew_effects");
-    public static final Key SWING_ANIMATION = Key.of("minecraft", "swing_animation ");
+    public static final Key SWING_ANIMATION = Key.of("minecraft", "swing_animation");
     public static final Key TOOL = Key.of("minecraft", "tool");
     public static final Key TOOLTIP_DISPLAY = Key.of("minecraft", "tooltip_display");
     public static final Key TOOLTIP_STYLE = Key.of("minecraft", "tooltip_style");
     public static final Key TRIM = Key.of("minecraft", "trim");
     public static final Key UNBREAKABLE = Key.of("minecraft", "unbreakable");
     public static final Key USE_COOLDOWN = Key.of("minecraft", "use_cooldown");
-    public static final Key USE_EFFECTS = Key.of("minecraft", "use_effects ");
+    public static final Key USE_EFFECTS = Key.of("minecraft", "use_effects");
     public static final Key USE_REMAINDER = Key.of("minecraft", "use_remainder");
     public static final Key WEAPON = Key.of("minecraft", "weapon");
     public static final Key WRITABLE_BOOK_CONTENT = Key.of("minecraft", "writable_book_content");
