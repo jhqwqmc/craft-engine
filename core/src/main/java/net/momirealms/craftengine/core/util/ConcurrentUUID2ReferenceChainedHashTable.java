@@ -213,7 +213,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * Returns whether the specified value has a key mapped to it.
      */
     public boolean containsValue(final V value) {
-        Validate.notNull(value, "Value cannot be null");
 
         final NodeIterator<V> iterator = new NodeIterator<>(this.table);
 
@@ -378,7 +377,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * Atomically updates the value associated with {@code key} to {@code value}, or inserts a new mapping.
      */
     public V put(final UUID key, final V value) {
-        Validate.notNull(value, "Value may not be null");
 
         final int hash = getHash(key);
 
@@ -429,7 +427,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * Atomically inserts a new mapping if and only if {@code key} is not currently mapped.
      */
     public V putIfAbsent(final UUID key, final V value) {
-        Validate.notNull(value, "Value may not be null");
 
         final int hash = getHash(key);
 
@@ -485,7 +482,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * Atomically updates the value associated with {@code key} to {@code value}, or does nothing if not mapped.
      */
     public V replace(final UUID key, final V value) {
-        Validate.notNull(value, "Value may not be null");
 
         final int hash = getHash(key);
 
@@ -530,8 +526,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * Atomically updates the value if the currently associated value is reference equal to {@code expect}.
      */
     public V replace(final UUID key, final V expect, final V update) {
-        Validate.notNull(expect, "Expect may not be null");
-        Validate.notNull(update, "Update may not be null");
 
         final int hash = getHash(key);
 
@@ -757,7 +751,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
      * </p>
      */
     public V computeIfAbsent(final UUID key, final Function<UUID, ? extends V> function) {
-        Validate.notNull(function, "Function may not be null");
 
         final int hash = getHash(key);
 
@@ -859,7 +852,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
         }
         @Override public TableEntry<V> next() { return this.nextNode(); }
         @Override public void forEachRemaining(final Consumer<? super TableEntry<V>> action) {
-            Validate.notNull(action, "Action may not be null");
             while (this.hasNext()) { action.accept(this.next()); }
         }
     }
@@ -868,7 +860,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
         public KeyIterator(final ConcurrentUUID2ReferenceChainedHashTable<V> map) { super(map); }
         @Override public UUID next() { return this.nextNode().key; }
         @Override public void forEachRemaining(final Consumer<? super UUID> action) {
-            Validate.notNull(action, "Action may not be null");
             while (this.hasNext()) { action.accept(this.next()); }
         }
     }
@@ -877,7 +868,6 @@ public class ConcurrentUUID2ReferenceChainedHashTable<V> implements Iterable<Con
         public ValueIterator(final ConcurrentUUID2ReferenceChainedHashTable<V> map) { super(map); }
         @Override public V next() { return this.nextNode().getValueVolatile(); }
         @Override public void forEachRemaining(final Consumer<? super V> action) {
-            Validate.notNull(action, "Action may not be null");
             while (this.hasNext()) { action.accept(this.next()); }
         }
     }
