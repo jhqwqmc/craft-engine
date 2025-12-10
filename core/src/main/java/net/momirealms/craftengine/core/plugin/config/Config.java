@@ -90,7 +90,8 @@ public class Config {
     protected boolean resource_pack$protection$fake_file_size;
     protected NumberProvider resource_pack$protection$obfuscation$namespace$length;
     protected int resource_pack$protection$obfuscation$namespace$amount;
-    protected String resource_pack$protection$obfuscation$path$source;
+    protected String resource_pack$protection$obfuscation$path$block_source;
+    protected String resource_pack$protection$obfuscation$path$item_source;
     protected NumberProvider resource_pack$protection$obfuscation$path$depth;
     protected NumberProvider resource_pack$protection$obfuscation$path$length;
     protected int resource_pack$protection$obfuscation$atlas$images_per_canvas;
@@ -364,7 +365,8 @@ public class Config {
         resource_pack$protection$obfuscation$namespace$length = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.namespace.length", 2));
         resource_pack$protection$obfuscation$path$depth = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.path.depth", 4));
         resource_pack$protection$obfuscation$path$length = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.path.length", 2));
-        resource_pack$protection$obfuscation$path$source = config.getString("resource-pack.protection.obfuscation.path.source", "obf");
+        resource_pack$protection$obfuscation$path$block_source = config.getString("resource-pack.protection.obfuscation.path.block-source", "obf_block");
+        resource_pack$protection$obfuscation$path$item_source = config.getString("resource-pack.protection.obfuscation.path.block-source", "obf_item");
         resource_pack$protection$obfuscation$path$anti_unzip = config.getBoolean("resource-pack.protection.obfuscation.path.anti-unzip", false);
         resource_pack$protection$obfuscation$atlas$images_per_canvas = config.getInt("resource-pack.protection.obfuscation.atlas.images-per-canvas", 256);
         resource_pack$protection$obfuscation$atlas$prefix = config.getString("resource-pack.protection.obfuscation.atlas.prefix", "atlas");
@@ -864,8 +866,12 @@ public class Config {
         return instance.resource_pack$protection$obfuscation$namespace$amount;
     }
 
-    public static String atlasSource() {
-        return instance.resource_pack$protection$obfuscation$path$source;
+    public static String blockAtlasSource() {
+        return instance.resource_pack$protection$obfuscation$path$block_source;
+    }
+
+    public static String itemAtlasSource() {
+        return instance.resource_pack$protection$obfuscation$path$item_source;
     }
 
     public static NumberProvider pathDepth() {

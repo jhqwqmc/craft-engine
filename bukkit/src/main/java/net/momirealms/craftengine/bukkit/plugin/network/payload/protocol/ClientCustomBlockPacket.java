@@ -88,5 +88,4 @@ public record ClientCustomBlockPacket(int vanillaSize, int currentSize) implemen
             }
         }
     }
-
 }

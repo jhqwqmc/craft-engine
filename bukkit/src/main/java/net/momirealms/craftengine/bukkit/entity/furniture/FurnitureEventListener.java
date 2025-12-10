@@ -143,17 +143,18 @@ public class FurnitureEventListener implements Listener {
             if (index >= variants.size()) {
                 index = 0;
             }
-            furniture.setVariant(variants.get(index));
-            try {
-                Object systemChatPacket = NetworkReflections.constructor$ClientboundSystemChatPacket.newInstance(
-                        ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.update")
-                                .arguments(
-                                        Component.text("variant"),
-                                        Component.text(variants.get(index))
-                                )), true);
-                player.sendPacket(systemChatPacket, false);
-            } catch (ReflectiveOperationException e) {
-                CraftEngine.instance().logger().warn("Could not create system chat packet", e);
+            if (furniture.setVariant(variants.get(index))) {
+                try {
+                    Object systemChatPacket = NetworkReflections.constructor$ClientboundSystemChatPacket.newInstance(
+                            ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.update")
+                                    .arguments(
+                                            Component.text("variant"),
+                                            Component.text(variants.get(index))
+                                    )), true);
+                    player.sendPacket(systemChatPacket, false);
+                } catch (ReflectiveOperationException e) {
+                    CraftEngine.instance().logger().warn("Could not create system chat packet", e);
+                }
             }
         }
     }

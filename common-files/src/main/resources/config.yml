@@ -149,15 +149,15 @@ resource-pack:
         length: 2
       # Determines the depth of the obfuscated path.
       path:
-        source: obf
         depth: 4
         length: 2
         # Prevent straightforward unzip
         anti-unzip: false
+      # Assemble multiple textures into one giant texture atlas to make it more difficult for thieves to directly extract the individual textures.
       # A larger atlas will result in slower generation speed, but it will also lead to a smaller resource pack size.
       atlas:
         prefix: atlas # The prefix of the folder where the generated atlas will be located
-        images-per-canvas: 256
+        images-per-canvas: 256 # -1 = disable
       # Sometimes, some vanilla files that have been overwritten might be mistakenly obfuscated
       # Please add the ignored textures/models/sounds here if that happens
       bypass-textures:
