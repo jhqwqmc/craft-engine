@@ -120,6 +120,6 @@ images:
   default:emojis:
     height: 11
     ascent: 9
-    font: minecraft:emoji
+    font: minecraft:default # If your chat plugin supports custom font, better using a custom font here
     file: minecraft:font/image/emojis.png
     grid-size: 4,4
