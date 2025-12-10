@@ -192,12 +192,12 @@ public class PacketIds1_20_5 implements PacketIds {
     }
 
     @Override
-    public int clientboundPlayerChatPacket() {
-        return PacketIdHelper.byName("minecraft:player_chat", PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    public int clientIntentionPacket() {
+        return PacketIdHelper.byName("minecraft:intention", PacketFlow.SERVERBOUND, ConnectionState.HANDSHAKING);
     }
 
     @Override
-    public int clientIntentionPacket() {
-        return PacketIdHelper.byName("minecraft:intention", PacketFlow.SERVERBOUND, ConnectionState.HANDSHAKING);
+    public int clientboundStatusResponsePacket() {
+        return PacketIdHelper.byName("minecraft:status_response", PacketFlow.CLIENTBOUND, ConnectionState.STATUS);
     }
 }

@@ -6,6 +6,9 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 
 public final class ProtocolVersion {
+    private static final Map<Integer, ProtocolVersion> BY_ID = new Int2ObjectOpenHashMap<>();
+    private static final Map<String, ProtocolVersion> BY_NAME = new Object2ObjectOpenHashMap<>();
+
     public static final ProtocolVersion UNKNOWN = new ProtocolVersion(-1, "Unknown");
     public static final ProtocolVersion V1_20 = new ProtocolVersion(763, "1.20");
     public static final ProtocolVersion V1_20_1 = new ProtocolVersion(763, "1.20.1");
@@ -26,8 +29,6 @@ public final class ProtocolVersion {
     public static final ProtocolVersion V1_21_9 = new ProtocolVersion(773, "1.21.9");
     public static final ProtocolVersion V1_21_10 = new ProtocolVersion(773, "1.21.10");
     public static final ProtocolVersion V1_21_11 = new ProtocolVersion(774, "1.21.11");
-    private static final Map<Integer, ProtocolVersion> BY_ID = new Int2ObjectOpenHashMap<>();
-    private static final Map<String, ProtocolVersion> BY_NAME = new Object2ObjectOpenHashMap<>();
 
     private final int id;
     private final String name;

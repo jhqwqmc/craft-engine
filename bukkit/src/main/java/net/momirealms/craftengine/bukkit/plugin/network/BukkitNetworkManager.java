@@ -3,6 +3,8 @@ package net.momirealms.craftengine.bukkit.plugin.network;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
@@ -34,6 +36,7 @@ import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurnitureManager;
 import net.momirealms.craftengine.bukkit.entity.projectile.BukkitProjectileManager;
+import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.FurnitureItemBehavior;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
@@ -64,6 +67,7 @@ import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
+import net.momirealms.craftengine.core.font.EmojiTextProcessResult;
 import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
@@ -382,9 +386,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new UpdateTagsListener(), NetworkReflections.clazz$ClientboundUpdateTagsPacket);
         registerNMSPacketConsumer(new ClientInformationListener(), VersionHelper.isOrAbove1_20_2() ? NetworkReflections.clazz$ServerboundClientInformationPacket1 : NetworkReflections.clazz$ServerboundClientInformationPacket0);
         registerNMSPacketConsumer(new ContainerClickListener1_21_5(), VersionHelper.isOrAbove1_21_5() ? NetworkReflections.clazz$ServerboundContainerClickPacket : null);
-        registerNMSPacketConsumer(new StatusResponseListener(), NetworkReflections.clazz$ClientboundStatusResponsePacket);
         registerNMSPacketConsumer(new ServerDataListener(), NetworkReflections.clazz$ClientboundServerDataPacket);
         registerNMSPacketConsumer(new ChatSessionUpdateListener(), NetworkReflections.clazz$ServerboundChatSessionUpdatePacket);
+        registerNMSPacketConsumer(new PlayerChatListener(), NetworkReflections.clazz$ClientboundPlayerChatPacket);
         registerNMSPacketConsumer(new LoginAcknowledgedListener(), NetworkReflections.clazz$ServerboundLoginAcknowledgedPacket);
         registerNMSPacketConsumer(new ConfigurationAcknowledgedListener(), NetworkReflections.clazz$ServerboundConfigurationAcknowledgedPacket);
         registerNMSPacketConsumer(new C2SFinishConfigurationListener(), NetworkReflections.clazz$ServerboundFinishConfigurationPacket);
@@ -392,6 +396,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
         registerNMSPacketConsumer(new StartConfigurationListener(), NetworkReflections.clazz$ClientboundStartConfigurationPacket);
         registerByteBufferPacketListener(new IntentionListener(), this.packetIds.clientIntentionPacket(), "ClientIntentionPacket", ConnectionState.HANDSHAKING, PacketFlow.SERVERBOUND);
+        registerByteBufferPacketListener(new StatusResponseListener(), this.packetIds.clientboundStatusResponsePacket(), "ClientboundStatusResponsePacket", ConnectionState.STATUS, PacketFlow.CLIENTBOUND);
         registerByteBufferPacketListener(new ForgetLevelChunkListener(), this.packetIds.clientboundForgetLevelChunkPacket(), "ClientboundForgetLevelChunkPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
         registerByteBufferPacketListener(new SetScoreListener1_20_3(), VersionHelper.isOrAbove1_20_3() ? this.packetIds.clientboundSetScorePacket() : -1, "ClientboundSetScorePacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
         registerByteBufferPacketListener(new AddRecipeBookListener(), this.packetIds.clientboundRecipeBookAddPacket(), "ClientboundRecipeBookAddPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
@@ -474,13 +479,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
                 new SetObjectiveListener1_20_3() :
                 new SetObjectiveListener1_20(),
                 this.packetIds.clientboundSetObjectivePacket(), "ClientboundSetObjectivePacket",
-                ConnectionState.PLAY, PacketFlow.CLIENTBOUND
-        );
-        registerByteBufferPacketListener(
-                VersionHelper.isOrAbove1_20_3() ?
-                new PlayerChatListener_1_20_3() :
-                new PlayerChatListener_1_20(),
-                this.packetIds.clientboundPlayerChatPacket(), "ClientboundPlayerChatPacket",
                 ConnectionState.PLAY, PacketFlow.CLIENTBOUND
         );
     }
@@ -1508,13 +1506,6 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
-    public static class StatusResponseListener implements NMSPacketListener {
-
-        @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-        }
-    }
-
     public static class ServerDataListener implements NMSPacketListener {
 
         @Override
@@ -1535,6 +1526,33 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
             event.setCancelled(true);
+        }
+    }
+
+    public static class PlayerChatListener implements NMSPacketListener {
+
+        @Override
+        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            event.setCancelled(true);
+            Object content = FastNMS.INSTANCE.field$ClientboundPlayerChatPacket$unsignedContent(packet);
+            if (content == null) {
+                content = FastNMS.INSTANCE.method$Component$literal(
+                        FastNMS.INSTANCE.field$SignedMessageBody$Packed$content(
+                                FastNMS.INSTANCE.field$ClientboundPlayerChatPacket$body(packet)
+                        )
+                );
+            }
+            Object chatType = FastNMS.INSTANCE.field$ClientboundPlayerChatPacket$chatType(packet);
+            Object decorate = FastNMS.INSTANCE.method$ChatType$Bound$decorate(chatType, content);
+            if (Config.allowEmojiChat()) {
+                String rawJsonMessage = ComponentUtils.minecraftToJson(decorate);
+                EmojiTextProcessResult result = BukkitFontManager.instance().replaceJsonEmoji(rawJsonMessage, (BukkitServerPlayer) user);
+                if (result.replaced()) {
+                    decorate = ComponentUtils.jsonToMinecraft(result.text());
+                }
+            }
+            Object systemChatPacket = FastNMS.INSTANCE.constructor$ClientboundSystemChatPacket(decorate, false);
+            user.sendPacket(systemChatPacket, false);
         }
     }
 
@@ -4479,192 +4497,17 @@ public class BukkitNetworkManager implements NetworkManager, Listener, PluginMes
         }
     }
 
-    public static class PlayerChatListener_1_20 implements ByteBufferPacketListener {
+    public static class StatusResponseListener implements ByteBufferPacketListener {
 
+        @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
-            if (!Config.interceptPlayerChat()) return;
             FriendlyByteBuf buf = event.getBuffer();
-            boolean changed = false;
-            UUID sender = buf.readUUID();
-            int index = buf.readVarInt();
-            byte @Nullable [] messageSignature = buf.readNullable(b -> {
-                byte[] bs = new byte[256];
-                buf.readBytes(bs);
-                return bs;
-            });
-            // SignedMessageBody.Packed start
-            String content = buf.readUtf(256);
-            Instant timeStamp = buf.readInstant();
-            long salt = buf.readLong();
-            // LastSeenMessages.Packed start
-            ArrayList<Pair<Integer, byte[]>> lastSeen = buf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), b -> {
-                int i = b.readVarInt() - 1;
-                if (i == -1) {
-                    byte[] bs = new byte[256];
-                    buf.readBytes(bs);
-                    return Pair.of(-1, bs);
-                } else {
-                    return Pair.of(i, null);
-                }
-            });
-            // LastSeenMessages.Packed end
-            // SignedMessageBody.Packed end
-            @Nullable String unsignedContent = buf.readNullable(FriendlyByteBuf::readUtf);
-            if (unsignedContent != null) {
-                Map<String, ComponentProvider> unsignedContentTokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
-                if (!unsignedContentTokens.isEmpty()) {
-                    Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(unsignedContent, JsonElement.class));
-                    Component component = AdventureHelper.nbtToComponent(tag);
-                    component = AdventureHelper.replaceText(component, unsignedContentTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                    unsignedContent = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
-                    changed = true;
-                }
-            }
-            // FilterMask start
-            int type = buf.readVarInt();
-            BitSet mask = type == 2 /* PARTIALLY_FILTERED */ ? buf.readBitSet() : null;
-            // FilterMask end
-            // ChatType.BoundNetwork start
-            int chatType = buf.readVarInt();
-            String name = buf.readUtf();
-            Map<String, ComponentProvider> nameTokens = CraftEngine.instance().fontManager().matchTags(name);
-            if (!nameTokens.isEmpty()) {
-                Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(name, JsonElement.class));
-                Component component = AdventureHelper.nbtToComponent(tag);
-                component = AdventureHelper.replaceText(component, nameTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                name = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
-                changed = true;
-            }
-            @Nullable String targetName = buf.readNullable(FriendlyByteBuf::readUtf);
-            if (targetName != null) {
-                Map<String, ComponentProvider> targetNameTokens = CraftEngine.instance().fontManager().matchTags(targetName);
-                if (!targetNameTokens.isEmpty()) {
-                    Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(targetName, JsonElement.class));
-                    Component component = AdventureHelper.nbtToComponent(tag);
-                    component = AdventureHelper.replaceText(component, targetNameTokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                    targetName = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.JSON, AdventureHelper.componentToNbt(component)).toString();
-                    changed = true;
-                }
-            }
-            // ChatType.BoundNetwork end
-            if (changed) {
-                event.setChanged(true);
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                buf.writeUUID(sender);
-                buf.writeVarInt(index);
-                buf.writeNullable(messageSignature, (b, bs) -> buf.writeBytes(bs));
-                buf.writeUtf(content);
-                buf.writeInstant(timeStamp);
-                buf.writeLong(salt);
-                buf.writeCollection(lastSeen, (b, pair) -> {
-                    b.writeVarInt(pair.left() + 1);
-                    if (pair.right() != null) {
-                        b.writeBytes(pair.right());
-                    }
-                });
-                buf.writeNullable(unsignedContent, FriendlyByteBuf::writeUtf);
-                buf.writeVarInt(type);
-                if (type == 2) buf.writeBitSet(mask);
-                buf.writeVarInt(chatType);
-                buf.writeUtf(name);
-                buf.writeNullable(targetName, FriendlyByteBuf::writeUtf);
-            }
-        }
-    }
-
-    public static class PlayerChatListener_1_20_3 implements ByteBufferPacketListener {
-
-        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
-            if (!Config.interceptPlayerChat()) return;
-            FriendlyByteBuf buf = event.getBuffer();
-            boolean changed = false;
-            int globalIndex = VersionHelper.isOrAbove1_21_5() ? buf.readVarInt() : -1;
-            UUID sender = buf.readUUID();
-            int index = buf.readVarInt();
-            byte @Nullable [] messageSignature = buf.readNullable(b -> {
-                byte[] bs = new byte[256];
-                buf.readBytes(bs);
-                return bs;
-            });
-            // SignedMessageBody.Packed start
-            String content = buf.readUtf(256);
-            Instant timeStamp = buf.readInstant();
-            long salt = buf.readLong();
-            // LastSeenMessages.Packed start
-            ArrayList<Pair<Integer, byte[]>> lastSeen = buf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), b -> {
-                int i = b.readVarInt() - 1;
-                if (i == -1) {
-                    byte[] bs = new byte[256];
-                    buf.readBytes(bs);
-                    return Pair.of(-1, bs);
-                } else {
-                    return Pair.of(i, null);
-                }
-            });
-            // LastSeenMessages.Packed end
-            // SignedMessageBody.Packed end
-            @Nullable Tag unsignedContent = buf.readNullable(b -> b.readNbt(false));
-            if (unsignedContent != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
-                if (!tokens.isEmpty()) {
-                    Component component = AdventureHelper.tagToComponent(unsignedContent);
-                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                    unsignedContent = AdventureHelper.componentToTag(component);
-                    changed = true;
-                }
-            }
-            // FilterMask start
-            int type = buf.readVarInt();
-            BitSet mask = type == 2 /* PARTIALLY_FILTERED */ ? buf.readBitSet() : null;
-            // FilterMask end
-            // ChatType.Bound start
-            int chatType = buf.readVarInt();
-            Tag name = buf.readNbt(false);
-            if (name != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(name);
-                if (!tokens.isEmpty()) {
-                    Component component = AdventureHelper.tagToComponent(name);
-                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                    name = AdventureHelper.componentToTag(component);
-                    changed = true;
-                }
-            }
-            @Nullable Tag targetName = buf.readNullable(b -> b.readNbt(false));
-            if (targetName != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(targetName);
-                if (!tokens.isEmpty()) {
-                    Component component = AdventureHelper.tagToComponent(targetName);
-                    component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
-                    targetName = AdventureHelper.componentToTag(component);
-                    changed = true;
-                }
-            }
-            // ChatType.Bound end
-            if (changed) {
-                event.setChanged(true);
-                buf.clear();
-                buf.writeVarInt(event.packetID());
-                if (VersionHelper.isOrAbove1_21_5()) buf.writeVarInt(globalIndex);
-                buf.writeUUID(sender);
-                buf.writeVarInt(index);
-                buf.writeNullable(messageSignature, (b, bs) -> buf.writeBytes(bs));
-                buf.writeUtf(content);
-                buf.writeInstant(timeStamp);
-                buf.writeLong(salt);
-                buf.writeCollection(lastSeen, (b, pair) -> {
-                    b.writeVarInt(pair.left() + 1);
-                    if (pair.right() != null) {
-                        b.writeBytes(pair.right());
-                    }
-                });
-                buf.writeNullable(unsignedContent, (b, tag) -> b.writeNbt(tag, false));
-                buf.writeVarInt(type);
-                if (type == 2) buf.writeBitSet(mask);
-                buf.writeVarInt(chatType);
-                buf.writeNbt(name, false);
-                buf.writeNullable(targetName, (b, tag) -> b.writeNbt(tag, false));
-            }
+            JsonObject jsonObject = JsonParser.parseString(buf.readUtf()).getAsJsonObject();
+            jsonObject.addProperty("preventsChatReports", true);
+            event.setChanged(true);
+            buf.clear();
+            buf.writeVarInt(event.packetID());
+            buf.writeUtf(jsonObject.toString());
         }
     }
 }

@@ -230,13 +230,13 @@ public class BukkitFontManager extends AbstractFontManager implements Listener {
                     changed = true;
                 }
             }
-            if (Config.allowEmojiChat()) {
-                EmojiTextProcessResult result = replaceJsonEmoji(rawJsonMessage, BukkitAdaptors.adapt(player));
-                if (result.replaced()) {
-                    rawJsonMessage = result.text();
-                    changed = true;
-                }
-            }
+            // if (Config.allowEmojiChat()) {
+            //     EmojiTextProcessResult result = replaceJsonEmoji(rawJsonMessage, BukkitAdaptors.adapt(player));
+            //     if (result.replaced()) {
+            //         rawJsonMessage = result.text();
+            //         changed = true;
+            //     }
+            // }
             if (changed) {
                 PaperReflections.method$AsyncChatDecorateEvent$result.invoke(event, ComponentUtils.jsonToPaperAdventure(rawJsonMessage));
             }

@@ -16,12 +16,14 @@ import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BukkitItemBehaviors;
 import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
 import net.momirealms.craftengine.bukkit.loot.BukkitVanillaLootManager;
+import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.pack.BukkitPackManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitSenderFactory;
 import net.momirealms.craftengine.bukkit.plugin.gui.BukkitGuiManager;
 import net.momirealms.craftengine.bukkit.plugin.injector.*;
 import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.scheduler.BukkitSchedulerAdapter;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.sound.BukkitSoundManager;
@@ -157,6 +159,14 @@ public class BukkitCraftEngine extends CraftEngine {
             ProtectedFieldVisitor.init();
         } catch (Exception e) {
             throw new InjectionException("Error initializing ProtectedFieldVisitor", e);
+        }
+        // 关闭聊天验证
+        try {
+            Object settings = CoreReflections.field$DedicatedServer$settings.get(FastNMS.INSTANCE.method$MinecraftServer$getServer());
+            Object properties = CoreReflections.field$DedicatedServerSettings$properties.get(settings);
+            CoreReflections.methodHandle$DedicatedServerProperties$enforceSecureProfileSetter.invoke(properties, false);
+        } catch (Throwable e) {
+            throw new InjectionException("Error injecting secure profile", e);
         }
         // 初始化一些注册表
         super.onPluginLoad();

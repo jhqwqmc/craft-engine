@@ -76,7 +76,7 @@ public interface PacketIds {
 
     int serverboundCustomPayloadPacket();
 
-    int clientboundPlayerChatPacket();
-
     int clientIntentionPacket();
+
+    int clientboundStatusResponsePacket();
 }
