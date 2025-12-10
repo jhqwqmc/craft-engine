@@ -52,27 +52,29 @@ public class BukkitFurniture extends Furniture {
     }
 
     @Override
-    public boolean setVariant(String variantName) {
+    public boolean setVariant(String variantName, boolean force) {
         FurnitureVariant variant = this.config.getVariant(variantName);
         if (variant == null) return false;
         if (this.currentVariant == variant) return false;
         // 检查新位置是否可用
-        List<AABB> aabbs = new ArrayList<>();
-        WorldPosition position = position();
-        for (FurnitureHitBoxConfig<?> hitBoxConfig : variant.hitBoxConfigs()) {
-            hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
-        }
-        if (!aabbs.isEmpty()) {
-            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
-                    o -> {
-                        for (Collider collider : super.colliders) {
-                            if (o == collider.handle()) {
-                                return false;
+        if (!force) {
+            List<AABB> aabbs = new ArrayList<>();
+            WorldPosition position = position();
+            for (FurnitureHitBoxConfig<?> hitBoxConfig : variant.hitBoxConfigs()) {
+                hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
+            }
+            if (!aabbs.isEmpty()) {
+                if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
+                        o -> {
+                            for (Collider collider : super.colliders) {
+                                if (o == collider.handle()) {
+                                    return false;
+                                }
                             }
-                        }
-                        return true;
-                    })) {
-                return false;
+                            return true;
+                        })) {
+                    return false;
+                }
             }
         }
         // 删除椅子
@@ -88,25 +90,27 @@ public class BukkitFurniture extends Furniture {
 
     @SuppressWarnings("deprecation")
     @Override
-    public CompletableFuture<Boolean> moveTo(WorldPosition position) {
+    public CompletableFuture<Boolean> moveTo(WorldPosition position, boolean force) {
         ItemDisplay itemDisplay = this.metaEntity.get();
         if (itemDisplay == null) return CompletableFuture.completedFuture(false);
-        // 检查新位置是否可用
-        List<AABB> aabbs = new ArrayList<>();
-        for (FurnitureHitBoxConfig<?> hitBoxConfig : getCurrentVariant().hitBoxConfigs()) {
-            hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
-        }
-        if (!aabbs.isEmpty()) {
-            if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
-                    o -> {
-                        for (Collider collider : super.colliders) {
-                            if (o == collider.handle()) {
-                                return false;
+        if (!force) {
+            // 检查新位置是否可用
+            List<AABB> aabbs = new ArrayList<>();
+            for (FurnitureHitBoxConfig<?> hitBoxConfig : getCurrentVariant().hitBoxConfigs()) {
+                hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
+            }
+            if (!aabbs.isEmpty()) {
+                if (!FastNMS.INSTANCE.checkEntityCollision(position.world.serverWorld(), aabbs.stream().map(it -> FastNMS.INSTANCE.constructor$AABB(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
+                        o -> {
+                            for (Collider collider : super.colliders) {
+                                if (o == collider.handle()) {
+                                    return false;
+                                }
                             }
-                        }
-                        return true;
-                    })) {
-                return CompletableFuture.completedFuture(false);
+                            return true;
+                        })) {
+                    return CompletableFuture.completedFuture(false);
+                }
             }
         }
         // 删除椅子

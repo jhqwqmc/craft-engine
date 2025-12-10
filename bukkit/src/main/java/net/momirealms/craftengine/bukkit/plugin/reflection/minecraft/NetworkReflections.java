@@ -52,9 +52,9 @@ public final class NetworkReflections {
             )
     );
 
-    public static final Constructor<?> constructor$ClientboundSystemChatPacket = requireNonNull(
-            ReflectionUtils.getConstructor(clazz$ClientboundSystemChatPacket, CoreReflections.clazz$Component, boolean.class)
-    );
+//    public static final Constructor<?> constructor$ClientboundSystemChatPacket = requireNonNull(
+//            ReflectionUtils.getConstructor(clazz$ClientboundSystemChatPacket, CoreReflections.clazz$Component, boolean.class)
+//    );
 
     public static final Field field$ClientboundSystemChatPacket$overlay = requireNonNull(
             ReflectionUtils.getDeclaredField(

@@ -65,9 +65,17 @@ public abstract class Furniture implements Cullable {
         return this.currentVariant;
     }
 
-    public abstract boolean setVariant(String variantName);
+    public boolean setVariant(String variantName) {
+        return this.setVariant(variantName, false);
+    }
 
-    public abstract CompletableFuture<Boolean> moveTo(WorldPosition position);
+    public abstract boolean setVariant(String variantName, boolean force);
+
+    public CompletableFuture<Boolean> moveTo(WorldPosition position) {
+        return this.moveTo(position, false);
+    }
+
+    public abstract CompletableFuture<Boolean> moveTo(WorldPosition position, boolean force);
 
     protected abstract void refresh();
 

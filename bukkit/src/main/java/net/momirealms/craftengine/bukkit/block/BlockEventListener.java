@@ -167,6 +167,7 @@ public final class BlockEventListener implements Listener {
                 // Restore sounds in cancelled events
                 else {
                     if (Config.processCancelledBreak()) {
+                        if (BukkitItemUtils.isDebugStick(itemInHand)) return;
                         serverPlayer.playSound(position, state.settings().sounds().breakSound(), SoundSource.BLOCK);
                     }
                 }
@@ -196,6 +197,7 @@ public final class BlockEventListener implements Listener {
             }
             // sound system
             if (Config.enableSoundSystem() && (!event.isCancelled() || Config.processCancelledBreak())) {
+                if (BukkitItemUtils.isDebugStick(itemInHand)) return;
                 Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(blockState);
                 Object soundEvent = FastNMS.INSTANCE.field$SoundType$breakSound(soundType);
                 Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);

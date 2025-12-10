@@ -897,12 +897,17 @@ public class BukkitServerPlayer extends Player {
             Object blockPos = LocationUtils.toBlockPos(hitPos);
             Object serverPlayer = serverPlayer();
 
+            // check item in hand
+            Item<ItemStack> item = this.getItemInHand(InteractionHand.MAIN_HAND);
+
             // send hit sound if the sound is removed
             if (currentTick - this.lastHitBlockTime > 3) {
-                Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(destroyedState);
-                Object soundEvent = FastNMS.INSTANCE.field$SoundType$hitSound(soundType);
-                Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
-                player.playSound(location, soundId.toString(), SoundCategory.BLOCKS, 0.5F, 0.5F);
+                if (!BukkitItemUtils.isDebugStick(item)) {
+                    Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(destroyedState);
+                    Object soundEvent = FastNMS.INSTANCE.field$SoundType$hitSound(soundType);
+                    Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
+                    player.playSound(location, soundId.toString(), SoundCategory.BLOCKS, 0.5F, 0.5F);
+                }
                 this.lastHitBlockTime = currentTick;
             }
 
@@ -911,8 +916,6 @@ public class BukkitServerPlayer extends Player {
                 // prevent server from taking over breaking custom blocks
                 Object gameMode = FastNMS.INSTANCE.field$ServerPlayer$gameMode(serverPlayer);
                 CoreReflections.field$ServerPlayerGameMode$isDestroyingBlock.set(gameMode, false);
-                // check item in hand
-                Item<ItemStack> item = this.getItemInHand(InteractionHand.MAIN_HAND);
                 if (!item.isEmpty()) {
                     Material itemMaterial = item.getItem().getType();
                     // creative mode + invalid item in hand

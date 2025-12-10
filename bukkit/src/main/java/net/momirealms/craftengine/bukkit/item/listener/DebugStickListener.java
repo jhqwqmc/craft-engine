@@ -5,9 +5,9 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkReflections;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.BukkitItemUtils;
 import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
@@ -16,7 +16,6 @@ import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -46,7 +45,7 @@ public class DebugStickListener implements Listener {
         Player bukkitPlayer = event.getPlayer();
         BukkitServerPlayer player = BukkitAdaptors.adapt(bukkitPlayer);
         Item<ItemStack> itemInHand = player.getItemInHand(event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
-        if (!itemInHand.vanillaId().equals(ItemKeys.DEBUG_STICK)) return;
+        if (!BukkitItemUtils.isDebugStick(itemInHand)) return;
         if (!(player.canInstabuild() && player.hasPermission("minecraft.debugstick")) && !player.hasPermission("minecraft.debugstick.always")) {
             return;
         }
@@ -64,47 +63,43 @@ public class DebugStickListener implements Listener {
             CustomBlock block = customState.owner().value();
             Collection<Property<?>> properties = block.properties();
             String blockId = block.id().toString();
-            try {
-                if (properties.isEmpty()) {
-                    Object systemChatPacket = NetworkReflections.constructor$ClientboundSystemChatPacket.newInstance(
-                            ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.empty").arguments(Component.text(blockId))), true);
-                    player.sendPacket(systemChatPacket, false);
-                } else {
-                    Object storedData = itemInHand.getJavaTag("craftengine:debug_stick_state");
-                    if (storedData == null) storedData = new HashMap<>();
-                    if (storedData instanceof Map<?,?> map) {
-                        Map<String, Object> data = new HashMap<>(MiscUtils.castToMap(map, false));
-                        String currentPropertyName = (String) data.get(blockId);
-                        Property<?> currentProperty = block.getProperty(currentPropertyName);
-                        if (currentProperty == null) {
-                            currentProperty = properties.iterator().next();
-                        }
-                        if (update) {
-                            ImmutableBlockState nextState = cycleState(customState, currentProperty, player.isSecondaryUseActive());
-                            CraftEngineBlocks.place(clickedBlock.getLocation(), nextState, new UpdateOption.Builder().updateClients().updateKnownShape().build(), false);
-                            Object systemChatPacket = NetworkReflections.constructor$ClientboundSystemChatPacket.newInstance(
-                                    ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.update")
-                                            .arguments(
-                                                    Component.text(currentProperty.name()),
-                                                    Component.text(getNameHelper(nextState, currentProperty))
-                                            )), true);
-                            player.sendPacket(systemChatPacket, false);
-                        } else {
-                            currentProperty = getRelative(properties, currentProperty, player.isSecondaryUseActive());
-                            data.put(blockId, currentProperty.name());
-                            itemInHand.setTag(data, "craftengine:debug_stick_state");
-                            Object systemChatPacket = NetworkReflections.constructor$ClientboundSystemChatPacket.newInstance(
-                                    ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.select")
-                                            .arguments(
-                                                    Component.text(currentProperty.name()),
-                                                    Component.text(getNameHelper(customState, currentProperty))
-                                            )), true);
-                            player.sendPacket(systemChatPacket, false);
-                        }
+            if (properties.isEmpty()) {
+                Object systemChatPacket = FastNMS.INSTANCE.constructor$ClientboundSystemChatPacket(
+                        ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.empty").arguments(Component.text(blockId))), true);
+                player.sendPacket(systemChatPacket, false);
+            } else {
+                Object storedData = itemInHand.getJavaTag("craftengine:debug_stick_state");
+                if (storedData == null) storedData = new HashMap<>();
+                if (storedData instanceof Map<?,?> map) {
+                    Map<String, Object> data = new HashMap<>(MiscUtils.castToMap(map, false));
+                    String currentPropertyName = (String) data.get(blockId);
+                    Property<?> currentProperty = block.getProperty(currentPropertyName);
+                    if (currentProperty == null) {
+                        currentProperty = properties.iterator().next();
+                    }
+                    if (update) {
+                        ImmutableBlockState nextState = cycleState(customState, currentProperty, player.isSecondaryUseActive());
+                        CraftEngineBlocks.place(clickedBlock.getLocation(), nextState, new UpdateOption.Builder().updateClients().updateKnownShape().build(), false);
+                        Object systemChatPacket = FastNMS.INSTANCE.constructor$ClientboundSystemChatPacket(
+                                ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.update")
+                                        .arguments(
+                                                Component.text(currentProperty.name()),
+                                                Component.text(getNameHelper(nextState, currentProperty))
+                                        )), true);
+                        player.sendPacket(systemChatPacket, false);
+                    } else {
+                        currentProperty = getRelative(properties, currentProperty, player.isSecondaryUseActive());
+                        data.put(blockId, currentProperty.name());
+                        itemInHand.setTag(data, "craftengine:debug_stick_state");
+                        Object systemChatPacket = FastNMS.INSTANCE.constructor$ClientboundSystemChatPacket(
+                                ComponentUtils.adventureToMinecraft(Component.translatable("item.minecraft.debug_stick.select")
+                                        .arguments(
+                                                Component.text(currentProperty.name()),
+                                                Component.text(getNameHelper(customState, currentProperty))
+                                        )), true);
+                        player.sendPacket(systemChatPacket, false);
                     }
                 }
-            } catch (ReflectiveOperationException e) {
-                this.plugin.logger().warn("Failed to send system chat packet", e);
             }
         });
     }
