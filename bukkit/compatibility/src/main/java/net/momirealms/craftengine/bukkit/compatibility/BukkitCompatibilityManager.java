@@ -41,6 +41,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AlwaysFalseCondition;
 import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -364,8 +365,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     }
 
     @Override
-    public int getPlayerProtocolVersion(UUID uuid) {
-        return ViaVersionUtils.getPlayerProtocolVersion(uuid);
+    public int getViaVersionProtocolVersion(NetWorkUser user) {
+        return ViaVersionUtils.getPlayerProtocolVersion(user);
     }
 
     @Override

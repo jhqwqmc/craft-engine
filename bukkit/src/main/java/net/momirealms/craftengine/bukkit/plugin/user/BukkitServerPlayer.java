@@ -42,6 +42,7 @@ import net.momirealms.craftengine.core.plugin.entityculling.EntityCulling;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
+import net.momirealms.craftengine.core.plugin.network.ProtocolVersion;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.*;
@@ -170,6 +171,8 @@ public class BukkitServerPlayer extends Player {
     private double displayEntityViewDistance;
     // 是否是基岩版
     private Tristate isBedrock = Tristate.UNDEFINED;
+    // 客户端协议
+    private ProtocolVersion protocolVersion = ProtocolVersion.UNKNOWN;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1185,6 +1188,16 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void setClientBlockList(IntIdentityList blockList) {
         this.blockList = blockList;
+    }
+
+    @Override
+    public ProtocolVersion protocolVersion() {
+        return this.protocolVersion;
+    }
+
+    @Override
+    public void setProtocolVersion(ProtocolVersion protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     @Override

@@ -4,8 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Context;
-
-import java.util.UUID;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
 public interface CompatibilityManager {
 
@@ -37,7 +36,7 @@ public interface CompatibilityManager {
 
     String parse(Player player1, Player player2, String text);
 
-    int getPlayerProtocolVersion(UUID uuid);
+    int getViaVersionProtocolVersion(NetWorkUser user);
 
     void executeMMSkill(String skill, float power, Player player);
 

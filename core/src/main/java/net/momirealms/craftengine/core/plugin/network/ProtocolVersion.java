@@ -1,33 +1,42 @@
 package net.momirealms.craftengine.core.plugin.network;
 
-public enum ProtocolVersion {
-    UNKNOWN(-1, "Unknown"),
-    V1_20(763, "1.20"),
-    V1_20_1(763, "1.20.1"),
-    V1_20_2(764, "1.20.2"),
-    V1_20_3(765, "1.20.3"),
-    V1_20_4(765, "1.20.4"),
-    V1_20_5(766, "1.20.5"),
-    V1_20_6(766, "1.20.6"),
-    V1_21(767, "1.21"),
-    V1_21_1(767, "1.21.1"),
-    V1_21_2(768, "1.21.2"),
-    V1_21_3(768, "1.21.3"),
-    V1_21_4(769, "1.21.4"),
-    V1_21_5(770, "1.21.5"),
-    V1_21_6(771, "1.21.6"),
-    V1_21_7(772, "1.21.7"),
-    V1_21_8(772, "1.21.8"),
-    V1_21_9(773, "1.21.9"),
-    V1_21_10(773, "1.21.10"),
-    V1_21_11(774, "1.21.11");
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
+import java.util.Map;
+
+public final class ProtocolVersion {
+    public static final ProtocolVersion UNKNOWN = new ProtocolVersion(-1, "Unknown");
+    public static final ProtocolVersion V1_20 = new ProtocolVersion(763, "1.20");
+    public static final ProtocolVersion V1_20_1 = new ProtocolVersion(763, "1.20.1");
+    public static final ProtocolVersion V1_20_2 = new ProtocolVersion(764, "1.20.2");
+    public static final ProtocolVersion V1_20_3 = new ProtocolVersion(765, "1.20.3");
+    public static final ProtocolVersion V1_20_4 = new ProtocolVersion(765, "1.20.4");
+    public static final ProtocolVersion V1_20_5 = new ProtocolVersion(766, "1.20.5");
+    public static final ProtocolVersion V1_20_6 = new ProtocolVersion(766, "1.20.6");
+    public static final ProtocolVersion V1_21 = new ProtocolVersion(767, "1.21");
+    public static final ProtocolVersion V1_21_1 = new ProtocolVersion(767, "1.21.1");
+    public static final ProtocolVersion V1_21_2 = new ProtocolVersion(768, "1.21.2");
+    public static final ProtocolVersion V1_21_3 = new ProtocolVersion(768, "1.21.3");
+    public static final ProtocolVersion V1_21_4 = new ProtocolVersion(769, "1.21.4");
+    public static final ProtocolVersion V1_21_5 = new ProtocolVersion(770, "1.21.5");
+    public static final ProtocolVersion V1_21_6 = new ProtocolVersion(771, "1.21.6");
+    public static final ProtocolVersion V1_21_7 = new ProtocolVersion(772, "1.21.7");
+    public static final ProtocolVersion V1_21_8 = new ProtocolVersion(772, "1.21.8");
+    public static final ProtocolVersion V1_21_9 = new ProtocolVersion(773, "1.21.9");
+    public static final ProtocolVersion V1_21_10 = new ProtocolVersion(773, "1.21.10");
+    public static final ProtocolVersion V1_21_11 = new ProtocolVersion(774, "1.21.11");
+    private static final Map<Integer, ProtocolVersion> BY_ID = new Int2ObjectOpenHashMap<>();
+    private static final Map<String, ProtocolVersion> BY_NAME = new Object2ObjectOpenHashMap<>();
 
     private final int id;
     private final String name;
 
-    ProtocolVersion(int id, String name) {
+    private ProtocolVersion(int id, String name) {
         this.id = id;
         this.name = name;
+        BY_ID.put(id, this);
+        BY_NAME.put(name, this);
     }
 
     public int getId() {
@@ -43,20 +52,18 @@ public enum ProtocolVersion {
     }
 
     public static ProtocolVersion getByName(String name) {
-        for (ProtocolVersion version : values()) {
-            if (version.getName().equals(name)) {
-                return version;
-            }
-        }
-        return UNKNOWN;
+        return BY_NAME.getOrDefault(name, UNKNOWN);
     }
 
     public static ProtocolVersion getById(int id) {
-        for (ProtocolVersion version : values()) {
-            if (version.getId() == id) {
-                return version;
-            }
-        }
-        return UNKNOWN;
+        return BY_ID.getOrDefault(id, UNKNOWN);
+    }
+
+    @Override
+    public String toString() {
+        return "ProtocolVersion{" +
+                "id=" + id +
+                ", name=" + name +
+                '}';
     }
 }
