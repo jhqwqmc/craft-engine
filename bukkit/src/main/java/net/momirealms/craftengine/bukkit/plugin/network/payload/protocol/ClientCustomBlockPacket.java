@@ -13,6 +13,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.paper.PaperReflection
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.RegistryUtils;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.ModPacket;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.network.codec.NetworkCodec;
@@ -75,7 +76,7 @@ public record ClientCustomBlockPacket(int vanillaSize, int currentSize) implemen
                 Object serverLevel = FastNMS.INSTANCE.field$CraftWorld$ServerLevel(((Player) user.platformPlayer()).getWorld());
                 Object lightEngine = CoreReflections.method$BlockAndTintGetter$getLightEngine.invoke(serverLevel);
                 Object chunkSource = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
-                for (long chunkPos : sentChunks) {
+                for (long chunkPos : sentChunks) { // 这里可能出现玄学报错，故将错误打印移动至debug输出
                     int chunkX = (int) chunkPos;
                     int chunkZ = (int) (chunkPos >> 32);
                     Object levelChunk = FastNMS.INSTANCE.method$ServerChunkCache$getChunk(chunkSource, chunkX, chunkZ, false);
@@ -83,7 +84,7 @@ public record ClientCustomBlockPacket(int vanillaSize, int currentSize) implemen
                     user.sendPacket(packet, true);
                 }
             } catch (Exception e) {
-                CraftEngine.instance().logger().warn("Failed to refresh chunk for player " + user.name(), e);
+                Debugger.COMMON.warn(() -> "Failed to refresh chunk for player " + user.name(), e);
             }
         }
     }
