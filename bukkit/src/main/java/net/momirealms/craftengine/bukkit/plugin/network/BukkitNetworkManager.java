@@ -47,9 +47,9 @@ import net.momirealms.craftengine.bukkit.plugin.network.handler.*;
 import net.momirealms.craftengine.bukkit.plugin.network.id.PacketIdHelper;
 import net.momirealms.craftengine.bukkit.plugin.network.id.PacketIds1_20;
 import net.momirealms.craftengine.bukkit.plugin.network.id.PacketIds1_20_5;
-import net.momirealms.craftengine.bukkit.plugin.network.listener.ByteBufferPacketListener;
-import net.momirealms.craftengine.bukkit.plugin.network.listener.ByteBufferPacketListenerHolder;
-import net.momirealms.craftengine.bukkit.plugin.network.listener.NMSPacketListener;
+import net.momirealms.craftengine.core.plugin.network.listener.ByteBufferPacketListener;
+import net.momirealms.craftengine.core.plugin.network.listener.ByteBufferPacketListenerHolder;
+import net.momirealms.craftengine.core.plugin.network.listener.NMSPacketListener;
 import net.momirealms.craftengine.bukkit.plugin.network.payload.DiscardedPayload;
 import net.momirealms.craftengine.bukkit.plugin.network.payload.Payload;
 import net.momirealms.craftengine.bukkit.plugin.network.payload.PayloadHelper;
@@ -134,7 +134,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -143,16 +142,30 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
     private final BukkitCraftEngine plugin;
     private final Map<Class<?>, NMSPacketListener> nmsPacketListeners = new IdentityHashMap<>(128);
 
-    private final ByteBufferPacketListenerHolder[] s2cHandshakingPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.HANDSHAKING)];
-    private final ByteBufferPacketListenerHolder[] c2sHandshakingPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.HANDSHAKING)];
-    private final ByteBufferPacketListenerHolder[] s2cStatusPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.STATUS)];
-    private final ByteBufferPacketListenerHolder[] c2sStatusPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.STATUS)];
-    private final ByteBufferPacketListenerHolder[] s2cLoginPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.LOGIN)];
-    private final ByteBufferPacketListenerHolder[] c2sLoginPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.LOGIN)];
-    private final ByteBufferPacketListenerHolder[] s2cPlayPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.PLAY)];
-    private final ByteBufferPacketListenerHolder[] c2sPlayPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.PLAY)];
-    private final ByteBufferPacketListenerHolder[] s2cConfigurationPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.CONFIGURATION)];
-    private final ByteBufferPacketListenerHolder[] c2sConfigurationPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.CONFIGURATION)];
+    private static final ByteBufferPacketListenerHolder[] s2cHandshakingPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.HANDSHAKING)];
+    private static final ByteBufferPacketListenerHolder[] c2sHandshakingPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.HANDSHAKING)];
+    private static final ByteBufferPacketListenerHolder[] s2cStatusPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.STATUS)];
+    private static final ByteBufferPacketListenerHolder[] c2sStatusPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.STATUS)];
+    private static final ByteBufferPacketListenerHolder[] s2cLoginPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.LOGIN)];
+    private static final ByteBufferPacketListenerHolder[] c2sLoginPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.LOGIN)];
+    private static final ByteBufferPacketListenerHolder[] s2cPlayPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.PLAY)];
+    private static final ByteBufferPacketListenerHolder[] c2sPlayPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.PLAY)];
+    private static final ByteBufferPacketListenerHolder[] s2cConfigurationPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.CLIENTBOUND, ConnectionState.CONFIGURATION)];
+    private static final ByteBufferPacketListenerHolder[] c2sConfigurationPacketListeners = new ByteBufferPacketListenerHolder[PacketIdHelper.count(PacketFlow.SERVERBOUND, ConnectionState.CONFIGURATION)];
+    private final ByteBufferPacketListenerHolder[][] s2cPacketListeners = new ByteBufferPacketListenerHolder[][]{
+            s2cHandshakingPacketListeners,
+            s2cStatusPacketListeners,
+            s2cLoginPacketListeners,
+            s2cPlayPacketListeners,
+            s2cConfigurationPacketListeners
+    };
+    private final ByteBufferPacketListenerHolder[][] c2sPacketListeners = new ByteBufferPacketListenerHolder[][]{
+            c2sHandshakingPacketListeners,
+            c2sStatusPacketListeners,
+            c2sLoginPacketListeners,
+            c2sPlayPacketListeners,
+            c2sConfigurationPacketListeners
+    };
 
     private final TriConsumer<ChannelHandler, Object, Object> packetConsumer;
     private final TriConsumer<ChannelHandler, List<Object>, Object> packetsConsumer;
@@ -233,17 +246,15 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
         // 对安装了 FreedomChat 的用户告警
         if (Bukkit.getPluginManager().getPlugin("FreedomChat") != null) {
-            for (int i = 0; i < 5; i++) {
-                plugin.logger().severe("");
-                if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
-                    plugin.logger().severe("CraftEngine 与 FreedomChat 不兼容，请立刻卸载 FreedomChat");
-                    plugin.logger().severe("同时使用可能会导致物品显示异常或无法正确翻译数据包等情况");
-                } else {
-                    plugin.logger().severe("CraftEngine is incompatible with FreedomChat. Please uninstall FreedomChat immediately.");
-                    plugin.logger().severe("Simultaneous use may result in item display anomalies or failure to correctly translate network packets.");
-                }
-                plugin.logger().severe("");
+            plugin.logger().severe("");
+            if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
+                plugin.logger().severe("CraftEngine 与 FreedomChat 不兼容，请立刻卸载 FreedomChat");
+                plugin.logger().severe("同时使用可能会导致物品显示异常或无法正确翻译数据包等情况");
+            } else {
+                plugin.logger().severe("CraftEngine is incompatible with FreedomChat. Please uninstall FreedomChat immediately.");
+                plugin.logger().severe("Simultaneous use may result in item display anomalies or failure to correctly translate network packets.");
             }
+            plugin.logger().severe("");
         }
     }
 
@@ -521,22 +532,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             user.sendPacket(TotemAnimationCommand.FIX_TOTEM_SOUND_PACKET, false);
             Channel channel = user.nettyChannel();
             if (this.hasAntiPopup && Config.disableChatReport() && channel != null) {
-                removeAntiPopupHandler(channel, 0); // 功能冲突直接移除
+                if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
+                    plugin.logger().warn("CraftEngine 的禁用聊天举报功能和 AntiPopup 冲突，可能会导致 Emoji 解析异常，请卸载 AntiPopup 或关闭禁用聊天举报功能");
+                } else {
+                    plugin.logger().warn("The Disable Chat Report feature conflicts with AntiPopup, potentially causing abnormal emoji parsing.");
+                    plugin.logger().warn("Please uninstall AntiPopup or disable the Disable Chat Report function.");
+                }
             }
         }
-    }
-
-    private void removeAntiPopupHandler(Channel channel, int times) {
-        if (times > 5) {
-            Debugger.COMMON.debug(() -> "antipopup_handler Removed Failed");
-            return;
-        }
-        if (channel.pipeline().get("antipopup_handler") == null) {
-            plugin.scheduler().asyncLater(() -> removeAntiPopupHandler(channel, times + 1), 1, TimeUnit.SECONDS);
-            return;
-        }
-        channel.pipeline().remove("antipopup_handler");
-        Debugger.COMMON.debug(() -> "antipopup_handler Handler Removed (" + times + ")");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -923,7 +926,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int packetId = buf.readVarInt();
             int preIndex = buf.readerIndex();
             try {
-                ByteBufPacketEvent event = ByteBufPacketEvent.create(packetId, buf, preIndex, this.player.encoderState(), PacketFlow.CLIENTBOUND);
+                ByteBufPacketEvent event = new ByteBufPacketEvent(packetId, buf, preIndex);
                 BukkitNetworkManager.this.handleS2CByteBufPacket(this.player, event);
                 if (event.isCancelled()) {
                     buf.clear();
@@ -967,7 +970,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int packetId = buf.readVarInt();
             int preIndex = buf.readerIndex();
             try {
-                ByteBufPacketEvent event = ByteBufPacketEvent.create(packetId, buf, preIndex, this.player.decoderState(), PacketFlow.SERVERBOUND);
+                ByteBufPacketEvent event = new ByteBufPacketEvent(packetId, buf, preIndex);
                 BukkitNetworkManager.this.handleC2SByteBufPacket(this.player, event);
                 if (event.isCancelled()) {
                     buf.clear();
@@ -1022,18 +1025,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     protected void handleS2CByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
-        ByteBufferPacketListenerHolder holder;
-        if (event.state() == ConnectionState.PLAY) {
-            holder = this.s2cPlayPacketListeners[packetID];
-        } else {
-            holder = switch (event.state()) {
-                case HANDSHAKING -> this.s2cHandshakingPacketListeners[packetID];
-                case STATUS -> this.s2cStatusPacketListeners[packetID];
-                case LOGIN -> this.s2cLoginPacketListeners[packetID];
-                case CONFIGURATION -> this.s2cConfigurationPacketListeners[packetID];
-                default -> null;
-            };
-        }
+        ByteBufferPacketListenerHolder holder = s2cPacketListeners[user.encoderState().ordinal()][packetID];
         if (holder != null) {
             try {
                 holder.listener().onPacketSend(user, event);
@@ -1045,18 +1037,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     protected void handleC2SByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
-        ByteBufferPacketListenerHolder holder;
-        if (event.state() == ConnectionState.PLAY) {
-            holder = this.c2sPlayPacketListeners[packetID];
-        } else {
-            holder = switch (event.state()) {
-                case HANDSHAKING -> this.c2sHandshakingPacketListeners[packetID];
-                case STATUS -> this.c2sStatusPacketListeners[packetID];
-                case LOGIN -> this.c2sLoginPacketListeners[packetID];
-                case CONFIGURATION -> this.c2sConfigurationPacketListeners[packetID];
-                default -> null;
-            };
-        }
+        ByteBufferPacketListenerHolder holder = c2sPacketListeners[user.decoderState().ordinal()][packetID];
         if (holder != null) {
             try {
                 holder.listener().onPacketReceive(user, event);

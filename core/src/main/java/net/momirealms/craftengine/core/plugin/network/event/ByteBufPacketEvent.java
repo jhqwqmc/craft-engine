@@ -1,25 +1,19 @@
 package net.momirealms.craftengine.core.plugin.network.event;
 
-import net.momirealms.craftengine.core.plugin.network.ConnectionState;
-import net.momirealms.craftengine.core.plugin.network.PacketFlow;
 import net.momirealms.craftengine.core.util.Cancellable;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 
-public abstract class ByteBufPacketEvent implements Cancellable {
+public class ByteBufPacketEvent implements Cancellable {
     private boolean cancelled;
     private final FriendlyByteBuf buf;
     private boolean changed;
     private final int packetID;
     private final int preIndex;
-    private final ConnectionState state;
-    private final PacketFlow direction;
 
-    protected ByteBufPacketEvent(int packetID, FriendlyByteBuf buf, int preIndex, ConnectionState state, PacketFlow direction) {
+    public ByteBufPacketEvent(int packetID, FriendlyByteBuf buf, int preIndex) {
         this.buf = buf;
         this.packetID = packetID;
         this.preIndex = preIndex;
-        this.state = state;
-        this.direction = direction;
     }
 
     public int packetID() {
@@ -47,23 +41,5 @@ public abstract class ByteBufPacketEvent implements Cancellable {
     @Override
     public void setCancelled(boolean cancel) {
         cancelled = cancel;
-    }
-
-    public ConnectionState state() {
-        return state;
-    }
-
-    public PacketFlow direction() {
-        return direction;
-    }
-
-    public static ByteBufPacketEvent create(int packetID, FriendlyByteBuf buf, int preIndex, ConnectionState state, PacketFlow direction) {
-        return switch (state) {
-            case HANDSHAKING -> new HandshakingByteBufPacketEvent(packetID, buf, preIndex, direction);
-            case STATUS -> new StatusByteBufPacketEvent(packetID, buf, preIndex, direction);
-            case LOGIN -> new LoginByteBufPacketEvent(packetID, buf, preIndex, direction);
-            case PLAY -> new PlayByteBufPacketEvent(packetID, buf, preIndex, direction);
-            case CONFIGURATION -> new ConfigurationByteBufPacketEvent(packetID, buf, preIndex, direction);
-        };
     }
 }
