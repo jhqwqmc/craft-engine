@@ -160,14 +160,6 @@ public class BukkitCraftEngine extends CraftEngine {
         } catch (Exception e) {
             throw new InjectionException("Error initializing ProtectedFieldVisitor", e);
         }
-        // 关闭聊天验证
-        try {
-            Object settings = CoreReflections.field$DedicatedServer$settings.get(FastNMS.INSTANCE.method$MinecraftServer$getServer());
-            Object properties = CoreReflections.field$DedicatedServerSettings$properties.get(settings);
-            CoreReflections.methodHandle$DedicatedServerProperties$enforceSecureProfileSetter.invoke(properties, false);
-        } catch (Throwable e) {
-            throw new InjectionException("Error injecting secure profile", e);
-        }
         // 初始化一些注册表
         super.onPluginLoad();
         BukkitBlockBehaviors.init();

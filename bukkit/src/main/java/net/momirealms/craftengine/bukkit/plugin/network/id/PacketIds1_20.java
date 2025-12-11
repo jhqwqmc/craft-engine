@@ -193,6 +193,11 @@ public class PacketIds1_20 implements PacketIds {
     }
 
     @Override
+    public int clientboundPlayerChatPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundPlayerChatPacket, PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    }
+
+    @Override
     public int clientIntentionPacket() {
         return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientIntentionPacket, PacketFlow.SERVERBOUND, ConnectionState.HANDSHAKING);
     }

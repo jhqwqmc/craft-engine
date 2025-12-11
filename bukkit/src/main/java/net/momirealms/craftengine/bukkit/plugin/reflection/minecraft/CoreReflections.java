@@ -4696,4 +4696,16 @@ public final class CoreReflections {
     public static final MethodHandle methodHandle$DedicatedServerProperties$enforceSecureProfileSetter = requireNonNull(
             ReflectionUtils.unreflectSetter(field$DedicatedServerProperties$enforceSecureProfile)
     ).asType(MethodType.methodType(void.class, Object.class, boolean.class));
+
+    public static final MethodHandle methodHandle$DedicatedServerProperties$enforceSecureProfileGetter;
+
+    static {
+        try {
+            methodHandle$DedicatedServerProperties$enforceSecureProfileGetter = requireNonNull(
+                    ReflectionUtils.unreflectGetter(field$DedicatedServerProperties$enforceSecureProfile)
+            ).asType(MethodType.methodType(boolean.class, Object.class));
+        } catch (IllegalAccessException e) {
+            throw new ReflectionInitException("Failed to init DedicatedServerProperties$enforceSecureProfileGetter", e);
+        }
+    }
 }
