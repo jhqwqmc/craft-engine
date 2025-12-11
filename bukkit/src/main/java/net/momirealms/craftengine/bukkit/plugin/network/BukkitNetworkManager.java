@@ -24,7 +24,6 @@ import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.DataComponentValue;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
@@ -135,12 +134,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class BukkitNetworkManager implements NetworkManager, Listener {
     private static BukkitNetworkManager instance;
-    private static Tristate enforceSecureProfile = Tristate.UNDEFINED;
     private final BukkitCraftEngine plugin;
     private final Map<Class<?>, NMSPacketListener> nmsPacketListeners = new IdentityHashMap<>(128);
 
@@ -175,6 +174,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     private final boolean hasModelEngine;
     private final boolean hasViaVersion;
+    private final boolean hasAntiPopup;
 
     private int[] blockStateRemapper;
     private int[] modBlockStateRemapper;
@@ -184,6 +184,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         Plugin modelEngine = Bukkit.getPluginManager().getPlugin("ModelEngine");
         this.hasModelEngine = modelEngine != null && modelEngine.getPluginMeta().getVersion().startsWith("R4");
         this.hasViaVersion = Bukkit.getPluginManager().getPlugin("ViaVersion") != null;
+        this.hasAntiPopup = Bukkit.getPluginManager().getPlugin("AntiPopup") != null;
         this.plugin = plugin;
         // set up packet id
         this.packetIds = VersionHelper.isOrAbove1_20_5() ? new PacketIds1_20_5() : new PacketIds1_20();
@@ -229,6 +230,20 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         // Inject Leaves bot list
         if (VersionHelper.isLeaves()) {
             this.injectLeavesBotList();
+        }
+        // 对安装了 FreedomChat 的用户告警
+        if (Bukkit.getPluginManager().getPlugin("FreedomChat") != null) {
+            for (int i = 0; i < 5; i++) {
+                plugin.logger().severe("");
+                if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
+                    plugin.logger().severe("CraftEngine 与 FreedomChat 不兼容，请立刻卸载 FreedomChat");
+                    plugin.logger().severe("同时使用可能会导致物品显示异常或无法正确翻译数据包等情况");
+                } else {
+                    plugin.logger().severe("CraftEngine is incompatible with FreedomChat. Please uninstall FreedomChat immediately.");
+                    plugin.logger().severe("Simultaneous use may result in item display anomalies or failure to correctly translate network packets.");
+                }
+                plugin.logger().severe("");
+            }
         }
     }
 
@@ -504,7 +519,24 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         () -> {}, 1, 1);
             }
             user.sendPacket(TotemAnimationCommand.FIX_TOTEM_SOUND_PACKET, false);
+            Channel channel = user.nettyChannel();
+            if (this.hasAntiPopup && Config.disableChatReport() && channel != null) {
+                removeAntiPopupHandler(channel, 0); // 功能冲突直接移除
+            }
         }
+    }
+
+    private void removeAntiPopupHandler(Channel channel, int times) {
+        if (times > 5) {
+            Debugger.COMMON.debug(() -> "antipopup_handler Removed Failed");
+            return;
+        }
+        if (channel.pipeline().get("antipopup_handler") == null) {
+            plugin.scheduler().asyncLater(() -> removeAntiPopupHandler(channel, times + 1), 1, TimeUnit.SECONDS);
+            return;
+        }
+        channel.pipeline().remove("antipopup_handler");
+        Debugger.COMMON.debug(() -> "antipopup_handler Handler Removed (" + times + ")");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -543,13 +575,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         try {
             Object settings = CoreReflections.field$DedicatedServer$settings.get(FastNMS.INSTANCE.method$MinecraftServer$getServer());
             Object properties = CoreReflections.field$DedicatedServerSettings$properties.get(settings);
-            boolean enforceSecureProfile = (boolean) CoreReflections.methodHandle$DedicatedServerProperties$enforceSecureProfileGetter.invoke(properties);
-            if (BukkitNetworkManager.enforceSecureProfile == Tristate.UNDEFINED) {
-                BukkitNetworkManager.enforceSecureProfile = Tristate.of(enforceSecureProfile);
-            }
-            if (BukkitNetworkManager.enforceSecureProfile.asBoolean()) { // 如果启用才修改
-                CoreReflections.methodHandle$DedicatedServerProperties$enforceSecureProfileSetter.invoke(properties, !Config.disableChatReport());
-            }
+            CoreReflections.methodHandle$DedicatedServerProperties$enforceSecureProfileSetter.invoke(properties, false);
         } catch (Throwable e) {
             throw new InjectionException("Error injecting secure profile", e);
         }
@@ -558,12 +584,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
     @Override
     public void init() {
         Bukkit.getPluginManager().registerEvents(this, this.plugin.javaPlugin());
-        updateEnforceSecureProfile();
-    }
-
-    @Override
-    public void load() {
-        updateEnforceSecureProfile();
+        if (Config.disableChatReport()) {
+            updateEnforceSecureProfile();
+        }
     }
 
     @Override
@@ -1574,6 +1597,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 );
             }
             Object chatType = FastNMS.INSTANCE.field$ClientboundPlayerChatPacket$chatType(packet);
+            if (!VersionHelper.isOrAbove1_20_5()) {
+                chatType = FastNMS.INSTANCE.method$ChatType$BoundNetwork$resolve(chatType);
+            }
             Object decorate = FastNMS.INSTANCE.method$ChatType$Bound$decorate(chatType, content);
             if (Config.allowEmojiChat()) {
                 String rawJsonMessage = ComponentUtils.minecraftToJson(decorate);
@@ -2011,7 +2037,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            user.setEncoderState(VersionHelper.isOrAbove1_20_2() ? ConnectionState.CONFIGURATION : ConnectionState.PLAY);
+            if (VersionHelper.isOrAbove1_20_2()) {
+                user.setEncoderState(ConnectionState.CONFIGURATION);
+            } else {
+                user.setConnectionState(ConnectionState.PLAY);
+            }
             GameProfile gameProfile = FastNMS.INSTANCE.field$ClientboundLoginFinishedPacket$gameProfile(packet);
             if (VersionHelper.isOrAbove1_21_9()) {
                 user.setVerifiedName(gameProfile.name());
@@ -2107,8 +2137,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 case 2, 3 -> ConnectionState.LOGIN;
                 default -> null;
             };
-            if (nextState == null) {
-                user.kick(Component.text("Illegal packet", NamedTextColor.RED));
+            if (nextState == null) { // 如果乱发包直接强行断开连接
+                Channel channel = user.nettyChannel();
+                if (channel != null) {
+                    channel.pipeline().disconnect();
+                }
                 return;
             }
             if (BukkitNetworkManager.instance.hasViaVersion) {

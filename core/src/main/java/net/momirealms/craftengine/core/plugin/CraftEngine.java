@@ -163,7 +163,6 @@ public abstract class CraftEngine implements Plugin {
         this.templateManager.reload();
         this.globalVariableManager.reload();
         this.furnitureManager.reload();
-        this.networkManager.reload();
         this.fontManager.reload();
         this.itemManager.reload();
         this.soundManager.reload();

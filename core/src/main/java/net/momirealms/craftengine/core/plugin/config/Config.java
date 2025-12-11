@@ -559,7 +559,9 @@ public class Config {
             image$codepoint_starting_value$overrides = Map.of();
         }
 
-        network$disable_chat_report = config.getBoolean("network.disable-chat-report", true);
+        if (firstTime) {
+            network$disable_chat_report = config.getBoolean("network.disable-chat-report", true);
+        }
         network$disable_item_operations = config.getBoolean("network.disable-item-operations", false);
         network$intercept_packets$system_chat = config.getBoolean("network.intercept-packets.system-chat", true);
         network$intercept_packets$tab_list = config.getBoolean("network.intercept-packets.tab-list", true);

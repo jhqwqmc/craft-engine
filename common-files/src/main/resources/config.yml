@@ -401,6 +401,7 @@ image:
 # Only consider modifying the options below if you need to optimize Netty performance.
 # In most cases, you can improve load handling by increasing the number of Netty threads.
 network:
+  # Requires a restart to apply.
   disable-chat-report: true
   # Disable network operations related to items.
   # This option will disable client-bound-data/material and the functionality of replacing tags in item name and lore.
