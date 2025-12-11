@@ -345,8 +345,8 @@ public class ResolutionMergePackMcMeta implements Resolution {
     public void run(PathContext existing, PathContext conflict) {
         try {
             mergeMcMeta(existing.path(), conflict.path(), AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(this.description)));
-        } catch (IOException e) {
-            CraftEngine.instance().logger().severe("Failed to merge pack.mcmeta when resolving file conflicts", e);
+        } catch (Exception e) {
+            CraftEngine.instance().logger().severe("Failed to merge pack.mcmeta when resolving file conflicts for '" + existing.path()  + "' and '" + conflict.path() + "'", e);
         }
     }
 
