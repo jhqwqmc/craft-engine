@@ -1577,7 +1577,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             Object decorate = FastNMS.INSTANCE.method$ChatType$Bound$decorate(chatType, content);
             if (Config.allowEmojiChat()) {
                 String rawJsonMessage = ComponentUtils.minecraftToJson(decorate);
-                EmojiTextProcessResult result = BukkitFontManager.instance().replaceJsonEmoji(rawJsonMessage, (BukkitServerPlayer) user);
+                UUID sender = FastNMS.INSTANCE.field$ClientboundPlayerChatPacket$sender(packet);
+                @Nullable BukkitServerPlayer chatSender = BukkitNetworkManager.instance.onlineUsers.get(sender);
+                EmojiTextProcessResult result = BukkitFontManager.instance().replaceJsonEmoji(rawJsonMessage, chatSender);
                 if (result.replaced()) {
                     decorate = ComponentUtils.jsonToMinecraft(result.text());
                 }
