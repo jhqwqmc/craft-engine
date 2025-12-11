@@ -560,7 +560,7 @@ public class Config {
         }
 
         if (firstTime) {
-            network$disable_chat_report = config.getBoolean("network.disable-chat-report", true);
+            network$disable_chat_report = config.getBoolean("network.disable-chat-report", false);
         }
         network$disable_item_operations = config.getBoolean("network.disable-item-operations", false);
         network$intercept_packets$system_chat = config.getBoolean("network.intercept-packets.system-chat", true);
