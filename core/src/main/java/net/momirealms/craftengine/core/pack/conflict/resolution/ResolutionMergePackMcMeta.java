@@ -52,8 +52,8 @@ public class ResolutionMergePackMcMeta implements Resolution {
             }
 
             if (mcmeta1Pack.has("min_format") || mcmeta2Pack.has("min_format")) {
-                int[] minFormat1 = new int[]{Integer.MAX_VALUE, 0};
-                int[] minFormat2 = new int[]{Integer.MAX_VALUE, 0};
+                int[] minFormat1 = new int[]{1000, 15};
+                int[] minFormat2 = new int[]{1000, 15};
 
                 if (mcmeta1Pack.has("min_format")) {
                     JsonElement minFormat = mcmeta1Pack.get("min_format");
@@ -62,9 +62,13 @@ public class ResolutionMergePackMcMeta implements Resolution {
                     }
                     if (minFormat.isJsonArray()) {
                         JsonArray minFormatArray = minFormat.getAsJsonArray();
-                        minFormat1[0] = minFormatArray.get(0).getAsInt();
-                        if (minFormatArray.size() > 1) {
-                            minFormat1[1] = minFormatArray.get(1).getAsInt();
+                        if (!minFormatArray.isEmpty()) {
+                            if (minFormatArray.get(0) instanceof JsonPrimitive jp0) {
+                                minFormat1[0] = jp0.getAsInt();
+                            }
+                            if (minFormatArray.size() > 1 && minFormatArray.get(1) instanceof JsonPrimitive jp1) {
+                                minFormat1[1] = jp1.getAsInt();
+                            }
                         }
                     }
                 }
@@ -74,11 +78,15 @@ public class ResolutionMergePackMcMeta implements Resolution {
                     if (minFormat.isJsonPrimitive()) {
                         minFormat2[0] = minFormat.getAsInt();
                     }
-                    if (mcmeta2Pack.isJsonArray()) {
+                    if (minFormat.isJsonArray()) {
                         JsonArray minFormatArray = minFormat.getAsJsonArray();
-                        minFormat2[0] = minFormatArray.get(0).getAsInt();
-                        if (minFormatArray.size() > 1) {
-                            minFormat2[1] = minFormatArray.get(1).getAsInt();
+                        if (!minFormatArray.isEmpty()) {
+                            if (minFormatArray.get(0) instanceof JsonPrimitive jp0) {
+                                minFormat2[0] = jp0.getAsInt();
+                            }
+                            if (minFormatArray.size() > 1 && minFormatArray.get(1) instanceof JsonPrimitive jp1) {
+                                minFormat2[1] = jp1.getAsInt();
+                            }
                         }
                     }
                 }
@@ -100,9 +108,13 @@ public class ResolutionMergePackMcMeta implements Resolution {
                     }
                     if (maxFormat.isJsonArray()) {
                         JsonArray maxFormatArray = maxFormat.getAsJsonArray();
-                        maxFormat1[0] = maxFormatArray.get(0).getAsInt();
-                        if (maxFormatArray.size() > 1) {
-                            maxFormat1[1] = maxFormatArray.get(1).getAsInt();
+                        if (!maxFormatArray.isEmpty()) {
+                            if (maxFormatArray.get(0) instanceof JsonPrimitive jp0) {
+                                maxFormat1[0] = jp0.getAsInt();
+                            }
+                            if (maxFormatArray.size() > 1 && maxFormatArray.get(1) instanceof JsonPrimitive jp1) {
+                                maxFormat1[1] = jp1.getAsInt();
+                            }
                         }
                     }
                 }
@@ -114,9 +126,13 @@ public class ResolutionMergePackMcMeta implements Resolution {
                     }
                     if (maxFormat.isJsonArray()) {
                         JsonArray maxFormatArray = maxFormat.getAsJsonArray();
-                        maxFormat2[0] = maxFormatArray.get(0).getAsInt();
-                        if (maxFormatArray.size() > 1) {
-                            maxFormat2[1] = maxFormatArray.get(1).getAsInt();
+                        if (!maxFormatArray.isEmpty()) {
+                            if (maxFormatArray.get(0) instanceof JsonPrimitive jp0) {
+                                maxFormat2[0] = jp0.getAsInt();
+                            }
+                            if (maxFormatArray.size() > 1 && maxFormatArray.get(1) instanceof JsonPrimitive jp1) {
+                                maxFormat2[1] = jp1.getAsInt();
+                            }
                         }
                     }
                 }

@@ -579,9 +579,10 @@ client-optimization:
 # Enables or disables debug mode
 debug:
   common: false
-  packet: false
   furniture: false
   item: false
   resource-pack: false
   block: false
   entity-culling: false
+  packet: false
+  ignored-packets: []

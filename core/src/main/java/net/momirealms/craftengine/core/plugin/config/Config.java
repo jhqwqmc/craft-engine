@@ -56,6 +56,7 @@ public class Config {
     protected boolean debug$resource_pack;
     protected boolean debug$block;
     protected boolean debug$entity_culling;
+    protected Set<String> debug$ignored_packets;
 
     protected boolean resource_pack$remove_tinted_leaves_particle;
     protected boolean resource_pack$generate_mod_assets;
@@ -323,6 +324,7 @@ public class Config {
         debug$resource_pack = config.getBoolean("debug.resource-pack", false);
         debug$block = config.getBoolean("debug.block", false);
         debug$entity_culling = config.getBoolean("debug.entity-culling", false);
+        debug$ignored_packets = new HashSet<>(config.getStringList("debug.ignored-packets"));
 
         // resource pack
         resource_pack$path = resolvePath(config.getString("resource-pack.path", "./generated/resource_pack.zip"));
@@ -1226,6 +1228,10 @@ public class Config {
 
     public static boolean entityCullingRayTracing() {
         return instance.client_optimization$entity_culling$ray_tracing;
+    }
+
+    public static boolean isPacketIgnored(Class<?> clazz) {
+        return instance.debug$ignored_packets.contains(clazz.toString());
     }
 
     public static boolean enableBedrockEditionSupport() {
