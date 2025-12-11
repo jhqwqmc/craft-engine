@@ -1561,7 +1561,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            if (!Config.interceptPlayerChat() || !Config.disableChatReport()) {
+            if (!Config.disableChatReport()) {
                 return;
             }
             event.setCancelled(true);
