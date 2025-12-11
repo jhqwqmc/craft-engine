@@ -190,6 +190,7 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
 
     private void press(Object thisBlock, ImmutableBlockState state, Object level, Object pos, @Nullable Object player) {
         FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, state.with(this.poweredProperty, true).customBlockState().literalObject(), UpdateOption.UPDATE_ALL.flags());
+        this.updateNeighbours(thisBlock, state, level, pos);
         FastNMS.INSTANCE.method$ScheduledTickAccess$scheduleBlockTick(level, pos, thisBlock, this.ticksToStayPressed);
         playSound(level, pos, true);
         Object gameEvent = VersionHelper.isOrAbove1_20_5() ? FastNMS.INSTANCE.method$Holder$direct(MGameEvents.BLOCK_ACTIVATE) : MGameEvents.BLOCK_ACTIVATE;
