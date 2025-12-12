@@ -985,7 +985,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
     }
 
     private void onNMSPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
-        Debugger.PACKET.debug(() -> "[C->S]" + packet.getClass());
+        Debugger.PACKET.debug(() -> {
+            if (Config.isPacketIgnored(packet.getClass())) {
+                return null;
+            }
+            return "[C->S]" + packet.getClass();
+        });
         handleReceiveNMSPacket(user, event, packet);
     }
 
@@ -996,7 +1001,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 onNMSPacketSend(player, event, p);
             }
         } else {
-            Debugger.PACKET.debug(() -> "[S->C]" + packet.getClass());
+            Debugger.PACKET.debug(() -> {
+                if (Config.isPacketIgnored(packet.getClass())) {
+                    return null;
+                }
+                return "[S->C]" + packet.getClass();
+            });
             handleSendNMSPacket(player, event, packet);
         }
     }
