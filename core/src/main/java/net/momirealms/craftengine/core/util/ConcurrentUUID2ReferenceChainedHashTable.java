@@ -6,7 +6,10 @@
  */
 package net.momirealms.craftengine.core.util;
 
-import ca.spottedleaf.concurrentutil.util.*;
+import ca.spottedleaf.concurrentutil.util.ConcurrentUtil;
+import ca.spottedleaf.concurrentutil.util.HashUtil;
+import ca.spottedleaf.concurrentutil.util.IntegerUtil;
+import ca.spottedleaf.concurrentutil.util.ThrowUtil;
 
 import java.lang.invoke.VarHandle;
 import java.util.*;

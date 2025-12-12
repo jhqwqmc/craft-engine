@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.compatibility.viaversion;
 
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.api.connection.ProtocolInfo;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.bukkit.handlers.BukkitEncodeHandler;
 import io.netty.channel.ChannelHandler;

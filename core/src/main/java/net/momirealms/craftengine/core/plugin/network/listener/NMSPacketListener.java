@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.plugin.network.listener;
 
-import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
+import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
 
 public interface NMSPacketListener {
 
