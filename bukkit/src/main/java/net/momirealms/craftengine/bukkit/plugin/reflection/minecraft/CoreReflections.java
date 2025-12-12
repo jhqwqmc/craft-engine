@@ -4675,4 +4675,20 @@ public final class CoreReflections {
             throw new ReflectionInitException("Failed to init ArmorStand", e);
         }
     }
+
+    public static final Field field$DedicatedServerProperties$enforceSecureProfile = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$DedicatedServerProperties, VersionHelper.isOrAbove1_21_11() ? new String[]{"enforceSecureProfile", "ag"}
+                            : VersionHelper.isOrAbove1_21_9() ? new String[]{"enforceSecureProfile", "af"}
+                            : VersionHelper.isOrAbove1_21_2() ? new String[]{"enforceSecureProfile", "X"}
+                            : VersionHelper.isOrAbove1_21() ? new String[]{"enforceSecureProfile", "Y"}
+                            : VersionHelper.isOrAbove1_20_5() ? new String[]{"enforceSecureProfile", "X"}
+                            : new String[]{"enforceSecureProfile", "W"}
+            )
+    );
+
+    public static final MethodHandle methodHandle$DedicatedServerProperties$enforceSecureProfileSetter = requireNonNull(
+            ReflectionUtils.unreflectSetter(field$DedicatedServerProperties$enforceSecureProfile)
+    ).asType(MethodType.methodType(void.class, Object.class, boolean.class));
+
 }

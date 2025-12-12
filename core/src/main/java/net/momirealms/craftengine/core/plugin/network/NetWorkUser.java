@@ -100,4 +100,14 @@ public interface NetWorkUser {
     IntIdentityList clientBlockList();
 
     void setClientBlockList(IntIdentityList integers);
+
+    ProtocolVersion protocolVersion();
+
+    void setProtocolVersion(ProtocolVersion protocolVersion);
+
+    void setConnectionState(ConnectionState connectionState);
+
+    void setDecoderState(ConnectionState decoderState);
+
+    void setEncoderState(ConnectionState encoderState);
 }

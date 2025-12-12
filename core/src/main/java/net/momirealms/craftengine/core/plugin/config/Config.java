@@ -184,6 +184,7 @@ public class Config {
     protected boolean network$intercept_packets$advancement;
     protected boolean network$intercept_packets$player_chat;
     protected boolean network$disable_item_operations;
+    protected boolean network$disable_chat_report;
 
     protected boolean item$client_bound_model;
     protected boolean item$non_italic_tag;
@@ -560,6 +561,9 @@ public class Config {
             image$codepoint_starting_value$overrides = Map.of();
         }
 
+        if (firstTime) {
+            network$disable_chat_report = config.getBoolean("network.disable-chat-report", false);
+        }
         network$disable_item_operations = config.getBoolean("network.disable-item-operations", false);
         network$intercept_packets$system_chat = config.getBoolean("network.intercept-packets.system-chat", true);
         network$intercept_packets$tab_list = config.getBoolean("network.intercept-packets.tab-list", true);
@@ -976,6 +980,10 @@ public class Config {
             id = 4;
         }
         return id;
+    }
+
+    public static boolean disableChatReport() {
+        return instance.network$disable_chat_report;
     }
 
     public static boolean disableItemOperations() {

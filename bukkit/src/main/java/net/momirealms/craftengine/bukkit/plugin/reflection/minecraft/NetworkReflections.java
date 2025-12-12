@@ -1743,4 +1743,73 @@ public final class NetworkReflections {
                     BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundPlayerChatPacket")
             )
     );
+
+    // 1.20.5+
+    public static final Field field$ClientboundLoginPacket$enforcesSecureChat = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ClientboundLoginPacket, boolean.class, 4
+            ),
+            VersionHelper.isOrAbove1_20_5()
+    );
+
+    // 1.20.5+
+    public static final MethodHandle methodHandle$ClientboundLoginPacket$enforcesSecureChatSetter = Optional.ofNullable(field$ClientboundLoginPacket$enforcesSecureChat)
+            .map(it -> requireNonNull(ReflectionUtils.unreflectSetter(it)).asType(MethodType.methodType(void.class, Object.class, boolean.class)))
+            .orElse(null);
+
+    public static final Class<?> clazz$ClientboundStatusResponsePacket = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "network.protocol.status.PacketStatusOutServerInfo",
+                    "network.protocol.status.ClientboundStatusResponsePacket"
+            )
+    );
+
+    public static final Class<?> clazz$ClientboundServerDataPacket = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundServerDataPacket")
+            )
+    );
+
+    // 1.20~1.20.4
+    public static final Field field$ClientboundServerDataPacket$enforcesSecureChat = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ClientboundServerDataPacket, boolean.class, 0
+            ),
+            !VersionHelper.isOrAbove1_20_5()
+    );
+
+    // 1.20~1.20.4
+    public static final MethodHandle methodHandle$ClientboundServerDataPacket$enforcesSecureChatSetter = Optional.ofNullable(field$ClientboundServerDataPacket$enforcesSecureChat)
+            .map(it -> requireNonNull(ReflectionUtils.unreflectSetter(it)).asType(MethodType.methodType(void.class, Object.class, boolean.class)))
+            .orElse(null);
+
+    public static final Class<?> clazz$ServerboundChatSessionUpdatePacket = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ServerboundChatSessionUpdatePacket")
+            )
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerboundConfigurationAcknowledgedPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ServerboundConfigurationAcknowledgedPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerboundFinishConfigurationPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.configuration.ServerboundFinishConfigurationPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ClientboundStartConfigurationPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundStartConfigurationPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
 }

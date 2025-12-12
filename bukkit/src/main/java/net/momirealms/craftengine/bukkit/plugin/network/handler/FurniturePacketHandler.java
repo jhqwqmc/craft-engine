@@ -3,7 +3,7 @@ package net.momirealms.craftengine.bukkit.plugin.network.handler;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
-import net.momirealms.craftengine.core.plugin.network.NMSPacketEvent;
+import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
 public class FurniturePacketHandler implements EntityPacketHandler {

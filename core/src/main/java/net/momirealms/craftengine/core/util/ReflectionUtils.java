@@ -13,15 +13,28 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ReflectionUtils {
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-
     public static final Unsafe UNSAFE;
+    public static final MethodHandles.Lookup LOOKUP;
+    private static final MethodHandle methodHandle$MethodHandleNatives$refKindIsSetter;
+    private static final MethodHandle methodHandle$constructor$MemberName;
+    private static final MethodHandle methodHandle$MemberName$getReferenceKind;
+    private static final MethodHandle methodHandle$MethodHandles$Lookup$getDirectField;
 
     static {
         try {
             Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
             UNSAFE = (Unsafe) unsafeField.get(null);
+            Field implLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+            @SuppressWarnings("deprecation") Object base = UNSAFE.staticFieldBase(implLookup);
+            @SuppressWarnings("deprecation") long offset = UNSAFE.staticFieldOffset(implLookup);
+            LOOKUP = (MethodHandles.Lookup) UNSAFE.getObject(base, offset); // 获取神权lookup
+            Class<?> clazz$MethodHandleNatives = Class.forName("java.lang.invoke.MethodHandleNatives");
+            Class<?> clazz$MemberName = Class.forName("java.lang.invoke.MemberName");
+            methodHandle$MethodHandleNatives$refKindIsSetter = LOOKUP.unreflect(clazz$MethodHandleNatives.getDeclaredMethod("refKindIsSetter", byte.class));
+            methodHandle$constructor$MemberName = LOOKUP.unreflectConstructor(clazz$MemberName.getDeclaredConstructor(Field.class, boolean.class));
+            methodHandle$MemberName$getReferenceKind = LOOKUP.unreflect(clazz$MemberName.getDeclaredMethod("getReferenceKind"));
+            methodHandle$MethodHandles$Lookup$getDirectField = LOOKUP.unreflect(MethodHandles.Lookup.class.getDeclaredMethod("getDirectField", byte.class, Class.class, clazz$MemberName));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -510,12 +523,19 @@ public class ReflectionUtils {
         }
     }
 
-    public static MethodHandle unreflectSetter(Field field) throws IllegalAccessException {
+    @Nullable
+    public static MethodHandle unreflectSetter(Field field) {
         try {
             return LOOKUP.unreflectSetter(field);
         } catch (IllegalAccessException e) {
-            field.setAccessible(true);
-            return LOOKUP.unreflectSetter(field);
+            try { // 绕过final限制获取方法句柄
+                Object memberName = methodHandle$constructor$MemberName.invoke(field, true);
+                Object refKind = methodHandle$MemberName$getReferenceKind.invoke(memberName);
+                methodHandle$MethodHandleNatives$refKindIsSetter.invoke(refKind);
+                return (MethodHandle) methodHandle$MethodHandles$Lookup$getDirectField.invoke(LOOKUP, refKind, field.getDeclaringClass(), memberName);
+            } catch (Throwable ex) {
+                return null;
+            }
         }
     }
 

@@ -148,7 +148,7 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
             updateNeighbours(thisBlock, blockState, level, pos);
             playSound(level, pos, on);
             Object gameEvent = VersionHelper.isOrAbove1_20_5()
-                    ? FastNMS.INSTANCE.method$Holder$direct(on ? MGameEvents.BLOCK_ACTIVATE : MGameEvents.BLOCK_DEACTIVATE)
+                    ? on ? MGameEvents.BLOCK_ACTIVATE$holder : MGameEvents.BLOCK_DEACTIVATE$holder
                     : on ? MGameEvents.BLOCK_ACTIVATE : MGameEvents.BLOCK_DEACTIVATE;
             FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, arrow, gameEvent, pos);
         }
@@ -193,7 +193,7 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
         this.updateNeighbours(thisBlock, state, level, pos);
         FastNMS.INSTANCE.method$ScheduledTickAccess$scheduleBlockTick(level, pos, thisBlock, this.ticksToStayPressed);
         playSound(level, pos, true);
-        Object gameEvent = VersionHelper.isOrAbove1_20_5() ? FastNMS.INSTANCE.method$Holder$direct(MGameEvents.BLOCK_ACTIVATE) : MGameEvents.BLOCK_ACTIVATE;
+        Object gameEvent = VersionHelper.isOrAbove1_20_5() ? MGameEvents.BLOCK_ACTIVATE$holder : MGameEvents.BLOCK_ACTIVATE;
         FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, player, gameEvent, pos);
     }
 

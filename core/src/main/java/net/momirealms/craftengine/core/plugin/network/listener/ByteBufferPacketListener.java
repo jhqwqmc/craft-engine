@@ -1,6 +1,6 @@
-package net.momirealms.craftengine.bukkit.plugin.network.listener;
+package net.momirealms.craftengine.core.plugin.network.listener;
 
-import net.momirealms.craftengine.core.plugin.network.ByteBufPacketEvent;
+import net.momirealms.craftengine.core.plugin.network.event.ByteBufPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
 public interface ByteBufferPacketListener {

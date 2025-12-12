@@ -30,6 +30,8 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-nms-helper:${rootProject.properties["nms_helper_version"]}")
     // Platform
     compileOnly("io.papermc.paper:paper-api:${rootProject.properties["paper_version"]}-R0.1-SNAPSHOT")
+    // Netty
+    compileOnly("io.netty:netty-all:${rootProject.properties["netty_version"]}")
     // NeigeItems
     compileOnly("pers.neige.neigeitems:NeigeItems:1.21.42")
     // Placeholder
@@ -49,7 +51,8 @@ dependencies {
     // LuckPerms
     compileOnly("net.luckperms:api:5.4")
     // viaversion
-    compileOnly("com.viaversion:viaversion-api:5.3.2")
+    compileOnly("com.viaversion:viaversion-api:5.5.1")
+    compileOnly("com.viaversion:viaversion-bukkit:5.5.1")
     // Skript
     compileOnly("com.github.SkriptLang:Skript:2.11.0")
     // AuraSkills

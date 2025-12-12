@@ -1,6 +1,6 @@
 package net.momirealms.craftengine.core.plugin.network;
 
 public enum PacketFlow {
-    SERVERBOUND,
-    CLIENTBOUND;
+    SERVERBOUND, // c2s
+    CLIENTBOUND; // s2c
 }
