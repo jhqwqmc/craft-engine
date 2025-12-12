@@ -66,7 +66,7 @@ public final class CoreReflections {
     
     public static final Class<?> clazz$ResourceLocation = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("resources.MinecraftKey", "resources.Identifier"),  // todo 确认 spigot 映射命名
+                    List.of("resources.MinecraftKey"),
                     List.of("resources.ResourceLocation", "resources.Identifier")
             )
     );
@@ -2956,7 +2956,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$AbstractArrow = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("world.entity.projectile.EntityArrow", "world.entity.projectile.arrow.AbstractArrow"),  // todo 确认 spigot 映射命名
+                    List.of("world.entity.projectile.EntityArrow", "world.entity.projectile.arrow.EntityArrow"),
                     List.of("world.entity.projectile.AbstractArrow", "world.entity.projectile.arrow.AbstractArrow")
             )
     );
@@ -2995,7 +2995,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$AbstractArrow$Pickup = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("world.entity.projectile.EntityArrow$PickupStatus", "world.entity.projectile.arrow.AbstractArrow$a"), // todo 确认 spigot 映射命名
+                    List.of("world.entity.projectile.EntityArrow$PickupStatus", "world.entity.projectile.arrow.EntityArrow$PickupStatus"),
                     List.of("world.entity.projectile.AbstractArrow$Pickup", "world.entity.projectile.arrow.AbstractArrow$Pickup")
             )
     );
@@ -4405,7 +4405,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$ImpossibleTrigger = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("advancements.critereon.CriterionTriggerImpossible", "advancements.criterion.CriterionTriggerImpossible"),  // todo 确认 spigot 映射命名
+                    List.of("advancements.critereon.CriterionTriggerImpossible", "advancements.criterion.CriterionTriggerImpossible"),
                     List.of("advancements.critereon.ImpossibleTrigger", "advancements.criterion.ImpossibleTrigger")
             )
     );
@@ -4416,7 +4416,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$ImpossibleTrigger$TriggerInstance = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("advancements.critereon.CriterionTriggerImpossible$a", "advancements.criterion.CriterionTriggerImpossible$a"),  // todo 确认 spigot 映射命名
+                    List.of("advancements.critereon.CriterionTriggerImpossible$a", "advancements.criterion.CriterionTriggerImpossible$a"),
                     List.of("advancements.critereon.ImpossibleTrigger$TriggerInstance", "advancements.criterion.ImpossibleTrigger$TriggerInstance")
             )
     );
