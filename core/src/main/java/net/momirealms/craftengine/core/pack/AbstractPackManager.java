@@ -1,6 +1,8 @@
 package net.momirealms.craftengine.core.pack;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -11,6 +13,8 @@ import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
+import net.momirealms.craftengine.core.pack.atlas.Atlas;
+import net.momirealms.craftengine.core.pack.atlas.TexturedModel;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionConditional;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
@@ -76,6 +80,8 @@ public abstract class AbstractPackManager implements PackManager {
     public static final Map<Key, JsonObject> PRESET_LEGACY_MODELS_ITEM = new HashMap<>();
     // 全版本的方块模型
     public static final Map<Key, JsonObject> PRESET_MODELS_BLOCK = new HashMap<>();
+    // 全版本全模型
+    public static final Map<Key, TexturedModel> PRESET_MODELS = new HashMap<>();
     // 1.21.4+物品模型定义
     public static final Map<Key, ModernItemModel> PRESET_ITEMS = new HashMap<>();
 
@@ -188,9 +194,11 @@ public abstract class AbstractPackManager implements PackManager {
         loadInternalData("internal/models/item/_all.json", ((key, jsonObject) -> {
             PRESET_MODERN_MODELS_ITEM.put(key, jsonObject);
             VANILLA_MODELS.add(Key.of(key.namespace(), "item/" + key.value()));
+            PRESET_MODELS.put(Key.of(key.namespace(), "item/" + key.value()), new TexturedModel(jsonObject));
         }));
         loadInternalData("internal/models/block/_all.json", ((key, jsonObject) -> {
             PRESET_MODELS_BLOCK.put(key, jsonObject);
+            PRESET_MODELS.put(Key.of(key.namespace(), "block/" + key.value()), new TexturedModel(jsonObject));
             Key modelKey = Key.of(key.namespace(), "block/" + key.value());
             VANILLA_MODELS.add(modelKey);
             VANILLA_BLOCK_MODELS.add(modelKey);
@@ -1239,101 +1247,48 @@ public abstract class AbstractPackManager implements PackManager {
         Multimap<Key, Key> textureToModels = ArrayListMultimap.create(); // 纹理到模型的映射
         Multimap<Key, Key> textureToEquipments = ArrayListMultimap.create(); // 纹理到盔甲的映射
         Multimap<Key, Key> oggToSoundEvents = ArrayListMultimap.create(); // 音频到声音的映射
-        Set<Key> collectedModels = new HashSet<>();
 
-        Set<Key> existingBlockTextures = new HashSet<>(VANILLA_TEXTURES);
-        Set<Key> existingItemTextures = new HashSet<>(VANILLA_TEXTURES);
-        Set<Key> blockTexturesInAtlas = new HashSet<>();
-        Set<Key> itemTexturesInAtlas = new HashSet<>();
-        Map<String, String> blockDirectoryMapper = new HashMap<>();
-        Map<String, String> itemDirectoryMapper = new HashMap<>();
-
-        // block atlas可以被item和block同时使用
-        processAtlas(
-                this.vanillaBlockAtlas,
-                (prefix, source) -> {
-                    itemDirectoryMapper.put(prefix, source);
-                    blockDirectoryMapper.put(source, prefix);
-                },
-                k -> {
-                    existingBlockTextures.add(k);
-                    existingItemTextures.add(k);
-                },
-                k -> {
-                    blockTexturesInAtlas.add(k);
-                    itemTexturesInAtlas.add(k);
-                }
-        );
-        // item atlas侧重于物品
-        processAtlas(
-                this.vanillaItemAtlas,
-                itemDirectoryMapper::put,
-                existingItemTextures::add,
-                itemTexturesInAtlas::add
-        );
-
-        Map<Path, JsonObject> blockAtlas = new HashMap<>();
-        Map<Path, JsonObject> itemAtlas = new HashMap<>();
+        Map<Path, JsonObject> blockAtlasJsons = new HashMap<>();
+        Map<Path, JsonObject> itemAtlasJsons = new HashMap<>();
 
         // 如果需要验证资源包，则需要先读取所有atlas
-        if (Config.validateResourcePack()) {
-            for (Path rootPath : rootPaths) {
-                Path blockAtlasFile = rootPath
-                        .resolve("assets")
-                        .resolve("minecraft")
-                        .resolve("atlases")
-                        .resolve("blocks.json");
-                if (Files.exists(blockAtlasFile)) {
-                    try {
-                        JsonObject atlasJsonObject = GsonHelper.readJsonFile(blockAtlasFile).getAsJsonObject();
-                        processAtlas(
-                                atlasJsonObject,
-                                (prefix, source) -> {
-                                    itemDirectoryMapper.put(prefix, source);
-                                    blockDirectoryMapper.put(source, prefix);
-                                },
-                                k -> {
-                                    existingBlockTextures.add(k);
-                                    existingItemTextures.add(k);
-                                },
-                                k -> {
-                                    blockTexturesInAtlas.add(k);
-                                    itemTexturesInAtlas.add(k);
-                                }
-                        );
-                        blockAtlas.put(blockAtlasFile, atlasJsonObject);
-                    } catch (IOException | JsonParseException e) {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", blockAtlasFile.toAbsolutePath().toString());
-                    }
-                }
-                Path itemAtlasFile = rootPath
-                        .resolve("assets")
-                        .resolve("minecraft")
-                        .resolve("atlases")
-                        .resolve("items.json");
-                if (Files.exists(itemAtlasFile)) {
-                    try {
-                        JsonObject atlasJsonObject = GsonHelper.readJsonFile(itemAtlasFile).getAsJsonObject();
-                        processAtlas(
-                                atlasJsonObject,
-                                itemDirectoryMapper::put,
-                                existingItemTextures::add,
-                                itemTexturesInAtlas::add
-                        );
-                        itemAtlas.put(itemAtlasFile, atlasJsonObject);
-                    } catch (IOException | JsonParseException e) {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", itemAtlasFile.toAbsolutePath().toString());
-                    }
+        for (Path rootPath : rootPaths) {
+            Path blockAtlasFile = rootPath
+                    .resolve("assets")
+                    .resolve("minecraft")
+                    .resolve("atlases")
+                    .resolve("blocks.json");
+            if (Files.exists(blockAtlasFile)) {
+                try {
+                    JsonObject atlasJsonObject = GsonHelper.readJsonFile(blockAtlasFile).getAsJsonObject();
+                    blockAtlasJsons.put(blockAtlasFile, atlasJsonObject);
+                } catch (IOException | JsonParseException e) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", blockAtlasFile.toAbsolutePath().toString());
                 }
             }
-            Path defaultBlockAtlas = path.resolve("assets").resolve("minecraft").resolve("atlases").resolve("blocks.json");
-            if (!blockAtlas.containsKey(defaultBlockAtlas)) {
-                blockAtlas.put(defaultBlockAtlas, new JsonObject());
+            Path itemAtlasFile = rootPath
+                    .resolve("assets")
+                    .resolve("minecraft")
+                    .resolve("atlases")
+                    .resolve("items.json");
+            if (Files.exists(itemAtlasFile)) {
+                try {
+                    JsonObject atlasJsonObject = GsonHelper.readJsonFile(itemAtlasFile).getAsJsonObject();
+                    itemAtlasJsons.put(itemAtlasFile, atlasJsonObject);
+                } catch (IOException | JsonParseException e) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", itemAtlasFile.toAbsolutePath().toString());
+                }
             }
-            Path defaultItemAtlas = path.resolve("assets").resolve("minecraft").resolve("atlases").resolve("items.json");
-            if (!itemAtlas.containsKey(defaultItemAtlas)) {
-                itemAtlas.put(defaultItemAtlas, new JsonObject());
-            }
+        }
+
+        // 添加必要的基础atlas路径，方便后续修复
+        Path defaultBlockAtlas = path.resolve("assets").resolve("minecraft").resolve("atlases").resolve("blocks.json");
+        if (!blockAtlasJsons.containsKey(defaultBlockAtlas)) {
+            blockAtlasJsons.put(defaultBlockAtlas, new JsonObject());
+        }
+        Path defaultItemAtlas = path.resolve("assets").resolve("minecraft").resolve("atlases").resolve("items.json");
+        if (!itemAtlasJsons.containsKey(defaultItemAtlas)) {
+            itemAtlasJsons.put(defaultItemAtlas, new JsonObject());
         }
 
         for (Path rootPath : rootPaths) {
@@ -1554,41 +1509,48 @@ public abstract class AbstractPackManager implements PackManager {
             TranslationManager.instance().log("warning.config.resource_pack.generation.missing_sound", entry.getValue().stream().distinct().toList().toString(), oggPath);
         }
 
-        // 验证方块模型是否存在，验证的同时去收集贴图
+        /*
+
+
+        构建Atlas文件
+
+
+         */
+        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+            k.addAll(blockAtlasJsons.values());
+            k.add(this.vanillaBlockAtlas);
+            return k;
+        }));
+        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+            k.addAll(itemAtlasJsons.values());
+            k.add(this.vanillaItemAtlas);
+            return k;
+        }));
+
+        /*
+
+
+        收集全部 含有贴图的有效模型阶段
+        有效指的是被实际使用的模型
+
+         */
+
+        // 获取所有带贴图的模型以及自定义父模型
+        Map<Key, TexturedModel> blockModels = new LinkedHashMap<>();
+        Map<Key, TexturedModel> itemModels = new LinkedHashMap<>();
+        // 此map仅用于缓存遇到过的路径上的模型
+        Map<Key, TexturedModel> blockModelsCache = new LinkedHashMap<>();
+        Map<Key, TexturedModel> itemModelsCache = new LinkedHashMap<>();
+        Set<Key> checkedModels = new HashSet<>();
+
+        // 收集全部方块状态的模型贴图
         label: for (Map.Entry<Key, Collection<String>> entry : modelToBlockStates.asMap().entrySet()) {
-            Key modelResourceLocation = entry.getKey();
-            boolean alreadyChecked = !collectedModels.add(modelResourceLocation);
-            if (alreadyChecked) continue;
-            String modelPath = "assets/" + modelResourceLocation.namespace() + "/models/" + modelResourceLocation.value() + ".json";
+            Key modelPath = entry.getKey();
+            if (!checkedModels.add(modelPath)) continue;
+            String modelStringPath = "assets/" + modelPath.namespace() + "/models/" + modelPath.value() + ".json";
             for (Path rootPath : rootPaths) {
-                Path modelJsonPath = rootPath.resolve(modelPath);
+                Path modelJsonPath = rootPath.resolve(modelStringPath);
                 if (Files.exists(modelJsonPath)) {
-                    JsonObject jsonObject;
-                    try {
-                        jsonObject = GsonHelper.readJsonFile(modelJsonPath).getAsJsonObject();
-                    } catch (IOException | JsonParseException e) {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
-                        continue;
-                    }
-                    verifyParentModelAndCollectTextures(modelResourceLocation, jsonObject, rootPaths, textureToModels, collectedModels);
-                    continue label;
-                }
-            }
-            TranslationManager.instance().log("warning.config.resource_pack.generation.missing_block_model", entry.getValue().stream().distinct().toList().toString(), modelPath);
-        }
-
-        // 所有方块纹理，必须进入blocks.json，而不是items.json，因此当前收集到的textures都为方块纹理
-        Set<Key> blockTextures = new HashSet<>(textureToModels.keys());
-
-        // 验证物品模型是否存在，验证的同时去收集贴图
-        label: for (Map.Entry<Key, Collection<Key>> entry : modelToItemDefinitions.asMap().entrySet()) {
-            Key modelResourceLocation = entry.getKey();
-            boolean alreadyChecked = !collectedModels.add(modelResourceLocation);
-            if (alreadyChecked || VANILLA_MODELS.contains(modelResourceLocation)) continue;
-            String modelPath = "assets/" + modelResourceLocation.namespace() + "/models/" + modelResourceLocation.value() + ".json";
-            for (Path rootPath : rootPaths) {
-                Path modelJsonPath = rootPath.resolve(modelPath);
-                if (Files.exists(rootPath.resolve(modelPath))) {
                     JsonObject modelJson;
                     try {
                         modelJson = GsonHelper.readJsonFile(modelJsonPath).getAsJsonObject();
@@ -1596,182 +1558,400 @@ public abstract class AbstractPackManager implements PackManager {
                         TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
                         continue;
                     }
-                    verifyParentModelAndCollectTextures(modelResourceLocation, modelJson, rootPaths, textureToModels, collectedModels);
+                    TexturedModel texturedModel = getTexturedModel(modelPath, modelJson, rootPaths, blockModelsCache);
+                    blockModels.put(modelPath, texturedModel);
                     continue label;
                 }
             }
-            TranslationManager.instance().log("warning.config.resource_pack.generation.missing_item_model", entry.getValue().stream().distinct().toList().toString(), modelPath);
+            // 提示方块状态缺少模型
+            if (!VANILLA_MODELS.contains(modelPath)) {
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_block_model", entry.getValue().stream().distinct().toList().toString(), modelStringPath);
+            }
         }
 
-        Set<Key> blockTexturesToFix = new HashSet<>();
-        Set<Key> itemTexturesToFix = new HashSet<>();
+        // 收集全部物品定义的模型贴图
+        label: for (Map.Entry<Key, Collection<Key>> entry : modelToItemDefinitions.asMap().entrySet()) {
+            Key modelPath = entry.getKey();
+            if (!checkedModels.add(modelPath)) continue;
+            String modelStringPath = "assets/" + modelPath.namespace() + "/models/" + modelPath.value() + ".json";
+            for (Path rootPath : rootPaths) {
+                Path modelJsonPath = rootPath.resolve(modelStringPath);
+                if (Files.exists(rootPath.resolve(modelStringPath))) {
+                    JsonObject modelJson;
+                    try {
+                        modelJson = GsonHelper.readJsonFile(modelJsonPath).getAsJsonObject();
+                    } catch (IOException | JsonParseException e) {
+                        TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
+                        continue;
+                    }
+                    TexturedModel texturedModel = getTexturedModel(modelPath, modelJson, rootPaths, itemModelsCache);
+                    itemModels.put(modelPath, texturedModel);
+                    continue label;
+                }
+            }
+            if (!VANILLA_MODELS.contains(modelPath)) {
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_item_model", entry.getValue().stream().distinct().toList().toString(), modelStringPath);
+            }
+        }
+
+        /*
+
+
+        Atlas验证与修复，如果发现atlas存在错误，则会警告并移除model到来源的映射
+
+
+         */
+
+        Multimap<Key, Key> blockAtlasesToFix = LinkedHashMultimap.create();
+        Multimap<Key, Key> itemAtlasesToFix = LinkedHashMultimap.create();
+        Multimap<Key, Key> anyAtlasesToFix = LinkedHashMultimap.create();
+
+        // 验证方块贴图是否在图集里
+        Iterator<Map.Entry<Key, TexturedModel>> iterator1 = blockModels.entrySet().iterator();
+        while (iterator1.hasNext()) {
+            Map.Entry<Key, TexturedModel> entry = iterator1.next();
+            Map<String, Key> textures = entry.getValue().textures;
+
+            boolean shouldRemove = false;
+            for (Map.Entry<String, Key> texture : textures.entrySet()) {
+                Key spritePath = texture.getValue();
+                boolean definedInBlockAtlas = blockAtlas.isDefined(spritePath);
+                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
+
+                // 双重定义
+                if (definedInItemAtlas && definedInBlockAtlas) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.duplicated_sprite",
+                            entry.getKey().asString(), spritePath.asString(),
+                            "minecraft:textures/atlas/blocks.png", "minecraft:textures/atlas/items.png");
+                    shouldRemove = true;
+                    break;
+                }
+
+                // 方块纹理不应该在item图集内，这样必然出问题
+                if (definedInItemAtlas) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.multiple_atlases",
+                            entry.getKey().asString(), "minecraft:textures/atlas/blocks.png",
+                            "minecraft:textures/atlas/items.png");
+                    shouldRemove = true;
+                    break;
+                }
+
+                // 未在方块图集内定义
+                if (!definedInBlockAtlas) {
+                    // 如果尝试修复
+                    if (Config.fixTextureAtlas()) {
+                        // 只能在方块图集
+                        blockAtlasesToFix.put(spritePath, entry.getKey());
+                    } else {
+                        // 如果不修复也不混淆，那么就报错
+                        if (!Config.enableObfuscation()) {
+                            TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas",
+                                    spritePath.asString());
+                            shouldRemove = true;
+                            break;
+                        } else {
+                            // 如果混淆，那么直接定义此模型有效，只验证贴图是否存在
+                            textureToModels.put(spritePath, entry.getKey());
+                        }
+                    }
+                }
+            }
+
+            if (shouldRemove) {
+                iterator1.remove();
+            }
+        }
+
+        // 验证物品贴图是否在图集内
+        // 使用迭代器遍历以便安全移除元素
+        Iterator<Map.Entry<Key, TexturedModel>> iterator2 = itemModels.entrySet().iterator();
+        while (iterator2.hasNext()) {
+            Map.Entry<Key, TexturedModel> entry = iterator2.next();
+            Map<String, Key> textures = entry.getValue().textures;
+            boolean blockAtlasInUse = false;
+            boolean itemAtlasInUse = false;
+            Set<Key> tempTextureToFix = new HashSet<>();
+
+            boolean shouldRemove = false;
+
+            for (Map.Entry<String, Key> texture : textures.entrySet()) {
+                Key spritePath = texture.getValue();
+                boolean definedInBlockAtlas = blockAtlas.isDefined(spritePath);
+                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
+
+                // 双倍定义
+                if (definedInItemAtlas && definedInBlockAtlas) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.duplicated_sprite",
+                            entry.getKey().asString(), spritePath.asString(),
+                            "minecraft:textures/atlas/items.png", "minecraft:textures/atlas/blocks.png");
+                    shouldRemove = true;
+                    break;
+                }
+
+                // 都没定义
+                if (!definedInItemAtlas && !definedInBlockAtlas) {
+                    if (Config.fixTextureAtlas()) {
+                        tempTextureToFix.add(spritePath);
+                    } else {
+                        // 如果不修复也不混淆，那么就报错
+                        if (!Config.enableObfuscation()) {
+                            TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas",
+                                    spritePath.asString());
+                            shouldRemove = true;
+                            break;
+                        } else {
+                            // 如果混淆，那么直接定义此模型有效，只验证贴图是否存在
+                            textureToModels.put(spritePath, entry.getKey());
+                        }
+                    }
+                }
+
+                // 那么就至少有一个定义
+                if (definedInBlockAtlas) {
+                    blockAtlasInUse = true;
+                }
+                if (definedInItemAtlas) {
+                    itemAtlasInUse = true;
+                }
+            }
+
+            // 如果之前已经标记为需要移除，直接跳过后续处理
+            if (shouldRemove) {
+                iterator2.remove();
+                continue;
+            }
+
+            // 双倍定义
+            if (blockAtlasInUse && itemAtlasInUse) {
+                TranslationManager.instance().log("warning.config.resource_pack.generation.multiple_atlases",
+                        entry.getKey().asString(), "minecraft:textures/atlas/items.png",
+                        "minecraft:textures/atlas/blocks.png");
+                iterator2.remove();
+                continue;
+            }
+
+            // 尝试修复
+            if (Config.fixTextureAtlas()) {
+                // 只用了方块图集，那么修复的东西丢方块图集
+                if (blockAtlasInUse) {
+                    for (Key key : tempTextureToFix) {
+                        blockAtlasesToFix.put(key, entry.getKey());
+                    }
+                }
+                // 只用了物品图集，那么修复的东西丢物品图集
+                if (itemAtlasInUse) {
+                    for (Key key : tempTextureToFix) {
+                        itemAtlasesToFix.put(key, entry.getKey());
+                    }
+                }
+                // 如果都没有，先暂定
+                if (!itemAtlasInUse && !blockAtlasInUse) {
+                    for (Key key : tempTextureToFix) {
+                        anyAtlasesToFix.put(key, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        if (Config.fixTextureAtlas()) {
+            // 获取两个 Multimap 的所有 key
+            // 找出相同的 key
+            Set<Key> commonKeys = new LinkedHashSet<>(blockAtlasesToFix.keySet());
+            commonKeys.retainAll(itemAtlasesToFix.keySet());
+
+            // 都是有问题的模型
+            if (!commonKeys.isEmpty()) {
+                for (Key sprite : commonKeys) {
+                    List<Key> duplicated = new ArrayList<>();
+                    duplicated.addAll(blockAtlasesToFix.get(sprite));
+                    duplicated.addAll(itemAtlasesToFix.get(sprite));
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.duplicated_sprite", duplicated.toString(), sprite.asString(), "minecraft:textures/atlas/blocks.png", "minecraft:textures/atlas/items.png");
+                    for (Key duplicatedModel : duplicated) {
+                        // model已经塌房了，就不进入后续遍历了
+                        blockModels.remove(duplicatedModel);
+                        itemModels.remove(duplicatedModel);
+                    }
+                }
+            }
+
+            // 将任意atlas的优先分配到items上，非必要不要到blocks上
+            for (Map.Entry<Key, Collection<Key>> entry : anyAtlasesToFix.asMap().entrySet()) {
+                if (blockAtlasesToFix.containsKey(entry.getKey())) {
+                    blockAtlasesToFix.putAll(entry.getKey(), entry.getValue());
+                } else {
+                    itemAtlasesToFix.putAll(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // 清空任意atlas分配，因为已经重分配了
+            anyAtlasesToFix.clear();
+
+           /*
+
+            至此已经完成了atlas的自动分配过程，将分配的atlas添加为single
+            后续我们先对剩余的正常模型进行贴图路径验证（此阶段不验证那些存在atlas问题的模型，理论已被全部移除）
+
+            */
+            if (!itemAtlasesToFix.isEmpty()) {
+                List<JsonObject> sourcesToAdd = new ArrayList<>();
+                for (Key itemTexture : itemAtlasesToFix.keySet()) {
+                    itemAtlas.addSingle(itemTexture);
+                    JsonObject source = new JsonObject();
+                    source.addProperty("type", "single");
+                    source.addProperty("resource", itemTexture.asString());
+                    sourcesToAdd.add(source);
+                }
+                for (Map.Entry<Path, JsonObject> atlas : itemAtlasJsons.entrySet()) {
+                    JsonObject right = atlas.getValue();
+                    JsonArray sources = right.getAsJsonArray("sources");
+                    if (sources == null) {
+                        sources = new JsonArray();
+                        right.add("sources", sources);
+                    }
+                    for (JsonObject source : sourcesToAdd) {
+                        sources.add(source);
+                    }
+                    try {
+                        Files.createDirectories(atlas.getKey().getParent());
+                        GsonHelper.writeJsonFile(right, atlas.getKey());
+                    } catch (IOException e) {
+                        this.plugin.logger().warn("Failed to write atlas to json file", e);
+                    }
+                }
+            }
+
+            if (!blockAtlasesToFix.isEmpty()) {
+                List<JsonObject> sourcesToAdd = new ArrayList<>();
+                for (Key blockTexture : blockAtlasesToFix.keySet()) {
+                    blockAtlas.addSingle(blockTexture);
+                    JsonObject source = new JsonObject();
+                    source.addProperty("type", "single");
+                    source.addProperty("resource", blockTexture.asString());
+                    sourcesToAdd.add(source);
+                }
+                for (Map.Entry<Path, JsonObject> atlas : blockAtlasJsons.entrySet()) {
+                    JsonObject right = atlas.getValue();
+                    JsonArray sources = right.getAsJsonArray("sources");
+                    if (sources == null) {
+                        sources = new JsonArray();
+                        right.add("sources", sources);
+                    }
+                    for (JsonObject source : sourcesToAdd) {
+                        sources.add(source);
+                    }
+                    try {
+                        Files.createDirectories(atlas.getKey().getParent());
+                        GsonHelper.writeJsonFile(right, atlas.getKey());
+                    } catch (IOException e) {
+                        this.plugin.logger().warn("Failed to write atlas to json file", e);
+                    }
+                }
+            }
+        }
+
+        // 再次遍历验证贴图
+        // 只处理还活着的
+        for (Map.Entry<Key, TexturedModel> entry : blockModels.entrySet()) {
+            Map<String, Key> textures = entry.getValue().textures;
+            for (Map.Entry<String, Key> texture : textures.entrySet()) {
+                Key spritePath = texture.getValue();
+                Key sourceTexturePath = blockAtlas.getSourceTexturePath(spritePath);
+                if (sourceTexturePath != null) {
+                    textureToModels.put(sourceTexturePath, entry.getKey());
+                }
+            }
+        }
+
+        for (Map.Entry<Key, TexturedModel> entry : itemModels.entrySet()) {
+            Map<String, Key> textures = entry.getValue().textures;
+            for (Map.Entry<String, Key> texture : textures.entrySet()) {
+                Key spritePath = texture.getValue();
+                Key sourceTexturePath = itemAtlas.getSourceTexturePath(spritePath);
+                if (sourceTexturePath != null) {
+                    textureToModels.put(sourceTexturePath, entry.getKey());
+                } else {
+                    sourceTexturePath = blockAtlas.getSourceTexturePath(spritePath);
+                    if (sourceTexturePath != null) {
+                        textureToModels.put(sourceTexturePath, entry.getKey());
+                    }
+                }
+            }
+        }
 
         // 验证贴图是否存在
-        boolean enableObf = Config.enableObfuscation();
-        label: for (Map.Entry<Key, Collection<Key>> entry : textureToModels.asMap().entrySet()) {
-            Key key = entry.getKey();
-
-            // 是方块的贴图
-            if (blockTextures.contains(key)) {
-                // 已经存在的贴图，直接过滤
-                if (existingBlockTextures.contains(key)) continue;
-
-                // 直接在single中被指定的贴图，只检测是否存在
-                if (enableObf || blockTexturesInAtlas.contains(key)) {
-                    String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
+        for (Map.Entry<Key, Collection<Key>> entry : textureToModels.asMap().entrySet()) {
+            Key sourceTexturePath = entry.getKey();
+            if (!VANILLA_TEXTURES.contains(sourceTexturePath)) {
+                String texturePath = "assets/" + sourceTexturePath.namespace() + "/textures/" + sourceTexturePath.value() + ".png";
+                outer: {
                     for (Path rootPath : rootPaths) {
-                        if (Files.exists(rootPath.resolve(imagePath))) {
-                            continue label;
+                        if (Files.exists(rootPath.resolve(texturePath))) {
+                            break outer;
                         }
                     }
-                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                } else {
-                    for (Map.Entry<String, String> directorySource : blockDirectoryMapper.entrySet()) {
-                        String prefix = directorySource.getKey();
-                        if (key.value().startsWith(prefix)) {
-                            String imagePath = "assets/" + key.namespace() + "/textures/" + directorySource.getValue() + key.value().substring(prefix.length()) + ".png";
-                            for (Path rootPath : rootPaths) {
-                                if (Files.exists(rootPath.resolve(imagePath))) {
-                                    continue label;
-                                }
-                            }
-                            TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                            continue label;
-                        }
-                    }
-                    if (Config.fixTextureAtlas()) {
-                        String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
-                        for (Path rootPath : rootPaths) {
-                            if (Files.exists(rootPath.resolve(imagePath))) {
-                                blockTexturesToFix.add(key);
-                                continue label;
-                            }
-                        }
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                    } else {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas", key.toString());
-                    }
-                }
-            }
-            // 是物品的贴图
-            else {
-                // 已经存在的贴图，直接过滤
-                if (existingItemTextures.contains(key)) continue;
-                // 直接在single中被指定的贴图，只检测是否存在
-                if (enableObf || itemTexturesInAtlas.contains(key)) {
-                    String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
-                    for (Path rootPath : rootPaths) {
-                        if (Files.exists(rootPath.resolve(imagePath))) {
-                            continue label;
-                        }
-                    }
-                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                } else {
-                    for (Map.Entry<String, String> directorySource : itemDirectoryMapper.entrySet()) {
-                        String prefix = directorySource.getKey();
-                        if (key.value().startsWith(prefix)) {
-                            String imagePath = "assets/" + key.namespace() + "/textures/" + directorySource.getValue() + key.value().substring(prefix.length()) + ".png";
-                            for (Path rootPath : rootPaths) {
-                                if (Files.exists(rootPath.resolve(imagePath))) {
-                                    continue label;
-                                }
-                            }
-                            TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                            continue label;
-                        }
-                    }
-                    if (Config.fixTextureAtlas()) {
-                        String imagePath = "assets/" + key.namespace() + "/textures/" + key.value() + ".png";
-                        for (Path rootPath : rootPaths) {
-                            if (Files.exists(rootPath.resolve(imagePath))) {
-                                itemTexturesToFix.add(key);
-                                continue label;
-                            }
-                        }
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), imagePath);
-                    } else {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.texture_not_in_atlas", key.toString());
-                    }
-                }
-            }
-        }
-
-        // 修复 atlas
-        if (Config.fixTextureAtlas()) {
-
-            boolean is1_21_11 = Config.packMinVersion().isAtOrAbove(MinecraftVersions.V1_21_11);
-            if (!is1_21_11) {
-                blockTexturesToFix.addAll(itemTexturesToFix);
-                itemTexturesToFix.clear();
-            }
-
-            // 修复方块贴图
-
-            if (!blockTexturesToFix.isEmpty()) {
-                List<JsonObject> sourcesToAdd = new ArrayList<>();
-                for (Key toFix : blockTexturesToFix) {
-                    JsonObject source = new JsonObject();
-                    source.addProperty("type", "single");
-                    source.addProperty("resource", toFix.asString());
-                    sourcesToAdd.add(source);
-                }
-
-                for (Map.Entry<Path, JsonObject> atlas : blockAtlas.entrySet()) {
-                    JsonObject right = atlas.getValue();
-                    JsonArray sources = right.getAsJsonArray("sources");
-                    if (sources == null) {
-                        sources = new JsonArray();
-                        right.add("sources", sources);
-                    }
-                    for (JsonObject source : sourcesToAdd) {
-                        sources.add(source);
-                    }
-                    try {
-                        Files.createDirectories(atlas.getKey().getParent());
-                        GsonHelper.writeJsonFile(right, atlas.getKey());
-                    } catch (IOException e) {
-                        this.plugin.logger().warn("Failed to write atlas to json file", e);
-                    }
-                }
-            }
-
-            // 修复物品贴图
-
-            if (!itemTexturesToFix.isEmpty()) {
-                List<JsonObject> sourcesToAdd = new ArrayList<>();
-                for (Key toFix : itemTexturesToFix) {
-                    JsonObject source = new JsonObject();
-                    source.addProperty("type", "single");
-                    source.addProperty("resource", toFix.asString());
-                    sourcesToAdd.add(source);
-                }
-
-                for (Map.Entry<Path, JsonObject> atlas : itemAtlas.entrySet()) {
-                    JsonObject right = atlas.getValue();
-                    JsonArray sources = right.getAsJsonArray("sources");
-                    if (sources == null) {
-                        sources = new JsonArray();
-                        right.add("sources", sources);
-                    }
-                    for (JsonObject source : sourcesToAdd) {
-                        sources.add(source);
-                    }
-                    try {
-                        Files.createDirectories(atlas.getKey().getParent());
-                        GsonHelper.writeJsonFile(right, atlas.getKey());
-                    } catch (IOException e) {
-                        this.plugin.logger().warn("Failed to write atlas to json file", e);
-                    }
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_model_texture", entry.getValue().stream().distinct().toList().toString(), texturePath);
                 }
             }
         }
     }
 
-    private void verifyParentModelAndCollectTextures(Key sourceModelLocation, JsonObject sourceModelJson, Path[] rootPaths, Multimap<Key, Key> imageToModels, Set<Key> collected) {
-        if (sourceModelJson.has("parent")) {
-            Key parentResourceLocation = Key.from(sourceModelJson.get("parent").getAsString());
-            if (collected.add(parentResourceLocation) && !VANILLA_MODELS.contains(parentResourceLocation)) {
-                String parentModelPath = "assets/" + parentResourceLocation.namespace() + "/models/" + parentResourceLocation.value() + ".json";
+    // 经过这一步拿到的模型为包含全部父贴图的模型
+    private TexturedModel getTexturedModel(Key path, JsonObject modelJson, Path[] rootPaths, Map<Key, TexturedModel> models) {
+        TexturedModel texturedModel = new TexturedModel(modelJson);
+        if (modelJson.has("parent")) {
+            Key parentModelPath = Key.from(modelJson.get("parent").getAsString());
+            TexturedModel parent = models.get(parentModelPath);
+            if (parent == null) {
+                String parentModelStringPath = "assets/" + parentModelPath.namespace() + "/models/" + parentModelPath.value() + ".json";
+                // 找一下有没有自定义的父模型
+                JsonObject parentModel = getParentModel(parentModelStringPath, rootPaths);
+                if (parentModel != null) {
+                    // 有自定义父模型，递归调用，以缓存到models里
+                    parent = getTexturedModel(parentModelPath, parentModel, rootPaths, models);
+                } else {
+                    // 否则只从缓存里拿一份用于归并
+                    if (VANILLA_MODELS.contains(parentModelPath)) {
+                        parent = PRESET_MODELS.get(parentModelPath);
+                    } else {
+                        TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", path.asString(), parentModelStringPath);
+                    }
+                }
+            }
+            if (parent != null) {
+                texturedModel.addParent(parent);
+            }
+        }
+        models.put(path, texturedModel);
+        return texturedModel;
+    }
+
+    private JsonObject getParentModel(String path, Path[] rootPaths) {
+        for (Path rootPath : rootPaths) {
+            Path modelJsonPath = rootPath.resolve(path);
+            if (Files.exists(modelJsonPath)) {
+                JsonObject parentModelJson;
+                try {
+                    parentModelJson = GsonHelper.readJsonFile(modelJsonPath).getAsJsonObject();
+                } catch (IOException | JsonParseException e) {
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
+                    continue;
+                }
+                return parentModelJson;
+            }
+        }
+        return null;
+    }
+
+    private void verifyParentModelAndCollectTextures(Key rl,
+                                                     JsonObject modelJson,
+                                                     Path[] rootPaths,
+                                                     Multimap<Key, Key> imageToModels,
+                                                     Set<Key> checkedModels) {
+        // 如果有父模型
+        if (modelJson.has("parent")) {
+            Key parentRL = Key.from(modelJson.get("parent").getAsString());
+            if (checkedModels.add(parentRL) && !VANILLA_MODELS.contains(parentRL)) {
+                String parentModelPath = "assets/" + parentRL.namespace() + "/models/" + parentRL.value() + ".json";
                 label: {
                     for (Path rootPath : rootPaths) {
                         Path modelJsonPath = rootPath.resolve(parentModelPath);
@@ -1783,22 +1963,22 @@ public abstract class AbstractPackManager implements PackManager {
                                 TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
                                 break label;
                             }
-                            verifyParentModelAndCollectTextures(parentResourceLocation, jsonObject, rootPaths, imageToModels, collected);
+                            verifyParentModelAndCollectTextures(parentRL, jsonObject, rootPaths, imageToModels, checkedModels);
                             break label;
                         }
                     }
-                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", sourceModelLocation.asString(), parentModelPath);
+                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", rl.asString(), parentModelPath);
                 }
             }
         }
-        if (sourceModelJson.has("textures")) {
-            JsonObject textures = sourceModelJson.get("textures").getAsJsonObject();
+        if (modelJson.has("textures")) {
+            JsonObject textures = modelJson.get("textures").getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : textures.entrySet()) {
                 String value = entry.getValue().getAsString();
                 // fixme 应该报错，这个影响资源包加载
                 if (value.isEmpty() || value.charAt(0) == '#') continue;
                 Key textureResourceLocation = Key.from(value);
-                imageToModels.put(textureResourceLocation, sourceModelLocation);
+                imageToModels.put(textureResourceLocation, rl);
             }
         }
     }
