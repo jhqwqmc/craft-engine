@@ -1248,8 +1248,8 @@ public abstract class AbstractPackManager implements PackManager {
         Multimap<Key, Key> textureToEquipments = ArrayListMultimap.create(); // 纹理到盔甲的映射
         Multimap<Key, Key> oggToSoundEvents = ArrayListMultimap.create(); // 音频到声音的映射
 
-        Map<Path, JsonObject> blockAtlasJsons = new HashMap<>();
-        Map<Path, JsonObject> itemAtlasJsons = new HashMap<>();
+        Map<Path, JsonObject> blockAtlasJsons = new LinkedHashMap<>();
+        Map<Path, JsonObject> itemAtlasJsons = new LinkedHashMap<>();
 
         // 如果需要验证资源包，则需要先读取所有atlas
         for (Path rootPath : rootPaths) {
@@ -1290,6 +1290,24 @@ public abstract class AbstractPackManager implements PackManager {
         if (!itemAtlasJsons.containsKey(defaultItemAtlas)) {
             itemAtlasJsons.put(defaultItemAtlas, new JsonObject());
         }
+
+        /*
+
+
+        构建Atlas文件
+
+
+         */
+        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+            k.add(blockAtlasJsons.get(defaultBlockAtlas));
+            k.add(this.vanillaBlockAtlas);
+            return k;
+        }));
+        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+            k.add(itemAtlasJsons.get(defaultItemAtlas));
+            k.add(this.vanillaItemAtlas);
+            return k;
+        }));
 
         for (Path rootPath : rootPaths) {
             Path assetsPath = rootPath.resolve("assets");
@@ -1508,24 +1526,6 @@ public abstract class AbstractPackManager implements PackManager {
             }
             TranslationManager.instance().log("warning.config.resource_pack.generation.missing_sound", entry.getValue().stream().distinct().toList().toString(), oggPath);
         }
-
-        /*
-
-
-        构建Atlas文件
-
-
-         */
-        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
-            k.addAll(blockAtlasJsons.values());
-            k.add(this.vanillaBlockAtlas);
-            return k;
-        }));
-        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
-            k.addAll(itemAtlasJsons.values());
-            k.add(this.vanillaItemAtlas);
-            return k;
-        }));
 
         /*
 
@@ -1753,7 +1753,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
         }
 
-        if (Config.fixTextureAtlas()) {
+        if (Config.fixTextureAtlas() && !Config.enableObfuscation()) {
             // 获取两个 Multimap 的所有 key
             // 找出相同的 key
             Set<Key> commonKeys = new LinkedHashSet<>(blockAtlasesToFix.keySet());
@@ -1792,6 +1792,13 @@ public abstract class AbstractPackManager implements PackManager {
             后续我们先对剩余的正常模型进行贴图路径验证（此阶段不验证那些存在atlas问题的模型，理论已被全部移除）
 
             */
+
+            // 如果最低支持版本太低了，那么全部塞blocks.json里
+            if (!Config.packMinVersion().isAtOrAbove(MinecraftVersions.V1_21_11)) {
+                blockAtlasesToFix.putAll(itemAtlasesToFix);
+                itemAtlasesToFix.clear();
+            }
+
             if (!itemAtlasesToFix.isEmpty()) {
                 List<JsonObject> sourcesToAdd = new ArrayList<>();
                 for (Key itemTexture : itemAtlasesToFix.keySet()) {

@@ -122,6 +122,7 @@ public final class Atlas {
         JsonArray newSources = new JsonArray();
         atlasJson.add("sources", newSources);
         for (JsonObject other : atlasJsons) {
+            if (other == null) continue;
             JsonArray sources = other.getAsJsonArray("sources");
             if (sources != null) {
                 newSources.addAll(sources);
