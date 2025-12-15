@@ -64,6 +64,11 @@ public class ContextHolder {
     }
 
     @SuppressWarnings("unchecked")
+    public <T> T getOrNull(ContextKey<T> parameter) {
+        return (T) Optional.ofNullable(this.params.get(parameter)).map(Supplier::get).orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> T getOrThrow(ContextKey<T> parameter) {
         Supplier<T> object = (Supplier<T>) this.params.get(parameter);
         if (object == null) {
