@@ -107,7 +107,7 @@ public class AxeItemBehavior extends ItemBehavior {
                 player.swingHand(context.getHand());
             }
             // shrink item amount
-            item.hurtAndBreak(1, player, context.getHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAIN_HAND : EquipmentSlot.OFF_HAND);
+            item.hurtAndBreak(1, player, context.getHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
         }
         return InteractionResult.SUCCESS_AND_CANCEL;
     }

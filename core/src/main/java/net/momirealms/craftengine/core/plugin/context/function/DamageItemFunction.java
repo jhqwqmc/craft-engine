@@ -33,7 +33,7 @@ public class DamageItemFunction<CTX extends Context> extends AbstractConditional
         } else if (item == null) {
             return;
         }
-        EquipmentSlot slot = hand == null ? null : hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAIN_HAND : EquipmentSlot.OFF_HAND;
+        EquipmentSlot slot = hand == null ? null : hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
         item.hurtAndBreak(amount.getInt(ctx), player, slot);
     }
 
