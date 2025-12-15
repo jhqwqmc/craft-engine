@@ -45,8 +45,7 @@ public class EquipmentData {
         if (slot == null) {
             throw new IllegalArgumentException("slot cannot be null");
         }
-        // todo 重新写判断，不应该支持手部
-        EquipmentSlot slotEnum = EquipmentSlot.valueOf(slot.toUpperCase(Locale.ENGLISH));
+        EquipmentSlot slotEnum = EquipmentSlot.valueOf(slot.toUpperCase(Locale.ENGLISH).replace("_", ""));
         EquipmentData.Builder builder = EquipmentData.builder().slot(slotEnum);
         if (data.containsKey("asset-id")) {
             builder.assetId(Key.of(data.get("asset-id").toString()));
