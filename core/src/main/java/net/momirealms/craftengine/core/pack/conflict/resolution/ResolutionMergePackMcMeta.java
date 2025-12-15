@@ -242,6 +242,7 @@ public class ResolutionMergePackMcMeta implements Resolution {
         supportedFormats.addProperty("min_inclusive", min.major);
         supportedFormats.addProperty("max_inclusive", max.major);
         merged.add("supported_formats", supportedFormats);
+        merged.addProperty("pack_format", min.major);
         // 新版格式支持
         JsonArray minFormat = new JsonArray();
         minFormat.add(min.major);
