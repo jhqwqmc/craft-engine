@@ -1,6 +1,7 @@
 {
 	"textures": {
-		"0": "item/custom/flower_basket"
+		"0": "item/custom/flower_basket",
+		"particle": "item/custom/flower_basket"
 	},
 	"elements": [
 		{
