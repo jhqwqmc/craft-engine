@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class LangData {
     private static final Map<String, Function<String, List<String>>> LANG_KEY_PROCESSORS = new HashMap<>();
-    public Map<String, String> translations = new HashMap<>();
+    public Map<String, String> translations = new LinkedHashMap<>();
 
     static {
         LANG_KEY_PROCESSORS.put("block_name", (id) -> {
@@ -42,7 +42,7 @@ public class LangData {
     }
 
     public void processTranslations() {
-        Map<String, String> temp = new HashMap<>(Math.max(10, this.translations.size()));
+        Map<String, String> temp = new LinkedHashMap<>(Math.max(10, this.translations.size()));
         for (Map.Entry<String, String> entry : this.translations.entrySet()) {
             String key = entry.getKey();
             String[] split = key.split(":", 2);

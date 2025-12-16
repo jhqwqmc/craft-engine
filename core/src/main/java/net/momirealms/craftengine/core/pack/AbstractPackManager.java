@@ -123,8 +123,8 @@ public abstract class AbstractPackManager implements PackManager {
     private final Map<String, Pack> loadedPacks = new HashMap<>();
     private final Map<String, ConfigParser> sectionParsers = new HashMap<>();
     private final TreeSet<ConfigParser> sortedParsers = new TreeSet<>();
-    private final JsonObject vanillaBlockAtlas;
-    private final JsonObject vanillaItemAtlas;
+    public final JsonObject vanillaBlockAtlas;
+    public final JsonObject vanillaItemAtlas;
     private Map<Path, CachedConfigFile> cachedConfigFiles = Collections.emptyMap();
     private Map<Path, CachedAssetFile> cachedAssetFiles = Collections.emptyMap();
     protected BiConsumer<Path, Path> zipGenerator;
@@ -882,61 +882,6 @@ public abstract class AbstractPackManager implements PackManager {
                 FileUtils.deleteDirectory(shadersPath);
             } catch (IOException e) {
                 plugin.logger().warn("Failed to delete shaders directory for " + shadersPath.toAbsolutePath(), e);
-            }
-        }
-    }
-
-    private void processAtlas(JsonObject atlasJsonObject, BiConsumer<String, String> directory, Consumer<Key> existing, Consumer<Key> included) {
-        JsonArray sources = atlasJsonObject.getAsJsonArray("sources");
-        if (sources != null) {
-            for (JsonElement source : sources) {
-                if (!(source instanceof JsonObject sourceJson)) continue;
-                String type = Optional.ofNullable(sourceJson.get("type")).map(JsonElement::getAsString).orElse(null);
-                if (type == null) continue;
-                switch (type) {
-                    case "directory", "minecraft:directory" -> {
-                        JsonElement source0 = sourceJson.get("source");
-                        JsonElement prefix = sourceJson.get("prefix");
-                        if (prefix == null || source0 == null) continue;
-                        directory.accept(prefix.getAsString(), source0.getAsString() + "/");
-                    }
-                    case "single", "minecraft:single" -> {
-                        JsonElement resource = sourceJson.get("resource");
-                        if (resource == null) continue;
-                        included.accept(Key.of(resource.getAsString()));
-                    }
-                    case "unstitch", "minecraft:unstitch" -> {
-                        JsonElement resource = sourceJson.get("resource");
-                        if (resource == null) continue;
-                        included.accept(Key.of(resource.getAsString()));
-                        JsonArray regions = sourceJson.getAsJsonArray("regions");
-                        if (regions != null) {
-                            for (JsonElement region : regions) {
-                                if (!(region instanceof JsonObject regionJson)) continue;
-                                JsonElement sprite = regionJson.get("sprite");
-                                if (sprite == null) continue;
-                                existing.accept(Key.of(sprite.getAsString()));
-                            }
-                        }
-                    }
-                    case "paletted_permutations", "minecraft:paletted_permutations" -> {
-                        JsonArray textures = sourceJson.getAsJsonArray("textures");
-                        if (textures == null) continue;
-                        JsonObject permutationsJson = sourceJson.getAsJsonObject("permutations");
-                        if (permutationsJson == null) continue;
-                        String separator = sourceJson.has("separator") ? sourceJson.get("separator").getAsString() : "_";
-                        List<String> permutations = new ArrayList<>(permutationsJson.keySet());
-                        for (JsonElement texture : textures) {
-                            if (!(texture instanceof JsonPrimitive texturePath)) continue;
-                            for (String permutation : permutations) {
-                                existing.accept(Key.of(texturePath.getAsString() + separator + permutation));
-                            }
-                        }
-                    }
-                    case "filter", "minecraft:filter" -> {
-                        // todo filter
-                    }
-                }
             }
         }
     }
@@ -1903,7 +1848,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     // 经过这一步拿到的模型为包含全部父贴图的模型
-    private TexturedModel getTexturedModel(Key path, JsonObject modelJson, Path[] rootPaths, Map<Key, TexturedModel> models) {
+    public TexturedModel getTexturedModel(Key path, JsonObject modelJson, Path[] rootPaths, Map<Key, TexturedModel> models) {
         TexturedModel texturedModel = new TexturedModel(modelJson);
         if (modelJson.has("parent")) {
             Key parentModelPath = Key.from(modelJson.get("parent").getAsString());
@@ -1947,47 +1892,6 @@ public abstract class AbstractPackManager implements PackManager {
             }
         }
         return null;
-    }
-
-    private void verifyParentModelAndCollectTextures(Key rl,
-                                                     JsonObject modelJson,
-                                                     Path[] rootPaths,
-                                                     Multimap<Key, Key> imageToModels,
-                                                     Set<Key> checkedModels) {
-        // 如果有父模型
-        if (modelJson.has("parent")) {
-            Key parentRL = Key.from(modelJson.get("parent").getAsString());
-            if (checkedModels.add(parentRL) && !VANILLA_MODELS.contains(parentRL)) {
-                String parentModelPath = "assets/" + parentRL.namespace() + "/models/" + parentRL.value() + ".json";
-                label: {
-                    for (Path rootPath : rootPaths) {
-                        Path modelJsonPath = rootPath.resolve(parentModelPath);
-                        if (Files.exists(modelJsonPath)) {
-                            JsonObject jsonObject;
-                            try {
-                                jsonObject = GsonHelper.readJsonFile(modelJsonPath).getAsJsonObject();
-                            } catch (IOException | JsonParseException e) {
-                                TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
-                                break label;
-                            }
-                            verifyParentModelAndCollectTextures(parentRL, jsonObject, rootPaths, imageToModels, checkedModels);
-                            break label;
-                        }
-                    }
-                    TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", rl.asString(), parentModelPath);
-                }
-            }
-        }
-        if (modelJson.has("textures")) {
-            JsonObject textures = modelJson.get("textures").getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : textures.entrySet()) {
-                String value = entry.getValue().getAsString();
-                // fixme 应该报错，这个影响资源包加载
-                if (value.isEmpty() || value.charAt(0) == '#') continue;
-                Key textureResourceLocation = Key.from(value);
-                imageToModels.put(textureResourceLocation, rl);
-            }
-        }
     }
 
     private static void collectMultipart(JsonArray jsonArray, Consumer<Key> callback) {

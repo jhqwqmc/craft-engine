@@ -93,7 +93,8 @@ resource-pack:
             path: "assets/minecraft/font/uniform.json"
       resolution:
         type: merge_font
-  # Validate if there is any error in the resource pack, such as missing textures or models
+  # Validate if there is any error in the resource pack, such as missing textures or models.
+  # Validation may not always be accurate due to the presence of overlays, and it is time-consuming for plugins to simulate multiple client versions for testing.
   # If your resource pack is compliant with the standard, you can disable validation to improve the resource pack generation speed.
   validation:
     enable: true
