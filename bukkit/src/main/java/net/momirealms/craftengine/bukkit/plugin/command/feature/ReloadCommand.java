@@ -43,7 +43,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                         Component.text(reloadResult.syncTime())
                                 );
                             });
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
                             plugin().logger().warn("Failed to reload config", e);
                         }
@@ -56,7 +56,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                         Component.text(reloadResult.syncTime())
                                 );
                             });
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
                             plugin().logger().warn("Failed to reload config", e);
                         }
@@ -68,7 +68,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                 long time2 = System.currentTimeMillis();
                                 long packTime = time2 - time1;
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_SUCCESS, Component.text(packTime));
-                            } catch (Exception e) {
+                            } catch (Throwable e) {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_FAILURE);
                                 plugin().logger().warn("Failed to generate resource pack", e);
                             }
@@ -88,7 +88,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                             Component.text(reloadResult.syncTime()),
                                             Component.text(packTime)
                                     );
-                                } catch (Exception e) {
+                                } catch (Throwable e) {
                                     handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_FAILURE);
                                     plugin().logger().warn("Failed to generate resource pack", e);
                                 } finally {

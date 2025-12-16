@@ -44,7 +44,7 @@ public interface PackManager extends Manageable {
 
     void clearResourceConfigs();
 
-    void generateResourcePack() throws IOException;
+    void generateResourcePack() throws Exception;
 
     Path resourcePackPath();
 

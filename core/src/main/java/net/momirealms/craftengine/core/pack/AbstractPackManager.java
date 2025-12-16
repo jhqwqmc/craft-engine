@@ -740,7 +740,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public void generateResourcePack() throws IOException {
+    public void generateResourcePack() throws Exception {
         this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.start"));
         long time1 = System.currentTimeMillis();
 
@@ -3039,7 +3039,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void processZipFile(Path zipFile, Path sourceFolder, @Nullable FileSystem fs,
-                                Map<String, List<Path>> conflictChecker, Map<Path, CachedAssetFile> previousFiles) throws IOException {
+                                Map<String, List<Path>> conflictChecker, Map<Path, CachedAssetFile> previousFiles) {
         try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
             long zipLastModified = Files.getLastModifiedTime(zipFile).toMillis();
             long zipSize = Files.size(zipFile);
@@ -3064,11 +3064,17 @@ public abstract class AbstractPackManager implements PackManager {
                         cachedAssetFiles.put(sourcePath, cachedAsset);
                     }
                     if (fs != null) {
-                        updateConflictChecker(fs, conflictChecker, entry, sourcePath, entryPathInZip, cachedAsset.data());
+                        try {
+                            updateConflictChecker(fs, conflictChecker, entry, sourcePath, entryPathInZip, cachedAsset.data());
+                        } catch (Exception e) {
+                            AbstractPackManager.this.plugin.logger().warn("Failed to update conflict checker", e);
+                        }
                     }
                     return FileVisitResult.CONTINUE;
                 }
             });
+        } catch (Exception e) {
+            this.plugin.logger().warn("Failed to process zip file " + zipFile, e);
         }
     }
 
