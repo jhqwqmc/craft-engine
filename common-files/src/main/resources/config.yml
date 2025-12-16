@@ -247,7 +247,7 @@ item:
     click-in-inventory: false # this option won't work for players in creative mode
     drop: false
     pick-up: false
-  # Decided the starting value for automatic custom model data assignment.
+  # Decide the starting value for automatic custom model data assignment.
   custom-model-data-starting-value:
     default: 10000
     overrides:
@@ -293,22 +293,18 @@ block:
   simplify-adventure-break-check: false
   # Similar to the option above, but designed for block placement
   simplify-adventure-place-check: false
-  # Uses raycasting to predict the player's next block break,
-  # enabling pre-calculation of mining speed attributes.
-
-  # Enables block break prediction.
-  # Enhances mining responsiveness with moderate performance cost.
+  # Uses ray-tracing to predict the player's next block break,
+  # enhances mining responsiveness with moderate performance cost.
   predict-breaking:
     enable: false
     interval: 10
     extended-interaction-range: 0.5
-  # Defines the value returned by Bukkit block.getMaterial()
+  # Defines the return value of Bukkit Block.getMaterial() for custom blocks
   # If another plugin causes incompatibility due to its reliance on this method, try changing this option to a different vanilla block.
+  # A restart is required to apply the changes.
   deceive-bukkit-material:
     default: bricks
-    # The numbers here represent the internal real IDs of the blocks.
-    # This means that overriding certain blocks needs to be done under the condition of forcibly assigning internal IDs.
-    # A restart is required to apply the changes.
+    # The numbers here represent the internal real IDs of the blocks. You can find them through command /ce debug real-state-usage
     overrides:
       0: bricks
       1~8: bricks
@@ -319,9 +315,10 @@ furniture:
   # - These are INVISIBLE entities used internally for tracking furniture states
   # - Recommended to keep enabled for better performance
   hide-base-entity: true
+  # Determines the type of collision entity associated with the hitbox.
+  # - interaction (best performance)
+  # - boat (better compatibility with some anti-cheat plugin)
   # Requires a restart to apply
-  # interaction (the best performance)
-  # boat (better compatibility with some anti-cheat plugin)
   collision-entity-type: interaction
 
 emoji:
@@ -335,23 +332,22 @@ emoji:
   max-emojis-per-parse: 16
 
 image:
-  # Block image tags using minecraft:default font in these interfaces
-  # Permission bypass: craftengine.filter.bypass.xxx (replace xxx with context: anvil/book/chat/etc)
+  # Prevents players from spamming the chat or other systems by sending raw characters.
+  # Bypass permission : craftengine.filter.bypass.[anvil/book/chat/command/sign]
   illegal-characters-filter:
     anvil: true
     book: true
     chat: true
     command: true
     sign: true
-  # Decided the starting value for automatic codepoint assignment.
+  # Decide the starting value for automatic codepoint assignment.
   codepoint-starting-value:
     default: 19968
     overrides:
       minecraft:default: 57344  # 57344 ~ 63743 (U+E000 ~ U+F8FF)
-
   # Defines Unicode characters used for <shift:xxx> positioning
   # - Must match the font defined in resource packs
-  # - Do NOT modify unless you understand text rendering mechanics
+  # - Warning: Do not modify these values unless you fully understand the underlying text rendering mechanics.
   offset-characters:
     enable: true
     font: minecraft:default
@@ -400,20 +396,21 @@ image:
     128: '\uf844'
     256: '\uf845'
 
-# Only consider modifying the options below if you need to optimize Netty performance.
-# In most cases, you can improve load handling by increasing the number of Netty threads.
 network:
+  # Disables the chat reporting.
   # Requires a restart to apply.
   disable-chat-report: false
+  # Only consider modifying the options below if you need to optimize Netty performance.
+  #
   # Disable network operations related to items.
-  # This option will disable client-bound-data/material and the functionality of replacing tags in item name and lore.
+  # ⚠️ This option will disable client-bound-data/material and the functionality of replacing tags in item name and lore.
   disable-item-operations: false
   # Allow <image> <shift> <global> tags in third-party plugins via packet manipulation
-  # ⚠️ Disable unused handlers to reduce async thread workload
+  # ⚠️ Disable unused handlers to reduce netty thread workload
   intercept-packets:
     system-chat: true
-    tab-list: true     # Tab list header and footer
-    player-info: true  # Player list in tab
+    tab-list: true      # Tab list header and footer
+    player-info: true   # Player list in tab
     set-score: true
     actionbar: true
     title: true
@@ -425,14 +422,13 @@ network:
     armor-stand: true   # Legacy Holograms
     text-display: true  # Modern Holograms
     item: true
-    advancement: true
+    advancement: true   # Toast
     player-chat: true
 
 recipe:
   # Master switch for custom recipes
-  # NOTE: When enabled, plugin recipes will OVERRIDE vanilla recipes
   enable: true
-  # Manage Minecraft's default recipe behavior
+  # Manage Minecraft's built-in recipe behavior
   disable-vanilla-recipes:
     # ⚠️ WARNING: When true, DISABLES ALL VANILLA RECIPES
     # - Conflicts with 'list' option (list will be ignored)
@@ -440,7 +436,7 @@ recipe:
     # Selective recipe disabling (safer alternative to 'all: true')
     # Example: ["minecraft:wooden_sword", "minecraft:stone_hoe"]
     list: []
-  # You can use items from other plugins by adding the supported plugin names here
+  # You can use items from other plugins by adding the supported them here
   ingredient-sources: []
 
 gui:
@@ -520,8 +516,8 @@ chunk-system:
   # Settings for injection
   injection:
     # Requires a restart to apply.
-    # section: Inject the LevelChunkSection (Use this if you have installed both FastAsyncWorldEdit and Axiom)
-    # palette: Inject the PalettedContainer
+    # - section: Injects the LevelChunkSection (Use this if you have installed both FastAsyncWorldEdit and Axiom)
+    # - palette: Injects the PalettedContainer
     target: palette
     # Enables faster injection method
     # Note: May not work with certain server forks that alter chunk class structure (In most cases it won't conflict)
