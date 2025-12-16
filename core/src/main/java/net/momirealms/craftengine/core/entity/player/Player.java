@@ -32,13 +32,10 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public abstract Item<?> getItemBySlot(int slot);
 
     @Override
-    public abstract Object serverPlayer();
-
-    @Override
     public abstract Object platformPlayer();
 
     @Override
-    public abstract Class<?> platformPlayerClass();
+    public abstract Object serverPlayer();
 
     public abstract void setClientSideWorld(World world);
 
