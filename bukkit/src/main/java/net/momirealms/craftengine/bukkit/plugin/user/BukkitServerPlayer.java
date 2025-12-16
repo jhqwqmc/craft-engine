@@ -1125,6 +1125,11 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public Class<org.bukkit.entity.Player> platformPlayerClass() {
+        return org.bukkit.entity.Player.class;
+    }
+
+    @Override
     public ChannelHandler connection() {
         if (this.connection == null) {
             Object serverPlayer = serverPlayer();

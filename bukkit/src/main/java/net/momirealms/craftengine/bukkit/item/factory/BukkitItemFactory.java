@@ -1,12 +1,12 @@
 package net.momirealms.craftengine.bukkit.item.factory;
 
+import cn.gtemc.itembridge.api.Provider;
 import com.google.gson.JsonElement;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
 import net.momirealms.craftengine.bukkit.util.ItemTags;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
-import net.momirealms.craftengine.core.item.ExternalItemSource;
 import net.momirealms.craftengine.core.item.ItemFactory;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.ItemWrapper;
@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extends ItemFactory<W, ItemStack> {
     private boolean hasExternalRecipeSource = false;
-    private ExternalItemSource<ItemStack>[] recipeIngredientSources = null;
+    private Provider<ItemStack>[] recipeIngredientSources = null;
 
     protected BukkitItemFactory(CraftEngine plugin) {
         super(plugin);
@@ -50,7 +50,7 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
         throw new IllegalStateException("Unsupported server version: " + VersionHelper.MINECRAFT_VERSION.version());
     }
 
-    public void resetRecipeIngredientSources(ExternalItemSource<ItemStack>[] recipeIngredientSources) {
+    public void resetRecipeIngredientSources(Provider<ItemStack>[] recipeIngredientSources) {
         if (recipeIngredientSources == null || recipeIngredientSources.length == 0) {
             this.recipeIngredientSources = null;
             this.hasExternalRecipeSource = false;
@@ -102,10 +102,10 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
             return null;
         }
         if (this.hasExternalRecipeSource) {
-           for (ExternalItemSource<ItemStack> source : this.recipeIngredientSources) {
-               String id = source.id(item.getItem());
-               if (id != null) {
-                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id)));
+           for (Provider<ItemStack> source : this.recipeIngredientSources) {
+               Optional<String> id = source.id(item.getItem());
+               if (id.isPresent()) {
+                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id.get())));
                }
            }
         }

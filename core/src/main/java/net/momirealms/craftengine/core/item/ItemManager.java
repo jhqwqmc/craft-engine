@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.core.item;
 
+import cn.gtemc.itembridge.api.Provider;
+import cn.gtemc.itembridge.core.ItemBridge;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
@@ -59,10 +61,6 @@ public interface ItemManager<T> extends Manageable, ModelGenerator {
     default Collection<Key> items() {
         return loadedItems().keySet();
     }
-
-    ExternalItemSource<T> getExternalItemSource(String name);
-
-    boolean registerExternalItemSource(ExternalItemSource<T> externalItemSource);
 
     Optional<Equipment> getEquipment(Key key);
 
@@ -124,4 +122,8 @@ public interface ItemManager<T> extends Manageable, ModelGenerator {
     List<UniqueKey> getIngredientSubstitutes(Key item);
 
     ItemUpdateResult updateItem(Item<T> item, Supplier<ItemBuildContext> contextSupplier);
+
+    ItemBridge itemBridgeProvider();
+
+    <I> Provider<I> getItemProvider(String plugin);
 }

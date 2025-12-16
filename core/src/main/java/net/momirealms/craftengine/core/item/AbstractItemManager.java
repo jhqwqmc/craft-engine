@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.item.updater.ItemUpdaters;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
-import net.momirealms.craftengine.core.pack.ResourceLocation;
 import net.momirealms.craftengine.core.pack.allocator.IdAllocator;
 import net.momirealms.craftengine.core.pack.model.*;
 import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenerator;
@@ -50,7 +49,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
     private final ItemParser itemParser;
     private final EquipmentParser equipmentParser;
-    protected final Map<String, ExternalItemSource<I>> externalItemSources = new HashMap<>();
     protected final Map<Key, CustomItem<I>> customItemsById = new LinkedHashMap<>();
     protected final Map<String, CustomItem<I>> customItemsByPath = new HashMap<>();
     protected final Map<Key, List<UniqueKey>> customItemTags = new HashMap<>();
@@ -118,19 +116,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
     @Override
     public ConfigParser[] parsers() {
         return new ConfigParser[]{this.itemParser, this.equipmentParser};
-    }
-
-    @Override
-    public ExternalItemSource<I> getExternalItemSource(String name) {
-        return this.externalItemSources.get(name);
-    }
-
-    @Override
-    public boolean registerExternalItemSource(ExternalItemSource<I> externalItemSource) {
-        if (!ResourceLocation.isValidNamespace(externalItemSource.plugin())) return false;
-        if (this.externalItemSources.containsKey(externalItemSource.plugin())) return false;
-        this.externalItemSources.put(externalItemSource.plugin(), externalItemSource);
-        return true;
     }
 
     @Override

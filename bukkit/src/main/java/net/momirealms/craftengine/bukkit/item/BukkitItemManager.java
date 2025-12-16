@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.bukkit.item;
 
+import cn.gtemc.itembridge.api.Provider;
+import cn.gtemc.itembridge.core.ItemBridge;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -56,6 +58,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     private final Item<ItemStack> emptyItem;
     private final UniqueIdItem<ItemStack> emptyUniqueItem;
     private final Function<Object, Integer> decoratedHashOpsGenerator;
+    private ItemBridge itemBridge;
     private Set<Key> lastRegisteredPatterns = Set.of();
 
     @SuppressWarnings("unchecked")
@@ -82,15 +85,13 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     @Override
     public void delayedLoad() {
         super.delayedLoad();
-        List<ExternalItemSource<ItemStack>> sources = new ArrayList<>();
+        List<Provider<ItemStack>> sources = new ArrayList<>();
         for (String externalSource : Config.recipeIngredientSources()) {
             String sourceId = externalSource.toLowerCase(Locale.ENGLISH);
-            ExternalItemSource<ItemStack> provider = getExternalItemSource(sourceId);
-            if (provider != null) {
-                sources.add(provider);
-            }
+            Optional<Provider<ItemStack>> provider = itemBridgeProvider().provider(sourceId);
+            provider.ifPresent(sources::add);
         }
-        this.factory.resetRecipeIngredientSources(sources.isEmpty() ? null : sources.toArray(new ExternalItemSource[0]));
+        this.factory.resetRecipeIngredientSources(sources.isEmpty() ? null : sources.toArray(new Provider[0]));
     }
 
     @Override
@@ -441,5 +442,21 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     @Nullable // 1.21.5+
     public Function<Object, Integer> decoratedHashOpsGenerator() {
         return decoratedHashOpsGenerator;
+    }
+
+    @Override
+    public ItemBridge itemBridgeProvider() {
+        if (this.itemBridge == null) {
+            ItemBridge.Builder builder = ItemBridge.builder();
+            builder.removeById("craftengine");
+            this.itemBridge = builder.build();
+        }
+        return this.itemBridge;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <I> Provider<I> getItemProvider(String plugin) {
+        return (Provider<I>) itemBridgeProvider().provider(plugin).orElse(null);
     }
 }

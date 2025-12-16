@@ -19,6 +19,7 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-public/") // quickshop
     maven("https://repo.nexomc.com/releases/") // nexo
     maven("https://repo.opencollab.dev/main/") // geyser
+    maven("https://repo.gtemc.net/releases/")
 }
 
 dependencies {
@@ -96,6 +97,8 @@ dependencies {
     compileOnly("org.geysermc.geyser:api:2.9.0-SNAPSHOT")
     // Floodgate
     compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
+    // ItemBridge
+    compileOnly("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
 }
 
 java {
