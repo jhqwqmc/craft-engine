@@ -1,8 +1,6 @@
 package net.momirealms.craftengine.core.pack;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -1186,12 +1184,12 @@ public abstract class AbstractPackManager implements PackManager {
             return;
         }
 
-        Multimap<Key, Key> glyphToFonts = ArrayListMultimap.create(); // 图片到字体的映射
-        Multimap<Key, Key> modelToItemDefinitions = ArrayListMultimap.create(); // 模型到物品的映射
-        Multimap<Key, String> modelToBlockStates = ArrayListMultimap.create(); // 模型到方块的映射
-        Multimap<Key, Key> textureToModels = ArrayListMultimap.create(); // 纹理到模型的映射
-        Multimap<Key, Key> textureToEquipments = ArrayListMultimap.create(); // 纹理到盔甲的映射
-        Multimap<Key, Key> oggToSoundEvents = ArrayListMultimap.create(); // 音频到声音的映射
+        Multimap<Key, Key> glyphToFonts = HashMultimap.create(128, 32); // 图片到字体的映射
+        Multimap<Key, Key> modelToItemDefinitions = HashMultimap.create(128, 4); // 模型到物品的映射
+        Multimap<Key, String> modelToBlockStates = HashMultimap.create(128, 32); // 模型到方块的映射
+        Multimap<Key, Key> textureToModels = HashMultimap.create(128, 8); // 纹理到模型的映射
+        Multimap<Key, Key> textureToEquipments = HashMultimap.create(128, 8); // 纹理到盔甲的映射
+        Multimap<Key, Key> oggToSoundEvents = HashMultimap.create(128, 4); // 音频到声音的映射
 
         Map<Path, JsonObject> blockAtlasJsons = new LinkedHashMap<>();
         Map<Path, JsonObject> itemAtlasJsons = new LinkedHashMap<>();
@@ -1239,16 +1237,17 @@ public abstract class AbstractPackManager implements PackManager {
         /*
 
 
-        构建Atlas文件
+        构建Atlas文件，
+        验证只使用默认的atlas，否则整个过程将会变成非常复杂
 
 
          */
-        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(4), k -> {
             k.add(blockAtlasJsons.get(defaultBlockAtlas));
             k.add(this.vanillaBlockAtlas);
             return k;
         }));
-        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(), k -> {
+        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(4), k -> {
             k.add(itemAtlasJsons.get(defaultItemAtlas));
             k.add(this.vanillaItemAtlas);
             return k;
@@ -1289,14 +1288,16 @@ public abstract class AbstractPackManager implements PackManager {
                                 if (providers != null) {
                                     Key fontName = Key.of(namespace, FileUtils.pathWithoutExtension(file.getFileName().toString()));
                                     for (JsonElement provider : providers) {
-                                        if (provider instanceof JsonObject providerJO && providerJO.has("type")) {
-                                            String type = providerJO.get("type").getAsString();
-                                            if (type.equals("bitmap") && providerJO.has("file")) {
-                                                String pngFile = providerJO.get("file").getAsString();
-                                                Key resourceLocation = Key.of(FileUtils.pathWithoutExtension(pngFile));
-                                                glyphToFonts.put(resourceLocation, fontName);
-                                            }
-                                        }
+                                        if (!(provider instanceof JsonObject providerJO)) continue;
+                                        JsonPrimitive typePrimitive = providerJO.getAsJsonPrimitive("type");
+                                        if (typePrimitive == null) continue;
+                                        String type = typePrimitive.getAsString();
+                                        if (!type.equals("bitmap")) continue;
+                                        JsonPrimitive filePrimitive = providerJO.getAsJsonPrimitive("file");
+                                        if (filePrimitive == null) continue;
+                                        String pngFile = filePrimitive.getAsString();
+                                        Key resourceLocation = Key.of(FileUtils.pathWithoutExtension(pngFile));
+                                        glyphToFonts.put(resourceLocation, fontName);
                                     }
                                 }
                                 return FileVisitResult.CONTINUE;
@@ -1383,9 +1384,11 @@ public abstract class AbstractPackManager implements PackManager {
                                         if (layer.getValue() instanceof JsonArray equipmentLayer) {
                                             for (JsonElement lay : equipmentLayer) {
                                                 if (lay instanceof JsonObject layObj) {
-                                                    Key rawTexture = Key.of(layObj.get("texture").getAsString());
-                                                    Key fullPath = Key.of(rawTexture.namespace(), "entity/equipment/" + type + "/" + rawTexture.value());
-                                                    textureToEquipments.put(fullPath, Key.of(namespace, equipmentId));
+                                                    if (layObj.get("texture") instanceof JsonPrimitive layerTexture) {
+                                                        Key rawTexture = Key.of(layerTexture.getAsString());
+                                                        Key fullPath = Key.of(rawTexture.namespace(), "entity/equipment/" + type + "/" + rawTexture.value());
+                                                        textureToEquipments.put(fullPath, Key.of(namespace, equipmentId));
+                                                    }
                                                 }
                                             }
                                         }
@@ -1411,9 +1414,7 @@ public abstract class AbstractPackManager implements PackManager {
                                 if (soundArray != null) {
                                     for (JsonElement sound : soundArray) {
                                         if (sound instanceof JsonPrimitive primitive) {
-                                            if (primitive.isString()) {
-                                                oggToSoundEvents.put(Key.of(primitive.getAsString()), soundKey);
-                                            }
+                                            oggToSoundEvents.put(Key.of(primitive.getAsString()), soundKey);
                                         } else if (sound instanceof JsonObject soundObj && soundObj.has("name")) {
                                             if (soundObj.has("type")) {
                                                 String type = soundObj.get("type").getAsString();
@@ -1481,12 +1482,12 @@ public abstract class AbstractPackManager implements PackManager {
          */
 
         // 获取所有带贴图的模型以及自定义父模型
-        Map<Key, TexturedModel> blockModels = new LinkedHashMap<>();
-        Map<Key, TexturedModel> itemModels = new LinkedHashMap<>();
+        Map<Key, TexturedModel> blockModels = new HashMap<>(256);
+        Map<Key, TexturedModel> itemModels = new HashMap<>(256);
         // 此map仅用于缓存遇到过的路径上的模型
-        Map<Key, TexturedModel> blockModelsCache = new LinkedHashMap<>();
-        Map<Key, TexturedModel> itemModelsCache = new LinkedHashMap<>();
-        Set<Key> checkedModels = new HashSet<>();
+        Map<Key, TexturedModel> blockModelsCache = new HashMap<>(256);
+        Map<Key, TexturedModel> itemModelsCache = new HashMap<>(256);
+        Set<Key> checkedModels = new HashSet<>(256);
 
         // 收集全部方块状态的模型贴图
         label: for (Map.Entry<Key, Collection<String>> entry : modelToBlockStates.asMap().entrySet()) {
@@ -1510,7 +1511,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
             // 提示方块状态缺少模型
             if (!VANILLA_MODELS.contains(modelPath)) {
-                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_block_model", entry.getValue().stream().distinct().toList().toString(), modelStringPath);
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_block_model", entry.getValue().toString(), modelStringPath);
             }
         }
 
@@ -1535,7 +1536,7 @@ public abstract class AbstractPackManager implements PackManager {
                 }
             }
             if (!VANILLA_MODELS.contains(modelPath)) {
-                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_item_model", entry.getValue().stream().distinct().toList().toString(), modelStringPath);
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_item_model", entry.getValue().toString(), modelStringPath);
             }
         }
 
@@ -1547,9 +1548,9 @@ public abstract class AbstractPackManager implements PackManager {
 
          */
 
-        Multimap<Key, Key> blockAtlasesToFix = LinkedHashMultimap.create();
-        Multimap<Key, Key> itemAtlasesToFix = LinkedHashMultimap.create();
-        Multimap<Key, Key> anyAtlasesToFix = LinkedHashMultimap.create();
+        Multimap<Key, Key> blockAtlasesToFix = HashMultimap.create(64, 4);
+        Multimap<Key, Key> itemAtlasesToFix = HashMultimap.create(64, 4);
+        Multimap<Key, Key> anyAtlasesToFix = HashMultimap.create(64, 4);
 
         // 验证方块贴图是否在图集里
         Iterator<Map.Entry<Key, TexturedModel>> iterator1 = blockModels.entrySet().iterator();
@@ -1560,19 +1561,9 @@ public abstract class AbstractPackManager implements PackManager {
             boolean shouldRemove = false;
             for (Map.Entry<String, Key> texture : textures.entrySet()) {
                 Key spritePath = texture.getValue();
-                boolean definedInBlockAtlas = blockAtlas.isDefined(spritePath);
-                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
-
-                // 双重定义
-                if (definedInItemAtlas && definedInBlockAtlas) {
-                    TranslationManager.instance().log("warning.config.resource_pack.generation.duplicated_sprite",
-                            entry.getKey().asString(), spritePath.asString(),
-                            "minecraft:textures/atlas/blocks.png", "minecraft:textures/atlas/items.png");
-                    shouldRemove = true;
-                    break;
-                }
 
                 // 方块纹理不应该在item图集内，这样必然出问题
+                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
                 if (definedInItemAtlas) {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.multiple_atlases",
                             entry.getKey().asString(), "minecraft:textures/atlas/blocks.png",
@@ -1582,7 +1573,7 @@ public abstract class AbstractPackManager implements PackManager {
                 }
 
                 // 未在方块图集内定义
-                if (!definedInBlockAtlas) {
+                if (!blockAtlas.isDefined(spritePath)) {
                     // 如果尝试修复
                     if (Config.fixTextureAtlas()) {
                         // 只能在方块图集
@@ -1649,14 +1640,13 @@ public abstract class AbstractPackManager implements PackManager {
                             textureToModels.put(spritePath, entry.getKey());
                         }
                     }
-                }
-
-                // 那么就至少有一个定义
-                if (definedInBlockAtlas) {
-                    blockAtlasInUse = true;
-                }
-                if (definedInItemAtlas) {
-                    itemAtlasInUse = true;
+                } else {
+                    // 那么就至少有一个定义
+                    if (definedInBlockAtlas) {
+                        blockAtlasInUse = true;
+                    } else /* if (definedInItemAtlas) */ {
+                        itemAtlasInUse = true;
+                    }
                 }
             }
 
@@ -1745,7 +1735,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
 
             if (!itemAtlasesToFix.isEmpty()) {
-                List<JsonObject> sourcesToAdd = new ArrayList<>();
+                List<JsonObject> sourcesToAdd = new ArrayList<>(itemAtlasesToFix.size());
                 for (Key itemTexture : itemAtlasesToFix.keySet()) {
                     itemAtlas.addSingle(itemTexture);
                     JsonObject source = new JsonObject();
@@ -1773,7 +1763,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
 
             if (!blockAtlasesToFix.isEmpty()) {
-                List<JsonObject> sourcesToAdd = new ArrayList<>();
+                List<JsonObject> sourcesToAdd = new ArrayList<>(blockAtlasesToFix.size());
                 for (Key blockTexture : blockAtlasesToFix.keySet()) {
                     blockAtlas.addSingle(blockTexture);
                     JsonObject source = new JsonObject();
@@ -1845,11 +1835,16 @@ public abstract class AbstractPackManager implements PackManager {
                 }
             }
         }
+
+        // todo 验证 unstitch 和 paletted permutations
     }
 
     // 经过这一步拿到的模型为包含全部父贴图的模型
+    @SuppressWarnings("all")
     public TexturedModel getTexturedModel(Key path, JsonObject modelJson, Path[] rootPaths, Map<Key, TexturedModel> models) {
         TexturedModel texturedModel = new TexturedModel(modelJson);
+        // 放这里防止parent互相引用造成死循环
+        models.put(path, texturedModel);
         if (modelJson.has("parent")) {
             Key parentModelPath = Key.from(modelJson.get("parent").getAsString());
             TexturedModel parent = models.get(parentModelPath);
@@ -1863,17 +1858,25 @@ public abstract class AbstractPackManager implements PackManager {
                 } else {
                     // 否则只从缓存里拿一份用于归并
                     if (VANILLA_MODELS.contains(parentModelPath)) {
+                        // 可能为空，因为存在built-in模型
                         parent = PRESET_MODELS.get(parentModelPath);
+                        if (parent == null) {
+                           parent = TexturedModel.BUILTIN;
+                        }
+                        models.put(parentModelPath, parent);
                     } else {
-                        TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", path.asString(), parentModelStringPath);
+                        parent = TexturedModel.EMPTY;
+                        models.put(parentModelPath, parent);
                     }
                 }
             }
-            if (parent != null) {
+            if (parent == TexturedModel.EMPTY) {
+                String parentModelStringPath = "assets/" + parentModelPath.namespace() + "/models/" + parentModelPath.value() + ".json";
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", path.asString(), parentModelStringPath);
+            } else {
                 texturedModel.addParent(parent);
             }
         }
-        models.put(path, texturedModel);
         return texturedModel;
     }
 

@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class TexturedModel {
     public static final TexturedModel EMPTY = new TexturedModel(Map.of());
+    public static final TexturedModel BUILTIN = new TexturedModel(Map.of());
     public final Map<String, Key> textures;
 
     private TexturedModel(Map<String, Key> textures) {

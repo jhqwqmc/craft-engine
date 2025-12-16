@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 public final class Atlas {
     private final Map<String, String> directory;
+    private final String[] prefixes;
     // 已经被包含在图集内的贴图
     private final Set<Key> defined;
     // 单独添加的
@@ -109,6 +110,7 @@ public final class Atlas {
             }
         }
         this.filtered = MiscUtils.anyOf(filtered);
+        this.prefixes = this.directory.keySet().toArray(new String[0]);
     }
 
     public Atlas(List<JsonObject> atlasJsons) {
@@ -135,10 +137,8 @@ public final class Atlas {
         if (this.filtered.test(texture)) return false;
         if (this.defined.contains(texture)) return true;
         String path = texture.value();
-        for (Map.Entry<String, String> entry : this.directory.entrySet()) {
-            if (path.startsWith(entry.getKey())) {
-                return true;
-            }
+        for (String prefix : this.prefixes) {
+            if (path.startsWith(prefix)) return true;
         }
         return false;
     }
@@ -156,8 +156,9 @@ public final class Atlas {
         String path = texture.value();
         // 路径匹配
         for (Map.Entry<String, String> entry : this.directory.entrySet()) {
-            if (path.startsWith(entry.getKey())) {
-                return Key.of(texture.namespace(), entry.getValue() + path.substring(entry.getKey().length()));
+            String prefix = entry.getKey();
+            if (path.startsWith(prefix)) {
+                return Key.of(texture.namespace(), entry.getValue() + path.substring(prefix.length()));
             }
         }
         return null;
