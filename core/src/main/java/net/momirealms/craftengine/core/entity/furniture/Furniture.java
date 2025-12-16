@@ -38,6 +38,7 @@ public abstract class Furniture implements Cullable {
     public final CustomFurniture config;
     public final FurnitureDataAccessor dataAccessor;
     public final Entity metaDataEntity;
+    public final int metaDataEntityId;
 
     protected CullingData cullingData;
     protected FurnitureVariant currentVariant;
@@ -54,6 +55,7 @@ public abstract class Furniture implements Cullable {
         this.config = config;
         this.dataAccessor = data;
         this.metaDataEntity = metaDataEntity;
+        this.metaDataEntityId = metaDataEntity.entityId();
         this.setVariantInternal(config.getVariant(data));
     }
 
@@ -282,11 +284,11 @@ public abstract class Furniture implements Cullable {
     }
 
     public int entityId() {
-        return this.metaDataEntity.entityId();
+        return this.metaDataEntityId;
     }
 
     public boolean hasExternalModel() {
-        return hasExternalModel;
+        return this.hasExternalModel;
     }
 
     public Vec3d getRelativePosition(Vector3f position) {
