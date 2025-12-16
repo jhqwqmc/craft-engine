@@ -1,7 +1,9 @@
 package net.momirealms.craftengine.bukkit.item;
 
 import cn.gtemc.itembridge.api.Provider;
-import cn.gtemc.itembridge.core.ItemBridge;
+import cn.gtemc.itembridge.api.context.BuildContext;
+import cn.gtemc.itembridge.core.BukkitItemBridge;
+import cn.gtemc.itembridge.hook.context.ItemContextKeys;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,10 +26,7 @@ import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.UniqueKey;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -58,7 +57,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     private final Item<ItemStack> emptyItem;
     private final UniqueIdItem<ItemStack> emptyUniqueItem;
     private final Function<Object, Integer> decoratedHashOpsGenerator;
-    private ItemBridge itemBridge;
+    private BukkitItemBridge itemBridge;
     private Set<Key> lastRegisteredPatterns = Set.of();
 
     @SuppressWarnings("unchecked")
@@ -445,18 +444,19 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     }
 
     @Override
-    public ItemBridge itemBridgeProvider() {
+    public BukkitItemBridge itemBridgeProvider() {
         if (this.itemBridge == null) {
-            ItemBridge.Builder builder = ItemBridge.builder();
+            BukkitItemBridge.BukkitBuilder builder = BukkitItemBridge.builder();
             builder.removeById("craftengine");
             this.itemBridge = builder.build();
         }
         return this.itemBridge;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <I> Provider<I> getItemProvider(String plugin) {
-        return (Provider<I>) itemBridgeProvider().provider(plugin).orElse(null);
+    public Optional<ItemStack> buildPlatformItem(Provider<ItemStack> provider, String id, ItemBuildContext context) {
+        Player player = context.player();
+        org.bukkit.entity.Player bukkitPlayer = player == null ? null : (org.bukkit.entity.Player) player.platformPlayer();
+        return provider.build(id, BuildContext.builder().withOptional(ItemContextKeys.PLAYER, bukkitPlayer).build());
     }
 }
