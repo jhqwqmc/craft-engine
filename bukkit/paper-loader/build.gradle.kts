@@ -96,15 +96,33 @@ paper {
         register("BetterModel") { required = false }
 
         // external items
-        register("NeigeItems") { required = false }
+        register("AzureFlow") { required = false }
+        register("CustomFishing") { required = false }
+        register("EcoArmor") { required = false }
+        register("EcoCrates") { required = false }
+        register("EcoItems") { required = false }
+        register("EcoMobs") { required = false }
+        register("EcoPets") { required = false }
+        register("EcoScrolls") { required = false }
+        register("ExecutableItems") { required = false }
+        register("HeadDatabase") { required = false }
+        register("HMCCosmetics") { required = false }
+        register("ItemsAdder") { required = false }
+        register("MagicGem") { required = false }
         register("MMOItems") { required = false }
         register("MythicMobs") { required = false }
-        register("CustomFishing") { required = false }
-        register("Zaphkiel") { required = false }
-        register("HeadDatabase") { required = false }
-        register("SX-Item") { required = false }
-        register("Slimefun") { required = false }
+        register("NeigeItems") { required = false }
         register("Nexo") { required = false }
+        register("Nova") { required = false }
+        register("Oraxen") { required = false }
+        register("PxRpg") { required = false }
+        register("Ratziel") { required = false }
+        register("Reforges") { required = false }
+        register("Slimefun") { required = false }
+        register("StatTrackers") { required = false }
+        register("SX-Item") { required = false }
+        register("Talismans") { required = false }
+        register("Zaphkiel") { required = false }
 
         // leveler
         register("AuraSkills") { required = false }
