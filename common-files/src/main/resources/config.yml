@@ -98,9 +98,17 @@ resource-pack:
   # If your resource pack is compliant with the standard, you can disable validation to improve the resource pack generation speed.
   validation:
     enable: true
+    # Determines on which versions the resource pack validation will be performed.
+    # Allowed values:
+    # - 1.20.1, 1.21, 1.21.8, etc.
+    # - latest: the latest client version
+    # - server: the current server version
+    test-versions:
+      - server
     # Fix textures that are not within the atlas. It is unreasonable to always rely on plugins to fix your mistakes.
+    # CraftEngine will only fix the atlas of resource pack under the first version specified in the test-versions.
     # You should strive to make your resource pack more standardized after gaining some experience with resource packs.
-    # When a model file mixes textures from both the blocks atlas and the items atlas, you must manually fix the issue.
+    # The fix-atlas feature is not all-powerful since 1.21.11. In some cases, CraftEngine cannot fix it for you, and you will need to fix your model yourself.
     fix-atlas: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:

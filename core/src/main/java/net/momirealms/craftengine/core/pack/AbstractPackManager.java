@@ -18,6 +18,8 @@ import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionCondit
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.pack.host.impl.NoneHost;
+import net.momirealms.craftengine.core.pack.mcmeta.Overlay;
+import net.momirealms.craftengine.core.pack.mcmeta.PackMcMeta;
 import net.momirealms.craftengine.core.pack.model.ItemModel;
 import net.momirealms.craftengine.core.pack.model.LegacyOverridesModel;
 import net.momirealms.craftengine.core.pack.model.ModernItemModel;
@@ -791,7 +793,9 @@ public abstract class AbstractPackManager implements PackManager {
             long time2 = System.currentTimeMillis();
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.generate", String.valueOf(time2 - time1)));
             if (Config.validateResourcePack()) {
-                this.validateResourcePack(generatedPackPath);
+                for (MinecraftVersion version : Config.validationTestVersions()) {
+                    this.validateResourcePack(generatedPackPath, version);
+                }
             }
             long time3 = System.currentTimeMillis();
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.validate", String.valueOf(time3 - time2)));
@@ -825,10 +829,10 @@ public abstract class AbstractPackManager implements PackManager {
         if (!rawMeta.has("pack")) {
             JsonObject pack = new JsonObject();
             rawMeta.add("pack", pack);
-            pack.addProperty("pack_format", Config.packMinVersion().packFormat());
+            pack.addProperty("pack_format", Config.packMinVersion().packFormat().major());
             JsonObject supportedFormats = new JsonObject();
-            supportedFormats.addProperty("min_inclusive", Config.packMinVersion().packFormat());
-            supportedFormats.addProperty("max_inclusive", Config.packMaxVersion().packFormat());
+            supportedFormats.addProperty("min_inclusive", Config.packMinVersion().packFormat().major());
+            supportedFormats.addProperty("max_inclusive", Config.packMaxVersion().packFormat().major());
             pack.add("supported_formats", supportedFormats);
             changed = true;
         }
@@ -869,7 +873,7 @@ public abstract class AbstractPackManager implements PackManager {
     private void removeAllShaders(Path path) {
         List<Path> rootPaths;
         try {
-            rootPaths = FileUtils.collectOverlays(path);
+            rootPaths = MiscUtils.init(FileUtils.collectOverlays(path), a -> a.addFirst(path));
         } catch (IOException e) {
             plugin.logger().warn("Failed to collect overlays for " + path.toAbsolutePath(), e);
             return;
@@ -889,7 +893,7 @@ public abstract class AbstractPackManager implements PackManager {
         // 收集全部overlay
         Path[] rootPaths;
         try {
-            rootPaths = FileUtils.collectOverlays(path).toArray(new Path[0]);
+            rootPaths = MiscUtils.init(FileUtils.collectOverlays(path), a -> a.addFirst(path)).toArray(new Path[0]);
         } catch (IOException e) {
             this.plugin.logger().warn("Failed to collect overlays for " + path.toAbsolutePath(), e);
             return;
@@ -1174,15 +1178,36 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private void validateResourcePack(Path path) {
-        // 收集全部overlay
-        Path[] rootPaths;
+    private void validateResourcePack(Path path, MinecraftVersion version) {
+        Path packMcMetaPath = path.resolve("pack.mcmeta");
+        PackMcMeta packMeta;
         try {
-            rootPaths = FileUtils.collectOverlays(path).toArray(new Path[0]);
+            packMeta = new PackMcMeta(GsonHelper.readJsonFile(packMcMetaPath).getAsJsonObject());
         } catch (IOException e) {
-            this.plugin.logger().warn("Failed to collect overlays for " + path.toAbsolutePath(), e);
+            this.plugin.logger().warn("Failed to read pack.mcmeta " + packMcMetaPath.toAbsolutePath(), e);
             return;
         }
+
+        // 获取当前版本生效的overlays
+        List<String> overlayDirectories = new ArrayList<>();
+        for (Overlay overlay : packMeta.overlays()) {
+            if (overlay.test(version)) {
+                overlayDirectories.add(overlay.directory());
+            }
+        }
+        overlayDirectories = overlayDirectories.stream().distinct().toList();
+
+        List<Path> rootPathList = new ArrayList<>();
+        rootPathList.add(path);
+        for (String directory : overlayDirectories) {
+            Path resolve = path.resolve(directory);
+            if (Files.isDirectory(resolve)) {
+                rootPathList.add(resolve);
+            }
+        }
+
+        // 收集全部overlay，按照正确的顺序加载
+        Path[] rootPaths = rootPathList.toArray(new Path[0]);
 
         Multimap<Key, Key> glyphToFonts = HashMultimap.create(128, 32); // 图片到字体的映射
         Multimap<Key, Key> modelToItemDefinitions = HashMultimap.create(128, 4); // 模型到物品的映射
@@ -1191,8 +1216,11 @@ public abstract class AbstractPackManager implements PackManager {
         Multimap<Key, Key> textureToEquipments = HashMultimap.create(128, 8); // 纹理到盔甲的映射
         Multimap<Key, Key> oggToSoundEvents = HashMultimap.create(128, 4); // 音频到声音的映射
 
-        Map<Path, JsonObject> blockAtlasJsons = new LinkedHashMap<>();
-        Map<Path, JsonObject> itemAtlasJsons = new LinkedHashMap<>();
+        Map<Path, JsonObject> blockAtlasJsons = new HashMap<>();
+        Map<Path, JsonObject> itemAtlasJsons = new HashMap<>();
+
+        JsonObject lastBlocksAtlas = null;
+        JsonObject lastItemAtlas = null;
 
         // 如果需要验证资源包，则需要先读取所有atlas
         for (Path rootPath : rootPaths) {
@@ -1205,6 +1233,7 @@ public abstract class AbstractPackManager implements PackManager {
                 try {
                     JsonObject atlasJsonObject = GsonHelper.readJsonFile(blockAtlasFile).getAsJsonObject();
                     blockAtlasJsons.put(blockAtlasFile, atlasJsonObject);
+                    lastBlocksAtlas = atlasJsonObject;
                 } catch (IOException | JsonParseException e) {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", blockAtlasFile.toAbsolutePath().toString());
                 }
@@ -1218,6 +1247,7 @@ public abstract class AbstractPackManager implements PackManager {
                 try {
                     JsonObject atlasJsonObject = GsonHelper.readJsonFile(itemAtlasFile).getAsJsonObject();
                     itemAtlasJsons.put(itemAtlasFile, atlasJsonObject);
+                    lastItemAtlas = atlasJsonObject;
                 } catch (IOException | JsonParseException e) {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", itemAtlasFile.toAbsolutePath().toString());
                 }
@@ -1242,16 +1272,15 @@ public abstract class AbstractPackManager implements PackManager {
 
 
          */
-        Atlas blockAtlas = new Atlas(MiscUtils.make(new ArrayList<>(4), k -> {
-            k.add(blockAtlasJsons.get(defaultBlockAtlas));
-            k.add(this.vanillaBlockAtlas);
-            return k;
-        }));
-        Atlas itemAtlas = new Atlas(MiscUtils.make(new ArrayList<>(4), k -> {
-            k.add(itemAtlasJsons.get(defaultItemAtlas));
-            k.add(this.vanillaItemAtlas);
-            return k;
-        }));
+        Atlas blockAtlas;
+        Atlas itemAtlas;
+        if (version.isAtOrAbove(MinecraftVersions.V1_21_11)) {
+            blockAtlas = new Atlas(ListUtils.newNonNullList(lastBlocksAtlas, this.vanillaBlockAtlas));
+            itemAtlas = new Atlas(ListUtils.newNonNullList(lastItemAtlas, this.vanillaItemAtlas));
+        } else {
+            blockAtlas = new Atlas(ListUtils.newNonNullList(lastBlocksAtlas, this.vanillaBlockAtlas, this.vanillaItemAtlas));
+            itemAtlas = null;
+        }
 
         for (Path rootPath : rootPaths) {
             Path assetsPath = rootPath.resolve("assets");
@@ -1564,7 +1593,7 @@ public abstract class AbstractPackManager implements PackManager {
                 Key spritePath = texture.getValue();
 
                 // 方块纹理不应该在item图集内，这样必然出问题
-                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
+                boolean definedInItemAtlas = itemAtlas != null && itemAtlas.isDefined(spritePath);
                 if (definedInItemAtlas) {
                     TranslationManager.instance().log("warning.config.resource_pack.generation.multiple_atlases",
                             entry.getKey().asString(), "minecraft:textures/atlas/blocks.png",
@@ -1614,7 +1643,7 @@ public abstract class AbstractPackManager implements PackManager {
             for (Map.Entry<String, Key> texture : textures.entrySet()) {
                 Key spritePath = texture.getValue();
                 boolean definedInBlockAtlas = blockAtlas.isDefined(spritePath);
-                boolean definedInItemAtlas = itemAtlas.isDefined(spritePath);
+                boolean definedInItemAtlas = itemAtlas != null && itemAtlas.isDefined(spritePath);
 
                 // 双倍定义
                 if (definedInItemAtlas && definedInBlockAtlas) {
@@ -1735,7 +1764,7 @@ public abstract class AbstractPackManager implements PackManager {
                 itemAtlasesToFix.clear();
             }
 
-            if (!itemAtlasesToFix.isEmpty()) {
+            if (!itemAtlasesToFix.isEmpty() && itemAtlas != null) {
                 List<JsonObject> sourcesToAdd = new ArrayList<>(itemAtlasesToFix.size());
                 for (Key itemTexture : itemAtlasesToFix.keySet()) {
                     itemAtlas.addSingle(itemTexture);
@@ -1809,7 +1838,7 @@ public abstract class AbstractPackManager implements PackManager {
             Map<String, Key> textures = entry.getValue().textures;
             for (Map.Entry<String, Key> texture : textures.entrySet()) {
                 Key spritePath = texture.getValue();
-                Key sourceTexturePath = itemAtlas.getSourceTexturePath(spritePath);
+                Key sourceTexturePath = itemAtlas == null ? null : itemAtlas.getSourceTexturePath(spritePath);
                 if (sourceTexturePath != null) {
                     textureToModels.put(sourceTexturePath, entry.getKey());
                 } else {

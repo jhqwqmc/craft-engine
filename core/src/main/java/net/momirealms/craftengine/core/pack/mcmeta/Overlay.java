@@ -1,0 +1,106 @@
+package net.momirealms.craftengine.core.pack.mcmeta;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import net.momirealms.craftengine.core.util.GsonHelper;
+import net.momirealms.craftengine.core.util.MinecraftVersion;
+import net.momirealms.craftengine.core.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Overlay {
+    private final PackVersion minVersion;
+    private final PackVersion maxVersion;
+    private final String directory;
+
+    public Overlay(PackVersion minVersion,
+                   PackVersion maxVersion,
+                   String directory
+    ) {
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.directory = directory;
+    }
+
+    public Overlay(JsonObject overlay) {
+        this.directory = overlay.get("directory").getAsString();
+        Pair<PackVersion, PackVersion> supportedVersions = getSupportedVersions(overlay);
+        this.minVersion = supportedVersions.left();
+        this.maxVersion = supportedVersions.right();
+    }
+
+    public PackVersion minVersion() {
+        return minVersion;
+    }
+
+    public PackVersion maxVersion() {
+        return maxVersion;
+    }
+
+    public String directory() {
+        return directory;
+    }
+
+    public boolean test(MinecraftVersion version) {
+        return version.packFormat().isAtOrAbove(this.minVersion) && version.packFormat().isAtOrBelow(this.maxVersion);
+    }
+
+    private static Pair<PackVersion, PackVersion> getSupportedVersions(JsonObject pack) {
+        List<PackVersion> minVersions = new ArrayList<>();
+        List<PackVersion> maxVersions = new ArrayList<>();
+        if (pack.has("min_format")) {
+            minVersions.add(getFormatVersion(pack.get("min_format")));
+        }
+        if (pack.has("max_format")) {
+            maxVersions.add(getFormatVersion(pack.get("max_format")));
+        }
+        if (pack.has("formats")) {
+            Pair<PackVersion, PackVersion> supportedFormats = parseSupportedFormats(pack.get("formats"));
+            minVersions.add(supportedFormats.left());
+            maxVersions.add(supportedFormats.right());
+        }
+        return Pair.of(
+                PackVersion.getLowest(minVersions),
+                PackVersion.getHighest(maxVersions)
+        );
+    }
+
+    private static PackVersion getFormatVersion(JsonElement format) {
+        if (format instanceof JsonArray array) {
+            if (array.size() == 1) {
+                return new PackVersion(GsonHelper.getAsInt(array.get(0), 15), 0);
+            }
+            if (array.size() == 2) {
+                return new PackVersion(GsonHelper.getAsInt(array.get(0), 15), GsonHelper.getAsInt(array.get(1), 1000));
+            }
+        } else if (format instanceof JsonPrimitive jsonPrimitive) {
+            float version = jsonPrimitive.getAsFloat();
+            return PackVersion.parse(version);
+        }
+        throw new IllegalArgumentException("Unknown overlay version format: " + format);
+    }
+
+    private static Pair<PackVersion, PackVersion> parseSupportedFormats(JsonElement formats) {
+        switch (formats) {
+            case JsonPrimitive jsonPrimitive -> {
+                return new Pair<>(new PackVersion(jsonPrimitive.getAsInt(), 0), new PackVersion(jsonPrimitive.getAsInt(), 0));
+            }
+            case JsonArray array -> {
+                if (array.size() == 2) {
+                    return new Pair<>(new PackVersion(GsonHelper.getAsInt(array.get(0), 15), 0), new PackVersion(GsonHelper.getAsInt(array.get(1), 1000), 0));
+                }
+            }
+            case JsonObject object -> {
+                int min = GsonHelper.getAsInt(object.get("min_inclusive"), 15);
+                int max = GsonHelper.getAsInt(object.get("max_inclusive"), 1000);
+                return new Pair<>(new PackVersion(min, 0), new PackVersion(max, 0));
+            }
+            default -> {
+            }
+        }
+        throw new IllegalArgumentException("Unsupported overlay version format: " + formats);
+    }
+}

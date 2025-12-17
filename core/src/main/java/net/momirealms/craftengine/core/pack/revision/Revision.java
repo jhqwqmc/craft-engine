@@ -60,12 +60,14 @@ public interface Revision {
 
         @Override
         public int maxPackVersion() {
-            return MinecraftVersions.FUTURE.packFormat();
+            // todo 重构revision系统
+            return MinecraftVersions.FUTURE.packFormat().major();
         }
 
         @Override
         public int minPackVersion() {
-            return this.minVersion.packFormat();
+            // todo 重构revision系统
+            return this.minVersion.packFormat().major();
         }
 
         @Override
@@ -112,12 +114,12 @@ public interface Revision {
 
         @Override
         public int minPackVersion() {
-            return this.minVersion.packFormat();
+            return this.minVersion.packFormat().major();
         }
 
         @Override
         public int maxPackVersion() {
-            return this.maxVersion.packFormat();
+            return this.maxVersion.packFormat().major();
         }
 
         @Override

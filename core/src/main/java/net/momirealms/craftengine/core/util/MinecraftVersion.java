@@ -1,36 +1,38 @@
 package net.momirealms.craftengine.core.util;
 
+import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public final class MinecraftVersion implements Comparable<MinecraftVersion> {
-    public static final Map<Integer, Integer> PACK_FORMATS = new HashMap<>();
+    public static final Map<Integer, PackVersion> PACK_FORMATS = new HashMap<>();
     static {
-        PACK_FORMATS.put(1_20_00, 15);
-        PACK_FORMATS.put(1_20_01, 15);
-        PACK_FORMATS.put(1_20_02, 18);
-        PACK_FORMATS.put(1_20_03, 22);
-        PACK_FORMATS.put(1_20_04, 22);
-        PACK_FORMATS.put(1_20_05, 32);
-        PACK_FORMATS.put(1_20_06, 32);
-        PACK_FORMATS.put(1_21_00, 34);
-        PACK_FORMATS.put(1_21_01, 34);
-        PACK_FORMATS.put(1_21_02, 42);
-        PACK_FORMATS.put(1_21_03, 42);
-        PACK_FORMATS.put(1_21_04, 46);
-        PACK_FORMATS.put(1_21_05, 55);
-        PACK_FORMATS.put(1_21_06, 63);
-        PACK_FORMATS.put(1_21_07, 64);
-        PACK_FORMATS.put(1_21_08, 64);
-        PACK_FORMATS.put(1_21_09, 69);
-        PACK_FORMATS.put(1_21_10, 69);
-        PACK_FORMATS.put(1_21_11, 75);
-        PACK_FORMATS.put(1_99_99, 1000);
+        PACK_FORMATS.put(1_20_00, new PackVersion(15, 0));
+        PACK_FORMATS.put(1_20_01, new PackVersion(15, 0));
+        PACK_FORMATS.put(1_20_02, new PackVersion(18, 0));
+        PACK_FORMATS.put(1_20_03, new PackVersion(22, 0));
+        PACK_FORMATS.put(1_20_04, new PackVersion(22, 0));
+        PACK_FORMATS.put(1_20_05, new PackVersion(32, 0));
+        PACK_FORMATS.put(1_20_06, new PackVersion(32, 0));
+        PACK_FORMATS.put(1_21_00, new PackVersion(34, 0));
+        PACK_FORMATS.put(1_21_01, new PackVersion(34, 0));
+        PACK_FORMATS.put(1_21_02, new PackVersion(42, 0));
+        PACK_FORMATS.put(1_21_03, new PackVersion(42, 0));
+        PACK_FORMATS.put(1_21_04, new PackVersion(46, 0));
+        PACK_FORMATS.put(1_21_05, new PackVersion(55, 0));
+        PACK_FORMATS.put(1_21_06, new PackVersion(63, 0));
+        PACK_FORMATS.put(1_21_07, new PackVersion(64, 0));
+        PACK_FORMATS.put(1_21_08, new PackVersion(64, 0));
+        PACK_FORMATS.put(1_21_09, new PackVersion(69, 0));
+        PACK_FORMATS.put(1_21_10, new PackVersion(69, 0));
+        PACK_FORMATS.put(1_21_11, new PackVersion(75, 0));
+        PACK_FORMATS.put(99_99_99, new PackVersion(1000, 0));
     }
 
     private final int version;
     private final String versionString;
-    private final int packFormat;
+    private final PackVersion packFormat;
 
     public static MinecraftVersion parse(final String version) {
         return new MinecraftVersion(version);
@@ -40,7 +42,7 @@ public final class MinecraftVersion implements Comparable<MinecraftVersion> {
         return versionString;
     }
 
-    public int packFormat() {
+    public PackVersion packFormat() {
         return packFormat;
     }
 

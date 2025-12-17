@@ -6,23 +6,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
+import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.Pair;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static net.momirealms.craftengine.core.pack.mcmeta.PackVersion.MAX_PACK_VERSION;
+import static net.momirealms.craftengine.core.pack.mcmeta.PackVersion.MIN_PACK_VERSION;
+
 public class ResolutionMergePackMcMeta implements Resolution {
     public static final Factory FACTORY = new Factory();
     public static final Set<String> STANDARD_PACK_KEYS = ImmutableSet.of("pack", "features", "filter", "overlays", "language");
-    public static final PackVersion MIN_PACK_VERSION = new PackVersion(15, 0); // 1.20
-    public static final PackVersion MAX_PACK_VERSION = new PackVersion(1000, 0); // future
+
     private final String description;
 
     public ResolutionMergePackMcMeta(String description) {
@@ -164,84 +166,20 @@ public class ResolutionMergePackMcMeta implements Resolution {
                 PackVersion max = supportedVersions.right();
                 // 旧版格式支持
                 JsonObject supportedFormats = new JsonObject();
-                supportedFormats.addProperty("min_inclusive", min.major);
-                supportedFormats.addProperty("max_inclusive", max.major);
+                supportedFormats.addProperty("min_inclusive", min.major());
+                supportedFormats.addProperty("max_inclusive", max.major());
                 entryJson.add("formats", supportedFormats);
                 // 新版格式支持
                 JsonArray minFormat = new JsonArray();
-                minFormat.add(min.major);
-                minFormat.add(min.minor);
+                minFormat.add(min.major());
+                minFormat.add(min.minor());
                 entryJson.add("min_format", minFormat);
                 JsonArray maxFormat = new JsonArray();
-                maxFormat.add(max.major);
-                maxFormat.add(max.minor);
+                maxFormat.add(max.major());
+                maxFormat.add(max.minor());
                 entryJson.add("max_format", maxFormat);
                 overlayCollector.accept(entryJson);
             }
-        }
-    }
-
-    public record PackVersion(int major, int minor) implements Comparable<PackVersion> {
-
-        @Override
-        public int compareTo(@NotNull ResolutionMergePackMcMeta.PackVersion o) {
-            // 首先比较 major 版本
-            int majorCompare = Integer.compare(this.major, o.major);
-            if (majorCompare != 0) {
-                return majorCompare;
-            }
-            // 如果 major 相同，则比较 minor 版本
-            return Integer.compare(this.minor, o.minor);
-        }
-
-        /**
-         * 返回两个版本中较小的那个（版本较低的）
-         */
-        public static PackVersion getLower(PackVersion v1, PackVersion v2) {
-            if (v1 == null) return v2;
-            if (v2 == null) return v1;
-            return v1.compareTo(v2) <= 0 ? v1 : v2;
-        }
-
-        /**
-         * 返回两个版本中较大的那个（版本较高的）
-         */
-        public static PackVersion getHigher(PackVersion v1, PackVersion v2) {
-            if (v1 == null) return v2;
-            if (v2 == null) return v1;
-            return v1.compareTo(v2) >= 0 ? v1 : v2;
-        }
-
-        public static PackVersion getLowest(List<PackVersion> versions) {
-            if (versions == null || versions.isEmpty()) {
-                return MIN_PACK_VERSION;
-            }
-
-            PackVersion lowest = versions.getFirst();
-            for (int i = 1; i < versions.size(); i++) {
-                lowest = getLower(lowest, versions.get(i));
-            }
-            return lowest;
-        }
-
-        public static PackVersion getHighest(List<PackVersion> versions) {
-            if (versions == null || versions.isEmpty()) {
-                return MAX_PACK_VERSION;
-            }
-
-            PackVersion highest = versions.getFirst();
-            for (int i = 1; i < versions.size(); i++) {
-                highest = getHigher(highest, versions.get(i));
-            }
-            return highest;
-        }
-
-        public static PackVersion parse(float num) {
-            String str = String.valueOf(num);
-            String[] parts = str.split("\\.");
-            int integerPart = Integer.parseInt(parts[0]);
-            int decimalPart = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-            return new PackVersion(integerPart, decimalPart);
         }
     }
 
@@ -252,18 +190,18 @@ public class ResolutionMergePackMcMeta implements Resolution {
         PackVersion max = PackVersion.getHigher(pack1Version.right(), pack2Version.right());
         // 旧版格式支持
         JsonObject supportedFormats = new JsonObject();
-        supportedFormats.addProperty("min_inclusive", min.major);
-        supportedFormats.addProperty("max_inclusive", max.major);
+        supportedFormats.addProperty("min_inclusive", min.major());
+        supportedFormats.addProperty("max_inclusive", max.major());
         merged.add("supported_formats", supportedFormats);
-        merged.addProperty("pack_format", min.major);
+        merged.addProperty("pack_format", min.major());
         // 新版格式支持
         JsonArray minFormat = new JsonArray();
-        minFormat.add(min.major);
-        minFormat.add(min.minor);
+        minFormat.add(min.major());
+        minFormat.add(min.minor());
         merged.add("min_format", minFormat);
         JsonArray maxFormat = new JsonArray();
-        maxFormat.add(max.major);
-        maxFormat.add(max.minor);
+        maxFormat.add(max.major());
+        maxFormat.add(max.minor());
         merged.add("max_format", maxFormat);
     }
 
@@ -307,15 +245,15 @@ public class ResolutionMergePackMcMeta implements Resolution {
             case JsonArray array -> {
                 if (array.isEmpty()) return Pair.of(MIN_PACK_VERSION, MAX_PACK_VERSION);
                 if (array.size() == 1) {
-                    return new Pair<>(new PackVersion(GsonHelper.getAsInt(array.get(0), MIN_PACK_VERSION.major), 0), MAX_PACK_VERSION);
+                    return new Pair<>(new PackVersion(GsonHelper.getAsInt(array.get(0), MIN_PACK_VERSION.major()), 0), MAX_PACK_VERSION);
                 }
                 if (array.size() == 2) {
-                    return new Pair<>(new PackVersion(GsonHelper.getAsInt(array.get(0), MIN_PACK_VERSION.major), 0), new PackVersion(GsonHelper.getAsInt(array.get(1), MAX_PACK_VERSION.major), 0));
+                    return new Pair<>(new PackVersion(GsonHelper.getAsInt(array.get(0), MIN_PACK_VERSION.major()), 0), new PackVersion(GsonHelper.getAsInt(array.get(1), MAX_PACK_VERSION.major()), 0));
                 }
             }
             case JsonObject object -> {
-                int min = GsonHelper.getAsInt(object.get("min_inclusive"), MIN_PACK_VERSION.major);
-                int max = GsonHelper.getAsInt(object.get("max_inclusive"), MAX_PACK_VERSION.major);
+                int min = GsonHelper.getAsInt(object.get("min_inclusive"), MIN_PACK_VERSION.major());
+                int max = GsonHelper.getAsInt(object.get("max_inclusive"), MAX_PACK_VERSION.major());
                 return new Pair<>(new PackVersion(min, 0), new PackVersion(max, 0));
             }
             default -> {
@@ -328,10 +266,10 @@ public class ResolutionMergePackMcMeta implements Resolution {
         if (format instanceof JsonArray array) {
             if (array.isEmpty()) return defaultVersion;
             if (array.size() == 1) {
-                return new PackVersion(GsonHelper.getAsInt(array.get(0), defaultVersion.major), 0);
+                return new PackVersion(GsonHelper.getAsInt(array.get(0), defaultVersion.major()), 0);
             }
             if (array.size() == 2) {
-                return new PackVersion(GsonHelper.getAsInt(array.get(0), defaultVersion.major), GsonHelper.getAsInt(array.get(1), defaultVersion.minor));
+                return new PackVersion(GsonHelper.getAsInt(array.get(0), defaultVersion.major()), GsonHelper.getAsInt(array.get(1), defaultVersion.minor()));
             }
         } else if (format instanceof JsonPrimitive jsonPrimitive) {
             float version = jsonPrimitive.getAsFloat();
