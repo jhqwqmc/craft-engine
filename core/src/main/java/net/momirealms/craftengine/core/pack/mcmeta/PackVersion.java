@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.pack.mcmeta;
 
+import com.google.gson.JsonArray;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -37,6 +38,21 @@ public record PackVersion(int major, int minor) implements Comparable<PackVersio
 
     public boolean isBelow(PackVersion other) {
         return this.compareTo(other) < 0;
+    }
+
+    public String asString() {
+        if (this.minor == 0) {
+            return String.valueOf(this.major);
+        } else {
+            return this.major + "." + this.minor;
+        }
+    }
+
+    public JsonArray getAsJsonArray() {
+        JsonArray array = new JsonArray();
+        array.add(this.major);
+        array.add(this.minor);
+        return array;
     }
 
     /**

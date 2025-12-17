@@ -836,10 +836,10 @@ public abstract class AbstractPackManager implements PackManager {
         if (!rawMeta.has("pack")) {
             JsonObject pack = new JsonObject();
             rawMeta.add("pack", pack);
-            pack.addProperty("pack_format", Config.packMinVersion().packFormat().major());
+            pack.addProperty("pack_format", Config.packMinVersion().majorPackFormat());
             JsonObject supportedFormats = new JsonObject();
-            supportedFormats.addProperty("min_inclusive", Config.packMinVersion().packFormat().major());
-            supportedFormats.addProperty("max_inclusive", Config.packMaxVersion().packFormat().major());
+            supportedFormats.addProperty("min_inclusive", Config.packMinVersion().majorPackFormat());
+            supportedFormats.addProperty("max_inclusive", Config.packMaxVersion().majorPackFormat());
             pack.add("supported_formats", supportedFormats);
             changed = true;
         }
@@ -867,10 +867,11 @@ public abstract class AbstractPackManager implements PackManager {
             JsonObject entry = new JsonObject();
             JsonObject formats = new JsonObject();
             entry.add("formats", formats);
-            formats.addProperty("min_inclusive", revision.minPackVersion());
-            formats.addProperty("max_inclusive", revision.maxPackVersion());
-            entry.addProperty("min_format", revision.minPackVersion());
-            entry.addProperty("max_format", revision.maxPackVersion());
+            JsonArray formatsArray = new JsonArray();
+            formatsArray.add(revision.minPackVersion().major());
+            formatsArray.add(revision.maxPackVersion().major());
+            entry.add("min_format", revision.minPackVersion().getAsJsonArray());
+            entry.add("max_format", revision.maxPackVersion().getAsJsonArray());
             entry.addProperty("directory", Config.createOverlayFolderName(revision.versionString()));
             entries.add(entry);
         }
@@ -1197,7 +1198,7 @@ public abstract class AbstractPackManager implements PackManager {
         List<OverlayCombination.Segment> segments = new ArrayList<>();
         // 完全小于1.21.11或完全大于1.21.11
         if (Config.packMaxVersion().isBelow(MinecraftVersion.V1_21_11) || Config.packMinVersion().isAtOrAbove(MinecraftVersion.V1_21_11)) {
-            OverlayCombination combination = new OverlayCombination(packMeta.overlays(), Config.packMinVersion().packFormat().major(), Config.packMaxVersion().packFormat().major());
+            OverlayCombination combination = new OverlayCombination(packMeta.overlays(), Config.packMinVersion().majorPackFormat(), Config.packMaxVersion().majorPackFormat());
             while (combination.hasNext()) {
                 OverlayCombination.Segment segment = combination.nextSegment();
                 if (segment != null) {
@@ -1209,7 +1210,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
         // 混合版本
         else {
-            OverlayCombination combinationLegacy = new OverlayCombination(packMeta.overlays(), Config.packMinVersion().packFormat().major(), MinecraftVersion.V1_21_11.packFormat().major() - 1);
+            OverlayCombination combinationLegacy = new OverlayCombination(packMeta.overlays(), Config.packMinVersion().majorPackFormat(), 72 /* 25w44a */);
             while (combinationLegacy.hasNext()) {
                 OverlayCombination.Segment segment = combinationLegacy.nextSegment();
                 if (segment != null) {
@@ -1218,7 +1219,7 @@ public abstract class AbstractPackManager implements PackManager {
                     break;
                 }
             }
-            OverlayCombination combinationModern = new OverlayCombination(packMeta.overlays(), MinecraftVersion.V1_21_11.packFormat().major(), Config.packMaxVersion().packFormat().major());
+            OverlayCombination combinationModern = new OverlayCombination(packMeta.overlays(), 73 /* 25w45a */, Config.packMaxVersion().majorPackFormat());
             while (combinationModern.hasNext()) {
                 OverlayCombination.Segment segment = combinationModern.nextSegment();
                 if (segment != null) {
@@ -1277,9 +1278,7 @@ public abstract class AbstractPackManager implements PackManager {
             for (AtlasFixer.Entry entry : itemFixer.entries()) {
                 int min = entry.min();
                 int max = entry.max();
-                MinecraftVersion minV = MinecraftVersion.byMajorPackFormat(min).getFirst();
-                MinecraftVersion maxV = MinecraftVersion.byMajorPackFormat(max).getLast();
-                String directoryName = Config.createOverlayFolderName(minV.version().replace("\\.", "_") + "-" + maxV.version().replace("\\.", "_"));
+                String directoryName = Config.createOverlayFolderName(min + "-" + max);
                 Path atlasPath = path.resolve(directoryName)
                         .resolve("assets")
                         .resolve("minecraft")
@@ -1300,9 +1299,7 @@ public abstract class AbstractPackManager implements PackManager {
             for (AtlasFixer.Entry entry : itemFixer.entries()) {
                 int min = entry.min();
                 int max = entry.max();
-                MinecraftVersion minV = MinecraftVersion.byMajorPackFormat(min).getFirst();
-                MinecraftVersion maxV = MinecraftVersion.byMajorPackFormat(max).getLast();
-                String directoryName = Config.createOverlayFolderName(minV.version().replace("\\.", "_") + "-" + maxV.version().replace("\\.", "_"));
+                String directoryName = Config.createOverlayFolderName(min + "-" + max);
                 // 这个版本不认可overlay，得把atlas直接写进主包内
                 if (min <= MinecraftVersion.V1_20_1.packFormat().major()) {
                     Path atlasPath = path.resolve("assets")

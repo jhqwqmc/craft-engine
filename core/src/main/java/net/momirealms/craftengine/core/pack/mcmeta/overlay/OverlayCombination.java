@@ -68,7 +68,7 @@ public class OverlayCombination {
             return null;
         }
         // 获取事件
-        VersionBasedEvent events = this.versionBasedEvents.get(this.cursor);
+        VersionBasedEvent events = this.versionBasedEvents.get(this.cursor++);
         // 将上一个版本和上次记录的版本打为一个overlay返回
         Segment segment = new Segment(this.version, events.version - 1, Set.copyOf(this.currentOverlays));
         this.version = events.version;
@@ -80,7 +80,7 @@ public class OverlayCombination {
                 this.currentOverlays.add(event.overlay);
             }
         }
-        this.cursor++;
+
         return segment;
     }
 
@@ -97,9 +97,25 @@ public class OverlayCombination {
     }
 
     record Event(Overlay overlay, Operation operation) {
+
+        @Override
+        public @NotNull String toString() {
+            return "Event{" +
+                    "overlay=" + overlay +
+                    ", operation=" + operation +
+                    '}';
+        }
     }
 
     record VersionBasedEvent(int version, List<Event> events) {
+
+        @Override
+        public @NotNull String toString() {
+            return "VersionBasedEvent{" +
+                    "version=" + version +
+                    ", events=" + events +
+                    '}';
+        }
     }
 
     enum Operation {

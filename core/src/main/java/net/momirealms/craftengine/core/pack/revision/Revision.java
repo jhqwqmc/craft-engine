@@ -1,14 +1,15 @@
 package net.momirealms.craftengine.core.pack.revision;
 
+import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 
 import java.util.Objects;
 
 public interface Revision {
 
-    int minPackVersion();
+    PackVersion minPackVersion();
 
-    int maxPackVersion();
+    PackVersion maxPackVersion();
 
     String versionString();
 
@@ -47,7 +48,7 @@ public interface Revision {
         @Override
         public String versionString() {
             if (this.versionString == null) {
-                this.versionString = this.minVersion.version().replace(".", "_");
+                this.versionString = this.minVersion.packFormat().asString();
             }
             return this.versionString;
         }
@@ -58,15 +59,13 @@ public interface Revision {
         }
 
         @Override
-        public int maxPackVersion() {
-            // todo 重构revision系统
-            return MinecraftVersion.FUTURE.packFormat().major();
+        public PackVersion maxPackVersion() {
+            return MinecraftVersion.FUTURE.packFormat();
         }
 
         @Override
-        public int minPackVersion() {
-            // todo 重构revision系统
-            return this.minVersion.packFormat().major();
+        public PackVersion minPackVersion() {
+            return this.minVersion.packFormat();
         }
 
         @Override
@@ -112,19 +111,19 @@ public interface Revision {
         }
 
         @Override
-        public int minPackVersion() {
-            return this.minVersion.packFormat().major();
+        public PackVersion minPackVersion() {
+            return this.minVersion.packFormat();
         }
 
         @Override
-        public int maxPackVersion() {
-            return this.maxVersion.packFormat().major();
+        public PackVersion maxPackVersion() {
+            return this.maxVersion.packFormat();
         }
 
         @Override
         public String versionString() {
             if (this.versionString == null) {
-                this.versionString = this.minVersion.version().replace(".", "_") + "-" + this.maxVersion.version().replace(".", "_");
+                this.versionString = this.minVersion.packFormat().asString() + "-" + this.maxVersion.packFormat().asString();
             }
             return this.versionString;
         }

@@ -79,7 +79,6 @@ public class Config {
 
     protected boolean resource_pack$validation$enable;
     protected boolean resource_pack$validation$fix_atlas;
-    protected List<MinecraftVersion> resource_pack$validation$test_versions;
     protected boolean resource_pack$exclude_core_shaders;
 
     protected boolean resource_pack$protection$obfuscation$enable;
@@ -392,7 +391,6 @@ public class Config {
         }).collect(Collectors.toSet());
         resource_pack$validation$enable = config.getBoolean("resource-pack.validation.enable", true);
         resource_pack$validation$fix_atlas = config.getBoolean("resource-pack.validation.fix-atlas", true);
-        resource_pack$validation$test_versions = config.getStringList("resource-pack.validation.test-versions", List.of("server")).stream().map(Config::getVersion).distinct().toList();
         resource_pack$exclude_core_shaders = config.getBoolean("resource-pack.exclude-core-shaders", false);
         resource_pack$overlay_format = config.getString("resource-pack.overlay-format", "overlay_{version}");
         if (!resource_pack$overlay_format.contains("{version}")) {
@@ -1110,10 +1108,6 @@ public class Config {
 
     public static boolean fixTextureAtlas() {
         return instance.resource_pack$validation$fix_atlas;
-    }
-
-    public static List<MinecraftVersion> validationTestVersions() {
-        return instance.resource_pack$validation$test_versions;
     }
 
     public static boolean excludeShaders() {
