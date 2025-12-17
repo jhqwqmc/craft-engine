@@ -52,10 +52,12 @@ public class Overlay {
         maxFormat.add(new JsonPrimitive(this.maxVersion.major()));
         maxFormat.add(new JsonPrimitive(this.maxVersion.minor()));
         entry.add("max_format", maxFormat);
-        JsonArray formats = new JsonArray();
-        formats.add(new JsonPrimitive(this.minVersion.major()));
-        formats.add(new JsonPrimitive(this.maxVersion.major()));
-        entry.add("formats", formats);
+        if (this.minVersion.major() < 65) {
+            JsonArray formats = new JsonArray();
+            formats.add(new JsonPrimitive(this.minVersion.major()));
+            formats.add(new JsonPrimitive(this.maxVersion.major()));
+            entry.add("formats", formats);
+        }
         return entry;
     }
 

@@ -865,10 +865,12 @@ public abstract class AbstractPackManager implements PackManager {
         }
         for (Revision revision : revisions) {
             JsonObject entry = new JsonObject();
-            JsonArray formatsArray = new JsonArray();
-            entry.add("formats", formatsArray);
-            formatsArray.add(revision.minPackVersion().major());
-            formatsArray.add(revision.maxPackVersion().major());
+            if (revision.minPackVersion().major() < 65) {
+                JsonArray formatsArray = new JsonArray();
+                entry.add("formats", formatsArray);
+                formatsArray.add(revision.minPackVersion().major());
+                formatsArray.add(revision.maxPackVersion().major());
+            }
             entry.add("min_format", revision.minPackVersion().getAsJsonArray());
             entry.add("max_format", revision.maxPackVersion().getAsJsonArray());
             entry.addProperty("directory", Config.createOverlayFolderName(revision.versionString()));

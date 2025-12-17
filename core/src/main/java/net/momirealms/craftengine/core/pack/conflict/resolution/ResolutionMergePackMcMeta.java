@@ -165,11 +165,14 @@ public class ResolutionMergePackMcMeta implements Resolution {
                 Pair<PackVersion, PackVersion> supportedVersions = getSupportedVersions(entryJson);
                 PackVersion min = PackVersion.getHigher(supportedVersions.left(), PackVersion.MIN_OVERLAY_VERSION);
                 PackVersion max = PackVersion.getHigher(supportedVersions.right(), PackVersion.MIN_OVERLAY_VERSION);
-                // 旧版格式支持
-                JsonArray supportedFormats = new JsonArray();
-                supportedFormats.add(min.major());
-                supportedFormats.add(max.major());
-                entryJson.add("formats", supportedFormats);
+                // https://minecraft.wiki/w/Java_Edition_25w31a
+                if (min.major() < 65) {
+                    // 旧版格式支持
+                    JsonArray supportedFormats = new JsonArray();
+                    supportedFormats.add(min.major());
+                    supportedFormats.add(max.major());
+                    entryJson.add("formats", supportedFormats);
+                }
                 // 新版格式支持
                 JsonArray minFormat = new JsonArray();
                 minFormat.add(min.major());
