@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin.context;
 
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,6 +92,16 @@ public class ContextHolder {
     @Nullable
     public <T> T getOrDefault(ContextKey<T> parameter, @Nullable T defaultValue) {
         return (T) Optional.ofNullable(this.params.get(parameter)).map(Supplier::get).orElse(defaultValue);
+    }
+
+    @ApiStatus.Internal
+    public Map<ContextKey<?>, Supplier<Object>> params() {
+        return ImmutableMap.copyOf(this.params);
+    }
+
+    @ApiStatus.Internal
+    public boolean isEmpty() {
+        return this.params.isEmpty();
     }
 
     public static Builder builder() {

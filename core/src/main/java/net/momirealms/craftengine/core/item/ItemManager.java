@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.item;
 
 import cn.gtemc.itembridge.api.ItemBridge;
-import cn.gtemc.itembridge.api.Provider;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
@@ -123,7 +122,5 @@ public interface ItemManager<T> extends Manageable, ModelGenerator {
 
     ItemUpdateResult updateItem(Item<T> item, Supplier<ItemBuildContext> contextSupplier);
 
-    ItemBridge<T> itemBridgeProvider();
-
-    Optional<T> buildPlatformItem(Provider<T> provider, String id, ItemBuildContext context);
+    <P> ItemBridge<T, P> itemBridgeProvider();
 }

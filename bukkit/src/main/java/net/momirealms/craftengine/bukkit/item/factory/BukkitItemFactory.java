@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.util.UniqueKey;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
@@ -26,7 +27,7 @@ import java.util.Optional;
 
 public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extends ItemFactory<W, ItemStack> {
     private boolean hasExternalRecipeSource = false;
-    private Provider<ItemStack>[] recipeIngredientSources = null;
+    private Provider<ItemStack, Player>[] recipeIngredientSources = null;
 
     protected BukkitItemFactory(CraftEngine plugin) {
         super(plugin);
@@ -50,7 +51,7 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
         throw new IllegalStateException("Unsupported server version: " + VersionHelper.MINECRAFT_VERSION.version());
     }
 
-    public void resetRecipeIngredientSources(Provider<ItemStack>[] recipeIngredientSources) {
+    public void resetRecipeIngredientSources(Provider<ItemStack, Player>[] recipeIngredientSources) {
         if (recipeIngredientSources == null || recipeIngredientSources.length == 0) {
             this.recipeIngredientSources = null;
             this.hasExternalRecipeSource = false;
@@ -102,7 +103,7 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
             return null;
         }
         if (this.hasExternalRecipeSource) {
-           for (Provider<ItemStack> source : this.recipeIngredientSources) {
+           for (Provider<ItemStack, Player> source : this.recipeIngredientSources) {
                Optional<String> id = source.id(item.getItem());
                if (id.isPresent()) {
                    return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id.get())));

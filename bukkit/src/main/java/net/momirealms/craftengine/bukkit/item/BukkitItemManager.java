@@ -1,9 +1,7 @@
 package net.momirealms.craftengine.bukkit.item;
 
 import cn.gtemc.itembridge.api.Provider;
-import cn.gtemc.itembridge.api.context.BuildContext;
 import cn.gtemc.itembridge.core.BukkitItemBridge;
-import cn.gtemc.itembridge.hook.context.ItemContextKeys;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,7 +24,10 @@ import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.GsonHelper;
+import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.UniqueKey;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +41,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
+@SuppressWarnings("unchecked")
 public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     static {
         registerVanillaItemExtraBehavior(FlintAndSteelItemBehavior.INSTANCE, ItemKeys.FLINT_AND_STEEL);
@@ -84,10 +86,10 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     @Override
     public void delayedLoad() {
         super.delayedLoad();
-        List<Provider<ItemStack>> sources = new ArrayList<>();
+        List<Provider<ItemStack, org.bukkit.entity.Player>> sources = new ArrayList<>();
         for (String externalSource : Config.recipeIngredientSources()) {
             String sourceId = externalSource.toLowerCase(Locale.ENGLISH);
-            Optional<Provider<ItemStack>> provider = itemBridgeProvider().provider(sourceId);
+            Optional<Provider<ItemStack, org.bukkit.entity.Player>> provider = itemBridgeProvider().provider(sourceId);
             provider.ifPresent(sources::add);
         }
         this.factory.resetRecipeIngredientSources(sources.isEmpty() ? null : sources.toArray(new Provider[0]));
@@ -451,12 +453,5 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
             this.itemBridge = builder.build();
         }
         return this.itemBridge;
-    }
-
-    @Override
-    public Optional<ItemStack> buildPlatformItem(Provider<ItemStack> provider, String id, ItemBuildContext context) {
-        Player player = context.player();
-        org.bukkit.entity.Player bukkitPlayer = player == null ? null : (org.bukkit.entity.Player) player.platformPlayer();
-        return provider.build(id, BuildContext.builder().withOptional(ItemContextKeys.PLAYER, bukkitPlayer).build());
     }
 }
