@@ -406,19 +406,19 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
 
         private boolean isModernFormatRequired() {
-            return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4);
+            return Config.packMaxVersion().isAtOrAbove(MinecraftVersion.V1_21_4);
         }
 
         private boolean needsLegacyCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersions.V1_21_4);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_4);
         }
 
         private boolean needsCustomModelDataCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersions.V1_21_2);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_2);
         }
 
         private boolean needsItemModelCompatibility() {
-            return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_2) && VersionHelper.isOrAbove1_21_2(); //todo 能否通过客户端包解决问题
+            return Config.packMaxVersion().isAtOrAbove(MinecraftVersion.V1_21_2) && VersionHelper.isOrAbove1_21_2(); //todo 能否通过客户端包解决问题
         }
 
         public Map<Key, IdAllocator> idAllocators() {

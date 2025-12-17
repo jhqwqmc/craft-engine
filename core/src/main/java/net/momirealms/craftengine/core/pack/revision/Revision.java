@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.pack.revision;
 
 import net.momirealms.craftengine.core.util.MinecraftVersion;
-import net.momirealms.craftengine.core.util.MinecraftVersions;
 
 import java.util.Objects;
 
@@ -37,7 +36,7 @@ public interface Revision {
 
         @Override
         public MinecraftVersion maxVersion() {
-            return MinecraftVersions.FUTURE;
+            return MinecraftVersion.FUTURE;
         }
 
         @Override
@@ -61,7 +60,7 @@ public interface Revision {
         @Override
         public int maxPackVersion() {
             // todo 重构revision系统
-            return MinecraftVersions.FUTURE.packFormat().major();
+            return MinecraftVersion.FUTURE.packFormat().major();
         }
 
         @Override

@@ -8,6 +8,10 @@ public record PackVersion(int major, int minor) implements Comparable<PackVersio
     public static final PackVersion MIN_PACK_VERSION = new PackVersion(15, 0); // 1.20
     public static final PackVersion MAX_PACK_VERSION = new PackVersion(1000, 0); // future
 
+    public PackVersion(int major) {
+        this(major, 0);
+    }
+
     @Override
     public int compareTo(@NotNull PackVersion o) {
         // 首先比较 major 版本

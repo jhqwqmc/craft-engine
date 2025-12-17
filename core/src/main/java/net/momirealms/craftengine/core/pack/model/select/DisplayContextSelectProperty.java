@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
-import net.momirealms.craftengine.core.util.MinecraftVersions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -38,7 +37,7 @@ public class DisplayContextSelectProperty implements SelectProperty {
 
     @Override
     public @Nullable JsonElement remap(JsonElement element, MinecraftVersion version) {
-        if (version.isBelow(MinecraftVersions.V1_21_9) && element instanceof JsonPrimitive primitive && primitive.isString()) {
+        if (version.isBelow(MinecraftVersion.V1_21_9) && element instanceof JsonPrimitive primitive && primitive.isString()) {
             if (primitive.getAsString().equals("on_shelf")) {
                 return null;
             }

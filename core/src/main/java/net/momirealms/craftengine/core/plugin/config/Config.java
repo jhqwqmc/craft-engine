@@ -611,12 +611,12 @@ public class Config {
 
     private static MinecraftVersion getVersion(String version) {
         if (version.equalsIgnoreCase("latest")) {
-            return new MinecraftVersion(PluginProperties.getValue("latest-version"));
+            return MinecraftVersion.byName(PluginProperties.getValue("latest-version"));
         }
         if (version.equalsIgnoreCase("server")) {
             return VersionHelper.MINECRAFT_VERSION;
         }
-        return MinecraftVersion.parse(version);
+        return MinecraftVersion.byName(version);
     }
 
     public static Locale forcedLocale() {

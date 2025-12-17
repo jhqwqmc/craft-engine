@@ -32,6 +32,33 @@ public class Overlay {
         this.maxVersion = supportedVersions.right();
     }
 
+    @Override
+    public String toString() {
+        return "Overlay{" +
+                "minVersion=" + minVersion +
+                ", maxVersion=" + maxVersion +
+                ", directory='" + directory + '\'' +
+                '}';
+    }
+
+    public JsonObject getAsOverlayEntry() {
+        JsonObject entry = new JsonObject();
+        entry.addProperty("directory", this.directory);
+        JsonArray minFormat = new JsonArray();
+        minFormat.add(new JsonPrimitive(this.minVersion.major()));
+        minFormat.add(new JsonPrimitive(this.minVersion.minor()));
+        entry.add("min_format", minFormat);
+        JsonArray maxFormat = new JsonArray();
+        maxFormat.add(new JsonPrimitive(this.maxVersion.major()));
+        maxFormat.add(new JsonPrimitive(this.maxVersion.minor()));
+        entry.add("max_format", maxFormat);
+        JsonArray formats = new JsonArray();
+        formats.add(new JsonPrimitive(this.minVersion.major()));
+        formats.add(new JsonPrimitive(this.maxVersion.major()));
+        entry.add("formats", formats);
+        return entry;
+    }
+
     public PackVersion minVersion() {
         return minVersion;
     }
