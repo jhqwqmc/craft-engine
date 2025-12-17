@@ -145,6 +145,7 @@ public final class Atlas {
 
     public void addSingle(Key key) {
         this.single.add(key);
+        this.defined.add(key);
     }
 
     // 获取贴图源文件路径，有些类型可能查不到

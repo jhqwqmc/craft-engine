@@ -100,7 +100,7 @@ public class ResolutionMergePackMcMeta implements Resolution {
                 newLanguage.add(entry.getKey(), entry.getValue());
             }
         });
-        if (!newLanguage.isEmpty()) {
+        if (!newLanguage.asMap().isEmpty()) { // 兼容低版本gson
             merged.add("language", newLanguage);
         }
         // 第七步，合并其他未知元素

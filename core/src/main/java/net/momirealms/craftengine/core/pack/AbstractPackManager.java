@@ -439,8 +439,6 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/remove_shulker_head/pack.yml");
 
         // legacy armor
-        plugin.saveResource("resources/legacy_armor/resourcepack/assets/minecraft/textures/trims/entity/humanoid/chainmail.png");
-        plugin.saveResource("resources/legacy_armor/resourcepack/assets/minecraft/textures/trims/entity/humanoid_leggings/chainmail.png");
         plugin.saveResource("resources/legacy_armor/configuration/chainmail.yml");
         plugin.saveResource("resources/legacy_armor/pack.yml");
 
@@ -451,6 +449,8 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/internal/configuration/offset_chars.yml");
         plugin.saveResource("resources/internal/configuration/gui.yml");
         plugin.saveResource("resources/internal/configuration/mappings.yml");
+        plugin.saveResource("resources/internal/resourcepack/assets/minecraft/textures/trims/entity/humanoid/chainmail.png");
+        plugin.saveResource("resources/internal/resourcepack/assets/minecraft/textures/trims/entity/humanoid_leggings/chainmail.png");
         plugin.saveResource("resources/internal/resourcepack/assets/minecraft/textures/font/offset/space_split.png");
         plugin.saveResource("resources/internal/resourcepack/assets/minecraft/textures/font/gui/custom/item_browser.png");
         plugin.saveResource("resources/internal/resourcepack/assets/minecraft/textures/font/gui/custom/category.png");
@@ -740,7 +740,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public void generateResourcePack() throws IOException {
+    public void generateResourcePack() throws Exception {
         this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.start"));
         long time1 = System.currentTimeMillis();
 
@@ -1478,6 +1478,7 @@ public abstract class AbstractPackManager implements PackManager {
 
         收集全部 含有贴图的有效模型阶段
         有效指的是被实际使用的模型
+
 
          */
 
@@ -3038,7 +3039,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void processZipFile(Path zipFile, Path sourceFolder, @Nullable FileSystem fs,
-                                Map<String, List<Path>> conflictChecker, Map<Path, CachedAssetFile> previousFiles) throws IOException {
+                                Map<String, List<Path>> conflictChecker, Map<Path, CachedAssetFile> previousFiles) {
         try (FileSystem zipFs = FileSystems.newFileSystem(zipFile)) {
             long zipLastModified = Files.getLastModifiedTime(zipFile).toMillis();
             long zipSize = Files.size(zipFile);
@@ -3063,11 +3064,17 @@ public abstract class AbstractPackManager implements PackManager {
                         cachedAssetFiles.put(sourcePath, cachedAsset);
                     }
                     if (fs != null) {
-                        updateConflictChecker(fs, conflictChecker, entry, sourcePath, entryPathInZip, cachedAsset.data());
+                        try {
+                            updateConflictChecker(fs, conflictChecker, entry, sourcePath, entryPathInZip, cachedAsset.data());
+                        } catch (Exception e) {
+                            AbstractPackManager.this.plugin.logger().warn("Failed to update conflict checker", e);
+                        }
                     }
                     return FileVisitResult.CONTINUE;
                 }
             });
+        } catch (Exception e) {
+            this.plugin.logger().warn("Failed to process zip file " + zipFile, e);
         }
     }
 
