@@ -50,6 +50,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
                                         byte peek,
                                         boolean interactive,
                                         boolean interactionEntity,
+                                        boolean invisible,
                                         Direction direction) {
         super(seats, position, canUseItemOn, blocksBuilding, canBeHitByProjectile);
         this.scale = scale;
@@ -66,7 +67,9 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
         ShulkerData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, this.cachedShulkerValues); // Invisible
 
         List<Object> cachedInteractionValues = new ArrayList<>();
-        InteractionEntityData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, cachedInteractionValues);
+        if (invisible) {
+            InteractionEntityData.SharedFlags.addEntityDataIfNotDefaultValue((byte) 0x20, cachedInteractionValues);
+        }
         float shulkerHeight = (getPhysicalPeek(peek * 0.01F) + 1) * scale;
         if (direction == Direction.UP) {
             InteractionEntityData.Height.addEntityDataIfNotDefaultValue(shulkerHeight + 0.01f, cachedInteractionValues);
@@ -309,11 +312,12 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
             boolean canUseItemOn = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("can-use-item-on", true), "can-use-item-on");
             boolean canBeHitByProjectile = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("can-be-hit-by-projectile", true), "can-be-hit-by-projectile");
             boolean blocksBuilding = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("blocks-building", true), "blocks-building");
+            boolean invisible = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("invisible", false), "invisible");
             return new ShulkerFurnitureHitboxConfig(
                     SeatConfig.fromObj(arguments.get("seats")),
                     position,
                     canUseItemOn, blocksBuilding, canBeHitByProjectile,
-                    scale, peek, interactive, interactionEntity, directionEnum
+                    scale, peek, interactive, interactionEntity, invisible, directionEnum
             );
         }
     }
