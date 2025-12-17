@@ -154,6 +154,8 @@ public final class Atlas {
         if (this.filtered.test(texture)) return null;
         // single直接包含
         if (this.single.contains(texture)) return texture;
+        // 被unstitch或者调色盘定义
+        if (this.defined.contains(texture)) return null;
         String path = texture.value();
         // 路径匹配
         for (Map.Entry<String, String> entry : this.directory.entrySet()) {
