@@ -58,13 +58,23 @@ public class ResolutionMergePackMcMeta implements Resolution {
         collectOverlays(mcmeta1.getAsJsonObject("overlays"), overlays::add);
         collectOverlays(mcmeta2.getAsJsonObject("overlays"), overlays::add);
         if (!overlays.isEmpty()) {
-            JsonObject mergedOverlay = new JsonObject();
-            JsonArray entries = new JsonArray();
-            for (JsonObject entry : overlays) {
-                entries.add(entry);
+            Map<String, JsonObject> overlayMap = new LinkedHashMap<>();
+            for (JsonObject overlay : overlays) {
+                JsonPrimitive directory = overlay.getAsJsonPrimitive("directory");
+                if (directory != null) {
+                    // 名字相同的大概率内部版本也一致，不进一步处理了
+                    overlayMap.put(directory.getAsString(), overlay);
+                }
             }
-            mergedOverlay.add("entries", entries);
-            merged.add("overlays", mergedOverlay);
+            if (!overlayMap.isEmpty()) {
+                JsonObject mergedOverlay = new JsonObject();
+                JsonArray entries = new JsonArray();
+                for (JsonObject entry : overlayMap.values()) {
+                    entries.add(entry);
+                }
+                mergedOverlay.add("entries", entries);
+                merged.add("overlays", mergedOverlay);
+            }
         }
         // 第四步，合并filter
         List<JsonObject> filters = new ArrayList<>();
