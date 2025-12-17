@@ -203,10 +203,9 @@ fun registerPaperTask(
     version: String,
     dirName: String = version,
     javaVersion : Int = 21,
-    serverJar: File? = null,
-    downloadPlugins: Action<DownloadPluginsSpec>? = null
+    serverJar: File? = null
 ) {
-    listOf(version, "${version}-with-viaversion").forEach { taskName ->
+    listOf(version).forEach { taskName ->
         tasks.register(taskName, RunServer::class) {
             group = "run dev server"
             minecraftVersion(version)
@@ -224,18 +223,6 @@ fun registerPaperTask(
             jvmArgs("-Ddisable.watchdog=true")
             jvmArgs("-Xlog:redefine+class*=info")
             jvmArgs("-XX:+AllowEnhancedClassRedefinition")
-            if (taskName.contains("viaversion")) {
-                downloadPlugins {
-                    url("https://ci.viaversion.com/job/ViaVersion/lastBuild/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaVersion/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
-                    url("https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards/662/artifact/build/libs/${getJenkinsArtifactFileName("https://ci.viaversion.com/job/ViaBackwards/lastSuccessfulBuild/api/json?tree=artifacts[*]")}")
-                }
-            }
         }
     }
-}
-
-fun getJenkinsArtifactFileName(url: String): String {
-    val response = URI.create(url).toURL().readText()
-    val regex = """"fileName":"([^"]+)"""".toRegex()
-    return regex.find(response)?.groupValues?.get(1) ?: throw Exception("fileName not found")
 }

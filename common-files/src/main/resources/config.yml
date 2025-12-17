@@ -16,8 +16,9 @@ resource-pack:
   # This option determines the location of the generated resource pack
   # You can use either an absolute path or a relative path here
   path: "./generated/resource_pack.zip"
+  # The minimum client version supported by CraftEngine is 1.20. If you need to provide support for lower client versions, please modify the resource pack yourself.
   # Allowed values:
-  # - 1.20.1, 1.21, 1.21.8, etc.
+  # - 1.20.2, 1.21, 1.21.8, etc.
   # - latest: the latest client version
   # - server: the current server version
   supported-version:

@@ -7,6 +7,7 @@ import java.util.List;
 
 public record PackVersion(int major, int minor) implements Comparable<PackVersion> {
     public static final PackVersion MIN_PACK_VERSION = new PackVersion(15, 0); // 1.20
+    public static final PackVersion MIN_OVERLAY_VERSION = new PackVersion(18, 0); // 1.20
     public static final PackVersion MAX_PACK_VERSION = new PackVersion(1000, 0); // future
 
     public PackVersion(int major) {

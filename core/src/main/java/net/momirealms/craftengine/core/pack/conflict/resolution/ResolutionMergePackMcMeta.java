@@ -8,6 +8,7 @@ import com.google.gson.JsonPrimitive;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
@@ -162,12 +163,12 @@ public class ResolutionMergePackMcMeta implements Resolution {
                 JsonObject entryJson = entry.getAsJsonObject();
                 if (entryJson == null) continue;
                 Pair<PackVersion, PackVersion> supportedVersions = getSupportedVersions(entryJson);
-                PackVersion min = supportedVersions.left();
-                PackVersion max = supportedVersions.right();
+                PackVersion min = PackVersion.getHigher(supportedVersions.left(), PackVersion.MIN_OVERLAY_VERSION);
+                PackVersion max = PackVersion.getHigher(supportedVersions.right(), PackVersion.MIN_OVERLAY_VERSION);
                 // 旧版格式支持
-                JsonObject supportedFormats = new JsonObject();
-                supportedFormats.addProperty("min_inclusive", min.major());
-                supportedFormats.addProperty("max_inclusive", max.major());
+                JsonArray supportedFormats = new JsonArray();
+                supportedFormats.add(min.major());
+                supportedFormats.add(max.major());
                 entryJson.add("formats", supportedFormats);
                 // 新版格式支持
                 JsonArray minFormat = new JsonArray();
@@ -186,8 +187,8 @@ public class ResolutionMergePackMcMeta implements Resolution {
     public static void mergePack(JsonObject merged, JsonObject pack1, JsonObject pack2) {
         Pair<PackVersion, PackVersion> pack1Version = getSupportedVersions(pack1);
         Pair<PackVersion, PackVersion> pack2Version = getSupportedVersions(pack2);
-        PackVersion min = PackVersion.getLower(pack1Version.left(), pack2Version.left());
-        PackVersion max = PackVersion.getHigher(pack1Version.right(), pack2Version.right());
+        PackVersion min = Config.packMinVersion().packFormat();
+        PackVersion max = PackVersion.getHigher(PackVersion.getHigher(pack1Version.right(), pack2Version.right()), Config.packMaxVersion().packFormat());
         // 旧版格式支持
         JsonObject supportedFormats = new JsonObject();
         supportedFormats.addProperty("min_inclusive", min.major());

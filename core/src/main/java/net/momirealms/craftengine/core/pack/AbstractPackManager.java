@@ -865,9 +865,8 @@ public abstract class AbstractPackManager implements PackManager {
         }
         for (Revision revision : revisions) {
             JsonObject entry = new JsonObject();
-            JsonObject formats = new JsonObject();
-            entry.add("formats", formats);
             JsonArray formatsArray = new JsonArray();
+            entry.add("formats", formatsArray);
             formatsArray.add(revision.minPackVersion().major());
             formatsArray.add(revision.maxPackVersion().major());
             entry.add("min_format", revision.minPackVersion().getAsJsonArray());
@@ -1188,8 +1187,10 @@ public abstract class AbstractPackManager implements PackManager {
     private void validateResourcePack(Path path) {
         Path packMcMetaPath = path.resolve("pack.mcmeta");
         PackMcMeta packMeta;
+        JsonObject packMetaJson;
         try {
-            packMeta = new PackMcMeta(GsonHelper.readJsonFile(packMcMetaPath).getAsJsonObject());
+            packMetaJson = GsonHelper.readJsonFile(packMcMetaPath).getAsJsonObject();
+            packMeta = new PackMcMeta(packMetaJson);
         } catch (IOException e) {
             this.plugin.logger().warn("Failed to read pack.mcmeta " + packMcMetaPath.toAbsolutePath(), e);
             return;
@@ -1256,7 +1257,7 @@ public abstract class AbstractPackManager implements PackManager {
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.validate.start",
                     String.valueOf(i + 1), String.valueOf(size), String.valueOf(segment.min()), String.valueOf(segment.max()), overlayInOrder.stream().map(Overlay::directory).toList().toString()));
             ValidationResult result = validateOverlayedResourcePack(rootPathList.toArray(new Path[0]), segment.max() >= MinecraftVersion.V1_21_11.packFormat().major());
-            if (Config.fixTextureAtlas()) {
+            if (Config.fixTextureAtlas() && !Config.enableObfuscation()) {
                 // 有修复物品
                 if (result.fixedItemAtlas != null) {
                     itemFixer.addEntry(segment.min(), segment.max(), result.fixedItemAtlas);
@@ -1272,7 +1273,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
 
         // 尝试修复atlas
-        if (Config.fixTextureAtlas()) {
+        if (Config.fixTextureAtlas() && !Config.enableObfuscation()) {
             Map<String, JsonObject> atlasToAdd = new LinkedHashMap<>();
             // 物品
             for (AtlasFixer.Entry entry : itemFixer.entries()) {
@@ -1296,7 +1297,7 @@ public abstract class AbstractPackManager implements PackManager {
                 }
             }
             // 方块
-            for (AtlasFixer.Entry entry : itemFixer.entries()) {
+            for (AtlasFixer.Entry entry : blockFixer.entries()) {
                 int min = entry.min();
                 int max = entry.max();
                 String directoryName = Config.createOverlayFolderName(min + "-" + max);
@@ -1329,6 +1330,25 @@ public abstract class AbstractPackManager implements PackManager {
                         this.plugin.logger().warn("Failed to write atlas " + atlasPath.toAbsolutePath(), e);
                     }
                 }
+            }
+
+            JsonObject overlaysJson = packMetaJson.getAsJsonObject("overlays");
+            if (overlaysJson == null) {
+                overlaysJson = new JsonObject();
+                packMetaJson.add("overlays", overlaysJson);
+            }
+            JsonArray overlayEntries = overlaysJson.getAsJsonArray("entries");
+            if (overlayEntries == null) {
+                overlayEntries = new JsonArray();
+                overlaysJson.add("entries", overlayEntries);
+            }
+            for (JsonElement entry : atlasToAdd.values()) {
+                overlayEntries.add(entry);
+            }
+            try {
+                GsonHelper.writeJsonFile(packMetaJson, packMcMetaPath);
+            } catch (IOException e) {
+                this.plugin.logger().warn("Failed to write pack.mcmeta", e);
             }
         }
     }
