@@ -90,6 +90,7 @@ public class Config {
     protected boolean resource_pack$protection$obfuscation$path$anti_unzip;
     protected boolean resource_pack$protection$incorrect_crc;
     protected boolean resource_pack$protection$fake_file_size;
+    protected NumberProvider resource_pack$protection$obfuscation$overlay$length;
     protected NumberProvider resource_pack$protection$obfuscation$namespace$length;
     protected int resource_pack$protection$obfuscation$namespace$amount;
     protected String resource_pack$protection$obfuscation$path$block_source;
@@ -368,6 +369,7 @@ public class Config {
         resource_pack$protection$fake_file_size = config.getBoolean("resource-pack.protection.fake-file-size", false);
         resource_pack$protection$obfuscation$namespace$amount = config.getInt("resource-pack.protection.obfuscation.namespace.amount", 32);
         resource_pack$protection$obfuscation$namespace$length = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.namespace.length", 2));
+        resource_pack$protection$obfuscation$overlay$length = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.overlay.length", 4));
         resource_pack$protection$obfuscation$path$depth = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.path.depth", 4));
         resource_pack$protection$obfuscation$path$length = NumberProviders.fromObject(config.get("resource-pack.protection.obfuscation.path.length", 2));
         resource_pack$protection$obfuscation$path$block_source = config.getString("resource-pack.protection.obfuscation.path.block-source", "obf_block");
@@ -888,6 +890,10 @@ public class Config {
 
     public static NumberProvider pathLength() {
         return instance.resource_pack$protection$obfuscation$path$length;
+    }
+
+    public static NumberProvider overlayLength() {
+        return instance.resource_pack$protection$obfuscation$overlay$length;
     }
 
     public static boolean antiUnzip() {

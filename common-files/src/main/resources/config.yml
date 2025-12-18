@@ -146,11 +146,14 @@ resource-pack:
     obfuscation:
       enable: false
       seed: 0 # 0 = random seed
-      # Determines the number and length of obfuscated namespaces.
+      # Determines the length of obfuscated overlay directories
+      overlay:
+        length: 4  # 0 = disable
+      # Determines the number and length of obfuscated namespaces
       namespace:
         amount: 32  # 0 = disable
         length: 2
-      # Determines the depth of the obfuscated path.
+      # Determines the depth and length of the obfuscated path
       path:
         depth: 4
         length: 2
