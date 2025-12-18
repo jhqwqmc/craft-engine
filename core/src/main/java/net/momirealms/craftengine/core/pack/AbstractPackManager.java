@@ -845,6 +845,7 @@ public abstract class AbstractPackManager implements PackManager {
             JsonElement description = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(Config.packDescription()));
             packJson.add("description", description);
             // 需要旧版本兼容性
+            // https://minecraft.wiki/w/Java_Edition_25w31a
             if (minVersion.isBelow(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
                 packJson.addProperty("pack_format", minVersion.major());
                 JsonObject supportedVersions = new JsonObject();
@@ -865,7 +866,7 @@ public abstract class AbstractPackManager implements PackManager {
             PackMcMeta mcMeta = new PackMcMeta(rawMeta);
             List<Overlay> overlays = mcMeta.overlays();
             if (!overlays.isEmpty()) {
-                boolean legacySupported = false;
+                boolean legacySupported = false; // https://minecraft.wiki/w/Java_Edition_25w31a
                 for (Overlay overlay : overlays) {
                     if (overlay.minVersion().isBelow(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
                         legacySupported = true;

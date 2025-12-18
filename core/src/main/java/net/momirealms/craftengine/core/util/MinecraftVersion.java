@@ -10,6 +10,12 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
     private static final Map<Integer, PackVersion> PACK_FORMATS = new HashMap<>();
 
     static {
+        PACK_FORMATS.put(1_16_00, new PackVersion(5, 0));
+        PACK_FORMATS.put(1_16_01, new PackVersion(5, 0));
+        PACK_FORMATS.put(1_16_02, new PackVersion(6, 0));
+        PACK_FORMATS.put(1_16_03, new PackVersion(6, 0));
+        PACK_FORMATS.put(1_16_04, new PackVersion(6, 0));
+        PACK_FORMATS.put(1_16_05, new PackVersion(6, 0));
         PACK_FORMATS.put(1_17_00, new PackVersion(7, 0));
         PACK_FORMATS.put(1_17_01, new PackVersion(7, 0));
         PACK_FORMATS.put(1_18_00, new PackVersion(8, 0));
@@ -45,6 +51,12 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
 
     private static final Map<String, MinecraftVersion> BY_NAME = new LinkedHashMap<>();
     private static final Multimap<Integer, MinecraftVersion> BY_PACK_FORMAT = ArrayListMultimap.create();
+    public static final MinecraftVersion V1_16 = new MinecraftVersion("1.16");
+    public static final MinecraftVersion V1_16_1 = new MinecraftVersion("1.16.1");
+    public static final MinecraftVersion V1_16_2 = new MinecraftVersion("1.16.2");
+    public static final MinecraftVersion V1_16_3 = new MinecraftVersion("1.16.3");
+    public static final MinecraftVersion V1_16_4 = new MinecraftVersion("1.16.4");
+    public static final MinecraftVersion V1_16_5 = new MinecraftVersion("1.16.5");
     public static final MinecraftVersion V1_17 = new MinecraftVersion("1.17");
     public static final MinecraftVersion V1_17_1 = new MinecraftVersion("1.17.1");
     public static final MinecraftVersion V1_18 = new MinecraftVersion("1.18");
