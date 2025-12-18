@@ -91,6 +91,12 @@ public class Overlay {
             minVersions.add(supportedFormats.left());
             maxVersions.add(supportedFormats.right());
         }
+        if (maxVersions.isEmpty()) {
+            maxVersions.add(PackVersion.MAX_PACK_VERSION);
+        }
+        if (minVersions.isEmpty()) {
+            minVersions.add(PackVersion.MIN_OVERLAY_VERSION);
+        }
         return Pair.of(
                 PackVersion.getLowest(minVersions),
                 PackVersion.getHighest(maxVersions)

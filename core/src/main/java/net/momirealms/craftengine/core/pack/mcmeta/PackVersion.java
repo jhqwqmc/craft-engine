@@ -6,8 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record PackVersion(int major, int minor) implements Comparable<PackVersion> {
-    public static final PackVersion MIN_PACK_VERSION = new PackVersion(15, 0); // 1.20
-    public static final PackVersion MIN_OVERLAY_VERSION = new PackVersion(18, 0); // 1.20
+    public static final PackVersion MIN_OVERLAY_VERSION = new PackVersion(18, 0); // 1.20.2
     public static final PackVersion PACK_FORMAT_CHANGE_VERSION = new PackVersion(65, 0); // 25w31a
     public static final PackVersion MAX_PACK_VERSION = new PackVersion(1000, 0); // future
 
@@ -77,7 +76,7 @@ public record PackVersion(int major, int minor) implements Comparable<PackVersio
 
     public static PackVersion getLowest(List<PackVersion> versions) {
         if (versions == null || versions.isEmpty()) {
-            return MIN_PACK_VERSION;
+            return null;
         }
 
         PackVersion lowest = versions.getFirst();
@@ -89,7 +88,7 @@ public record PackVersion(int major, int minor) implements Comparable<PackVersio
 
     public static PackVersion getHighest(List<PackVersion> versions) {
         if (versions == null || versions.isEmpty()) {
-            return MAX_PACK_VERSION;
+            return null;
         }
 
         PackVersion highest = versions.getFirst();
