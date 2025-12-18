@@ -9,13 +9,11 @@ import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
 import java.util.Set;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
