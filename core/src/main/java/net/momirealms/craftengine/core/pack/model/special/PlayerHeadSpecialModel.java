@@ -5,7 +5,6 @@ import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
-import net.momirealms.craftengine.core.util.MinecraftVersions;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ public class PlayerHeadSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        if (version.isAtOrAbove(MinecraftVersions.V1_21_6)) {
+        if (version.isAtOrAbove(MinecraftVersion.V1_21_6)) {
             json.addProperty("type", type().toString());
         } else {
             json.addProperty("type", SpecialModels.HEAD.toString());

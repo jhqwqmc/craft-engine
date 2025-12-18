@@ -7,6 +7,9 @@ import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OverwritableItemModelModifier<I> implements SimpleNetworkItemDataModifier<I> {
     public static final Factory<?> FACTORY = new Factory<>();
     private final Key data;
@@ -21,7 +24,7 @@ public class OverwritableItemModelModifier<I> implements SimpleNetworkItemDataMo
 
     @Override
     public Key type() {
-        return ItemDataModifiers.OVERWRITABLE_CUSTOM_MODEL_DATA;
+        return ItemDataModifiers.OVERWRITABLE_ITEM_MODEL;
     }
 
     @Override

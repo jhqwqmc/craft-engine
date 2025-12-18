@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
-import net.momirealms.craftengine.core.util.MinecraftVersions;
 
 import java.util.List;
 
@@ -33,13 +32,13 @@ public class ModernItemModel {
 
     public JsonObject toJson(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        if (this.oversizedInGui && version.isAtOrAbove(MinecraftVersions.V1_21_6)) {
+        if (this.oversizedInGui && version.isAtOrAbove(MinecraftVersion.V1_21_6)) {
             json.addProperty("oversized_in_gui", true);
         }
         if (!this.handAnimationOnSwap) {
             json.addProperty("hand_animation_on_swap", false);
         }
-        if (this.swapAnimationScale != 1.0f && version.isAtOrAbove(MinecraftVersions.V1_21_11)) {
+        if (this.swapAnimationScale != 1.0f && version.isAtOrAbove(MinecraftVersion.V1_21_11)) {
             json.addProperty("swap_animation_scale", this.swapAnimationScale);
         }
         json.add("model", this.itemModel.apply(version));

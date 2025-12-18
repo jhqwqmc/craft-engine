@@ -22,6 +22,11 @@ public interface CustomFurniture {
 
     FurnitureSettings settings();
 
+    default String translationKey() {
+        Key id = this.id();
+        return "furniture." + id.namespace() + "." + id.value();
+    }
+
     @Nullable
     LootTable<?> lootTable();
 

@@ -16,13 +16,16 @@ resource-pack:
   # This option determines the location of the generated resource pack
   # You can use either an absolute path or a relative path here
   path: "./generated/resource_pack.zip"
+  # The minimum client version supported by CraftEngine is 1.16. If you need to provide support for lower client versions, please modify the resource pack yourself.
   # Allowed values:
-  # - 1.20.1, 1.21, 1.21.8, etc.
+  # - 1.20.1, 1.21, 1.21.8, 26.1, etc.
   # - latest: the latest client version
   # - server: the current server version
   supported-version:
     min: server
     max: latest
+  # The description of your resource pack
+  description: "<gray>CraftEngine ResourcePack</gray>"
   # Remove 1.21.5+ tinted_leaves particles
   remove-tinted-leaves-particle: true
   # Define the name of the overlay folders
@@ -64,7 +67,6 @@ resource-pack:
         path: "pack.mcmeta"
       resolution:
         type: merge_pack_mcmeta
-        description: "<gray>CraftEngine ResourcePack</gray>"
     - term:
         type: exact
         path: "pack.png"
@@ -94,13 +96,12 @@ resource-pack:
       resolution:
         type: merge_font
   # Validate if there is any error in the resource pack, such as missing textures or models.
-  # Validation may not always be accurate due to the presence of resource pack overlays.
   # If your resource pack is compliant with the standard, you can disable validation to improve the resource pack generation speed.
   validation:
     enable: true
     # Fix textures that are not within the atlas. It is unreasonable to always rely on plugins to fix your mistakes.
     # You should strive to make your resource pack more standardized after gaining some experience with resource packs.
-    # When a model file mixes textures from both the blocks atlas and the items atlas, you must manually fix the issue.
+    # The fix-atlas feature is not all-powerful since 1.21.11. In some cases, CraftEngine cannot fix it for you, and you will need to fix your model yourself.
     fix-atlas: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:

@@ -19,18 +19,18 @@ public class LangData {
             if (id.contains("[") && id.contains("]")) {
                 ImmutableBlockState parsed = BlockStateParser.deserialize(id);
                 if (parsed == null) return List.of(id);
-                return List.of("block." + stateToRealBlockId(parsed));
+                return List.of(translationKey(parsed));
             } else {
                 Key blockId = Key.of(id);
                 Optional<CustomBlock> blockOptional = CraftEngine.instance().blockManager().blockById(blockId);
                 if (blockOptional.isPresent()) {
                     List<ImmutableBlockState> states = blockOptional.get().variantProvider().states();
                     if (states.size() == 1) {
-                        return List.of("block." + stateToRealBlockId(states.getFirst()));
+                        return List.of(translationKey(states.getFirst()));
                     } else {
                         ArrayList<String> processed = new ArrayList<>();
                         for (ImmutableBlockState state : states) {
-                            processed.add("block." + stateToRealBlockId(state));
+                            processed.add(translationKey(state));
                         }
                         return processed;
                     }
@@ -91,7 +91,7 @@ public class LangData {
         });
     }
 
-    private static String stateToRealBlockId(ImmutableBlockState state) {
+    public static String translationKey(ImmutableBlockState state) {
         String id = state.customBlockState().literalObject().toString();
         int first = -1, last = -1;
         for (int i = 0; i < id.length(); i++) {
@@ -113,6 +113,6 @@ public class LangData {
                 chars[i] = '.';
             }
         }
-        return new String(chars);
+        return  "block." + new String(chars);
     }
 }

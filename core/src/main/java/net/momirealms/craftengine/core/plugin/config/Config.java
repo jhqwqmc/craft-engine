@@ -66,6 +66,7 @@ public class Config {
     protected List<String> resource_pack$merge_external_zips;
     protected Set<String> resource_pack$exclude_file_extensions;
     protected Path resource_pack$path;
+    protected String resource_pack$description;
 
     protected boolean resource_pack$protection$crash_tools$method_1;
     protected boolean resource_pack$protection$crash_tools$method_2;
@@ -329,6 +330,7 @@ public class Config {
 
         // resource pack
         resource_pack$path = resolvePath(config.getString("resource-pack.path", "./generated/resource_pack.zip"));
+        resource_pack$description = config.getString("resource-pack.description", "<gray>CraftEngine ResourcePack</gray>");
         resource_pack$override_uniform_font = config.getBoolean("resource-pack.override-uniform-font", false);
         resource_pack$generate_mod_assets = config.getBoolean("resource-pack.generate-mod-assets", false);
         resource_pack$remove_tinted_leaves_particle = config.getBoolean("resource-pack.remove-tinted-leaves-particle", true);
@@ -609,12 +611,12 @@ public class Config {
 
     private static MinecraftVersion getVersion(String version) {
         if (version.equalsIgnoreCase("latest")) {
-            return new MinecraftVersion(PluginProperties.getValue("latest-version"));
+            return MinecraftVersion.byName(PluginProperties.getValue("latest-version"));
         }
         if (version.equalsIgnoreCase("server")) {
             return VersionHelper.MINECRAFT_VERSION;
         }
-        return MinecraftVersion.parse(version);
+        return MinecraftVersion.byName(version);
     }
 
     public static Locale forcedLocale() {
@@ -1128,6 +1130,10 @@ public class Config {
 
     public static Key sacrificedHumanoidLeggings() {
         return instance.equipment$sacrificed_vanilla_armor$humanoid_leggings;
+    }
+
+    public static String packDescription() {
+        return instance.resource_pack$description;
     }
 
     public static String sacrificedVanillaArmorType() {
