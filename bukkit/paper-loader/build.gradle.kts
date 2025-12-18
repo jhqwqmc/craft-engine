@@ -116,6 +116,7 @@ paper {
         register("PxRpg") { required = false }
         register("Ratziel") { required = false }
         register("Reforges") { required = false }
+        register("Sertraline") { required = false }
         register("Slimefun") { required = false }
         register("StatTrackers") { required = false }
         register("SX-Item") { required = false }
