@@ -575,7 +575,7 @@ warning.config.resource_pack.generation.missing_sound: "<yellow>声音事件 '<a
 warning.config.resource_pack.generation.texture_not_in_atlas: "<yellow>纹理 '<arg:0>' 不在纹理图集内. 你需要将纹理路径或文件夹前缀添加到纹理图集内, 或者启用 config.yml 中的 'fix-atlas' 选项</yellow>"
 warning.config.resource_pack.generation.multiple_atlases: "<yellow>模型 '<arg:0>' 使用了多个纹理图集, 预期应来自 '<arg:1>', 但同时检测到 '<arg:2>'. 请确保模型使用的所有纹理均来自同一纹理图集以修复此问题</yellow>"
 warning.config.resource_pack.generation.duplicated_sprite: "<yellow>无法加载模型 '<arg:0>'. 纹理图集 '<arg:2>' 中的精灵图 '<arg:1>' 与纹理图集 '<arg:3>' 中的定义重复</yellow>"
-warning.config.resource_pack.invalid_overlay_format: "<yellow>在 config.yml 的 'resource-pack.overlay-format' 处发现问题 - 无效的叠加格式 '<arg:0>'. 叠加格式必须包含占位符 '{version}'</yellow>"
+warning.config.resource_pack.invalid_overlay_format: "<yellow>在 config.yml 的 'resource-pack.overlay-format' 处发现问题 - 无效的叠加资源包格式 '<arg:0>'. 叠加资源包格式必须包含占位符 '{version}'</yellow>"
 warning.config.equipment.duplicate: "<yellow>在文件 <arg:0> 发现问题 - 重复的装备配置 '<arg:1>'. 请检查其他文件中是否存在相同配置</yellow>"
 warning.config.equipment.missing_type: "<yellow>在文件 <arg:0> 发现问题 - 装备 '<arg:1>' 缺少必需的 'type' 参数</yellow>"
 warning.config.equipment.invalid_type: "<yellow>在文件 <arg:0> 发现问题 - 装备 '<arg:1>' 使用了无效的 'type' 参数</yellow>"
