@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
-import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.Pair;
@@ -26,13 +25,7 @@ public class ResolutionMergePackMcMeta implements Resolution {
     public static final Factory FACTORY = new Factory();
     public static final Set<String> STANDARD_PACK_KEYS = ImmutableSet.of("pack", "features", "filter", "overlays", "language");
 
-    private final String description;
-
-    public ResolutionMergePackMcMeta(String description) {
-        this.description = description;
-    }
-
-    public static void merge(Path file1, Path file2, JsonElement customDescription) throws IOException {
+    public static void merge(Path file1, Path file2) throws IOException {
         // 第一步，解析全部的mcmeta文件为json对象
         JsonObject mcmeta1;
         try {
@@ -49,13 +42,15 @@ public class ResolutionMergePackMcMeta implements Resolution {
             return;
         }
         JsonObject merged = new JsonObject();
-        // 第三步，处理pack区域
-        JsonObject pack1 = mcmeta1.getAsJsonObject("pack");
-        JsonObject pack2 = mcmeta2.getAsJsonObject("pack");
-        JsonObject mergedPack = new JsonObject();
-        mergedPack.add("description", customDescription);
-        merged.add("pack", mergedPack);
-        mergePack(mergedPack, pack1, pack2);
+
+// 注释: 无需处理，由后续验证合并
+//        //第二步，处理pack区域
+//        JsonObject pack1 = mcmeta1.getAsJsonObject("pack");
+//        JsonObject pack2 = mcmeta2.getAsJsonObject("pack");
+//        JsonObject mergedPack = new JsonObject();
+//        merged.add("pack", mergedPack);
+//        mergePack(mergedPack, pack1, pack2);
+
         // 第三步，合并overlays
         List<JsonObject> overlays = new ArrayList<>();
         collectOverlays(mcmeta1.getAsJsonObject("overlays"), overlays::add);
@@ -165,14 +160,11 @@ public class ResolutionMergePackMcMeta implements Resolution {
                 Pair<PackVersion, PackVersion> supportedVersions = getSupportedVersions(entryJson);
                 PackVersion min = PackVersion.getHigher(supportedVersions.left(), PackVersion.MIN_OVERLAY_VERSION);
                 PackVersion max = PackVersion.getHigher(supportedVersions.right(), PackVersion.MIN_OVERLAY_VERSION);
-                // https://minecraft.wiki/w/Java_Edition_25w31a
-                if (min.major() < 65) {
-                    // 旧版格式支持
-                    JsonArray supportedFormats = new JsonArray();
-                    supportedFormats.add(min.major());
-                    supportedFormats.add(max.major());
-                    entryJson.add("formats", supportedFormats);
-                }
+                // 旧版格式支持
+                JsonArray supportedFormats = new JsonArray();
+                supportedFormats.add(min.major());
+                supportedFormats.add(max.major());
+                entryJson.add("formats", supportedFormats);
                 // 新版格式支持
                 JsonArray minFormat = new JsonArray();
                 minFormat.add(min.major());
@@ -285,7 +277,7 @@ public class ResolutionMergePackMcMeta implements Resolution {
     @Override
     public void run(PathContext existing, PathContext conflict) {
         try {
-            merge(existing.path(), conflict.path(), AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(this.description)));
+            merge(existing.path(), conflict.path());
         } catch (Exception e) {
             CraftEngine.instance().logger().severe("Failed to merge pack.mcmeta when resolving file conflicts for '" + existing.path()  + "' and '" + conflict.path() + "'", e);
         }
@@ -299,8 +291,7 @@ public class ResolutionMergePackMcMeta implements Resolution {
     public static class Factory implements ResolutionFactory {
         @Override
         public Resolution create(Map<String, Object> arguments) {
-            String description = arguments.getOrDefault("description", "<gray>CraftEngine ResourcePack</gray>").toString();
-            return new ResolutionMergePackMcMeta(description);
+            return new ResolutionMergePackMcMeta();
         }
     }
 }

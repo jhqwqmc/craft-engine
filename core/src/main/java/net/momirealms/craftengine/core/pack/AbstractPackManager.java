@@ -788,19 +788,28 @@ public abstract class AbstractPackManager implements PackManager {
             this.generateClientLang(generatedPackPath);
             this.generateEquipments(generatedPackPath, revisions::add);
             this.generateParticle(generatedPackPath);
-            this.generatePackMetadata(generatedPackPath.resolve("pack.mcmeta"), revisions);
+
+            Path packMcMetaPath = generatedPackPath.resolve("pack.mcmeta");
+            JsonObject packMcMeta = Files.isRegularFile(packMcMetaPath) ? GsonHelper.readJsonFile(packMcMetaPath).getAsJsonObject() : new JsonObject();
+            // 生成revision overlay
+            this.generateRevisionOverlays(packMcMeta, revisions);
+
             if (Config.excludeShaders()) {
                 this.removeAllShaders(generatedPackPath);
             }
             long time2 = System.currentTimeMillis();
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.generate.finish", String.valueOf(time2 - time1)));
+            // 校验资源包
             if (Config.validateResourcePack()) {
-                this.validateResourcePack(generatedPackPath);
+                this.validateResourcePack(generatedPackPath, packMcMeta);
             }
             long time3 = System.currentTimeMillis();
             if (Config.validateResourcePack()) {
                 this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.validate.finish", String.valueOf(time3 - time2)));
             }
+            // 验证完成后，应该重新校验pack.mcmeta并写入
+            this.validatePackMetadata(generatedPackPath.resolve("pack.mcmeta"), packMcMeta);
+            // 优化资源包
             if (Config.optimizeResourcePack()) {
                 this.optimizeResourcePack(generatedPackPath);
             }
@@ -824,29 +833,61 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private void generatePackMetadata(Path path, Set<Revision> revisions) throws IOException {
-        JsonObject rawMeta;
-        boolean changed = false;
-        if (!Files.exists(path)) {
-            rawMeta = new JsonObject();
-            changed = true;
-        } else {
-            rawMeta = GsonHelper.readJsonFile(path).getAsJsonObject();
-        }
-        if (!rawMeta.has("pack")) {
-            JsonObject pack = new JsonObject();
-            rawMeta.add("pack", pack);
-            pack.addProperty("pack_format", Config.packMinVersion().majorPackFormat());
-            JsonObject supportedFormats = new JsonObject();
-            supportedFormats.addProperty("min_inclusive", Config.packMinVersion().majorPackFormat());
-            supportedFormats.addProperty("max_inclusive", Config.packMaxVersion().majorPackFormat());
-            pack.add("supported_formats", supportedFormats);
-            changed = true;
-        }
-        if (revisions.isEmpty()) {
-            if (changed) {
-                GsonHelper.writeJsonFile(rawMeta, path);
+    private void validatePackMetadata(Path path, JsonObject rawMeta) throws IOException {
+        // 获取设定的最大和最小值
+        PackVersion minVersion = Config.packMinVersion().packFormat();
+        PackVersion maxVersion = Config.packMaxVersion().packFormat();
+
+        // 设置pack
+        {
+            JsonObject packJson = new JsonObject();
+            rawMeta.add("pack", packJson);
+            JsonElement description = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(Config.packDescription()));
+            packJson.add("description", description);
+            // 需要旧版本兼容性
+            if (minVersion.isBelow(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
+                packJson.addProperty("pack_format", minVersion.major());
+                JsonObject supportedVersions = new JsonObject();
+                supportedVersions.addProperty("min_inclusive", minVersion.major());
+                supportedVersions.addProperty("max_inclusive", maxVersion.major());
+                packJson.add("supported_formats", supportedVersions);
             }
+            // 到达了1.21.9
+            if (maxVersion.isAtOrAbove(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
+                // 同时要兼容低版本
+                packJson.add("min_format", minVersion.getAsJsonArray());
+                packJson.add("max_format", maxVersion.getAsJsonArray());
+            }
+        }
+
+        // 验证overlay
+        {
+            PackMcMeta mcMeta = new PackMcMeta(rawMeta);
+            List<Overlay> overlays = mcMeta.overlays();
+            if (!overlays.isEmpty()) {
+                boolean legacySupported = false;
+                for (Overlay overlay : overlays) {
+                    if (overlay.minVersion().isBelow(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
+                        legacySupported = true;
+                        break;
+                    }
+                }
+                JsonArray newOverlayEntries = new JsonArray();
+                for (Overlay overlay : overlays) {
+                    newOverlayEntries.add(overlay.getAsOverlayEntry(legacySupported));
+                }
+                JsonObject overlaysJson = new JsonObject();
+                overlaysJson.add("entries", newOverlayEntries);
+                rawMeta.add("overlays", overlaysJson);
+            }
+        }
+
+        GsonHelper.writeJsonFile(rawMeta, path);
+    }
+
+    // 这里都是随便写写的，重点在之后的校验里
+    private void generateRevisionOverlays(JsonObject rawMeta, Set<Revision> revisions) throws IOException {
+        if (revisions.isEmpty()) {
             return;
         }
         JsonObject overlays;
@@ -865,18 +906,15 @@ public abstract class AbstractPackManager implements PackManager {
         }
         for (Revision revision : revisions) {
             JsonObject entry = new JsonObject();
-            if (revision.minPackVersion().major() < 65) {
-                JsonArray formatsArray = new JsonArray();
-                entry.add("formats", formatsArray);
-                formatsArray.add(revision.minPackVersion().major());
-                formatsArray.add(revision.maxPackVersion().major());
-            }
+            JsonArray formatsArray = new JsonArray();
+            entry.add("formats", formatsArray);
+            formatsArray.add(revision.minPackVersion().major());
+            formatsArray.add(revision.maxPackVersion().major());
             entry.add("min_format", revision.minPackVersion().getAsJsonArray());
             entry.add("max_format", revision.maxPackVersion().getAsJsonArray());
             entry.addProperty("directory", Config.createOverlayFolderName(revision.versionString()));
             entries.add(entry);
         }
-        GsonHelper.writeJsonFile(rawMeta, path);
     }
 
     private void removeAllShaders(Path path) {
@@ -1186,18 +1224,8 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private void validateResourcePack(Path path) {
-        Path packMcMetaPath = path.resolve("pack.mcmeta");
-        PackMcMeta packMeta;
-        JsonObject packMetaJson;
-        try {
-            packMetaJson = GsonHelper.readJsonFile(packMcMetaPath).getAsJsonObject();
-            packMeta = new PackMcMeta(packMetaJson);
-        } catch (IOException e) {
-            this.plugin.logger().warn("Failed to read pack.mcmeta " + packMcMetaPath.toAbsolutePath(), e);
-            return;
-        }
-
+    private void validateResourcePack(Path path, JsonObject packMetaJson) {
+        PackMcMeta packMeta = new PackMcMeta(packMetaJson);
         List<OverlayCombination.Segment> segments = new ArrayList<>();
         // 完全小于1.21.11或完全大于1.21.11
         if (Config.packMaxVersion().isBelow(MinecraftVersion.V1_21_11) || Config.packMinVersion().isAtOrAbove(MinecraftVersion.V1_21_11)) {
@@ -1292,7 +1320,7 @@ public abstract class AbstractPackManager implements PackManager {
                     GsonHelper.writeJsonFile(entry.atlas(), atlasPath);
                     if (!atlasToAdd.containsKey(directoryName)) {
                         Overlay overlay = new Overlay(new PackVersion(min), new PackVersion(max), directoryName);
-                        atlasToAdd.put(directoryName, overlay.getAsOverlayEntry());
+                        atlasToAdd.put(directoryName, overlay.getAsOverlayEntry(true));
                     }
                 } catch (IOException e) {
                     this.plugin.logger().warn("Failed to write atlas " + atlasPath.toAbsolutePath(), e);
@@ -1326,7 +1354,7 @@ public abstract class AbstractPackManager implements PackManager {
                         GsonHelper.writeJsonFile(entry.atlas(), atlasPath);
                         if (!atlasToAdd.containsKey(directoryName)) {
                             Overlay overlay = new Overlay(new PackVersion(min), new PackVersion(max), directoryName);
-                            atlasToAdd.put(directoryName, overlay.getAsOverlayEntry());
+                            atlasToAdd.put(directoryName, overlay.getAsOverlayEntry(true));
                         }
                     } catch (IOException e) {
                         this.plugin.logger().warn("Failed to write atlas " + atlasPath.toAbsolutePath(), e);
@@ -1346,11 +1374,6 @@ public abstract class AbstractPackManager implements PackManager {
             }
             for (JsonElement entry : atlasToAdd.values()) {
                 overlayEntries.add(entry);
-            }
-            try {
-                GsonHelper.writeJsonFile(packMetaJson, packMcMetaPath);
-            } catch (IOException e) {
-                this.plugin.logger().warn("Failed to write pack.mcmeta", e);
             }
         }
     }

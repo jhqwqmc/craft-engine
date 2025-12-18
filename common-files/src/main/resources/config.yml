@@ -24,6 +24,8 @@ resource-pack:
   supported-version:
     min: server
     max: latest
+  # The description of your resource pack
+  description: "<gray>CraftEngine ResourcePack</gray>"
   # Remove 1.21.5+ tinted_leaves particles
   remove-tinted-leaves-particle: true
   # Define the name of the overlay folders
@@ -65,7 +67,6 @@ resource-pack:
         path: "pack.mcmeta"
       resolution:
         type: merge_pack_mcmeta
-        description: "<gray>CraftEngine ResourcePack</gray>"
     - term:
         type: exact
         path: "pack.png"

@@ -41,7 +41,7 @@ public class Overlay {
                 '}';
     }
 
-    public JsonObject getAsOverlayEntry() {
+    public JsonObject getAsOverlayEntry(boolean legacy) {
         JsonObject entry = new JsonObject();
         entry.addProperty("directory", this.directory);
         JsonArray minFormat = new JsonArray();
@@ -52,7 +52,7 @@ public class Overlay {
         maxFormat.add(new JsonPrimitive(this.maxVersion.major()));
         maxFormat.add(new JsonPrimitive(this.maxVersion.minor()));
         entry.add("max_format", maxFormat);
-        if (this.minVersion.major() < 65) {
+        if (legacy) {
             JsonArray formats = new JsonArray();
             formats.add(new JsonPrimitive(this.minVersion.major()));
             formats.add(new JsonPrimitive(this.maxVersion.major()));
