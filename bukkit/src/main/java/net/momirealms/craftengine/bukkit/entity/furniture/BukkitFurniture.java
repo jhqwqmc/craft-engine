@@ -144,7 +144,7 @@ public class BukkitFurniture extends Furniture {
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void refresh() {
+    public void refresh() {
         ItemDisplay itemDisplay = this.metaEntity.get();
         if (itemDisplay == null) return;
         Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(itemDisplay.getEntityId())));
@@ -154,6 +154,17 @@ public class BukkitFurniture extends Furniture {
             BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
             BukkitAdaptors.adapt(player).sendPacket(addPacket, false);
         }
+    }
+
+    @Override
+    public void refresh(net.momirealms.craftengine.core.entity.player.Player player) {
+        ItemDisplay itemDisplay = this.metaEntity.get();
+        if (itemDisplay == null) return;
+        Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(itemDisplay.getEntityId())));
+        Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
+                itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
+        player.sendPacket(removePacket, false);
+        player.sendPacket(addPacket, false);
     }
 
     @Override

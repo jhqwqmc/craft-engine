@@ -79,7 +79,9 @@ public abstract class Furniture implements Cullable {
 
     public abstract CompletableFuture<Boolean> moveTo(WorldPosition position, boolean force);
 
-    protected abstract void refresh();
+    public abstract void refresh();
+
+    public abstract void refresh(Player player);
 
     protected void clearColliders() {
         if (this.colliders != null) {
