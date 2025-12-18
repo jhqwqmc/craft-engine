@@ -11,6 +11,7 @@ repositories {
     maven("https://jitpack.io/")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.gtemc.net/releases/")
     mavenCentral()
 }
 
@@ -31,6 +32,7 @@ dependencies {
     implementation("net.momirealms:sparrow-util:${rootProject.properties["sparrow_util_version"]}")
     implementation("net.momirealms:antigrieflib:${rootProject.properties["anti_grief_version"]}")
     implementation("net.momirealms:craft-engine-nms-helper-mojmap:${rootProject.properties["nms_helper_version"]}")
+    implementation("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
 }
 
 java {
@@ -92,15 +94,33 @@ paper {
         register("BetterModel") { required = false }
 
         // external items
-        register("NeigeItems") { required = false }
+        register("AzureFlow") { required = false }
+        register("CustomFishing") { required = false }
+        register("EcoArmor") { required = false }
+        register("EcoCrates") { required = false }
+        register("EcoItems") { required = false }
+        register("EcoMobs") { required = false }
+        register("EcoPets") { required = false }
+        register("EcoScrolls") { required = false }
+        register("ExecutableItems") { required = false }
+        register("HeadDatabase") { required = false }
+        register("HMCCosmetics") { required = false }
+        register("ItemsAdder") { required = false }
+        register("MagicGem") { required = false }
         register("MMOItems") { required = false }
         register("MythicMobs") { required = false }
-        register("CustomFishing") { required = false }
-        register("Zaphkiel") { required = false }
-        register("HeadDatabase") { required = false }
-        register("SX-Item") { required = false }
-        register("Slimefun") { required = false }
+        register("NeigeItems") { required = false }
         register("Nexo") { required = false }
+        register("Nova") { required = false }
+        register("Oraxen") { required = false }
+        register("PxRpg") { required = false }
+        register("Ratziel") { required = false }
+        register("Reforges") { required = false }
+        register("Slimefun") { required = false }
+        register("StatTrackers") { required = false }
+        register("SX-Item") { required = false }
+        register("Talismans") { required = false }
+        register("Zaphkiel") { required = false }
 
         // leveler
         register("AuraSkills") { required = false }
@@ -155,6 +175,7 @@ tasks {
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.momirealms.antigrieflib", "net.momirealms.craftengine.libraries.antigrieflib")
+        relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
         relocate("org.incendo", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.bstats", "net.momirealms.craftengine.libraries.bstats")

@@ -7,6 +7,7 @@ repositories {
     maven("https://jitpack.io/")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.gtemc.net/releases/")
     mavenCentral()
 }
 
@@ -27,6 +28,7 @@ dependencies {
     implementation("net.momirealms:sparrow-util:${rootProject.properties["sparrow_util_version"]}")
     implementation("net.momirealms:antigrieflib:${rootProject.properties["anti_grief_version"]}")
     implementation("net.momirealms:craft-engine-nms-helper:${rootProject.properties["nms_helper_version"]}")
+    implementation("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
 }
 
 java {
@@ -66,6 +68,7 @@ tasks {
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.momirealms.antigrieflib", "net.momirealms.craftengine.libraries.antigrieflib")
+        relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
         relocate("org.incendo", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.bstats", "net.momirealms.craftengine.libraries.bstats")

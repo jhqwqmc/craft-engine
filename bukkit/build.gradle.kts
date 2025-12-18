@@ -9,6 +9,7 @@ repositories {
     maven("https://repo.momirealms.net/releases/")
     maven("https://libraries.minecraft.net/")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.gtemc.net/releases/")
 }
 
 dependencies {
@@ -62,6 +63,8 @@ dependencies {
     compileOnly("com.mojang:authlib:${rootProject.properties["authlib_version"]}")
     // concurrentutil
     compileOnly("ca.spottedleaf:concurrentutil:${rootProject.properties["concurrent_util_version"]}")
+    // ItemBridge
+    compileOnly("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
 }
 
 java {
@@ -90,6 +93,7 @@ tasks {
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.momirealms.antigrieflib", "net.momirealms.craftengine.libraries.antigrieflib")
+        relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
         relocate("org.incendo", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.bstats", "net.momirealms.craftengine.libraries.bstats")

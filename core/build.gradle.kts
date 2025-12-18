@@ -7,6 +7,7 @@ repositories {
     maven("https://jitpack.io/")
     maven("https://libraries.minecraft.net/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.gtemc.net/releases/")
 }
 
 dependencies {
@@ -71,6 +72,8 @@ dependencies {
     compileOnly("ca.spottedleaf:concurrentutil:${rootProject.properties["concurrent_util_version"]}")
     // bucket4j
     compileOnly("com.bucket4j:bucket4j_jdk17-core:${rootProject.properties["bucket4j_version"]}")
+    // ItemBridge
+    compileOnly("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
 }
 
 java {
@@ -110,6 +113,7 @@ tasks {
         relocate("io.netty.handler.codec.spdy", "net.momirealms.craftengine.libraries.netty.handler.codec.spdy")
         relocate("io.netty.handler.codec.http2", "net.momirealms.craftengine.libraries.netty.handler.codec.http2")
         relocate("io.github.bucket4j", "net.momirealms.craftengine.libraries.bucket4j") // bucket4j
+        relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
     }
 }
 

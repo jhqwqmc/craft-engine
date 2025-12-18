@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.FloodgateUtils;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.GeyserUtils;
-import net.momirealms.craftengine.bukkit.compatibility.item.*;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
 import net.momirealms.craftengine.bukkit.compatibility.leveler.*;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelBlockEntityElementConfig;
@@ -26,7 +25,6 @@ import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateProvid
 import net.momirealms.craftengine.bukkit.compatibility.viaversion.ViaVersionUtils;
 import net.momirealms.craftengine.bukkit.compatibility.worldedit.WorldEditBlockRegister;
 import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
-import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
@@ -130,7 +128,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             this.hasPlaceholderAPI = true;
             logHook("PlaceholderAPI");
         }
-        this.initItemHooks();
         if (this.isPluginEnabled("LuckPerms")) {
             this.initLuckPermsHook();
             logHook("LuckPerms");
@@ -167,7 +164,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             logHook("EcoJobs");
         }
         if (this.isPluginEnabled("MythicMobs")) {
-            BukkitItemManager.instance().registerExternalItemSource(new MythicMobsSource());
             new MythicItemDropListener(this.plugin);
             logHook("MythicMobs");
         }
@@ -224,7 +220,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     private void initLuckPermsHook() {
         new LuckPermsEventListeners(plugin.javaPlugin(), (uuid) -> {
-            BukkitFontManager fontManager = (BukkitFontManager) plugin.fontManager();
+            BukkitFontManager fontManager = plugin.fontManager();
             fontManager.refreshEmojiSuggestions(uuid);
         });
     }
@@ -294,42 +290,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             }
         } catch (Exception e) {
             this.plugin.logger().warn("Failed to initialize world edit hook", e);
-        }
-    }
-
-    private void initItemHooks() {
-        BukkitItemManager itemManager = BukkitItemManager.instance();
-        if (this.isPluginEnabled("NeigeItems")) {
-            itemManager.registerExternalItemSource(new NeigeItemsSource());
-            logHook("NeigeItems");
-        }
-        if (this.isPluginEnabled("MMOItems")) {
-            itemManager.registerExternalItemSource(new MMOItemsSource());
-            logHook("MMOItems");
-        }
-        if (this.isPluginEnabled("CustomFishing")) {
-            itemManager.registerExternalItemSource(new CustomFishingSource());
-            logHook("CustomFishing");
-        }
-        if (this.isPluginEnabled("Zaphkiel")) {
-            itemManager.registerExternalItemSource(new ZaphkielSource());
-            logHook("Zaphkiel");
-        }
-        if (this.isPluginEnabled("HeadDatabase")) {
-            itemManager.registerExternalItemSource(new HeadDatabaseSource());
-            logHook("HeadDatabase");
-        }
-        if (this.isPluginEnabled("SX-Item")) {
-            itemManager.registerExternalItemSource(new SXItemSource());
-            logHook("SX-Item");
-        }
-        if (this.isPluginEnabled("Slimefun")) {
-            itemManager.registerExternalItemSource(new SlimefunSource());
-            logHook("Slimefun");
-        }
-        if (this.isPluginEnabled("Nexo")) {
-            itemManager.registerExternalItemSource(new NexoItemSource());
-            logHook("Nexo");
         }
     }
 
