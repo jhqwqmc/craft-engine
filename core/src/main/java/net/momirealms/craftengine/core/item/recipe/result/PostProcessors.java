@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.item.recipe.result;
 
 import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.modifier.ItemDataModifiers;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;
@@ -22,10 +23,7 @@ public class PostProcessors {
         registerPostProcessorType(APPLY_DATA, args -> {
             List<ItemDataModifier<?>> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(entry.getKey(), Key.DEFAULT_NAMESPACE)))
-                        .ifPresent(factory -> modifiers.add(factory.create(entry.getValue())));
-            }
+            ItemDataModifiers.applyDataModifiers(data, modifiers::add);
             return new ApplyItemDataPostProcessor<>(modifiers.toArray(new ItemDataModifier[0]));
         });
     }

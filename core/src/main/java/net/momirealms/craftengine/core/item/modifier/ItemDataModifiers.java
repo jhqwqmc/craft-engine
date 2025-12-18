@@ -4,12 +4,18 @@ import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
 import net.momirealms.craftengine.core.item.modifier.lore.DynamicLoreModifier;
 import net.momirealms.craftengine.core.item.modifier.lore.LoreModifier;
 import net.momirealms.craftengine.core.item.modifier.lore.OverwritableLoreModifier;
+import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;
 import net.momirealms.craftengine.core.registry.WritableRegistry;
+import net.momirealms.craftengine.core.util.ExceptionCollector;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceKey;
 import net.momirealms.craftengine.core.util.VersionHelper;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class ItemDataModifiers {
     private ItemDataModifiers() {}
@@ -51,6 +57,8 @@ public final class ItemDataModifiers {
     public static final Key OVERWRITABLE_LORE = Key.of("craftengine:overwritable-lore");
     public static final Key MAX_DAMAGE = Key.of("craftengine:max-damage");
     public static final Key BLOCK_STATE = Key.of("craftengine:block-state");
+    public static final Key CONDITIONAL = Key.of("craftengine:conditional");
+    public static final Key CONDITION = Key.of("craftengine:condition");
 
     public static <T> void register(Key key, ItemDataModifierFactory<T> factory) {
         ((WritableRegistry<ItemDataModifierFactory<?>>) BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY)
@@ -59,6 +67,30 @@ public final class ItemDataModifiers {
             ((WritableRegistry<ItemDataModifierFactory<?>>) BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY)
                     .register(ResourceKey.create(Registries.ITEM_DATA_MODIFIER_FACTORY.location(), new Key(key.namespace(), key.value().replace("-", "_"))), factory);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <I> void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemDataModifier<I>> callback) {
+        ExceptionCollector<LocalizedResourceConfigException> errorCollector = new ExceptionCollector<>();
+        if (dataSection != null) {
+            for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {
+                Object value = dataEntry.getValue();
+                if (value == null) continue;
+                String key = dataEntry.getKey();
+                int idIndex = key.indexOf('#');
+                if (idIndex != -1) {
+                    key = key.substring(0, idIndex);
+                }
+                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(key, Key.DEFAULT_NAMESPACE))).ifPresent(factory -> {
+                    try {
+                        callback.accept((ItemDataModifier<I>) factory.create(value));
+                    } catch (LocalizedResourceConfigException e) {
+                        errorCollector.add(e);
+                    }
+                });
+            }
+        }
+        errorCollector.throwIfPresent();
     }
 
     public static void init() {}
@@ -105,6 +137,10 @@ public final class ItemDataModifiers {
             register(TOOLTIP_STYLE, TooltipStyleModifier.FACTORY);
             register(ITEM_MODEL, ItemModelModifier.FACTORY);
             register(EQUIPPABLE, EquippableModifier.FACTORY);
+        }
+        if (VersionHelper.PREMIUM) {
+            register(CONDITIONAL, ConditionalModifier.FACTORY);
+            register(CONDITION, ConditionalModifier.FACTORY);
         }
     }
 }

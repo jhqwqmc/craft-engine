@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.item.updater.impl;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.modifier.ItemDataModifiers;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
 import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
@@ -39,10 +40,9 @@ public class ApplyDataOperation<I> implements ItemUpdater<I> {
         public ItemUpdater<I> create(Key item, Map<String, Object> args) {
             List<ItemDataModifier<I>> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(entry.getKey(), Key.DEFAULT_NAMESPACE)))
-                        .ifPresent(factory -> modifiers.add((ItemDataModifier<I>) factory.create(entry.getValue())));
-            }
+            ItemDataModifiers.applyDataModifiers(data, m -> {
+                modifiers.add((ItemDataModifier<I>) m);
+            });
             return new ApplyDataOperation<>(modifiers);
         }
     }

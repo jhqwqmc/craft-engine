@@ -91,30 +91,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemDataModifier<I>> callback) {
-        ExceptionCollector<LocalizedResourceConfigException> errorCollector = new ExceptionCollector<>();
-        if (dataSection != null) {
-            for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {
-                Object value = dataEntry.getValue();
-                if (value == null) continue;
-                String key = dataEntry.getKey();
-                int idIndex = key.indexOf('#');
-                if (idIndex != -1) {
-                    key = key.substring(0, idIndex);
-                }
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(key, Key.DEFAULT_NAMESPACE))).ifPresent(factory -> {
-                    try {
-                        callback.accept((ItemDataModifier<I>) factory.create(value));
-                    } catch (LocalizedResourceConfigException e) {
-                        errorCollector.add(e);
-                    }
-                });
-            }
-        }
-        errorCollector.throwIfPresent();
-    }
-
     @Override
     public ConfigParser[] parsers() {
         return new ConfigParser[]{this.itemParser, this.equipmentParser};
@@ -628,7 +604,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 应用物品数据
                 try {
-                    applyDataModifiers(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
+                    ItemDataModifiers.applyDataModifiers(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                 }
@@ -636,7 +612,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 应用客户端侧数据
                 try {
                     if (VersionHelper.PREMIUM) {
-                        applyDataModifiers(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
+                        ItemDataModifiers.applyDataModifiers(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
                     }
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
