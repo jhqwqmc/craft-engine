@@ -62,12 +62,12 @@ public class ExternalModifier<I> implements ItemDataModifier<I> {
         try {
             ItemManager<I> itemManager = CraftEngine.instance().itemManager();
             Player player = context.player();
-            Optional<I> another = this.provider.build(this.id, player == null ? null : player.platformPlayer(), adapt(context));
-            if (another.isEmpty()) {
+            I another = this.provider.buildOrNull(this.id, player == null ? null : player.platformPlayer(), adapt(context));
+            if (another == null) {
                 CraftEngine.instance().logger().warn("'" + this.id + "' could not be found in " + provider.plugin());
                 return item;
             }
-            Item<I> anotherWrapped = itemManager.wrap(another.get());
+            Item<I> anotherWrapped = itemManager.wrap(another);
             item.merge(anotherWrapped);
             return item;
         } catch (Throwable e) {

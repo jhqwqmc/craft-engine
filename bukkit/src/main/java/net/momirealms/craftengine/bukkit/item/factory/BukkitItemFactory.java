@@ -104,9 +104,9 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
         }
         if (this.hasExternalRecipeSource) {
            for (Provider<ItemStack, Player> source : this.recipeIngredientSources) {
-               Optional<String> id = source.id(item.getItem());
-               if (id.isPresent()) {
-                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id.get())));
+               String id = source.idOrNull(item.getItem());
+               if (id != null) {
+                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id)));
                }
            }
         }
