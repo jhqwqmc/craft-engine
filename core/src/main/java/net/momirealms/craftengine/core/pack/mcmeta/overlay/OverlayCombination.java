@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.pack.mcmeta.overlay;
 
 import net.momirealms.craftengine.core.pack.mcmeta.Overlay;
-import net.momirealms.craftengine.core.util.MinecraftVersion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

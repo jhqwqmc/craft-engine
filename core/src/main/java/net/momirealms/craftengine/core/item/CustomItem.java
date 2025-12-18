@@ -26,6 +26,11 @@ public interface CustomItem<I> extends BuildableItem<I> {
 
     UniqueKey uniqueId();
 
+    default String translationKey() {
+        Key id = this.id();
+        return "item." + id.namespace() + "." + id.value();
+    }
+
     Key material();
 
     Key clientBoundMaterial();

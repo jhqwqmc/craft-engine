@@ -211,6 +211,7 @@ public abstract class AbstractPackManager implements PackManager {
         for (int i = 0; i < 256; i++) {
             VANILLA_TEXTURES.add(Key.of("minecraft", "font/unicode_page_" + String.format("%02x", i)));
         }
+        VANILLA_TEXTURES.add(Key.of("minecraft", "missingno"));
         loadInternalList("internal/textures/processed.json", VANILLA_TEXTURES::add);
         loadInternalList("internal/sounds/processed.json", VANILLA_SOUNDS::add);
 

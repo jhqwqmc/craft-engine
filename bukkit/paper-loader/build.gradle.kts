@@ -1,7 +1,5 @@
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 import xyz.jpenilla.runpaper.task.RunServer
-import xyz.jpenilla.runtask.pluginsapi.DownloadPluginsSpec
-import java.net.URI
 
 plugins {
     id("com.gradleup.shadow") version "9.3.0"

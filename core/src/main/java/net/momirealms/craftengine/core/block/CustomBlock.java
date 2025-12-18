@@ -20,6 +20,12 @@ public interface CustomBlock {
     @Nullable
     LootTable<?> lootTable();
 
+    @NotNull
+    default String translationKey() {
+        Key id = id();
+        return "block." + id.namespace() + "." + id.value();
+    }
+
     void execute(Context context, EventTrigger trigger);
 
     @NotNull
