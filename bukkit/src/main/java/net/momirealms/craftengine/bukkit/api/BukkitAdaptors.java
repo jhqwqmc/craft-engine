@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class BukkitAdaptors {
 
@@ -23,9 +24,9 @@ public final class BukkitAdaptors {
      * This provides access to CraftEngine-specific player functionality and data.
      *
      * @param player the Bukkit Player to adapt, must not be null
-     * @return a non-null BukkitServerPlayer instance wrapping the provided player
+     * @return a BukkitServerPlayer instance wrapping the provided player, null if the player is not online
      */
-    @NotNull
+    @Nullable
     public static BukkitServerPlayer adapt(@NotNull final Player player) {
         return BukkitCraftEngine.instance().adapt(player);
     }
