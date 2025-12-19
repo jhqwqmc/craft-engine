@@ -26,6 +26,10 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_RESOURCE_DISABLE_SUCCESS = Component.translatable().key("command.resource.disable.success");
     TranslatableComponent.Builder COMMAND_RESOURCE_DISABLE_FAILURE = Component.translatable().key("command.resource.disable.failure.unknown");
     TranslatableComponent.Builder COMMAND_RESOURCE_LIST = Component.translatable().key("command.resource.list");
+    TranslatableComponent.Builder COMMAND_RESOURCE_CREATE_SUCCESS = Component.translatable().key("command.resource.create.success");
+    TranslatableComponent.Builder COMMAND_RESOURCE_CREATE_FAILURE = Component.translatable().key("command.resource.create.failure");
+    TranslatableComponent.Builder COMMAND_RESOURCE_CREATE_FAILURE_INVALID_NAMESPACE = Component.translatable().key("command.resource.create.failure.invalid_namespace");
+    TranslatableComponent.Builder COMMAND_RESOURCE_CREATE_EXISTS = Component.translatable().key("command.resource.create.exists");
     TranslatableComponent.Builder COMMAND_UPLOAD_FAILURE_NOT_SUPPORTED = Component.translatable().key("command.upload.failure.not_supported");
     TranslatableComponent.Builder COMMAND_UPLOAD_ON_PROGRESS = Component.translatable().key("command.upload.on_progress");
     TranslatableComponent.Builder COMMAND_SEND_RESOURCE_PACK_SUCCESS_SINGLE = Component.translatable().key("command.send_resource_pack.success.single");
