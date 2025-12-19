@@ -13,6 +13,7 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
 import org.bukkit.entity.Entity;
@@ -22,13 +23,15 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Constructor;
 
 public class MythicItemDrop extends ItemDrop implements IItemDrop {
-    private final CustomItem<ItemStack> customItem;
     private static final Constructor<?> constructor$BukkitItemStack = ReflectionUtils.getConstructor(BukkitItemStack.class, ItemStack.class);
     private static final boolean useReflection = constructor$BukkitItemStack != null;
+    private final LazyReference<CustomItem<ItemStack>> customItem;
+    private final String itemId;
 
-    public MythicItemDrop(String line, MythicLineConfig config, CustomItem<ItemStack> customItem) {
+    public MythicItemDrop(String line, MythicLineConfig config, LazyReference<CustomItem<ItemStack>> customItem, String itemId) {
         super(line, config);
         this.customItem = customItem;
+        this.itemId = itemId;
     }
 
     @Override
@@ -43,8 +46,13 @@ public class MythicItemDrop extends ItemDrop implements IItemDrop {
             }
         }
         int amountInt = MiscUtils.floor(amount + 0.5F);
-        ItemStack itemStack = this.customItem.buildItemStack(context, amountInt);
-        return adapt(itemStack).amount(amountInt);
+        CustomItem<ItemStack> customItem = this.customItem.get();
+        if (customItem != null) {
+            ItemStack itemStack = this.customItem.get().buildItemStack(context, amountInt);
+            return adapt(itemStack).amount(amountInt);
+        } else {
+            throw new IllegalArgumentException("Cannot find CraftEngine item " + this.itemId);
+        }
     }
 
     private static AbstractItemStack adapt(ItemStack itemStack) {

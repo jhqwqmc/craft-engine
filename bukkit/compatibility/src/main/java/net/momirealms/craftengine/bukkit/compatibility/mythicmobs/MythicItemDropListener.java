@@ -4,6 +4,7 @@ import io.lumine.mythic.bukkit.events.MythicDropLoadEvent;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LazyReference;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,11 +31,10 @@ public class MythicItemDropListener implements Listener {
         if (itemId == null || itemId.isEmpty()) {
             return;
         }
-        CustomItem<ItemStack> customItem = this.plugin.itemManager().getCustomItem(Key.of(itemId)).orElse(null);
-        if (customItem == null) {
-            return;
-        }
-        event.register(new MythicItemDrop(line, event.getConfig(), customItem));
+        event.register(new MythicItemDrop(line, event.getConfig(),
+                LazyReference.lazyReference(() -> this.plugin.itemManager().getCustomItem(Key.of(itemId)).orElse(null)),
+                itemId
+        ));
     }
 
     private static String extractItemId(String line) {
