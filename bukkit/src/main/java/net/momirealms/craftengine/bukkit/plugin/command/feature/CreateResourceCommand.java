@@ -27,6 +27,7 @@ public class CreateResourceCommand extends BukkitCommandFeature<CommandSender> {
     public Command.Builder<? extends CommandSender> assembleCommand(CommandManager<CommandSender> manager, Command.Builder<CommandSender> builder) {
         return builder
                 .flag(manager.flagBuilder("silent").withAliases("s"))
+                .flag(manager.flagBuilder("full").withAliases("f"))
                 .required("pack", StringParser.stringComponent(StringParser.StringMode.SINGLE))
                 .optional("namespace", StringParser.stringComponent(StringParser.StringMode.SINGLE))
                 .optional("author", StringParser.stringComponent(StringParser.StringMode.SINGLE))
@@ -53,17 +54,19 @@ public class CreateResourceCommand extends BukkitCommandFeature<CommandSender> {
                         FileUtils.createDirectoriesSafe(configurationPath);
                         Path namespacePath = resourcepackPath.resolve("assets").resolve(namespace);
                         FileUtils.createDirectoriesSafe(namespacePath);
-                        Path modelsPath = namespacePath.resolve("models");
-                        FileUtils.createDirectoriesSafe(modelsPath.resolve("block"));
-                        FileUtils.createDirectoriesSafe(modelsPath.resolve("item"));
-                        Path texturesPath = namespacePath.resolve("textures");
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("block"));
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("entity"));
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("font"));
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("gui").resolve("sprites").resolve("tooltip"));
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("item"));
-                        FileUtils.createDirectoriesSafe(texturesPath.resolve("trims"));
-                        FileUtils.createDirectoriesSafe(namespacePath.resolve("sounds"));
+                        if (context.flags().hasFlag("full")) {
+                            Path modelsPath = namespacePath.resolve("models");
+                            FileUtils.createDirectoriesSafe(modelsPath.resolve("block"));
+                            FileUtils.createDirectoriesSafe(modelsPath.resolve("item"));
+                            Path texturesPath = namespacePath.resolve("textures");
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("block"));
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("entity"));
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("font"));
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("gui").resolve("sprites").resolve("tooltip"));
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("item"));
+                            FileUtils.createDirectoriesSafe(texturesPath.resolve("trims"));
+                            FileUtils.createDirectoriesSafe(namespacePath.resolve("sounds"));
+                        }
                         YamlDocument document = plugin().config().loadYamlData(packMetaPath);
                         document.set("author", author);
                         document.set("version", "0.0.1");
