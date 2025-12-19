@@ -51,8 +51,19 @@ public class CreateResourceCommand extends BukkitCommandFeature<CommandSender> {
                     try {
                         FileUtils.createDirectoriesSafe(packPath);
                         FileUtils.createDirectoriesSafe(configurationPath);
-                        FileUtils.createDirectoriesSafe(resourcepackPath.resolve("assets").resolve(namespace));
-                        Files.createFile(packMetaPath);
+                        Path namespacePath = resourcepackPath.resolve("assets").resolve(namespace);
+                        FileUtils.createDirectoriesSafe(namespacePath);
+                        Path modelsPath = namespacePath.resolve("models");
+                        FileUtils.createDirectoriesSafe(modelsPath.resolve("block"));
+                        FileUtils.createDirectoriesSafe(modelsPath.resolve("item"));
+                        Path texturesPath = namespacePath.resolve("textures");
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("block"));
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("entity"));
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("font"));
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("gui").resolve("sprites").resolve("tooltip"));
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("item"));
+                        FileUtils.createDirectoriesSafe(texturesPath.resolve("trims"));
+                        FileUtils.createDirectoriesSafe(namespacePath.resolve("sounds"));
                         YamlDocument document = plugin().config().loadYamlData(packMetaPath);
                         document.set("author", author);
                         document.set("version", "0.0.1");
