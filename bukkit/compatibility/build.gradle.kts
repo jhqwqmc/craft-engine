@@ -8,12 +8,8 @@ repositories {
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/")  // slime world
     maven("https://repo.momirealms.net/releases/")
     maven("https://mvn.lumine.io/repository/maven-public/") // model engine mythic mobs
-    maven("https://nexus.phoenixdevt.fr/repository/maven-public/") // mmocore
     maven("https://repo.viaversion.com") // via
     maven("https://repo.skriptlang.org/releases/") // skript
-    maven("https://nexus.neetgames.com/repository/maven-releases/") // mcmmo
-    maven("https://repo.dmulloy2.net/repository/public/") // mcmmo required
-    maven("https://repo.auxilor.io/repository/maven-public/") // eco
     maven("https://repo.hiusers.com/releases")
     maven("https://jitpack.io")
     maven("https://repo.codemc.io/repository/maven-public/") // quickshop
@@ -48,30 +44,14 @@ dependencies {
     compileOnly("com.viaversion:viaversion-bukkit:5.5.1")
     // Skript
     compileOnly("com.github.SkriptLang:Skript:2.11.0")
-    // AuraSkills
-    compileOnly("dev.aurelium:auraskills-api-bukkit:2.2.4")
     // FAWE
     compileOnly(platform("com.intellectualsites.bom:bom-newest:1.52"))
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit") { isTransitive = false }
     // MythicMobs
     compileOnly("io.lumine:Mythic-Dist:5.9.0")
-    // McMMO
-    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.038")
-    // MMOCore
-    compileOnly("net.Indyuce:MMOCore-API:1.13.1-SNAPSHOT")
-    compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
-    // JobsReborn
-    compileOnly("com.github.Zrips:Jobs:v5.2.2.3")
     // CustomNameplates
     compileOnly("net.momirealms:custom-nameplates:3.0.33")
-    // eco
-    compileOnly("com.willfp:eco:6.70.1")
-    compileOnly("com.willfp:EcoJobs:3.56.1")
-    compileOnly("com.willfp:EcoSkills:3.46.1")
-    compileOnly("com.willfp:libreforge:4.58.1")
-    // AureliumSkills
-    compileOnly("com.github.Archy-X:AureliumSkills:Beta1.3.21")
     // WorldGuard
     compileOnly(files("${rootProject.rootDir}/libs/worldguard-bukkit-7.0.14-dist.jar"))
     // QuickShop
@@ -82,6 +62,8 @@ dependencies {
     compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
     // ItemBridge
     compileOnly("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
+    // LevelerBridge
+    compileOnly("cn.gtemc:levelerbridge:${rootProject.properties["levelerbridge_version"]}")
 }
 
 java {

@@ -18,7 +18,6 @@ import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
 public class PayloadHelper {
-    public static final byte[] JADE_RESPONSE = new byte[]{0, 0, 0, 0};
 
     public static void registerDataTypes() {
         registerDataType(ClientCustomBlockPacket.TYPE, ClientCustomBlockPacket.CODEC);
