@@ -45,13 +45,13 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-public class FastAsyncWorldEditDelegate extends AbstractDelegateExtent {
+final class FastAsyncWorldEditDelegate extends AbstractDelegateExtent {
     private static int[] ordinalToIbdID;
     private final Set<CEChunk> chunksToSave;
     private final LazyReference<CEWorld> ceWorld;
     private final Set<ChunkPos> brokenChunks = Collections.synchronizedSet(new HashSet<>());
 
-    protected FastAsyncWorldEditDelegate(EditSessionEvent event, Extent extent) {
+    private FastAsyncWorldEditDelegate(EditSessionEvent event, Extent extent) {
         super(extent);
         this.chunksToSave = new HashSet<>();
         this.ceWorld = LazyReference.lazyReference(() -> {
@@ -65,7 +65,7 @@ public class FastAsyncWorldEditDelegate extends AbstractDelegateExtent {
         });
     }
 
-    public static void init() {
+    static void init() {
         Settings.settings().EXTENT.ALLOWED_PLUGINS.add(FastAsyncWorldEditDelegate.class.getCanonicalName());
         try {
             Method ordinalToIbdIDMethod = CachedBukkitAdapter.class.getDeclaredMethod("getOrdinalToIbdID"); // 这样获取有代码提示
