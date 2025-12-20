@@ -8,16 +8,15 @@ repositories {
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/")  // slime world
     maven("https://repo.momirealms.net/releases/")
     maven("https://mvn.lumine.io/repository/maven-public/") // model engine mythic mobs
-    maven("https://nexus.phoenixdevt.fr/repository/maven-public/") // mmoitems
+    maven("https://nexus.phoenixdevt.fr/repository/maven-public/") // mmocore
     maven("https://repo.viaversion.com") // via
     maven("https://repo.skriptlang.org/releases/") // skript
     maven("https://nexus.neetgames.com/repository/maven-releases/") // mcmmo
     maven("https://repo.dmulloy2.net/repository/public/") // mcmmo required
     maven("https://repo.auxilor.io/repository/maven-public/") // eco
-    maven("https://repo.hiusers.com/releases") // zaphkiel
-    maven("https://jitpack.io") // sxitem slimefun
+    maven("https://repo.hiusers.com/releases")
+    maven("https://jitpack.io")
     maven("https://repo.codemc.io/repository/maven-public/") // quickshop
-    maven("https://repo.nexomc.com/releases/") // nexo
     maven("https://repo.opencollab.dev/main/") // geyser
     maven("https://repo.gtemc.net/releases/")
 }
@@ -33,8 +32,6 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:${rootProject.properties["paper_version"]}-R0.1-SNAPSHOT")
     // Netty
     compileOnly("io.netty:netty-all:${rootProject.properties["netty_version"]}")
-    // NeigeItems
-    compileOnly("pers.neige.neigeitems:NeigeItems:1.21.42")
     // Placeholder
     compileOnly("me.clip:placeholderapi:${rootProject.properties["placeholder_api_version"]}")
     // SlimeWorld
@@ -44,11 +41,6 @@ dependencies {
     // BetterModel
     compileOnly("io.github.toxicity188:bettermodel:1.14.0")
     compileOnly("com.mojang:authlib:${rootProject.properties["authlib_version"]}")
-    // MMOItems
-    compileOnly("net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT")
-    compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
-    // Nexo
-    compileOnly("com.nexomc:nexo:1.13.0")
     // LuckPerms
     compileOnly("net.luckperms:api:5.4")
     // viaversion
@@ -68,10 +60,9 @@ dependencies {
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.038")
     // MMOCore
     compileOnly("net.Indyuce:MMOCore-API:1.13.1-SNAPSHOT")
+    compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
     // JobsReborn
     compileOnly("com.github.Zrips:Jobs:v5.2.2.3")
-    // CustomFishing
-    compileOnly("net.momirealms:custom-fishing:2.3.3")
     // CustomNameplates
     compileOnly("net.momirealms:custom-nameplates:3.0.33")
     // eco
@@ -81,16 +72,8 @@ dependencies {
     compileOnly("com.willfp:libreforge:4.58.1")
     // AureliumSkills
     compileOnly("com.github.Archy-X:AureliumSkills:Beta1.3.21")
-    // Zaphkiel
-    compileOnly("ink.ptms:ZaphkielAPI:2.1.0")
     // WorldGuard
     compileOnly(files("${rootProject.rootDir}/libs/worldguard-bukkit-7.0.14-dist.jar"))
-    // HeadDatabase
-    compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
-    // SXItem
-    compileOnly("com.github.Saukiya:SX-Item:4.4.6")
-    // Slimefun
-    compileOnly("io.github.Slimefun:Slimefun4:RC-32")
     // QuickShop
     compileOnly("com.ghostchu:quickshop-api:6.2.0.10")
     // Geyser

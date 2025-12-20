@@ -117,6 +117,13 @@ list_resource:
     - /craftengine resource list
     - /ce resource list
 
+create_resource:
+  enable: true
+  permission: ce.command.admin.resource
+  usage:
+    - /craftengine resource create
+    - /ce resource create
+
 set_locale:
   enable: true
   permission: ce.command.admin.set_locale

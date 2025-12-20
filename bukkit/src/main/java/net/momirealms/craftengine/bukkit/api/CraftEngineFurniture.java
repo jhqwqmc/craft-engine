@@ -315,7 +315,7 @@ public final class CraftEngineFurniture {
         if (isSeat(seat)) {
             CompoundTag seatExtraData = BukkitSeatManager.instance().getSeatExtraData(seat);
             int entityId = seatExtraData.getInt("entity_id");
-            BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entityId);
+            return BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(entityId);
         }
         return null;
     }

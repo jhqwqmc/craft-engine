@@ -47,24 +47,23 @@ public class MythicItemDrop extends ItemDrop implements IItemDrop {
         }
         int amountInt = MiscUtils.floor(amount + 0.5F);
         CustomItem<ItemStack> customItem = this.customItem.get();
-        if (customItem != null) {
-            ItemStack itemStack = this.customItem.get().buildItemStack(context, amountInt);
-            return adapt(itemStack).amount(amountInt);
-        } else {
+        if (customItem == null) {
             throw new IllegalArgumentException("Cannot find CraftEngine item " + this.itemId);
+        } else {
+            ItemStack itemStack = customItem.buildItemStack(context, amountInt);
+            return adapt(itemStack).amount(amountInt);
         }
     }
 
     private static AbstractItemStack adapt(ItemStack itemStack) {
-        if (useReflection) {
-            try {
-                return (AbstractItemStack) constructor$BukkitItemStack.newInstance(itemStack);
-            } catch (Exception e) {
-                CraftEngine.instance().logger().warn("adapt(ItemStack itemStack) error: " + e.getMessage());
-                return null;
-            }
-        } else {
+        if (!useReflection) {
             return BukkitAdapter.adapt(itemStack);
+        }
+        try {
+            return (AbstractItemStack) constructor$BukkitItemStack.newInstance(itemStack);
+        } catch (Exception e) {
+            CraftEngine.instance().logger().warn("adapt(ItemStack itemStack) error: " + e.getMessage());
+            return null;
         }
     }
 }
