@@ -17,11 +17,11 @@ import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicSkillHel
 import net.momirealms.craftengine.bukkit.compatibility.papi.PlaceholderAPIUtils;
 import net.momirealms.craftengine.bukkit.compatibility.permission.LuckPermsEventListeners;
 import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemExpressionHandler;
-import net.momirealms.craftengine.bukkit.compatibility.region.WorldGuardRegionCondition;
+import net.momirealms.craftengine.bukkit.compatibility.worldguard.WorldGuardRegionCondition;
 import net.momirealms.craftengine.bukkit.compatibility.skript.SkriptHook;
 import net.momirealms.craftengine.bukkit.compatibility.slimeworld.SlimeFormatStorageAdaptor;
-import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateHatSettings;
-import net.momirealms.craftengine.bukkit.compatibility.tag.CustomNameplateProviders;
+import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateHatSettings;
+import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateProviders;
 import net.momirealms.craftengine.bukkit.compatibility.viaversion.ViaVersionUtils;
 import net.momirealms.craftengine.bukkit.compatibility.worldedit.WorldEditBlockRegister;
 import net.momirealms.craftengine.bukkit.font.BukkitFontManager;

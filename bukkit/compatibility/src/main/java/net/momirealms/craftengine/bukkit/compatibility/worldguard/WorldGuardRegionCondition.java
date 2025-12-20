@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.bukkit.compatibility.region;
+package net.momirealms.craftengine.bukkit.compatibility.worldguard;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;

@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.bukkit.compatibility.tag;
+package net.momirealms.craftengine.bukkit.compatibility.nameplates;
 
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.core.plugin.compatibility.TagResolverProvider;

@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.bukkit.compatibility.tag;
+package net.momirealms.craftengine.bukkit.compatibility.nameplates;
 
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
