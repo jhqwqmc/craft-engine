@@ -24,8 +24,6 @@ items:
               property: pebble
               items:
                 - default:pebble
-              sounds:
-                stack: minecraft:block.stone.fall
           loot:
             pools:
               - rolls: 1
