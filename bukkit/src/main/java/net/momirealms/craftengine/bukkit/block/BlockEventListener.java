@@ -147,9 +147,8 @@ public final class BlockEventListener implements Listener {
                         return;
                     }
 
-                    if (!customBreakEvent.dropItems()) {
-                        event.setDropItems(false);
-                    }
+                    // 同步选项
+                    event.setDropItems(customBreakEvent.dropItems());
 
                     // execute functions
                     Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
