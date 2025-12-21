@@ -6,11 +6,6 @@ metrics: true
 update-checker: true
 # Forces a specific locale (e.g., zh_cn)
 forced-locale: ''
-# Filter configuration phase player disconnection logs
-filter-configuration-phase-disconnect: false
-# This option delays CraftEngine's config reading until after all plugins start.
-# Don't disable this setting unless you need datapack-generated spawn chunks.
-delay-configuration-load: true
 
 resource-pack:
   # This option determines the location of the generated resource pack
@@ -579,6 +574,17 @@ client-optimization:
       enable: true
       bucket-size: 1000
       restore-per-tick: 25
+
+misc:
+  # Filter configuration phase player disconnection logs
+  filter-configuration-phase-disconnect: false
+  # This option delays CraftEngine's config reading until after all plugins start.
+  # Don't disable this setting unless you need datapack-generated spawn chunks.
+  delay-configuration-load: true
+  # The registry of packetevents is sometimes inaccurate. This option determines whether
+  # to enable injection to resolve certain issues with plugins that rely on packetevents.
+  # This option may become outdated at any time. If errors occur after enabling it, please report them promptly.
+  inject-packetevents: false
 
 # Enables or disables debug mode
 debug:

@@ -45,9 +45,11 @@ public class Config {
     protected boolean firstTime = true;
     protected boolean checkUpdate;
     protected boolean metrics;
-    protected boolean filterConfigurationPhaseDisconnect;
     protected Locale forcedLocale;
-    protected boolean delayConfigurationLoad;
+
+    protected boolean misc$filterConfigurationPhaseDisconnect;
+    protected boolean misc$delayConfigurationLoad;
+    protected boolean misc$inject_packet_vents;
 
     protected boolean debug$common;
     protected boolean debug$packet;
@@ -311,13 +313,14 @@ public class Config {
     public void loadFullSettings() {
         YamlDocument config = settings();
         forcedLocale = TranslationManager.parseLocale(config.getString("forced-locale", ""));
-        delayConfigurationLoad = config.getBoolean("delay-configuration-load", false);
+        misc$delayConfigurationLoad = config.getBoolean("misc.delay-configuration-load", false);
+        misc$inject_packet_vents = config.getBoolean("misc.inject-packetevents", false);
 
         // basics
         metrics = config.getBoolean("metrics", false);
         checkUpdate = config.getBoolean("update-checker", false);
-        filterConfigurationPhaseDisconnect = config.getBoolean("filter-configuration-phase-disconnect", false);
-        DisconnectLogFilter.instance().setEnable(filterConfigurationPhaseDisconnect);
+        misc$filterConfigurationPhaseDisconnect = config.getBoolean("misc.filter-configuration-phase-disconnect", false);
+        DisconnectLogFilter.instance().setEnable(misc$filterConfigurationPhaseDisconnect);
 
         // debug
         debug$common = config.getBoolean("debug.common", false);
@@ -630,7 +633,11 @@ public class Config {
     }
 
     public static boolean delayConfigurationLoad() {
-        return instance.delayConfigurationLoad;
+        return instance.misc$delayConfigurationLoad;
+    }
+
+    public static boolean injectPacketEvents() {
+        return instance.misc$inject_packet_vents;
     }
 
     public static boolean debugCommon() {
@@ -678,7 +685,7 @@ public class Config {
     }
 
     public static boolean filterConfigurationPhaseDisconnect() {
-        return instance.filterConfigurationPhaseDisconnect;
+        return instance.misc$filterConfigurationPhaseDisconnect;
     }
 
     public static boolean resourcePack$overrideUniform() {

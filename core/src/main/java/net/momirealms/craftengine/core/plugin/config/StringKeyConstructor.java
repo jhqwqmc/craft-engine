@@ -98,7 +98,6 @@ public class StringKeyConstructor extends SafeConstructor {
         return map;
     }
 
-
     // 处理版本化块合并
     private void processVersionedBlock(Map<Object, Object> targetMap, String key, Node valueNode) {
         String versionSpec = key.substring(VERSION_PREFIX.length());
@@ -155,7 +154,6 @@ public class StringKeyConstructor extends SafeConstructor {
         setValueWithDuplicationCheck(targetMap, key, newValue, key, keyNode);
     }
 
-
     // 设置值并检查重复键
     @SuppressWarnings("unchecked")
     private void setValueWithDuplicationCheck(Map<Object, Object> targetMap, String key, Object newValue, String fullKeyPath, Node keyNode) {
@@ -173,7 +171,6 @@ public class StringKeyConstructor extends SafeConstructor {
             targetMap.put(key, newValue);
         }
     }
-
 
     // 合并两个Map并检查重复键
     @SuppressWarnings("unchecked")
@@ -196,7 +193,6 @@ public class StringKeyConstructor extends SafeConstructor {
             }
         }
     }
-
 
     /**
      * 检查一个MappingNode是否是“值选择器”（即所有键都以 '$$' 开头）。

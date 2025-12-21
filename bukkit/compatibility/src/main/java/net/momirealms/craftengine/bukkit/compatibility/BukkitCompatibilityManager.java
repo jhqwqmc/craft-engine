@@ -13,17 +13,17 @@ import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEn
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineUtils;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicItemDropListener;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicSkillHelper;
+import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateHatSettings;
+import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateProviders;
 import net.momirealms.craftengine.bukkit.compatibility.packetevents.WrappedBlockStateHelper;
 import net.momirealms.craftengine.bukkit.compatibility.papi.PlaceholderAPIUtils;
 import net.momirealms.craftengine.bukkit.compatibility.permission.LuckPermsEventListeners;
 import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemExpressionHandler;
-import net.momirealms.craftengine.bukkit.compatibility.worldguard.WorldGuardRegionCondition;
 import net.momirealms.craftengine.bukkit.compatibility.skript.SkriptHook;
 import net.momirealms.craftengine.bukkit.compatibility.slimeworld.SlimeFormatStorageAdaptor;
-import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateHatSettings;
-import net.momirealms.craftengine.bukkit.compatibility.nameplates.CustomNameplateProviders;
 import net.momirealms.craftengine.bukkit.compatibility.viaversion.ViaVersionUtils;
 import net.momirealms.craftengine.bukkit.compatibility.worldedit.WorldEditBlockRegister;
+import net.momirealms.craftengine.bukkit.compatibility.worldguard.WorldGuardRegionCondition;
 import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.block.BlockManager;
@@ -77,36 +77,30 @@ public class BukkitCompatibilityManager implements CompatibilityManager<org.bukk
         // WorldEdit
         // FastAsyncWorldEdit
         if (this.isPluginEnabled("FastAsyncWorldEdit")) {
-            try {
-                this.initFastAsyncWorldEditHook();
-                logHook("FastAsyncWorldEdit");
-            } catch (Exception e) {
-                this.plugin.logger().warn("[Compatibility] Failed to initialize FastAsyncWorldEdit hook", e);
-            }
+            runCatchingHook(this::initFastAsyncWorldEditHook, "FastAsyncWorldEdit");
         } else if (this.isPluginEnabled("WorldEdit")) {
-            this.initWorldEditHook();
-            logHook("WorldEdit");
+            runCatchingHook(this::initWorldEditHook, "WorldEdit");
         }
         if (this.hasPlugin("BetterModel")) {
-            BukkitBlockEntityElementConfigs.register(Key.of("craftengine:better_model"), new BetterModelBlockEntityElementConfig.Factory());
-            logHook("BetterModel");
+            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.of("craftengine:better_model"), new BetterModelBlockEntityElementConfig.Factory()), "BetterModel");
         }
         if (this.hasPlugin("ModelEngine")) {
-            BukkitBlockEntityElementConfigs.register(Key.of("craftengine:model_engine"), new ModelEngineBlockEntityElementConfig.Factory());
-            logHook("ModelEngine");
+            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.of("craftengine:model_engine"), new ModelEngineBlockEntityElementConfig.Factory()), "ModelEngine");
         }
         if (this.hasPlugin("CustomNameplates")) {
-            registerTagResolverProvider(new CustomNameplateProviders.Background());
-            registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
-            registerTagResolverProvider(new CustomNameplateProviders.Bubble());
-            new CustomNameplateHatSettings().register();
-            logHook("CustomNameplates");
+            runCatchingHook(() -> {
+                registerTagResolverProvider(new CustomNameplateProviders.Background());
+                registerTagResolverProvider(new CustomNameplateProviders.Nameplate());
+                registerTagResolverProvider(new CustomNameplateProviders.Bubble());
+                new CustomNameplateHatSettings().register();
+            }, "CustomNameplates");
         }
         Key worldGuardRegion = Key.of("worldguard:region");
         if (this.hasPlugin("WorldGuard")) {
-            EventConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
-            LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
-            logHook("WorldGuard");
+            runCatchingHook(() -> {
+                EventConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+                LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+            }, "WorldGuard");
         } else {
             EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
             LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
@@ -127,37 +121,36 @@ public class BukkitCompatibilityManager implements CompatibilityManager<org.bukk
             logHook("PlaceholderAPI");
         }
         if (this.isPluginEnabled("LuckPerms")) {
-            this.initLuckPermsHook();
-            logHook("LuckPerms");
+            runCatchingHook(this::initLuckPermsHook, "LuckPerms");
         }
         if (this.isPluginEnabled("Skript")) {
-            SkriptHook.register();
-            logHook("Skript");
+            runCatchingHook(SkriptHook::register, "Skript");
         }
         if (this.isPluginEnabled("MythicMobs")) {
-            new MythicItemDropListener(this.plugin);
-            logHook("MythicMobs");
+            runCatchingHook(() -> new MythicItemDropListener(this.plugin), "MythicMobs");
         }
         if (this.isPluginEnabled("QuickShop-Hikari")) {
-            new QuickShopItemExpressionHandler(this.plugin).register();
-            logHook("QuickShop-Hikari");
+            runCatchingHook(() -> new QuickShopItemExpressionHandler(this.plugin).register(), "QuickShop-Hikari");
         }
-        if (this.isPluginEnabled("packetevents")) {
-            try {
-                WrappedBlockStateHelper.register(null);
-            } catch (Throwable e) {
-                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
-            }
-            logHook("packetevents");
+        if (this.isPluginEnabled("packetevents") && Config.injectPacketEvents()) {
+            runCatchingHook(() -> WrappedBlockStateHelper.register(null), "packetevents");
         }
-        if (this.isPluginEnabled("GrimAC")) {
-            try {
-                WrappedBlockStateHelper.register("ac{}grim{}grimac{}shaded{}com{}github{}retrooper{}packetevents");
-            } catch (Throwable e) {
-                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
-            }
-            logHook("GrimAC");
+        if (this.isPluginEnabled("GrimAC") && Config.injectPacketEvents()) {
+            runCatchingHook(() -> WrappedBlockStateHelper.register("ac{}grim{}grimac{}shaded{}com{}github{}retrooper{}packetevents"), "GrimAC");
         }
+    }
+
+    private void runCatchingHook(ThrowableRunnable runnable, String plugin) {
+        try {
+            runnable.run();
+            logHook(plugin);
+        } catch (Throwable e) {
+            this.plugin.logger().warn("Failed to hook " + plugin, e);
+        }
+    }
+
+    private interface ThrowableRunnable {
+        void run() throws Throwable;
     }
 
     @Override
