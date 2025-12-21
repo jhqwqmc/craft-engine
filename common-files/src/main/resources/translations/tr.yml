@@ -10,7 +10,7 @@ exception.no_such_command: "Bilinmeyen komut."
 argument.entity.notfound.player: "<red>Hiçbir oyuncu bulunamadı</red>"
 argument.entity.notfound.entity: "<red>Hiçbir varlık bulunamadı</red>"
 argument.parse.failure.time: "<red>'<arg:0>' geçerli bir zaman biçimi değil</red>"
-argument.parse.failure.material: "<red>'<arg:0>' geçerli bir malzeme adı değil</red>"ru_ru
+argument.parse.failure.material: "<red>'<arg:0>' geçerli bir malzeme adı değil</red>"
 argument.parse.failure.enchantment: "<red>'<arg:0>' geçerli bir büyü değil</red>"
 argument.parse.failure.offlineplayer: "<red>'<arg:0>' girişi için oyuncu bulunamadı</red>"
 argument.parse.failure.player: "<red>'<arg:0>' girişi için oyuncu bulunamadı</red>"
