@@ -188,25 +188,19 @@ resource-pack:
     file-to-upload: "./generated/resource_pack.zip"
     # If you are hosting the resource pack by yourself, replace `localhost` with your server ip otherwise it would only work on your local pc
     # If using BungeeCord or Velocity, consider using a proxy-side plugin to handle resource pack delivery.
-    # Read this page for more host types: https://xiao-momi.github.io/craft-engine-wiki/getting_start/set_up_host
+    # Read this page for more host types and argument explanations: https://xiao-momi.github.io/craft-engine-wiki/getting_start/set_up_host
     hosting:
       - type: "self"
         ip: "localhost"
         port: 8163
         protocol: "http"
-        # Blocks all requests from non-Minecraft clients.
         deny-non-minecraft-request: true
-        # Generates a single-use, time-limited download link for each player.
         one-time-token: true
-        # Improved validation for deny-non-minecraft-request and one-time-token; do not enable on offline servers or validation will fail.
         strict-validation: false
         rate-limiting:
-          # Maximum bandwidth per second to prevent server instability for other players during resource pack downloads
-          max-bandwidth-per-second: 5_000_000 # 5MB/s
-          # Minimum guaranteed download speed per player to ensure acceptable download performance during concurrent downloads
-          min-download-speed-per-player: 50_000 # 50KB/s
-          # Prevent a single IP from sending too many resource pack download requests in a short time period
-          qps-per-ip: 5/60 #  5 requests per 60 seconds
+          max-bandwidth-per-second: 5_000_000
+          min-download-speed-per-player: 50_000
+          qps-per-ip: 5/60
 
 item:
   # [Premium Exclusive]
