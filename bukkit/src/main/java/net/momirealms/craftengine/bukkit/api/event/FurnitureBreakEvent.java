@@ -10,8 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class FurnitureBreakEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
-    private boolean cancelled;
     private final BukkitFurniture furniture;
+    private boolean cancelled;
+    private boolean dropItems = true;
 
     public FurnitureBreakEvent(@NotNull Player player,
                                @NotNull BukkitFurniture furniture) {
@@ -22,6 +23,14 @@ public final class FurnitureBreakEvent extends PlayerEvent implements Cancellabl
     @NotNull
     public Player player() {
         return getPlayer();
+    }
+
+    public boolean dropItems() {
+        return dropItems;
+    }
+
+    public void setDropItems(boolean dropItems) {
+        this.dropItems = dropItems;
     }
 
     @NotNull

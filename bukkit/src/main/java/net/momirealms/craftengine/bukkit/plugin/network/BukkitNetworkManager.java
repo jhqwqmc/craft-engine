@@ -1037,6 +1037,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = s2cPacketListeners[user.encoderState().ordinal()];
         if (packetID >= listener.length) { // fixme 为什么会这样
+            String string = "[name=" + user.name() + ", uuid=" + user.uuid() + ", remoteAddress=" + Optional.ofNullable(user.nettyChannel()).map(Channel::remoteAddress).orElse(null) + "]";
+            this.plugin.logger().warn("服务端尝试在 " + user.encoderState() + " 状态发送 ID 为 " + packetID + " 的无效数据包给 " + string);
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];
@@ -1053,6 +1055,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
         if (packetID >= listener.length) { // fixme 为什么会这样
+            String string = "[name=" + user.name() + ", uuid=" + user.uuid() + ", remoteAddress=" + Optional.ofNullable(user.nettyChannel()).map(Channel::remoteAddress).orElse(null) + "]";
+            this.plugin.logger().warn("客户端尝试在 " + user.decoderState() + " 状态发送 ID 为 " + packetID + " 的无效数据包给 " + string);
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];
@@ -3963,6 +3967,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
 
                     FurnitureBreakEvent breakEvent = new FurnitureBreakEvent(serverPlayer.platformPlayer(), furniture);
+                    breakEvent.setDropItems(!serverPlayer.isCreativeMode());
                     if (EventUtils.fireAndCheckCancel(breakEvent))
                         return;
 
@@ -3981,7 +3986,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
                     }
 
-                    CraftEngineFurniture.remove(furniture, serverPlayer, !serverPlayer.isCreativeMode(), true);
+                    CraftEngineFurniture.remove(furniture, serverPlayer, breakEvent.dropItems(), true);
                 };
             } else if (actionType == 2) {
                 // INTERACT_AT
