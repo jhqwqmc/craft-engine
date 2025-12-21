@@ -14,9 +14,11 @@ import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxCo
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.entity.seat.Seat;
+import net.momirealms.craftengine.core.entity.seat.SeatOwner;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
 import net.momirealms.craftengine.core.world.Cullable;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -28,10 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class Furniture implements Cullable {
@@ -107,11 +106,23 @@ public abstract class Furniture implements Cullable {
         FurnitureHitBoxConfig<?>[] furnitureHitBoxConfigs = variant.hitBoxConfigs();
         ObjectArrayList<Collider> colliders = new ObjectArrayList<>(furnitureHitBoxConfigs.length);
         this.hitboxes = new FurnitureHitBox[furnitureHitBoxConfigs.length];
+        // 辅助map，用于排除重复的座椅
+        LazyReference<Map<Vector3f, Seat<FurnitureHitBox>>> seatMap = LazyReference.lazyReference(HashMap::new);
         for (int i = 0; i < furnitureHitBoxConfigs.length; i++) {
             FurnitureHitBox hitbox = furnitureHitBoxConfigs[i].create(this);
             this.hitboxes[i] = hitbox;
             for (FurnitureHitboxPart part : hitbox.parts()) {
                 this.hitboxMap.put(part.entityId(), hitbox);
+            }
+            Seat<FurnitureHitBox>[] seats = hitbox.seats();
+            for (int index = 0; index < seats.length; index++) {
+                Map<Vector3f, Seat<FurnitureHitBox>> tempMap = seatMap.get();
+                Vector3f seatPos = seats[i].config().position();
+                if (tempMap.containsKey(seatPos)) {
+                    seats[i] = tempMap.get(seatPos);
+                } else {
+                    tempMap.put(seatPos, seats[i]);
+                }
             }
             hitbox.collectVirtualEntityId(virtualEntityIds::addLast);
             colliders.addAll(hitbox.colliders());
