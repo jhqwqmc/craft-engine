@@ -13,8 +13,10 @@ import org.bukkit.command.CommandSender;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.parser.standard.StringParser;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +72,13 @@ public class CreateResourceCommand extends BukkitCommandFeature<CommandSender> {
                         FileUtils.createDirectoriesSafe(texturesPath.resolve("gui").resolve("sprites").resolve("tooltip"));
                         FileUtils.createDirectoriesSafe(texturesPath.resolve("item"));
                         FileUtils.createDirectoriesSafe(namespacePath.resolve("sounds"));
-                        Yaml yaml = new Yaml(new StringKeyConstructor(packMetaPath, new LoaderOptions()));
+                        DumperOptions options = new DumperOptions();
+                        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+                        options.setPrettyFlow(true);
+                        options.setIndent(2);
+                        options.setSplitLines(false);
+                        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+                        Yaml yaml = new Yaml(new StringKeyConstructor(packMetaPath, new LoaderOptions()), new Representer(options), options);
                         Map<String, Object> data = new HashMap<>();
                         data.put("author", author);
                         data.put("description", description);
