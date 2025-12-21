@@ -308,9 +308,19 @@ public class TranslationManagerImpl implements TranslationManager {
 
             Map<String, String> bundle = new HashMap<>();
             for (Map.Entry<String, Object> entry : section.entrySet()) {
-                String key = entry.getKey();
-                bundle.put(key, entry.getValue().toString());
-                TranslationManagerImpl.this.translationKeys.add(key);
+                StringBuilder key = new StringBuilder(entry.getKey());
+                Object value = entry.getValue();
+                for (;;) {
+                    if (!(value instanceof Map<?,?> map)) {
+                        value = entry.getValue();
+                        break;
+                    }
+                    Map.Entry<?, ?> next = map.entrySet().iterator().next();
+                    key.append(".").append(next.getKey());
+                    value = next.getValue();
+                }
+                bundle.put(key.toString(), String.valueOf(value));
+                TranslationManagerImpl.this.translationKeys.add(key.toString());
                 this.count++;
             }
 

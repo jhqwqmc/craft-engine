@@ -3963,6 +3963,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
 
                     FurnitureBreakEvent breakEvent = new FurnitureBreakEvent(serverPlayer.platformPlayer(), furniture);
+                    breakEvent.setDropItems(!serverPlayer.isCreativeMode());
                     if (EventUtils.fireAndCheckCancel(breakEvent))
                         return;
 
@@ -3981,7 +3982,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
                     }
 
-                    CraftEngineFurniture.remove(furniture, serverPlayer, !serverPlayer.isCreativeMode(), true);
+                    CraftEngineFurniture.remove(furniture, serverPlayer, breakEvent.dropItems(), true);
                 };
             } else if (actionType == 2) {
                 // INTERACT_AT
