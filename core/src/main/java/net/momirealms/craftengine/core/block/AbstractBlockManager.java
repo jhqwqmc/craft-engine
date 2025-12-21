@@ -745,11 +745,6 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
             if (arguments == null) return Optional.empty();
             List<BlockEntityElementConfig<? extends BlockEntityElement>> blockEntityElementConfigs = ResourceConfigUtils.parseConfigAsList(arguments, BlockEntityElementConfigs::fromMap);
             if (blockEntityElementConfigs.isEmpty()) return Optional.empty();
-            for (BlockEntityElementConfig<? extends BlockEntityElement> blockEntityElementConfig : blockEntityElementConfigs) {
-                if (blockEntityElementConfig instanceof Glowing glowing && glowing.glowColor() != null) {
-                    AbstractBlockManager.this.plugin.teamManager().setColorInUse(glowing.glowColor());
-                }
-            }
             return Optional.of(blockEntityElementConfigs.toArray(new BlockEntityElementConfig[0]));
         }
 

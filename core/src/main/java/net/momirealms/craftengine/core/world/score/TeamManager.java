@@ -4,7 +4,9 @@ import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 
 public interface TeamManager extends Manageable {
-    String TEAM_PREFIX = "ce_";
+    String TEAM_PREFIX = "craftengine_";
 
-    void setColorInUse(LegacyChatFormatter color);
+    Object getTeamByColor(LegacyChatFormatter color);
+
+    Object addTeamsPacket();
 }
