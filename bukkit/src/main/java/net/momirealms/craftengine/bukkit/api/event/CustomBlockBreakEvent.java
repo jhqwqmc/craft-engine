@@ -24,31 +24,25 @@ public final class CustomBlockBreakEvent extends PlayerEvent implements Cancella
     public CustomBlockBreakEvent(@NotNull BukkitServerPlayer player,
                                  @NotNull Location location,
                                  @NotNull Block bukkitBlock,
-                                 @NotNull ImmutableBlockState state) {
+                                 @NotNull ImmutableBlockState state,
+                                 boolean dropItems) {
         super(player.platformPlayer());
         this.customBlock = state.owner().value();
         this.state = state;
         this.bukkitBlock = bukkitBlock;
         this.location = location;
         this.player = player;
+        this.dropItems = dropItems;
     }
 
     public BukkitServerPlayer player() {
         return player;
     }
 
-    /**
-     * Please use {@link BlockBreakEvent#isDropItems()}
-     */
-    @Deprecated(forRemoval = true)
     public boolean dropItems() {
         return dropItems;
     }
 
-    /**
-     * Please use {@link BlockBreakEvent#setDropItems(boolean)}
-     */
-    @Deprecated(forRemoval = true)
     public void setDropItems(boolean dropItems) {
         this.dropItems = dropItems;
     }

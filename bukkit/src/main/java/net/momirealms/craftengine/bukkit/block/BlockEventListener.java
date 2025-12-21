@@ -140,11 +140,15 @@ public final class BlockEventListener implements Listener {
                     }
 
                     // trigger api event
-                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state);
+                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state, event.isDropItems());
                     boolean isCancelled = EventUtils.fireAndCheckCancel(customBreakEvent);
                     if (isCancelled) {
                         event.setCancelled(true);
                         return;
+                    }
+
+                    if (!customBreakEvent.dropItems()) {
+                        event.setDropItems(false);
                     }
 
                     // execute functions
