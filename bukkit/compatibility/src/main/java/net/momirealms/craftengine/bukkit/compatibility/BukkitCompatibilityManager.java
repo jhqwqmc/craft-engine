@@ -13,6 +13,7 @@ import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEn
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineUtils;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicItemDropListener;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicSkillHelper;
+import net.momirealms.craftengine.bukkit.compatibility.packetevents.WrappedBlockStateHelper;
 import net.momirealms.craftengine.bukkit.compatibility.papi.PlaceholderAPIUtils;
 import net.momirealms.craftengine.bukkit.compatibility.permission.LuckPermsEventListeners;
 import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemExpressionHandler;
@@ -140,6 +141,22 @@ public class BukkitCompatibilityManager implements CompatibilityManager<org.bukk
         if (this.isPluginEnabled("QuickShop-Hikari")) {
             new QuickShopItemExpressionHandler(this.plugin).register();
             logHook("QuickShop-Hikari");
+        }
+        if (this.isPluginEnabled("packetevents")) {
+            try {
+                WrappedBlockStateHelper.register(null);
+            } catch (Throwable e) {
+                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
+            }
+            logHook("packetevents");
+        }
+        if (this.isPluginEnabled("GrimAC")) {
+            try {
+                WrappedBlockStateHelper.register("ac{}grim{}grimac{}shaded{}com{}github{}retrooper{}packetevents");
+            } catch (Throwable e) {
+                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
+            }
+            logHook("GrimAC");
         }
     }
 

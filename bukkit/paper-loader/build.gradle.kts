@@ -78,6 +78,10 @@ paper {
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
 
+        // PacketEvents
+        register("GrimAC") { required = false }
+        register("packetevents") { required = false }
+
         // Geyser
         register("Geyser-Spigot") { required = false }
         register("floodgate") { required = false }
