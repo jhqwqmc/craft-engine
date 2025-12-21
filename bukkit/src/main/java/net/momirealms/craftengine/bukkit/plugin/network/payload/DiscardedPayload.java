@@ -22,23 +22,20 @@ public record DiscardedPayload(Key channel, Object rawPayload) implements Payloa
         }
     }
 
-    public byte[] getData() {
+    public ByteBuf getData() {
         try {
             if (useNewMethod) {
-                return (byte[]) NetworkReflections.method$DiscardedPayload$dataByteArray.invoke(this.rawPayload());
+                return Unpooled.wrappedBuffer((byte[]) NetworkReflections.method$DiscardedPayload$dataByteArray.invoke(this.rawPayload()));
             } else {
-                ByteBuf buf = (ByteBuf) NetworkReflections.method$DiscardedPayload$data.invoke(this.rawPayload());
-                byte[] data = new byte[buf.readableBytes()];
-                buf.readBytes(data);
-                return data;
+                return (ByteBuf) NetworkReflections.method$DiscardedPayload$data.invoke(this.rawPayload());
             }
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("Failed to get data from DiscardedPayload", e);
-            return new byte[0];
+            return Unpooled.EMPTY_BUFFER;
         }
     }
 
     public FriendlyByteBuf toBuffer() {
-        return new FriendlyByteBuf(Unpooled.wrappedBuffer(this.getData()));
+        return new FriendlyByteBuf(this.getData());
     }
 }

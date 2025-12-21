@@ -276,18 +276,18 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         if (id == -1) return;
         ByteBufferPacketListenerHolder[] listeners = switch (direction) {
             case SERVERBOUND -> switch (state) {
-                case HANDSHAKING -> this.c2sHandshakingPacketListeners;
-                case STATUS -> this.c2sStatusPacketListeners;
-                case LOGIN -> this.c2sLoginPacketListeners;
-                case PLAY -> this.c2sPlayPacketListeners;
-                case CONFIGURATION -> this.c2sConfigurationPacketListeners;
+                case HANDSHAKING -> c2sHandshakingPacketListeners;
+                case STATUS -> c2sStatusPacketListeners;
+                case LOGIN -> c2sLoginPacketListeners;
+                case PLAY -> c2sPlayPacketListeners;
+                case CONFIGURATION -> c2sConfigurationPacketListeners;
             };
             case CLIENTBOUND -> switch (state) {
-                case HANDSHAKING -> this.s2cHandshakingPacketListeners;
-                case STATUS -> this.s2cStatusPacketListeners;
-                case LOGIN -> this.s2cLoginPacketListeners;
-                case PLAY -> this.s2cPlayPacketListeners;
-                case CONFIGURATION -> this.s2cConfigurationPacketListeners;
+                case HANDSHAKING -> s2cHandshakingPacketListeners;
+                case STATUS -> s2cStatusPacketListeners;
+                case LOGIN -> s2cLoginPacketListeners;
+                case PLAY -> s2cPlayPacketListeners;
+                case CONFIGURATION -> s2cConfigurationPacketListeners;
             };
         };
         if (id < 0 || id >= listeners.length) {
@@ -1035,7 +1035,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     protected void handleS2CByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
-        ByteBufferPacketListenerHolder holder = s2cPacketListeners[user.encoderState().ordinal()][packetID];
+        ByteBufferPacketListenerHolder[] listener = s2cPacketListeners[user.encoderState().ordinal()];
+        if (packetID >= listener.length) { // fixme 为什么会这样
+            return;
+        }
+        ByteBufferPacketListenerHolder holder = listener[packetID];
         if (holder != null) {
             try {
                 holder.listener().onPacketSend(user, event);
@@ -1047,7 +1051,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     protected void handleC2SByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
-        ByteBufferPacketListenerHolder holder = c2sPacketListeners[user.decoderState().ordinal()][packetID];
+        ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
+        if (packetID >= listener.length) { // fixme 为什么会这样
+            return;
+        }
+        ByteBufferPacketListenerHolder holder = listener[packetID];
         if (holder != null) {
             try {
                 holder.listener().onPacketReceive(user, event);
@@ -2107,7 +2115,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class StartConfigurationListener  implements NMSPacketListener {
+    public static class StartConfigurationListener implements NMSPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {

@@ -1662,6 +1662,11 @@ public final class NetworkReflections {
             .map(it -> ReflectionUtils.getDeclaredField(it, ByteBuf.class, 0))
             .orElse(null);
 
+    // 1.20.2~1.20.4 可能打了 https://github.com/PaperMC/Paper/commit/9b1798d.patch 补丁
+    public static final Field field$ServerboundCustomPayloadPacket$UnknownPayload$dataByteArray = Optional.ofNullable(clazz$ServerboundCustomPayloadPacket$UnknownPayload)
+            .map(it -> ReflectionUtils.getDeclaredField(it, byte[].class, 0))
+            .orElse(null);
+
     // 1.20.2~1.20.4
     public static final Constructor<?> constructor$ServerboundCustomPayloadPacket$UnknownPayload = Optional.ofNullable(clazz$ServerboundCustomPayloadPacket$UnknownPayload)
             .map(it -> ReflectionUtils.getConstructor(it, CoreReflections.clazz$ResourceLocation, ByteBuf.class))

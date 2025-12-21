@@ -1,12 +1,13 @@
 package net.momirealms.craftengine.core.plugin.compatibility;
 
+import cn.gtemc.levelerbridge.api.LevelerBridge;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
-public interface CompatibilityManager {
+public interface CompatibilityManager<P> {
 
     void onLoad();
 
@@ -14,13 +15,7 @@ public interface CompatibilityManager {
 
     void onDelayedEnable();
 
-    void registerLevelerProvider(String plugin, LevelerProvider provider);
-
     void registerTagResolverProvider(TagResolverProvider provider);
-
-    void addLevelerExp(Player player, String plugin, String target, double value);
-
-    int getLevel(Player player, String plugin, String target);
 
     ExternalModel createModel(String plugin, String id);
 
@@ -43,4 +38,6 @@ public interface CompatibilityManager {
     TagResolver[] createExternalTagResolvers(Context context);
 
     boolean isBedrockPlayer(Player player);
+
+    LevelerBridge<P> levelerBridge();
 }

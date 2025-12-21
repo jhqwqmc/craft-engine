@@ -15,6 +15,7 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.gui.CraftEngineGUIHolder;
 import net.momirealms.craftengine.bukkit.plugin.network.payload.DiscardedPayload;
+import net.momirealms.craftengine.bukkit.plugin.network.payload.UnknownPayload;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MAttributeHolders;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MMobEffects;
@@ -476,12 +477,10 @@ public class BukkitServerPlayer extends Player {
             Object responsePacket;
             if (VersionHelper.isOrAbove1_20_2()) {
                 Object dataPayload;
-                if (!VersionHelper.isOrAbove1_20_5()) {
-                    dataPayload = NetworkReflections.constructor$ServerboundCustomPayloadPacket$UnknownPayload.newInstance(channelResourceLocation, Unpooled.wrappedBuffer(data));
-                } else if (DiscardedPayload.useNewMethod) {
-                    dataPayload = NetworkReflections.constructor$DiscardedPayload.newInstance(channelResourceLocation, data);
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    dataPayload = NetworkReflections.constructor$DiscardedPayload.newInstance(channelResourceLocation, DiscardedPayload.useNewMethod ? data : Unpooled.wrappedBuffer(data));
                 } else {
-                    dataPayload = NetworkReflections.constructor$DiscardedPayload.newInstance(channelResourceLocation, Unpooled.wrappedBuffer(data));
+                    dataPayload = NetworkReflections.constructor$ServerboundCustomPayloadPacket$UnknownPayload.newInstance(channelResourceLocation, UnknownPayload.isByteArray ? data : Unpooled.wrappedBuffer(data));
                 }
                 responsePacket = NetworkReflections.constructor$ClientboundCustomPayloadPacket.newInstance(dataPayload);
             } else {

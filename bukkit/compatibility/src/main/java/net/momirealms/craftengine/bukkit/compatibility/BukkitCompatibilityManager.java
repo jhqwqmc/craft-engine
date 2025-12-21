@@ -1,12 +1,11 @@
 package net.momirealms.craftengine.bukkit.compatibility;
 
+import cn.gtemc.levelerbridge.core.BukkitLevelerBridge;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.FloodgateUtils;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.GeyserUtils;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
-import net.momirealms.craftengine.bukkit.compatibility.leveler.*;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelBlockEntityElementConfig;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelModel;
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineBlockEntityElementConfig;
@@ -14,6 +13,7 @@ import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEn
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineUtils;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicItemDropListener;
 import net.momirealms.craftengine.bukkit.compatibility.mythicmobs.MythicSkillHelper;
+import net.momirealms.craftengine.bukkit.compatibility.packetevents.WrappedBlockStateHelper;
 import net.momirealms.craftengine.bukkit.compatibility.papi.PlaceholderAPIUtils;
 import net.momirealms.craftengine.bukkit.compatibility.permission.LuckPermsEventListeners;
 import net.momirealms.craftengine.bukkit.compatibility.quickshop.QuickShopItemExpressionHandler;
@@ -31,7 +31,6 @@ import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager;
-import net.momirealms.craftengine.core.plugin.compatibility.LevelerProvider;
 import net.momirealms.craftengine.core.plugin.compatibility.ModelProvider;
 import net.momirealms.craftengine.core.plugin.compatibility.TagResolverProvider;
 import net.momirealms.craftengine.core.plugin.config.Config;
@@ -49,12 +48,12 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-public class BukkitCompatibilityManager implements CompatibilityManager {
+public class BukkitCompatibilityManager implements CompatibilityManager<org.bukkit.entity.Player> {
     private final BukkitCraftEngine plugin;
     private final Map<String, ModelProvider> modelProviders;
-    private final Map<String, LevelerProvider> levelerProviders;
     private final Map<String, TagResolverProvider> tagResolverProviders;
     private TagResolverProvider[] tagResolverProviderArray = null;
+    private BukkitLevelerBridge levelerBridge;
     private boolean hasPlaceholderAPI;
     private boolean hasGeyser;
     private boolean hasFloodgate;
@@ -65,7 +64,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 "ModelEngine", ModelEngineModel::new,
                 "BetterModel", BetterModelModel::new
         ));
-        this.levelerProviders = new HashMap<>();
         this.tagResolverProviders = new HashMap<>();
     }
 
@@ -136,33 +134,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             SkriptHook.register();
             logHook("Skript");
         }
-        if (this.isPluginEnabled("AuraSkills")) {
-            this.registerLevelerProvider("AuraSkills", new AuraSkillsLevelerProvider());
-            logHook("AuraSkills");
-        }
-        if (this.isPluginEnabled("AureliumSkills")) {
-            this.registerLevelerProvider("AureliumSkills", new AureliumSkillsLevelerProvider());
-        }
-        if (this.isPluginEnabled("McMMO")) {
-            this.registerLevelerProvider("mcMMO", new McMMOLevelerProvider());
-            logHook("McMMO");
-        }
-        if (this.isPluginEnabled("MMOCore")) {
-            this.registerLevelerProvider("MMOCore", new MMOCoreLevelerProvider());
-            logHook("MMOCore");
-        }
-        if (this.isPluginEnabled("Jobs")) {
-            registerLevelerProvider("Jobs", new JobsRebornLevelerProvider());
-            logHook("Jobs");
-        }
-        if (this.isPluginEnabled("EcoSkills")) {
-            registerLevelerProvider("EcoSkills", new EcoSkillsLevelerProvider());
-            logHook("EcoSkills");
-        }
-        if (this.isPluginEnabled("EcoJobs")) {
-            registerLevelerProvider("EcoJobs", new EcoJobsLevelerProvider());
-            logHook("EcoJobs");
-        }
         if (this.isPluginEnabled("MythicMobs")) {
             new MythicItemDropListener(this.plugin);
             logHook("MythicMobs");
@@ -171,16 +142,27 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             new QuickShopItemExpressionHandler(this.plugin).register();
             logHook("QuickShop-Hikari");
         }
+        if (this.isPluginEnabled("packetevents")) {
+            try {
+                WrappedBlockStateHelper.register(null);
+            } catch (Throwable e) {
+                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
+            }
+            logHook("packetevents");
+        }
+        if (this.isPluginEnabled("GrimAC")) {
+            try {
+                WrappedBlockStateHelper.register("ac{}grim{}grimac{}shaded{}com{}github{}retrooper{}packetevents");
+            } catch (Throwable e) {
+                this.plugin.logger().warn("Failed to register block to WrappedBlockState", e);
+            }
+            logHook("GrimAC");
+        }
     }
 
     @Override
     public void executeMMSkill(String skill, float power, Player player) {
         MythicSkillHelper.execute(skill, power, player);
-    }
-
-    @Override
-    public void registerLevelerProvider(String plugin, LevelerProvider provider) {
-        this.levelerProviders.put(plugin, provider);
     }
 
     @Override
@@ -192,20 +174,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     private void logHook(String plugin) {
         this.plugin.logger().info(TranslationManager.instance().translateLog("info.compatibility", plugin));
-    }
-
-    @Override
-    public void addLevelerExp(Player player, String plugin, String target, double value) {
-        Optional.ofNullable(this.levelerProviders.get(plugin)).ifPresentOrElse(leveler -> leveler.addExp(player, target, value),
-                () -> this.plugin.logger().warn("[Compatibility] '" + plugin + "' leveler provider not found"));
-    }
-
-    @Override
-    public int getLevel(Player player, String plugin, String target) {
-        return Optional.ofNullable(this.levelerProviders.get(plugin)).map(leveler -> leveler.getLevel(player, target)).orElseGet(() -> {
-            this.plugin.logger().warn("[Compatibility] '" + plugin + "' leveler provider not found");
-            return 0;
-        });
     }
 
     @Override
@@ -254,11 +222,11 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         }
     }
 
-    @SuppressWarnings({"deprecation", "all"})
+    @SuppressWarnings({"deprecation", "DataFlowIssue"})
     private void initFastAsyncWorldEditHook() {
         Plugin fastAsyncWorldEdit = Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit");
         String version = VersionHelper.isPaper() ? fastAsyncWorldEdit.getPluginMeta().getVersion() : fastAsyncWorldEdit.getDescription().getVersion();
-        if (!this.fastAsyncWorldEditVersionCheck(version)) {
+        if (!WorldEditBlockRegister.checkFAWECompatible(version)) {
             if (VersionHelper.isOrAbove1_20_3()) {
                 this.plugin.logger().severe("");
                 if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
@@ -271,22 +239,14 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 this.plugin.logger().severe("");
             }
         }
-        new WorldEditBlockRegister(BukkitBlockManager.instance(), true);
-    }
-
-    private boolean fastAsyncWorldEditVersionCheck(String version) {
-        String cleanVersion = version.split("-")[0];
-        String[] parts = cleanVersion.split("\\.");
-        int first = Integer.parseInt(parts[0]);
-        int second = Integer.parseInt(parts[1]);
-        return first >= 2 && second >= 13;
+        WorldEditBlockRegister.init(true);
     }
 
     private void initWorldEditHook() {
-        WorldEditBlockRegister weBlockRegister = new WorldEditBlockRegister(BukkitBlockManager.instance(), false);
+        WorldEditBlockRegister.init(false);
         try {
             for (int i = 0; i < Config.serverSideBlocks(); i++) {
-                weBlockRegister.register(BlockManager.createCustomBlockKey(i));
+                WorldEditBlockRegister.register(BlockManager.createCustomBlockKey(i));
             }
         } catch (Exception e) {
             this.plugin.logger().warn("Failed to initialize world edit hook", e);
@@ -350,5 +310,13 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             return GeyserUtils.isGeyserPlayer(uuid);
         }
         return uuid.version() == 0;
+    }
+
+    @Override
+    public BukkitLevelerBridge levelerBridge() {
+        if (this.levelerBridge == null) {
+            this.levelerBridge = BukkitLevelerBridge.builder().build();
+        }
+        return this.levelerBridge;
     }
 }

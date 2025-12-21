@@ -94,7 +94,7 @@ public interface Plugin {
 
     VanillaLootManager vanillaLootManager();
 
-    CompatibilityManager compatibilityManager();
+    <T> CompatibilityManager<T> compatibilityManager();
 
     GlobalVariableManager globalVariableManager();
 

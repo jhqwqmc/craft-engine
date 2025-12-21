@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
-        implements FallOnBlockBehavior, PlaceLiquidBlockBehavior, IsPathFindableBlockBehavior {
+        implements FallOnBlockBehavior, PlaceLiquidBlockBehavior, IsPathFindableBlockBehavior, CanBeReplacedBlockBehavior {
     private final AbstractBlockBehavior[] behaviors;
 
     public UnsafeCompositeBlockBehavior(CustomBlock customBlock, List<AbstractBlockBehavior> behaviors) {
@@ -258,8 +258,8 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     @Override
     public boolean canBeReplaced(BlockPlaceContext context, ImmutableBlockState state) {
         for (AbstractBlockBehavior behavior : this.behaviors) {
-            if (!behavior.canBeReplaced(context, state)) {
-                return false;
+            if (behavior instanceof CanBeReplacedBlockBehavior canBeReplacedBlockBehavior) {
+                return canBeReplacedBlockBehavior.canBeReplaced(context, state);
             }
         }
         return super.canBeReplaced(context, state);

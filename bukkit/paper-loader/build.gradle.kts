@@ -33,6 +33,7 @@ dependencies {
     implementation("net.momirealms:antigrieflib:${rootProject.properties["anti_grief_version"]}")
     implementation("net.momirealms:craft-engine-nms-helper-mojmap:${rootProject.properties["nms_helper_version"]}")
     implementation("cn.gtemc:itembridge:${rootProject.properties["itembridge_version"]}")
+    implementation("cn.gtemc:levelerbridge:${rootProject.properties["levelerbridge_version"]}")
 }
 
 java {
@@ -76,6 +77,10 @@ paper {
         register("LuckPerms") { required = false }
         register("ViaVersion") { required = false }
         register("QuickShop-Hikari") { required = false }
+
+        // PacketEvents
+        register("GrimAC") { required = false }
+        register("packetevents") { required = false }
 
         // Geyser
         register("Geyser-Spigot") { required = false }
@@ -177,6 +182,7 @@ tasks {
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.momirealms.antigrieflib", "net.momirealms.craftengine.libraries.antigrieflib")
         relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
+        relocate("cn.gtemc.levelerbridge", "net.momirealms.craftengine.libraries.levelerbridge")
         relocate("org.incendo", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.bstats", "net.momirealms.craftengine.libraries.bstats")
