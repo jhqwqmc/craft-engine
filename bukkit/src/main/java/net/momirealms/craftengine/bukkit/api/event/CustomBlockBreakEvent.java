@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,11 +37,17 @@ public final class CustomBlockBreakEvent extends PlayerEvent implements Cancella
         return player;
     }
 
+    /**
+     * Please use {@link BlockBreakEvent#isDropItems()}
+     */
     @Deprecated(forRemoval = true)
     public boolean dropItems() {
         return dropItems;
     }
 
+    /**
+     * Please use {@link BlockBreakEvent#setDropItems(boolean)}
+     */
     @Deprecated(forRemoval = true)
     public void setDropItems(boolean dropItems) {
         this.dropItems = dropItems;
