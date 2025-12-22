@@ -57,6 +57,7 @@ import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.plugin.user.FakeBukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.*;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
+import net.momirealms.craftengine.bukkit.world.score.BukkitTeamManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -530,6 +531,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         () -> {}, 1, 1);
             }
             user.sendPacket(TotemAnimationCommand.FIX_TOTEM_SOUND_PACKET, false);
+            user.sendPacket(BukkitTeamManager.instance().addTeamsPacket(), false);
             Channel channel = user.nettyChannel();
             if (this.hasAntiPopup && Config.disableChatReport() && channel != null) {
                 if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
@@ -3963,6 +3965,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
 
                     FurnitureBreakEvent breakEvent = new FurnitureBreakEvent(serverPlayer.platformPlayer(), furniture);
+                    breakEvent.setDropItems(!serverPlayer.isCreativeMode());
                     if (EventUtils.fireAndCheckCancel(breakEvent))
                         return;
 
@@ -3981,7 +3984,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         return;
                     }
 
-                    CraftEngineFurniture.remove(furniture, serverPlayer, !serverPlayer.isCreativeMode(), true);
+                    CraftEngineFurniture.remove(furniture, serverPlayer, breakEvent.dropItems(), true);
                 };
             } else if (actionType == 2) {
                 // INTERACT_AT

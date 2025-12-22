@@ -117,11 +117,11 @@ public abstract class Furniture implements Cullable {
             Seat<FurnitureHitBox>[] seats = hitbox.seats();
             for (int index = 0; index < seats.length; index++) {
                 Map<Vector3f, Seat<FurnitureHitBox>> tempMap = seatMap.get();
-                Vector3f seatPos = seats[i].config().position();
+                Vector3f seatPos = seats[index].config().position();
                 if (tempMap.containsKey(seatPos)) {
-                    seats[i] = tempMap.get(seatPos);
+                    seats[index] = tempMap.get(seatPos);
                 } else {
-                    tempMap.put(seatPos, seats[i]);
+                    tempMap.put(seatPos, seats[index]);
                 }
             }
             hitbox.collectVirtualEntityId(virtualEntityIds::addLast);

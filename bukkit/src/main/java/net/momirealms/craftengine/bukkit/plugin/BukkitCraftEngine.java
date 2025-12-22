@@ -196,6 +196,8 @@ public class BukkitCraftEngine extends CraftEngine {
         super.furnitureManager = new BukkitFurnitureManager(this);
         // 初始化队伍管理器
         super.teamManager = new BukkitTeamManager(this);
+        // 初始化虚拟队伍
+        super.teamManager.init();
         // 注册默认的parser
         this.registerDefaultParsers();
         // 完成加载

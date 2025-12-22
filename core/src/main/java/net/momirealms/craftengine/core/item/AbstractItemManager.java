@@ -193,9 +193,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
             if (settings.destroyOnDeathChance != 0) {
                 this.featureFlag$destroyOnDeathChance = true;
             }
-            if (settings.glowColor != null) {
-                this.plugin.teamManager().setColorInUse(settings.glowColor);
-            }
         }
         return true;
     }

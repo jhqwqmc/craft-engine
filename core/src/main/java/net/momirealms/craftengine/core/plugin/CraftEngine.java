@@ -176,7 +176,6 @@ public abstract class CraftEngine implements Plugin {
         this.projectileManager.reload();
         this.seatManager.reload();
         this.entityCullingManager.reload();
-        this.teamManager.reload();
     }
 
     private void runDelayTasks(boolean reloadRecipe) {
@@ -249,8 +248,6 @@ public abstract class CraftEngine implements Plugin {
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
-                        // 同步修改队伍
-                        this.teamManager.runDelayedSyncTasks();
                         long time4 = System.currentTimeMillis();
                         long syncTime = time4 - time3;
                         this.reloadEventDispatcher.accept(this);

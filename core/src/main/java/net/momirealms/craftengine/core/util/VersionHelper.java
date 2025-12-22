@@ -94,7 +94,7 @@ public class VersionHelper {
 
             COMPONENT_RELEASE = v1_20_5;
 
-            mojmap = checkMojMap();
+            mojmap = checkMojMap() || v26_1;
             folia = checkFolia();
             paper = checkPaper();
             leaves = checkLeaves();
