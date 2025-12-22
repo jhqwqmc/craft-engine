@@ -1,7 +1,5 @@
 package net.momirealms.craftengine.bukkit.item;
 
-import cn.gtemc.itembridge.api.Provider;
-import cn.gtemc.itembridge.core.BukkitItemBridge;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,6 +20,7 @@ import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.item.recipe.DatapackRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
+import net.momirealms.craftengine.core.plugin.compatibility.ItemSource;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.GsonHelper;
@@ -59,7 +58,6 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     private final Item<ItemStack> emptyItem;
     private final UniqueIdItem<ItemStack> emptyUniqueItem;
     private final Function<Object, Integer> decoratedHashOpsGenerator;
-    private BukkitItemBridge itemBridge;
     private Set<Key> lastRegisteredPatterns = Set.of();
 
     @SuppressWarnings("unchecked")
@@ -86,13 +84,15 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     @Override
     public void delayedLoad() {
         super.delayedLoad();
-        List<Provider<ItemStack, org.bukkit.entity.Player>> sources = new ArrayList<>();
+        List<ItemSource<ItemStack>> sources = new ArrayList<>();
         for (String externalSource : Config.recipeIngredientSources()) {
             String sourceId = externalSource.toLowerCase(Locale.ENGLISH);
-            Optional<Provider<ItemStack, org.bukkit.entity.Player>> provider = itemBridgeProvider().provider(sourceId);
-            provider.ifPresent(sources::add);
+            ItemSource<?> itemSource = this.plugin.compatibilityManager().getItemSource(sourceId);
+            if (itemSource != null) {
+                sources.add((ItemSource<ItemStack>) itemSource);
+            }
         }
-        this.factory.resetRecipeIngredientSources(sources.isEmpty() ? null : sources.toArray(new Provider[0]));
+        this.factory.resetRecipeIngredientSources(sources.isEmpty() ? null : sources.toArray(new ItemSource[0]));
     }
 
     @Override
@@ -443,15 +443,5 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     @Nullable // 1.21.5+
     public Function<Object, Integer> decoratedHashOpsGenerator() {
         return decoratedHashOpsGenerator;
-    }
-
-    @Override
-    public BukkitItemBridge itemBridgeProvider() {
-        if (this.itemBridge == null) {
-            BukkitItemBridge.BukkitBuilder builder = BukkitItemBridge.builder();
-            builder.removeById("craftengine");
-            this.itemBridge = builder.build();
-        }
-        return this.itemBridge;
     }
 }

@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.bukkit.item.factory;
 
-import cn.gtemc.itembridge.api.Provider;
 import com.google.gson.JsonElement;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
@@ -13,13 +12,13 @@ import net.momirealms.craftengine.core.item.ItemWrapper;
 import net.momirealms.craftengine.core.item.data.JukeboxPlayable;
 import net.momirealms.craftengine.core.item.setting.EquipmentData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.compatibility.ItemSource;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.StringUtils;
 import net.momirealms.craftengine.core.util.UniqueKey;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
@@ -27,7 +26,7 @@ import java.util.Optional;
 
 public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extends ItemFactory<W, ItemStack> {
     private boolean hasExternalRecipeSource = false;
-    private Provider<ItemStack, Player>[] recipeIngredientSources = null;
+    private ItemSource<ItemStack>[] recipeIngredientSources = null;
 
     protected BukkitItemFactory(CraftEngine plugin) {
         super(plugin);
@@ -51,7 +50,7 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
         throw new IllegalStateException("Unsupported server version: " + VersionHelper.MINECRAFT_VERSION.version());
     }
 
-    public void resetRecipeIngredientSources(Provider<ItemStack, Player>[] recipeIngredientSources) {
+    public void resetRecipeIngredientSources(ItemSource<ItemStack>[] recipeIngredientSources) {
         if (recipeIngredientSources == null || recipeIngredientSources.length == 0) {
             this.recipeIngredientSources = null;
             this.hasExternalRecipeSource = false;
@@ -103,8 +102,8 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
             return null;
         }
         if (this.hasExternalRecipeSource) {
-           for (Provider<ItemStack, Player> source : this.recipeIngredientSources) {
-               String id = source.idOrNull(item.getItem());
+           for (ItemSource<ItemStack> source : this.recipeIngredientSources) {
+               String id = source.id(item.getItem());
                if (id != null) {
                    return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id)));
                }

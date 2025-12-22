@@ -48,7 +48,6 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -93,7 +92,7 @@ public class BukkitCraftEngine extends CraftEngine {
         Class<?> compatibilityClass = ReflectionUtils.getClazz(COMPATIBILITY_CLASS);
         if (compatibilityClass != null) {
             try {
-                super.compatibilityManager = (CompatibilityManager<Player>) Objects.requireNonNull(ReflectionUtils.getConstructor(compatibilityClass, 0)).newInstance(this);
+                super.compatibilityManager = (CompatibilityManager) Objects.requireNonNull(ReflectionUtils.getConstructor(compatibilityClass, 0)).newInstance(this);
             } catch (ReflectiveOperationException e) {
                 logger().warn("Compatibility class could not be instantiated: " + compatibilityClass.getName());
             }
@@ -350,8 +349,8 @@ public class BukkitCraftEngine extends CraftEngine {
     }
 
     @Override
-    public  CompatibilityManager<Player> compatibilityManager() {
-        return (CompatibilityManager<Player>) compatibilityManager;
+    public CompatibilityManager compatibilityManager() {
+        return compatibilityManager;
     }
 
     @Override

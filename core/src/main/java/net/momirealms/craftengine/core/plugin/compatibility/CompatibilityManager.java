@@ -1,13 +1,12 @@
 package net.momirealms.craftengine.core.plugin.compatibility;
 
-import cn.gtemc.levelerbridge.api.LevelerBridge;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
-public interface CompatibilityManager<P> {
+public interface CompatibilityManager {
 
     void onLoad();
 
@@ -39,5 +38,11 @@ public interface CompatibilityManager<P> {
 
     boolean isBedrockPlayer(Player player);
 
-    LevelerBridge<P> levelerBridge();
+    ItemSource<?> getItemSource(String id);
+
+    void registerItemSource(ItemSource<?> itemSource);
+
+    LevelerProvider getLevelerProvider(String id);
+
+    void registerLevelerProvider(LevelerProvider provider);
 }

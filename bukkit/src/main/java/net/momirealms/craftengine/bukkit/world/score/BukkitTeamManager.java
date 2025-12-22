@@ -6,7 +6,9 @@ import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.world.score.TeamManager;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public class BukkitTeamManager implements TeamManager {
     private static BukkitTeamManager instance;

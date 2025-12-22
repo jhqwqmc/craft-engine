@@ -1,11 +1,15 @@
 package net.momirealms.craftengine.bukkit.compatibility;
 
+import cn.gtemc.itembridge.api.Provider;
+import cn.gtemc.itembridge.core.BukkitItemBridge;
 import cn.gtemc.levelerbridge.core.BukkitLevelerBridge;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.element.BukkitBlockEntityElementConfigs;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.FloodgateUtils;
 import net.momirealms.craftengine.bukkit.compatibility.bedrock.GeyserUtils;
+import net.momirealms.craftengine.bukkit.compatibility.item.ItemBridgeSource;
 import net.momirealms.craftengine.bukkit.compatibility.legacy.slimeworld.LegacySlimeFormatStorageAdaptor;
+import net.momirealms.craftengine.bukkit.compatibility.leveler.LevelerBridgeLeveler;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelBlockEntityElementConfig;
 import net.momirealms.craftengine.bukkit.compatibility.model.bettermodel.BetterModelModel;
 import net.momirealms.craftengine.bukkit.compatibility.model.modelengine.ModelEngineBlockEntityElementConfig;
@@ -30,9 +34,7 @@ import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.loot.LootConditions;
-import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager;
-import net.momirealms.craftengine.core.plugin.compatibility.ModelProvider;
-import net.momirealms.craftengine.core.plugin.compatibility.TagResolverProvider;
+import net.momirealms.craftengine.core.plugin.compatibility.*;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AlwaysFalseCondition;
@@ -44,27 +46,52 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.WorldManager;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-public class BukkitCompatibilityManager implements CompatibilityManager<org.bukkit.entity.Player> {
+public class BukkitCompatibilityManager implements CompatibilityManager {
     private final BukkitCraftEngine plugin;
     private final Map<String, ModelProvider> modelProviders;
     private final Map<String, TagResolverProvider> tagResolverProviders;
+    private final Map<String, ItemSource<ItemStack>> itemSources;
+    private final Map<String, LevelerProvider> levelerProviders;
     private TagResolverProvider[] tagResolverProviderArray = null;
-    private BukkitLevelerBridge levelerBridge;
     private boolean hasPlaceholderAPI;
     private boolean hasGeyser;
     private boolean hasFloodgate;
 
     public BukkitCompatibilityManager(BukkitCraftEngine plugin) {
         this.plugin = plugin;
+        this.itemSources = new HashMap<>();
+        this.levelerProviders = new HashMap<>();
         this.modelProviders = new HashMap<>(Map.of(
                 "ModelEngine", ModelEngineModel::new,
                 "BetterModel", BetterModelModel::new
         ));
         this.tagResolverProviders = new HashMap<>();
+    }
+
+    @Override
+    public ItemSource<?> getItemSource(String id) {
+        return this.itemSources.get(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void registerItemSource(ItemSource<?> itemSource) {
+        this.itemSources.put(itemSource.plugin(), (ItemSource<ItemStack>) itemSource);
+    }
+
+    @Override
+    public LevelerProvider getLevelerProvider(String id) {
+        return this.levelerProviders.get(id);
+    }
+
+    @Override
+    public void registerLevelerProvider(LevelerProvider provider) {
+        this.levelerProviders.put(provider.plugin(), provider);
     }
 
     @Override
@@ -137,6 +164,14 @@ public class BukkitCompatibilityManager implements CompatibilityManager<org.bukk
         }
         if (this.isPluginEnabled("GrimAC") && Config.injectPacketEvents()) {
             runCatchingHook(() -> WrappedBlockStateHelper.register("ac{}grim{}grimac{}shaded{}com{}github{}retrooper{}packetevents"), "GrimAC");
+        }
+        BukkitLevelerBridge levelerBridge = BukkitLevelerBridge.builder(false).build();
+        for (cn.gtemc.levelerbridge.api.LevelerProvider<org.bukkit.entity.Player> provider : levelerBridge.providers()) {
+            this.registerLevelerProvider(new LevelerBridgeLeveler(provider));
+        }
+        BukkitItemBridge itemBridge = BukkitItemBridge.builder(true).build();
+        for (Provider<ItemStack, org.bukkit.entity.Player> provider : itemBridge.providers()) {
+            this.registerItemSource(new ItemBridgeSource(provider));
         }
     }
 
@@ -303,13 +338,5 @@ public class BukkitCompatibilityManager implements CompatibilityManager<org.bukk
             return GeyserUtils.isGeyserPlayer(uuid);
         }
         return uuid.version() == 0;
-    }
-
-    @Override
-    public BukkitLevelerBridge levelerBridge() {
-        if (this.levelerBridge == null) {
-            this.levelerBridge = BukkitLevelerBridge.builder().build();
-        }
-        return this.levelerBridge;
     }
 }

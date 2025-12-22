@@ -88,7 +88,7 @@ public abstract class CraftEngine implements Plugin {
     protected SoundManager soundManager;
     protected VanillaLootManager vanillaLootManager;
     protected AdvancementManager advancementManager;
-    protected CompatibilityManager<?> compatibilityManager;
+    protected CompatibilityManager compatibilityManager;
     protected GlobalVariableManager globalVariableManager;
     protected ProjectileManager projectileManager;
     protected SeatManager seatManager;
@@ -644,10 +644,9 @@ public abstract class CraftEngine implements Plugin {
         return vanillaLootManager;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> CompatibilityManager<T> compatibilityManager() {
-        return (CompatibilityManager<T>) compatibilityManager;
+    public CompatibilityManager compatibilityManager() {
+        return compatibilityManager;
     }
 
     @Override
