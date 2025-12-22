@@ -31,7 +31,7 @@ dependencies {
     // Placeholder
     compileOnly("me.clip:placeholderapi:${rootProject.properties["placeholder_api_version"]}")
     // SlimeWorld
-    compileOnly("com.infernalsuite.asp:api:4.0.0-SNAPSHOT")
+    compileOnly("com.infernalsuite.asp:api:4.2.0-SNAPSHOT")
     // ModelEngine
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
     // BetterModel

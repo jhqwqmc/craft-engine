@@ -17,7 +17,7 @@ public interface WorldManager extends Manageable {
 
     CEWorld loadWorld(World world);
 
-    void loadWorld(CEWorld world);
+    void loadWorld(CEWorld world, boolean forceInitChunks);
 
     CEWorld createWorld(World world, WorldDataStorage storage);
 

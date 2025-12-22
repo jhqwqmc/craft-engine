@@ -187,9 +187,13 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     @Override
-    public void loadWorld(CEWorld world) {
+    public void loadWorld(CEWorld world, boolean forceInit) {
         UUID uuid = world.world().uuid();
-        if (this.worlds.containsKey(uuid)) return;
+        if (this.worlds.containsKey(uuid)) {
+            if (!forceInit) {
+                return;
+            }
+        }
         this.worlds.put(uuid, world);
         this.resetWorldArray();
         this.injectChunkGenerator(world);
