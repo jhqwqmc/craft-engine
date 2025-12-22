@@ -14,7 +14,7 @@ public class BukkitTeamManager implements TeamManager {
     private static BukkitTeamManager instance;
     private final BukkitCraftEngine plugin;
     private final Map<LegacyChatFormatter, Object> teamByColor = new EnumMap<>(LegacyChatFormatter.class);
-    private Object addTeamsPacket;
+    private List<Object> addTeamsPackets;
 
     public BukkitTeamManager(BukkitCraftEngine plugin) {
         this.plugin = plugin;
@@ -31,8 +31,8 @@ public class BukkitTeamManager implements TeamManager {
     }
 
     @Override
-    public Object addTeamsPacket() {
-        return addTeamsPacket;
+    public List<Object> addTeamsPackets() {
+        return this.addTeamsPackets;
     }
 
     @Override
@@ -48,6 +48,6 @@ public class BukkitTeamManager implements TeamManager {
             this.teamByColor.put(color, team);
             packets.add(FastNMS.INSTANCE.method$ClientboundSetPlayerTeamPacket$createAddOrModifyPacket(team, true));
         }
-        this.addTeamsPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
+        this.addTeamsPackets = packets;
     }
 }

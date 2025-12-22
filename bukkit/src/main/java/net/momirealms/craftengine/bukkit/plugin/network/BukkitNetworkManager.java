@@ -530,15 +530,19 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 player.getScheduler().runAtFixedRate(plugin.javaPlugin(), (t) -> user.tick(),
                         () -> {}, 1, 1);
             }
+            // 发送修复图腾音效
             user.sendPacket(TotemAnimationCommand.FIX_TOTEM_SOUND_PACKET, false);
-            user.sendPacket(BukkitTeamManager.instance().addTeamsPacket(), false);
+            // 发送颜色队伍
+            for (Object packet : BukkitTeamManager.instance().addTeamsPackets()) {
+                user.sendPacket(packet, false);
+            }
             Channel channel = user.nettyChannel();
             if (this.hasAntiPopup && Config.disableChatReport() && channel != null) {
                 if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
                     plugin.logger().warn("CraftEngine 的禁用聊天举报功能和 AntiPopup 冲突，可能会导致 Emoji 解析异常，请卸载 AntiPopup 或关闭禁用聊天举报功能");
                 } else {
                     plugin.logger().warn("The Disable Chat Report feature conflicts with AntiPopup, potentially causing abnormal emoji parsing.");
-                    plugin.logger().warn("Please uninstall AntiPopup or disable the Disable Chat Report function.");
+                    plugin.logger().warn("Please uninstall AntiPopup or disable the 'disable-chat-report' option.");
                 }
             }
         }
