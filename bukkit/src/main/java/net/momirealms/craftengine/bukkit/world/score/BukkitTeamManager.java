@@ -37,13 +37,15 @@ public class BukkitTeamManager implements TeamManager {
     public void init() {
         Object scoreboard = FastNMS.INSTANCE.field$MinecraftServer$scoreboard();
         List<Object> packets = new ObjectArrayList<>();
-        for (LegacyChatFormatter color : LegacyChatFormatter.values()) {
+        LegacyChatFormatter[] values = LegacyChatFormatter.values();
+        for (int i = 0; i < 16; i++) {
+            LegacyChatFormatter color = values[i];
             String teamName = TeamManager.createTeamName(color);
             Object team = FastNMS.INSTANCE.constructor$PlayerTeam(scoreboard, teamName);
             FastNMS.INSTANCE.method$PlayerTeam$setColor(team, color.name());
             this.teamByColor.put(color, team);
             packets.add(FastNMS.INSTANCE.method$ClientboundSetPlayerTeamPacket$createAddOrModifyPacket(team, true));
         }
-        addTeamsPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
+        this.addTeamsPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(packets);
     }
 }

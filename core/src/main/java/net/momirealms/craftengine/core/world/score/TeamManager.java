@@ -12,6 +12,6 @@ public interface TeamManager extends Manageable {
     Object addTeamsPacket();
 
     static String createTeamName(LegacyChatFormatter color) {
-        return "\ufeffce_" + color.name().toLowerCase(Locale.ROOT) + "\ufeff";
+        return "ce_" + color.name().toLowerCase(Locale.ROOT);
     }
 }
