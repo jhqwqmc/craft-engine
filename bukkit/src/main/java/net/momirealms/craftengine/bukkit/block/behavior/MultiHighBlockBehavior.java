@@ -237,7 +237,7 @@ public class MultiHighBlockBehavior extends BukkitBlockBehavior {
                 return null;
             }
         }
-        return state.with(property, 0);
+        return state.with(property, property.min);
     }
 
     public static class Factory implements BlockBehaviorFactory {
