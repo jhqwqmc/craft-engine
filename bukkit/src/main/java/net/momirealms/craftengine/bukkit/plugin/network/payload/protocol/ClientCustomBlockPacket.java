@@ -12,6 +12,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkRefl
 import net.momirealms.craftengine.bukkit.plugin.reflection.paper.PaperReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.RegistryUtils;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.ModPacket;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
@@ -69,22 +70,28 @@ public record ClientCustomBlockPacket(int vanillaSize, int currentSize) implemen
         PayloadHelper.sendData(user, BukkitBlockManager.instance().cachedVisualBlockStatePacket());
         if (!VersionHelper.isOrAbove1_20_2()) {
             // 因为旧版本没有配置阶段需要重新发送区块
-            try {
-                Object chunkLoader = PaperReflections.field$ServerPlayer$chunkLoader.get(user.serverPlayer());
-                LongOpenHashSet sentChunks = (LongOpenHashSet) PaperReflections.field$RegionizedPlayerChunkLoader$PlayerChunkLoaderData$sentChunks.get(chunkLoader);
-                Object serverLevel = FastNMS.INSTANCE.field$CraftWorld$ServerLevel(((Player) user.platformPlayer()).getWorld());
-                Object lightEngine = CoreReflections.method$BlockAndTintGetter$getLightEngine.invoke(serverLevel);
-                Object chunkSource = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
-                for (long chunkPos : sentChunks) { // 这里可能出现玄学报错，故将错误打印移动至debug输出
-                    int chunkX = (int) chunkPos;
-                    int chunkZ = (int) (chunkPos >> 32);
-                    Object levelChunk = FastNMS.INSTANCE.method$ServerChunkCache$getChunk(chunkSource, chunkX, chunkZ, false);
-                    Object packet = NetworkReflections.constructor$ClientboundLevelChunkWithLightPacket.newInstance(levelChunk, lightEngine, null, null);
-                    user.sendPacket(packet, true);
+            CraftEngine.instance().scheduler().executeSync(() -> {
+                try {
+                    Object chunkLoader = PaperReflections.field$ServerPlayer$chunkLoader.get(user.serverPlayer());
+                    LongOpenHashSet sentChunks = (LongOpenHashSet) PaperReflections.field$RegionizedPlayerChunkLoader$PlayerChunkLoaderData$sentChunks.get(chunkLoader);
+                    if (sentChunks.isEmpty()) {
+                        return;
+                    }
+                    sentChunks = sentChunks.clone();
+                    Object serverLevel = FastNMS.INSTANCE.field$CraftWorld$ServerLevel(((Player) user.platformPlayer()).getWorld());
+                    Object lightEngine = CoreReflections.method$BlockAndTintGetter$getLightEngine.invoke(serverLevel);
+                    Object chunkSource = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
+                    for (long chunkPos : sentChunks) {
+                        int chunkX = (int) chunkPos;
+                        int chunkZ = (int) (chunkPos >> 32);
+                        Object levelChunk = FastNMS.INSTANCE.method$ServerChunkCache$getChunk(chunkSource, chunkX, chunkZ, false);
+                        Object packet = NetworkReflections.constructor$ClientboundLevelChunkWithLightPacket.newInstance(levelChunk, lightEngine, null, null);
+                        user.sendPacket(packet, true);
+                    }
+                } catch (Exception e) {
+                    CraftEngine.instance().logger().warn("Failed to refresh chunk for player " + user.name(), e);
                 }
-            } catch (Exception e) {
-                Debugger.COMMON.warn(() -> "Failed to refresh chunk for player " + user.name(), e);
-            }
+            });
         }
     }
 }
