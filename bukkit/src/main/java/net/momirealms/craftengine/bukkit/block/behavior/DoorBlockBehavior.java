@@ -114,11 +114,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
         } else {
             if (half == DoubleBlockHalf.LOWER && direction == CoreReflections.instance$Direction$DOWN
                     && !canSurvive(thisBlock, blockState, level, blockPos)) {
-                BlockPos pos = LocationUtils.fromBlockPos(blockPos);
-                net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
-                WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(pos));
-                world.playBlockSound(position, customState.settings().sounds().breakSound());
-                FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId());
+                MultiHighBlockBehavior.playBreakEffect(customState, blockPos, level);
                 return MBlocks.AIR$defaultState;
             }
             return blockState;

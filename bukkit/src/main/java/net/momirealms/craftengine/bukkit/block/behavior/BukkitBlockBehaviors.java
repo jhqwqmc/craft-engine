@@ -49,6 +49,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final Key HANGABLE_BLOCK = Key.from("craftengine:hangable_block");
     public static final Key DROP_EXPERIENCE_BLOCK = Key.from("craftengine:drop_experience_block");
     public static final Key DROP_EXP_BLOCK = Key.from("craftengine:drop_exp_block");
+    public static final Key MULTI_HIGH_BLOCK = Key.from("craftengine:multi_high_block");
 
     public static void init() {
         register(EMPTY, (block, args) -> EmptyBlockBehavior.INSTANCE);
@@ -96,5 +97,6 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
         register(HANGABLE_BLOCK, HangableBlockBehavior.FACTORY);
         register(DROP_EXPERIENCE_BLOCK, DropExperienceBlockBehavior.FACTORY);
         register(DROP_EXP_BLOCK, DropExperienceBlockBehavior.FACTORY);
+        register(MULTI_HIGH_BLOCK, MultiHighBlockBehavior.FACTORY);
     }
 }
