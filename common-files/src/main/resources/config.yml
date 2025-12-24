@@ -110,10 +110,13 @@ resource-pack:
       # If your image is special, for example, containing color pixels that need to be specifically recognized by a shader, the optimization might break it. You can add exclusions here.
       exclude:
         - assets/minecraft/textures/block/do_not_optimize.png
+      exclude-path:
+        - assets/minecraft/textures/block/do_not_optimize_path
     # .json / .mcmeta
     json:
       enable: true
       exclude: []
+      exclude-path: []
   # [Premium Exclusive]
   # Protect your resource pack from being cracked by others
   protection:

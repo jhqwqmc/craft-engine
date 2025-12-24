@@ -953,10 +953,22 @@ public abstract class AbstractPackManager implements PackManager {
         List<Path> modelJsonToOptimize = new ArrayList<>();
         Set<String> excludeTexture = new HashSet<>(Config.optimizeTextureExclude());
         Set<String> excludeJson = new HashSet<>(Config.optimizeJsonExclude());
+        Set<String> excludeTexturePath = new HashSet<>(Config.optimizeTextureExcludePath());
+        Set<String> excludeJsonPath = new HashSet<>(Config.optimizeJsonExcludePath());
         excludeTexture.addAll(this.parser.excludeTexture());
         excludeJson.addAll(this.parser.excludeJson());
-        Predicate<Path> texturePathPredicate = p -> !excludeTexture.contains(CharacterUtils.replaceBackslashWithSlash(path.relativize(p).toString()));
-        Predicate<Path> jsonPathPredicate = p -> !excludeJson.contains(CharacterUtils.replaceBackslashWithSlash(path.relativize(p).toString()));
+        Predicate<Path> texturePathPredicate = p -> {
+            Path relativize = path.relativize(p);
+            boolean unFilteredFile = !excludeTexture.contains(CharacterUtils.replaceBackslashWithSlash(relativize.toString()));
+            boolean unFilteredPath = !excludeTexturePath.contains(CharacterUtils.replaceBackslashWithSlash(String.valueOf(relativize.getParent())));
+            return unFilteredFile && unFilteredPath;
+        };
+        Predicate<Path> jsonPathPredicate = p -> {
+            Path relativize = path.relativize(p);
+            boolean unFilteredFile = !excludeJson.contains(CharacterUtils.replaceBackslashWithSlash(relativize.toString()));
+            boolean unFilteredPath = !excludeJsonPath.contains(CharacterUtils.replaceBackslashWithSlash(String.valueOf(relativize.getParent())));
+            return unFilteredFile && unFilteredPath;
+        };
 
         if (Config.optimizeJson()) {
             Path metaPath = path.resolve("pack.mcmeta");

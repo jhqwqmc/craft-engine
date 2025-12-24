@@ -63,7 +63,7 @@ The code you contribute will be open-sourced under the GPLv3 license. If you pre
 Help sustain CraftEngine's development by going Premium!
 
 - **Polymart**: [Support via Polymart](https://polymart.org/product/7624/craftengine)
-- **BuiltByBit**: [None]
+- **BuiltByBit**: [Support via BuiltByBit](https://builtbybit.com/resources/craftengine.82674/)
 - **Afdian**: [Support via Afdian](https://afdian.com/@xiaomomi/)
 
 ## CraftEngine API
