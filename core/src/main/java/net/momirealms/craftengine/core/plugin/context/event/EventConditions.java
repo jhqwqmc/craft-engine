@@ -49,7 +49,8 @@ public class EventConditions {
                 .register(ResourceKey.create(Registries.EVENT_CONDITION_FACTORY.location(), key), factory);
     }
 
-    public static Condition<Context> fromMap(Map<String, Object> map) {
+    @SuppressWarnings("unchecked")
+    public static <CTX extends Context> Condition<CTX> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.event.condition.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
         if (key.value().charAt(0) == '!') {
@@ -57,13 +58,13 @@ public class EventConditions {
             if (factory == null) {
                 throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
             }
-            return new InvertedCondition<>(factory.create(map));
+            return new InvertedCondition<>((Condition<CTX>) factory.create(map));
         } else {
             ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(key);
             if (factory == null) {
                 throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
             }
-            return factory.create(map);
+            return (Condition<CTX>) factory.create(map);
         }
     }
 }
