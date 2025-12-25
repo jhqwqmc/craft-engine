@@ -6,7 +6,9 @@ import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.bukkit.world.BukkitWorld;
+import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.world.CEWorld;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -36,7 +38,7 @@ public final class BukkitAdaptors {
      * This enables CraftEngine world operations on Bukkit world instances.
      *
      * @param world the Bukkit World to adapt, must not be null
-     * @return a non-null BukkitWorld instance wrapping the provided world
+     * @return the BukkitWorld instance wrapping the provided world
      */
     @NotNull
     public static BukkitWorld adapt(@NotNull final World world) {

@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.util;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -18,7 +19,7 @@ public final class LocationUtils {
     }
 
     public static WorldPosition toWorldPosition(Location location) {
-        return new WorldPosition(new BukkitWorld(location.getWorld()), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
+        return new WorldPosition(BukkitAdaptors.adapt(location.getWorld()), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
     }
 
     public static Object toVec(Vec3d vec) {

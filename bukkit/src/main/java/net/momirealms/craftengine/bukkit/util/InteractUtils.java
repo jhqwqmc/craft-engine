@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.util;
 
 import io.papermc.paper.entity.Shearable;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BlockItemBehavior;
 import net.momirealms.craftengine.bukkit.item.behavior.FlintAndSteelItemBehavior;
@@ -195,7 +196,7 @@ public final class InteractUtils {
                         && redstoneWire.getFace(BlockFace.WEST).equals(RedstoneWire.Connection.NONE);
                 if (isCross || isDot) {
                     BlockPos blockPos = result.getBlockPos();
-                    BukkitWorld bukkitWorld = new BukkitWorld(player.getWorld());
+                    BukkitWorld bukkitWorld = BukkitAdaptors.adapt(player.getWorld());
                     World world = bukkitWorld.platformWorld();
 
                     Direction[] directions = {Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH};

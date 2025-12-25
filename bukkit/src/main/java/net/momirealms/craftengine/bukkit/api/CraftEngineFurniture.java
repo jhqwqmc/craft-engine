@@ -7,7 +7,6 @@ import net.momirealms.craftengine.bukkit.nms.CollisionEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.entity.furniture.AnchorType;
 import net.momirealms.craftengine.core.entity.furniture.CustomFurniture;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
@@ -73,6 +72,7 @@ public final class CraftEngineFurniture {
     @Nullable
     public static BukkitFurniture rayTrace(Player player, double maxDistance) {
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return null;
         Location eyeLocation = serverPlayer.getEyeLocation();
         RayTraceResult result = player.getWorld().rayTrace(eyeLocation, eyeLocation.getDirection(), maxDistance, FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
         if (result == null)
@@ -92,6 +92,7 @@ public final class CraftEngineFurniture {
     @Nullable
     public static BukkitFurniture rayTrace(Player player) {
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return null;
         Location eyeLocation = serverPlayer.getEyeLocation();
         RayTraceResult result = player.getWorld().rayTrace(eyeLocation, eyeLocation.getDirection(), serverPlayer.getCachedInteractionRange(), FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
         if (result == null)
@@ -433,7 +434,7 @@ public final class CraftEngineFurniture {
         Location location = ((BukkitFurniture) furniture).getDropLocation();
         furniture.destroy();
         LootTable<ItemStack> lootTable = (LootTable<ItemStack>) furniture.config.lootTable();
-        World world = new BukkitWorld(location.getWorld());
+        World world = BukkitAdaptors.adapt(location.getWorld());
         WorldPosition position = new WorldPosition(world, location.getX(), location.getY(), location.getZ());
         if (dropLoot && lootTable != null) {
             ContextHolder.Builder builder = ContextHolder.builder()

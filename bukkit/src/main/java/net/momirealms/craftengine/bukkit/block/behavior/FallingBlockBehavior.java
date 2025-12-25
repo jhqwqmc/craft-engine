@@ -87,7 +87,7 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
             Object blockState = CoreReflections.field$FallingBlockEntity$blockState.get(fallingBlockEntity);
             Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(blockState);
             if (optionalCustomState.isEmpty()) return;
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
             WorldPosition position = new WorldPosition(world, CoreReflections.field$Entity$xo.getDouble(fallingBlockEntity), CoreReflections.field$Entity$yo.getDouble(fallingBlockEntity), CoreReflections.field$Entity$zo.getDouble(fallingBlockEntity));
             if (this.destroySound != null) {
                 world.playBlockSound(position, this.destroySound);
@@ -106,7 +106,7 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
         ImmutableBlockState immutableBlockState = BukkitBlockManager.instance().getImmutableBlockState(stateId);
         if (immutableBlockState == null || immutableBlockState.isEmpty()) return;
         if (!entity.getEntityData(BaseEntityData.Silent)) {
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
             if (this.landSound != null) {
                 world.playBlockSound(Vec3d.atCenterOf(LocationUtils.fromBlockPos(pos)), this.landSound);
             }

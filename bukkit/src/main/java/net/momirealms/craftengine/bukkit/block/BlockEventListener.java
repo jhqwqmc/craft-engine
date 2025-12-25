@@ -107,7 +107,7 @@ public final class BlockEventListener implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-        net.momirealms.craftengine.core.world.World world = new BukkitWorld(player.getWorld());
+        net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(player.getWorld());
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         Item<ItemStack> itemInHand = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
 
@@ -224,7 +224,7 @@ public final class BlockEventListener implements Listener {
                     event.setExpToDrop(0);
                 }
                 Location location = block.getLocation();
-                net.momirealms.craftengine.core.world.World world = new BukkitWorld(location.getWorld());
+                net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(location.getWorld());
                 WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
                 ContextHolder.Builder builder = ContextHolder.builder()
                         .withParameter(DirectContextParameters.POSITION, position)
@@ -255,7 +255,7 @@ public final class BlockEventListener implements Listener {
             Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
             state.owner().value().execute(PlayerOptionalContext.of(BukkitAdaptors.adapt(player), ContextHolder.builder()
                     .withParameter(DirectContextParameters.EVENT, cancellable)
-                    .withParameter(DirectContextParameters.POSITION, new WorldPosition(new BukkitWorld(event.getWorld()), LocationUtils.toVec3d(location)))
+                    .withParameter(DirectContextParameters.POSITION, new WorldPosition(BukkitAdaptors.adapt(event.getWorld()), LocationUtils.toVec3d(location)))
                     .withParameter(DirectContextParameters.BLOCK, new BukkitExistingBlock(block))
                     .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, state)
             ), EventTrigger.STEP);

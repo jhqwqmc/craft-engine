@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -261,7 +262,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
             world.sendGameEvent(player == null ? null : (org.bukkit.entity.Player) player.platformPlayer(), isOpen ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, new Vector(pos.x(), pos.y(), pos.z()));
             SoundData soundData = isOpen ? this.openSound : this.closeSound;
             if (soundData != null) {
-                new BukkitWorld(world).playBlockSound(
+                BukkitAdaptors.adapt(world).playBlockSound(
                         new Vec3d(pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5),
                         soundData
                 );
@@ -313,7 +314,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
                 world.sendGameEvent(null, flag ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, new Vector(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ()));
                 SoundData soundData = flag ? this.openSound : this.closeSound;
                 if (soundData != null) {
-                    new BukkitWorld(world).playBlockSound(
+                    BukkitAdaptors.adapt(world).playBlockSound(
                             new Vec3d(FastNMS.INSTANCE.field$Vec3i$x(blockPos) + 0.5, FastNMS.INSTANCE.field$Vec3i$y(blockPos) + 0.5, FastNMS.INSTANCE.field$Vec3i$z(blockPos) + 0.5),
                             soundData
                     );

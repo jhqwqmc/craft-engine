@@ -14,6 +14,7 @@ import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.This;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -117,7 +118,7 @@ public final class BlockStateGenerator {
             }
 
             Object serverLevel = FastNMS.INSTANCE.method$LootParams$Builder$getLevel(builder);
-            World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(serverLevel));
+            World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(serverLevel));
             ContextHolder.Builder lootBuilder = new ContextHolder.Builder()
                     .withParameter(DirectContextParameters.POSITION, new WorldPosition(world, FastNMS.INSTANCE.field$Vec3$x(vec3), FastNMS.INSTANCE.field$Vec3$y(vec3), FastNMS.INSTANCE.field$Vec3$z(vec3)));
             if (!item.isEmpty()) {

@@ -31,15 +31,18 @@ import java.util.UUID;
 
 public class BukkitWorld implements World {
     private final WeakReference<org.bukkit.World> world;
+    private final UUID uuid;
+    private CEWorld ceWorld;
     private WorldHeight worldHeight;
 
-    public BukkitWorld(org.bukkit.World world) {
+    public BukkitWorld(@NotNull org.bukkit.World world) {
         this.world = new WeakReference<>(world);
+        this.uuid = world.getUID();
     }
 
     @Override
     public org.bukkit.World platformWorld() {
-        return world.get();
+        return this.world.get();
     }
 
     @Override
@@ -139,7 +142,10 @@ public class BukkitWorld implements World {
 
     @Override
     public CEWorld storageWorld() {
-        return BukkitWorldManager.instance().getWorld(uuid());
+        if (this.ceWorld == null) {
+            this.ceWorld = BukkitWorldManager.instance().getWorld(uuid());
+        }
+        return this.ceWorld;
     }
 
     @Override
@@ -155,5 +161,16 @@ public class BukkitWorld implements World {
             tracked.add(BukkitAdaptors.adapt(FastNMS.INSTANCE.method$ServerPlayer$getBukkitEntity(player)));
         }
         return tracked;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BukkitWorld that)) return false;
+        return this.uuid.equals(that.uuid());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.uuid.hashCode();
     }
 }

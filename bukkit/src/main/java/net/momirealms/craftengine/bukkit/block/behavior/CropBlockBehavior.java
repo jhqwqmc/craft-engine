@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
@@ -175,7 +176,7 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         int i = this.getAge(customState) + this.boneMealBonus.getInt(
                 SimpleContext.of(ContextHolder.builder()
                             .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, customState)
-                            .withParameter(DirectContextParameters.POSITION, new WorldPosition(new BukkitWorld(world), Vec3d.atCenterOf(new Vec3i(x, y, z))))
+                            .withParameter(DirectContextParameters.POSITION, new WorldPosition(BukkitAdaptors.adapt(world), Vec3d.atCenterOf(new Vec3i(x, y, z))))
                             .build())
         );
         int maxAge = this.ageProperty.max;

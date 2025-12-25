@@ -56,7 +56,7 @@ public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
             return MBlocks.AIR$defaultState;
         } else if (half == DoubleBlockHalf.LOWER && direction == CoreReflections.instance$Direction$DOWN && !canSurvive(thisBlock, blockState, level, blockPos)) {
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
-            World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
             WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(pos));
             world.playBlockSound(position, customState.settings().sounds().breakSound());
             FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId());

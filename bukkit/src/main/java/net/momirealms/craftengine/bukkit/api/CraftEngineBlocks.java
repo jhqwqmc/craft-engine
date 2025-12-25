@@ -198,7 +198,7 @@ public final class CraftEngineBlocks {
                                  boolean sendLevelEvent) {
         ImmutableBlockState state = getCustomBlockState(block);
         if (state == null || state.isEmpty()) return false;
-        World world = new BukkitWorld(block.getWorld());
+        World world = BukkitAdaptors.adapt(block.getWorld());
         Location location = block.getLocation();
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         if (dropLoot) {

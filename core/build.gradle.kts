@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     // JOML
-    compileOnly("org.joml:joml:1.10.8")
+    compileOnly("org.joml:joml:${rootProject.properties["joml_version"]}")
     // YAML
     compileOnly(files("${rootProject.rootDir}/libs/boosted-yaml-${rootProject.properties["boosted_yaml_version"]}.jar"))
     compileOnly("org.yaml:snakeyaml:${rootProject.properties["snake_yaml_version"]}")

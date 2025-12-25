@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.block.entity.BlockEntityHolder;
@@ -1093,7 +1094,7 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public World world() {
-        return new BukkitWorld(platformPlayer().getWorld());
+        return BukkitAdaptors.adapt(platformPlayer().getWorld());
     }
 
     @Override

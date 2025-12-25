@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.world;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.injector.WorldStorageInjector;
@@ -77,7 +78,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         } else {
             World bukkitWorld = Bukkit.getWorld(uuid);
             if (bukkitWorld != null) {
-                world = this.loadWorld(new BukkitWorld(bukkitWorld));
+                world = this.loadWorld(wrap(bukkitWorld));
             }
         }
         return world;
@@ -95,7 +96,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
     public void delayedInit() {
         // 此时大概率为空，暂且保留代码
         for (World world : Bukkit.getWorlds()) {
-            BukkitWorld wrappedWorld = new BukkitWorld(world);
+            BukkitWorld wrappedWorld = wrap(world);
             try {
                 CEWorld ceWorld = this.worlds.computeIfAbsent(world.getUID(), k -> new BukkitCEWorld(wrappedWorld, this.storageAdaptor));
                 injectChunkGenerator(ceWorld);
@@ -144,7 +145,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         World world = event.getWorld();
         UUID uuid = world.getUID();
         if (this.worlds.containsKey(uuid)) return;
-        CEWorld ceWorld = new BukkitCEWorld(new BukkitWorld(world), this.storageAdaptor);
+        CEWorld ceWorld = new BukkitCEWorld(wrap(world), this.storageAdaptor);
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
         this.injectChunkGenerator(ceWorld);
@@ -165,7 +166,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             }
             ceWorld.setTicking(true);
         } else {
-            this.loadWorld(new BukkitWorld(world));
+            this.loadWorld(wrap(world));
         }
     }
 
@@ -217,7 +218,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onWorldUnload(WorldUnloadEvent event) {
-        unloadWorld(new BukkitWorld(event.getWorld()));
+        unloadWorld(wrap(event.getWorld()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -255,9 +256,9 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     @Override
-    public <T> net.momirealms.craftengine.core.world.World wrap(T world) {
+    public <T> BukkitWorld wrap(T world) {
         if (world instanceof World w) {
-            return new BukkitWorld(w);
+            return BukkitAdaptors.adapt(w);
         } else {
             throw new IllegalArgumentException(world.getClass() + " is not a Bukkit World");
         }

@@ -66,7 +66,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
                 event.setDroppedExp(0);
             }
             Location location = entity.getLocation();
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(entity.getWorld());
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(entity.getWorld());
             WorldPosition position = new WorldPosition(world, location.getX(), location.getY(), location.getZ());
             ContextHolder.Builder builder = ContextHolder.builder()
                     .withParameter(DirectContextParameters.POSITION, position);

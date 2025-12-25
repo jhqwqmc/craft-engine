@@ -19,6 +19,15 @@ public class WorldPosition implements Position {
         this.yRot = 0f;
     }
 
+    public WorldPosition(World world, Vec3i position) {
+        this.x = position.x();
+        this.y = position.y();
+        this.z = position.z();
+        this.world = world;
+        this.xRot = 0f;
+        this.yRot = 0f;
+    }
+
     public WorldPosition(World world, Position position, float xRot, float yRot) {
         this.x = position.x();
         this.y = position.y();
