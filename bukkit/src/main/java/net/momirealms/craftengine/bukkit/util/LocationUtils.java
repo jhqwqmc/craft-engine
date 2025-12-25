@@ -45,8 +45,16 @@ public final class LocationUtils {
         return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) + 1, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
     }
 
+    public static Object above(Object blockPos, int y) {
+        return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) + y, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
+    }
+
     public static Object below(Object blockPos) {
         return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) - 1, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
+    }
+
+    public static Object below(Object blockPos, int y) {
+        return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) - y, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
     }
 
     public static Object toBlockPos(int x, int y, int z) {

@@ -109,9 +109,11 @@ public class Config {
     protected boolean resource_pack$optimization$enable;
     protected boolean resource_pack$optimization$texture$enable;
     protected Set<String> resource_pack$optimization$texture$exlude;
+    protected Set<String> resource_pack$optimization$texture$exclude_path;
     protected int resource_pack$optimization$texture$zopfli_iterations;
     protected boolean resource_pack$optimization$json$enable;
     protected Set<String> resource_pack$optimization$json$exclude;
+    protected Set<String> resource_pack$optimization$json$exclude_path;
 
     protected MinecraftVersion resource_pack$supported_version$min;
     protected MinecraftVersion resource_pack$supported_version$max;
@@ -391,9 +393,17 @@ public class Config {
             if (!p.endsWith(".png")) return p + ".png";
             return p;
         }).collect(Collectors.toSet());
+        resource_pack$optimization$texture$exclude_path = config.getStringList("resource-pack.optimization.texture.exclude-path").stream().map(p -> {
+            if (p.endsWith("/")) return p.substring(0, p.length() - 1);
+            return p;
+        }).collect(Collectors.toSet());
         resource_pack$optimization$json$enable = config.getBoolean("resource-pack.optimization.json.enable", true);
         resource_pack$optimization$json$exclude = config.getStringList("resource-pack.optimization.json.exclude").stream().map(p -> {
             if (!p.endsWith(".json") && !p.endsWith(".mcmeta")) return p + ".json";
+            return p;
+        }).collect(Collectors.toSet());
+        resource_pack$optimization$json$exclude_path = config.getStringList("resource-pack.optimization.json.exclude-path").stream().map(p -> {
+            if (p.endsWith("/")) return p.substring(0, p.length() - 1);
             return p;
         }).collect(Collectors.toSet());
         resource_pack$validation$enable = config.getBoolean("resource-pack.validation.enable", true);
@@ -1209,12 +1219,20 @@ public class Config {
         return instance.resource_pack$optimization$texture$exlude;
     }
 
+    public static Set<String> optimizeTextureExcludePath() {
+        return instance.resource_pack$optimization$texture$exclude_path;
+    }
+
     public static boolean optimizeJson() {
         return instance.resource_pack$optimization$json$enable;
     }
 
     public static Set<String> optimizeJsonExclude() {
         return instance.resource_pack$optimization$json$exclude;
+    }
+
+    public static Set<String> optimizeJsonExcludePath() {
+        return instance.resource_pack$optimization$json$exclude_path;
     }
 
     public static int zopfliIterations() {
