@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
+// todo move the package on 1.0
 public abstract class BlockBehavior {
 
     @SuppressWarnings("unchecked")

@@ -9,7 +9,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.InteractUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -43,7 +42,8 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:trapdoor_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<SingleBlockHalf> halfProperty;
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> poweredProperty;
@@ -229,7 +229,8 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
+
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<SingleBlockHalf> half = (Property<SingleBlockHalf>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("half"), "warning.config.block.behavior.trapdoor.missing_half");

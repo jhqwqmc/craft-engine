@@ -14,14 +14,17 @@ import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavio
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+// todo 修改
 public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:hangable_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final BooleanProperty hanging;
 
     public HangableBlockBehavior(CustomBlock customBlock, BooleanProperty hanging) {
@@ -82,7 +85,7 @@ public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPath
         return false;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

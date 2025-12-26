@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.NetworkItemBuildContext;
 import net.momirealms.craftengine.core.item.NetworkItemHandler;
-import net.momirealms.craftengine.core.item.modifier.ArgumentsModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ArgumentsProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
@@ -209,7 +209,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
         // 应用client-bound-data
         CompoundTag tag = new CompoundTag();
         // 创建context
-        Tag argumentTag = wrapped.getTag(ArgumentsModifier.ARGUMENTS_TAG);
+        Tag argumentTag = wrapped.getTag(ArgumentsProcessor.ARGUMENTS_TAG);
         NetworkItemBuildContext context;
         if (argumentTag instanceof CompoundTag arguments) {
             ContextHolder.Builder builder = ContextHolder.builder();
@@ -221,11 +221,11 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
             context = NetworkItemBuildContext.of(player);
         }
         // 准备阶段
-        for (ItemDataModifier<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.prepareNetworkItem(wrapped, context, tag);
         }
         // 应用阶段
-        for (ItemDataModifier<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.apply(wrapped, context);
         }
         // 如果拦截物品的描述名称等

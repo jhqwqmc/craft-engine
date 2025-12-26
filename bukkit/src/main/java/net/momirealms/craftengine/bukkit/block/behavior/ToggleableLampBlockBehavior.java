@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
@@ -18,7 +19,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:toggleable_lamp_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<Boolean> litProperty;
     private final Property<Boolean> poweredProperty;
     private final boolean canOpenWithHand;
@@ -88,7 +90,8 @@ public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
+
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             boolean canOpenWithHand = ResourceConfigUtils.getAsBoolean(ResourceConfigUtils.get(arguments, "can-open-with-hand", "can-toggle-with-hand"), "can-toggle-with-hand");

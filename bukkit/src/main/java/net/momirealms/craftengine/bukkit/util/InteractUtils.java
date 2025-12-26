@@ -17,7 +17,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.modifier.AttributeModifiersModifier;
+import net.momirealms.craftengine.core.item.processor.AttributeModifiersProcessor;
 import net.momirealms.craftengine.core.item.recipe.RecipeType;
 import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.item.recipe.input.SingleItemInput;
@@ -1051,7 +1051,7 @@ public final class InteractUtils {
 
     public static boolean isFullHealth(Entity entity) {
         if (entity instanceof LivingEntity living) {
-            Key key = AttributeModifiersModifier.getNativeAttributeName(Key.of("max_health"));
+            Key key = AttributeModifiersProcessor.getNativeAttributeName(Key.of("max_health"));
             Attribute maxHealthAttr = Registry.ATTRIBUTE.get(KeyUtils.toNamespacedKey(key));
             if (maxHealthAttr == null) return false;
             AttributeInstance attribute = living.getAttribute(maxHealthAttr);

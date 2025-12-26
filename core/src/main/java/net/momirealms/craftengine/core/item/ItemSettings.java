@@ -5,9 +5,9 @@ import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
-import net.momirealms.craftengine.core.item.modifier.EquippableModifier;
-import net.momirealms.craftengine.core.item.modifier.FoodModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.EquippableProcessor;
+import net.momirealms.craftengine.core.item.processor.FoodProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainder;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainders;
 import net.momirealms.craftengine.core.item.setting.*;
@@ -57,25 +57,25 @@ public class ItemSettings {
 
     private ItemSettings() {}
 
-    public <I> List<ItemDataModifier<I>> modifiers() {
-        ArrayList<ItemDataModifier<I>> modifiers = new ArrayList<>();
+    public <I> List<ItemProcessor<I>> modifiers() {
+        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
-                modifiers.add(new EquippableModifier<>(data));
+                modifiers.add(new EquippableProcessor<>(data));
             }
             if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 modifiers.addAll(this.equipment.equipment().modifiers());
             }
         }
         if (VersionHelper.isOrAbove1_20_5() && this.foodData != null) {
-            modifiers.add(new FoodModifier<>(this.foodData.nutrition(), this.foodData.saturation(), false));
+            modifiers.add(new FoodProcessor<>(this.foodData.nutrition(), this.foodData.saturation(), false));
         }
         return modifiers;
     }
 
-    public <I> List<ItemDataModifier<I>> clientBoundModifiers() {
-        ArrayList<ItemDataModifier<I>> modifiers = new ArrayList<>();
+    public <I> List<ItemProcessor<I>> clientBoundModifiers() {
+        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             if (this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 modifiers.addAll(this.equipment.equipment().modifiers());

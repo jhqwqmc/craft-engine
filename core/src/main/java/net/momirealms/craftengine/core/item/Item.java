@@ -10,7 +10,7 @@ import net.momirealms.craftengine.core.item.data.Enchantment;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.item.data.JukeboxPlayable;
 import net.momirealms.craftengine.core.item.data.Trim;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.setting.EquipmentData;
 import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.Key;
@@ -228,7 +228,7 @@ public interface Item<I> {
 
     void merge(Item<I> another);
 
-    default Item<I> apply(ItemDataModifier<I> modifier, ItemBuildContext context) {
+    default Item<I> apply(ItemProcessor<I> modifier, ItemBuildContext context) {
         return modifier.apply(this, context);
     }
 

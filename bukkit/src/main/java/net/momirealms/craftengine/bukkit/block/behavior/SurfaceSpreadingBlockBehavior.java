@@ -11,10 +11,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.util.LazyReference;
-import net.momirealms.craftengine.core.util.RandomUtils;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -22,7 +19,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:surface_spreading_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final int requiredLight;
     private final LazyReference<Object> baseBlock;
     private final Property<Boolean> snowyProperty;
@@ -101,7 +99,7 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
         return canBeGrass(state, level, pos) && !FastNMS.INSTANCE.method$FluidState$is(FastNMS.INSTANCE.method$BlockGetter$getFluidState(level, blockPos), MTagKeys.Fluid$WATER);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

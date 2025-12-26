@@ -12,10 +12,7 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SofaShape;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 
 import java.util.Map;
@@ -23,7 +20,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SofaBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:sofa_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<SofaShape> shapeProperty;
 
@@ -99,7 +97,7 @@ public class SofaBlockBehavior extends BukkitBlockBehavior {
         return anotherState.get(anotherBehavior.facingProperty) != state.get(this.facingProperty);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         @SuppressWarnings("unchecked")

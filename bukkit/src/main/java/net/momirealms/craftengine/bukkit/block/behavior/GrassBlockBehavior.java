@@ -29,7 +29,8 @@ import java.util.Optional;
 
 @SuppressWarnings("DuplicatedCode")
 public class GrassBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:grass_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Key feature;
 
     public GrassBlockBehavior(CustomBlock block, Key feature) {
@@ -155,7 +156,7 @@ public class GrassBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String feature = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "feature", "placed-feature"), "warning.config.block.behavior.grass.missing_feature");

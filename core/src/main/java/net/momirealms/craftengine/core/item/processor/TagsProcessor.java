@@ -1,0 +1,137 @@
+package net.momirealms.craftengine.core.item.processor;
+
+import net.momirealms.craftengine.core.item.*;
+import net.momirealms.craftengine.core.util.*;
+import net.momirealms.sparrow.nbt.CompoundTag;
+import net.momirealms.sparrow.nbt.Tag;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class TagsProcessor<I> implements ItemProcessor<I> {
+    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+    private final Map<String, Object> arguments;
+
+    public TagsProcessor(Map<String, Object> arguments) {
+        this.arguments = mapToMap(arguments);
+    }
+
+    public Map<String, Object> tags() {
+        return arguments;
+    }
+
+    @Override
+    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        for (Map.Entry<String, Object> entry : this.arguments.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            item.setTag(value, key);
+        }
+        return item;
+    }
+
+    // TODO NOT PERFECT
+    @Override
+    public Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+        if (VersionHelper.isOrAbove1_20_5()) {
+            Tag previous = item.getSparrowNBTComponent(DataComponentKeys.CUSTOM_DATA);
+            if (previous != null) {
+                networkData.put(DataComponentKeys.CUSTOM_DATA.asString(), NetworkItemHandler.pack(NetworkItemHandler.Operation.ADD, previous));
+            } else {
+                networkData.put(DataComponentKeys.CUSTOM_DATA.asString(), NetworkItemHandler.pack(NetworkItemHandler.Operation.REMOVE));
+            }
+        } else {
+            for (Map.Entry<String, Object> entry : this.arguments.entrySet()) {
+                Tag previous = item.getTag(entry.getKey());
+                if (previous != null) {
+                    networkData.put(entry.getKey(), NetworkItemHandler.pack(NetworkItemHandler.Operation.ADD, previous));
+                } else {
+                    networkData.put(entry.getKey(), NetworkItemHandler.pack(NetworkItemHandler.Operation.REMOVE));
+                }
+            }
+        }
+        return item;
+    }
+
+    private static Map<String, Object> mapToMap(final Map<String, Object> source) {
+        Map<String, Object> resultMap = new LinkedHashMap<>();
+        recursiveMapProcessing(source, resultMap);
+        return resultMap;
+    }
+
+    private static void recursiveMapProcessing(
+            final Map<String, Object> sourceMap,
+            final Map<String, Object> targetMap
+    ) {
+        for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
+            processMapEntry(entry.getKey(), entry.getValue(), targetMap);
+        }
+    }
+
+    private static void processMapEntry(
+            final String key,
+            final Object value,
+            final Map<String, Object> targetMap
+    ) {
+        if (value instanceof Map) {
+            handleNestedMap(key, MiscUtils.castToMap(value, false), targetMap);
+        } else if (value instanceof String) {
+            handleStringValue(key, (String) value, targetMap);
+        } else {
+            targetMap.put(key, value);
+        }
+    }
+
+    private static void handleNestedMap(
+            final String key,
+            final Map<String, Object> nestedSource,
+            final Map<String, Object> parentMap
+    ) {
+        Map<String, Object> nestedTarget = new LinkedHashMap<>();
+        parentMap.put(key, nestedTarget);
+        recursiveMapProcessing(nestedSource, nestedTarget);
+    }
+
+    private static void handleStringValue(
+            final String key,
+            final String value,
+            final Map<String, Object> targetMap
+    ) {
+        ParsedValue parsed = tryParseTypedValue(value);
+        targetMap.put(key, parsed.success ? parsed.result : value);
+    }
+
+    private static ParsedValue tryParseTypedValue(final String str) {
+        if (str.length() < 3 || str.charAt(0) != '(') {
+            return ParsedValue.FAILURE;
+        }
+
+        int closingBracketPos = str.indexOf(')', 1);
+        if (closingBracketPos == -1 || closingBracketPos + 2 > str.length()) {
+            return ParsedValue.FAILURE;
+        }
+
+        if (str.charAt(closingBracketPos + 1) != ' ') {
+            return ParsedValue.FAILURE;
+        }
+
+        String typeMarker = str.substring(1, closingBracketPos);
+        String content = str.substring(closingBracketPos + 2);
+        return new ParsedValue(
+                true,
+                TypeUtils.castBasicTypes(content, typeMarker)
+        );
+    }
+
+    private record ParsedValue(boolean success, Object result) {
+            static final ParsedValue FAILURE = new ParsedValue(false, null);
+    }
+
+    private static class Factory<I> implements ItemProcessorFactory<I> {
+        @Override
+        public ItemProcessor<I> create(Object arg) {
+            Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "nbt");
+            return new TagsProcessor<>(data);
+        }
+    }
+}

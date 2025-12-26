@@ -17,6 +17,7 @@ import net.momirealms.craftengine.core.block.parser.BlockStateParser;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.bukkit.block.BlockState;
@@ -27,7 +28,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ConcretePowderBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:concrete_powder_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final LazyReference<@Nullable ImmutableBlockState> targetBlock;
 
     public ConcretePowderBlockBehavior(CustomBlock block, String targetBlock) {
@@ -125,7 +127,7 @@ public class ConcretePowderBlockBehavior extends BukkitBlockBehavior {
         return flag;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

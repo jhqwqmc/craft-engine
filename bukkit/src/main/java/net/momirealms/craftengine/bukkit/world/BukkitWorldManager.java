@@ -334,6 +334,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     public void handleChunkGenerate(CEWorld ceWorld, ChunkPos chunkPos, Object chunkAccess) {
+        if (ceWorld.isChunkLoaded(chunkPos.longKey)) return;
         Object[] sections = FastNMS.INSTANCE.method$ChunkAccess$getSections(chunkAccess);
         CEChunk ceChunk;
         try {

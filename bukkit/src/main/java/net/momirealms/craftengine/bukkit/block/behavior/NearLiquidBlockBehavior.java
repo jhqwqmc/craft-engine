@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -18,9 +19,10 @@ import java.util.Map;
 import java.util.Optional;
 
 public class NearLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
+    public static final Key ID = Key.from("craftengine:near_liquid_block");
     private static final List<Object> WATER = List.of(MFluids.WATER, MFluids.FLOWING_WATER);
     private static final List<Object> LAVA = List.of(MFluids.LAVA, MFluids.FLOWING_LAVA);
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final boolean onWater;
     private final boolean onLava;
     private final boolean stackable;
@@ -42,7 +44,8 @@ public class NearLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
         return this.onLava;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
+
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             List<String> liquidTypes = MiscUtils.getAsStringList(arguments.getOrDefault("liquid-type", List.of("water")));

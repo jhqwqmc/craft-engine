@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.util.Direction;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -18,7 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SturdyBaseBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:sturdy_base_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Direction direction;
     private final boolean stackable;
     private final boolean checkFull;
@@ -60,7 +62,7 @@ public class SturdyBaseBlockBehavior extends AbstractCanSurviveBlockBehavior {
         return optionalCustomState.filter(immutableBlockState -> immutableBlockState.owner().value() == super.customBlock).isPresent();
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

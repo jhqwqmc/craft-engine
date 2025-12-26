@@ -27,7 +27,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior, CanBeReplacedBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:slab_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<SlabType> typeProperty;
 
     public SlabBlockBehavior(CustomBlock block, Property<SlabType> typeProperty) {
@@ -114,7 +115,7 @@ public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFind
         return false;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

@@ -20,7 +20,8 @@ import org.bukkit.Registry;
 import java.util.*;
 
 public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:bush_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     protected final List<Object> tagsCanSurviveOn;
     protected final Set<Object> blockStatesCanSurviveOn;
     protected final Set<String> customBlocksCansSurviveOn;
@@ -28,7 +29,8 @@ public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
     protected final boolean stackable;
     protected final int maxHeight;
 
-    public BushBlockBehavior(CustomBlock block, int delay, boolean blacklist, boolean stackable, int maxHeight, List<Object> tagsCanSurviveOn, Set<Object> blockStatesCanSurviveOn, Set<String> customBlocksCansSurviveOn) {
+    public BushBlockBehavior(CustomBlock block, int delay, boolean blacklist, boolean stackable, int maxHeight,
+                             List<Object> tagsCanSurviveOn, Set<Object> blockStatesCanSurviveOn, Set<String> customBlocksCansSurviveOn) {
         super(block, delay);
         this.blacklistMode = blacklist;
         this.stackable = stackable;
@@ -38,7 +40,7 @@ public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
         this.customBlocksCansSurviveOn = customBlocksCansSurviveOn;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

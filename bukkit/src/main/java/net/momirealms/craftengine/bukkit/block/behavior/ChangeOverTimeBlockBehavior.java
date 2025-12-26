@@ -8,10 +8,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
-import net.momirealms.craftengine.core.util.LazyReference;
-import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.util.RandomUtils;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.sparrow.nbt.CompoundTag;
 
 import java.util.List;
@@ -19,7 +16,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ChangeOverTimeBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:change_over_time_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final float changeSpeed;
     private final String nextBlock;
     private final LazyReference<BlockStateWrapper> lazyState;
@@ -64,7 +62,7 @@ public class ChangeOverTimeBlockBehavior extends BukkitBlockBehavior {
         });
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

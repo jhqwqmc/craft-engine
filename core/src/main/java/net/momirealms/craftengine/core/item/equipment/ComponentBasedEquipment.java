@@ -2,8 +2,8 @@ package net.momirealms.craftengine.core.item.equipment;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.item.modifier.EquippableAssetIdModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.EquippableAssetIdProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -31,8 +31,8 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
     }
 
     @Override
-    public <I> List<ItemDataModifier<I>> modifiers() {
-        return List.of(new EquippableAssetIdModifier<>(this.assetId));
+    public <I> List<ItemProcessor<I>> modifiers() {
+        return List.of(new EquippableAssetIdProcessor<>(this.assetId));
     }
 
     public EnumMap<EquipmentLayerType, List<Layer>> layers() {

@@ -22,7 +22,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class AttachedStemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:attached_stem_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Key fruit;
     private final Key stem;
@@ -85,7 +86,7 @@ public class AttachedStemBlockBehavior extends BukkitBlockBehavior implements Is
         return null;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

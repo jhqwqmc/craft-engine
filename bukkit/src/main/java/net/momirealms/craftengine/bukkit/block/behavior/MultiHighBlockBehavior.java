@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.*;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +29,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class MultiHighBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:multi_high_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     public final IntegerProperty highProperty;
 
     public MultiHighBlockBehavior(CustomBlock customBlock, IntegerProperty highProperty) {
@@ -240,7 +242,7 @@ public class MultiHighBlockBehavior extends BukkitBlockBehavior {
         return state.with(property, property.min);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

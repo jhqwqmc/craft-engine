@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 public class StackableBlockBehavior extends BukkitBlockBehavior implements CanBeReplacedBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:stackable_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final IntegerProperty amountProperty;
     private final List<Key> items;
     private final String propertyName;
@@ -71,7 +72,7 @@ public class StackableBlockBehavior extends BukkitBlockBehavior implements CanBe
         return blockState.cycle(property);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

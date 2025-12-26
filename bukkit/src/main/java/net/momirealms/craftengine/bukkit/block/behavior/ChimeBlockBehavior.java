@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.sound.SoundData;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
@@ -14,7 +15,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ChimeBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:chime_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final SoundData hitSound;
 
     public ChimeBlockBehavior(CustomBlock customBlock, SoundData hitSound) {
@@ -29,7 +31,7 @@ public class ChimeBlockBehavior extends BukkitBlockBehavior {
         FastNMS.INSTANCE.method$LevelAccessor$playSound(args[0], null, blockPos, sound, CoreReflections.instance$SoundSource$BLOCKS, hitSound.volume().get(), hitSound.pitch().get());
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

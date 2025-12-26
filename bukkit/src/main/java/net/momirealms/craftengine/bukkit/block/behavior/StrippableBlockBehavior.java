@@ -5,6 +5,7 @@ import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public class StrippableBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:strippable_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final String stripped;
     private final LazyReference<BlockStateWrapper> lazyState;
     private final List<String> excludedProperties;
@@ -41,7 +43,7 @@ public class StrippableBlockBehavior extends BukkitBlockBehavior {
         return properties;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

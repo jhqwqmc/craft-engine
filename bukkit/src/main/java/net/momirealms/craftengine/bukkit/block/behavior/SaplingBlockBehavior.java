@@ -34,7 +34,8 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class SaplingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:sapling_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Key feature;
     private final IntegerProperty stageProperty;
     private final double boneMealSuccessChance;
@@ -169,7 +170,7 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
         return InteractionResult.SUCCESS;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

@@ -22,7 +22,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MAttributeH
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MMobEffects;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkReflections;
 import net.momirealms.craftengine.bukkit.util.*;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;

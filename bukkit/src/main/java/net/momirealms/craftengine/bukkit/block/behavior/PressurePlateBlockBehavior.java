@@ -16,10 +16,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.PressurePlateSensitivity;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldEvents;
 import org.bukkit.GameEvent;
@@ -31,7 +28,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:pressure_plate_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<Boolean> poweredProperty;
     private final SoundData onSound;
     private final SoundData offSound;
@@ -220,7 +218,7 @@ public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
         return true;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

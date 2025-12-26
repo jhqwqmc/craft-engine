@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemKeys;
-import net.momirealms.craftengine.core.item.modifier.ComponentsModifier;
-import net.momirealms.craftengine.core.item.modifier.TagsModifier;
+import net.momirealms.craftengine.core.item.processor.ComponentsProcessor;
+import net.momirealms.craftengine.core.item.processor.TagsProcessor;
 import net.momirealms.craftengine.core.item.trade.MerchantOffer;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.*;
@@ -96,10 +96,10 @@ public class MerchantTradeFunction<CTX extends Context> extends AbstractConditio
                     item.count(ResourceConfigUtils.getAsInt(args.get("count"), "count"));
                 }
                 if (VersionHelper.isOrAbove1_20_5() && args.containsKey("components")) {
-                    item = new ComponentsModifier<>(MiscUtils.castToMap(args.get("components"), false)).apply(item, ItemBuildContext.empty());
+                    item = new ComponentsProcessor<>(MiscUtils.castToMap(args.get("components"), false)).apply(item, ItemBuildContext.empty());
                 }
                 if (!VersionHelper.isOrAbove1_20_5() && args.containsKey("nbt")) {
-                    item = new TagsModifier<>(MiscUtils.castToMap(args.get("nbt"), false)).apply(item, ItemBuildContext.empty());
+                    item = new TagsProcessor<>(MiscUtils.castToMap(args.get("nbt"), false)).apply(item, ItemBuildContext.empty());
                 }
                 return item;
             } else {

@@ -12,6 +12,7 @@ import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -22,7 +23,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:vertical_crop_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final int maxHeight;
     private final IntegerProperty ageProperty;
     private final float growSpeed;
@@ -78,7 +80,7 @@ public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

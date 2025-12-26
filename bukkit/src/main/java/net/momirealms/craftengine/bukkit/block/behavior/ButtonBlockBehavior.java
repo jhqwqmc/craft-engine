@@ -18,10 +18,7 @@ import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -29,7 +26,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ButtonBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:button_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final BooleanProperty poweredProperty;
     private final int ticksToStayPressed;
     private final boolean canButtonBeActivatedByArrows;
@@ -197,7 +195,7 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
         FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, player, gameEvent, pos);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings({"unchecked", "DuplicatedCode"})
         @Override

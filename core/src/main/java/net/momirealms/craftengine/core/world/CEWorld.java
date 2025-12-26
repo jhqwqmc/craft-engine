@@ -90,7 +90,7 @@ public abstract class CEWorld {
     }
 
     public boolean isChunkLoaded(final long chunkPos) {
-        return loadedChunkMap.containsKey(chunkPos);
+        return this.loadedChunkMap.containsKey(chunkPos);
     }
 
     public void addLoadedChunk(CEChunk chunk) {

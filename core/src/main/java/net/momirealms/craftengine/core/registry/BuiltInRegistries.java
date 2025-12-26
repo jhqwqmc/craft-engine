@@ -1,14 +1,14 @@
 package net.momirealms.craftengine.core.registry;
 
 import net.momirealms.craftengine.core.block.CustomBlock;
-import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.BlockBehaviorType;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.block.properties.PropertyFactory;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
-import net.momirealms.craftengine.core.item.ItemDataModifierFactory;
+import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.item.equipment.EquipmentFactory;
 import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe;
@@ -52,8 +52,8 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 public class BuiltInRegistries {
     public static final Registry<CustomBlock> BLOCK = createDynamicBoundRegistry(Registries.BLOCK, 512);
-    public static final Registry<BlockBehaviorFactory> BLOCK_BEHAVIOR_FACTORY = createConstantBoundRegistry(Registries.BLOCK_BEHAVIOR_FACTORY, 64);
-    public static final Registry<ItemDataModifierFactory<?>> ITEM_DATA_MODIFIER_FACTORY = createConstantBoundRegistry(Registries.ITEM_DATA_MODIFIER_FACTORY, 64);
+    public static final Registry<BlockBehaviorType> BLOCK_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.BLOCK_BEHAVIOR_TYPE, 64);
+    public static final Registry<ItemProcessorFactory<?>> ITEM_DATA_MODIFIER_FACTORY = createConstantBoundRegistry(Registries.ITEM_DATA_MODIFIER_FACTORY, 64);
     public static final Registry<ItemBehaviorFactory> ITEM_BEHAVIOR_FACTORY = createConstantBoundRegistry(Registries.ITEM_BEHAVIOR_FACTORY, 64);
     public static final Registry<PropertyFactory> PROPERTY_FACTORY = createConstantBoundRegistry(Registries.PROPERTY_FACTORY, 16);
     public static final Registry<LootFunctionFactory<?>> LOOT_FUNCTION_FACTORY = createConstantBoundRegistry(Registries.LOOT_FUNCTION_FACTORY, 32);

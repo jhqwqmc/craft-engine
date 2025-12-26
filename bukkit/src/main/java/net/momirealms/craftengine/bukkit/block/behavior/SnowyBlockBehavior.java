@@ -11,13 +11,15 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class SnowyBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:snowy_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final BooleanProperty snowyProperty;
 
     public SnowyBlockBehavior(CustomBlock customBlock, BooleanProperty snowyProperty) {
@@ -44,7 +46,7 @@ public class SnowyBlockBehavior extends BukkitBlockBehavior {
         return FastNMS.INSTANCE.method$BlockStateBase$is(state, MTagKeys.Block$SNOW);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BuddingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:budding_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final float growthChance;
     private final List<Key> blocks;
 
@@ -86,7 +87,7 @@ public class BuddingBlockBehavior extends BukkitBlockBehavior {
                 && FastNMS.INSTANCE.field$FluidState$amount(FastNMS.INSTANCE.field$BlockBehaviour$BlockStateBase$fluidState(state)) == 8;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

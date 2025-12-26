@@ -15,13 +15,15 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 
 import java.util.Map;
 
 public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:seat_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<HorizontalDirection> directionProperty;
     private final SeatConfig[] seats;
 
@@ -64,7 +66,7 @@ public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBloc
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

@@ -13,10 +13,7 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.AnchorType;
 import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.Tuple;
+import net.momirealms.craftengine.core.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +23,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class FaceAttachedHorizontalDirectionalBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:face_attached_horizontal_directional_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<AnchorType> anchorTypeProperty;
     private final Property<HorizontalDirection> facingProperty;
     private final List<Object> tagsCanSurviveOn;
@@ -135,7 +133,7 @@ public class FaceAttachedHorizontalDirectionalBlockBehavior extends BukkitBlockB
         };
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

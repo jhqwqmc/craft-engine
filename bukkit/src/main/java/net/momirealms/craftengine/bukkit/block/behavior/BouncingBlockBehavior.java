@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -18,7 +19,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BouncingBlockBehavior extends BukkitBlockBehavior implements FallOnBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:bouncing_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final double bounceHeight;
     private final boolean syncPlayerPosition;
     private final double fallDamageMultiplier;
@@ -77,7 +79,7 @@ public class BouncingBlockBehavior extends BukkitBlockBehavior implements FallOn
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

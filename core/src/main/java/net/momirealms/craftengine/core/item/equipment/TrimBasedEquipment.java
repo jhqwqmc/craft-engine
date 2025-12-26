@@ -1,9 +1,9 @@
 package net.momirealms.craftengine.core.item.equipment;
 
 import net.momirealms.craftengine.core.item.DataComponentKeys;
-import net.momirealms.craftengine.core.item.modifier.HideTooltipModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
-import net.momirealms.craftengine.core.item.modifier.TrimModifier;
+import net.momirealms.craftengine.core.item.processor.HideTooltipProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
+import net.momirealms.craftengine.core.item.processor.TrimProcessor;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
@@ -39,10 +39,10 @@ public class TrimBasedEquipment extends AbstractEquipment {
     }
 
     @Override
-    public <I> List<ItemDataModifier<I>> modifiers() {
+    public <I> List<ItemProcessor<I>> modifiers() {
         return List.of(
-                new TrimModifier<>(Key.of(AbstractPackManager.NEW_TRIM_MATERIAL), this.assetId),
-                new HideTooltipModifier<>(List.of(DataComponentKeys.TRIM))
+                new TrimProcessor<>(Key.of(AbstractPackManager.NEW_TRIM_MATERIAL), this.assetId),
+                new HideTooltipProcessor<>(List.of(DataComponentKeys.TRIM))
         );
     }
 

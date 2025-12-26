@@ -26,7 +26,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class DirectionalAttachedBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:directional_attached_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<?> facingProperty;
     private final boolean isSixDirection;
     private final List<Object> tagsCanSurviveOn;
@@ -132,7 +133,7 @@ public class DirectionalAttachedBlockBehavior extends BukkitBlockBehavior {
         return null;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {

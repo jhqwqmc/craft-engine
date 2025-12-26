@@ -21,6 +21,7 @@ import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.AdventureHelper;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -38,7 +39,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:simple_storage_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final String containerTitle;
     private final int rows;
     private final SoundData openSound;
@@ -198,7 +200,7 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
         return null;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @SuppressWarnings("unchecked")
         @Override

@@ -32,7 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class FenceBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:fence_block");
+    public static final BlockBehaviorFactory FACTORY = new Factory();
     private final BooleanProperty northProperty;
     private final BooleanProperty eastProperty;
     private final BooleanProperty southProperty;
@@ -137,7 +138,7 @@ public class FenceBlockBehavior extends BukkitBlockBehavior implements IsPathFin
         return superMethod.call();
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory {
 
         @Override
         public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
