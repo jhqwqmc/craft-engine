@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class ConditionalProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:conditional");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Predicate<Context> condition;
     private final ItemProcessor<I>[] modifiers;

@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class UnbreakableProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:unbreakable");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] NBT_PATH = new Object[]{"Unbreakable"};
     private final boolean argument;

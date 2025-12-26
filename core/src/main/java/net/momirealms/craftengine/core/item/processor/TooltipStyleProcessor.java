@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 public class TooltipStyleProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:tooltip_style");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Key argument;
 

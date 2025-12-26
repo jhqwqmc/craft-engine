@@ -20,51 +20,54 @@ import java.util.function.Consumer;
 public final class ItemProcessors {
     private ItemProcessors() {}
 
-    public static final Key ITEM_MODEL = Key.of("craftengine:item_model");
-    public static final Key OVERWRITABLE_ITEM_MODEL = Key.of("craftengine:overwritable_item_model");
-    public static final Key ID = Key.of("craftengine:id");
-    public static final Key HIDE_TOOLTIP = Key.of("craftengine:hide_tooltip");
-    public static final Key FOOD = Key.of("craftengine:food");
-    public static final Key EXTERNAL = Key.of("craftengine:external");
-    public static final Key EQUIPPABLE = Key.of("craftengine:equippable");
-    public static final Key EQUIPPABLE_ASSET_ID = Key.of("craftengine:equippable_asset_id");
-    public static final Key ENCHANTMENT = Key.of("craftengine:enchantment");
-    public static final Key ENCHANTMENTS = Key.of("craftengine:enchantments");
-    public static final Key DYED_COLOR = Key.of("craftengine:dyed_color");
-    public static final Key DISPLAY_NAME = Key.of("craftengine:display_name");
-    public static final Key CUSTOM_NAME = Key.of("craftengine:custom_name");
-    public static final Key CUSTOM_MODEL_DATA = Key.of("craftengine:custom_model_data");
-    public static final Key OVERWRITABLE_CUSTOM_MODEL_DATA = Key.of("craftengine:overwritable_custom_model_data");
-    public static final Key COMPONENTS = Key.of("craftengine:components");
-    public static final Key COMPONENT = Key.of("craftengine:component");
-    public static final Key ATTRIBUTE_MODIFIERS = Key.of("craftengine:attribute_modifiers");
-    public static final Key ATTRIBUTES = Key.of("craftengine:attributes");
-    public static final Key ARGUMENTS = Key.of("craftengine:arguments");
-    public static final Key VERSION = Key.of("craftengine:version");
-    public static final Key PDC = Key.of("craftengine:pdc");
-    public static final Key ITEM_NAME = Key.of("craftengine:item_name");
-    public static final Key OVERWRITABLE_ITEM_NAME = Key.of("craftengine:overwritable_item_name");
-    public static final Key JUKEBOX_PLAYABLE = Key.of("craftengine:jukebox_playable");
-    public static final Key REMOVE_COMPONENTS = Key.of("craftengine:remove_components");
-    public static final Key REMOVE_COMPONENT = Key.of("craftengine:remove_component");
-    public static final Key TAGS = Key.of("craftengine:tags");
-    public static final Key NBT = Key.of("craftengine:nbt");
-    public static final Key TOOLTIP_STYLE = Key.of("craftengine:tooltip_style");
-    public static final Key TRIM = Key.of("craftengine:trim");
-    public static final Key LORE = Key.of("craftengine:lore");
-    public static final Key UNBREAKABLE = Key.of("craftengine:unbreakable");
-    public static final Key DYNAMIC_LORE = Key.of("craftengine:dynamic_lore");
-    public static final Key OVERWRITABLE_LORE = Key.of("craftengine:overwritable_lore");
-    public static final Key MAX_DAMAGE = Key.of("craftengine:max_damage");
-    public static final Key BLOCK_STATE = Key.of("craftengine:block_state");
-    public static final Key CONDITIONAL = Key.of("craftengine:conditional");
-    public static final Key CONDITION = Key.of("craftengine:condition");
+    public static final ItemProcessorType<?> ITEM_MODEL = register(ItemModelProcessor.ID, ItemModelProcessor.FACTORY, VersionHelper.isOrAbove1_21_2());
+    public static final ItemProcessorType<?> ARGUMENTS = register(ArgumentsProcessor.ID, ArgumentsProcessor.FACTORY);
+    public static final ItemProcessorType<?> OVERWRITABLE_ITEM_MODEL = register(OverwritableItemModelProcessor.ID, OverwritableItemModelProcessor.FACTORY, VersionHelper.isOrAbove1_21_2());
+    public static final ItemProcessorType<?> ID = register(IdProcessor.ID, IdProcessor.FACTORY);
+    public static final ItemProcessorType<?> HIDE_TOOLTIP = register(HideTooltipProcessor.ID, HideTooltipProcessor.FACTORY);
+    public static final ItemProcessorType<?> FOOD = register(FoodProcessor.ID, FoodProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> EXTERNAL = register(ExternalSourceProcessor.ID, ExternalSourceProcessor.FACTORY);
+    public static final ItemProcessorType<?> EQUIPPABLE = register(EquippableProcessor.ID, EquippableProcessor.FACTORY, VersionHelper.isOrAbove1_21_2());
+    public static final ItemProcessorType<?> EQUIPPABLE_ASSET_ID = register(EquippableAssetIdProcessor.ID, EquippableAssetIdProcessor.FACTORY, VersionHelper.isOrAbove1_21_2());
+    public static final ItemProcessorType<?> ENCHANTMENTS = register(EnchantmentsProcessor.ID, EnchantmentsProcessor.FACTORY);
+    public static final ItemProcessorType<?> ENCHANTMENT = register(Key.of("craftengine:enchantment"), EnchantmentsProcessor.FACTORY);
+    public static final ItemProcessorType<?> DYED_COLOR = register(DyedColorProcessor.ID, DyedColorProcessor.FACTORY);
+    public static final ItemProcessorType<?> DISPLAY_NAME = register(Key.of("craftengine:display_name"), ItemNameProcessor.FACTORY);
+    public static final ItemProcessorType<?> ITEM_NAME = register(ItemNameProcessor.ID, ItemNameProcessor.FACTORY);
+    public static final ItemProcessorType<?> CUSTOM_NAME = register(CustomNameProcessor.ID, CustomNameProcessor.FACTORY);
+    public static final ItemProcessorType<?> CUSTOM_MODEL_DATA = register(CustomModelDataProcessor.ID, CustomModelDataProcessor.FACTORY);
+    public static final ItemProcessorType<?> OVERWRITABLE_CUSTOM_MODEL_DATA = register(OverwritableCustomModelDataProcessor.ID, OverwritableCustomModelDataProcessor.FACTORY);
+    public static final ItemProcessorType<?> COMPONENTS = register(ComponentsProcessor.ID, ComponentsProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> COMPONENT = register(Key.of("craftengine:component"), ComponentsProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> ATTRIBUTE_MODIFIERS = register(AttributeModifiersProcessor.ID, AttributeModifiersProcessor.FACTORY);
+    public static final ItemProcessorType<?> ATTRIBUTES = register(Key.of("craftengine:attributes"), AttributeModifiersProcessor.FACTORY);
+    public static final ItemProcessorType<?> PDC = register(PDCProcessor.ID, PDCProcessor.FACTORY);
+    public static final ItemProcessorType<?> OVERWRITABLE_ITEM_NAME = register(OverwritableItemNameProcessor.ID, OverwritableItemNameProcessor.FACTORY);
+    public static final ItemProcessorType<?> JUKEBOX_PLAYABLE = register(JukeboxSongProcessor.ID, JukeboxSongProcessor.FACTORY, VersionHelper.isOrAbove1_21());
+    public static final ItemProcessorType<?> REMOVE_COMPONENTS = register(RemoveComponentProcessor.ID, RemoveComponentProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> REMOVE_COMPONENT = register(Key.of("craftengine:remove_component"), RemoveComponentProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> TAGS = register(TagsProcessor.ID, TagsProcessor.FACTORY);
+    public static final ItemProcessorType<?> NBT = register(Key.of("craftengine:nbt"), TagsProcessor.FACTORY);
+    public static final ItemProcessorType<?> TOOLTIP_STYLE = register(TooltipStyleProcessor.ID, TooltipStyleProcessor.FACTORY, VersionHelper.isOrAbove1_21_2());
+    public static final ItemProcessorType<?> TRIM = register(TrimProcessor.ID, TrimProcessor.FACTORY);
+    public static final ItemProcessorType<?> LORE = register(LoreProcessor.ID, LoreProcessor.FACTORY);
+    public static final ItemProcessorType<?> UNBREAKABLE = register(UnbreakableProcessor.ID, UnbreakableProcessor.FACTORY);
+    public static final ItemProcessorType<?> DYNAMIC_LORE = register(DynamicLoreProcessor.ID, DynamicLoreProcessor.FACTORY);
+    public static final ItemProcessorType<?> OVERWRITABLE_LORE = register(OverwritableLoreProcessor.ID, OverwritableLoreProcessor.FACTORY);
+    public static final ItemProcessorType<?> MAX_DAMAGE = register(MaxDamageProcessor.ID, MaxDamageProcessor.FACTORY, VersionHelper.isOrAbove1_20_5());
+    public static final ItemProcessorType<?> BLOCK_STATE = register(BlockStateProcessor.ID, BlockStateProcessor.FACTORY);
+    public static final ItemProcessorType<?> CONDITIONAL = register(ConditionalProcessor.ID, ConditionalProcessor.FACTORY, VersionHelper.PREMIUM);
+    public static final ItemProcessorType<?> CONDITION = register(Key.of("craftengine:condition"), ConditionalProcessor.FACTORY, VersionHelper.PREMIUM);
 
     public static <T> ItemProcessorType<T> register(Key key, ItemProcessorFactory<T> factory) {
         ItemProcessorType<T> type = new ItemProcessorType<>(key, factory);
-        ((WritableRegistry<ItemProcessorFactory<?>>) BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY)
-                .register(ResourceKey.create(Registries.ITEM_DATA_MODIFIER_FACTORY.location(), key), factory);
+        ((WritableRegistry<ItemProcessorType<?>>) BuiltInRegistries.ITEM_PROCESSOR_TYPE)
+                .register(ResourceKey.create(Registries.ITEM_PROCESSOR_TYPE.location(), key), type);
         return type;
+    }
+
+    private static <T> ItemProcessorType<T> register(Key key, ItemProcessorFactory<T> factory, boolean condition) {
+        return register(key, condition ? factory : null);
     }
 
     @SuppressWarnings("unchecked")
@@ -74,15 +77,13 @@ public final class ItemProcessors {
             for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {
                 Object value = dataEntry.getValue();
                 if (value == null) continue;
-                String key = dataEntry.getKey();
-                int idIndex = key.indexOf('#');
-                if (idIndex != -1)
-                    key = key.substring(0, idIndex);
-                if (key.contains("-"))
-                    key = key.replace("-", "_");
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(key, Key.DEFAULT_NAMESPACE))).ifPresent(factory -> {
+                String key = processKey(dataEntry.getKey());
+                Optional.ofNullable(BuiltInRegistries.ITEM_PROCESSOR_TYPE.getValue(Key.withDefaultNamespace(key, Key.DEFAULT_NAMESPACE))).ifPresent(processorType -> {
                     try {
-                        callback.accept((ItemProcessor<I>) factory.create(value));
+                        ItemProcessorFactory<?> factory = processorType.factory();
+                        if (factory != null) {
+                            callback.accept((ItemProcessor<I>) factory.create(value));
+                        }
                     } catch (LocalizedResourceConfigException e) {
                         errorCollector.add(e);
                     }
@@ -92,54 +93,55 @@ public final class ItemProcessors {
         errorCollector.throwIfPresent();
     }
 
-    public static void init() {}
+    public static String processKey(String key) {
+        if (key == null) return null;
+        int len = key.length();
+        if (len == 0) return key;
 
-    static {
-        register(EXTERNAL, ExternalSourceProcessor.FACTORY);
-        register(LORE, LoreProcessor.FACTORY);
-        register(DYNAMIC_LORE, DynamicLoreProcessor.FACTORY);
-        register(OVERWRITABLE_LORE, OverwritableLoreProcessor.FACTORY);
-        register(DYED_COLOR, DyedColorProcessor.FACTORY);
-        register(TAGS, TagsProcessor.FACTORY);
-        register(NBT, TagsProcessor.FACTORY);
-        register(ATTRIBUTE_MODIFIERS, AttributeModifiersProcessor.FACTORY);
-        register(ATTRIBUTES, AttributeModifiersProcessor.FACTORY);
-        register(CUSTOM_MODEL_DATA, CustomModelDataProcessor.FACTORY);
-        register(UNBREAKABLE, UnbreakableProcessor.FACTORY);
-        register(ENCHANTMENT, EnchantmentsProcessor.FACTORY);
-        register(ENCHANTMENTS, EnchantmentsProcessor.FACTORY);
-        register(TRIM, TrimProcessor.FACTORY);
-        register(HIDE_TOOLTIP, HideTooltipProcessor.FACTORY);
-        register(ARGUMENTS, ArgumentsProcessor.FACTORY);
-        register(OVERWRITABLE_ITEM_NAME, OverwritableItemNameProcessor.FACTORY);
-        register(PDC, PDCProcessor.FACTORY);
-        register(BLOCK_STATE, BlockStateProcessor.FACTORY);
-        if (VersionHelper.isOrAbove1_20_5()) {
-            register(CUSTOM_NAME, CustomNameProcessor.FACTORY);
-            register(ITEM_NAME, ItemNameProcessor.FACTORY);
-            register(DISPLAY_NAME, ItemNameProcessor.FACTORY);
-            register(COMPONENTS, ComponentsProcessor.FACTORY);
-            register(COMPONENT, ComponentsProcessor.FACTORY);
-            register(REMOVE_COMPONENTS, RemoveComponentProcessor.FACTORY);
-            register(REMOVE_COMPONENT, RemoveComponentProcessor.FACTORY);
-            register(FOOD, FoodProcessor.FACTORY);
-            register(MAX_DAMAGE, MaxDamageProcessor.FACTORY);
-        } else {
-            register(CUSTOM_NAME, CustomNameProcessor.FACTORY);
-            register(ITEM_NAME, CustomNameProcessor.FACTORY);
-            register(DISPLAY_NAME, CustomNameProcessor.FACTORY);
+        // 提前扫描确定是否需要处理
+        boolean hasHash = false;
+        boolean hasDash = false;
+        int hashPos = -1;
+
+        for (int i = 0; i < len; i++) {
+            char c = key.charAt(i);
+            if (c == '#') {
+                hasHash = true;
+                hashPos = i;
+                break;
+            } else if (c == '-') {
+                hasDash = true;
+            }
         }
-        if (VersionHelper.isOrAbove1_21()) {
-            register(JUKEBOX_PLAYABLE, JukeboxSongProcessor.FACTORY);
+
+        // 情况1：无需任何处理
+        if (!hasHash && !hasDash) {
+            return key;
         }
-        if (VersionHelper.isOrAbove1_21_2()) {
-            register(TOOLTIP_STYLE, TooltipStyleProcessor.FACTORY);
-            register(ITEM_MODEL, ItemModelProcessor.FACTORY);
-            register(EQUIPPABLE, EquippableProcessor.FACTORY);
+
+        // 情况2：只有替换，没有截断
+        if (!hasHash) {
+            char[] chars = key.toCharArray();
+            for (int i = 0; i < len; i++) {
+                if (chars[i] == '-') {
+                    chars[i] = '_';
+                }
+            }
+            return new String(chars);
         }
-        if (VersionHelper.PREMIUM) {
-            register(CONDITIONAL, ConditionalProcessor.FACTORY);
-            register(CONDITION, ConditionalProcessor.FACTORY);
+
+        // 情况3：需要截断（可能有替换）
+        int newLen = hashPos;
+        char[] result = new char[newLen];
+
+        // 只需要复制到 hashPos 位置
+        for (int i = 0; i < newLen; i++) {
+            char c = key.charAt(i);
+            result[i] = (c == '-') ? '_' : c;
         }
+
+        return new String(result);
     }
+
+    public static void init() {}
 }

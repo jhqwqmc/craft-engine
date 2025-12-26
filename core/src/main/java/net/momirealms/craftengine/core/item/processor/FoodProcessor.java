@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class FoodProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:food");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final int nutrition;
     private final float saturation;

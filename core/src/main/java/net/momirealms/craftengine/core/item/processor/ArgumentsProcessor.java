@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ArgumentsProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:arguments");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final String ARGUMENTS_TAG = "craftengine:arguments";
     private final Map<String, TextProvider> arguments;

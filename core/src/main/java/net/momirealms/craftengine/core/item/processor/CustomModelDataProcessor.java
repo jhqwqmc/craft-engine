@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class CustomModelDataProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:custom_model_data");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final int argument;
 

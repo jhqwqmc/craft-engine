@@ -53,7 +53,7 @@ public class EventConditions {
     public static <CTX extends Context> Condition<CTX> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.event.condition.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        if (key.value().charAt(0) == '!') {
+        if (type.charAt(0) == '!') {
             ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(new Key(key.namespace(), key.value().substring(1)));
             if (factory == null) {
                 throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);

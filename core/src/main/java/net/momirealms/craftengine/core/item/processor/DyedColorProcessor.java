@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 public class DyedColorProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:dyed_color");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] NBT_PATH = new Object[]{"display", "color"};
     private final Color color;

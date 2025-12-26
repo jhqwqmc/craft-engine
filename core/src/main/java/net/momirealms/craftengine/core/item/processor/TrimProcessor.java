@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TrimProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:trim");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] NBT_PATH = new Object[] {"Trim"};
     private final Key material;

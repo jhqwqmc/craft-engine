@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 public class MaxDamageProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:max_damage");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final NumberProvider argument;
 

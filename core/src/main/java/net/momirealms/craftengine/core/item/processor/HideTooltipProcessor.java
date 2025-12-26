@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class HideTooltipProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:hide_tooltip");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final Map<Key, Integer> TO_LEGACY;
     public static final List<Key> COMPONENTS = List.of(

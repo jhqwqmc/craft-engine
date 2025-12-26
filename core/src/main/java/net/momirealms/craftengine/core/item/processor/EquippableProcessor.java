@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class EquippableProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:equippable");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final EquipmentData data;
 

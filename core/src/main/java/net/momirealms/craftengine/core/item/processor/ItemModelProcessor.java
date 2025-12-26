@@ -5,9 +5,11 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemModelProcessor<I> implements SimpleNetworkItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:item_model");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Key data;
 
@@ -21,6 +23,7 @@ public class ItemModelProcessor<I> implements SimpleNetworkItemProcessor<I> {
 
     @Override
     public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        if (!VersionHelper.isOrAbove1_21_2()) return item;
         return item.itemModel(this.data.asString());
     }
 

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RemoveComponentProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:remove_components");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final List<String> arguments;
 

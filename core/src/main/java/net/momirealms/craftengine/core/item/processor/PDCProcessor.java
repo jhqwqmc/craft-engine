@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class PDCProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:pdc");
     public static final String BUKKIT_PDC = "PublicBukkitValues";
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final CompoundTag data;

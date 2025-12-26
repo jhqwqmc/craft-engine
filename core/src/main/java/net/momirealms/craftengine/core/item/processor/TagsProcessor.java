@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TagsProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:tags");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Map<String, Object> arguments;
 

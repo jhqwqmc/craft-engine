@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ExternalSourceProcessor<I> implements ItemProcessor<I> {
+    public static final Key ID = Key.of("craftengine:external");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final ThreadLocal<Set<Dependency>> BUILD_STACK = ThreadLocal.withInitial(LinkedHashSet::new);
     private final String id;
