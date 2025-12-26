@@ -17,11 +17,11 @@ public final class RangeDispatchProperties {
     public static final RangeDispatchPropertyType COOLDOWN = register(Key.of("minecraft:cooldown"), SimpleRangeDispatchProperty.FACTORY, SimpleRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType COUNT = register(Key.of("minecraft:count"), NormalizeRangeDispatchProperty.FACTORY, NormalizeRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType CROSSBOW_PULL = register(CrossBowPullingRangeDispatchProperty.ID, CrossBowPullingRangeDispatchProperty.FACTORY, CrossBowPullingRangeDispatchProperty.READER);
-    public static final RangeDispatchPropertyType CUSTOM_MODEL_DATA = register(CustomModelDataRangeDispatchProperty.ID, CustomModelDataRangeDispatchProperty.FACTORY, CustomModelDataRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType DAMAGE = register(DamageRangeDispatchProperty.ID, DamageRangeDispatchProperty.FACTORY, DamageRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType TIME = register(TimeRangeDispatchProperty.ID, TimeRangeDispatchProperty.FACTORY, TimeRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType USE_CYCLE = register(UseCycleRangeDispatchProperty.ID, UseCycleRangeDispatchProperty.FACTORY, UseCycleRangeDispatchProperty.READER);
     public static final RangeDispatchPropertyType USE_DURATION = register(UseDurationRangeDispatchProperty.ID, UseDurationRangeDispatchProperty.FACTORY, UseDurationRangeDispatchProperty.READER);
+    public static final RangeDispatchPropertyType CUSTOM_MODEL_DATA = register(CustomModelDataRangeDispatchProperty.ID, CustomModelDataRangeDispatchProperty.FACTORY, CustomModelDataRangeDispatchProperty.READER);
 
     private RangeDispatchProperties() {}
 
