@@ -8,10 +8,10 @@ import net.momirealms.craftengine.core.util.TriFunction;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-// todo 可以考虑未来添加条件系统
-public record LoreModification(Operation operation, boolean split, FormattedLine[] content) {
+public record LoreModification(Operation operation, boolean split, FormattedLine[] content, Predicate<ItemBuildContext> predicate) {
 
     public Stream<Component> apply(Stream<Component> lore, ItemBuildContext context) {
         return this.operation.function.apply(lore, context, this);
@@ -27,8 +27,18 @@ public record LoreModification(Operation operation, boolean split, FormattedLine
     }
 
     public enum Operation {
-        APPEND((s, c, modification) -> Stream.concat(s, modification.parseAsStream(c))),
-        PREPEND((s, c, modification) -> Stream.concat(modification.parseAsStream(c), s));
+        APPEND((s, c, modification) -> {
+            if (modification.predicate.test(c)) {
+                return Stream.concat(s, modification.parseAsStream(c));
+            }
+            return s;
+        }),
+        PREPEND((s, c, modification) -> {
+            if (modification.predicate.test(c)) {
+                return Stream.concat(modification.parseAsStream(c), s);
+            }
+            return s;
+        });
 
         private final TriFunction<Stream<Component>, ItemBuildContext, LoreModification, Stream<Component>> function;
 
