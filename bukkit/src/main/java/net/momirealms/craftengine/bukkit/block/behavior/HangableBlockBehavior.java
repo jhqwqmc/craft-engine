@@ -21,30 +21,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-// todo 修改
 public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
     public static final Key ID = Key.from("craftengine:hangable_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
-    private final BooleanProperty hanging;
+    private final BooleanProperty hangingProperty;
 
-    public HangableBlockBehavior(CustomBlock customBlock, BooleanProperty hanging) {
+    public HangableBlockBehavior(CustomBlock customBlock, BooleanProperty hangingProperty) {
         super(customBlock);
-        this.hanging = hanging;
+        this.hangingProperty = hangingProperty;
     }
 
     @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
-        BooleanProperty hanging = (BooleanProperty) state.owner().value().getProperty("hanging");
-        if (hanging == null) return state;
-        @Nullable BooleanProperty waterlogged = (BooleanProperty) state.owner().value().getProperty("waterlogged");
         Object world = context.getLevel().serverWorld();
         Object blockPos = LocationUtils.toBlockPos(context.getClickedPos());
         Object fluidType = FastNMS.INSTANCE.method$FluidState$getType(FastNMS.INSTANCE.method$BlockGetter$getFluidState(world, blockPos));
         for (Direction direction : context.getNearestLookingDirections()) {
             if (direction.axis() != Direction.Axis.Y) continue;
-            ImmutableBlockState blockState = state.with(hanging, direction == Direction.UP);
+            ImmutableBlockState blockState = state.with(this.hangingProperty, direction == Direction.UP);
             if (!FastNMS.INSTANCE.method$BlockStateBase$canSurvive(blockState.customBlockState().literalObject(), world, blockPos)) continue;
-            return waterlogged != null ? blockState.with(waterlogged, fluidType == MFluids.WATER) : blockState;
+            return super.waterloggedProperty != null ? blockState.with(super.waterloggedProperty, fluidType == MFluids.WATER) : blockState;
         }
         return state;
     }
@@ -67,13 +63,10 @@ public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPath
     public Object updateShape(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         ImmutableBlockState state = BlockStateUtils.getOptionalCustomBlockState(args[0]).orElse(null);
         if (state == null) return MBlocks.AIR$defaultState;
-        @Nullable BooleanProperty waterlogged = (BooleanProperty) state.owner().value().getProperty("waterlogged");
-        if (waterlogged != null && state.get(waterlogged)) {
+        if (super.waterloggedProperty != null && state.get(super.waterloggedProperty)) {
             FastNMS.INSTANCE.method$ScheduledTickAccess$scheduleFluidTick(args[updateShape$level], args[updateShape$blockPos], MFluids.WATER, 5);
         }
-        BooleanProperty hanging = (BooleanProperty) state.owner().value().getProperty("hanging");
-        if (hanging == null) return MBlocks.AIR$defaultState;
-        if ((state.get(hanging) ? CoreReflections.instance$Direction$UP : CoreReflections.instance$Direction$DOWN) == args[updateShape$direction]
+        if ((state.get(this.hangingProperty) ? CoreReflections.instance$Direction$UP : CoreReflections.instance$Direction$DOWN) == args[updateShape$direction]
                 && !FastNMS.INSTANCE.method$BlockStateBase$canSurvive(args[0], args[updateShape$level], args[updateShape$blockPos])) {
             return MBlocks.AIR$defaultState;
         }
