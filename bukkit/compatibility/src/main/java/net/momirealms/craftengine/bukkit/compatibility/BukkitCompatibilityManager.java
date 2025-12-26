@@ -36,9 +36,9 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.plugin.compatibility.*;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AlwaysFalseCondition;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
@@ -125,11 +125,11 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         Key worldGuardRegion = Key.of("worldguard:region");
         if (this.hasPlugin("WorldGuard")) {
             runCatchingHook(() -> {
-                EventConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+                CommonConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
                 LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
             }, "WorldGuard");
         } else {
-            EventConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+            CommonConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
             LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
         }
         if (this.hasPlugin("Geyser-Spigot")) {

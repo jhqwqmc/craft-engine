@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class S3HostFactory implements ResourcePackHostFactory {
-    public static final S3HostFactory INSTANCE = new S3HostFactory();
+    public static final ResourcePackHostFactory INSTANCE = new S3HostFactory();
 
     @Override
     public ResourcePackHost create(Map<String, Object> arguments) {

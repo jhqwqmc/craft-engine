@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class ExternalHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     private final ResourcePackDownloadData downloadData;
 
     public ExternalHost(ResourcePackDownloadData downloadData) {
@@ -43,7 +43,7 @@ public class ExternalHost implements ResourcePackHost {
         return ResourcePackHosts.EXTERNAL;
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

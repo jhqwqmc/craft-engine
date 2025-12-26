@@ -9,11 +9,11 @@ import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessors;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.*;
@@ -34,14 +34,14 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
     protected Function<Context>[] functions(Map<String, Object> arguments) {
         Object functions = ResourceConfigUtils.get(arguments, "functions", "function");
         if (functions == null) return null;
-        List<Function<Context>> functionList = ResourceConfigUtils.parseConfigAsList(functions, EventFunctions::fromMap);
+        List<Function<Context>> functionList = ResourceConfigUtils.parseConfigAsList(functions, CommonFunctions::fromMap);
         return functionList.toArray(new Function[0]);
     }
 
     protected Condition<Context> conditions(Map<String, Object> arguments) {
         Object conditions = ResourceConfigUtils.get(arguments, "conditions", "condition");
         if (conditions == null) return null;
-        List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(conditions, EventConditions::fromMap);
+        List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(conditions, CommonConditions::fromMap);
         if (conditionList.isEmpty()) return null;
         if (conditionList.size() == 1) return conditionList.getFirst();
         return new AllOfCondition<>(conditionList);

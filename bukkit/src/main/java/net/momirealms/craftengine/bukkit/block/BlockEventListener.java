@@ -17,8 +17,8 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
@@ -58,6 +58,7 @@ public final class BlockEventListener implements Listener {
         if (!VersionHelper.isOrAbove1_20_5()) {
             if (event.getDamager() instanceof Player player) {
                 BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                if (serverPlayer == null) return;
                 serverPlayer.setClientSideCanBreakBlock(true);
             }
         }
@@ -67,6 +68,7 @@ public final class BlockEventListener implements Listener {
     public void onPlaceBlock(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
         // send swing if player is clicking a replaceable block
         if (serverPlayer.shouldResendSwing()) {
             player.swingHand(event.getHand());
@@ -106,6 +108,7 @@ public final class BlockEventListener implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
         net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(player.getWorld());
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         Item<ItemStack> itemInHand = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);

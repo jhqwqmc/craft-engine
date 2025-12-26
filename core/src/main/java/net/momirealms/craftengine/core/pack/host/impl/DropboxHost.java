@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class DropboxHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String appKey;
     private final String appSecret;
     private final String uploadPath;
@@ -257,7 +257,7 @@ public class DropboxHost implements ResourcePackHost {
         }
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

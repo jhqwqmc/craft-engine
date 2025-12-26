@@ -14,19 +14,22 @@ import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.pack.allocator.IdAllocator;
-import net.momirealms.craftengine.core.pack.model.*;
+import net.momirealms.craftengine.core.pack.model.definition.*;
+import net.momirealms.craftengine.core.pack.model.definition.select.ChargeTypeSelectProperty;
+import net.momirealms.craftengine.core.pack.model.definition.select.TrimMaterialSelectProperty;
 import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenerator;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
-import net.momirealms.craftengine.core.pack.model.select.ChargeTypeSelectProperty;
-import net.momirealms.craftengine.core.pack.model.select.TrimMaterialSelectProperty;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyItemModel;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyModelPredicate;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyOverridesModel;
 import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.util.*;
@@ -605,7 +608,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
                 try {
-                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
+                    eventTriggerListMap = CommonFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                     eventTriggerListMap = Map.of();

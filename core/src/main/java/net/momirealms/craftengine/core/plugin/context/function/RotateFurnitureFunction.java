@@ -1,9 +1,9 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
@@ -50,7 +50,7 @@ public class RotateFurnitureFunction<CTX extends Context> extends AbstractCondit
 
     @Override
     public Key type() {
-        return CommonFunctions.ROTATE_FURNITURE;
+        return net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.ROTATE_FURNITURE;
     }
 
     public NumberProvider degree() {
@@ -66,8 +66,8 @@ public class RotateFurnitureFunction<CTX extends Context> extends AbstractCondit
         @Override
         public Function<CTX> create(Map<String, Object> arguments) {
             NumberProvider degree = NumberProviders.fromObject(arguments.getOrDefault("degree", 90));
-            List<Function<Context>> onSuccess = ResourceConfigUtils.parseConfigAsList(arguments.get("on-success"), EventFunctions::fromMap);
-            List<Function<Context>> onFailure = ResourceConfigUtils.parseConfigAsList(arguments.get("on-failure"), EventFunctions::fromMap);
+            List<Function<Context>> onSuccess = ResourceConfigUtils.parseConfigAsList(arguments.get("on-success"), CommonFunctions::fromMap);
+            List<Function<Context>> onFailure = ResourceConfigUtils.parseConfigAsList(arguments.get("on-failure"), CommonFunctions::fromMap);
             return new RotateFurnitureFunction<>(getPredicates(arguments), degree, onSuccess, onFailure);
         }
     }

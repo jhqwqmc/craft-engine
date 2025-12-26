@@ -135,7 +135,7 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("bukkit") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-bukkit"
             version = rootProject.properties["project_version"].toString()
@@ -153,7 +153,7 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("mavenJavaSnapshot") {
+        create<MavenPublication>("bukkitSnapshot") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-bukkit"
             version = "${rootProject.properties["project_version"]}-SNAPSHOT"
@@ -177,11 +177,11 @@ publishing {
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleasesRepository")
+    dependsOn("publishBukkitPublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {
     group = "publishing"
     description = "Publishes to the snapshot repository"
-    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository")
+    dependsOn("publishBukkitSnapshotPublicationToSnapshotRepository")
 }

@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class SelfHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     private static final SelfHost INSTANCE = new SelfHost();
 
     public SelfHost() {
@@ -57,7 +57,7 @@ public class SelfHost implements ResourcePackHost {
         return ResourcePackHosts.SELF;
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

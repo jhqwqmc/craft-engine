@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class AlistHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String apiUrl;
     private final String userName;
     private final String password;
@@ -284,7 +284,7 @@ public class AlistHost implements ResourcePackHost {
                 new RuntimeException("Failed to obtain resource pack download URL (HTTP " + response.statusCode() + "): " + response.body()));
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

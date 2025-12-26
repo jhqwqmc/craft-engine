@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class NoneHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     public static final NoneHost INSTANCE = new NoneHost();
 
     @Override
@@ -36,7 +36,7 @@ public class NoneHost implements ResourcePackHost {
         return ResourcePackHosts.NONE;
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.processor.SimpleNetworkItemProcessor;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -75,7 +75,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
                 LoreModification.Operation operation = ResourceConfigUtils.getAsEnum(Optional.ofNullable(complexLore.get("operation")).map(String::valueOf).orElse(null), LoreModification.Operation.class, LoreModification.Operation.APPEND);
                 lastPriority = Optional.ofNullable(complexLore.get("priority")).map(it -> ResourceConfigUtils.getAsInt(it, "priority")).orElse(lastPriority);
                 boolean split = ResourceConfigUtils.getAsBoolean(complexLore.get("split-lines"), "split-lines");
-                List<Condition<ItemBuildContext>> conditions = ResourceConfigUtils.parseConfigAsList(complexLore.get("conditions"), EventConditions::fromMap);
+                List<Condition<ItemBuildContext>> conditions = ResourceConfigUtils.parseConfigAsList(complexLore.get("conditions"), CommonConditions::fromMap);
                 modifications.add(new LoreModificationHolder(new LoreModification(operation, split,
                         Arrays.stream(content).map(line -> Config.addNonItalicTag() && !line.startsWith("<!i>") ? FormattedLine.create("<!i>" + line) : FormattedLine.create(line))
                         .toArray(FormattedLine[]::new), MiscUtils.allOf(conditions)), lastPriority));

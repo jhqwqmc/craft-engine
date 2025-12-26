@@ -3,9 +3,9 @@ package net.momirealms.craftengine.core.item.processor;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -53,7 +53,7 @@ public class ConditionalProcessor<I> implements ItemProcessor<I> {
         @Override
         public ItemProcessor<I> create(Object arg) {
             Map<String, Object> conditionalData = ResourceConfigUtils.getAsMap(arg, "conditional");
-            List<Condition<Context>> conditions = ResourceConfigUtils.parseConfigAsList(conditionalData.get("conditions"), EventConditions::fromMap);
+            List<Condition<Context>> conditions = ResourceConfigUtils.parseConfigAsList(conditionalData.get("conditions"), CommonConditions::fromMap);
             List<ItemProcessor<I>> modifiers = new ArrayList<>();
             ItemProcessors.applyDataModifiers(ResourceConfigUtils.getAsMap(conditionalData.get("data"), "conditional.data"), m -> modifiers.add((ItemProcessor<I>) m));
             return new ConditionalProcessor<>(MiscUtils.allOf(conditions), modifiers.toArray(new ItemProcessor[0]));

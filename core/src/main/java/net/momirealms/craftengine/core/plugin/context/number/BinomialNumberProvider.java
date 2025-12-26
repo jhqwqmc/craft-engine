@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record BinomialNumberProvider(NumberProvider trials, NumberProvider successProbability) implements NumberProvider {
-    public static final Factory FACTORY = new Factory();
+    public static final NumberProviderFactory FACTORY = new Factory();
 
     @Override
     public float getFloat(Context context) {
@@ -39,7 +39,7 @@ public record BinomialNumberProvider(NumberProvider trials, NumberProvider succe
         return NumberProviders.BINOMIAL;
     }
 
-    public static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory {
 
         @Override
         public NumberProvider create(Map<String, Object> arguments) {

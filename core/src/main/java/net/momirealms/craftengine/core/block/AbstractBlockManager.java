@@ -28,9 +28,9 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.config.SectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
@@ -523,7 +523,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
 
                 Map<EventTrigger, List<Function<Context>>> events;
                 try {
-                    events = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
+                    events = CommonFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
                 } catch (LocalizedResourceConfigException e) {
                     eCollector1.add(e);
                     events = Map.of();

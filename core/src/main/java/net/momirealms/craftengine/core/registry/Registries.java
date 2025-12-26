@@ -27,18 +27,14 @@ import net.momirealms.craftengine.core.loot.function.LootFunctionFactory;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.model.ItemModelFactory;
-import net.momirealms.craftengine.core.pack.model.ItemModelReader;
-import net.momirealms.craftengine.core.pack.model.condition.ConditionPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.condition.ConditionPropertyReader;
-import net.momirealms.craftengine.core.pack.model.rangedisptach.RangeDispatchPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.rangedisptach.RangeDispatchPropertyReader;
-import net.momirealms.craftengine.core.pack.model.select.SelectPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.select.SelectPropertyReader;
-import net.momirealms.craftengine.core.pack.model.special.SpecialModelFactory;
-import net.momirealms.craftengine.core.pack.model.special.SpecialModelReader;
-import net.momirealms.craftengine.core.pack.model.tint.TintFactory;
-import net.momirealms.craftengine.core.pack.model.tint.TintReader;
+import net.momirealms.craftengine.core.pack.model.definition.ItemModelType;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyFactory;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyReader;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.rangedisptach.RangeDispatchPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.select.SelectPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.special.SpecialModelType;
+import net.momirealms.craftengine.core.pack.model.definition.tint.TintType;
 import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgumentFactory;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
@@ -51,7 +47,9 @@ import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-public class Registries {
+public final class Registries {
+    private Registries() {}
+
     public static final Key ROOT_REGISTRY = Key.withDefaultNamespace("root");
     public static final ResourceKey<Registry<CustomBlock>> BLOCK = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block"));
     public static final ResourceKey<Registry<ItemProcessorType<?>>> ITEM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_processor_type"));
@@ -63,18 +61,12 @@ public class Registries {
     public static final ResourceKey<Registry<ConditionFactory<LootContext>>> LOOT_CONDITION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_condition_factory"));
     public static final ResourceKey<Registry<NumberProviderFactory>> NUMBER_PROVIDER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("number_provider_factory"));
     public static final ResourceKey<Registry<TemplateArgumentFactory>> TEMPLATE_ARGUMENT_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("template_argument_factory"));
-    public static final ResourceKey<Registry<ItemModelFactory>> ITEM_MODEL_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_model_factory"));
-    public static final ResourceKey<Registry<ItemModelReader>> ITEM_MODEL_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_model_reader"));
-    public static final ResourceKey<Registry<TintFactory>> TINT_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("tint_factory"));
-    public static final ResourceKey<Registry<TintReader>> TINT_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("tint_reader"));
-    public static final ResourceKey<Registry<SpecialModelFactory>> SPECIAL_MODEL_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("special_model_factory"));
-    public static final ResourceKey<Registry<SpecialModelReader>> SPECIAL_MODEL_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("special_model_reader"));
-    public static final ResourceKey<Registry<RangeDispatchPropertyFactory>> RANGE_DISPATCH_PROPERTY_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("range_dispatch_property_factory"));
-    public static final ResourceKey<Registry<RangeDispatchPropertyReader>> RANGE_DISPATCH_PROPERTY_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("range_dispatch_property_reader"));
-    public static final ResourceKey<Registry<ConditionPropertyFactory>> CONDITION_PROPERTY_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("condition_property_factory"));
-    public static final ResourceKey<Registry<ConditionPropertyReader>> CONDITION_PROPERTY_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("condition_property_reader"));
-    public static final ResourceKey<Registry<SelectPropertyFactory>> SELECT_PROPERTY_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("select_property_factory"));
-    public static final ResourceKey<Registry<SelectPropertyReader>> SELECT_PROPERTY_READER = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("select_property_reader"));
+    public static final ResourceKey<Registry<ItemModelType>> ITEM_MODEL_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_model_type"));
+    public static final ResourceKey<Registry<TintType>> TINT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("tint_type"));
+    public static final ResourceKey<Registry<SpecialModelType>> SPECIAL_MODEL_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("special_model_type"));
+    public static final ResourceKey<Registry<RangeDispatchPropertyType>> RANGE_DISPATCH_PROPERTY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("range_dispatch_property_type"));
+    public static final ResourceKey<Registry<ConditionPropertyType>> CONDITION_PROPERTY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("condition_property_type"));
+    public static final ResourceKey<Registry<SelectPropertyType>> SELECT_PROPERTY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("select_property_type"));
     public static final ResourceKey<Registry<RecipeSerializer<?, ? extends Recipe<?>>>> RECIPE_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("recipe_factory"));
     public static final ResourceKey<Registry<ApplyBonusCountFunction.FormulaFactory>> FORMULA_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("formula_factory"));
     public static final ResourceKey<Registry<ConditionFactory<PathContext>>> PATH_MATCHER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("path_matcher_factory"));

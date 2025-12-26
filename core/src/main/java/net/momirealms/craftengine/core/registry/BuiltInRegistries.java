@@ -27,18 +27,14 @@ import net.momirealms.craftengine.core.loot.function.LootFunctionFactory;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionFactory;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.model.ItemModelFactory;
-import net.momirealms.craftengine.core.pack.model.ItemModelReader;
-import net.momirealms.craftengine.core.pack.model.condition.ConditionPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.condition.ConditionPropertyReader;
-import net.momirealms.craftengine.core.pack.model.rangedisptach.RangeDispatchPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.rangedisptach.RangeDispatchPropertyReader;
-import net.momirealms.craftengine.core.pack.model.select.SelectPropertyFactory;
-import net.momirealms.craftengine.core.pack.model.select.SelectPropertyReader;
-import net.momirealms.craftengine.core.pack.model.special.SpecialModelFactory;
-import net.momirealms.craftengine.core.pack.model.special.SpecialModelReader;
-import net.momirealms.craftengine.core.pack.model.tint.TintFactory;
-import net.momirealms.craftengine.core.pack.model.tint.TintReader;
+import net.momirealms.craftengine.core.pack.model.definition.ItemModelType;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyFactory;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyReader;
+import net.momirealms.craftengine.core.pack.model.definition.condition.ConditionPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.rangedisptach.RangeDispatchPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.select.SelectPropertyType;
+import net.momirealms.craftengine.core.pack.model.definition.special.SpecialModelType;
+import net.momirealms.craftengine.core.pack.model.definition.tint.TintType;
 import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgumentFactory;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
@@ -50,7 +46,7 @@ import net.momirealms.craftengine.core.plugin.network.codec.NetworkCodec;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-public class BuiltInRegistries {
+public final class BuiltInRegistries {
     public static final Registry<CustomBlock> BLOCK = createDynamicBoundRegistry(Registries.BLOCK, 512);
     public static final Registry<BlockBehaviorType> BLOCK_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.BLOCK_BEHAVIOR_TYPE, 64);
     public static final Registry<ItemProcessorType<?>> ITEM_PROCESSOR_TYPE = createConstantBoundRegistry(Registries.ITEM_PROCESSOR_TYPE, 64);
@@ -61,18 +57,12 @@ public class BuiltInRegistries {
     public static final Registry<LootEntryContainerFactory<?>> LOOT_ENTRY_CONTAINER_FACTORY = createConstantBoundRegistry(Registries.LOOT_ENTRY_CONTAINER_FACTORY, 16);
     public static final Registry<NumberProviderFactory> NUMBER_PROVIDER_FACTORY = createConstantBoundRegistry(Registries.NUMBER_PROVIDER_FACTORY, 16);
     public static final Registry<TemplateArgumentFactory> TEMPLATE_ARGUMENT_FACTORY = createConstantBoundRegistry(Registries.TEMPLATE_ARGUMENT_FACTORY, 16);
-    public static final Registry<ItemModelFactory> ITEM_MODEL_FACTORY = createConstantBoundRegistry(Registries.ITEM_MODEL_FACTORY, 16);
-    public static final Registry<ItemModelReader> ITEM_MODEL_READER = createConstantBoundRegistry(Registries.ITEM_MODEL_READER, 16);
-    public static final Registry<TintFactory> TINT_FACTORY = createConstantBoundRegistry(Registries.TINT_FACTORY, 16);
-    public static final Registry<TintReader> TINT_READER = createConstantBoundRegistry(Registries.TINT_READER, 16);
-    public static final Registry<SpecialModelFactory> SPECIAL_MODEL_FACTORY = createConstantBoundRegistry(Registries.SPECIAL_MODEL_FACTORY, 16);
-    public static final Registry<SpecialModelReader> SPECIAL_MODEL_READER = createConstantBoundRegistry(Registries.SPECIAL_MODEL_READER, 16);
-    public static final Registry<RangeDispatchPropertyFactory> RANGE_DISPATCH_PROPERTY_FACTORY = createConstantBoundRegistry(Registries.RANGE_DISPATCH_PROPERTY_FACTORY, 16);
-    public static final Registry<RangeDispatchPropertyReader> RANGE_DISPATCH_PROPERTY_READER = createConstantBoundRegistry(Registries.RANGE_DISPATCH_PROPERTY_READER, 16);
-    public static final Registry<ConditionPropertyFactory> CONDITION_PROPERTY_FACTORY = createConstantBoundRegistry(Registries.CONDITION_PROPERTY_FACTORY, 16);
-    public static final Registry<ConditionPropertyReader> CONDITION_PROPERTY_READER = createConstantBoundRegistry(Registries.CONDITION_PROPERTY_READER, 16);
-    public static final Registry<SelectPropertyFactory> SELECT_PROPERTY_FACTORY = createConstantBoundRegistry(Registries.SELECT_PROPERTY_FACTORY, 16);
-    public static final Registry<SelectPropertyReader> SELECT_PROPERTY_READER = createConstantBoundRegistry(Registries.SELECT_PROPERTY_READER, 16);
+    public static final Registry<ItemModelType> ITEM_MODEL_TYPE = createConstantBoundRegistry(Registries.ITEM_MODEL_TYPE, 16);
+    public static final Registry<TintType> TINT_TYPE = createConstantBoundRegistry(Registries.TINT_TYPE, 16);
+    public static final Registry<SpecialModelType> SPECIAL_MODEL_TYPE = createConstantBoundRegistry(Registries.SPECIAL_MODEL_TYPE, 16);
+    public static final Registry<RangeDispatchPropertyType> RANGE_DISPATCH_PROPERTY_TYPE = createConstantBoundRegistry(Registries.RANGE_DISPATCH_PROPERTY_TYPE, 16);
+    public static final Registry<ConditionPropertyType> CONDITION_PROPERTY_TYPE = createConstantBoundRegistry(Registries.CONDITION_PROPERTY_TYPE, 16);
+    public static final Registry<SelectPropertyType> SELECT_PROPERTY_TYPE = createConstantBoundRegistry(Registries.SELECT_PROPERTY_TYPE, 16);
     public static final Registry<RecipeSerializer<?, ? extends Recipe<?>>> RECIPE_SERIALIZER = createConstantBoundRegistry(Registries.RECIPE_FACTORY, 16);
     public static final Registry<ApplyBonusCountFunction.FormulaFactory> FORMULA_FACTORY = createConstantBoundRegistry(Registries.FORMULA_FACTORY, 16);
     public static final Registry<ConditionFactory<PathContext>> PATH_MATCHER_FACTORY = createConstantBoundRegistry(Registries.PATH_MATCHER_FACTORY, 16);
@@ -95,6 +85,8 @@ public class BuiltInRegistries {
     public static final Registry<FurnitureElementConfigFactory<?>> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
     public static final Registry<FurnitureHitBoxConfigFactory<?>> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
     public static final Registry<FurnitureBehaviorType<?>> FURNITURE_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.FURNITURE_BEHAVIOR_TYPE, 32);
+
+    private BuiltInRegistries() {}
 
     private static <T> Registry<T> createConstantBoundRegistry(ResourceKey<? extends Registry<T>> key, int expectedSize) {
         return new ConstantBoundRegistry<>(key, expectedSize);

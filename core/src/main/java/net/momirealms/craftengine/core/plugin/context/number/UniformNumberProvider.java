@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public class UniformNumberProvider implements NumberProvider {
-    public static final Factory FACTORY = new Factory();
+    public static final NumberProviderFactory FACTORY = new Factory();
     private final NumberProvider min;
     private final NumberProvider max;
 
@@ -45,7 +45,7 @@ public class UniformNumberProvider implements NumberProvider {
         return NumberProviders.UNIFORM;
     }
 
-    public static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory {
 
         @Override
         public NumberProvider create(Map<String, Object> arguments) {

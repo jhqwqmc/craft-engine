@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class LobFileHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+    public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String apiKey;
     private final ProxySelector proxy;
     private AccountInfo accountInfo;
@@ -267,7 +267,7 @@ public class LobFileHost implements ResourcePackHost {
         return sb.toString();
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory {
 
         @Override
         public ResourcePackHost create(Map<String, Object> arguments) {

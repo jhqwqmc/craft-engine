@@ -99,14 +99,12 @@ tasks.withType<JavaCompile> {
     dependsOn(tasks.clean)
 }
 
-val adventureLibrariesJar by tasks.registering(ShadowJar::class) {
+tasks.register("adventureBundle", ShadowJar::class) {
     group = "build"
-    description = "将 adventureLibraries 类型的依赖打包并 Relocate 到单独的 Jar 中"
-    archiveBaseName.set("buildAdventureLibrariesJar")   // 你想要的产物名
+    archiveBaseName.set("adventure-bundle")
     archiveClassifier.set("")
     configurations = listOf(adventureLibraries)
-
-    relocate("net.kyori", "net.momirealms.craftengine.libraries.net.kyori")
+    relocate("net.kyori", "net.momirealms.craftengine.libraries")
 }
 
 tasks {
@@ -155,7 +153,7 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("core") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-core"
             version = rootProject.properties["project_version"].toString()
@@ -173,7 +171,7 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("mavenJavaSnapshot") {
+        create<MavenPublication>("coreSnapshot") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-core"
             version = "${rootProject.properties["project_version"]}-SNAPSHOT"
@@ -191,21 +189,21 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("mavenAdventure") {
+        create<MavenPublication>("adventure") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-adventure"
             version = rootProject.properties["project_version"].toString()
-            artifact(tasks.named("adventureLibrariesJar"))
+            artifact(tasks.named("adventureBundle"))
             pom {
                 name = "CraftEngine API"
                 url = "https://github.com/Xiao-MoMi/craft-engine"
             }
         }
-        create<MavenPublication>("mavenAdventureSnapshot") {
+        create<MavenPublication>("adventureSnapshot") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-adventure"
             version = "${rootProject.properties["project_version"]}-SNAPSHOT"
-            artifact(tasks.named("adventureLibrariesJar"))
+            artifact(tasks.named("adventureBundle"))
             pom {
                 name = "CraftEngine API"
                 url = "https://github.com/Xiao-MoMi/craft-engine"
@@ -217,11 +215,11 @@ publishing {
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleasesRepository", "publishMavenAdventurePublicationToReleasesRepository")
+    dependsOn("publishCorePublicationToReleasesRepository", "publishAdventurePublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {
     group = "publishing"
     description = "Publishes to the snapshot repository"
-    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository", "publishMavenAdventureSnapshotPublicationToSnapshotRepository")
+    dependsOn("publishCoreSnapshotPublicationToSnapshotRepository", "publishAdventureSnapshotPublicationToSnapshotRepository")
 }
