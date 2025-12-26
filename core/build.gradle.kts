@@ -1,6 +1,17 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("com.gradleup.shadow") version "9.3.0"
     id("maven-publish")
+}
+
+val adventureLibraries: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+configurations {
+    compileOnly.get().extendsFrom(adventureLibraries)
 }
 
 repositories {
@@ -26,14 +37,13 @@ dependencies {
     // Util
     compileOnly("net.momirealms:sparrow-util:${rootProject.properties["sparrow_util_version"]}")
     // Adventure
-    compileOnly("net.kyori:adventure-api:${rootProject.properties["adventure_bundle_version"]}")
-    compileOnly("net.kyori:adventure-text-minimessage:${rootProject.properties["adventure_bundle_version"]}")
-    compileOnly("net.kyori:adventure-text-serializer-gson:${rootProject.properties["adventure_bundle_version"]}") {
+    adventureLibraries("net.kyori:adventure-api:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-minimessage:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-gson:${rootProject.properties["adventure_bundle_version"]}") {
         exclude("com.google.code.gson", "gson")
     }
-    compileOnly("net.kyori:adventure-text-serializer-legacy:${rootProject.properties["adventure_bundle_version"]}")
-
-    compileOnly("net.kyori:adventure-text-serializer-json-legacy-impl:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-legacy:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-json-legacy-impl:${rootProject.properties["adventure_bundle_version"]}")
     // Command
     compileOnly("org.incendo:cloud-core:${rootProject.properties["cloud_core_version"]}")
     compileOnly("org.incendo:cloud-minecraft-extras:${rootProject.properties["cloud_minecraft_extras_version"]}")
@@ -89,6 +99,16 @@ tasks.withType<JavaCompile> {
     dependsOn(tasks.clean)
 }
 
+val adventureLibrariesJar by tasks.registering(ShadowJar::class) {
+    group = "build"
+    description = "将 adventureLibraries 类型的依赖打包并 Relocate 到单独的 Jar 中"
+    archiveBaseName.set("buildAdventureLibrariesJar")   // 你想要的产物名
+    archiveClassifier.set("")
+    configurations = listOf(adventureLibraries)
+
+    relocate("net.kyori", "net.momirealms.craftengine.libraries.net.kyori")
+}
+
 tasks {
     shadowJar {
         archiveClassifier = ""
@@ -96,7 +116,6 @@ tasks {
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.yaml.snakeyaml", "net.momirealms.craftengine.libraries.snakeyaml")
-        relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("org.ahocorasick", "net.momirealms.craftengine.libraries.ahocorasick")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.jpountz", "net.momirealms.craftengine.libraries.jpountz") // lz4
@@ -172,17 +191,37 @@ publishing {
                 }
             }
         }
+        create<MavenPublication>("mavenAdventure") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-adventure"
+            version = rootProject.properties["project_version"].toString()
+            artifact(tasks.named("adventureLibrariesJar"))
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+            }
+        }
+        create<MavenPublication>("mavenAdventureSnapshot") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-adventure"
+            version = "${rootProject.properties["project_version"]}-SNAPSHOT"
+            artifact(tasks.named("adventureLibrariesJar"))
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+            }
+        }
     }
 }
 
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleasesRepository")
+    dependsOn("publishMavenJavaPublicationToReleasesRepository", "publishMavenAdventurePublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {
     group = "publishing"
     description = "Publishes to the snapshot repository"
-    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository")
+    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository", "publishMavenAdventureSnapshotPublicationToSnapshotRepository")
 }
