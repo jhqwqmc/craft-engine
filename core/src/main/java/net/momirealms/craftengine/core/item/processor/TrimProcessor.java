@@ -25,11 +25,11 @@ public class TrimProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     public Key material() {
-        return material;
+        return this.material;
     }
 
     public Key pattern() {
-        return pattern;
+        return this.pattern;
     }
 
     @Override
