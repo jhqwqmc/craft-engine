@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("minecraft:spreading_block");
+    public static final Key ID = Key.from("craftengine:spreading_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final LazyReference<Object> targetBlock;
 
