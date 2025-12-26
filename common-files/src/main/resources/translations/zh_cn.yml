@@ -435,6 +435,7 @@ warning.config.block.behavior.surface_spreading.missing_base_block: "<yellow>在
 warning.config.block.behavior.snowy.missing_snowy: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'snowy_block' 行为缺少必需的 'snowy' 属性</yellow>"
 warning.config.block.behavior.hangable.missing_hanging: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'hangable_block' 行为缺少必需的 'hanging' 属性</yellow>"
 warning.config.block.behavior.multi_high.missing_high: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'multi_high_block' 行为缺少必需的 'high' 属性</yellow>"
+warning.config.block.behavior.spreading.missing_target_block: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'spreading_block' 行为缺少必需的 'target-block' 选项</yellow>"
 warning.config.model.generation.missing_parent: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 的 'generation' 段落缺少必需的 'parent' 参数</yellow>"
 warning.config.model.generation.conflict: "<yellow>在文件 <arg:0> 发现问题 - 无法为 '<arg:1>' 生成模型 存在多个配置尝试使用相同路径 '<arg:2>' 生成不同的 JSON 模型</yellow>"
 warning.config.model.generation.invalid_display_position: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 在 'generation.display' 区域使用了无效的 display 位置类型 '<arg:2>'. 可用展示类型: [<arg:3>]</yellow>"

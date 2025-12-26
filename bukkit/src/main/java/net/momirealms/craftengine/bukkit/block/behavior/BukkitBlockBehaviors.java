@@ -52,6 +52,7 @@ public class BukkitBlockBehaviors extends BlockBehaviors {
     public static final BlockBehaviorType DROP_EXPERIENCE_BLOCK = register(DropExperienceBlockBehavior.ID, DropExperienceBlockBehavior.FACTORY);
     public static final BlockBehaviorType DROP_EXP_BLOCK = register(Key.from("craftengine:drop_exp_block"), DropExperienceBlockBehavior.FACTORY);
     public static final BlockBehaviorType MULTI_HIGH_BLOCK = register(MultiHighBlockBehavior.ID, MultiHighBlockBehavior.FACTORY);
+    public static final BlockBehaviorType SPREADING_BLOCK = register(SpreadingBlockBehavior.ID, SpreadingBlockBehavior.FACTORY);
 
     public static void init() {
     }
