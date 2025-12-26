@@ -3,17 +3,18 @@ package net.momirealms.craftengine.bukkit.item.behavior;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 
 import java.nio.file.Path;
 import java.util.Map;
 
 public class WallBlockItemBehavior extends BlockItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:wall_block_item");
+    public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public WallBlockItemBehavior(Key wallBlockId) {
         super(wallBlockId);
@@ -32,7 +33,7 @@ public class WallBlockItemBehavior extends BlockItemBehavior {
         return super.place(context);
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory {
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");

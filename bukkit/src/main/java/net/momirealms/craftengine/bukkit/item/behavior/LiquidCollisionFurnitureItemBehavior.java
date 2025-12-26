@@ -14,7 +14,6 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.pack.PendingConfigSection;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -28,13 +27,15 @@ import net.momirealms.craftengine.core.world.BlockHitResult;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.*;
 
 public class LiquidCollisionFurnitureItemBehavior extends FurnitureItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:liquid_collision_furniture_item");
+    public static final ItemBehaviorFactory FACTORY = new Factory();
     private final List<String> liquidTypes;
     private final boolean sourceOnly;
 
@@ -90,7 +91,7 @@ public class LiquidCollisionFurnitureItemBehavior extends FurnitureItemBehavior 
         }
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory {
 
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {

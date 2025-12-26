@@ -1,24 +1,24 @@
-package net.momirealms.craftengine.core.block;
+package net.momirealms.craftengine.core.block.behavior;
 
-import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.BlockBoundItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.BlockAccessor;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-// todo move the package on 1.0
 public abstract class BlockBehavior {
 
     @SuppressWarnings("unchecked")

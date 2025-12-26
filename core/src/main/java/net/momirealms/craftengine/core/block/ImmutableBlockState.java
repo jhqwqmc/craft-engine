@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.block;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;

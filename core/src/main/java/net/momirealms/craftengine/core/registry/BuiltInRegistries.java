@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.block.properties.PropertyFactory;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
-import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
+import net.momirealms.craftengine.core.item.behavior.ItemBehaviorType;
 import net.momirealms.craftengine.core.item.equipment.EquipmentFactory;
 import net.momirealms.craftengine.core.item.processor.ItemProcessorType;
 import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe;
@@ -54,7 +54,7 @@ public class BuiltInRegistries {
     public static final Registry<CustomBlock> BLOCK = createDynamicBoundRegistry(Registries.BLOCK, 512);
     public static final Registry<BlockBehaviorType> BLOCK_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.BLOCK_BEHAVIOR_TYPE, 64);
     public static final Registry<ItemProcessorType<?>> ITEM_PROCESSOR_TYPE = createConstantBoundRegistry(Registries.ITEM_PROCESSOR_TYPE, 64);
-    public static final Registry<ItemBehaviorFactory> ITEM_BEHAVIOR_FACTORY = createConstantBoundRegistry(Registries.ITEM_BEHAVIOR_FACTORY, 64);
+    public static final Registry<ItemBehaviorType> ITEM_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.ITEM_BEHAVIOR_TYPE, 64);
     public static final Registry<PropertyFactory> PROPERTY_FACTORY = createConstantBoundRegistry(Registries.PROPERTY_FACTORY, 16);
     public static final Registry<LootFunctionFactory<?>> LOOT_FUNCTION_FACTORY = createConstantBoundRegistry(Registries.LOOT_FUNCTION_FACTORY, 32);
     public static final Registry<ConditionFactory<LootContext>> LOOT_CONDITION_FACTORY = createConstantBoundRegistry(Registries.LOOT_CONDITION_FACTORY, 32);

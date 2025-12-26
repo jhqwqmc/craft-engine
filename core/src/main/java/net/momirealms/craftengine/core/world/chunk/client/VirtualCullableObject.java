@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.world.chunk.client;
 
+import net.momirealms.craftengine.core.entity.Cullable;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.world.Cullable;
 
 public class VirtualCullableObject {
     public Cullable cullable;

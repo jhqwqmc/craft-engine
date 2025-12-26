@@ -10,7 +10,11 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.InteractUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.*;
+import net.momirealms.craftengine.core.block.BlockStateWrapper;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.UpdateOption;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -18,13 +22,13 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
 import org.bukkit.block.Block;
@@ -103,11 +107,10 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
         boolean neighborStateIsWall = this.isWall(neighborState);
         boolean relativeStateIsWall = this.isWall(relativeState);
         boolean flag = neighborStateIsWall || relativeStateIsWall;
+        // TODO: 连接原版方块
         if (neighborStateIsWall) {
-            // TODO: 连接原版方块
         }
         if (relativeStateIsWall) {
-            // TODO: 连接原版方块
         }
         return customState.with(this.inWallProperty, flag).customBlockState().literalObject();
     }

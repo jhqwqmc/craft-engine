@@ -10,7 +10,6 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
@@ -21,13 +20,15 @@ import net.momirealms.craftengine.core.world.BlockHitResult;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Map;
 
 public class LiquidCollisionBlockItemBehavior extends BlockItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:liquid_collision_block_item");
+    public static final ItemBehaviorFactory FACTORY = new Factory();
     private final int offsetY;
 
     public LiquidCollisionBlockItemBehavior(Key blockId, int offsetY) {
@@ -66,7 +67,7 @@ public class LiquidCollisionBlockItemBehavior extends BlockItemBehavior {
         }
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory {
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");

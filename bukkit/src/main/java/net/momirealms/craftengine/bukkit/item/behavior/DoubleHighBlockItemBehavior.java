@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DoubleHighBlockItemBehavior extends BlockItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:double_high_block_item");
+    public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public DoubleHighBlockItemBehavior(Key blockId) {
         super(blockId);
@@ -36,7 +37,7 @@ public class DoubleHighBlockItemBehavior extends BlockItemBehavior {
         return super.placeBlock(location, blockState, revertState);
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory {
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");

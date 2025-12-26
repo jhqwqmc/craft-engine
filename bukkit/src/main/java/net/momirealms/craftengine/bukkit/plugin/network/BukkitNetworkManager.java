@@ -71,7 +71,6 @@ import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeHolder;
 import net.momirealms.craftengine.core.item.recipe.network.modern.RecipeBookEntry;
 import net.momirealms.craftengine.core.item.recipe.network.modern.SingleInputButtonDisplay;
@@ -107,6 +106,7 @@ import net.momirealms.craftengine.core.world.chunk.client.PackedOcclusionStorage
 import net.momirealms.craftengine.core.world.chunk.client.SingularOcclusionStorage;
 import net.momirealms.craftengine.core.world.chunk.packet.BlockEntityData;
 import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
 import net.momirealms.sparrow.nbt.Tag;

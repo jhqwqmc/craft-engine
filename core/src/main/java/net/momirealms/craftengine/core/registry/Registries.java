@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.block.properties.PropertyFactory;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
-import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
+import net.momirealms.craftengine.core.item.behavior.ItemBehaviorType;
 import net.momirealms.craftengine.core.item.equipment.EquipmentFactory;
 import net.momirealms.craftengine.core.item.processor.ItemProcessorType;
 import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe;
@@ -57,7 +57,7 @@ public class Registries {
     public static final ResourceKey<Registry<ItemProcessorType<?>>> ITEM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_processor_type"));
     public static final ResourceKey<Registry<PropertyFactory>> PROPERTY_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("property_factory"));
     public static final ResourceKey<Registry<BlockBehaviorType>> BLOCK_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_behavior_type"));
-    public static final ResourceKey<Registry<ItemBehaviorFactory>> ITEM_BEHAVIOR_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_behavior_factory"));
+    public static final ResourceKey<Registry<ItemBehaviorType>> ITEM_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_behavior_type"));
     public static final ResourceKey<Registry<LootFunctionFactory<?>>> LOOT_FUNCTION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_function_factory"));
     public static final ResourceKey<Registry<LootEntryContainerFactory<?>>> LOOT_ENTRY_CONTAINER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_entry_container_factory"));
     public static final ResourceKey<Registry<ConditionFactory<LootContext>>> LOOT_CONDITION_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_condition_factory"));

@@ -16,7 +16,6 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.ItemUtils;
@@ -24,6 +23,7 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.GameEvent;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -36,7 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AxeItemBehavior extends ItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final Key ID = Key.from("craftengine:axe_item");
+    public static final ItemBehaviorFactory FACTORY = new Factory();
     public static final AxeItemBehavior INSTANCE = new AxeItemBehavior();
     private static final Key AXE_STRIP_SOUND = Key.of("minecraft:item.axe.strip");
 
@@ -112,7 +113,7 @@ public class AxeItemBehavior extends ItemBehavior {
         return InteractionResult.SUCCESS_AND_CANCEL;
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory {
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             return INSTANCE;
