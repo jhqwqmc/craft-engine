@@ -6,6 +6,4 @@ import net.momirealms.craftengine.core.util.Key;
 public interface Resolution {
 
     void run(PathContext existing, PathContext conflict);
-
-    Key type();
 }

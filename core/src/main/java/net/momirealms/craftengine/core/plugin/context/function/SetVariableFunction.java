@@ -10,7 +10,6 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -36,14 +35,9 @@ public class SetVariableFunction<CTX extends Context> extends AbstractConditiona
                 .ifRight(number -> contexts.withParameter(ContextKey.direct("var_" + this.variableName), asInt ? number.getInt(ctx) : number.getDouble(ctx)));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.SET_VARIABLE;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

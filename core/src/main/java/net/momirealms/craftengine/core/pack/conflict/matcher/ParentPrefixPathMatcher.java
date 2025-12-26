@@ -11,32 +11,23 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class PathMatcherParentSuffix implements Condition<PathContext> {
-    private final String suffix;
-
-    public PathMatcherParentSuffix(String suffix) {
-        this.suffix = suffix;
-    }
+public record ParentPrefixPathMatcher(String prefix) implements Condition<PathContext> {
+    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final Key ID = Key.of("craftengine:parent_path_prefix");
 
     @Override
     public boolean test(PathContext path) {
         Path parent = path.path().getParent();
         if (parent == null) return false;
         String pathStr = CharacterUtils.replaceBackslashWithSlash(parent.toString());
-        return pathStr.endsWith(suffix);
+        return pathStr.startsWith(this.prefix);
     }
 
-    @Override
-    public Key type() {
-        return PathMatchers.PARENT_PATH_SUFFIX;
-    }
-
-    public static class FactoryImpl implements ConditionFactory<PathContext> {
-
+    private static class Factory implements ConditionFactory<PathContext> {
         @Override
         public Condition<PathContext> create(Map<String, Object> arguments) {
-            String suffix = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("suffix"), () -> new LocalizedException("warning.config.conflict_matcher.parent_suffix.missing_suffix"));
-            return new PathMatcherParentSuffix(suffix);
+            String prefix = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("prefix"), () -> new LocalizedException("warning.config.conflict_matcher.parent_prefix.missing_prefix"));
+            return new ParentPrefixPathMatcher(prefix);
         }
     }
 }

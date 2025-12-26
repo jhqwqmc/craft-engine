@@ -17,9 +17,13 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ResolutionMergePackMcMeta implements Resolution {
-    public static final Factory FACTORY = new Factory();
+public final class MergePackMcMetaResolution implements Resolution {
+    public static final Key ID = Key.of("craftengine:merge_pack_mcmeta");
+    public static final ResolutionFactory FACTORY = new Factory();
     public static final Set<String> STANDARD_PACK_KEYS = ImmutableSet.of("pack", "features", "filter", "overlays", "language");
+    public static final MergePackMcMetaResolution INSTANCE = new MergePackMcMetaResolution();
+
+    private MergePackMcMetaResolution() {}
 
     public static void merge(Path file1, Path file2) throws IOException {
         // 第一步，解析全部的mcmeta文件为json对象
@@ -255,15 +259,10 @@ public class ResolutionMergePackMcMeta implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.MERGE_PACK_MCMETA;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
         @Override
         public Resolution create(Map<String, Object> arguments) {
-            return new ResolutionMergePackMcMeta();
+            return INSTANCE;
         }
     }
 }

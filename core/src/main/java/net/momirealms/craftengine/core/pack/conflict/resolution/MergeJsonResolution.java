@@ -10,13 +10,9 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.io.IOException;
 import java.util.Map;
 
-public class ResolutionMergeJson implements Resolution {
-    public static final Factory FACTORY = new Factory();
-    private final boolean deeply;
-
-    public ResolutionMergeJson(boolean deeply) {
-        this.deeply = deeply;
-    }
+public record MergeJsonResolution(boolean deeply) implements Resolution {
+    public static final Key ID = Key.of("craftengine:merge_json");
+    public static final ResolutionFactory FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -35,17 +31,12 @@ public class ResolutionMergeJson implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.MERGE_JSON;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
         public Resolution create(Map<String, Object> arguments) {
             boolean deeply = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deeply", false), "deeply");
-            return new ResolutionMergeJson(deeply);
+            return new MergeJsonResolution(deeply);
         }
     }
 }

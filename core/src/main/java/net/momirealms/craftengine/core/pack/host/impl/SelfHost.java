@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class SelfHost implements ResourcePackHost {
+public final class SelfHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private static final SelfHost INSTANCE = new SelfHost();
 

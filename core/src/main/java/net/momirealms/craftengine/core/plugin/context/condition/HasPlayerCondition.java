@@ -3,18 +3,12 @@ package net.momirealms.craftengine.core.plugin.context.condition;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
 
-public class HasPlayerCondition<CTX extends Context> implements Condition<CTX> {
+public final class HasPlayerCondition<CTX extends Context> implements Condition<CTX> {
 
     public HasPlayerCondition() {
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.HAS_PLAYER;
     }
 
     @Override
@@ -25,7 +19,11 @@ public class HasPlayerCondition<CTX extends Context> implements Condition<CTX> {
         return false;
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {

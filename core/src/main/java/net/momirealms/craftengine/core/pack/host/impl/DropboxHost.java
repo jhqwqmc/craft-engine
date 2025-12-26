@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class DropboxHost implements ResourcePackHost {
+public final class DropboxHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String appKey;
     private final String appSecret;

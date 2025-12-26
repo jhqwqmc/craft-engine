@@ -11,9 +11,12 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.HashSet;
 import java.util.Map;
 
-public class ResolutionMergeAltas implements Resolution {
-    public static final Factory FACTORY = new Factory();
-    public static final ResolutionMergeAltas INSTANCE = new ResolutionMergeAltas();
+public final class MergeAltasResolution implements Resolution {
+    public static final Key ID = Key.of("craftengine:merge_atlas");
+    public static final ResolutionFactory FACTORY = new Factory();
+    public static final MergeAltasResolution INSTANCE = new MergeAltasResolution();
+
+    private MergeAltasResolution() {}
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -42,12 +45,7 @@ public class ResolutionMergeAltas implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.MERGE_ATLAS;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
         public Resolution create(Map<String, Object> arguments) {

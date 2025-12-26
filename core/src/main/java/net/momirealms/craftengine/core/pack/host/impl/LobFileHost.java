@@ -32,7 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class LobFileHost implements ResourcePackHost {
+public final class LobFileHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String apiKey;
     private final ProxySelector proxy;

@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.List;
 import java.util.Map;
@@ -22,14 +21,9 @@ public class UpdateInteractionFunction<CTX extends Context> extends AbstractCond
         cancellable.ifPresent(value -> value.updateLastSuccessfulInteractionTick(value.gameTicks()));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.UPDATE_INTERACTION_TICK;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

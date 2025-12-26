@@ -33,7 +33,6 @@ import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.plugin.compatibility.*;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.CommonConditions;
@@ -125,12 +124,10 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         Key worldGuardRegion = Key.of("worldguard:region");
         if (this.hasPlugin("WorldGuard")) {
             runCatchingHook(() -> {
-                CommonConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
-                LootConditions.register(worldGuardRegion, new WorldGuardRegionCondition.FactoryImpl<>());
+                CommonConditions.register(worldGuardRegion, WorldGuardRegionCondition.factory());
             }, "WorldGuard");
         } else {
-            CommonConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
-            LootConditions.register(worldGuardRegion, new AlwaysFalseCondition.FactoryImpl<>());
+            CommonConditions.register(worldGuardRegion, AlwaysFalseCondition.factory());
         }
         if (this.hasPlugin("Geyser-Spigot")) {
             this.hasGeyser = true;

@@ -13,8 +13,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeSet;
 
-public class ResolutionMergeLegacyModel implements Resolution {
-    public static final Factory FACTORY = new Factory();
+public final class MergeLegacyModelResolution implements Resolution {
+    public static final Key ID = Key.of("craftengine:merge_legacy_model");
+    public static final ResolutionFactory FACTORY = new Factory();
+    public static final MergeLegacyModelResolution INSTANCE = new MergeLegacyModelResolution();
+
+    private MergeLegacyModelResolution() {}
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -61,16 +65,11 @@ public class ResolutionMergeLegacyModel implements Resolution {
         return element != null && element.isJsonArray();
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.MERGE_LEGACY_MODEL;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
         public Resolution create(Map<String, Object> arguments) {
-            return new ResolutionMergeLegacyModel();
+            return INSTANCE;
         }
     }
 }

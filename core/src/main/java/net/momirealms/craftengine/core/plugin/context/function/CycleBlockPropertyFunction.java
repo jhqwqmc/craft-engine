@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.World;
@@ -79,14 +78,9 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         return wrapper.withProperty(this.property, mapValue);
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.CYCLE_BLOCK_PROPERTY;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

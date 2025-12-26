@@ -14,32 +14,32 @@ import java.util.Map;
 public class CommonConditions {
 
     static {
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_PLAYER, new HasPlayerCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_ITEM, new HasItemCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ITEM, new MatchItemCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ENTITY, new MatchEntityCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK, new MatchBlockCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK_PROPERTY, new MatchBlockPropertyCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.TABLE_BONUS, new TableBonusCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.SURVIVES_EXPLOSION, new SurvivesExplosionCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ANY_OF, new AnyOfCondition.FactoryImpl<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ALL_OF, new AllOfCondition.FactoryImpl<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ENCHANTMENT, new EnchantmentCondition.Factory<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVERTED, new InvertedCondition.FactoryImpl<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.FALLING_BLOCK, new FallingBlockCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.RANDOM, new RandomCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.DISTANCE, new DistanceCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.PERMISSION, new PermissionCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EQUALS, new StringEqualsCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_REGEX, new StringRegexCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_EQUALS, new StringEqualsCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_CONTAINS, new StringContainsCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EXPRESSION, new ExpressionCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.IS_NULL, new IsNullCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAND, new HandCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ON_COOLDOWN, new OnCooldownCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVENTORY_HAS_ITEM, new InventoryHasItemCondition.FactoryImpl<>());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_FURNITURE_VARIANT, new MatchFurnitureVariantCondition.FactoryImpl<>());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_PLAYER, HasPlayerCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_ITEM, HasItemCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ITEM, MatchItemCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ENTITY, MatchEntityCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK, MatchBlockCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK_PROPERTY, MatchBlockPropertyCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.TABLE_BONUS, TableBonusCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.SURVIVES_EXPLOSION, SurvivesExplosionCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ANY_OF, AnyOfCondition.factory(CommonConditions::fromMap));
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ALL_OF, AllOfCondition.factory(CommonConditions::fromMap));
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ENCHANTMENT, EnchantmentCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVERTED, InvertedCondition.factory(CommonConditions::fromMap));
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.FALLING_BLOCK, FallingBlockCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.RANDOM, RandomCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.DISTANCE, DistanceCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.PERMISSION, PermissionCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EQUALS, StringEqualsCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_REGEX, StringRegexCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_EQUALS, StringEqualsCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_CONTAINS, StringContainsCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EXPRESSION, ExpressionCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.IS_NULL, IsNullCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAND, HandCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ON_COOLDOWN, OnCooldownCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVENTORY_HAS_ITEM, InventoryHasItemCondition.factory());
+        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_FURNITURE_VARIANT, MatchFurnitureVariantCondition.factory());
     }
 
     public static void register(Key key, ConditionFactory<Context> factory) {
@@ -50,19 +50,15 @@ public class CommonConditions {
     @SuppressWarnings("unchecked")
     public static <CTX extends Context> Condition<CTX> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.event.condition.missing_type");
-        Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        if (type.charAt(0) == '!') {
-            ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(new Key(key.namespace(), key.value().substring(1)));
-            if (factory == null) {
-                throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
-            }
-            return new InvertedCondition<>((Condition<CTX>) factory.create(map));
-        } else {
-            ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(key);
-            if (factory == null) {
-                throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
-            }
-            return (Condition<CTX>) factory.create(map);
+        boolean inverted = type.charAt(0) == '!';
+        if (inverted) {
+            type = type.substring(1);
         }
+        Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
+        ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(key);
+        if (factory == null) {
+            throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
+        }
+        return inverted ? new InvertedCondition<>((Condition<CTX>) factory.create(map)) : (Condition<CTX>) factory.create(map);
     }
 }

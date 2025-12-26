@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.List;
@@ -31,14 +30,9 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
         optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.floor(x.getDouble(ctx)), MiscUtils.floor(y.getDouble(ctx)), MiscUtils.floor(z.getDouble(ctx))));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.BREAK_BLOCK;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

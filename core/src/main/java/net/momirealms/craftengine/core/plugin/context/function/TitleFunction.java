@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextPar
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -53,14 +52,9 @@ public class TitleFunction<CTX extends Context> extends AbstractConditionalFunct
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.TITLE;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

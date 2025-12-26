@@ -14,7 +14,7 @@ import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
 import net.momirealms.craftengine.core.pack.atlas.Atlas;
 import net.momirealms.craftengine.core.pack.atlas.TexturedModel;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
-import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionConditional;
+import net.momirealms.craftengine.core.pack.conflict.resolution.ConditionalResolution;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
 import net.momirealms.craftengine.core.pack.host.impl.NoneHost;
@@ -3296,7 +3296,7 @@ public abstract class AbstractPackManager implements PackManager {
             PathContext relativeCTX = PathContext.of(relative);
             PathContext targetCTX = PathContext.of(targetPath);
             PathContext sourceCTX = PathContext.of(sourcePath);
-            for (ResolutionConditional resolution : Config.resolutions()) {
+            for (ConditionalResolution resolution : Config.resolutions()) {
                 if (resolution.matcher().test(relativeCTX)) {
                     resolution.resolution().run(targetCTX, sourceCTX);
                     return;

@@ -12,18 +12,13 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 import java.util.Optional;
 
-public class InventoryHasItemCondition<CTX extends Context> implements Condition<CTX> {
+public final class InventoryHasItemCondition<CTX extends Context> implements Condition<CTX> {
     private final Key itemId;
     private final NumberProvider count;
 
     public InventoryHasItemCondition(Key itemId, NumberProvider count) {
         this.itemId = itemId;
         this.count = count;
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.INVENTORY_HAS_ITEM;
     }
 
     @Override
@@ -36,7 +31,11 @@ public class InventoryHasItemCondition<CTX extends Context> implements Condition
         return player.clearOrCountMatchingInventoryItems(this.itemId, 0) >= this.count.getInt(ctx);
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {

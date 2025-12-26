@@ -18,30 +18,30 @@ import java.util.function.Predicate;
 public class LootConditions {
 
     static {
-        register(CommonConditions.MATCH_ITEM, new MatchItemCondition.FactoryImpl<>());
-        register(CommonConditions.MATCH_BLOCK_PROPERTY, new MatchBlockPropertyCondition.FactoryImpl<>());
-        register(CommonConditions.TABLE_BONUS, new TableBonusCondition.FactoryImpl<>());
-        register(CommonConditions.SURVIVES_EXPLOSION, new SurvivesExplosionCondition.FactoryImpl<>());
-        register(CommonConditions.ANY_OF, new AnyOfCondition.FactoryImpl<>(LootConditions::fromMap));
-        register(CommonConditions.ALL_OF, new AllOfCondition.FactoryImpl<>(LootConditions::fromMap));
-        register(CommonConditions.HAS_PLAYER, new HasPlayerCondition.FactoryImpl<>());
-        register(CommonConditions.HAS_ITEM, new HasItemCondition.FactoryImpl<>());
-        register(CommonConditions.ENCHANTMENT, new EnchantmentCondition.Factory<>());
-        register(CommonConditions.INVERTED, new InvertedCondition.FactoryImpl<>(LootConditions::fromMap));
-        register(CommonConditions.FALLING_BLOCK, new FallingBlockCondition.FactoryImpl<>());
-        register(CommonConditions.RANDOM, new RandomCondition.FactoryImpl<>());
-        register(CommonConditions.DISTANCE, new DistanceCondition.FactoryImpl<>());
-        register(CommonConditions.PERMISSION, new PermissionCondition.FactoryImpl<>());
-        register(CommonConditions.EQUALS, new StringEqualsCondition.FactoryImpl<>());
-        register(CommonConditions.STRING_REGEX, new StringRegexCondition.FactoryImpl<>());
-        register(CommonConditions.STRING_EQUALS, new StringEqualsCondition.FactoryImpl<>());
-        register(CommonConditions.STRING_CONTAINS, new StringContainsCondition.FactoryImpl<>());
-        register(CommonConditions.EXPRESSION, new ExpressionCondition.FactoryImpl<>());
-        register(CommonConditions.IS_NULL, new IsNullCondition.FactoryImpl<>());
-        register(CommonConditions.HAND, new HandCondition.FactoryImpl<>());
-        register(CommonConditions.ON_COOLDOWN, new OnCooldownCondition.FactoryImpl<>());
-        register(CommonConditions.INVENTORY_HAS_ITEM, new InventoryHasItemCondition.FactoryImpl<>());
-        register(CommonConditions.MATCH_FURNITURE_VARIANT, new MatchFurnitureVariantCondition.FactoryImpl<>());
+        register(CommonConditions.MATCH_ITEM, MatchItemCondition.factory());
+        register(CommonConditions.MATCH_BLOCK_PROPERTY, MatchBlockPropertyCondition.factory());
+        register(CommonConditions.TABLE_BONUS, TableBonusCondition.factory());
+        register(CommonConditions.SURVIVES_EXPLOSION, SurvivesExplosionCondition.factory());
+        register(CommonConditions.ANY_OF, AnyOfCondition.factory(LootConditions::fromMap));
+        register(CommonConditions.ALL_OF, AllOfCondition.factory(LootConditions::fromMap));
+        register(CommonConditions.HAS_PLAYER, HasPlayerCondition.factory());
+        register(CommonConditions.HAS_ITEM, HasItemCondition.factory());
+        register(CommonConditions.ENCHANTMENT, EnchantmentCondition.factory());
+        register(CommonConditions.INVERTED, InvertedCondition.factory(LootConditions::fromMap));
+        register(CommonConditions.FALLING_BLOCK, FallingBlockCondition.factory());
+        register(CommonConditions.RANDOM, RandomCondition.factory());
+        register(CommonConditions.DISTANCE, DistanceCondition.factory());
+        register(CommonConditions.PERMISSION, PermissionCondition.factory());
+        register(CommonConditions.EQUALS, StringEqualsCondition.factory());
+        register(CommonConditions.STRING_REGEX, StringRegexCondition.factory());
+        register(CommonConditions.STRING_EQUALS, StringEqualsCondition.factory());
+        register(CommonConditions.STRING_CONTAINS, StringContainsCondition.factory());
+        register(CommonConditions.EXPRESSION, ExpressionCondition.factory());
+        register(CommonConditions.IS_NULL, IsNullCondition.factory());
+        register(CommonConditions.HAND, HandCondition.factory());
+        register(CommonConditions.ON_COOLDOWN, OnCooldownCondition.factory());
+        register(CommonConditions.INVENTORY_HAS_ITEM, InventoryHasItemCondition.factory());
+        register(CommonConditions.MATCH_FURNITURE_VARIANT, MatchFurnitureVariantCondition.factory());
     }
 
     public static void register(Key key, ConditionFactory<LootContext> factory) {

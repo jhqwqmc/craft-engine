@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class OverlayCombination {
+public final class OverlayCombination {
     private final List<VersionBasedEvent> versionBasedEvents;
     private final List<Overlay> currentOverlays;
     private int cursor;

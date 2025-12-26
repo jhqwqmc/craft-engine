@@ -2,12 +2,13 @@ package net.momirealms.craftengine.core.pack.model.simplified;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
-public class ConditionModelReader implements SimplifiedModelReader {
+public final class ConditionModelReader implements SimplifiedModelReader {
     public static final ConditionModelReader FISHING_ROD = new ConditionModelReader("fishing_rod", "fishing_rod/cast", "_cast");
     public static final ConditionModelReader ELYTRA = new ConditionModelReader("generated", "broken", "_broken");
     public static final ConditionModelReader SHIELD = new ConditionModelReader("", "using_item", "_blocking");
@@ -58,7 +59,7 @@ public class ConditionModelReader implements SimplifiedModelReader {
     }
 
     @Override
-    public @Nullable Map<String, Object> convert(List<String> models) {
+    public @NotNull Map<String, Object> convert(List<String> models) {
         if (models.size() != 2) {
             throw new LocalizedResourceConfigException("warning.config.item.simplified_model.invalid_model", "2", String.valueOf(models.size()));
         }

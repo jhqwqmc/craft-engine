@@ -5,19 +5,21 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
+import java.util.function.Function;
 
-public class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
+public final class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
+    public static final AlwaysFalseCondition<Context> INSTANCE = new AlwaysFalseCondition<>();
 
-    @Override
-    public Key type() {
-        return CommonConditions.ALWAYS_FALSE;
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new FactoryImpl<>();
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
 
+        @SuppressWarnings("unchecked")
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {
-            return new AlwaysFalseCondition<>();
+            return (Condition<CTX>) INSTANCE;
         }
     }
 }

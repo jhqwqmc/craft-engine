@@ -11,7 +11,7 @@ import net.momirealms.craftengine.core.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Overlay {
+public final class Overlay {
     private final PackVersion minVersion;
     private final PackVersion maxVersion;
     private final String directory;

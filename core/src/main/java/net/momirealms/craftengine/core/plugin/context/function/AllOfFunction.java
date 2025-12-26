@@ -23,9 +23,4 @@ public class AllOfFunction<CTX extends Context> implements Function<CTX> {
             function.run(ctx);
         }
     }
-
-    @Override
-    public Key type() {
-        return CommonFunctions.ALL_OF;
-    }
 }

@@ -5,13 +5,12 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.*;
 
-public class MatchEntityCondition<CTX extends Context> implements Condition<CTX> {
+public final class MatchEntityCondition<CTX extends Context> implements Condition<CTX> {
     private final Set<String> ids;
     private final boolean regexMatch;
 
@@ -21,17 +20,16 @@ public class MatchEntityCondition<CTX extends Context> implements Condition<CTX>
     }
 
     @Override
-    public Key type() {
-        return CommonConditions.MATCH_ENTITY;
-    }
-
-    @Override
     public boolean test(CTX ctx) {
         Optional<Entity> entity = ctx.getOptionalParameter(DirectContextParameters.ENTITY);
         return entity.filter(value -> MiscUtils.matchRegex(value.type().asString(), this.ids, this.regexMatch)).isPresent();
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {
