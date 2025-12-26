@@ -26,7 +26,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class GitLabHost implements ResourcePackHost {
+public final class GitLabHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String gitlabUrl;
     private final String accessToken;

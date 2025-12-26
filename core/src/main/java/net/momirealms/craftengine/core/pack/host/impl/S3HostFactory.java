@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import java.util.List;
 import java.util.Map;
 
-public class S3HostFactory implements ResourcePackHostFactory {
+public final class S3HostFactory implements ResourcePackHostFactory {
     public static final ResourcePackHostFactory INSTANCE = new S3HostFactory();
 
     @Override

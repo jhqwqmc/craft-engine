@@ -8,8 +8,9 @@ import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.Map;
 
-public record ResolutionConditional(Condition<PathContext> matcher, Resolution resolution) implements Resolution {
-    public static final Factory FACTORY = new Factory();
+public record ConditionalResolution(Condition<PathContext> matcher, Resolution resolution) implements Resolution {
+    public static final Key ID = Key.of("craftengine:conditional");
+    public static final ResolutionFactory FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -18,18 +19,13 @@ public record ResolutionConditional(Condition<PathContext> matcher, Resolution r
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.CONDITIONAL;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
-        public ResolutionConditional create(Map<String, Object> arguments) {
+        public ConditionalResolution create(Map<String, Object> arguments) {
             Map<String, Object> term = MiscUtils.castToMap(arguments.get("term"), false);
             Map<String, Object> resolution = MiscUtils.castToMap(arguments.get("resolution"), false);
-            return new ResolutionConditional(PathMatchers.fromMap(term), Resolutions.fromMap(resolution));
+            return new ConditionalResolution(PathMatchers.fromMap(term), Resolutions.fromMap(resolution));
         }
     }
 }

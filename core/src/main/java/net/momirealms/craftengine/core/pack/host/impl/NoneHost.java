@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class NoneHost implements ResourcePackHost {
+public final class NoneHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     public static final NoneHost INSTANCE = new NoneHost();
+
+    private NoneHost() {}
 
     @Override
     public CompletableFuture<List<ResourcePackDownloadData>> requestResourcePackDownloadLink(UUID player) {

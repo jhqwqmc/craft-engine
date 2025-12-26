@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class LegacyOverridesModel implements Comparable<LegacyOverridesModel> {
+public final class LegacyOverridesModel implements Comparable<LegacyOverridesModel> {
     private final Map<String, Object> predicate;
     private final String model;
     private final int customModelData;

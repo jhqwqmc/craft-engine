@@ -12,13 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
-public class RetainMatchingResolution implements Resolution {
-    public static final Factory FACTORY = new Factory();
-    private final Condition<PathContext> matcher;
-
-    public RetainMatchingResolution(Condition<PathContext> matcher) {
-        this.matcher = matcher;
-    }
+public record RetainMatchingResolution(Condition<PathContext> matcher) implements Resolution {
+    public static final Key ID = Key.of("craftengine:retain_matching");
+    public static final ResolutionFactory FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -31,12 +27,7 @@ public class RetainMatchingResolution implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.RETAIN_MATCHING;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
         public Resolution create(Map<String, Object> arguments) {

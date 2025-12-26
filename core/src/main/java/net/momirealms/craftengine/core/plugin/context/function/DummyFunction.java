@@ -8,9 +8,4 @@ public class DummyFunction<CTX extends Context> implements Function<CTX> {
     @Override
     public void run(CTX ctx) {
     }
-
-    @Override
-    public Key type() {
-        return CommonFunctions.DUMMY;
-    }
 }

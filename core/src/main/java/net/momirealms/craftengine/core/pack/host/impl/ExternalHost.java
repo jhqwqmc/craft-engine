@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ExternalHost implements ResourcePackHost {
+public final class ExternalHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final ResourcePackDownloadData downloadData;
 

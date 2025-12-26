@@ -10,12 +10,9 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class PathMatcherExact implements Condition<PathContext> {
-    private final String path;
-
-    public PathMatcherExact(String path) {
-        this.path = path;
-    }
+public record ExactPathMatcher(String path) implements Condition<PathContext> {
+    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final Key ID = Key.of("craftengine:exact");
 
     @Override
     public boolean test(PathContext path) {
@@ -23,17 +20,11 @@ public class PathMatcherExact implements Condition<PathContext> {
         return pathStr.equals(this.path);
     }
 
-    @Override
-    public Key type() {
-        return PathMatchers.EXACT;
-    }
-
-    public static class FactoryImpl implements ConditionFactory<PathContext> {
-
+    private static class Factory implements ConditionFactory<PathContext> {
         @Override
         public Condition<PathContext> create(Map<String, Object> arguments) {
             String path = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("path"), () -> new LocalizedException("warning.config.conflict_matcher.exact.missing_path"));
-            return new PathMatcherExact(path);
+            return new ExactPathMatcher(path);
         }
     }
 }

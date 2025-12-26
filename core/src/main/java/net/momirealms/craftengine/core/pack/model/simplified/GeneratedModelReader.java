@@ -2,13 +2,14 @@ package net.momirealms.craftengine.core.pack.model.simplified;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GeneratedModelReader implements SimplifiedModelReader {
+public final class GeneratedModelReader implements SimplifiedModelReader {
     public static final GeneratedModelReader GENERATED = new GeneratedModelReader("generated");
     public static final GeneratedModelReader HANDHELD = new GeneratedModelReader("handheld");
 
@@ -49,7 +50,7 @@ public class GeneratedModelReader implements SimplifiedModelReader {
     }
 
     @Override
-    public @Nullable Map<String, Object> convert(List<String> optionalModelPaths) {
+    public @NotNull Map<String, Object> convert(List<String> optionalModelPaths) {
         if (optionalModelPaths.size() >= 2) {
             return Map.of(
                     "type", "composite",

@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PackMcMeta {
+public final class PackMcMeta {
     private final List<Overlay> overlays;
 
     public PackMcMeta(JsonObject mcmeta) {

@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class AlistHost implements ResourcePackHost {
+public final class AlistHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String apiUrl;
     private final String userName;

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LegacyItemModel {
+public final class LegacyItemModel {
     private final List<ModelGeneration> modelsToGenerate;
     private final String path;
     private final List<LegacyOverridesModel> overrides;

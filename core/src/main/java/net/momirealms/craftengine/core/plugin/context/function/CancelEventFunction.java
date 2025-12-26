@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.Cancellable;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.List;
 import java.util.Map;
@@ -22,14 +21,9 @@ public class CancelEventFunction<CTX extends Context> extends AbstractConditiona
         cancellable.ifPresent(value -> value.setCancelled(true));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.CANCEL_EVENT;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

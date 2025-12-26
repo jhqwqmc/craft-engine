@@ -39,14 +39,9 @@ public class RemovePotionEffectFunction<CTX extends Context> extends AbstractCon
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.REMOVE_POTION_EFFECT;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 

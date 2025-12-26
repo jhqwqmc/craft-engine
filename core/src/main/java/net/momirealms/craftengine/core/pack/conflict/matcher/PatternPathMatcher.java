@@ -11,15 +11,21 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class PathPatternMatcher implements Condition<PathContext> {
+public final class PatternPathMatcher implements Condition<PathContext> {
+    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final Key ID = Key.of("craftengine:pattern");
     private final Pattern pattern;
 
-    public PathPatternMatcher(String pattern) {
+    public PatternPathMatcher(String pattern) {
         this.pattern = Pattern.compile(pattern);
     }
 
-    public PathPatternMatcher(Pattern pattern) {
+    public PatternPathMatcher(Pattern pattern) {
         this.pattern = pattern;
+    }
+
+    public Pattern pattern() {
+        return pattern;
     }
 
     @Override
@@ -28,21 +34,11 @@ public class PathPatternMatcher implements Condition<PathContext> {
         return this.pattern.matcher(pathStr).matches();
     }
 
-    @Override
-    public Key type() {
-        return PathMatchers.PATTERN;
-    }
-
-    public Pattern pattern() {
-        return pattern;
-    }
-
-    public static class FactoryImpl implements ConditionFactory<PathContext> {
-
+    private static class Factory implements ConditionFactory<PathContext> {
         @Override
         public Condition<PathContext> create(Map<String, Object> arguments) {
             String pattern = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("pattern"), () -> new LocalizedException("warning.config.conflict_matcher.pattern.missing_pattern"));
-            return new PathPatternMatcher(pattern);
+            return new PatternPathMatcher(pattern);
         }
     }
 }

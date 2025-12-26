@@ -8,6 +8,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
+import net.momirealms.craftengine.core.plugin.context.condition.AlwaysTrueCondition;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.Key;
@@ -33,6 +34,10 @@ public class WorldGuardRegionCondition<CTX extends Context> implements Condition
         this.regions = regions;
     }
 
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new Factory<>();
+    }
+
     @Override
     public boolean test(CTX ctx) {
         if (this.regions.isEmpty()) return false;
@@ -53,11 +58,6 @@ public class WorldGuardRegionCondition<CTX extends Context> implements Condition
             return this.mode.matcher.apply(predicate, this.regions);
         }
         return false;
-    }
-
-    @Override
-    public Key type() {
-        return TYPE;
     }
 
     public enum MatchMode {
@@ -85,7 +85,7 @@ public class WorldGuardRegionCondition<CTX extends Context> implements Condition
         }
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {

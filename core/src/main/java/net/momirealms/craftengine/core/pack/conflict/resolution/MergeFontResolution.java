@@ -11,9 +11,12 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.HashSet;
 import java.util.Map;
 
-public class ResolutionMergeFont implements Resolution {
-    public static final Factory FACTORY = new Factory();
-    public static final ResolutionMergeFont INSTANCE = new ResolutionMergeFont();
+public final class MergeFontResolution implements Resolution {
+    public static final Key ID = Key.of("craftengine:merge_font");
+    public static final ResolutionFactory FACTORY = new Factory();
+    public static final MergeFontResolution INSTANCE = new MergeFontResolution();
+
+    private MergeFontResolution() {}
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -42,12 +45,7 @@ public class ResolutionMergeFont implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.MERGE_FONT;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory {
 
         @Override
         public Resolution create(Map<String, Object> arguments) {

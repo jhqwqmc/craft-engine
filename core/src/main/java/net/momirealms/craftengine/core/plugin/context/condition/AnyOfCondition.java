@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class AnyOfCondition<CTX extends Context> implements Condition<CTX> {
-    protected final Predicate<CTX> condition;
+public final class AnyOfCondition<CTX extends Context> implements Condition<CTX> {
+    private final Predicate<CTX> condition;
 
     public AnyOfCondition(List<? extends Condition<CTX>> conditions) {
         this.condition = MiscUtils.anyOf(conditions);
@@ -25,17 +25,11 @@ public class AnyOfCondition<CTX extends Context> implements Condition<CTX> {
         return this.condition.test(ctx);
     }
 
-    @Override
-    public Key type() {
-        return CommonConditions.ANY_OF;
+    public static <CTX extends Context> ConditionFactory<CTX> factory(Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
-        private final Function<Map<String, Object>, Condition<CTX>> factory;
-
-        public FactoryImpl(Function<Map<String, Object>, Condition<CTX>> factory) {
-            this.factory = factory;
-        }
+    private record Factory<CTX extends Context>(Function<Map<String, Object>, Condition<CTX>> factory) implements ConditionFactory<CTX> {
 
         @SuppressWarnings("unchecked")
         @Override

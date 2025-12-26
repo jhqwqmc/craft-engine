@@ -14,7 +14,7 @@ import dev.dejvokep.boostedyaml.utils.format.NodeRole;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.entity.furniture.ColliderType;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
-import net.momirealms.craftengine.core.pack.conflict.resolution.ResolutionConditional;
+import net.momirealms.craftengine.core.pack.conflict.resolution.ConditionalResolution;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.PluginProperties;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
@@ -63,7 +63,7 @@ public class Config {
     protected boolean resource_pack$remove_tinted_leaves_particle;
     protected boolean resource_pack$generate_mod_assets;
     protected boolean resource_pack$override_uniform_font;
-    protected List<ResolutionConditional> resource_pack$duplicated_files_handler;
+    protected List<ConditionalResolution> resource_pack$duplicated_files_handler;
     protected List<String> resource_pack$merge_external_folders;
     protected List<String> resource_pack$merge_external_zips;
     protected Set<String> resource_pack$exclude_file_extensions;
@@ -417,7 +417,7 @@ public class Config {
         try {
             resource_pack$duplicated_files_handler = config.getMapList("resource-pack.duplicated-files-handler").stream().map(it -> {
                 Map<String, Object> args = MiscUtils.castToMap(it, false);
-                return ResolutionConditional.FACTORY.create(args);
+                return (ConditionalResolution) ConditionalResolution.FACTORY.create(args);
             }).toList();
         } catch (LocalizedResourceConfigException e) {
             TranslationManager.instance().log(e.node(), e.arguments());
@@ -825,7 +825,7 @@ public class Config {
         return instance.resource_pack$delivery$file_to_upload;
     }
 
-    public static List<ResolutionConditional> resolutions() {
+    public static List<ConditionalResolution> resolutions() {
         return instance.resource_pack$duplicated_files_handler;
     }
 

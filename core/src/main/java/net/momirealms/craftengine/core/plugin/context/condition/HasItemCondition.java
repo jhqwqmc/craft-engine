@@ -5,19 +5,13 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.ItemUtils;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class HasItemCondition<CTX extends Context> implements Condition<CTX> {
+public final class HasItemCondition<CTX extends Context> implements Condition<CTX> {
 
     public HasItemCondition() {
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.HAS_ITEM;
     }
 
     @Override
@@ -28,7 +22,11 @@ public class HasItemCondition<CTX extends Context> implements Condition<CTX> {
         return !ItemUtils.isEmpty(itemInHand);
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
 
         @Override
         public Condition<CTX> create(Map<String, Object> arguments) {

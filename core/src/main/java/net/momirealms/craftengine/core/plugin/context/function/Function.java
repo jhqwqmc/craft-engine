@@ -9,8 +9,6 @@ public interface Function<CTX extends Context> {
 
     void run(CTX ctx);
 
-    Key type();
-
     static <CTX extends Context> Function<CTX> allOf(List<Function<CTX>> functions) {
         if (functions == null || functions.isEmpty()) {
             return new DummyFunction<>();

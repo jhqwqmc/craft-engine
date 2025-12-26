@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -32,14 +31,9 @@ public class WhenFunction<CTX extends Context> extends AbstractConditionalFuncti
         function.run(ctx);
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.IF_ELSE;
-    }
+    public static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
-
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
             super(conditionFactory, functionFactory);
         }
 

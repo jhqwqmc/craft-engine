@@ -29,7 +29,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class OneDriveHost implements ResourcePackHost {
+public final class OneDriveHost implements ResourcePackHost {
     public static final ResourcePackHostFactory FACTORY = new Factory();
     private final String clientId;
     private final String clientSecret;
