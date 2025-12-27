@@ -1,7 +1,10 @@
 package net.momirealms.craftengine.core.item.processor;
 
 import net.momirealms.craftengine.core.item.*;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.TypeUtils;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 
@@ -9,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TagsProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:tags");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Map<String, Object> arguments;
 

@@ -9,7 +9,5 @@ public interface Equipment {
 
     Key assetId();
 
-    Key type();
-
     <I> List<ItemProcessor<I>> modifiers();
 }

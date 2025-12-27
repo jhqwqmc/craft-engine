@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class CeilingBlockItemBehavior extends BlockItemBehavior {
-    public static final Key ID = Key.from("craftengine:ceiling_block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public CeilingBlockItemBehavior(Key ceilingBlockId) {

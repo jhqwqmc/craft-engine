@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.processor.ItemProcessors;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
-import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
+import net.momirealms.craftengine.core.item.updater.ItemUpdaterFactory;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ApplyDataOperation<I> implements ItemUpdater<I> {
-    public static final Type<?> TYPE = new Type<>();
+public final class ApplyDataOperation<I> implements ItemUpdater<I> {
+    public static final ItemUpdaterFactory<?> FACTORY = new Factory<>();
     private final List<ItemProcessor<I>> modifiers;
 
     public ApplyDataOperation(List<ItemProcessor<I>> modifiers) {
@@ -31,7 +31,7 @@ public class ApplyDataOperation<I> implements ItemUpdater<I> {
         return item;
     }
 
-    public static class Type<I> implements ItemUpdaterType<I> {
+    private static class Factory<I> implements ItemUpdaterFactory<I> {
 
         @SuppressWarnings("unchecked")
         @Override

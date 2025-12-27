@@ -2,10 +2,7 @@ package net.momirealms.craftengine.core.pack.host.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
@@ -58,7 +55,7 @@ public final class OneDriveHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType type() {
         return ResourcePackHosts.ONEDRIVE;
     }
 

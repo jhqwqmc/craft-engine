@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.pack.model.definition.tint;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.incendo.cloud.type.Either;
 
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class CustomModelDataTint implements Tint {
-    public static final Key ID = Key.of("minecraft:custom_model_data");
     public static final TintFactory FACTORY = new Factory();
     public static final TintReader READER = new Reader();
     private final Either<Integer, List<Float>> value;
@@ -31,7 +29,7 @@ public final class CustomModelDataTint implements Tint {
     @Override
     public JsonObject get() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "custom_model_data");
         if (this.index != 0)
             json.addProperty("index", this.index);
         applyAnyTint(json, this.value, "default");

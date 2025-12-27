@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class BaseItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:model");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final String path;
@@ -53,7 +52,7 @@ public final class BaseItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "model");
         json.addProperty("model", this.path);
         if (!this.tints.isEmpty()) {
             JsonArray array = new JsonArray();

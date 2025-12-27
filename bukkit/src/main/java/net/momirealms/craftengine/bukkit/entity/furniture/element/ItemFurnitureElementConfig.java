@@ -28,8 +28,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFurnitureElement> {
+    public static final FurnitureElementConfigFactory<ItemFurnitureElement> FACTORY = new Factory();
     public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
     public final Key itemId;
     public final boolean applyDyedColor;
@@ -37,7 +37,7 @@ public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFu
     public final Predicate<PlayerContext> predicate;
     public final boolean hasCondition;
 
-    public ItemFurnitureElementConfig(Key itemId,
+    private ItemFurnitureElementConfig(Key itemId,
                                       Vector3f position,
                                       boolean applyDyedColor,
                                       Predicate<PlayerContext> predicate,
@@ -74,7 +74,7 @@ public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFu
         return new ItemFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<ItemFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<ItemFurnitureElement> {
 
         @Override
         public ItemFurnitureElementConfig create(Map<String, Object> arguments) {

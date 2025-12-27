@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class DamagedConditionProperty implements ConditionProperty, LegacyModelPredicate<Boolean> {
-    public static final Key ID = Key.of("minecraft:damaged");
     public static final ConditionPropertyFactory FACTORY = new Factory();
     public static final ConditionPropertyReader READER = new Reader();
     public static final DamagedConditionProperty INSTANCE = new DamagedConditionProperty();
@@ -16,7 +15,7 @@ public final class DamagedConditionProperty implements ConditionProperty, Legacy
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "damaged");
     }
 
     @Override

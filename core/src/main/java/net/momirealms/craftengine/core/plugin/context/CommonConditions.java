@@ -11,40 +11,41 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 import java.util.Map;
 
-public class CommonConditions {
+public final class CommonConditions {
+    public static final ConditionType<Context> HAS_PLAYER = register(Key.ce("has_player"), HasPlayerCondition.factory());
+    public static final ConditionType<Context> HAS_ITEM = register(Key.ce("has_item"), HasItemCondition.factory());
+    public static final ConditionType<Context> MATCH_ITEM = register(Key.ce("match_item"), MatchItemCondition.factory());
+    public static final ConditionType<Context> MATCH_ENTITY = register(Key.ce("match_entity"), MatchEntityCondition.factory());
+    public static final ConditionType<Context> MATCH_BLOCK = register(Key.ce("match_block"), MatchBlockCondition.factory());
+    public static final ConditionType<Context> MATCH_BLOCK_PROPERTY = register(Key.ce("match_block_property"), MatchBlockPropertyCondition.factory());
+    public static final ConditionType<Context> TABLE_BONUS = register(Key.ce("table_bonus"), TableBonusCondition.factory());
+    public static final ConditionType<Context> SURVIVES_EXPLOSION = register(Key.ce("survives_explosion"), SurvivesExplosionCondition.factory());
+    public static final ConditionType<Context> ANY_OF = register(Key.ce("any_of"), AnyOfCondition.factory(CommonConditions::fromMap));
+    public static final ConditionType<Context> ALL_OF = register(Key.ce("all_of"), AllOfCondition.factory(CommonConditions::fromMap));
+    public static final ConditionType<Context> ENCHANTMENT = register(Key.ce("enchantment"), EnchantmentCondition.factory());
+    public static final ConditionType<Context> INVERTED = register(Key.ce("inverted"), InvertedCondition.factory(CommonConditions::fromMap));
+    public static final ConditionType<Context> FALLING_BLOCK = register(Key.ce("falling_block"), FallingBlockCondition.factory());
+    public static final ConditionType<Context> RANDOM = register(Key.ce("random"), RandomCondition.factory());
+    public static final ConditionType<Context> DISTANCE = register(Key.ce("distance"), DistanceCondition.factory());
+    public static final ConditionType<Context> PERMISSION = register(Key.ce("permission"), PermissionCondition.factory());
+    public static final ConditionType<Context> EQUALS = register(Key.ce("equals"), StringEqualsCondition.factory());
+    public static final ConditionType<Context> REGEX = register(Key.ce("regex"), StringRegexCondition.factory());
+    public static final ConditionType<Context> STRING_EQUALS = register(Key.ce("string_equals"), StringEqualsCondition.factory());
+    public static final ConditionType<Context> STRING_CONTAINS = register(Key.ce("string_contains"), StringContainsCondition.factory());
+    public static final ConditionType<Context> EXPRESSION = register(Key.ce("expression"), ExpressionCondition.factory());
+    public static final ConditionType<Context> IS_NULL = register(Key.ce("is_null"), IsNullCondition.factory());
+    public static final ConditionType<Context> HAND = register(Key.ce("hand"), HandCondition.factory());
+    public static final ConditionType<Context> ON_COOLDOWN = register(Key.ce("on_cooldown"), OnCooldownCondition.factory());
+    public static final ConditionType<Context> INVENTORY_HAS_ITEM = register(Key.ce("inventory_has_item"), InventoryHasItemCondition.factory());
+    public static final ConditionType<Context> MATCH_FURNITURE_VARIANT = register(Key.ce("match_furniture_variant"), MatchFurnitureVariantCondition.factory());
 
-    static {
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_PLAYER, HasPlayerCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAS_ITEM, HasItemCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ITEM, MatchItemCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_ENTITY, MatchEntityCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK, MatchBlockCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_BLOCK_PROPERTY, MatchBlockPropertyCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.TABLE_BONUS, TableBonusCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.SURVIVES_EXPLOSION, SurvivesExplosionCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ANY_OF, AnyOfCondition.factory(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ALL_OF, AllOfCondition.factory(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ENCHANTMENT, EnchantmentCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVERTED, InvertedCondition.factory(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.FALLING_BLOCK, FallingBlockCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.RANDOM, RandomCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.DISTANCE, DistanceCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.PERMISSION, PermissionCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EQUALS, StringEqualsCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_REGEX, StringRegexCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_EQUALS, StringEqualsCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.STRING_CONTAINS, StringContainsCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.EXPRESSION, ExpressionCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.IS_NULL, IsNullCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.HAND, HandCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.ON_COOLDOWN, OnCooldownCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.INVENTORY_HAS_ITEM, InventoryHasItemCondition.factory());
-        register(net.momirealms.craftengine.core.plugin.context.condition.CommonConditions.MATCH_FURNITURE_VARIANT, MatchFurnitureVariantCondition.factory());
-    }
+    private CommonConditions() {}
 
-    public static void register(Key key, ConditionFactory<Context> factory) {
-        ((WritableRegistry<ConditionFactory<Context>>) BuiltInRegistries.EVENT_CONDITION_FACTORY)
-                .register(ResourceKey.create(Registries.EVENT_CONDITION_FACTORY.location(), key), factory);
+    public static <CTX extends Context> ConditionType<CTX> register(Key key, ConditionFactory<CTX> factory) {
+        ConditionType<CTX> type = new ConditionType<>(key, factory);
+        ((WritableRegistry<ConditionType<?>>) BuiltInRegistries.COMMON_CONDITION_TYPE)
+                .register(ResourceKey.create(Registries.COMMON_CONDITION_TYPE.location(), key), type);
+        return type;
     }
 
     @SuppressWarnings("unchecked")
@@ -55,10 +56,10 @@ public class CommonConditions {
             type = type.substring(1);
         }
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        ConditionFactory<Context> factory = BuiltInRegistries.EVENT_CONDITION_FACTORY.getValue(key);
-        if (factory == null) {
+        ConditionType<Context> conditionType = (ConditionType<Context>) BuiltInRegistries.COMMON_CONDITION_TYPE.getValue(key);
+        if (conditionType == null) {
             throw new LocalizedResourceConfigException("warning.config.event.condition.invalid_type", type);
         }
-        return inverted ? new InvertedCondition<>((Condition<CTX>) factory.create(map)) : (Condition<CTX>) factory.create(map);
+        return inverted ? new InvertedCondition<>((Condition<CTX>) conditionType.factory().create(map)) : (Condition<CTX>) conditionType.factory().create(map);
     }
 }

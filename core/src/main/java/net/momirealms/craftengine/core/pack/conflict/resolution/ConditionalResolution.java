@@ -3,13 +3,11 @@ package net.momirealms.craftengine.core.pack.conflict.resolution;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.matcher.PathMatchers;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.Map;
 
 public record ConditionalResolution(Condition<PathContext> matcher, Resolution resolution) implements Resolution {
-    public static final Key ID = Key.of("craftengine:conditional");
     public static final ResolutionFactory FACTORY = new Factory();
 
     @Override

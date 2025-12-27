@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.util.VersionHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class OverwritableItemNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:overwritable_item_name");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final ItemNameProcessor<I> modifier;
 

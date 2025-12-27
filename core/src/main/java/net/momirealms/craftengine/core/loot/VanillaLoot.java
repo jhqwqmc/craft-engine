@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.loot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VanillaLoot {
+public final class VanillaLoot {
     private final Type type;
     private final List<LootTable<?>> lootTables;
     private boolean override;

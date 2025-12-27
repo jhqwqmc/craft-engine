@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class CopperGolemStatueSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:copper_golem_statue");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     private final String pose;
@@ -37,7 +35,7 @@ public final class CopperGolemStatueSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "copper_golem_statue");
         json.addProperty("pose", this.pose);
         json.addProperty("texture", this.texture);
         return json;

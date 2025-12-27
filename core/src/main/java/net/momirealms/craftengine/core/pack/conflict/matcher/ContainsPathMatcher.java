@@ -5,13 +5,11 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.util.CharacterUtils;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public record ContainsPathMatcher(String path) implements Condition<PathContext> {
-    public static final Key ID = Key.of("craftengine:contains");
     public static final ConditionFactory<PathContext> FACTORY = new Factory();
 
     @Override

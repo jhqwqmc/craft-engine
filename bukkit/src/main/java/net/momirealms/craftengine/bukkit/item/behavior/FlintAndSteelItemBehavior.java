@@ -30,7 +30,6 @@ import java.util.Map;
 
 public class FlintAndSteelItemBehavior extends ItemBehavior {
     public static final FlintAndSteelItemBehavior INSTANCE = new FlintAndSteelItemBehavior();
-    public static final Key ID = Key.from("craftengine:flint_and_steel_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     private static final Key FLINT_SOUND = Key.of("item.flintandsteel.use");
 

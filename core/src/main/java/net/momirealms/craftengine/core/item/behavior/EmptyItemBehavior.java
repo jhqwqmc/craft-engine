@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class EmptyItemBehavior extends ItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final ItemBehaviorFactory FACTORY = new Factory();
     public static final EmptyItemBehavior INSTANCE = new EmptyItemBehavior();
 
-    public static class Factory implements ItemBehaviorFactory {
+    private EmptyItemBehavior() {}
+
+    private static class Factory implements ItemBehaviorFactory {
 
         @Override
         public ItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments) {

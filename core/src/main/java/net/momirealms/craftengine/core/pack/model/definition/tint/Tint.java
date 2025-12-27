@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.pack.model.definition.tint;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import org.incendo.cloud.type.Either;
 
 import java.util.List;

@@ -6,50 +6,35 @@ import com.ezylang.evalex.parser.ParseException;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class ExpressionNumberProvider implements NumberProvider {
+public record ExpressionNumberProvider(String expression) implements NumberProvider {
     public static final NumberProviderFactory FACTORY = new Factory();
-    private final String expr;
-
-    public ExpressionNumberProvider(String expr) {
-        this.expr = expr;
-    }
 
     @Override
     public float getFloat(Context context) {
-        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expr, context.tagResolvers());
+        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expression, context.tagResolvers());
         String resultString = AdventureHelper.plainTextContent(resultComponent);
         Expression expression = new Expression(resultString);
         try {
             return expression.evaluate().getNumberValue().floatValue();
         } catch (EvaluationException | ParseException e) {
-            throw new RuntimeException("Invalid expression: " + this.expr + " -> " + resultString + " -> Cannot parse", e);
+            throw new RuntimeException("Invalid expression: " + this.expression + " -> " + resultString + " -> Cannot parse", e);
         }
     }
 
     @Override
     public double getDouble(Context context) {
-        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expr, context.tagResolvers());
+        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expression, context.tagResolvers());
         String resultString = AdventureHelper.plainTextContent(resultComponent);
         Expression expression = new Expression(resultString);
         try {
             return expression.evaluate().getNumberValue().doubleValue();
         } catch (EvaluationException | ParseException e) {
-            throw new RuntimeException("Invalid expression: " + this.expr + " -> " + resultString + " -> Cannot parse", e);
+            throw new RuntimeException("Invalid expression: " + this.expression + " -> " + resultString + " -> Cannot parse", e);
         }
-    }
-
-    @Override
-    public Key type() {
-        return NumberProviders.EXPRESSION;
-    }
-
-    public String expression() {
-        return this.expr;
     }
 
     private static class Factory implements NumberProviderFactory {

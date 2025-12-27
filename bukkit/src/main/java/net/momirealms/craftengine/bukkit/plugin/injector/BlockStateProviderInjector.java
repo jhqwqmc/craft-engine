@@ -15,10 +15,10 @@ public final class BlockStateProviderInjector {
     public static void init() throws ReflectiveOperationException {
         CoreReflections.field$MappedRegistry$frozen.set(MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, false);
 
-        register(Key.of("craftengine:simple_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomSimpleStateProviderType());
-        register(Key.of("craftengine:weighted_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomWeightedStateProviderType());
-        register(Key.of("craftengine:rotated_block_provider"), FastNMS.INSTANCE.getCraftEngineCustomRotatedBlockProviderType());
-        register(Key.of("craftengine:randomized_int_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomRandomizedIntStateProviderType());
+        register(Key.ce("simple_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomSimpleStateProviderType());
+        register(Key.ce("weighted_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomWeightedStateProviderType());
+        register(Key.ce("rotated_block_provider"), FastNMS.INSTANCE.getCraftEngineCustomRotatedBlockProviderType());
+        register(Key.ce("randomized_int_state_provider"), FastNMS.INSTANCE.getCraftEngineCustomRandomizedIntStateProviderType());
 
         CoreReflections.field$MappedRegistry$frozen.set(MBuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, true);
     }

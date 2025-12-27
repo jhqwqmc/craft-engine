@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
+public final class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
     private final InteractionFurnitureHitboxConfig config;
     private final Collider collider;
     private final Object spawnPacket;
@@ -25,7 +25,7 @@ public class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
     private final FurnitureHitboxPart part;
     private final int entityId;
 
-    public InteractionFurnitureHitbox(Furniture furniture, InteractionFurnitureHitboxConfig config) {
+    InteractionFurnitureHitbox(Furniture furniture, InteractionFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();

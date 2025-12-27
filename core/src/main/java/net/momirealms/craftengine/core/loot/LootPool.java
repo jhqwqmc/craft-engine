@@ -17,31 +17,28 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class LootPool<T> {
+public final class LootPool<T> {
     private final List<LootEntryContainer<T>> entryContainers;
-    private final List<Condition<LootContext>> conditions;
     private final Predicate<LootContext> compositeCondition;
     private final List<LootFunction<T>> functions;
     private final BiFunction<Item<T>, LootContext, Item<T>> compositeFunction;
     private final NumberProvider rolls;
     private final NumberProvider bonusRolls;
 
-    public LootPool(List<LootEntryContainer<T>> entryContainers, List<Condition<LootContext>> conditions, List<LootFunction<T>> functions, NumberProvider rolls, NumberProvider bonusRolls) {
+    public LootPool(List<LootEntryContainer<T>> entryContainers,
+                    List<Condition<LootContext>> conditions,
+                    List<LootFunction<T>> functions,
+                    NumberProvider rolls,
+                    NumberProvider bonusRolls) {
         this.entryContainers = entryContainers;
-        this.conditions = conditions;
         this.functions = functions;
         this.rolls = rolls;
         this.bonusRolls = bonusRolls;
-        this.compositeCondition = LootConditions.andConditions(conditions);
+        this.compositeCondition = MiscUtils.allOf(conditions);
         this.compositeFunction = LootFunctions.compose(functions);
     }
 
     public void addRandomItems(Consumer<Item<T>> lootConsumer, LootContext context) {
-        for (Condition<LootContext> condition : this.conditions) {
-            if (!condition.test(context)) {
-                return;
-            }
-        }
         if (this.compositeCondition.test(context)) {
             Consumer<Item<T>> consumer = LootFunction.decorate(this.compositeFunction, lootConsumer, context);
             int i = this.rolls.getInt(context) + MiscUtils.floor(this.bonusRolls.getFloat(context) * context.luck());
@@ -75,7 +72,7 @@ public class LootPool<T> {
         int i = list.size();
         if (mutableInt.intValue() != 0 && i != 0) {
             if (i == 1) {
-                list.get(0).createItem(lootConsumer, context);
+                list.getFirst().createItem(lootConsumer, context);
             } else {
                 int j = RandomUtils.generateRandomInt(0, mutableInt.intValue());
                 for (LootEntry<T> loot : list) {

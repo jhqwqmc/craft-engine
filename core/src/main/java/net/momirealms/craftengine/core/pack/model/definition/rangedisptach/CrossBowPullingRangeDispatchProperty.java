@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class CrossBowPullingRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final Key ID = Key.of("minecraft:crossbow/pull");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     public static final CrossBowPullingRangeDispatchProperty INSTANCE = new CrossBowPullingRangeDispatchProperty();
@@ -17,7 +16,7 @@ public final class CrossBowPullingRangeDispatchProperty implements RangeDispatch
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "crossbow/pull");
     }
 
     @Override

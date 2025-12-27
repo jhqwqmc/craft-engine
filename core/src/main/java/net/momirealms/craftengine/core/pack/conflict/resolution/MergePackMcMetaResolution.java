@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.mcmeta.PackVersion;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.Pair;
 
 import java.io.IOException;
@@ -18,7 +17,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class MergePackMcMetaResolution implements Resolution {
-    public static final Key ID = Key.of("craftengine:merge_pack_mcmeta");
     public static final ResolutionFactory FACTORY = new Factory();
     public static final Set<String> STANDARD_PACK_KEYS = ImmutableSet.of("pack", "features", "filter", "overlays", "language");
     public static final MergePackMcMetaResolution INSTANCE = new MergePackMcMetaResolution();

@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 
@@ -18,7 +17,6 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class LampBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:lamp_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<Boolean> litProperty;
 

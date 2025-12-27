@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 @ApiStatus.Experimental
-public class FurnitureBehaviorTypes {
+public class FurnitureBehaviors {
+
+    protected FurnitureBehaviors() {}
 
     public static FurnitureBehavior fromMap(@Nullable Map<String, Object> map) {
         if (map == null || map.isEmpty()) return EmptyFurnitureBehavior.INSTANCE;
@@ -28,8 +30,8 @@ public class FurnitureBehaviorTypes {
 
     public static <T extends FurnitureBehavior> FurnitureBehaviorType<T> register(Key id, FurnitureBehaviorFactory<T> factory) {
         FurnitureBehaviorType<T> type = new FurnitureBehaviorType<>(id, factory);
-        ((WritableRegistry<FurnitureBehaviorType<?>>) BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE)
-                .register(ResourceKey.create(Registries.BLOCK_BEHAVIOR_TYPE.location(), id), type);
+        ((WritableRegistry<FurnitureBehaviorType<? extends FurnitureBehavior>>) BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE)
+                .register(ResourceKey.create(Registries.FURNITURE_BEHAVIOR_TYPE.location(), id), type);
         return type;
     }
 }

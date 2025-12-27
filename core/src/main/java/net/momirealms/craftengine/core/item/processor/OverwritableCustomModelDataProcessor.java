@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class OverwritableCustomModelDataProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:overwritable_custom_model_data");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final int argument;
 

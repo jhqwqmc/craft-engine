@@ -1,13 +1,12 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class SelfIncreaseIntTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class SelfIncreaseIntTemplateArgument implements TemplateArgument {
+    public static final TemplateArgumentFactory FACTORY = new Factory();
     private final int min;
     private final int max;
     private int current;
@@ -38,21 +37,16 @@ public class SelfIncreaseIntTemplateArgument implements TemplateArgument {
         return value;
     }
 
-    @Override
-    public Key type() {
-        return TemplateArguments.SELF_INCREASE_INT;
-    }
-
-    public int current() {
-        return this.current;
-    }
-
     public int min() {
         return this.min;
     }
 
     public int max() {
         return this.max;
+    }
+
+    public int current() {
+        return this.current;
     }
 
     public int step() {
@@ -67,7 +61,8 @@ public class SelfIncreaseIntTemplateArgument implements TemplateArgument {
         return this.callCount;
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory {
+
         @Override
         public TemplateArgument create(Map<String, Object> arguments) {
             int from = ResourceConfigUtils.getAsInt(arguments.get("from"), "from");

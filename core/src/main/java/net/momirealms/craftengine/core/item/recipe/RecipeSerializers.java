@@ -40,7 +40,7 @@ public final class RecipeSerializers {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T, R extends Recipe<T>> void register(Key key, RecipeSerializer<T, R> serializer) {
         WritableRegistry<RecipeSerializer<T, R>> registry = (WritableRegistry) BuiltInRegistries.RECIPE_SERIALIZER;
-        registry.register(ResourceKey.create(Registries.RECIPE_FACTORY.location(), key), serializer);
+        registry.register(ResourceKey.create(Registries.RECIPE_SERIALIZER.location(), key), serializer);
     }
 
     @SuppressWarnings("unchecked")

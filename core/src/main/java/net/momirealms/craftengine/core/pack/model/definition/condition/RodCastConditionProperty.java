@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class RodCastConditionProperty implements ConditionProperty, LegacyModelPredicate<Boolean> {
-    public static final Key ID = Key.of("minecraft:fishing_rod/cast");
     public static final ConditionPropertyFactory FACTORY = new Factory();
     public static final ConditionPropertyReader READER = new Reader();
     public static final RodCastConditionProperty INSTANCE = new RodCastConditionProperty();
@@ -17,7 +16,7 @@ public final class RodCastConditionProperty implements ConditionProperty, Legacy
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "fishing_rod/cast");
     }
 
     @Override

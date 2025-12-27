@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class DirectionalAttachedBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:directional_attached_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<?> facingProperty;
     private final boolean isSixDirection;

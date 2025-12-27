@@ -10,7 +10,6 @@ import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.tick.BlockEntityTicker;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SimpleParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:simple_particle_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;

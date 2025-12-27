@@ -20,7 +20,6 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -39,7 +38,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:simple_storage_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final String containerTitle;
     private final int rows;

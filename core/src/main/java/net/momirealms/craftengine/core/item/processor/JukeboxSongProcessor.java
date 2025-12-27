@@ -4,10 +4,8 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.item.data.JukeboxPlayable;
-import net.momirealms.craftengine.core.util.Key;
 
 public class JukeboxSongProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:jukebox_playable");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final JukeboxPlayable song;
 

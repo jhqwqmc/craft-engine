@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.block.entity.tick.BlockEntityTicker;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 public class WallTorchParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:wall_torch_particle_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;

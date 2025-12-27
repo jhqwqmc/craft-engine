@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.CompoundTag;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ArgumentsProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:arguments");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final String ARGUMENTS_TAG = "craftengine:arguments";
     private final Map<String, TextProvider> arguments;

@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.select;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class CustomModelDataSelectProperty implements SelectProperty {
-    public static final Key ID = Key.of("minecraft:custom_model_data");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     private final int index;
@@ -22,7 +20,7 @@ public final class CustomModelDataSelectProperty implements SelectProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "custom_model_data");
         jsonObject.addProperty("index", this.index);
     }
 

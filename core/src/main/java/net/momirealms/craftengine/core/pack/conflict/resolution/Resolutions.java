@@ -11,13 +11,13 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class Resolutions {
-    public static final ResolutionType RETAIN_MATCHING = register(RetainMatchingResolution.ID, RetainMatchingResolution.FACTORY);
-    public static final ResolutionType MERGE_JSON = register(MergeJsonResolution.ID, MergeJsonResolution.FACTORY);
-    public static final ResolutionType MERGE_ATLAS = register(MergeAltasResolution.ID, MergeAltasResolution.FACTORY);
-    public static final ResolutionType MERGE_FONT = register(MergeFontResolution.ID, MergeFontResolution.FACTORY);
-    public static final ResolutionType CONDITIONAL = register(ConditionalResolution.ID, ConditionalResolution.FACTORY);
-    public static final ResolutionType MERGE_PACK_MCMETA = register(MergePackMcMetaResolution.ID, MergePackMcMetaResolution.FACTORY);
-    public static final ResolutionType MERGE_LEGACY_MODEL = register(MergeLegacyModelResolution.ID, MergeLegacyModelResolution.FACTORY);
+    public static final ResolutionType RETAIN_MATCHING = register(Key.ce("retain_matching"), RetainMatchingResolution.FACTORY);
+    public static final ResolutionType MERGE_JSON = register(Key.ce("merge_json"), MergeJsonResolution.FACTORY);
+    public static final ResolutionType MERGE_ATLAS = register(Key.ce("merge_atlas"), MergeAltasResolution.FACTORY);
+    public static final ResolutionType MERGE_FONT = register(Key.ce("merge_font"), MergeFontResolution.FACTORY);
+    public static final ResolutionType CONDITIONAL = register(Key.ce("conditional"), ConditionalResolution.FACTORY);
+    public static final ResolutionType MERGE_PACK_MCMETA = register(Key.ce("merge_pack_mcmeta"), MergePackMcMetaResolution.FACTORY);
+    public static final ResolutionType MERGE_LEGACY_MODEL = register(Key.ce("merge_legacy_model"), MergeLegacyModelResolution.FACTORY);
 
     private Resolutions() {}
 

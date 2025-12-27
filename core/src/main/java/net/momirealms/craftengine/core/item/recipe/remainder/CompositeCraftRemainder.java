@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.item.recipe.remainder;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.util.Key;
 
-public class CompositeCraftRemainder implements CraftRemainder {
+public final class CompositeCraftRemainder implements CraftRemainder {
     private final CraftRemainder[] remainders;
 
     public CompositeCraftRemainder(CraftRemainder[] remainders) {

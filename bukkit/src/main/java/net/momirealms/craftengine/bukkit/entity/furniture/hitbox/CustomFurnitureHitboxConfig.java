@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class CustomFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<CustomFurnitureHitbox> {
+public final class CustomFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<CustomFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
     private final float scale;
     private final Object entityType;
@@ -30,7 +30,7 @@ public class CustomFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<C
     private final float width;
     private final float height;
 
-    public CustomFurnitureHitboxConfig(SeatConfig[] seats,
+    private CustomFurnitureHitboxConfig(SeatConfig[] seats,
                                        Vector3f position,
                                        boolean canUseItemOn,
                                        boolean blocksBuilding,

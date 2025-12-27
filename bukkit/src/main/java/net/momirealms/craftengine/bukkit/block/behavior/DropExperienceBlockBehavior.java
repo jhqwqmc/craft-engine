@@ -19,7 +19,6 @@ import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -34,7 +33,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:drop_experience_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final NumberProvider amount;
     private final Predicate<Context> condition;

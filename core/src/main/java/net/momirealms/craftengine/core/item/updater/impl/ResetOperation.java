@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemManager;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
-import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
+import net.momirealms.craftengine.core.item.updater.ItemUpdaterFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
@@ -15,8 +15,8 @@ import net.momirealms.craftengine.core.util.VersionHelper;
 import java.util.List;
 import java.util.Map;
 
-public class ResetOperation<I> implements ItemUpdater<I> {
-    public static final Type<?> TYPE = new Type<>();
+public final class ResetOperation<I> implements ItemUpdater<I> {
+    public static final ItemUpdaterFactory<?> FACTORY = new Factory<>();
     private final LazyReference<CustomItem<I>> item;
     private final List<Key> componentsToKeep;
     private final List<String[]> tagsToKeep;
@@ -46,7 +46,7 @@ public class ResetOperation<I> implements ItemUpdater<I> {
         return newItem;
     }
 
-    public static class Type<I> implements ItemUpdaterType<I> {
+    private static class Factory<I> implements ItemUpdaterFactory<I> {
 
         @Override
         public ItemUpdater<I> create(Key item, Map<String, Object> args) {

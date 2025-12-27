@@ -11,8 +11,7 @@ import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.CompoundTag;
 
 public final class OverwritableLoreProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:overwritable_lore");
-    public static final Factory<?> FACTORY = new Factory<>();
+    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final LoreProcessor<I> loreProcessor;
 
     public OverwritableLoreProcessor(LoreProcessor<I> loreProcessor) {
@@ -48,7 +47,7 @@ public final class OverwritableLoreProcessor<I> implements SimpleNetworkItemProc
         return "display.Lore";
     }
 
-    public static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory<I> implements ItemProcessorFactory<I> {
         @Override
         public ItemProcessor<I> create(Object arg) {
             LoreProcessor<I> lore = LoreProcessor.createLoreModifier(arg);

@@ -1,19 +1,12 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
-
 import java.util.Map;
 
-public class NullTemplateArgument implements TemplateArgument {
+public final class NullTemplateArgument implements TemplateArgument {
     public static final NullTemplateArgument INSTANCE = new NullTemplateArgument();
-    public static final Factory FACTORY = new Factory();
+    public static final TemplateArgumentFactory FACTORY = new Factory();
 
     private NullTemplateArgument() {
-    }
-
-    @Override
-    public Key type() {
-        return TemplateArguments.NULL;
     }
 
     @Override
@@ -21,7 +14,7 @@ public class NullTemplateArgument implements TemplateArgument {
         return null;
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory {
 
         @Override
         public TemplateArgument create(Map<String, Object> arguments) {

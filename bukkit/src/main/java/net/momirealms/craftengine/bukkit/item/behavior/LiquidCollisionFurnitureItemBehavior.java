@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class LiquidCollisionFurnitureItemBehavior extends FurnitureItemBehavior {
-    public static final Key ID = Key.from("craftengine:liquid_collision_furniture_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     private final List<String> liquidTypes;
     private final boolean sourceOnly;

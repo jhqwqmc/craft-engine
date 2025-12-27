@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class MainHandSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final Key ID = Key.of("minecraft:main_hand");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     public static final MainHandSelectProperty INSTANCE = new MainHandSelectProperty();
@@ -16,7 +15,7 @@ public final class MainHandSelectProperty implements SelectProperty, LegacyModel
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "main_hand");
     }
 
     @Override

@@ -1,21 +1,23 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class ConditionTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class ConditionTemplateArgument implements TemplateArgument {
+    public static final TemplateArgumentFactory FACTORY = new Factory();
     private final TemplateArgument result;
 
     private ConditionTemplateArgument(TemplateArgument result) {
         this.result = result;
     }
 
-    @Override
-    public Key type() {
-        return TemplateArguments.CONDITION;
+    public TemplateArgument result() {
+        return this.result;
+    }
+
+    public static ConditionTemplateArgument condition(final TemplateArgument result) {
+        return new ConditionTemplateArgument(result);
     }
 
     @Override
@@ -23,7 +25,7 @@ public class ConditionTemplateArgument implements TemplateArgument {
         return this.result.get(arguments);
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory {
 
         @Override
         public TemplateArgument create(Map<String, Object> arguments) {

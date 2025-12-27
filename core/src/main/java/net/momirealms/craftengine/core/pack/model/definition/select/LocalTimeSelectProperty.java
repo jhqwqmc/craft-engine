@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.pack.model.definition.select;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public final class LocalTimeSelectProperty implements SelectProperty {
-    public static final Key ID = Key.of("minecraft:local_time");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     private final String pattern;
@@ -38,7 +36,7 @@ public final class LocalTimeSelectProperty implements SelectProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "local_time");
         jsonObject.addProperty("pattern", this.pattern);
         if (this.locale != null) {
             jsonObject.addProperty("locale", this.locale);

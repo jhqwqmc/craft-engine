@@ -11,7 +11,10 @@ import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.LazyReference;
+import net.momirealms.craftengine.core.util.RandomUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -19,7 +22,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:surface_spreading_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final int requiredLight;
     private final LazyReference<Object> baseBlock;

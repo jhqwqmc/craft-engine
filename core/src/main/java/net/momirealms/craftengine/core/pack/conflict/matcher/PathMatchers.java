@@ -2,7 +2,10 @@ package net.momirealms.craftengine.core.pack.conflict.matcher;
 
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.plugin.context.condition.*;
+import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
+import net.momirealms.craftengine.core.plugin.context.condition.AnyOfCondition;
+import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
+import net.momirealms.craftengine.core.plugin.context.condition.InvertedCondition;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;
@@ -16,15 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 public final class PathMatchers {
-    public static final PathMatcherType ANY_OF = register(Key.of("craftengine:any_of"), AnyOfCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType ALL_OF = register(Key.of("craftengine:all_of"), AllOfCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType INVERTED = register(Key.of("craftengine:inverted"), InvertedCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType CONTAINS = register(ContainsPathMatcher.ID, ContainsPathMatcher.FACTORY);
-    public static final PathMatcherType EXACT = register(ExactPathMatcher.ID, ExactPathMatcher.FACTORY);
-    public static final PathMatcherType FILENAME = register(FilenamePathMatcher.ID, FilenamePathMatcher.FACTORY);
-    public static final PathMatcherType PATTERN = register(PatternPathMatcher.ID, PatternPathMatcher.FACTORY);
-    public static final PathMatcherType PARENT_PATH_SUFFIX = register(ParentSuffixPathMatcher.ID, ParentSuffixPathMatcher.FACTORY);
-    public static final PathMatcherType PARENT_PATH_PREFIX = register(ParentPrefixPathMatcher.ID, ParentPrefixPathMatcher.FACTORY);
+    public static final PathMatcherType ANY_OF = register(Key.ce("any_of"), AnyOfCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType ALL_OF = register(Key.ce("all_of"), AllOfCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType INVERTED = register(Key.ce("inverted"), InvertedCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType CONTAINS = register(Key.ce("contains"), ContainsPathMatcher.FACTORY);
+    public static final PathMatcherType EXACT = register(Key.ce("exact"), ExactPathMatcher.FACTORY);
+    public static final PathMatcherType FILENAME = register(Key.ce("filename"), FilenamePathMatcher.FACTORY);
+    public static final PathMatcherType PATTERN = register(Key.ce("pattern"), PatternPathMatcher.FACTORY);
+    public static final PathMatcherType PARENT_PATH_SUFFIX = register(Key.ce("parent_path_suffix"), ParentSuffixPathMatcher.FACTORY);
+    public static final PathMatcherType PARENT_PATH_PREFIX = register(Key.ce("parent_path_prefix"), ParentPrefixPathMatcher.FACTORY);
 
     private PathMatchers() {}
 

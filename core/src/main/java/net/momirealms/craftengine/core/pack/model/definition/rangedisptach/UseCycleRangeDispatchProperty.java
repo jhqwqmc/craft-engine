@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.rangedisptach;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class UseCycleRangeDispatchProperty implements RangeDispatchProperty {
-    public static final Key ID = Key.of("minecraft:use_cycle");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final float period;
@@ -22,7 +20,7 @@ public final class UseCycleRangeDispatchProperty implements RangeDispatchPropert
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "use_cycle");
         jsonObject.addProperty("period", this.period);
     }
 

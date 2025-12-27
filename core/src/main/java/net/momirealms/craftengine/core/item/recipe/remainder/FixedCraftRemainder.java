@@ -7,8 +7,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class FixedCraftRemainder implements CraftRemainder {
-    public static final Factory FACTORY = new Factory();
+public final class FixedCraftRemainder implements CraftRemainder {
+    public static final CraftRemainderFactory<FixedCraftRemainder> FACTORY = new Factory();
     private final Key item;
 
     public FixedCraftRemainder(Key item) {
@@ -21,7 +21,7 @@ public class FixedCraftRemainder implements CraftRemainder {
         return (Item<T>) CraftEngine.instance().itemManager().createWrappedItem(this.item, null);
     }
 
-    public static class Factory implements CraftRemainderFactory<FixedCraftRemainder> {
+    private static class Factory implements CraftRemainderFactory<FixedCraftRemainder> {
 
         @Override
         public FixedCraftRemainder create(Map<String, Object> args) {

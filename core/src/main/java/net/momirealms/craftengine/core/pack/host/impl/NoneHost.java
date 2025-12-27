@@ -1,10 +1,6 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
-import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.pack.host.*;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -29,13 +25,13 @@ public final class NoneHost implements ResourcePackHost {
     }
 
     @Override
-    public boolean canUpload() {
-        return false;
+    public ResourcePackHostType type() {
+        return ResourcePackHosts.NONE;
     }
 
     @Override
-    public Key type() {
-        return ResourcePackHosts.NONE;
+    public boolean canUpload() {
+        return false;
     }
 
     private static class Factory implements ResourcePackHostFactory {

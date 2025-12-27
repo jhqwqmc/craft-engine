@@ -10,49 +10,39 @@ import net.momirealms.craftengine.core.util.*;
 import java.util.Map;
 
 public final class Properties {
-    public static final Key BOOLEAN = Key.of("craftengine:boolean");
-    public static final Key INT = Key.of("craftengine:int");
-    public static final Key STRING = Key.of("craftengine:string");
-    public static final Key AXIS = Key.of("craftengine:axis");
-    public static final Key HORIZONTAL_DIRECTION = Key.of("craftengine:horizontal_direction");
-    public static final Key DIRECTION = Key.of("craftengine:direction");
-    public static final Key SINGLE_BLOCK_HALF = Key.of("craftengine:single_block_half");
-    public static final Key DOUBLE_BLOCK_HALF = Key.of("craftengine:double_block_half");
-    public static final Key HINGE = Key.of("craftengine:hinge");
-    public static final Key STAIRS_SHAPE = Key.of("craftengine:stairs_shape");
-    public static final Key SLAB_TYPE = Key.of("craftengine:slab_type");
-    public static final Key SOFA_SHAPE = Key.of("craftengine:sofa_shape");
-    public static final Key ANCHOR_TYPE = Key.of("craftengine:anchor_type");
+    public static final PropertyType<?> BOOLEAN = register(Key.ce("boolean"), BooleanProperty.FACTORY);
+    public static final PropertyType<?> INT = register(Key.ce("int"), IntegerProperty.FACTORY);
+    public static final PropertyType<?> STRING = register(Key.ce("string"), StringProperty.FACTORY);
+    public static final PropertyType<?> AXIS = register(Key.ce("axis"), EnumProperty.factory(Direction.Axis.class));
+    public static final PropertyType<?> HORIZONTAL_DIRECTION = register(Key.ce("horizontal_direction"), EnumProperty.factory(HorizontalDirection.class));
+    public static final PropertyType<?> FOUR_DIRECTION = register(Key.ce("4-direction"), EnumProperty.factory(HorizontalDirection.class));
+    public static final PropertyType<?> DIRECTION = register(Key.ce("direction"), EnumProperty.factory(Direction.class));
+    public static final PropertyType<?> SIX_DIRECTION = register(Key.ce("6-direction"), EnumProperty.factory(Direction.class));
+    public static final PropertyType<?> SINGLE_BLOCK_HALF = register(Key.ce("single_block_half"), EnumProperty.factory(SingleBlockHalf.class));
+    public static final PropertyType<?> DOUBLE_BLOCK_HALF = register(Key.ce("double_block_half"), EnumProperty.factory(DoubleBlockHalf.class));
+    public static final PropertyType<?> HINGE = register(Key.ce("hinge"), EnumProperty.factory(DoorHinge.class));
+    public static final PropertyType<?> STAIRS_SHAPE = register(Key.ce("stairs_shape"), EnumProperty.factory(StairsShape.class));
+    public static final PropertyType<?> SLAB_TYPE = register(Key.ce("slab_type"), EnumProperty.factory(SlabType.class));
+    public static final PropertyType<?> SOFA_SHAPE = register(Key.ce("sofa_shape"), EnumProperty.factory(SofaShape.class));
+    public static final PropertyType<?> ANCHOR_TYPE = register(Key.ce("anchor_type"), EnumProperty.factory(AnchorType.class));
 
-    static {
-        register(BOOLEAN, BooleanProperty.FACTORY);
-        register(INT, IntegerProperty.FACTORY);
-        register(STRING, StringProperty.FACTORY);
-        register(AXIS, new EnumProperty.Factory<>(Direction.Axis.class));
-        register(DIRECTION, new EnumProperty.Factory<>(Direction.class));
-        register(Key.of("craftengine:6-direction"), new EnumProperty.Factory<>(Direction.class));
-        register(HORIZONTAL_DIRECTION, new EnumProperty.Factory<>(HorizontalDirection.class));
-        register(Key.of("craftengine:4-direction"), new EnumProperty.Factory<>(HorizontalDirection.class));
-        register(SINGLE_BLOCK_HALF, new EnumProperty.Factory<>(SingleBlockHalf.class));
-        register(DOUBLE_BLOCK_HALF, new EnumProperty.Factory<>(DoubleBlockHalf.class));
-        register(HINGE, new EnumProperty.Factory<>(DoorHinge.class));
-        register(STAIRS_SHAPE, new EnumProperty.Factory<>(StairsShape.class));
-        register(SLAB_TYPE, new EnumProperty.Factory<>(SlabType.class));
-        register(SOFA_SHAPE, new EnumProperty.Factory<>(SofaShape.class));
-        register(ANCHOR_TYPE, new EnumProperty.Factory<>(AnchorType.class));
+    private Properties() {}
+
+    public static <T extends Comparable<T>> PropertyType<T> register(Key key, PropertyFactory<T> factory) {
+        PropertyType<T> type = new PropertyType<>(key, factory);
+        ((WritableRegistry<PropertyType<? extends Comparable<?>>>) BuiltInRegistries.PROPERTY_TYPE)
+                .register(ResourceKey.create(Registries.PROPERTY_TYPE.location(), key), type);
+        return type;
     }
 
-    public static void register(Key key, PropertyFactory factory) {
-        ((WritableRegistry<PropertyFactory>) BuiltInRegistries.PROPERTY_FACTORY).register(ResourceKey.create(Registries.PROPERTY_FACTORY.location(), key), factory);
-    }
-
-    public static Property<?> fromMap(String name, Map<String, Object> map) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable<T>> Property<T> fromMap(String name, Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.block.state.property.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        PropertyFactory factory = BuiltInRegistries.PROPERTY_FACTORY.getValue(key);
-        if (factory == null) {
+        PropertyType<T> propertyType = (PropertyType<T>) BuiltInRegistries.PROPERTY_TYPE.getValue(key);
+        if (propertyType == null) {
             throw new LocalizedResourceConfigException("warning.config.block.state.property.invalid_type", key.toString(), name);
         }
-        return factory.create(name, map);
+        return propertyType.factory().create(name, map);
     }
 }

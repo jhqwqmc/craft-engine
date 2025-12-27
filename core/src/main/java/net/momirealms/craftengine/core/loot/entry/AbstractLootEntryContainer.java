@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.loot.entry;
 
 import net.momirealms.craftengine.core.loot.LootContext;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.List;
@@ -21,6 +20,4 @@ public abstract class AbstractLootEntryContainer<T> implements LootEntryContaine
     public final boolean test(LootContext context) {
         return this.compositeCondition.test(context);
     }
-
-    public abstract Key type();
 }

@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<ShulkerFurnitureHitbox> {
+public final class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<ShulkerFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
     private final float scale;
     private final byte peek;
@@ -41,7 +41,7 @@ public class ShulkerFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<
     private final List<Object> cachedShulkerValues = new ArrayList<>(6);
     private final AABBCreator aabbCreator;
 
-    public ShulkerFurnitureHitboxConfig(SeatConfig[] seats,
+    private ShulkerFurnitureHitboxConfig(SeatConfig[] seats,
                                         Vector3f position,
                                         boolean canUseItemOn,
                                         boolean blocksBuilding,

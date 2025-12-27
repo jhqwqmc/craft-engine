@@ -2,10 +2,8 @@ package net.momirealms.craftengine.core.plugin.context.condition;
 
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public final class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
     public static final AlwaysFalseCondition<Context> INSTANCE = new AlwaysFalseCondition<>();

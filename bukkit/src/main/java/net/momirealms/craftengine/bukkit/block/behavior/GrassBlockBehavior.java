@@ -29,7 +29,6 @@ import java.util.Optional;
 
 @SuppressWarnings("DuplicatedCode")
 public class GrassBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:grass_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Key feature;
 

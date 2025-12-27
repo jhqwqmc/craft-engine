@@ -11,7 +11,7 @@ public abstract class BlockEntityTypes {
 
     public static <T extends BlockEntity> BlockEntityType<T> register(Key id) {
         BlockEntityType<T> type = new BlockEntityType<>(id);
-        ((WritableRegistry<BlockEntityType<?>>) BuiltInRegistries.BLOCK_ENTITY_TYPE)
+        ((WritableRegistry<BlockEntityType<? extends BlockEntity>>) BuiltInRegistries.BLOCK_ENTITY_TYPE)
                 .register(ResourceKey.create(Registries.BLOCK_ENTITY_TYPE.location(), id), type);
         return type;
     }

@@ -4,14 +4,12 @@ import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public record FilenamePathMatcher(String name) implements Condition<PathContext> {
     public static final ConditionFactory<PathContext> FACTORY = new Factory();
-    public static final Key ID = Key.of("craftengine:filename");
 
     @Override
     public boolean test(PathContext path) {

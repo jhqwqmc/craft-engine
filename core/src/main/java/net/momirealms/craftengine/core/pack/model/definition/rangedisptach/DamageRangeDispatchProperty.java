@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class DamageRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final Key ID = Key.of("minecraft:damage");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final boolean normalize;
@@ -23,7 +22,7 @@ public final class DamageRangeDispatchProperty implements RangeDispatchProperty,
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "damage");
         if (!normalize) {
             jsonObject.addProperty("normalize", false);
         }

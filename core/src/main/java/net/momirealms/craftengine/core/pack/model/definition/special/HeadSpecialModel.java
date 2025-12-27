@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class HeadSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:head");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     private final String kind;
@@ -44,7 +42,7 @@ public final class HeadSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "head");
         json.addProperty("kind", this.kind);
         if (this.texture != null) {
             json.addProperty("texture", this.texture);

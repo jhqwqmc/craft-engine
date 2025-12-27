@@ -7,13 +7,13 @@ import net.momirealms.sparrow.nbt.Tag;
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class EnumProperty<T extends Enum<T>> extends Property<T> {
+public final class EnumProperty<T extends Enum<T>> extends Property<T> {
     private final List<T> values;
     private final Map<String, T> names;
     private final int[] ordinalToIndex;
     private final int[] idLookupTable;
 
-    public EnumProperty(String name, Class<T> type, List<T> values, T defaultValue) {
+    private EnumProperty(String name, Class<T> type, List<T> values, T defaultValue) {
         super(name, type, defaultValue);
         this.values = List.copyOf(values);
         T[] enums = type.getEnumConstants();
@@ -106,7 +106,11 @@ public class EnumProperty<T extends Enum<T>> extends Property<T> {
         return new EnumProperty<>(name, type, values, defaultValue);
     }
 
-    public static class Factory<A extends Enum<A>> implements PropertyFactory {
+    public static <T extends Enum<T>> PropertyFactory<T> factory(Class<T> enumClass) {
+        return new Factory<>(enumClass);
+    }
+
+    private static class Factory<A extends Enum<A>> implements PropertyFactory<A> {
         private final Class<A> enumClass;
 
         public Factory(Class<A> enumClass) {
@@ -114,7 +118,7 @@ public class EnumProperty<T extends Enum<T>> extends Property<T> {
         }
 
         @Override
-        public Property<?> create(String name, Map<String, Object> arguments) {
+        public Property<A> create(String name, Map<String, Object> arguments) {
             List<A> enums = Arrays.asList(enumClass.getEnumConstants());
             String defaultValueName = arguments.getOrDefault("default", "").toString().toLowerCase(Locale.ENGLISH);
             A defaultValue = enums.stream()

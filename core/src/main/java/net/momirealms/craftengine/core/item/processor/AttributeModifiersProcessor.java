@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:attribute_modifiers");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final Map<Key, Key> CONVERTOR = new HashMap<>();
     private static final Object[] NBT_PATH = new Object[]{"AttributeModifiers"};

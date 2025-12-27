@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 public class MultiHighBlockItemBehavior extends BlockItemBehavior {
-    public static final Key ID = Key.from("craftengine:multi_high_block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public MultiHighBlockItemBehavior(Key blockId) {

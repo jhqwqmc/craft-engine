@@ -28,10 +28,14 @@ public class IfElseFunction<CTX extends Context> extends AbstractConditionalFunc
         }
     }
 
-    public static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+        return new Factory<>(f1, f2);
+    }
 
-        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
-            super(conditionFactory, functionFactory);
+    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+
+        public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
+            super(functionFactory, conditionFactory);
         }
 
         @Override

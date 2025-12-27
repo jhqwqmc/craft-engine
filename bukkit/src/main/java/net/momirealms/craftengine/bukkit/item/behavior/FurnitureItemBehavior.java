@@ -38,7 +38,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class FurnitureItemBehavior extends ItemBehavior {
-    public static final Key ID = Key.from("craftengine:furniture_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     protected static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
     private final Key id;

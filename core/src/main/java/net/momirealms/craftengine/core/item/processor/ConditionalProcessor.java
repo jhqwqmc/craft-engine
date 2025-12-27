@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.sparrow.nbt.CompoundTag;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class ConditionalProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:conditional");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Predicate<Context> condition;
     private final ItemProcessor<I>[] modifiers;

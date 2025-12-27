@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TrimMaterialSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final Key ID = Key.of("minecraft:trim_material");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     public static final TrimMaterialSelectProperty INSTANCE = new TrimMaterialSelectProperty();
@@ -32,7 +31,7 @@ public final class TrimMaterialSelectProperty implements SelectProperty, LegacyM
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "trim_material");
     }
 
     @Override

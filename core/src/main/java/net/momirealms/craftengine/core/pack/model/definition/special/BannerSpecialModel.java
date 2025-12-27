@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class BannerSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:banner");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     private final String color;
@@ -31,7 +29,7 @@ public final class BannerSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "banner");
         json.addProperty("color", this.color);
         return json;
     }

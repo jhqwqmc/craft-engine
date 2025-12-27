@@ -5,7 +5,6 @@ import net.momirealms.craftengine.core.item.DataComponentKeys;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
-import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.processor.SimpleNetworkItemProcessor;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.CommonConditions;
@@ -21,8 +20,7 @@ import java.util.stream.Stream;
 
 public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         permits LoreProcessor.EmptyLoreProcessor, LoreProcessor.CompositeLoreProcessor, LoreProcessor.DoubleLoreProcessor, LoreProcessor.SingleLoreProcessor {
-    ItemProcessorFactory<?> FACTORY = new Factory<>();
-    Key ID = Key.of("craftengine:lore");
+    ItemProcessorFactory<?> FACTORY = new LoreFactory<>();
 
     @Override
     @Nullable
@@ -42,13 +40,6 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
     }
 
     List<LoreModification> lore();
-
-    class Factory<I> implements ItemProcessorFactory<I> {
-        @Override
-        public ItemProcessor<I> create(Object arg) {
-            return createLoreModifier(arg);
-        }
-    }
 
     static <I> LoreProcessor<I> createLoreModifier(Object arg) {
         List<Object> rawLoreData = MiscUtils.getAsList(arg, Object.class);

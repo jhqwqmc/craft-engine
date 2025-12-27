@@ -9,58 +9,49 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.List;
 import java.util.Map;
 
-public class TemplateArguments {
-    public static final Key PLAIN = Key.of("craftengine:plain");
-    public static final Key SELF_INCREASE_INT = Key.of("craftengine:self_increase_int");
-    public static final Key MAP = Key.of("craftengine:map");
-    public static final Key LIST = Key.of("craftengine:list");
-    public static final Key NULL = Key.of("craftengine:null");
-    public static final Key CONDITION = Key.of("craftengine:condition");
-    public static final Key EXPRESSION = Key.of("craftengine:expression");
-    public static final Key OBJECT = Key.of("craftengine:object"); // No Factory, internal use
-    public static final Key TO_UPPER_CASE = Key.of("craftengine:to_upper_case");
-    public static final Key TO_LOWER_CASE = Key.of("craftengine:to_lower_case");
-    public static final Key WHEN = Key.of("craftengine:when");
+public final class TemplateArguments {
+    public static final TemplateArgumentType PLAIN = register(Key.ce("plain"), PlainStringTemplateArgument.FACTORY);
+    public static final TemplateArgumentType SELF_INCREASE_INT = register(Key.ce("self_increase_int"), SelfIncreaseIntTemplateArgument.FACTORY);
+    public static final TemplateArgumentType MAP = register(Key.ce("map"), MapTemplateArgument.FACTORY);
+    public static final TemplateArgumentType LIST = register(Key.ce("list"), ListTemplateArgument.FACTORY);
+    public static final TemplateArgumentType NULL = register(Key.ce("null"), NullTemplateArgument.FACTORY);
+    public static final TemplateArgumentType EXPRESSION = register(Key.ce("expression"), ExpressionTemplateArgument.FACTORY);
+    public static final TemplateArgumentType CONDITION = register(Key.ce("condition"), ConditionTemplateArgument.FACTORY);
+    public static final TemplateArgumentType TO_UPPER_CASE = register(Key.ce("to_upper_case"), ToUpperCaseTemplateArgument.FACTORY);
+    public static final TemplateArgumentType TO_LOWER_CASE = register(Key.ce("to_lower_case"), ToLowerCaseTemplateArgument.FACTORY);
+    public static final TemplateArgumentType OBJECT = register(Key.ce("object"), ObjectTemplateArgument.FACTORY);
+    public static final TemplateArgumentType WHEN = register(Key.ce("when"), WhenTemplateArgument.FACTORY);
 
-    public static void register(Key key, TemplateArgumentFactory factory) {
-        ((WritableRegistry<TemplateArgumentFactory>) BuiltInRegistries.TEMPLATE_ARGUMENT_FACTORY)
-                .register(ResourceKey.create(Registries.TEMPLATE_ARGUMENT_FACTORY.location(), key), factory);
-    }
+    private TemplateArguments() {}
 
-    static {
-        register(PLAIN, PlainStringTemplateArgument.FACTORY);
-        register(SELF_INCREASE_INT, SelfIncreaseIntTemplateArgument.FACTORY);
-        register(MAP, MapTemplateArgument.FACTORY);
-        register(LIST, ListTemplateArgument.FACTORY);
-        register(NULL, NullTemplateArgument.FACTORY);
-        register(EXPRESSION, ExpressionTemplateArgument.FACTORY);
-        register(CONDITION, ConditionTemplateArgument.FACTORY);
-        register(TO_UPPER_CASE, ToUpperCaseTemplateArgument.FACTORY);
-        register(TO_LOWER_CASE, ToLowerCaseTemplateArgument.FACTORY);
-        register(WHEN, WhenTemplateArgument.FACTORY);
+    public static TemplateArgumentType register(Key key, TemplateArgumentFactory factory) {
+        TemplateArgumentType type = new TemplateArgumentType(key, factory);
+        ((WritableRegistry<TemplateArgumentType>) BuiltInRegistries.TEMPLATE_ARGUMENT_TYPE)
+                .register(ResourceKey.create(Registries.TEMPLATE_ARGUMENT_TYPE.location(), key), type);
+        return type;
     }
 
     @SuppressWarnings("unchecked")
     public static TemplateArgument fromObject(Object object) {
         return switch (object) {
             case null -> NullTemplateArgument.INSTANCE;
-            case List<?> list -> new ListTemplateArgument((List<Object>) list);
+            case List<?> list -> ListTemplateArgument.list((List<Object>) list);
             case Map<?, ?> map -> fromMap((Map<String, Object>) map);
-            default -> new ObjectTemplateArgument(object);
+            default -> ObjectTemplateArgument.object(object);
         };
     }
 
     public static TemplateArgument fromMap(Map<String, Object> map) {
         Object type = map.get("type");
         if (!(type instanceof String type0) || map.containsKey("__skip_template_argument__")) {
-            return new MapTemplateArgument(map);
+            return MapTemplateArgument.map(map);
         } else {
             Key key = Key.withDefaultNamespace(type0, Key.DEFAULT_NAMESPACE);
-            TemplateArgumentFactory factory = BuiltInRegistries.TEMPLATE_ARGUMENT_FACTORY.getValue(key);
-            if (factory == null) {
+            TemplateArgumentType argumentType = BuiltInRegistries.TEMPLATE_ARGUMENT_TYPE.getValue(key);
+            if (argumentType == null) {
                 throw new IllegalArgumentException("Unknown argument type: " + type);
             }
-            return factory.create(map);
+            return argumentType.factory().create(map);
         }
     }
 }

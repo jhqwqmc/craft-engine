@@ -3,14 +3,12 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 
 import java.util.List;
 import java.util.Map;
 
 public final class PlayerHeadSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:player_head");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     public static final PlayerHeadSpecialModel INSTANCE = new PlayerHeadSpecialModel();
@@ -26,9 +24,9 @@ public final class PlayerHeadSpecialModel implements SpecialModel {
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
         if (version.isAtOrAbove(MinecraftVersion.V1_21_6)) {
-            json.addProperty("type", ID.asMinimalString());
+            json.addProperty("type", "player_head");
         } else {
-            json.addProperty("type", HeadSpecialModel.ID.asString());
+            json.addProperty("type", "head");
             json.addProperty("kind", "player");
         }
         return json;

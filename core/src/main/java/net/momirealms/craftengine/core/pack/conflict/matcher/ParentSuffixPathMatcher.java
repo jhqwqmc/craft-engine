@@ -5,7 +5,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.util.CharacterUtils;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.nio.file.Path;
@@ -13,7 +12,6 @@ import java.util.Map;
 
 public record ParentSuffixPathMatcher(String suffix) implements Condition<PathContext> {
     public static final ConditionFactory<PathContext> FACTORY = new Factory();
-    public static final Key ID = Key.of("craftengine:parent_path_suffix");
 
     @Override
     public boolean test(PathContext path) {

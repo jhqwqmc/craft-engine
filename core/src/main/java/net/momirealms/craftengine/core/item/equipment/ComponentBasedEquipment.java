@@ -16,18 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ComponentBasedEquipment extends AbstractEquipment implements Supplier<JsonObject> {
-    public static final Factory FACTORY = new Factory();
+public final class ComponentBasedEquipment extends AbstractEquipment implements Supplier<JsonObject> {
+    public static final EquipmentFactory<ComponentBasedEquipment> FACTORY = new Factory();
     private final EnumMap<EquipmentLayerType, List<Layer>> layers;
 
     public ComponentBasedEquipment(Key assetId) {
         super(assetId);
         this.layers = new EnumMap<>(EquipmentLayerType.class);
-    }
-
-    @Override
-    public Key type() {
-        return Equipments.COMPONENT;
     }
 
     @Override
@@ -65,7 +60,7 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
         layersJson.add(key, layersArray);
     }
 
-    public static class Factory implements EquipmentFactory {
+    private static class Factory implements EquipmentFactory<ComponentBasedEquipment> {
 
         @Override
         public ComponentBasedEquipment create(Key id, Map<String, Object> args) {

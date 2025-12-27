@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ItemDisplayFurnitureElement extends AbstractFurnitureElement {
+public final class ItemDisplayFurnitureElement extends AbstractFurnitureElement {
     private final ItemDisplayFurnitureElementConfig config;
     private final Furniture furniture;
     private final WorldPosition position;
@@ -23,7 +23,7 @@ public class ItemDisplayFurnitureElement extends AbstractFurnitureElement {
     private final Object despawnPacket;
     private final UUID uuid = UUID.randomUUID();
 
-    public ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config) {
+    ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config) {
         super(config.predicate, config.hasCondition);
         this.config = config;
         this.furniture = furniture;

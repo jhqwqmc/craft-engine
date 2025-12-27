@@ -29,8 +29,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig<TextDisplayFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class TextDisplayFurnitureElementConfig implements FurnitureElementConfig<TextDisplayFurnitureElement> {
+    public static final FurnitureElementConfigFactory<TextDisplayFurnitureElement> FACTORY = new Factory();
     public final Function<Player, List<Object>> metadata;
     public final String text;
     public final Vector3f scale;
@@ -57,7 +57,7 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final Predicate<PlayerContext> predicate;
     public final boolean hasCondition;
 
-    public TextDisplayFurnitureElementConfig(String text,
+    private TextDisplayFurnitureElementConfig(String text,
                                              Vector3f scale,
                                              Vector3f position,
                                              Vector3f translation,
@@ -135,7 +135,7 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
         return new TextDisplayFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<TextDisplayFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<TextDisplayFurnitureElement> {
 
         @Override
         public TextDisplayFurnitureElementConfig create(Map<String, Object> arguments) {

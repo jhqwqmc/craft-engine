@@ -2,13 +2,11 @@ package net.momirealms.craftengine.core.pack.model.definition.tint;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class GrassTint implements Tint {
-    public static final Key ID = Key.of("minecraft:grass");
     public static final Factory FACTORY = new Factory();
     public static final Reader READER = new Reader();
     private final float temperature;
@@ -30,13 +28,14 @@ public final class GrassTint implements Tint {
     @Override
     public JsonObject get() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "grass");
         json.addProperty("temperature", this.temperature);
         json.addProperty("downfall", this.downfall);
         return json;
     }
 
-    public static class Factory implements TintFactory {
+    private static class Factory implements TintFactory {
+
         @Override
         public Tint create(Map<String, Object> arguments) {
             float temperature = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("temperature", 0), "temperature");

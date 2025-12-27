@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -18,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class OnLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:on_liquid_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final boolean onWater;
     private final boolean onLava;

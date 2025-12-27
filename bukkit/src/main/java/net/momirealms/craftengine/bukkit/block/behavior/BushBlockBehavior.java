@@ -20,7 +20,6 @@ import org.bukkit.Registry;
 import java.util.*;
 
 public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:bush_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     protected final List<Object> tagsCanSurviveOn;
     protected final Set<Object> blockStatesCanSurviveOn;

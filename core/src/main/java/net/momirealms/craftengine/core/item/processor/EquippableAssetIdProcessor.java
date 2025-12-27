@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class EquippableAssetIdProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:equippable_asset_id");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Key assetId;
 

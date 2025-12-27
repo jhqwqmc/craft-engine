@@ -3,18 +3,12 @@ package net.momirealms.craftengine.core.plugin.context.number;
 import com.ezylang.evalex.Expression;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class FixedNumberProvider implements NumberProvider {
+public record FixedNumberProvider(double value) implements NumberProvider {
     public static final NumberProviderFactory FACTORY = new Factory();
-    private final double value;
-
-    public FixedNumberProvider(double value) {
-        this.value = value;
-    }
 
     @Override
     public float getFloat(Context context) {
@@ -24,11 +18,6 @@ public class FixedNumberProvider implements NumberProvider {
     @Override
     public double getDouble(Context context) {
         return this.value;
-    }
-
-    @Override
-    public Key type() {
-        return NumberProviders.FIXED;
     }
 
     public static FixedNumberProvider of(final double value) {

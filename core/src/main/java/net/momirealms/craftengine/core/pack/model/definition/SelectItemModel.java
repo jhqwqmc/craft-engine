@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import org.incendo.cloud.type.Either;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class SelectItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:select");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final SelectProperty property;
@@ -51,7 +49,7 @@ public final class SelectItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "select");
         this.property.accept(json);
         JsonArray array = new JsonArray();
         json.add("cases", array);

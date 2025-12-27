@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:enchantments");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] STORED_ENCHANTMENTS = new Object[] {"StoredEnchantments"};
     private static final Object[] ENCHANTMENTS = new Object[] {"Enchantments"};

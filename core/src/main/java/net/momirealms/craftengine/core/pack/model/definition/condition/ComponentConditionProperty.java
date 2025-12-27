@@ -3,13 +3,11 @@ package net.momirealms.craftengine.core.pack.model.definition.condition;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class ComponentConditionProperty implements ConditionProperty {
-    public static final Key ID = Key.of("minecraft:component");
     public static final ConditionPropertyFactory FACTORY = new Factory();
     public static final ConditionPropertyReader READER = new Reader();
     private final String predicate;
@@ -30,7 +28,7 @@ public final class ComponentConditionProperty implements ConditionProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "component");
         jsonObject.addProperty("predicate", this.predicate);
         jsonObject.add("value", this.value);
     }

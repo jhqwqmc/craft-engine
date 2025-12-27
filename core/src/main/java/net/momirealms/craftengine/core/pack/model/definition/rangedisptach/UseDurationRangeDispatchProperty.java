@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class UseDurationRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final Key ID = Key.of("minecraft:use_duration");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final boolean remaining;
@@ -24,7 +23,7 @@ public final class UseDurationRangeDispatchProperty implements RangeDispatchProp
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "use_duration");
         if (this.remaining) {
             jsonObject.addProperty("remaining", true);
         }

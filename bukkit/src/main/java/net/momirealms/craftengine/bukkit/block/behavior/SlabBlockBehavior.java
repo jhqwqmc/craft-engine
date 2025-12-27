@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior, CanBeReplacedBlockBehavior {
-    public static final Key ID = Key.from("craftengine:slab_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<SlabType> typeProperty;
 

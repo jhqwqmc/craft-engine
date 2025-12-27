@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class HappyGhastFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<HappyGhastFurnitureHitbox> {
+public final class HappyGhastFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<HappyGhastFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
     private final double scale;
     private final boolean hardCollision;
     private final List<Object> cachedValues = new ArrayList<>(3);
 
-    public HappyGhastFurnitureHitboxConfig(SeatConfig[] seats,
+    private HappyGhastFurnitureHitboxConfig(SeatConfig[] seats,
                                            Vector3f position,
                                            boolean canUseItemOn,
                                            boolean blocksBuilding,

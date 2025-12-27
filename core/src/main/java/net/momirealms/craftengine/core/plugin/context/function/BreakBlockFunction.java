@@ -30,7 +30,11 @@ public class BreakBlockFunction<CTX extends Context> extends AbstractConditional
         optionalPlayer.ifPresent(player -> player.breakBlock(MiscUtils.floor(x.getDouble(ctx)), MiscUtils.floor(y.getDouble(ctx)), MiscUtils.floor(z.getDouble(ctx))));
     }
 
-    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
+    }
+
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);

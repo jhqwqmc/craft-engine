@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ItemFurnitureElement extends AbstractFurnitureElement {
+public final class ItemFurnitureElement extends AbstractFurnitureElement {
     private final ItemFurnitureElementConfig config;
     private final Furniture furniture;
     private final int entityId1;
@@ -25,7 +25,7 @@ public class ItemFurnitureElement extends AbstractFurnitureElement {
     private final Object cachedSpawnPacket2;
     private final Object cachedRidePacket;
 
-    public ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config) {
+    ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config) {
         super(config.predicate, config.hasCondition);
         this.furniture = furniture;
         this.config = config;

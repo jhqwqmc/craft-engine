@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ComponentsProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:components");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final List<Pair<Key, Tag>> arguments;
     private CompoundTag customData = null;

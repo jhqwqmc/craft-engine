@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.plugin.context.number;
 
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -32,11 +31,6 @@ public record BinomialNumberProvider(NumberProvider trials, NumberProvider succe
             }
         }
         return successCount;
-    }
-
-    @Override
-    public Key type() {
-        return NumberProviders.BINOMIAL;
     }
 
     private static class Factory implements NumberProviderFactory {
