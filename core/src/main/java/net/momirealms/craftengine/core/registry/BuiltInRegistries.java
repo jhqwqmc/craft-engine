@@ -32,11 +32,10 @@ import net.momirealms.craftengine.core.pack.model.definition.rangedisptach.Range
 import net.momirealms.craftengine.core.pack.model.definition.select.SelectPropertyType;
 import net.momirealms.craftengine.core.pack.model.definition.special.SpecialModelType;
 import net.momirealms.craftengine.core.pack.model.definition.tint.TintType;
-import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgumentFactory;
+import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgumentType;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.context.function.FunctionFactory;
-import net.momirealms.craftengine.core.plugin.context.number.NumberProviderFactory;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviderType;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectorFactory;
 import net.momirealms.craftengine.core.plugin.network.ModPacket;
@@ -53,7 +52,7 @@ public final class BuiltInRegistries {
     public static final Registry<LootFunctionType<?>> LOOT_FUNCTION_TYPE = createConstantBoundRegistry(Registries.LOOT_FUNCTION_TYPE, 32);
     public static final Registry<LootEntryContainerType<?>> LOOT_ENTRY_CONTAINER_TYPE = createConstantBoundRegistry(Registries.LOOT_ENTRY_CONTAINER_TYPE, 16);
     public static final Registry<NumberProviderType> NUMBER_PROVIDER_TYPE = createConstantBoundRegistry(Registries.NUMBER_PROVIDER_TYPE, 16);
-    public static final Registry<TemplateArgumentFactory> TEMPLATE_ARGUMENT_FACTORY = createConstantBoundRegistry(Registries.TEMPLATE_ARGUMENT_FACTORY, 16);
+    public static final Registry<TemplateArgumentType> TEMPLATE_ARGUMENT_TYPE = createConstantBoundRegistry(Registries.TEMPLATE_ARGUMENT_TYPE, 16);
     public static final Registry<ItemModelType> ITEM_MODEL_TYPE = createConstantBoundRegistry(Registries.ITEM_MODEL_TYPE, 16);
     public static final Registry<TintType> TINT_TYPE = createConstantBoundRegistry(Registries.TINT_TYPE, 16);
     public static final Registry<SpecialModelType> SPECIAL_MODEL_TYPE = createConstantBoundRegistry(Registries.SPECIAL_MODEL_TYPE, 16);

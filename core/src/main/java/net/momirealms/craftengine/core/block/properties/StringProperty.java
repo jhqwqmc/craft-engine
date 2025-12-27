@@ -16,7 +16,7 @@ public final class StringProperty extends Property<String> {
     private final List<String> values;
     private final ImmutableMap<String, String> names;
 
-    public StringProperty(String name, List<String> values, String defaultValue) {
+    private StringProperty(String name, List<String> values, String defaultValue) {
         super(name, String.class, defaultValue);
 
         this.values = List.copyOf(values);

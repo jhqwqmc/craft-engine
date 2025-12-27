@@ -8,17 +8,21 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Locale;
 import java.util.Map;
 
-public class ToLowerCaseTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class ToLowerCaseTemplateArgument implements TemplateArgument {
+    public static final Key ID = Key.of("craftengine:to_lower_case");
+    public static final TemplateArgumentFactory FACTORY = new Factory();
     private final String result;
 
     private ToLowerCaseTemplateArgument(String result) {
         this.result = result;
     }
 
-    @Override
-    public Key type() {
-        return TemplateArguments.TO_LOWER_CASE;
+    public static ToLowerCaseTemplateArgument toLowerCase(String result) {
+        return new ToLowerCaseTemplateArgument(result.toLowerCase(Locale.ROOT));
+    }
+
+    public String result() {
+        return this.result;
     }
 
     @Override
@@ -26,7 +30,7 @@ public class ToLowerCaseTemplateArgument implements TemplateArgument {
         return this.result;
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory {
 
         @Override
         public TemplateArgument create(Map<String, Object> arguments) {

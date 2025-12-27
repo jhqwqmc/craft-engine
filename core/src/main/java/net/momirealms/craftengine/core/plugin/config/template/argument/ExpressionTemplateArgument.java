@@ -10,12 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ExpressionTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class ExpressionTemplateArgument implements TemplateArgument {
+    public static final Key ID = Key.of("craftengine:expression");
+    public static final TemplateArgumentFactory FACTORY = new Factory();
     private final ArgumentString expression;
     private final ValueType valueType;
 
-    protected ExpressionTemplateArgument(String expression, ValueType valueType) {
+    private ExpressionTemplateArgument(String expression, ValueType valueType) {
         this.expression = ArgumentString.preParse(expression);
         this.valueType = valueType;
     }
@@ -29,11 +30,6 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process expression argument: " + this.expression, e);
         }
-    }
-
-    @Override
-    public Key type() {
-        return TemplateArguments.EXPRESSION;
     }
 
     protected enum ValueType {
@@ -56,7 +52,8 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         }
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory {
+
         @Override
         public TemplateArgument create(Map<String, Object> arguments) {
             return new ExpressionTemplateArgument(

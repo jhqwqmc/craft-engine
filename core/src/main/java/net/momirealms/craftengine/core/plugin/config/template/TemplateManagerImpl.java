@@ -311,9 +311,9 @@ public class TemplateManagerImpl implements TemplateManager {
             Object processedPlaceholderValue = processUnknownValue(argumentEntry.getValue(), result);
             switch (processedPlaceholderValue) {
                 case Map<?, ?> map -> result.put(placeholder, TemplateArguments.fromMap(MiscUtils.castToMap(map, false)));
-                case List<?> listArgument -> result.put(placeholder, new ListTemplateArgument((List<Object>) listArgument));
+                case List<?> listArgument -> result.put(placeholder, ListTemplateArgument.list((List<Object>) listArgument));
                 case null -> result.put(placeholder, NullTemplateArgument.INSTANCE);
-                default -> result.put(placeholder, new ObjectTemplateArgument(processedPlaceholderValue));
+                default -> result.put(placeholder, ObjectTemplateArgument.object(processedPlaceholderValue));
             }
         }
         return result;

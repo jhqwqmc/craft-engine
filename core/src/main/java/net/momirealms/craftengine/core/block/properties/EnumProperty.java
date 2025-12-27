@@ -13,7 +13,7 @@ public final class EnumProperty<T extends Enum<T>> extends Property<T> {
     private final int[] ordinalToIndex;
     private final int[] idLookupTable;
 
-    public EnumProperty(String name, Class<T> type, List<T> values, T defaultValue) {
+    private EnumProperty(String name, Class<T> type, List<T> values, T defaultValue) {
         super(name, type, defaultValue);
         this.values = List.copyOf(values);
         T[] enums = type.getEnumConstants();
