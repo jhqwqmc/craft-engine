@@ -30,7 +30,7 @@ public final class Properties {
 
     public static <T extends Comparable<T>> PropertyType<T> register(Key key, PropertyFactory<T> factory) {
         PropertyType<T> type = new PropertyType<>(key, factory);
-        ((WritableRegistry<PropertyType<?>>) BuiltInRegistries.PROPERTY_TYPE)
+        ((WritableRegistry<PropertyType<? extends Comparable<?>>>) BuiltInRegistries.PROPERTY_TYPE)
                 .register(ResourceKey.create(Registries.PROPERTY_TYPE.location(), key), type);
         return type;
     }

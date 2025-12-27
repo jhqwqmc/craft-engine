@@ -25,8 +25,8 @@ public final class ResourcePackHosts {
 
     public static ResourcePackHostType register(Key key, ResourcePackHostFactory factory) {
         ResourcePackHostType type = new ResourcePackHostType(key, factory);
-        ((WritableRegistry<ResourcePackHostType>) BuiltInRegistries.RESOURCE_PACK_HOST_FACTORY)
-                .register(ResourceKey.create(Registries.RESOURCE_PACK_HOST_FACTORY.location(), key), type);
+        ((WritableRegistry<ResourcePackHostType>) BuiltInRegistries.RESOURCE_PACK_HOST_TYPE)
+                .register(ResourceKey.create(Registries.RESOURCE_PACK_HOST_TYPE.location(), key), type);
         return type;
     }
 
@@ -36,7 +36,7 @@ public final class ResourcePackHosts {
             throw new LocalizedException("warning.config.host.missing_type");
         }
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        ResourcePackHostType hostType = BuiltInRegistries.RESOURCE_PACK_HOST_FACTORY.getValue(key);
+        ResourcePackHostType hostType = BuiltInRegistries.RESOURCE_PACK_HOST_TYPE.getValue(key);
         if (hostType == null) {
             throw new LocalizedException("warning.config.host.invalid_type", type);
         }

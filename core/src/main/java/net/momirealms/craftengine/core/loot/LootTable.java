@@ -24,7 +24,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class LootTable<T> {
+public final class LootTable<T> {
     private final List<LootPool<T>> pools;
     private final List<LootFunction<T>> functions;
     private final BiFunction<Item<T>, LootContext, Item<T>> compositeFunction;

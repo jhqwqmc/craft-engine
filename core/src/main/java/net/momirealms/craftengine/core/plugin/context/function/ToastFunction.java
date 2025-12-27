@@ -49,7 +49,11 @@ public class ToastFunction<CTX extends Context> extends AbstractConditionalFunct
         }
     }
 
-    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
+    }
+
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);

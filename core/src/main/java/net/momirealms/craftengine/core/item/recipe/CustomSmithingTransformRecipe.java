@@ -228,21 +228,13 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
         }
     }
 
-    public static class ItemDataProcessors {
-        public static final Key KEEP_COMPONENTS = Key.ce("keep_components");
-        public static final Key KEEP_TAGS = Key.ce("keep_tags");
-        public static final Key MERGE_ENCHANTMENTS = Key.ce("merge_enchantments");
-        public static final Key KEEP_CUSTOM_DATA = Key.ce("keep_custom_data");
+    public static final class ItemDataProcessors {
+        public static final ItemDataProcessor.Type KEEP_COMPONENTS = register(Key.ce("keep_components"), KeepComponents.FACTORY);
+        public static final ItemDataProcessor.Type KEEP_TAGS = register(Key.ce("keep_tags"), KeepTags.FACTORY);
+        public static final ItemDataProcessor.Type KEEP_CUSTOM_DATA = register(Key.ce("keep_custom_data"), KeepCustomData.FACTORY);
+        public static final ItemDataProcessor.Type MERGE_ENCHANTMENTS = register(Key.ce("merge_enchantments"), MergeEnchantments.FACTORY);
 
-        static {
-            if (VersionHelper.isOrAbove1_20_5()) {
-                register(KEEP_COMPONENTS, KeepComponents.FACTORY);
-                register(KEEP_CUSTOM_DATA, KeepCustomData.FACTORY);
-            } else {
-                register(KEEP_TAGS, KeepTags.FACTORY);
-            }
-            register(MERGE_ENCHANTMENTS, MergeEnchantments.FACTORY);
-        }
+        private ItemDataProcessors() {}
 
         public static List<ItemDataProcessor> fromMapList(List<Map<String, Object>> mapList) {
             if (mapList == null || mapList.isEmpty()) return List.of();
@@ -259,36 +251,33 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                 throw new LocalizedResourceConfigException("warning.config.recipe.smithing_transform.post_processor.missing_type");
             }
             Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-            ItemDataProcessor.ProcessorFactory factory = BuiltInRegistries.SMITHING_RESULT_PROCESSOR_FACTORY.getValue(key);
-            if (factory == null) {
+            ItemDataProcessor.Type processorType = BuiltInRegistries.SMITHING_RESULT_PROCESSOR_TYPE.getValue(key);
+            if (processorType == null) {
                 throw new LocalizedResourceConfigException("warning.config.recipe.smithing_transform.post_processor.invalid_type", type);
             }
-            return factory.create(map);
+            return processorType.factory.create(map);
         }
 
-        public static void register(Key key, ItemDataProcessor.ProcessorFactory factory) {
-            ((WritableRegistry<ItemDataProcessor.ProcessorFactory>) BuiltInRegistries.SMITHING_RESULT_PROCESSOR_FACTORY)
-                    .register(ResourceKey.create(Registries.SMITHING_RESULT_PROCESSOR_FACTORY.location(), key), factory);
+        public static ItemDataProcessor.Type register(Key key, ItemDataProcessor.Factory factory) {
+            ItemDataProcessor.Type type = new ItemDataProcessor.Type(key, factory);
+            ((WritableRegistry<ItemDataProcessor.Type>) BuiltInRegistries.SMITHING_RESULT_PROCESSOR_TYPE)
+                    .register(ResourceKey.create(Registries.SMITHING_RESULT_PROCESSOR_TYPE.location(), key), type);
+            return type;
         }
     }
 
     public interface ItemDataProcessor extends TriConsumer<Item<?>, Item<?>, Item<?>> {
 
-        Key type();
-
-        interface ProcessorFactory {
+        interface Factory {
             ItemDataProcessor create(Map<String, Object> arguments);
         }
+
+        record Type(Key id, Factory factory) {}
     }
 
     public static class MergeEnchantments implements ItemDataProcessor {
         public static final MergeEnchantments INSTANCE = new MergeEnchantments();
-        public static final Factory FACTORY = new Factory();
-
-        @Override
-        public Key type() {
-            return ItemDataProcessors.MERGE_ENCHANTMENTS;
-        }
+        public static final ItemDataProcessor.Factory FACTORY = new Factory();
 
         @Override
         public void accept(Item<?> item1, Item<?> item2, Item<?> item3) {
@@ -308,7 +297,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             });
         }
 
-        public static class Factory implements ProcessorFactory {
+        private static class Factory implements ItemDataProcessor.Factory {
 
             @Override
             public ItemDataProcessor create(Map<String, Object> arguments) {
@@ -318,7 +307,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     }
 
     public static class KeepCustomData implements ItemDataProcessor {
-        public static final Factory FACTORY = new Factory();
+        public static final ItemDataProcessor.Factory FACTORY = new Factory();
         private final List<String[]> paths;
 
         public KeepCustomData(List<String[]> data) {
@@ -335,12 +324,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             }
         }
 
-        @Override
-        public Key type() {
-            return ItemDataProcessors.KEEP_CUSTOM_DATA;
-        }
-
-        public static class Factory implements ProcessorFactory {
+        private static class Factory implements ItemDataProcessor.Factory {
 
             @Override
             public ItemDataProcessor create(Map<String, Object> arguments) {
@@ -354,7 +338,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     }
 
     public static class KeepComponents implements ItemDataProcessor {
-        public static final Factory FACTORY = new Factory();
+        public static final ItemDataProcessor.Factory FACTORY = new Factory();
         private final List<Key> components;
 
         public KeepComponents(List<Key> components) {
@@ -371,12 +355,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             }
         }
 
-        @Override
-        public Key type() {
-            return ItemDataProcessors.KEEP_COMPONENTS;
-        }
-
-        public static class Factory implements ProcessorFactory {
+        private static class Factory implements ItemDataProcessor.Factory {
             private static final Key CUSTOM_DATA = Key.of("minecraft", "custom_data");
 
             @Override
@@ -392,7 +371,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     }
 
     public static class KeepTags implements ItemDataProcessor {
-        public static final Factory FACTORY = new Factory();
+        public static final ItemDataProcessor.Factory FACTORY = new Factory();
         private final List<String[]> tags;
 
         public KeepTags(List<String[]> tags) {
@@ -409,12 +388,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
             }
         }
 
-        @Override
-        public Key type() {
-            return ItemDataProcessors.KEEP_TAGS;
-        }
-
-        public static class Factory implements ProcessorFactory {
+        private static class Factory implements ItemDataProcessor.Factory {
 
             @Override
             public ItemDataProcessor create(Map<String, Object> arguments) {

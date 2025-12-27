@@ -57,7 +57,11 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
         CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> CraftEngine.instance().furnitureManager().place(position, furniture, FurnitureDataAccessor.ofVariant(variant), playSound));
     }
 
-    public static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
+    }
+
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class ExpLootEntryContainer<T> extends AbstractLootEntryContainer<T> {
-    public static final Factory<?> FACTORY = new Factory<>();
+    public static final LootEntryContainerFactory<?> FACTORY = new Factory<>();
     private final NumberProvider value;
 
     private ExpLootEntryContainer(NumberProvider value, List<Condition<LootContext>> conditions) {
@@ -32,7 +32,7 @@ public final class ExpLootEntryContainer<T> extends AbstractLootEntryContainer<T
         }
     }
 
-    public static class Factory<A> implements LootEntryContainerFactory<A> {
+    private static class Factory<A> implements LootEntryContainerFactory<A> {
 
         @Override
         public LootEntryContainer<A> create(Map<String, Object> arguments) {

@@ -16,7 +16,7 @@ public abstract class BlockEntityElementConfigs {
 
     public static <E extends BlockEntityElement> BlockEntityElementConfigType<E> register(Key key, BlockEntityElementConfigFactory<E> factory) {
         BlockEntityElementConfigType<E> type = new BlockEntityElementConfigType<>(key, factory);
-        ((WritableRegistry<BlockEntityElementConfigType<?>>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE)
+        ((WritableRegistry<BlockEntityElementConfigType<? extends BlockEntityElement>>) BuiltInRegistries.BLOCK_ENTITY_ELEMENT_TYPE)
                 .register(ResourceKey.create(Registries.BLOCK_ENTITY_ELEMENT_TYPE.location(), key), type);
         return type;
     }

@@ -10,71 +10,76 @@ import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
-public class CommonFunctions {
+public final class CommonFunctions {
+    public static final FunctionType<Context> COMMAND = register(Key.ce("command"), CommandFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> MESSAGE = register(Key.ce("message"), MessageFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> ACTIONBAR = register(Key.ce("actionbar"), ActionBarFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> TITLE = register(Key.ce("title"), TitleFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> OPEN_WINDOW = register(Key.ce("open_window"), OpenWindowFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> CANCEL_EVENT = register(Key.ce("cancel_event"), CancelEventFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> RUN = register(Key.ce("run"), RunFunction.factory(CommonFunctions::fromMap, CommonConditions::fromMap));
+    public static final FunctionType<Context> PLACE_BLOCK = register(Key.ce("place_block"), PlaceBlockFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> UPDATE_BLOCK_PROPERTY = register(Key.ce("update_block_property"), UpdateBlockPropertyFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> TRANSFORM_BLOCK = register(Key.ce("transform_block"), TransformBlockFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> BREAK_BLOCK = register(Key.ce("break_block"), BreakBlockFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> UPDATE_INTERACTION_TICK = register(Key.ce("update_interaction_tick"), UpdateInteractionFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_COUNT = register(Key.ce("set_count"), SetCountFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> DROP_LOOT = register(Key.ce("drop_loot"), DropLootFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SWING_HAND = register(Key.ce("swing_hand"), SwingHandFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_FOOD = register(Key.ce("set_food"), SetFoodFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_SATURATION = register(Key.ce("set_saturation"), SetSaturationFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> PLAY_SOUND = register(Key.ce("play_sound"), PlaySoundFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> PARTICLE = register(Key.ce("particle"), ParticleFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> POTION_EFFECT = register(Key.ce("potion_effect"), PotionEffectFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> REMOVE_POTION_EFFECT = register(Key.ce("remove_potion_effect"), RemovePotionEffectFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> LEVELER_EXP = register(Key.ce("leveler_exp"), LevelerExpFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_COOLDOWN = register(Key.ce("set_cooldown"), SetCooldownFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> REMOVE_COOLDOWN = register(Key.ce("remove_cooldown"), RemoveCooldownFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SPAWN_FURNITURE = register(Key.ce("spawn_furniture"), SpawnFurnitureFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> REMOVE_FURNITURE = register(Key.ce("remove_furniture"), RemoveFurnitureFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> REPLACE_FURNITURE = register(Key.ce("replace_furniture"), ReplaceFurnitureFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> ROTATE_FURNITURE = register(Key.ce("rotate_furniture"), RotateFurnitureFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> MYTHIC_MOBS_SKILL = register(Key.ce("mythic_mobs_skill"), MythicMobsSkillFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> TELEPORT = register(Key.ce("teleport"), TeleportFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_VARIABLE = register(Key.ce("set_variable"), SetVariableFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> TOAST = register(Key.ce("toast"), ToastFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> DAMAGE = register(Key.ce("damage"), DamageFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> MERCHANT_TRADE = register(Key.ce("merchant_trade"), MerchantTradeFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> REMOVE_ENTITY = register(Key.ce("remove_entity"), RemoveEntityFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> IF_ELSE = register(Key.ce("if_else"), IfElseFunction.factory(CommonFunctions::fromMap, CommonConditions::fromMap));
+    public static final FunctionType<Context> ALTERNATIVES = register(Key.ce("alternatives"), IfElseFunction.factory(CommonFunctions::fromMap, CommonConditions::fromMap));
+    public static final FunctionType<Context> WHEN = register(Key.ce("when"), WhenFunction.factory(CommonFunctions::fromMap, CommonConditions::fromMap));
+    public static final FunctionType<Context> DAMAGE_ITEM = register(Key.ce("damage_item"), DamageItemFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> CYCLE_BLOCK_PROPERTY = register(Key.ce("cycle_block_property"), CycleBlockPropertyFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_EXP = register(Key.ce("set_exp"), SetExpFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> SET_LEVEL = register(Key.ce("set_level"), SetLevelFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> PLAY_TOTEM_ANIMATION = register(Key.ce("play_totem_animation"), PlayTotemAnimationFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> CLOSE_INVENTORY = register(Key.ce("close_inventory"), CloseInventoryFunction.factory(CommonConditions::fromMap));
+    public static final FunctionType<Context> CLEAR_ITEM = register(Key.ce("clear_item"), ClearItemFunction.factory(CommonConditions::fromMap));
 
-    static {
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.COMMAND, new CommandFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.MESSAGE, new MessageFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.ACTIONBAR, new ActionBarFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.TITLE, new TitleFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.OPEN_WINDOW, new OpenWindowFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.CANCEL_EVENT, new CancelEventFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.RUN, new RunFunction.Factory<>(CommonFunctions::fromMap, CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.PLACE_BLOCK, new PlaceBlockFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.UPDATE_BLOCK_PROPERTY, new UpdateBlockPropertyFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.TRANSFORM_BLOCK, new TransformBlockFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.BREAK_BLOCK, new BreakBlockFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.UPDATE_INTERACTION_TICK, new UpdateInteractionFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_COUNT, new SetCountFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.DROP_LOOT, new DropLootFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SWING_HAND, new SwingHandFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_FOOD, new SetFoodFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_SATURATION, new SetSaturationFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.PLAY_SOUND, new PlaySoundFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.PARTICLE, new ParticleFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.POTION_EFFECT, new PotionEffectFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.REMOVE_POTION_EFFECT, new RemovePotionEffectFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.LEVELER_EXP, new LevelerExpFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_COOLDOWN, new SetCooldownFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.REMOVE_COOLDOWN, new RemoveCooldownFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SPAWN_FURNITURE, new SpawnFurnitureFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.REMOVE_FURNITURE, new RemoveFurnitureFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.REPLACE_FURNITURE, new ReplaceFurnitureFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.ROTATE_FURNITURE, new RotateFurnitureFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.MYTHIC_MOBS_SKILL, new MythicMobsSkillFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.TELEPORT, new TeleportFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_VARIABLE, new SetVariableFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.TOAST, new ToastFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.DAMAGE, new DamageFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.MERCHANT_TRADE, new MerchantTradeFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.REMOVE_ENTITY, new RemoveEntityFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.IF_ELSE, new IfElseFunction.Factory<>(CommonConditions::fromMap, CommonFunctions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.ALTERNATIVES, new IfElseFunction.Factory<>(CommonConditions::fromMap, CommonFunctions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.WHEN, new WhenFunction.Factory<>(CommonConditions::fromMap, CommonFunctions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.DAMAGE_ITEM, new DamageItemFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.CYCLE_BLOCK_PROPERTY, new CycleBlockPropertyFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_EXP, new SetExpFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.SET_LEVEL, new SetLevelFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.PLAY_TOTEM_ANIMATION, new PlayTotemAnimationFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.CLOSE_INVENTORY, new CloseInventoryFunction.Factory<>(CommonConditions::fromMap));
-        register(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.CLEAR_ITEM, new ClearItemFunction.Factory<>(CommonConditions::fromMap));
+    private CommonFunctions() {}
+
+    public static <CTX extends Context> FunctionType<CTX> register(Key key, FunctionFactory<CTX> factory) {
+        FunctionType<CTX> type = new FunctionType<>(key, factory);
+        ((WritableRegistry<FunctionType<?>>) BuiltInRegistries.COMMON_FUNCTION_TYPE)
+                .register(ResourceKey.create(Registries.COMMON_FUNCTION_TYPE.location(), key), type);
+        return type;
     }
 
-    public static void register(Key key, FunctionFactory<Context> factory) {
-        ((WritableRegistry<FunctionFactory<Context>>) BuiltInRegistries.EVENT_FUNCTION_FACTORY)
-                .register(ResourceKey.create(Registries.EVENT_FUNCTION_FACTORY.location(), key), factory);
-    }
-
-    public static Function<Context> fromMap(Map<String, Object> map) {
+    @SuppressWarnings("unchecked")
+    public static <CTX extends Context> Function<CTX> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.function.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        FunctionFactory<Context> factory = BuiltInRegistries.EVENT_FUNCTION_FACTORY.getValue(key);
-        if (factory == null) {
+        FunctionType<CTX> functionType = (FunctionType<CTX>) BuiltInRegistries.COMMON_FUNCTION_TYPE.getValue(key);
+        if (functionType == null) {
             throw new LocalizedResourceConfigException("warning.config.function.invalid_type", type);
         }
-        return factory.create(map);
+        return functionType.factory().create(map);
     }
 
     public static Map<EventTrigger, List<Function<Context>>> parseEvents(Object eventsObj) {
@@ -101,7 +106,7 @@ public class CommonFunctions {
                         Function<Context> function = CommonFunctions.fromMap(eventSection);
                         events.computeIfAbsent(eventTrigger, k -> new ArrayList<>(4)).add(function);
                     } else if (eventSection.containsKey("functions")) {
-                        events.computeIfAbsent(eventTrigger, k -> new ArrayList<>(4)).add(Objects.requireNonNull(BuiltInRegistries.EVENT_FUNCTION_FACTORY.getValue(net.momirealms.craftengine.core.plugin.context.function.CommonFunctions.RUN)).create(eventSection));
+                        events.computeIfAbsent(eventTrigger, k -> new ArrayList<>(4)).add(RUN.factory().create(eventSection));
                     }
                 } catch (IllegalArgumentException e) {
                     throw new LocalizedResourceConfigException("warning.config.event.invalid_trigger", on);

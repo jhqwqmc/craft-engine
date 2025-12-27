@@ -15,7 +15,7 @@ public class FurnitureElementConfigs {
 
     public static <E extends FurnitureElement> FurnitureElementConfigType<E> register(Key key, FurnitureElementConfigFactory<E> factory) {
         FurnitureElementConfigType<E> type = new FurnitureElementConfigType<>(key, factory);
-        ((WritableRegistry<FurnitureElementConfigType<?>>) BuiltInRegistries.FURNITURE_ELEMENT_TYPE)
+        ((WritableRegistry<FurnitureElementConfigType<? extends FurnitureElement>>) BuiltInRegistries.FURNITURE_ELEMENT_TYPE)
                 .register(ResourceKey.create(Registries.FURNITURE_ELEMENT_TYPE.location(), key), type);
         return type;
     }

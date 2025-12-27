@@ -30,8 +30,8 @@ public class FurnitureBehaviors {
 
     public static <T extends FurnitureBehavior> FurnitureBehaviorType<T> register(Key id, FurnitureBehaviorFactory<T> factory) {
         FurnitureBehaviorType<T> type = new FurnitureBehaviorType<>(id, factory);
-        ((WritableRegistry<FurnitureBehaviorType<?>>) BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE)
-                .register(ResourceKey.create(Registries.BLOCK_BEHAVIOR_TYPE.location(), id), type);
+        ((WritableRegistry<FurnitureBehaviorType<? extends FurnitureBehavior>>) BuiltInRegistries.FURNITURE_BEHAVIOR_TYPE)
+                .register(ResourceKey.create(Registries.FURNITURE_BEHAVIOR_TYPE.location(), id), type);
         return type;
     }
 }

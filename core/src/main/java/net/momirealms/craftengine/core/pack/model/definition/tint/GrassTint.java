@@ -34,7 +34,8 @@ public final class GrassTint implements Tint {
         return json;
     }
 
-    public static class Factory implements TintFactory {
+    private static class Factory implements TintFactory {
+
         @Override
         public Tint create(Map<String, Object> arguments) {
             float temperature = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("temperature", 0), "temperature");

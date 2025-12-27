@@ -23,7 +23,7 @@ public final class PlayerSelectors {
 
     public static <CTX extends Context> PlayerSelectorType<CTX> register(Key key, PlayerSelectorFactory<CTX> factory) {
         PlayerSelectorType<CTX> type = new PlayerSelectorType<>(key, factory);
-        ((WritableRegistry<PlayerSelectorType<?>>) BuiltInRegistries.PLAYER_SELECTOR_TYPE)
+        ((WritableRegistry<PlayerSelectorType<? extends Context>>) BuiltInRegistries.PLAYER_SELECTOR_TYPE)
                 .register(ResourceKey.create(Registries.PLAYER_SELECTOR_TYPE.location(), key), type);
         return type;
     }

@@ -15,7 +15,7 @@ public class FurnitureHitBoxes {
 
     public static <H extends FurnitureHitBox> FurnitureHitboxConfigType<H> register(Key key, FurnitureHitBoxConfigFactory<H> factory) {
         FurnitureHitboxConfigType<H> type = new FurnitureHitboxConfigType<>(key, factory);
-        ((WritableRegistry<FurnitureHitboxConfigType<?>>) BuiltInRegistries.FURNITURE_HITBOX_TYPE)
+        ((WritableRegistry<FurnitureHitboxConfigType<? extends FurnitureHitBox>>) BuiltInRegistries.FURNITURE_HITBOX_TYPE)
                 .register(ResourceKey.create(Registries.FURNITURE_HITBOX_TYPE.location(), key), type);
         return type;
     }

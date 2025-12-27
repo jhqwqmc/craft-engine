@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class DynamicLoreProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Factory<?> FACTORY = new Factory<>();
+    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final String CONTEXT_TAG_KEY = "craftengine:display_context";
     private final Map<String, LoreProcessor<I>> displayContexts;
     private final LoreProcessor<I> defaultModifier;
@@ -52,7 +52,7 @@ public final class DynamicLoreProcessor<I> implements SimpleNetworkItemProcessor
         return "display.Lore";
     }
 
-    public static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory<I> implements ItemProcessorFactory<I> {
         @Override
         public ItemProcessor<I> create(Object arg) {
             Map<String, LoreProcessor<I>> dynamicLore = new LinkedHashMap<>();
