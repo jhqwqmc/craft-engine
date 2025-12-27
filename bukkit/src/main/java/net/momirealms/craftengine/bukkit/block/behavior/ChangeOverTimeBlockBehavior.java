@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ChangeOverTimeBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:change_over_time_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final float changeSpeed;
     private final String nextBlock;

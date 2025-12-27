@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.block.properties;
 
 import com.google.common.collect.ImmutableMap;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.sparrow.nbt.StringTag;
 import net.momirealms.sparrow.nbt.Tag;
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class StringProperty extends Property<String> {
-    public static final Key ID = Key.of("craftengine:string");
     public static final PropertyFactory<String> FACTORY = new Factory();
     private final List<String> values;
     private final ImmutableMap<String, String> names;

@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BouncingBlockBehavior extends BukkitBlockBehavior implements FallOnBlockBehavior {
-    public static final Key ID = Key.from("craftengine:bouncing_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final double bounceHeight;
     private final boolean syncPlayerPosition;

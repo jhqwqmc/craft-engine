@@ -229,10 +229,10 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     }
 
     public static class ItemDataProcessors {
-        public static final Key KEEP_COMPONENTS = Key.of("craftengine:keep_components");
-        public static final Key KEEP_TAGS = Key.of("craftengine:keep_tags");
-        public static final Key MERGE_ENCHANTMENTS = Key.of("craftengine:merge_enchantments");
-        public static final Key KEEP_CUSTOM_DATA = Key.of("craftengine:keep_custom_data");
+        public static final Key KEEP_COMPONENTS = Key.ce("keep_components");
+        public static final Key KEEP_TAGS = Key.ce("keep_tags");
+        public static final Key MERGE_ENCHANTMENTS = Key.ce("merge_enchantments");
+        public static final Key KEEP_CUSTOM_DATA = Key.ce("keep_custom_data");
 
         static {
             if (VersionHelper.isOrAbove1_20_5()) {

@@ -13,30 +13,28 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
-public class ItemUpdaters {
-    public static final Key APPLY_DATA = Key.of("craftengine:apply_data");
-    public static final Key TRANSMUTE = Key.of("craftengine:transmute");
-    public static final Key RESET = Key.of("craftengine:reset");
+public final class ItemUpdaters {
+    public static final ItemUpdaterType<?> APPLY_DATA = register(Key.ce("apply_data"), ApplyDataOperation.FACTORY);
+    public static final ItemUpdaterType<?> TRANSMUTE = register(Key.ce("transmute"), TransmuteOperation.FACTORY);
+    public static final ItemUpdaterType<?> RESET = register(Key.ce("reset"), ResetOperation.FACTORY);
 
-    static {
-        register(APPLY_DATA, ApplyDataOperation.TYPE);
-        register(TRANSMUTE, TransmuteOperation.TYPE);
-        register(RESET, ResetOperation.TYPE);
+    private ItemUpdaters() {}
+
+    public static <I> ItemUpdaterType<I> register(Key id, ItemUpdaterFactory<I> factory) {
+        ItemUpdaterType<I> type = new ItemUpdaterType<>(id, factory);
+        ((WritableRegistry<ItemUpdaterType<?>>) BuiltInRegistries.ITEM_UPDATER_TYPE)
+                .register(ResourceKey.create(Registries.ITEM_UPDATER_TYPE.location(), id), type);
+        return type;
     }
 
-    public static void register(Key id, ItemUpdaterType<?> type) {
-        WritableRegistry<ItemUpdaterType<?>> registry = (WritableRegistry<ItemUpdaterType<?>>) BuiltInRegistries.ITEM_UPDATER_TYPE;
-        registry.register(ResourceKey.create(Registries.ITEM_UPDATER_TYPE.location(), id), type);
-    }
-
+    @SuppressWarnings("unchecked")
     public static <I> ItemUpdater<I> fromMap(Key item, Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.updater.missing_type");
-        Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
+        Key key = Key.ce(type);
         ItemUpdaterType<I> updaterType = (ItemUpdaterType<I>) BuiltInRegistries.ITEM_UPDATER_TYPE.getValue(key);
         if (updaterType == null) {
             throw new LocalizedResourceConfigException("warning.config.item.updater.invalid_type", type);
         }
-        return updaterType.create(item, map);
+        return updaterType.factory().create(item, map);
     }
 }

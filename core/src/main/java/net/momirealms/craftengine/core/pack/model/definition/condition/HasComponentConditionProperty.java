@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.condition;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class HasComponentConditionProperty implements ConditionProperty {
-    public static final Key ID = Key.of("minecraft:has_component");
     public static final ConditionPropertyFactory FACTORY = new Factory();
     public static final ConditionPropertyReader READER = new Reader();
     private final String component;
@@ -28,7 +26,7 @@ public final class HasComponentConditionProperty implements ConditionProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "has_component");
         jsonObject.addProperty("component", this.component);
         if (this.ignoreDefault) {
             jsonObject.addProperty("ignore_default", true);

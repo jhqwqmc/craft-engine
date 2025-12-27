@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:surface_spreading_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final int requiredLight;
     private final LazyReference<Object> baseBlock;

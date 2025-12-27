@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class GroundBlockItemBehavior extends BlockItemBehavior {
-    public static final Key ID = Key.from("craftengine:ground_block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public GroundBlockItemBehavior(Key ceilingBlockId) {

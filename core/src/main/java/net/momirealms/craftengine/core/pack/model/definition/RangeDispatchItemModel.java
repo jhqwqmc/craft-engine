@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.pack.model.definition.rangedisptach.Range
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public final class RangeDispatchItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:range_dispatch");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final RangeDispatchProperty property;
@@ -58,7 +56,7 @@ public final class RangeDispatchItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "range_dispatch");
         this.property.accept(json);
         JsonArray array = new JsonArray();
         for (Map.Entry<Float, ItemModel> entry : this.entries.entrySet()) {

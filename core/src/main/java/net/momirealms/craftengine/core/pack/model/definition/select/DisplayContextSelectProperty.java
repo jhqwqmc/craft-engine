@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.pack.revision.Revisions;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class DisplayContextSelectProperty implements SelectProperty {
-    public static final Key ID = Key.of("minecraft:display_context");
     public static final DisplayContextSelectProperty INSTANCE = new DisplayContextSelectProperty();
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
@@ -22,7 +20,7 @@ public final class DisplayContextSelectProperty implements SelectProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "display_context");
     }
 
     @Override

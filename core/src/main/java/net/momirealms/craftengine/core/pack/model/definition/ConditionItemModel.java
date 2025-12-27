@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.pack.model.definition.condition.Condition
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class ConditionItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:condition");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final ConditionProperty property;
@@ -65,7 +63,7 @@ public final class ConditionItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "condition");
         json.add("on_true", this.onTrue.apply(version));
         json.add("on_false", this.onFalse.apply(version));
         this.property.accept(json);

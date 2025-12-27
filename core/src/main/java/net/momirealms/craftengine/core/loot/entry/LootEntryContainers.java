@@ -11,12 +11,12 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public class LootEntryContainers {
-    public static final LootEntryContainerType<?> ALTERNATIVES = register(AlternativesLootEntryContainer.ID, AlternativesLootEntryContainer.FACTORY);
-    public static final LootEntryContainerType<?> IF_ELSE = register(Key.from("craftengine:if_else"), AlternativesLootEntryContainer.FACTORY);
-    public static final LootEntryContainerType<?> ITEM = register(SingleItemLootEntryContainer.ID, SingleItemLootEntryContainer.FACTORY);
-    public static final LootEntryContainerType<?> EXP = register(ExpLootEntryContainer.ID, ExpLootEntryContainer.FACTORY);
-    public static final LootEntryContainerType<?> FURNITURE_ITEM = register(FurnitureItemLootEntryContainer.ID, FurnitureItemLootEntryContainer.FACTORY);
-    public static final LootEntryContainerType<?> EMPTY = register(EmptyLoopEntryContainer.ID, EmptyLoopEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> ALTERNATIVES = register(Key.ce("alternatives"), AlternativesLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> IF_ELSE = register(Key.ce("if_else"), AlternativesLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> ITEM = register(Key.ce("item"), SingleItemLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> EXP = register(Key.ce("exp"), ExpLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> FURNITURE_ITEM = register(Key.ce("furniture_item"), FurnitureItemLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> EMPTY = register(Key.ce("empty"), EmptyLoopEntryContainer.FACTORY);
 
     protected LootEntryContainers() {}
 

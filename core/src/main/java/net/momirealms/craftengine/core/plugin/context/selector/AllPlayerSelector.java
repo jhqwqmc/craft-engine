@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.ArrayList;
@@ -20,12 +19,24 @@ import java.util.function.Predicate;
 public class AllPlayerSelector<CTX extends Context> implements PlayerSelector<CTX> {
     private final Predicate<CTX> predicate;
 
-    public AllPlayerSelector(List<Condition<CTX>> predicates) {
+    private AllPlayerSelector(List<Condition<CTX>> predicates) {
         this.predicate = MiscUtils.allOf(predicates);
     }
 
-    public AllPlayerSelector() {
+    private AllPlayerSelector() {
         this.predicate = null;
+    }
+
+    public static <CTX extends Context> AllPlayerSelector<CTX> all(List<Condition<CTX>> predicates) {
+        return new AllPlayerSelector<>(predicates);
+    }
+
+    public static <CTX extends Context> AllPlayerSelector<CTX> all() {
+        return new AllPlayerSelector<>();
+    }
+
+    public static <CTX extends Context> PlayerSelectorFactory<CTX> factory() {
+        return new Factory<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -48,18 +59,11 @@ public class AllPlayerSelector<CTX extends Context> implements PlayerSelector<CT
         }
     }
 
-    @Override
-    public Key type() {
-        return PlayerSelectors.ALL;
-    }
-
-    public static class FactoryImpl<CTX extends Context> implements PlayerSelectorFactory<CTX> {
+    private static class Factory<CTX extends Context> implements PlayerSelectorFactory<CTX> {
 
         @Override
         public PlayerSelector<CTX> create(Map<String, Object> args, Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
-
-
-            return null;
+            return new AllPlayerSelector<>();
         }
     }
 }

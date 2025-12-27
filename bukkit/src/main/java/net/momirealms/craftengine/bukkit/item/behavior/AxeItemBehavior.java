@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AxeItemBehavior extends ItemBehavior {
-    public static final Key ID = Key.from("craftengine:axe_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     public static final AxeItemBehavior INSTANCE = new AxeItemBehavior();
     private static final Key AXE_STRIP_SOUND = Key.of("minecraft:item.axe.strip");

@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
+public final class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
     private final ShulkerFurnitureHitboxConfig config;
     private final List<FurnitureHitboxPart> parts;
     private final List<Collider> colliders;
@@ -32,7 +32,7 @@ public class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
     private final Object despawnPacket;
     private final int[] entityIds;
 
-    public ShulkerFurnitureHitbox(Furniture furniture, ShulkerFurnitureHitboxConfig config) {
+    ShulkerFurnitureHitbox(Furniture furniture, ShulkerFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
         this.entityIds = acquireEntityIds(CoreReflections.instance$Entity$ENTITY_COUNTER::incrementAndGet);

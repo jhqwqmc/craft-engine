@@ -43,7 +43,6 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Key ID = Key.from("craftengine:fence_gate_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> inWallProperty;

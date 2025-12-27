@@ -1,12 +1,10 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class WhenTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:when");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final TemplateArgument result;
 

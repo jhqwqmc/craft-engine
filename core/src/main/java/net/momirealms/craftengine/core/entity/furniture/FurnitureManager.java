@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface FurnitureManager extends Manageable {
-    Key FURNITURE_KEY = Key.of("craftengine:furniture_id");
-    Key FURNITURE_EXTRA_DATA_KEY = Key.of("craftengine:furniture_extra_data");
-    Key FURNITURE_COLLISION = Key.of("craftengine:collision");
+    Key FURNITURE_KEY = Key.ce("furniture_id");
+    Key FURNITURE_EXTRA_DATA_KEY = Key.ce("furniture_extra_data");
+    Key FURNITURE_COLLISION = Key.ce("collision");
 
     ConfigParser parser();
 

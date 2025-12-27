@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class SpecialItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:special");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final SpecialModel specialModel;
@@ -46,7 +45,7 @@ public final class SpecialItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "special");
         json.add("model", this.specialModel.apply(version));
         json.addProperty("base", this.base);
         return json;

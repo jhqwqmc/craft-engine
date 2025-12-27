@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class MultiHighBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:multi_high_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     public final IntegerProperty highProperty;
 

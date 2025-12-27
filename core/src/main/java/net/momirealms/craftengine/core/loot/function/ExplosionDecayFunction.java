@@ -5,7 +5,6 @@ import net.momirealms.craftengine.core.loot.LootContext;
 import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class ExplosionDecayFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Key ID = Key.from("craftengine:explosion_decay");
     public static final LootFunctionFactory<?> FACTORY = new Factory<>();
 
     public ExplosionDecayFunction(List<Condition<LootContext>> predicates) {

@@ -1,11 +1,8 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
-
 import java.util.Map;
 
 public final class ObjectTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:object");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final Object value;
 

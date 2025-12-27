@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ItemUpdateConfig {
+public final class ItemUpdateConfig {
     private final List<Version> versions;
     private final int maxVersion;
 

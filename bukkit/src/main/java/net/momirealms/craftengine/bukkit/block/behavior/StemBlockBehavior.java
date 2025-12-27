@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class StemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Key ID = Key.from("craftengine:stem_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final IntegerProperty ageProperty;
     private final Key fruit;

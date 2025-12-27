@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class LiquidCollisionBlockItemBehavior extends BlockItemBehavior {
-    public static final Key ID = Key.from("craftengine:liquid_collision_block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     private final int offsetY;
 

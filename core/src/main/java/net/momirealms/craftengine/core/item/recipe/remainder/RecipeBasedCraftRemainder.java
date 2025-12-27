@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RecipeBasedCraftRemainder implements CraftRemainder {
-    public static final Factory FACTORY = new Factory();
+public final class RecipeBasedCraftRemainder implements CraftRemainder {
+    public static final CraftRemainderFactory<RecipeBasedCraftRemainder> FACTORY = new Factory();
     private final Map<Key, CraftRemainder> remainders;
     @Nullable
     private final CraftRemainder fallback;
@@ -30,7 +30,7 @@ public class RecipeBasedCraftRemainder implements CraftRemainder {
         return this.fallback != null ? this.fallback.remainder(recipeId, item) : null;
     }
 
-    public static class Factory implements CraftRemainderFactory<RecipeBasedCraftRemainder> {
+    private static class Factory implements CraftRemainderFactory<RecipeBasedCraftRemainder> {
 
         @Override
         public RecipeBasedCraftRemainder create(Map<String, Object> args) {

@@ -1,14 +1,12 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public final class ListTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:list");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final List<Object> value;
 

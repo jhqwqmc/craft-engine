@@ -3,7 +3,6 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import net.momirealms.craftengine.core.plugin.config.template.ArgumentString;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Locale;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public final class ExpressionTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:expression");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final ArgumentString expression;
     private final ValueType valueType;

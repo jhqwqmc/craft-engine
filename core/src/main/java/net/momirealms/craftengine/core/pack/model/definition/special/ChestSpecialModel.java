@@ -3,7 +3,6 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class ChestSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:chest");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     private final String texture;
@@ -38,7 +36,7 @@ public final class ChestSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "chest");
         json.addProperty("texture", this.texture);
         if (this.openness > 0) {
             json.addProperty("openness", this.openness);

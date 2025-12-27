@@ -34,7 +34,6 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class SaplingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:sapling_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Key feature;
     private final IntegerProperty stageProperty;

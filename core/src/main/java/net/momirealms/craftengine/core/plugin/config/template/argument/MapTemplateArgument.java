@@ -1,12 +1,10 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.util.Map;
 
 public final class MapTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:map");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final Map<String, Object> value;
 

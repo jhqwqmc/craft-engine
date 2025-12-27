@@ -12,19 +12,19 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class SpecialModels {
-    public static final SpecialModelType BANNER = register(BannerSpecialModel.ID, BannerSpecialModel.FACTORY, BannerSpecialModel.READER);
-    public static final SpecialModelType BED = register(BedSpecialModel.ID, BedSpecialModel.FACTORY, BedSpecialModel.READER);
-    public static final SpecialModelType CHEST = register(ChestSpecialModel.ID, ChestSpecialModel.FACTORY, ChestSpecialModel.READER);
-    public static final SpecialModelType CONDUIT = register(Key.of("minecraft:conduit"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
-    public static final SpecialModelType COPPER_GOLEM_STATUE = register(CopperGolemStatueSpecialModel.ID, CopperGolemStatueSpecialModel.FACTORY, CopperGolemStatueSpecialModel.READER);
-    public static final SpecialModelType DECORATED_POT = register(Key.of("minecraft:decorated_pot"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
-    public static final SpecialModelType HEAD = register(HeadSpecialModel.ID, HeadSpecialModel.FACTORY, HeadSpecialModel.READER);
-    public static final SpecialModelType PLAYER_HEAD = register(PlayerHeadSpecialModel.ID, PlayerHeadSpecialModel.FACTORY, PlayerHeadSpecialModel.READER);
-    public static final SpecialModelType SHIELD = register(Key.of("minecraft:shield"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
-    public static final SpecialModelType SHULKER_BOX = register(ShulkerBoxSpecialModel.ID, ShulkerBoxSpecialModel.FACTORY, ShulkerBoxSpecialModel.READER);
-    public static final SpecialModelType STANDING_SIGN = register(Key.of("minecraft:standing_sign"), SignSpecialModel.FACTORY, SignSpecialModel.READER);
-    public static final SpecialModelType HANGING_SIGN = register(Key.of("minecraft:hanging_sign"), SignSpecialModel.FACTORY, SignSpecialModel.READER);
-    public static final SpecialModelType TRIDENT = register(Key.of("minecraft:trident"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
+    public static final SpecialModelType BANNER = register(Key.of("banner"), BannerSpecialModel.FACTORY, BannerSpecialModel.READER);
+    public static final SpecialModelType BED = register(Key.of("bed"), BedSpecialModel.FACTORY, BedSpecialModel.READER);
+    public static final SpecialModelType CHEST = register(Key.of("chest"), ChestSpecialModel.FACTORY, ChestSpecialModel.READER);
+    public static final SpecialModelType CONDUIT = register(Key.of("conduit"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
+    public static final SpecialModelType COPPER_GOLEM_STATUE = register(Key.of("copper_golem_statue"), CopperGolemStatueSpecialModel.FACTORY, CopperGolemStatueSpecialModel.READER);
+    public static final SpecialModelType DECORATED_POT = register(Key.of("decorated_pot"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
+    public static final SpecialModelType HEAD = register(Key.of("head"), HeadSpecialModel.FACTORY, HeadSpecialModel.READER);
+    public static final SpecialModelType PLAYER_HEAD = register(Key.of("player_head"), PlayerHeadSpecialModel.FACTORY, PlayerHeadSpecialModel.READER);
+    public static final SpecialModelType SHIELD = register(Key.of("shield"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
+    public static final SpecialModelType SHULKER_BOX = register(Key.of("shulker_box"), ShulkerBoxSpecialModel.FACTORY, ShulkerBoxSpecialModel.READER);
+    public static final SpecialModelType STANDING_SIGN = register(Key.of("standing_sign"), SignSpecialModel.FACTORY, SignSpecialModel.READER);
+    public static final SpecialModelType HANGING_SIGN = register(Key.of("hanging_sign"), SignSpecialModel.FACTORY, SignSpecialModel.READER);
+    public static final SpecialModelType TRIDENT = register(Key.of("trident"), SimpleSpecialModel.FACTORY, SimpleSpecialModel.READER);
 
     private SpecialModels() {}
 

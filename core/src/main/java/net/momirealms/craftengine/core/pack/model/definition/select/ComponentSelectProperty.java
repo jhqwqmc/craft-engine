@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.select;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class ComponentSelectProperty implements SelectProperty {
-    public static final Key ID = Key.of("minecraft:component");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     private final String component;
@@ -22,7 +20,7 @@ public final class ComponentSelectProperty implements SelectProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "component");
         jsonObject.addProperty("component", this.component);
     }
 

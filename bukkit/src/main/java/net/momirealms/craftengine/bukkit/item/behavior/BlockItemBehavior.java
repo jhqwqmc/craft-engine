@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BlockItemBehavior extends BlockBoundItemBehavior {
-    public static final Key ID = Key.from("craftengine:block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     private final Key blockId;
 

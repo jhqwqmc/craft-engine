@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:item_name");;
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] NBT_PATH = new Object[]{"display", "Name"};
     private final String argument;

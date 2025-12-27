@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<InteractionFurnitureHitbox> {
+public final class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxConfig<InteractionFurnitureHitbox> {
     public static final Factory FACTORY = new Factory();
     public static final InteractionFurnitureHitboxConfig DEFAULT = new InteractionFurnitureHitboxConfig();
 
@@ -26,7 +26,7 @@ public class InteractionFurnitureHitboxConfig extends AbstractFurnitureHitBoxCon
     private final boolean invisible;
     private final List<Object> cachedValues = new ArrayList<>(4);
 
-    public InteractionFurnitureHitboxConfig(SeatConfig[] seats,
+    private InteractionFurnitureHitboxConfig(SeatConfig[] seats,
                                             Vector3f position,
                                             boolean canUseItemOn,
                                             boolean blocksBuilding,

@@ -1,14 +1,14 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
 import com.google.gson.reflect.TypeToken;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.GsonHelper;
+import net.momirealms.craftengine.core.util.HashUtils;
+import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,11 +92,6 @@ public final class GitLabHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
-        return ResourcePackHosts.GITLAB;
-    }
-
-    @Override
     public CompletableFuture<List<ResourcePackDownloadData>> requestResourcePackDownloadLink(UUID player) {
         if (url == null) return CompletableFuture.completedFuture(Collections.emptyList());
         return CompletableFuture.completedFuture(List.of(ResourcePackDownloadData.of(this.url, this.uuid, this.sha1)));
@@ -164,6 +159,11 @@ public final class GitLabHost implements ResourcePackHost {
         parts.add(endBoundary.getBytes(StandardCharsets.UTF_8));
 
         return HttpRequest.BodyPublishers.ofByteArrays(parts);
+    }
+
+    @Override
+    public ResourcePackHostType type() {
+        return ResourcePackHosts.GITLAB;
     }
 
     private static class Factory implements ResourcePackHostFactory {

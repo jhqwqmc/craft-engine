@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.block.properties;
 
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.sparrow.nbt.IntTag;
 import net.momirealms.sparrow.nbt.NumericTag;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 public final class IntegerProperty extends Property<Integer> {
-    public static final Key ID = Key.of("craftengine:int");
     public static final PropertyFactory<Integer> FACTORY = new Factory();
     private final IntImmutableList values;
     public final int min;

@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class WallBlockItemBehavior extends BlockItemBehavior {
-    public static final Key ID = Key.from("craftengine:wall_block_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
 
     public WallBlockItemBehavior(Key wallBlockId) {

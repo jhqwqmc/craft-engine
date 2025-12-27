@@ -1,7 +1,5 @@
 package net.momirealms.craftengine.core.pack.host;
 
-import net.momirealms.craftengine.core.util.Key;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -15,5 +13,5 @@ public interface ResourcePackHost {
 
     boolean canUpload();
 
-    Key type();
+    ResourcePackHostType type();
 }

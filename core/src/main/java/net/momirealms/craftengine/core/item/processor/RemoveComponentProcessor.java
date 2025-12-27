@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.item.NetworkItemHandler;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
@@ -13,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class RemoveComponentProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:remove_components");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final List<String> arguments;
 

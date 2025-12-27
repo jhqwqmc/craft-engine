@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:pressure_plate_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<Boolean> poweredProperty;
     private final SoundData onSound;

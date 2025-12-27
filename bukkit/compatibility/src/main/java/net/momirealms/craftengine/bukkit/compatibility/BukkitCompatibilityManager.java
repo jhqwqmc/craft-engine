@@ -108,10 +108,10 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
             runCatchingHook(this::initWorldEditHook, "WorldEdit");
         }
         if (this.hasPlugin("BetterModel")) {
-            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.of("craftengine:better_model"), new BetterModelBlockEntityElementConfig.Factory()), "BetterModel");
+            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.ce("better_model"), new BetterModelBlockEntityElementConfig.Factory()), "BetterModel");
         }
         if (this.hasPlugin("ModelEngine")) {
-            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.of("craftengine:model_engine"), new ModelEngineBlockEntityElementConfig.Factory()), "ModelEngine");
+            runCatchingHook(() -> BukkitBlockEntityElementConfigs.register(Key.ce("model_engine"), new ModelEngineBlockEntityElementConfig.Factory()), "ModelEngine");
         }
         if (this.hasPlugin("CustomNameplates")) {
             runCatchingHook(() -> {

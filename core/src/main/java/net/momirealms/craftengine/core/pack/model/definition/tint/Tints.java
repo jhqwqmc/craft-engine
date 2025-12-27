@@ -12,14 +12,14 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class Tints {
-    public static final TintType CONSTANT = register(ConstantTint.ID, ConstantTint.FACTORY, ConstantTint.READER);
-    public static final TintType CUSTOM_MODEL_DATA = register(CustomModelDataTint.ID, CustomModelDataTint.FACTORY, CustomModelDataTint.READER);
-    public static final TintType DYE = register(Key.of("minecraft:dye"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
-    public static final TintType FIREWORK = register(Key.of("minecraft:firework"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
-    public static final TintType MAP_COLOR = register(Key.of("minecraft:map_color"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
-    public static final TintType POTION = register(Key.of("minecraft:potion"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
-    public static final TintType TEAM = register(Key.of("minecraft:team"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
-    public static final TintType GRASS = register(GrassTint.ID, GrassTint.FACTORY, GrassTint.READER);
+    public static final TintType CONSTANT = register(Key.of("constant"), ConstantTint.FACTORY, ConstantTint.READER);
+    public static final TintType CUSTOM_MODEL_DATA = register(Key.of("custom_model_data"), CustomModelDataTint.FACTORY, CustomModelDataTint.READER);
+    public static final TintType DYE = register(Key.of("dye"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
+    public static final TintType FIREWORK = register(Key.of("firework"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
+    public static final TintType MAP_COLOR = register(Key.of("map_color"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
+    public static final TintType POTION = register(Key.of("potion"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
+    public static final TintType TEAM = register(Key.of("team"), SimpleDefaultTint.FACTORY, SimpleDefaultTint.READER);
+    public static final TintType GRASS = register(Key.of("grass"), GrassTint.FACTORY, GrassTint.READER);
 
     private Tints() {}
 

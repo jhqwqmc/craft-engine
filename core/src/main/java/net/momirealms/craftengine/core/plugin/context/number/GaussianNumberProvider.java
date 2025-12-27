@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.plugin.context.number;
 
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
@@ -10,7 +9,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) implements NumberProvider {
-    public static final Key ID = Key.of("craftengine:gaussian");
     public static final NumberProviderFactory FACTORY = new Factory();
 
     public GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) {

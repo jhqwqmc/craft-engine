@@ -11,12 +11,12 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class NumberProviders {
-    public static final NumberProviderType FIXED = register(FixedNumberProvider.ID, FixedNumberProvider.FACTORY);
-    public static final NumberProviderType CONSTANT = register(Key.of("craftengine:constant"), FixedNumberProvider.FACTORY);
-    public static final NumberProviderType UNIFORM = register(UniformNumberProvider.ID, UniformNumberProvider.FACTORY);
-    public static final NumberProviderType EXPRESSION = register(ExpressionNumberProvider.ID, ExpressionNumberProvider.FACTORY);
-    public static final NumberProviderType GAUSSIAN = register(GaussianNumberProvider.ID, GaussianNumberProvider.FACTORY);
-    public static final NumberProviderType BINOMIAL = register(BinomialNumberProvider.ID, BinomialNumberProvider.FACTORY);
+    public static final NumberProviderType FIXED = register(Key.ce("fixed"), FixedNumberProvider.FACTORY);
+    public static final NumberProviderType CONSTANT = register(Key.ce("constant"), FixedNumberProvider.FACTORY);
+    public static final NumberProviderType UNIFORM = register(Key.ce("uniform"), UniformNumberProvider.FACTORY);
+    public static final NumberProviderType EXPRESSION = register(Key.ce("expression"), ExpressionNumberProvider.FACTORY);
+    public static final NumberProviderType GAUSSIAN = register(Key.ce("gaussian"), GaussianNumberProvider.FACTORY);
+    public static final NumberProviderType BINOMIAL = register(Key.ce("binomial"), BinomialNumberProvider.FACTORY);
 
     private NumberProviders() {}
 

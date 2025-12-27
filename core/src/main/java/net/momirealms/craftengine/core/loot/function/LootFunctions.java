@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public final class LootFunctions {
-    public static final LootFunctionType<?> APPLY_BONUS = register(ApplyBonusCountFunction.ID, ApplyBonusCountFunction.FACTORY);
-    public static final LootFunctionType<?> APPLY_DATA = register(ApplyDataFunction.ID, ApplyDataFunction.FACTORY);
-    public static final LootFunctionType<?> SET_COUNT = register(SetCountFunction.ID, SetCountFunction.FACTORY);
-    public static final LootFunctionType<?> EXPLOSION_DECAY = register(ExplosionDecayFunction.ID, ExplosionDecayFunction.FACTORY);
-    public static final LootFunctionType<?> DROP_EXP = register(DropExpFunction.ID, DropExpFunction.FACTORY);
-    public static final LootFunctionType<?> LIMIT_COUNT = register(LimitCountFunction.ID, LimitCountFunction.FACTORY);
+    public static final LootFunctionType<?> APPLY_BONUS = register(Key.ce("apply_bonus"), ApplyBonusCountFunction.FACTORY);
+    public static final LootFunctionType<?> APPLY_DATA = register(Key.ce("apply_data"), ApplyDataFunction.FACTORY);
+    public static final LootFunctionType<?> SET_COUNT = register(Key.ce("set_count"), SetCountFunction.FACTORY);
+    public static final LootFunctionType<?> EXPLOSION_DECAY = register(Key.ce("explosion_decay"), ExplosionDecayFunction.FACTORY);
+    public static final LootFunctionType<?> DROP_EXP = register(Key.ce("drop_exp"), DropExpFunction.FACTORY);
+    public static final LootFunctionType<?> LIMIT_COUNT = register(Key.ce("limit_count"), LimitCountFunction.FACTORY);
 
     private LootFunctions() {}
 

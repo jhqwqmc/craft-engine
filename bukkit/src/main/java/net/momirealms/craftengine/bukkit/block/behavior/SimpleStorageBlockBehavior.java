@@ -39,7 +39,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:simple_storage_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final String containerTitle;
     private final int rows;

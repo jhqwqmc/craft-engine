@@ -4,14 +4,12 @@ import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.io.IOException;
 import java.util.Map;
 
 public record MergeJsonResolution(boolean deeply) implements Resolution {
-    public static final Key ID = Key.of("craftengine:merge_json");
     public static final ResolutionFactory FACTORY = new Factory();
 
     @Override

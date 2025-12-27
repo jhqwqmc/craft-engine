@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.condition;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class CustomModelDataConditionProperty implements ConditionProperty {
-    public static final Key ID = Key.of("minecraft:custom_model_data");
     public static final ConditionPropertyFactory FACTORY = new Factory();
     public static final ConditionPropertyReader READER = new Reader();
     private final int index;
@@ -22,7 +20,7 @@ public final class CustomModelDataConditionProperty implements ConditionProperty
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "custom_model_data");
         if (this.index != 0)
             jsonObject.addProperty("index", this.index);
     }

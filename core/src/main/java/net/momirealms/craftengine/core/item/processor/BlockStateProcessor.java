@@ -17,7 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public class BlockStateProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:blockstate");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final Object[] NBT_PATH = new Object[]{"BlockStateTag"};
     private final LazyReference<Map<String, String>> wrapper;

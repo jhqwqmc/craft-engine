@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class StairsBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:stairs_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<SingleBlockHalf> halfProperty;

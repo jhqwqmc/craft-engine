@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class LeavesBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:leaves_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private static final Object LOG_TAG = BlockTags.getOrCreate(Key.of("minecraft", "logs"));
     private final int maxDistance;

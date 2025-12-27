@@ -12,16 +12,16 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class SelectProperties {
-    public static final SelectPropertyType BLOCK_STATE = register(BlockStateSelectProperty.ID, BlockStateSelectProperty.FACTORY, BlockStateSelectProperty.READER);
-    public static final SelectPropertyType CHARGE_TYPE = register(ChargeTypeSelectProperty.ID, ChargeTypeSelectProperty.FACTORY, ChargeTypeSelectProperty.READER);
-    public static final SelectPropertyType COMPONENT = register(ComponentSelectProperty.ID, ComponentSelectProperty.FACTORY, ComponentSelectProperty.READER);
-    public static final SelectPropertyType CONTEXT_DIMENSION = register(Key.of("minecraft:context_dimension"), SimpleSelectProperty.FACTORY, SimpleSelectProperty.READER);
-    public static final SelectPropertyType CONTEXT_ENTITY_TYPE = register(Key.of("minecraft:context_entity_type"), SimpleSelectProperty.FACTORY, SimpleSelectProperty.READER);
-    public static final SelectPropertyType DISPLAY_CONTEXT = register(DisplayContextSelectProperty.ID, DisplayContextSelectProperty.FACTORY, DisplayContextSelectProperty.READER);
-    public static final SelectPropertyType LOCAL_TIME = register(LocalTimeSelectProperty.ID, LocalTimeSelectProperty.FACTORY, LocalTimeSelectProperty.READER);
-    public static final SelectPropertyType MAIN_HAND = register(MainHandSelectProperty.ID, MainHandSelectProperty.FACTORY, MainHandSelectProperty.READER);
-    public static final SelectPropertyType TRIM_MATERIAL = register(TrimMaterialSelectProperty.ID, TrimMaterialSelectProperty.FACTORY, TrimMaterialSelectProperty.READER);
-    public static final SelectPropertyType CUSTOM_MODEL_DATA = register(CustomModelDataSelectProperty.ID, CustomModelDataSelectProperty.FACTORY, CustomModelDataSelectProperty.READER);
+    public static final SelectPropertyType BLOCK_STATE = register(Key.of("block_state"), BlockStateSelectProperty.FACTORY, BlockStateSelectProperty.READER);
+    public static final SelectPropertyType CHARGE_TYPE = register(Key.of("charge_type"), ChargeTypeSelectProperty.FACTORY, ChargeTypeSelectProperty.READER);
+    public static final SelectPropertyType COMPONENT = register(Key.of("component"), ComponentSelectProperty.FACTORY, ComponentSelectProperty.READER);
+    public static final SelectPropertyType CONTEXT_DIMENSION = register(Key.of("context_dimension"), SimpleSelectProperty.FACTORY, SimpleSelectProperty.READER);
+    public static final SelectPropertyType CONTEXT_ENTITY_TYPE = register(Key.of("context_entity_type"), SimpleSelectProperty.FACTORY, SimpleSelectProperty.READER);
+    public static final SelectPropertyType DISPLAY_CONTEXT = register(Key.of("display_context"), DisplayContextSelectProperty.FACTORY, DisplayContextSelectProperty.READER);
+    public static final SelectPropertyType LOCAL_TIME = register(Key.of("local_time"), LocalTimeSelectProperty.FACTORY, LocalTimeSelectProperty.READER);
+    public static final SelectPropertyType MAIN_HAND = register(Key.of("main_hand"), MainHandSelectProperty.FACTORY, MainHandSelectProperty.READER);
+    public static final SelectPropertyType TRIM_MATERIAL = register(Key.of("trim_material"), TrimMaterialSelectProperty.FACTORY, TrimMaterialSelectProperty.READER);
+    public static final SelectPropertyType CUSTOM_MODEL_DATA = register(Key.of("custom_model_data"), CustomModelDataSelectProperty.FACTORY, CustomModelDataSelectProperty.READER);
 
     private SelectProperties() {}
 

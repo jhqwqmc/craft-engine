@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SturdyBaseBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:sturdy_base_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Direction direction;
     private final boolean stackable;

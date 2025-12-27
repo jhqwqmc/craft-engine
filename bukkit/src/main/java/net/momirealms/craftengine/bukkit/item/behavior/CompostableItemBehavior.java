@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class CompostableItemBehavior extends ItemBehavior {
-    public static final Key ID = Key.from("craftengine:compostable_item");
     public static final ItemBehaviorFactory FACTORY = new Factory();
     private final double chance;
 

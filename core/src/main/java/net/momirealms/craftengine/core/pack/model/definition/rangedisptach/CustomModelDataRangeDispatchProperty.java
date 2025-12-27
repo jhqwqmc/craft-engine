@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CustomModelDataRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final Key ID = Key.of("minecraft:custom_model_data");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final int index;
@@ -23,7 +22,7 @@ public final class CustomModelDataRangeDispatchProperty implements RangeDispatch
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "custom_model_data");
         jsonObject.addProperty("index", this.index);
     }
 

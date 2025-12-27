@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 public final class ItemModels {
-    public static final ItemModelType EMPTY = register(EmptyItemModel.ID, EmptyItemModel.FACTORY, EmptyItemModel.READER);
-    public static final ItemModelType MODEL = register(BaseItemModel.ID, BaseItemModel.FACTORY, BaseItemModel.READER);
-    public static final ItemModelType COMPOSITE = register(CompositeItemModel.ID, CompositeItemModel.FACTORY, CompositeItemModel.READER);
-    public static final ItemModelType CONDITION = register(ConditionItemModel.ID, ConditionItemModel.FACTORY, ConditionItemModel.READER);
-    public static final ItemModelType RANGE_DISPATCH = register(RangeDispatchItemModel.ID, RangeDispatchItemModel.FACTORY, RangeDispatchItemModel.READER);
-    public static final ItemModelType SELECT = register(SelectItemModel.ID, SelectItemModel.FACTORY, SelectItemModel.READER);
-    public static final ItemModelType SPECIAL = register(SpecialItemModel.ID, SpecialItemModel.FACTORY, SpecialItemModel.READER);
-    public static final ItemModelType BUNDLE_SELECTED_ITEM = register(BundleSelectedItemModel.ID, BundleSelectedItemModel.FACTORY, BundleSelectedItemModel.READER);
+    public static final ItemModelType EMPTY = register(Key.of("empty"), EmptyItemModel.FACTORY, EmptyItemModel.READER);
+    public static final ItemModelType MODEL = register(Key.of("model"), BaseItemModel.FACTORY, BaseItemModel.READER);
+    public static final ItemModelType COMPOSITE = register(Key.of("composite"), CompositeItemModel.FACTORY, CompositeItemModel.READER);
+    public static final ItemModelType CONDITION = register(Key.of("condition"), ConditionItemModel.FACTORY, ConditionItemModel.READER);
+    public static final ItemModelType RANGE_DISPATCH = register(Key.of("range_dispatch"), RangeDispatchItemModel.FACTORY, RangeDispatchItemModel.READER);
+    public static final ItemModelType SELECT = register(Key.of("select"), SelectItemModel.FACTORY, SelectItemModel.READER);
+    public static final ItemModelType SPECIAL = register(Key.of("special"), SpecialItemModel.FACTORY, SpecialItemModel.READER);
+    public static final ItemModelType BUNDLE_SELECTED_ITEM = register(Key.of("bundle/selected_item"), BundleSelectedItemModel.FACTORY, BundleSelectedItemModel.READER);
 
     private ItemModels() {}
 

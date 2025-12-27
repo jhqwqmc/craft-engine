@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class SingleItemLootEntryContainer<T> extends AbstractSingleLootEntryContainer<T> {
-    public static final Key ID = Key.from("craftengine:item");
     public static final LootEntryContainerFactory<?> FACTORY = new Factory<>();
     private final Key item;
 

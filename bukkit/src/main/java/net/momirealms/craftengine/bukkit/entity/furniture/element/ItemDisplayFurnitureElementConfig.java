@@ -33,8 +33,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
+    public static final FurnitureElementConfigFactory<ItemDisplayFurnitureElement> FACTORY = new Factory();
     public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
     public final Key itemId;
     public final Vector3f scale;
@@ -55,7 +55,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final Predicate<PlayerContext> predicate;
     public final boolean hasCondition;
 
-    public ItemDisplayFurnitureElementConfig(Key itemId,
+    private ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
                                              Vector3f position,
                                              Vector3f translation,
@@ -132,7 +132,7 @@ public class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig
         return new ItemDisplayFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<ItemDisplayFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<ItemDisplayFurnitureElement> {
 
         @Override
         public ItemDisplayFurnitureElementConfig create(Map<String, Object> arguments) {

@@ -2,14 +2,12 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Locale;
 import java.util.Map;
 
 public final class ToUpperCaseTemplateArgument implements TemplateArgument {
-    public static final Key ID = Key.of("craftengine:to_upper_case");
     public static final TemplateArgumentFactory FACTORY = new Factory();
     private final String result;
 

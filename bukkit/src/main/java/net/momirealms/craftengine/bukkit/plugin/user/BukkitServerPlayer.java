@@ -80,11 +80,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class BukkitServerPlayer extends Player {
-    public static final Key SELECTED_LOCALE_KEY = Key.of("craftengine:locale");
-    public static final Key ENTITY_CULLING_DISTANCE_SCALE = Key.of("craftengine:entity_culling_distance_scale");
-    public static final Key DISPLAY_ENTITY_VIEW_DISTANCE_SCALE = Key.of("craftengine:display_entity_view_distance_scale");
-    public static final Key ENABLE_ENTITY_CULLING = Key.of("craftengine:enable_entity_culling");
-    public static final Key ENABLE_FURNITURE_DEBUG = Key.of("craftengine:enable_furniture_debug");
+    public static final Key SELECTED_LOCALE_KEY = Key.ce("locale");
+    public static final Key ENTITY_CULLING_DISTANCE_SCALE = Key.ce("entity_culling_distance_scale");
+    public static final Key DISPLAY_ENTITY_VIEW_DISTANCE_SCALE = Key.ce("display_entity_view_distance_scale");
+    public static final Key ENABLE_ENTITY_CULLING = Key.ce("enable_entity_culling");
+    public static final Key ENABLE_FURNITURE_DEBUG = Key.ce("enable_furniture_debug");
     private final BukkitCraftEngine plugin;
 
     // connection state

@@ -7,14 +7,12 @@ import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.model.legacy.LegacyOverridesModel;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeSet;
 
 public final class MergeLegacyModelResolution implements Resolution {
-    public static final Key ID = Key.of("craftengine:merge_legacy_model");
     public static final ResolutionFactory FACTORY = new Factory();
     public static final MergeLegacyModelResolution INSTANCE = new MergeLegacyModelResolution();
 

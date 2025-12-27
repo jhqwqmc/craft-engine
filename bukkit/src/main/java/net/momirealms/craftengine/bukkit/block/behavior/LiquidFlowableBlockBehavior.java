@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class LiquidFlowableBlockBehavior extends BukkitBlockBehavior implements PlaceLiquidBlockBehavior {
-    public static final Key ID = Key.from("craftengine:liquid_flowable_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
 
     public LiquidFlowableBlockBehavior(CustomBlock customBlock) {

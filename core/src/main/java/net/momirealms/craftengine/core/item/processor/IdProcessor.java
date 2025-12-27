@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
 
 public class IdProcessor<I> implements ItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:id");
     public static final String CRAFT_ENGINE_ID = "craftengine:id";
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Key argument;

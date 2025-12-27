@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.rangedisptach;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class CompassRangeDispatchProperty implements RangeDispatchProperty {
-    public static final Key ID = Key.of("minecraft:compass");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final String target;
@@ -28,7 +26,7 @@ public final class CompassRangeDispatchProperty implements RangeDispatchProperty
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "compass");
         jsonObject.addProperty("target", this.target);
         if (!this.wobble) {
             jsonObject.addProperty("wobble", false);

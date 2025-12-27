@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class DoubleHighBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:double_high_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<DoubleBlockHalf> halfProperty;
 

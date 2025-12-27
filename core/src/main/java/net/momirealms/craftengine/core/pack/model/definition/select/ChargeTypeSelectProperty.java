@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class ChargeTypeSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final Key ID = Key.of("minecraft:charge_type");
     public static final SelectPropertyFactory FACTORY = new Factory();
     public static final SelectPropertyReader READER = new Reader();
     public static final ChargeTypeSelectProperty INSTANCE = new ChargeTypeSelectProperty();
@@ -17,7 +16,7 @@ public final class ChargeTypeSelectProperty implements SelectProperty, LegacyMod
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "charge_type");
     }
 
     @Override

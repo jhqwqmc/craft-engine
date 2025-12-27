@@ -34,7 +34,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:drop_experience_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final NumberProvider amount;
     private final Predicate<Context> condition;

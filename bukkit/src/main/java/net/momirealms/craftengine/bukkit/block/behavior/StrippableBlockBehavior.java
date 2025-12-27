@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class StrippableBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:strippable_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final String stripped;
     private final LazyReference<BlockStateWrapper> lazyState;

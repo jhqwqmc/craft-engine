@@ -1,13 +1,11 @@
 package net.momirealms.craftengine.core.pack.model.definition.rangedisptach;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public final class TimeRangeDispatchProperty implements RangeDispatchProperty {
-    public static final Key ID = Key.of("minecraft:time");
     public static final RangeDispatchPropertyFactory FACTORY = new Factory();
     public static final RangeDispatchPropertyReader READER = new Reader();
     private final String source;
@@ -28,7 +26,7 @@ public final class TimeRangeDispatchProperty implements RangeDispatchProperty {
 
     @Override
     public void accept(JsonObject jsonObject) {
-        jsonObject.addProperty("property", ID.asMinimalString());
+        jsonObject.addProperty("property", "time");
         jsonObject.addProperty("source", this.source);
         if (!this.wobble) {
             jsonObject.addProperty("wobble", false);

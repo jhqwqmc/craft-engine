@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class ExpLootEntryContainer<T> extends AbstractLootEntryContainer<T> {
-    public static final Key ID = Key.from("craftengine:exp");
     public static final Factory<?> FACTORY = new Factory<>();
     private final NumberProvider value;
 

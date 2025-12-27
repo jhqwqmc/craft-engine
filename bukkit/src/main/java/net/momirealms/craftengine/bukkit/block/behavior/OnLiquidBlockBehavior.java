@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class OnLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:on_liquid_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final boolean onWater;
     private final boolean onLava;

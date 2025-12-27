@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class CompositeItemModel implements ItemModel {
-    public static final Key ID = Key.of("minecraft:composite");
     public static final ItemModelFactory FACTORY = new Factory();
     public static final ItemModelReader READER = new Reader();
     private final List<ItemModel> models;
@@ -32,7 +30,7 @@ public final class CompositeItemModel implements ItemModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "composite");
         JsonArray array = new JsonArray();
         for (ItemModel model : this.models) {
             array.add(model.apply(version));

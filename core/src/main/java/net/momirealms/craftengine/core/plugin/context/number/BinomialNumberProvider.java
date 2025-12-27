@@ -1,14 +1,12 @@
 package net.momirealms.craftengine.core.plugin.context.number;
 
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public record BinomialNumberProvider(NumberProvider trials, NumberProvider successProbability) implements NumberProvider {
-    public static final Key ID = Key.of("craftengine:binomial");
     public static final NumberProviderFactory FACTORY = new Factory();
 
     @Override

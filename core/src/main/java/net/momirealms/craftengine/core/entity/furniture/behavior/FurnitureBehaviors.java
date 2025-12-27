@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 @ApiStatus.Experimental
-public class FurnitureBehaviorTypes {
+public class FurnitureBehaviors {
+
+    protected FurnitureBehaviors() {}
 
     public static FurnitureBehavior fromMap(@Nullable Map<String, Object> map) {
         if (map == null || map.isEmpty()) return EmptyFurnitureBehavior.INSTANCE;

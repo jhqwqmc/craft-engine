@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BuddingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:budding_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final float growthChance;
     private final List<Key> blocks;

@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.item.processor.ItemProcessors;
 import net.momirealms.craftengine.core.loot.LootContext;
 import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class ApplyDataFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Key ID = Key.from("craftengine:apply_data");
     public static final LootFunctionFactory<?> FACTORY = new Factory<>();
     private final ItemProcessor<?>[] modifiers;
 

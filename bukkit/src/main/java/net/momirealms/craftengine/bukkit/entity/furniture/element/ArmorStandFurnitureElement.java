@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ArmorStandFurnitureElement extends AbstractFurnitureElement {
+public final class ArmorStandFurnitureElement extends AbstractFurnitureElement {
     private final ArmorStandFurnitureElementConfig config;
     private final Furniture furniture;
     private final Object cachedSpawnPacket;
@@ -34,7 +34,7 @@ public class ArmorStandFurnitureElement extends AbstractFurnitureElement {
         return this.furniture;
     }
 
-    public ArmorStandFurnitureElement(Furniture furniture, ArmorStandFurnitureElementConfig config) {
+    ArmorStandFurnitureElement(Furniture furniture, ArmorStandFurnitureElementConfig config) {
         super(config.predicate, config.hasCondition);
         this.config = config;
         this.furniture = furniture;

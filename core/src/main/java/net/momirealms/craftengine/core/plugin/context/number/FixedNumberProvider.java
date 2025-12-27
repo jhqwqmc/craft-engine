@@ -3,13 +3,11 @@ package net.momirealms.craftengine.core.plugin.context.number;
 import com.ezylang.evalex.Expression;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public record FixedNumberProvider(double value) implements NumberProvider {
-    public static final Key ID = Key.of("craftengine:fixed");
     public static final NumberProviderFactory FACTORY = new Factory();
 
     @Override

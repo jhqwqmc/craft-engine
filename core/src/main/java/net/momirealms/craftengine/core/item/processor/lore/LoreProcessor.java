@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         permits LoreProcessor.EmptyLoreProcessor, LoreProcessor.CompositeLoreProcessor, LoreProcessor.DoubleLoreProcessor, LoreProcessor.SingleLoreProcessor {
     ItemProcessorFactory<?> FACTORY = new Factory<>();
-    Key ID = Key.of("craftengine:lore");
 
     @Override
     @Nullable

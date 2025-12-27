@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.pack.model.definition.tint;
 
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.incendo.cloud.type.Either;
 
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class ConstantTint implements Tint {
-    public static final Key ID = Key.of("minecraft:constant");
     public static final TintFactory FACTORY = new Factory();
     public static final TintReader READER = new Reader();
     private final Either<Integer, List<Float>> value;
@@ -25,7 +23,7 @@ public final class ConstantTint implements Tint {
     @Override
     public JsonObject get() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
+        json.addProperty("type", "constant");
         applyAnyTint(json, this.value, "value");
         return json;
     }

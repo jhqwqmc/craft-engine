@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Key ID = Key.from("craftengine:apply_bonus");
     public static final LootFunctionFactory<?> FACTORY = new Factory<>();
     private final Key enchantment;
     private final Formula formula;
@@ -63,8 +62,8 @@ public final class ApplyBonusCountFunction<T> extends AbstractLootConditionalFun
     }
 
     public static class Formulas {
-        public static final Key ORE_DROPS = Key.of("craftengine:ore_drops");
-        public static final Key CROP_DROPS = Key.of("craftengine:binomial_with_bonus_count");
+        public static final Key ORE_DROPS = Key.ce("ore_drops");
+        public static final Key CROP_DROPS = Key.ce("binomial_with_bonus_count");
 
         static {
             register(ORE_DROPS, OreDrops.FACTORY);

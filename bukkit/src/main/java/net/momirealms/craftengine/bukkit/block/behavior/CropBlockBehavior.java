@@ -23,7 +23,6 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.ItemUtils;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -39,7 +38,6 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class CropBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:crop_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final IntegerProperty ageProperty;
     private final float growSpeed;

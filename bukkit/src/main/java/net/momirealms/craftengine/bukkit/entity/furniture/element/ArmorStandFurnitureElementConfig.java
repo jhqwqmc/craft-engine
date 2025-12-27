@@ -30,8 +30,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement> {
+    public static final FurnitureElementConfigFactory<ArmorStandFurnitureElement> FACTORY = new Factory();
     public final Function<Player, List<Object>> metadata;
     public final Key itemId;
     public final float scale;
@@ -42,7 +42,7 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
     public final Predicate<PlayerContext> predicate;
     public final boolean hasCondition;
 
-    public ArmorStandFurnitureElementConfig(Key itemId,
+    private ArmorStandFurnitureElementConfig(Key itemId,
                                             float scale,
                                             Vector3f position,
                                             boolean applyDyedColor,
@@ -92,7 +92,7 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
         return new ArmorStandFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<ArmorStandFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<ArmorStandFurnitureElement> {
 
         @Override
         public ArmorStandFurnitureElementConfig create(Map<String, Object> arguments) {

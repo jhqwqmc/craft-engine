@@ -7,14 +7,12 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
 import java.util.Map;
 
 public final class DropExpFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Key ID = Key.from("craftengine:drop_exp");
     public static final LootFunctionFactory<?> FACTORY = new Factory<>();
     private final NumberProvider value;
 

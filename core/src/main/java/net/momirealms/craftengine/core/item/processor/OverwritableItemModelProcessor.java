@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 public class OverwritableItemModelProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final Key ID = Key.of("craftengine:overwritable_item_model");
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Key data;
 

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class BlockBehaviors {
-    public static final BlockBehaviorType EMPTY = register(Key.from("craftengine:empty"), (block, args) -> EmptyBlockBehavior.INSTANCE);
+    public static final BlockBehaviorType EMPTY = register(Key.ce("empty"), (block, args) -> EmptyBlockBehavior.INSTANCE);
 
     protected BlockBehaviors() {
     }

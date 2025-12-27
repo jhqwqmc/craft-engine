@@ -10,21 +10,21 @@ import net.momirealms.craftengine.core.util.*;
 import java.util.Map;
 
 public final class Properties {
-    public static final PropertyType<?> BOOLEAN = register(BooleanProperty.ID, BooleanProperty.FACTORY);
-    public static final PropertyType<?> INT = register(IntegerProperty.ID, IntegerProperty.FACTORY);
-    public static final PropertyType<?> STRING = register(StringProperty.ID, StringProperty.FACTORY);
-    public static final PropertyType<?> AXIS = register(Key.of("craftengine:axis"), EnumProperty.factory(Direction.Axis.class));
-    public static final PropertyType<?> HORIZONTAL_DIRECTION = register(Key.of("craftengine:horizontal_direction"), EnumProperty.factory(HorizontalDirection.class));
-    public static final PropertyType<?> FOUR_DIRECTION = register(Key.of("craftengine:4-direction"), EnumProperty.factory(HorizontalDirection.class));
-    public static final PropertyType<?> DIRECTION = register(Key.of("craftengine:direction"), EnumProperty.factory(Direction.class));
-    public static final PropertyType<?> SIX_DIRECTION = register(Key.of("craftengine:6-direction"), EnumProperty.factory(Direction.class));
-    public static final PropertyType<?> SINGLE_BLOCK_HALF = register(Key.of("craftengine:single_block_half"), EnumProperty.factory(SingleBlockHalf.class));
-    public static final PropertyType<?> DOUBLE_BLOCK_HALF = register(Key.of("craftengine:double_block_half"), EnumProperty.factory(DoubleBlockHalf.class));
-    public static final PropertyType<?> HINGE = register(Key.of("craftengine:hinge"), EnumProperty.factory(DoorHinge.class));
-    public static final PropertyType<?> STAIRS_SHAPE = register(Key.of("craftengine:stairs_shape"), EnumProperty.factory(StairsShape.class));
-    public static final PropertyType<?> SLAB_TYPE = register(Key.of("craftengine:slab_type"), EnumProperty.factory(SlabType.class));
-    public static final PropertyType<?> SOFA_SHAPE = register(Key.of("craftengine:sofa_shape"), EnumProperty.factory(SofaShape.class));
-    public static final PropertyType<?> ANCHOR_TYPE = register(Key.of("craftengine:anchor_type"), EnumProperty.factory(AnchorType.class));
+    public static final PropertyType<?> BOOLEAN = register(Key.ce("boolean"), BooleanProperty.FACTORY);
+    public static final PropertyType<?> INT = register(Key.ce("int"), IntegerProperty.FACTORY);
+    public static final PropertyType<?> STRING = register(Key.ce("string"), StringProperty.FACTORY);
+    public static final PropertyType<?> AXIS = register(Key.ce("axis"), EnumProperty.factory(Direction.Axis.class));
+    public static final PropertyType<?> HORIZONTAL_DIRECTION = register(Key.ce("horizontal_direction"), EnumProperty.factory(HorizontalDirection.class));
+    public static final PropertyType<?> FOUR_DIRECTION = register(Key.ce("4-direction"), EnumProperty.factory(HorizontalDirection.class));
+    public static final PropertyType<?> DIRECTION = register(Key.ce("direction"), EnumProperty.factory(Direction.class));
+    public static final PropertyType<?> SIX_DIRECTION = register(Key.ce("6-direction"), EnumProperty.factory(Direction.class));
+    public static final PropertyType<?> SINGLE_BLOCK_HALF = register(Key.ce("single_block_half"), EnumProperty.factory(SingleBlockHalf.class));
+    public static final PropertyType<?> DOUBLE_BLOCK_HALF = register(Key.ce("double_block_half"), EnumProperty.factory(DoubleBlockHalf.class));
+    public static final PropertyType<?> HINGE = register(Key.ce("hinge"), EnumProperty.factory(DoorHinge.class));
+    public static final PropertyType<?> STAIRS_SHAPE = register(Key.ce("stairs_shape"), EnumProperty.factory(StairsShape.class));
+    public static final PropertyType<?> SLAB_TYPE = register(Key.ce("slab_type"), EnumProperty.factory(SlabType.class));
+    public static final PropertyType<?> SOFA_SHAPE = register(Key.ce("sofa_shape"), EnumProperty.factory(SofaShape.class));
+    public static final PropertyType<?> ANCHOR_TYPE = register(Key.ce("anchor_type"), EnumProperty.factory(AnchorType.class));
 
     private Properties() {}
 

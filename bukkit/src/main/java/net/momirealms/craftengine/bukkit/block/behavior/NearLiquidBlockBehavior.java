@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class NearLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Key ID = Key.from("craftengine:near_liquid_block");
     private static final List<Object> WATER = List.of(MFluids.WATER, MFluids.FLOWING_WATER);
     private static final List<Object> LAVA = List.of(MFluids.LAVA, MFluids.FLOWING_LAVA);
     public static final BlockBehaviorFactory FACTORY = new Factory();

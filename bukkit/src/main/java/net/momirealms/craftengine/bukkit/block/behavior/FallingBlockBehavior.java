@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class FallingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:falling_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final float hurtAmount;
     private final int maxHurt;

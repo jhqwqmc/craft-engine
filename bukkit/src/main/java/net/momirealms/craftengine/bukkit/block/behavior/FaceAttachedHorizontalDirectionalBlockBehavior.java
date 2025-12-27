@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class FaceAttachedHorizontalDirectionalBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:face_attached_horizontal_directional_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final Property<AnchorType> anchorTypeProperty;
     private final Property<HorizontalDirection> facingProperty;

@@ -6,13 +6,11 @@ import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.GsonHelper;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.HashSet;
 import java.util.Map;
 
 public final class MergeFontResolution implements Resolution {
-    public static final Key ID = Key.of("craftengine:merge_font");
     public static final ResolutionFactory FACTORY = new Factory();
     public static final MergeFontResolution INSTANCE = new MergeFontResolution();
 

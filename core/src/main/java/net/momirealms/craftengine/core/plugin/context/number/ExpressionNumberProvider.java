@@ -6,13 +6,11 @@ import com.ezylang.evalex.parser.ParseException;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
 public record ExpressionNumberProvider(String expression) implements NumberProvider {
-    public static final Key ID = Key.of("craftengine:expression");
     public static final NumberProviderFactory FACTORY = new Factory();
 
     @Override

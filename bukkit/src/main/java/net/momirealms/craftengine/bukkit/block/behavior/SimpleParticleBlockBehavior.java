@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SimpleParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:simple_particle_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;

@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.pack.revision.Revision;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MinecraftVersion;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class ShulkerBoxSpecialModel implements SpecialModel {
-    public static final Key ID = Key.of("minecraft:shulker_box");
     public static final SpecialModelFactory FACTORY = new Factory();
     public static final SpecialModelReader READER = new Reader();
     private final String texture;
@@ -48,12 +46,12 @@ public final class ShulkerBoxSpecialModel implements SpecialModel {
     @Override
     public JsonObject apply(MinecraftVersion version) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", ID.asMinimalString());
-        json.addProperty("texture", texture);
-        if (orientation != null) {
-            json.addProperty("orientation", orientation.name().toLowerCase(Locale.ENGLISH));
+        json.addProperty("type", "shulker_box");
+        json.addProperty("texture", this.texture);
+        if (this.orientation != null) {
+            json.addProperty("orientation", this.orientation.name().toLowerCase(Locale.ENGLISH));
         }
-        json.addProperty("openness", openness);
+        json.addProperty("openness", this.openness);
         return json;
     }
 

@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 public final class TemplateArguments {
-    public static final TemplateArgumentType PLAIN = register(PlainStringTemplateArgument.ID, PlainStringTemplateArgument.FACTORY);
-    public static final TemplateArgumentType SELF_INCREASE_INT = register(SelfIncreaseIntTemplateArgument.ID, SelfIncreaseIntTemplateArgument.FACTORY);
-    public static final TemplateArgumentType MAP = register(MapTemplateArgument.ID, MapTemplateArgument.FACTORY);
-    public static final TemplateArgumentType LIST = register(ListTemplateArgument.ID, ListTemplateArgument.FACTORY);
-    public static final TemplateArgumentType NULL = register(NullTemplateArgument.ID, NullTemplateArgument.FACTORY);
-    public static final TemplateArgumentType EXPRESSION = register(ExpressionTemplateArgument.ID, ExpressionTemplateArgument.FACTORY);
-    public static final TemplateArgumentType CONDITION = register(ConditionTemplateArgument.ID, ConditionTemplateArgument.FACTORY);
-    public static final TemplateArgumentType TO_UPPER_CASE = register(ToUpperCaseTemplateArgument.ID, ToUpperCaseTemplateArgument.FACTORY);
-    public static final TemplateArgumentType TO_LOWER_CASE = register(ToLowerCaseTemplateArgument.ID, ToLowerCaseTemplateArgument.FACTORY);
-    public static final TemplateArgumentType OBJECT = register(ObjectTemplateArgument.ID, ObjectTemplateArgument.FACTORY);
-    public static final TemplateArgumentType WHEN = register(WhenTemplateArgument.ID, WhenTemplateArgument.FACTORY);
+    public static final TemplateArgumentType PLAIN = register(Key.ce("plain"), PlainStringTemplateArgument.FACTORY);
+    public static final TemplateArgumentType SELF_INCREASE_INT = register(Key.ce("self_increase_int"), SelfIncreaseIntTemplateArgument.FACTORY);
+    public static final TemplateArgumentType MAP = register(Key.ce("map"), MapTemplateArgument.FACTORY);
+    public static final TemplateArgumentType LIST = register(Key.ce("list"), ListTemplateArgument.FACTORY);
+    public static final TemplateArgumentType NULL = register(Key.ce("null"), NullTemplateArgument.FACTORY);
+    public static final TemplateArgumentType EXPRESSION = register(Key.ce("expression"), ExpressionTemplateArgument.FACTORY);
+    public static final TemplateArgumentType CONDITION = register(Key.ce("condition"), ConditionTemplateArgument.FACTORY);
+    public static final TemplateArgumentType TO_UPPER_CASE = register(Key.ce("to_upper_case"), ToUpperCaseTemplateArgument.FACTORY);
+    public static final TemplateArgumentType TO_LOWER_CASE = register(Key.ce("to_lower_case"), ToLowerCaseTemplateArgument.FACTORY);
+    public static final TemplateArgumentType OBJECT = register(Key.ce("object"), ObjectTemplateArgument.FACTORY);
+    public static final TemplateArgumentType WHEN = register(Key.ce("when"), WhenTemplateArgument.FACTORY);
 
     private TemplateArguments() {}
 

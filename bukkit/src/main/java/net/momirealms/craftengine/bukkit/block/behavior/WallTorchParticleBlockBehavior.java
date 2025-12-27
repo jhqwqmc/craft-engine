@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 public class WallTorchParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Key ID = Key.from("craftengine:wall_torch_particle_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;

@@ -24,7 +24,7 @@ public class UploadPackCommand extends BukkitCommandFeature<CommandSender> {
                         handleFeedback(context, MessageConstants.COMMAND_UPLOAD_ON_PROGRESS);
                         plugin().packManager().uploadResourcePack();
                     } else {
-                        handleFeedback(context, MessageConstants.COMMAND_UPLOAD_FAILURE_NOT_SUPPORTED, Component.text(host.type().value()));
+                        handleFeedback(context, MessageConstants.COMMAND_UPLOAD_FAILURE_NOT_SUPPORTED, Component.text(host.type().id().value()));
                     }
                 });
     }
