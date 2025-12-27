@@ -1,12 +1,12 @@
 package net.momirealms.craftengine.core.loot;
 
-import com.google.common.collect.Lists;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.entry.LootEntryContainer;
 import net.momirealms.craftengine.core.loot.entry.LootEntryContainers;
 import net.momirealms.craftengine.core.loot.function.LootFunction;
 import net.momirealms.craftengine.core.loot.function.LootFunctions;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -51,18 +50,9 @@ public class LootTable<T> {
                 Map<String, Object> pool = MiscUtils.castToMap(rawPoolMap, false);
                 NumberProvider rolls = NumberProviders.fromObject(pool.getOrDefault("rolls", 1));
                 NumberProvider bonus_rolls = NumberProviders.fromObject(pool.getOrDefault("bonus_rolls", 0));
-                List<Condition<LootContext>> conditions = Optional.ofNullable(pool.get("conditions"))
-                        .map(it -> LootConditions.fromMapList(castToMapListOrThrow(it,
-                                () -> new LocalizedResourceConfigException("warning.config.loot_table.invalid_conditions_type", it.getClass().getSimpleName()))))
-                        .orElse(Lists.newArrayList());
-                List<LootEntryContainer<T>> containers = Optional.ofNullable(pool.get("entries"))
-                        .map(it -> (List<LootEntryContainer<T>>) new ArrayList<LootEntryContainer<T>>(LootEntryContainers.fromMapList(castToMapListOrThrow(it,
-                                () -> new LocalizedResourceConfigException("warning.config.loot_table.invalid_entries_type", it.getClass().getSimpleName())))))
-                        .orElse(Lists.newArrayList());
-                List<LootFunction<T>> functions = Optional.ofNullable(pool.get("functions"))
-                        .map(it -> (List<LootFunction<T>>) new ArrayList<LootFunction<T>>(LootFunctions.fromMapList(castToMapListOrThrow(it,
-                                () -> new LocalizedResourceConfigException("warning.config.loot_table.invalid_functions_type", it.getClass().getSimpleName())))))
-                        .orElse(Lists.newArrayList());
+                List<Condition<LootContext>> conditions = ResourceConfigUtils.parseConfigAsList(pool.get("conditions"), CommonConditions::fromMap);
+                List<LootEntryContainer<T>> containers = ResourceConfigUtils.parseConfigAsList(pool.get("entries"), LootEntryContainers::fromMap);
+                List<LootFunction<T>> functions = ResourceConfigUtils.parseConfigAsList(pool.get("functions"), LootFunctions::fromMap);
                 lootPools.add(new LootPool<>(containers, conditions, functions, rolls, bonus_rolls));
             } else if (rawPool instanceof String string) {
                 LootPool<T> lootPool = readFlatFormatLootPool(string);
@@ -70,12 +60,7 @@ public class LootTable<T> {
                     lootPools.add(lootPool);
             }
         }
-        return new LootTable<>(lootPools,
-                Optional.ofNullable(map.get("functions"))
-                        .map(it -> (List<LootFunction<T>>) new ArrayList<LootFunction<T>>(LootFunctions.fromMapList(castToMapListOrThrow(it,
-                                () -> new LocalizedResourceConfigException("warning.config.loot_table.invalid_functions_type", it.getClass().getSimpleName())))))
-                        .orElse(Lists.newArrayList())
-        );
+        return new LootTable<>(lootPools, ResourceConfigUtils.parseConfigAsList(map.get("functions"), LootFunctions::fromMap));
     }
 
     public List<Item<T>> getRandomItems(ContextHolder parameters, World world) {

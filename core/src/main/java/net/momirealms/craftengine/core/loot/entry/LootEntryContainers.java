@@ -8,49 +8,33 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class LootEntryContainers {
-    public static final Key ALTERNATIVES = Key.from("craftengine:alternatives");
-    public static final Key IF_ELSE = Key.from("craftengine:if_else");
-    public static final Key ITEM = Key.from("craftengine:item");
-    public static final Key FURNITURE_ITEM = Key.from("craftengine:furniture_item");
-    public static final Key EXP = Key.from("craftengine:exp");
-    public static final Key EMPTY = Key.from("craftengine:empty");
+    public static final LootEntryContainerType<?> ALTERNATIVES = register(AlternativesLootEntryContainer.ID, AlternativesLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> IF_ELSE = register(Key.from("craftengine:if_else"), AlternativesLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> ITEM = register(SingleItemLootEntryContainer.ID, SingleItemLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> EXP = register(ExpLootEntryContainer.ID, ExpLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> FURNITURE_ITEM = register(FurnitureItemLootEntryContainer.ID, FurnitureItemLootEntryContainer.FACTORY);
+    public static final LootEntryContainerType<?> EMPTY = register(EmptyLoopEntryContainer.ID, EmptyLoopEntryContainer.FACTORY);
 
-    static {
-        register(ALTERNATIVES, AlternativesLootEntryContainer.FACTORY);
-        register(IF_ELSE, AlternativesLootEntryContainer.FACTORY);
-        register(ITEM, SingleItemLootEntryContainer.FACTORY);
-        register(EXP, ExpLootEntryContainer.FACTORY);
-        register(FURNITURE_ITEM, FurnitureItemLootEntryContainer.FACTORY);
-        register(EMPTY, EmptyLoopEntryContainer.FACTORY);
-    }
+    protected LootEntryContainers() {}
 
-    public static <T> void register(Key key, LootEntryContainerFactory<T> factory) {
-        ((WritableRegistry<LootEntryContainerFactory<?>>) BuiltInRegistries.LOOT_ENTRY_CONTAINER_FACTORY)
-                .register(ResourceKey.create(Registries.LOOT_ENTRY_CONTAINER_FACTORY.location(), key), factory);
-    }
-
-    public static <T> List<LootEntryContainer<T>> fromMapList(List<Map<String, Object>> mapList) {
-        if (mapList == null || mapList.isEmpty()) return List.of();
-        List<LootEntryContainer<T>> functions = new ArrayList<>();
-        for (Map<String, Object> map : mapList) {
-            functions.add(fromMap(map));
-        }
-        return functions;
+    public static <T> LootEntryContainerType<T> register(Key key, LootEntryContainerFactory<T> factory) {
+        LootEntryContainerType<T> type = new LootEntryContainerType<>(key, factory);
+        ((WritableRegistry<LootEntryContainerType<?>>) BuiltInRegistries.LOOT_ENTRY_CONTAINER_TYPE)
+                .register(ResourceKey.create(Registries.LOOT_ENTRY_CONTAINER_TYPE.location(), key), type);
+        return type;
     }
 
     @SuppressWarnings("unchecked")
     public static <T> LootEntryContainer<T> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.loot_table.entry.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        LootEntryContainerFactory<T> factory = (LootEntryContainerFactory<T>) BuiltInRegistries.LOOT_ENTRY_CONTAINER_FACTORY.getValue(key);
-        if (factory == null) {
+        LootEntryContainerType<T> containerType = (LootEntryContainerType<T>) BuiltInRegistries.LOOT_ENTRY_CONTAINER_TYPE.getValue(key);
+        if (containerType == null) {
             throw new LocalizedResourceConfigException("warning.config.loot_table.entry.invalid_type", type);
         }
-        return factory.create(map);
+        return containerType.factory().create(map);
     }
 }

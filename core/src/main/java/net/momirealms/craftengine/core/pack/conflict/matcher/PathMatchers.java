@@ -2,7 +2,10 @@ package net.momirealms.craftengine.core.pack.conflict.matcher;
 
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.plugin.context.condition.*;
+import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
+import net.momirealms.craftengine.core.plugin.context.condition.AnyOfCondition;
+import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
+import net.momirealms.craftengine.core.plugin.context.condition.InvertedCondition;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;

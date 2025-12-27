@@ -2,8 +2,8 @@ package net.momirealms.craftengine.core.loot.function;
 
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.data.Enchantment;
-import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.loot.LootContext;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
@@ -12,13 +12,13 @@ import net.momirealms.craftengine.core.registry.Registries;
 import net.momirealms.craftengine.core.registry.WritableRegistry;
 import net.momirealms.craftengine.core.util.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Factory<?> FACTORY = new Factory<>();
+public final class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<T> {
+    public static final Key ID = Key.from("craftengine:apply_bonus");
+    public static final LootFunctionFactory<?> FACTORY = new Factory<>();
     private final Key enchantment;
     private final Formula formula;
 
@@ -37,14 +37,8 @@ public class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<
         return item;
     }
 
-    @Override
-    public Key type() {
-        return LootFunctions.APPLY_BONUS;
-    }
+    private static class Factory<T> implements LootFunctionFactory<T> {
 
-    public static class Factory<T> implements LootFunctionFactory<T> {
-
-        @SuppressWarnings("unchecked")
         @Override
         public LootFunction<T> create(Map<String, Object> arguments) {
             String enchantment = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("enchantment"), "warning.config.loot_table.function.apply_bonus.missing_enchantment");
@@ -52,9 +46,7 @@ public class ApplyBonusCountFunction<T> extends AbstractLootConditionalFunction<
             if (formulaMap == null) {
                 throw new LocalizedResourceConfigException("warning.config.loot_table.function.apply_bonus.missing_formula");
             }
-            List<Condition<LootContext>> conditions = Optional.ofNullable(arguments.get("conditions"))
-                    .map(it -> LootConditions.fromMapList((List<Map<String, Object>>) it))
-                    .orElse(Collections.emptyList());
+            List<Condition<LootContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new ApplyBonusCountFunction<>(conditions, Key.from(enchantment), Formulas.fromMap(formulaMap));
         }
     }

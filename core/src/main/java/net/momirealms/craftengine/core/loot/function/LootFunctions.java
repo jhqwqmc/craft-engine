@@ -10,31 +10,25 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class LootFunctions {
-    public static final Key APPLY_BONUS = Key.from("craftengine:apply_bonus");
-    public static final Key APPLY_DATA = Key.from("craftengine:apply_data");
-    public static final Key SET_COUNT = Key.from("craftengine:set_count");
-    public static final Key EXPLOSION_DECAY = Key.from("craftengine:explosion_decay");
-    public static final Key DROP_EXP = Key.from("craftengine:drop_exp");
-    public static final Key LIMIT_COUNT = Key.from("craftengine:limit_count");
+public final class LootFunctions {
+    public static final LootFunctionType<?> APPLY_BONUS = register(ApplyBonusCountFunction.ID, ApplyBonusCountFunction.FACTORY);
+    public static final LootFunctionType<?> APPLY_DATA = register(ApplyDataFunction.ID, ApplyDataFunction.FACTORY);
+    public static final LootFunctionType<?> SET_COUNT = register(SetCountFunction.ID, SetCountFunction.FACTORY);
+    public static final LootFunctionType<?> EXPLOSION_DECAY = register(ExplosionDecayFunction.ID, ExplosionDecayFunction.FACTORY);
+    public static final LootFunctionType<?> DROP_EXP = register(DropExpFunction.ID, DropExpFunction.FACTORY);
+    public static final LootFunctionType<?> LIMIT_COUNT = register(LimitCountFunction.ID, LimitCountFunction.FACTORY);
 
-    static {
-        register(SET_COUNT, SetCountFunction.FACTORY);
-        register(APPLY_DATA, ApplyDataFunction.FACTORY);
-        register(EXPLOSION_DECAY, ExplosionDecayFunction.FACTORY);
-        register(APPLY_BONUS, ApplyBonusCountFunction.FACTORY);
-        register(DROP_EXP, DropExpFunction.FACTORY);
-        register(LIMIT_COUNT, LimitCountFunction.FACTORY);
-    }
+    private LootFunctions() {}
 
-    public static <T> void register(Key key, LootFunctionFactory<T> factory) {
-        ((WritableRegistry<LootFunctionFactory<?>>) BuiltInRegistries.LOOT_FUNCTION_FACTORY)
-                .register(ResourceKey.create(Registries.LOOT_FUNCTION_FACTORY.location(), key), factory);
+    public static <T> LootFunctionType<T> register(Key key, LootFunctionFactory<T> factory) {
+        LootFunctionType<T> type = new LootFunctionType<>(key, factory);
+        ((WritableRegistry<LootFunctionType<?>>) BuiltInRegistries.LOOT_FUNCTION_TYPE)
+                .register(ResourceKey.create(Registries.LOOT_FUNCTION_TYPE.location(), key), type);
+        return type;
     }
 
     public static <T> BiFunction<Item<T>, LootContext, Item<T>> identity() {
@@ -60,23 +54,14 @@ public class LootFunctions {
         };
     }
 
-    public static <T> List<LootFunction<T>> fromMapList(List<Map<String, Object>> mapList) {
-        if (mapList == null || mapList.isEmpty()) return List.of();
-        List<LootFunction<T>> functions = new ArrayList<>();
-        for (Map<String, Object> map : mapList) {
-            functions.add(fromMap(map));
-        }
-        return functions;
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> LootFunction<T> fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.loot_table.function.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        LootFunctionFactory<T> factory = (LootFunctionFactory<T>) BuiltInRegistries.LOOT_FUNCTION_FACTORY.getValue(key);
-        if (factory == null) {
+        LootFunctionType<T> functionType = (LootFunctionType<T>) BuiltInRegistries.LOOT_FUNCTION_TYPE.getValue(key);
+        if (functionType == null) {
             throw new LocalizedResourceConfigException("warning.config.loot_table.function.invalid_type", type);
         }
-        return factory.create(map);
+        return functionType.factory().create(map);
     }
 }

@@ -1,21 +1,21 @@
 package net.momirealms.craftengine.core.loot.function;
 
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.loot.LootContext;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public class LimitCountFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Factory<?> FACTORY = new Factory<>();
+public final class LimitCountFunction<T> extends AbstractLootConditionalFunction<T> {
+    public static final Key ID = Key.from("craftengine:limit_count");
+    public static final LootFunctionFactory<?> FACTORY = new Factory<>();
     @Nullable
     private final NumberProvider min;
     @Nullable
@@ -25,11 +25,6 @@ public class LimitCountFunction<T> extends AbstractLootConditionalFunction<T> {
         super(predicates);
         this.min = min;
         this.max = max;
-    }
-
-    @Override
-    public Key type() {
-        return LootFunctions.LIMIT_COUNT;
     }
 
     @Override
@@ -50,15 +45,13 @@ public class LimitCountFunction<T> extends AbstractLootConditionalFunction<T> {
         return item;
     }
 
-    public static class Factory<A> implements LootFunctionFactory<A> {
-        @SuppressWarnings("unchecked")
+    private static class Factory<A> implements LootFunctionFactory<A> {
+
         @Override
         public LootFunction<A> create(Map<String, Object> arguments) {
             Object min = arguments.get("min");
             Object max = arguments.get("max");
-            List<Condition<LootContext>> conditions = Optional.ofNullable(arguments.get("conditions"))
-                    .map(it -> LootConditions.fromMapList((List<Map<String, Object>>) it))
-                    .orElse(Collections.emptyList());
+            List<Condition<LootContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new LimitCountFunction<>(conditions, min == null ? null : NumberProviders.fromObject(min), max == null ? null : NumberProviders.fromObject(max));
         }
     }
