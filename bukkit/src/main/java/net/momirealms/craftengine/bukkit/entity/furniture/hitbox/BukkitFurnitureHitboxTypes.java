@@ -3,7 +3,6 @@ package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxes;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxConfigType;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.VersionHelper;
 
 public final class BukkitFurnitureHitboxTypes extends FurnitureHitBoxes {
     public static final FurnitureHitboxConfigType<InteractionFurnitureHitbox> INTERACTION = register(Key.ce("interaction"), InteractionFurnitureHitboxConfig.FACTORY);
