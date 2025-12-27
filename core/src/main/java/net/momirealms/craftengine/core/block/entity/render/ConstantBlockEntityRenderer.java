@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import org.jetbrains.annotations.Nullable;
 
-public class ConstantBlockEntityRenderer implements Cullable {
+public final class ConstantBlockEntityRenderer implements Cullable {
     private final BlockEntityElement[] elements;
     public final CullingData cullingData;
 

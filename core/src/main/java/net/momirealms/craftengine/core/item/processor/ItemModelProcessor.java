@@ -18,12 +18,11 @@ public class ItemModelProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     public Key data() {
-        return data;
+        return this.data;
     }
 
     @Override
     public Item<I> apply(Item<I> item, ItemBuildContext context) {
-        if (!VersionHelper.isOrAbove1_21_2()) return item;
         return item.itemModel(this.data.asString());
     }
 

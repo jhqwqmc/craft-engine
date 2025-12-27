@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record Key(String namespace, String value) {
     public static final String DEFAULT_NAMESPACE = "craftengine";
+    public static final String MINECRAFT_NAMESPACE = "minecraft";
 
     public static Key withDefaultNamespace(String value) {
         return new Key(DEFAULT_NAMESPACE, value);
@@ -22,11 +23,15 @@ public record Key(String namespace, String value) {
     }
 
     public static Key of(String namespacedId) {
-        return of(decompose(namespacedId, "minecraft"));
+        return of(decompose(namespacedId, MINECRAFT_NAMESPACE));
+    }
+
+    public static Key ce(String namespacedId) {
+        return of(decompose(namespacedId, DEFAULT_NAMESPACE));
     }
 
     public static Key from(String namespacedId) {
-        return of(decompose(namespacedId, "minecraft"));
+        return of(decompose(namespacedId, MINECRAFT_NAMESPACE));
     }
 
     public static Key fromNamespaceAndPath(String namespace, String path) {
@@ -65,7 +70,7 @@ public record Key(String namespace, String value) {
     }
 
     public String asMinimalString() {
-        if (this.namespace.equals("minecraft")) {
+        if (this.namespace.equals(MINECRAFT_NAMESPACE)) {
             return this.value;
         }
         return asString();
