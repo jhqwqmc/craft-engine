@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -16,7 +15,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Key ID = Key.from("craftengine:spreading_block");
     public static final BlockBehaviorFactory FACTORY = new Factory();
     private final LazyReference<Object> targetBlock;
 
