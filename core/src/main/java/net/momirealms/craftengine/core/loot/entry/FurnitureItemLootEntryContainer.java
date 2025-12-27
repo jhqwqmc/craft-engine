@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FurnitureItemLootEntryContainer<T> extends SingleItemLootEntryContainer<T> {
+public final class FurnitureItemLootEntryContainer<T> extends SingleItemLootEntryContainer<T> {
     public static final LootEntryContainerFactory<?> FACTORY = new Factory<>();
     private final boolean hasFallback;
 
-    protected FurnitureItemLootEntryContainer(@Nullable Key item, List<Condition<LootContext>> conditions, List<LootFunction<T>> lootFunctions, int weight, int quality) {
+    private FurnitureItemLootEntryContainer(@Nullable Key item, List<Condition<LootContext>> conditions, List<LootFunction<T>> lootFunctions, int weight, int quality) {
         super(item, conditions, lootFunctions, weight, quality);
         this.hasFallback = item != null;
     }

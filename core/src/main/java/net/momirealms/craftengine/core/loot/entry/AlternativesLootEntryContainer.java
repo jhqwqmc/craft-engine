@@ -9,11 +9,11 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.List;
 import java.util.Map;
 
-public class AlternativesLootEntryContainer<T> extends AbstractCompositeLootEntryContainer<T> {
+public final class AlternativesLootEntryContainer<T> extends AbstractCompositeLootEntryContainer<T> {
     public static final Key ID = Key.from("craftengine:alternatives");
     public static final LootEntryContainerFactory<?> FACTORY = new Factory<>();
 
-    protected AlternativesLootEntryContainer(List<Condition<LootContext>> conditions, List<LootEntryContainer<T>> children) {
+    private AlternativesLootEntryContainer(List<Condition<LootContext>> conditions, List<LootEntryContainer<T>> children) {
         super(conditions, children);
     }
 

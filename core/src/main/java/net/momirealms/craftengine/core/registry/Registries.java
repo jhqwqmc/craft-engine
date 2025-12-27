@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorType;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
-import net.momirealms.craftengine.core.block.properties.PropertyFactory;
+import net.momirealms.craftengine.core.block.properties.PropertyType;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
@@ -50,7 +50,7 @@ public final class Registries {
     public static final Key ROOT_REGISTRY = Key.withDefaultNamespace("root");
     public static final ResourceKey<Registry<CustomBlock>> BLOCK = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block"));
     public static final ResourceKey<Registry<ItemProcessorType<?>>> ITEM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_processor_type"));
-    public static final ResourceKey<Registry<PropertyFactory>> PROPERTY_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("property_factory"));
+    public static final ResourceKey<Registry<PropertyType<?>>> PROPERTY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("property_type"));
     public static final ResourceKey<Registry<BlockBehaviorType>> BLOCK_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_behavior_type"));
     public static final ResourceKey<Registry<ItemBehaviorType>> ITEM_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_behavior_type"));
     public static final ResourceKey<Registry<LootFunctionType<?>>> LOOT_FUNCTION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_function_type"));

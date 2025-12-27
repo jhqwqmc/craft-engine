@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorType;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
-import net.momirealms.craftengine.core.block.properties.PropertyFactory;
+import net.momirealms.craftengine.core.block.properties.PropertyType;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorType;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
@@ -20,7 +20,6 @@ import net.momirealms.craftengine.core.item.recipe.network.modern.display.slot.S
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainderFactory;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
 import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
-import net.momirealms.craftengine.core.loot.LootContext;
 import net.momirealms.craftengine.core.loot.entry.LootEntryContainerType;
 import net.momirealms.craftengine.core.loot.function.ApplyBonusCountFunction;
 import net.momirealms.craftengine.core.loot.function.LootFunctionType;
@@ -49,7 +48,7 @@ public final class BuiltInRegistries {
     public static final Registry<BlockBehaviorType> BLOCK_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.BLOCK_BEHAVIOR_TYPE, 64);
     public static final Registry<ItemProcessorType<?>> ITEM_PROCESSOR_TYPE = createConstantBoundRegistry(Registries.ITEM_PROCESSOR_TYPE, 64);
     public static final Registry<ItemBehaviorType> ITEM_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.ITEM_BEHAVIOR_TYPE, 64);
-    public static final Registry<PropertyFactory> PROPERTY_FACTORY = createConstantBoundRegistry(Registries.PROPERTY_FACTORY, 16);
+    public static final Registry<PropertyType<?>> PROPERTY_TYPE = createConstantBoundRegistry(Registries.PROPERTY_TYPE, 16);
     public static final Registry<LootFunctionType<?>> LOOT_FUNCTION_TYPE = createConstantBoundRegistry(Registries.LOOT_FUNCTION_TYPE, 32);
     public static final Registry<LootEntryContainerType<?>> LOOT_ENTRY_CONTAINER_TYPE = createConstantBoundRegistry(Registries.LOOT_ENTRY_CONTAINER_TYPE, 16);
     public static final Registry<NumberProviderFactory> NUMBER_PROVIDER_FACTORY = createConstantBoundRegistry(Registries.NUMBER_PROVIDER_FACTORY, 16);

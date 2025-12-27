@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ExpLootEntryContainer<T> extends AbstractLootEntryContainer<T> {
+public final class ExpLootEntryContainer<T> extends AbstractLootEntryContainer<T> {
     public static final Key ID = Key.from("craftengine:exp");
     public static final Factory<?> FACTORY = new Factory<>();
     private final NumberProvider value;
 
-    protected ExpLootEntryContainer(NumberProvider value, List<Condition<LootContext>> conditions) {
+    private ExpLootEntryContainer(NumberProvider value, List<Condition<LootContext>> conditions) {
         super(conditions);
         this.value = value;
     }

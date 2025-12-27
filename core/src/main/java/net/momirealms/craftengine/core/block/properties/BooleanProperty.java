@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.block.properties;
 
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.sparrow.nbt.ByteTag;
 import net.momirealms.sparrow.nbt.Tag;
@@ -8,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BooleanProperty extends Property<Boolean> {
-    public final static Factory FACTORY = new Factory();
+public final class BooleanProperty extends Property<Boolean> {
+    public static final Key ID = Key.of("craftengine:boolean");
+    public static final PropertyFactory<Boolean> FACTORY = new Factory();
     private static final List<Boolean> VALUES = List.of(true, false);
     private static final Boolean[] BY_ID = new Boolean[]{ Boolean.FALSE, Boolean.TRUE };
     private static final ByteTag TRUE = new ByteTag((byte) 1);
@@ -81,9 +83,10 @@ public class BooleanProperty extends Property<Boolean> {
         return new BooleanProperty(name, defaultValue);
     }
 
-    public static class Factory implements PropertyFactory {
+    private static class Factory implements PropertyFactory<Boolean> {
+
         @Override
-        public Property<?> create(String name, Map<String, Object> arguments) {
+        public Property<Boolean> create(String name, Map<String, Object> arguments) {
             boolean bool = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("default", false), "default");
             return BooleanProperty.create(name, bool);
         }

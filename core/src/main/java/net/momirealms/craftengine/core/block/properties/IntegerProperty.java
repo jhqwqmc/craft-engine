@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.block.properties;
 
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.sparrow.nbt.IntTag;
 import net.momirealms.sparrow.nbt.NumericTag;
@@ -12,8 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class IntegerProperty extends Property<Integer> {
-    public static final Factory FACTORY = new Factory();
+public final class IntegerProperty extends Property<Integer> {
+    public static final Key ID = Key.of("craftengine:int");
+    public static final PropertyFactory<Integer> FACTORY = new Factory();
     private final IntImmutableList values;
     public final int min;
     public final int max;
@@ -95,9 +97,10 @@ public class IntegerProperty extends Property<Integer> {
         return new IntegerProperty(name, min, max, defaultValue);
     }
 
-    public static class Factory implements PropertyFactory {
+    private static class Factory implements PropertyFactory<Integer> {
+
         @Override
-        public Property<?> create(String name, Map<String, Object> arguments) {
+        public Property<Integer> create(String name, Map<String, Object> arguments) {
             String range = arguments.getOrDefault("range", "1~1").toString();
             String[] split = range.split("~");
             if (split.length != 2) {

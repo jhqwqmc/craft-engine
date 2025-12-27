@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.block.properties;
 
 import com.google.common.collect.ImmutableMap;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.sparrow.nbt.StringTag;
 import net.momirealms.sparrow.nbt.Tag;
@@ -9,8 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class StringProperty extends Property<String> {
-    public static final Factory FACTORY = new Factory();
+public final class StringProperty extends Property<String> {
+    public static final Key ID = Key.of("craftengine:string");
+    public static final PropertyFactory<String> FACTORY = new Factory();
     private final List<String> values;
     private final ImmutableMap<String, String> names;
 
@@ -90,10 +92,10 @@ public class StringProperty extends Property<String> {
         return new StringProperty(name, values, defaultValue);
     }
 
-    public static class Factory implements PropertyFactory {
+    private static class Factory implements PropertyFactory<String> {
 
         @Override
-        public Property<?> create(String name, Map<String, Object> arguments) {
+        public Property<String> create(String name, Map<String, Object> arguments) {
             List<String> values = MiscUtils.getAsStringList(arguments.get("values"))
                     .stream()
                     .toList();
