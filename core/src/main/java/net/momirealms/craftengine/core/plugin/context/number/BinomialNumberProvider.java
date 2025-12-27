@@ -8,6 +8,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record BinomialNumberProvider(NumberProvider trials, NumberProvider successProbability) implements NumberProvider {
+    public static final Key ID = Key.of("craftengine:binomial");
     public static final NumberProviderFactory FACTORY = new Factory();
 
     @Override
@@ -32,11 +33,6 @@ public record BinomialNumberProvider(NumberProvider trials, NumberProvider succe
             }
         }
         return successCount;
-    }
-
-    @Override
-    public Key type() {
-        return NumberProviders.BINOMIAL;
     }
 
     private static class Factory implements NumberProviderFactory {

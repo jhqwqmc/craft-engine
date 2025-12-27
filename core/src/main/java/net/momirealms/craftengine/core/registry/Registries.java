@@ -37,6 +37,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.ConditionFactory;
 import net.momirealms.craftengine.core.plugin.context.function.FunctionFactory;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviderFactory;
+import net.momirealms.craftengine.core.plugin.context.number.NumberProviderType;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectorFactory;
 import net.momirealms.craftengine.core.plugin.network.ModPacket;
 import net.momirealms.craftengine.core.plugin.network.codec.NetworkCodec;
@@ -55,7 +56,7 @@ public final class Registries {
     public static final ResourceKey<Registry<ItemBehaviorType>> ITEM_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_behavior_type"));
     public static final ResourceKey<Registry<LootFunctionType<?>>> LOOT_FUNCTION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_function_type"));
     public static final ResourceKey<Registry<LootEntryContainerType<?>>> LOOT_ENTRY_CONTAINER_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("loot_entry_container_type"));
-    public static final ResourceKey<Registry<NumberProviderFactory>> NUMBER_PROVIDER_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("number_provider_factory"));
+    public static final ResourceKey<Registry<NumberProviderType>> NUMBER_PROVIDER_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("number_provider_type"));
     public static final ResourceKey<Registry<TemplateArgumentFactory>> TEMPLATE_ARGUMENT_FACTORY = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("template_argument_factory"));
     public static final ResourceKey<Registry<ItemModelType>> ITEM_MODEL_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_model_type"));
     public static final ResourceKey<Registry<TintType>> TINT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("tint_type"));

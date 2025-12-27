@@ -7,23 +7,9 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class UniformNumberProvider implements NumberProvider {
+public record UniformNumberProvider(NumberProvider min, NumberProvider max) implements NumberProvider {
+    public static final Key ID = Key.of("craftengine:uniform");
     public static final NumberProviderFactory FACTORY = new Factory();
-    private final NumberProvider min;
-    private final NumberProvider max;
-
-    public UniformNumberProvider(NumberProvider min, NumberProvider max) {
-        this.min = min;
-        this.max = max;
-    }
-
-    public NumberProvider max() {
-        return max;
-    }
-
-    public NumberProvider min() {
-        return min;
-    }
 
     @Override
     public int getInt(Context context) {
@@ -38,11 +24,6 @@ public class UniformNumberProvider implements NumberProvider {
     @Override
     public float getFloat(Context context) {
         return RandomUtils.generateRandomFloat(this.min.getFloat(context), this.max.getFloat(context));
-    }
-
-    @Override
-    public Key type() {
-        return NumberProviders.UNIFORM;
     }
 
     private static class Factory implements NumberProviderFactory {
