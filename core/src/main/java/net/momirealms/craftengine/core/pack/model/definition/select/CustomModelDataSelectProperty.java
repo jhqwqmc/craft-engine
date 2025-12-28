@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CustomModelDataSelectProperty implements SelectProperty {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<CustomModelDataSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<CustomModelDataSelectProperty> READER = new Reader();
     private final int index;
 
     public CustomModelDataSelectProperty(int index) {
@@ -24,17 +24,17 @@ public final class CustomModelDataSelectProperty implements SelectProperty {
         jsonObject.addProperty("index", this.index);
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<CustomModelDataSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public CustomModelDataSelectProperty create(Map<String, Object> arguments) {
             int index = ResourceConfigUtils.getAsInt(arguments.getOrDefault("index", 0), "index");
             return new CustomModelDataSelectProperty(index);
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<CustomModelDataSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public CustomModelDataSelectProperty read(JsonObject json) {
             int index = json.has("index") ? json.get("index").getAsInt() : 0;
             return new CustomModelDataSelectProperty(index);
         }

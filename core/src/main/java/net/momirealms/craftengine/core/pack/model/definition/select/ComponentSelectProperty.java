@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class ComponentSelectProperty implements SelectProperty {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<ComponentSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<ComponentSelectProperty> READER = new Reader();
     private final String component;
 
     public ComponentSelectProperty(String component) {
@@ -24,17 +24,17 @@ public final class ComponentSelectProperty implements SelectProperty {
         jsonObject.addProperty("component", this.component);
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<ComponentSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public ComponentSelectProperty create(Map<String, Object> arguments) {
             String component = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("component"), "warning.config.item.model.select.component.missing_component");
             return new ComponentSelectProperty(component);
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<ComponentSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public ComponentSelectProperty read(JsonObject json) {
             String component = json.get("component").getAsString();
             return new ComponentSelectProperty(component);
         }

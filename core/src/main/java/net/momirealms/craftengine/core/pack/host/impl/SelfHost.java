@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class SelfHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<SelfHost> FACTORY = new Factory();
     private static final SelfHost INSTANCE = new SelfHost();
 
     public SelfHost() {
@@ -49,14 +49,14 @@ public final class SelfHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<SelfHost> type() {
         return ResourcePackHosts.SELF;
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<SelfHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public SelfHost create(Map<String, Object> arguments) {
             SelfHostHttpServer selfHostHttpServer = SelfHostHttpServer.instance();
             String ip = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("ip"), () -> new LocalizedException("warning.config.host.self.missing_ip"));
             int port = ResourceConfigUtils.getAsInt(arguments.getOrDefault("port", 8163), "port");

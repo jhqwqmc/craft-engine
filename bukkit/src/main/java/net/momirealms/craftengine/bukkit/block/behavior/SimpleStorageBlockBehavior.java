@@ -10,7 +10,6 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
@@ -38,7 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SimpleStorageBlockBehavior> FACTORY = new Factory();
     private final String containerTitle;
     private final int rows;
     private final SoundData openSound;
@@ -198,11 +197,11 @@ public class SimpleStorageBlockBehavior extends BukkitBlockBehavior implements E
         return null;
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SimpleStorageBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SimpleStorageBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String title = arguments.getOrDefault("title", "").toString();
             int rows = MiscUtils.clamp(ResourceConfigUtils.getAsInt(arguments.getOrDefault("rows", 1), "rows"), 1, 6);
             Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");

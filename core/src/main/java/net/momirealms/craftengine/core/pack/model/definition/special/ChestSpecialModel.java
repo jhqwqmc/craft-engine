@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class ChestSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<ChestSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<ChestSpecialModel> READER = new Reader();
     private final String texture;
     private final float openness;
 
@@ -44,9 +44,9 @@ public final class ChestSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<ChestSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public ChestSpecialModel create(Map<String, Object> arguments) {
             float openness = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("openness", 0), "openness");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.chest.missing_texture");
             if (openness > 1 || openness < 0) {
@@ -56,9 +56,9 @@ public final class ChestSpecialModel implements SpecialModel {
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<ChestSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public ChestSpecialModel read(JsonObject json) {
             float openness = json.has("openness") ? json.get("openness").getAsFloat() : 0;
             return new ChestSpecialModel(json.get("texture").getAsString(), openness);
         }

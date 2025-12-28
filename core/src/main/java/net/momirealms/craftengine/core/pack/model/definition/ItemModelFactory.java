@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.pack.model.definition;
 import java.util.Map;
 
 @FunctionalInterface
-public interface ItemModelFactory {
+public interface ItemModelFactory<T extends ItemModel> {
 
-    ItemModel create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

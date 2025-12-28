@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.select;
 
 import java.util.Map;
 
-public interface SelectPropertyFactory {
+public interface SelectPropertyFactory<T extends SelectProperty> {
 
-    SelectProperty create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

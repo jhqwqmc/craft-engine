@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior, CanBeReplacedBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SlabBlockBehavior> FACTORY = new Factory();
     private final Property<SlabType> typeProperty;
 
     public SlabBlockBehavior(CustomBlock block, Property<SlabType> typeProperty) {
@@ -114,11 +114,11 @@ public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFind
         return false;
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SlabBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SlabBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<SlabType> type = (Property<SlabType>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("type"), "warning.config.block.behavior.slab.missing_type");
             return new SlabBlockBehavior(block, type);
         }

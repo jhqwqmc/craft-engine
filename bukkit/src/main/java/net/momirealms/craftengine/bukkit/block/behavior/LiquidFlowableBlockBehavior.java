@@ -4,7 +4,6 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.PlaceLiquidBlockBehavior;
 import net.momirealms.craftengine.core.world.WorldEvents;
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class LiquidFlowableBlockBehavior extends BukkitBlockBehavior implements PlaceLiquidBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<LiquidFlowableBlockBehavior> FACTORY = new Factory();
 
     public LiquidFlowableBlockBehavior(CustomBlock customBlock) {
         super(customBlock);
@@ -40,10 +39,10 @@ public class LiquidFlowableBlockBehavior extends BukkitBlockBehavior implements 
         return true;
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<LiquidFlowableBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public LiquidFlowableBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             return new LiquidFlowableBlockBehavior(block);
         }
     }

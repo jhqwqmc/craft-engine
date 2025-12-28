@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class BannerSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<BannerSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<BannerSpecialModel> READER = new Reader();
     private final String color;
 
     public BannerSpecialModel(String color) {
@@ -34,17 +34,17 @@ public final class BannerSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<BannerSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public BannerSpecialModel create(Map<String, Object> arguments) {
             String color = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("color"), "warning.config.item.model.special.banner.missing_color");
             return new BannerSpecialModel(color);
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<BannerSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public BannerSpecialModel read(JsonObject json) {
             String color = json.get("color").getAsString();
             return new BannerSpecialModel(color);
         }

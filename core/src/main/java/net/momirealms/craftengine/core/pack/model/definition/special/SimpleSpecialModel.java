@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class SimpleSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<SimpleSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<SimpleSpecialModel> READER = new Reader();
     private final Key type;
 
     public SimpleSpecialModel(Key type) {
@@ -33,17 +33,17 @@ public final class SimpleSpecialModel implements SpecialModel {
         return List.of();
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<SimpleSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public SimpleSpecialModel create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("type").toString());
             return new SimpleSpecialModel(type);
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<SimpleSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public SimpleSpecialModel read(JsonObject json) {
             Key type = Key.of(json.get("type").getAsString());
             return new SimpleSpecialModel(type);
         }

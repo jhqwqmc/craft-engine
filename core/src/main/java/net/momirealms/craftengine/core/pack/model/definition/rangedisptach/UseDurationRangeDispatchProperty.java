@@ -9,8 +9,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class UseDurationRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<UseDurationRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<UseDurationRangeDispatchProperty> READER = new Reader();
     private final boolean remaining;
 
     public UseDurationRangeDispatchProperty(boolean remaining) {
@@ -40,17 +40,17 @@ public final class UseDurationRangeDispatchProperty implements RangeDispatchProp
         return value;
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<UseDurationRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public UseDurationRangeDispatchProperty create(Map<String, Object> arguments) {
             boolean remaining = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("remaining", false), "remaining");
             return new UseDurationRangeDispatchProperty(remaining);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<UseDurationRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public UseDurationRangeDispatchProperty read(JsonObject json) {
             boolean remaining = json.has("remaining") && json.get("remaining").getAsBoolean();
             return new UseDurationRangeDispatchProperty(remaining);
         }

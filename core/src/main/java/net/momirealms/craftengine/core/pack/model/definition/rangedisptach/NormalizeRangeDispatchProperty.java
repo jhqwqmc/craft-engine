@@ -7,8 +7,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class NormalizeRangeDispatchProperty implements RangeDispatchProperty {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<NormalizeRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<NormalizeRangeDispatchProperty> READER = new Reader();
     private final Key type;
     private final boolean normalize;
 
@@ -33,18 +33,18 @@ public final class NormalizeRangeDispatchProperty implements RangeDispatchProper
         }
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<NormalizeRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public NormalizeRangeDispatchProperty create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("property").toString());
             boolean normalize = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("normalize", true), "normalize");
             return new NormalizeRangeDispatchProperty(type, normalize);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<NormalizeRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public NormalizeRangeDispatchProperty read(JsonObject json) {
             Key type = Key.of(json.get("property").toString());
             boolean normalize = !json.has("normalize") || json.get("normalize").getAsBoolean();
             return new NormalizeRangeDispatchProperty(type, normalize);

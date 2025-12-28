@@ -7,7 +7,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class OnLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<OnLiquidBlockBehavior> FACTORY = new Factory();
     private final boolean onWater;
     private final boolean onLava;
     private final boolean stackable;
@@ -37,9 +36,9 @@ public class OnLiquidBlockBehavior extends AbstractCanSurviveBlockBehavior {
         return this.onLava;
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<OnLiquidBlockBehavior> {
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public OnLiquidBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             List<String> liquidTypes = MiscUtils.getAsStringList(arguments.getOrDefault("liquid-type", List.of("water")));
             boolean stackable = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("stackable", false), "stackable");
             int delay = ResourceConfigUtils.getAsInt(arguments.getOrDefault("delay", 0), "delay");

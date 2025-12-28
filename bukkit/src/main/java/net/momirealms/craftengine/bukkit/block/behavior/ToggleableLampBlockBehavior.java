@@ -6,7 +6,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
@@ -18,7 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<ToggleableLampBlockBehavior> FACTORY = new Factory();
     private final Property<Boolean> litProperty;
     private final Property<Boolean> poweredProperty;
     private final boolean canOpenWithHand;
@@ -88,10 +87,10 @@ public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
     }
 
     @SuppressWarnings("unchecked")
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<ToggleableLampBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ToggleableLampBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             boolean canOpenWithHand = ResourceConfigUtils.getAsBoolean(ResourceConfigUtils.get(arguments, "can-open-with-hand", "can-toggle-with-hand"), "can-toggle-with-hand");
             Property<Boolean> lit = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("lit"), "warning.config.block.behavior.toggleable_lamp.missing_lit");
             Property<Boolean> powered = (Property<Boolean>) (canOpenWithHand ? block.getProperty("powered") : ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.toggleable_lamp.missing_powered"));

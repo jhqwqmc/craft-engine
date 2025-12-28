@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public final class MergeAltasResolution implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<MergeAltasResolution> FACTORY = new Factory();
     public static final MergeAltasResolution INSTANCE = new MergeAltasResolution();
 
     private MergeAltasResolution() {}
@@ -43,10 +43,10 @@ public final class MergeAltasResolution implements Resolution {
         }
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<MergeAltasResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public MergeAltasResolution create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class CompositeItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<CompositeItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<CompositeItemModel> READER = new Reader();
     private final List<ItemModel> models;
 
     public CompositeItemModel(List<ItemModel> models) {
@@ -57,11 +57,11 @@ public final class CompositeItemModel implements ItemModel {
         return models;
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<CompositeItemModel> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public CompositeItemModel create(Map<String, Object> arguments) {
             Object m = arguments.get("models");
             if (m instanceof List<?> list) {
                 List<Object> models = (List<Object>) list;
@@ -81,10 +81,10 @@ public final class CompositeItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<CompositeItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public CompositeItemModel read(JsonObject json) {
             JsonArray models = json.getAsJsonArray("models");
             if (models == null) {
                 throw new IllegalArgumentException("models is expected to be a JsonArray");

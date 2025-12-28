@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class TimeRangeDispatchProperty implements RangeDispatchProperty {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<TimeRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<TimeRangeDispatchProperty> READER = new Reader();
     private final String source;
     private final boolean wobble;
 
@@ -33,18 +33,18 @@ public final class TimeRangeDispatchProperty implements RangeDispatchProperty {
         }
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<TimeRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public TimeRangeDispatchProperty create(Map<String, Object> arguments) {
             String sourceObj = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("source"), "warning.config.item.model.range_dispatch.time.missing_source");
             boolean wobble = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("wobble", true), "wobble");
             return new TimeRangeDispatchProperty(sourceObj, wobble);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<TimeRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public TimeRangeDispatchProperty read(JsonObject json) {
             String source = json.get("source").getAsString();
             boolean wobble = !json.has("wobble") || json.get("wobble").getAsBoolean();
             return new TimeRangeDispatchProperty(source, wobble);

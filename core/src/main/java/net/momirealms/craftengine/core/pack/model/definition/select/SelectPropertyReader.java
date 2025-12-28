@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.select;
 
 import com.google.gson.JsonObject;
 
-public interface SelectPropertyReader {
+public interface SelectPropertyReader<T extends SelectProperty> {
     
-    SelectProperty read(JsonObject json);
+    T read(JsonObject json);
 }

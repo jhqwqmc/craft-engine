@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public interface TintFactory {
+public interface TintFactory<T extends Tint> {
 
-    Tint create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 
     default Either<Integer, List<Float>> parseTintValue(Object value) {
         if (value instanceof Number i) {

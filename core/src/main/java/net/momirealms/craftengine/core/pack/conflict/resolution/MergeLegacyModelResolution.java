@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 public final class MergeLegacyModelResolution implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<MergeLegacyModelResolution> FACTORY = new Factory();
     public static final MergeLegacyModelResolution INSTANCE = new MergeLegacyModelResolution();
 
     private MergeLegacyModelResolution() {}
@@ -63,10 +63,10 @@ public final class MergeLegacyModelResolution implements Resolution {
         return element != null && element.isJsonArray();
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<MergeLegacyModelResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public MergeLegacyModelResolution create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

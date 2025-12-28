@@ -10,7 +10,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class FallingBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FallingBlockBehavior> FACTORY = new Factory();
     private final float hurtAmount;
     private final int maxHurt;
     private final SoundData landSound;
@@ -112,11 +111,11 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FallingBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FallingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             float hurtAmount = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("hurt-amount", -1f), "hurt-amount");
             int hurtMax = ResourceConfigUtils.getAsInt(arguments.getOrDefault("max-hurt", -1), "max-hurt");
             Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");

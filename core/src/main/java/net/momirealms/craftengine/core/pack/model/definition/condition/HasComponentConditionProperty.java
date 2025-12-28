@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class HasComponentConditionProperty implements ConditionProperty {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<HasComponentConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<HasComponentConditionProperty> READER = new Reader();
     private final String component;
     private final boolean ignoreDefault;
 
@@ -33,18 +33,18 @@ public final class HasComponentConditionProperty implements ConditionProperty {
         }
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<HasComponentConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public HasComponentConditionProperty create(Map<String, Object> arguments) {
             boolean ignoreDefault = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("ignore-default", false), "ignore-default");
             String componentObj = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("component"), "warning.config.item.model.condition.has_component.missing_component");
             return new HasComponentConditionProperty(componentObj, ignoreDefault);
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<HasComponentConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public HasComponentConditionProperty read(JsonObject json) {
             String component = json.get("component").getAsString();
             boolean ignoreDefault = json.has("ignore_default") && json.get("ignore_default").getAsBoolean();
             return new HasComponentConditionProperty(component, ignoreDefault);

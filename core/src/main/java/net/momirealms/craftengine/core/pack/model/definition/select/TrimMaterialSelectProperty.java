@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TrimMaterialSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<TrimMaterialSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<TrimMaterialSelectProperty> READER = new Reader();
     public static final TrimMaterialSelectProperty INSTANCE = new TrimMaterialSelectProperty();
     private static final Map<String, Float> LEGACY_TRIM_DATA = MiscUtils.init(new HashMap<>(), map -> {
         map.put("minecraft:quartz", 0.1f);
@@ -48,16 +48,16 @@ public final class TrimMaterialSelectProperty implements SelectProperty, LegacyM
         return f;
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<TrimMaterialSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public TrimMaterialSelectProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<TrimMaterialSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public TrimMaterialSelectProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.util.MiscUtils;
 import java.util.Map;
 
 public final class MapTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<MapTemplateArgument> FACTORY = new Factory();
     private final Map<String, Object> value;
 
     private MapTemplateArgument(Map<String, Object> value) {
@@ -25,10 +25,10 @@ public final class MapTemplateArgument implements TemplateArgument {
         return this.value;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<MapTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public MapTemplateArgument create(Map<String, Object> arguments) {
             return new MapTemplateArgument(MiscUtils.castToMap(arguments.getOrDefault("map", Map.of()), false));
         }
     }

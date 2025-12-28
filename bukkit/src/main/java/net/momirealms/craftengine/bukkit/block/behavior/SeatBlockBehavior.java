@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.block.entity.SeatBlockEntity;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
@@ -21,7 +20,7 @@ import net.momirealms.craftengine.core.world.context.UseOnContext;
 import java.util.Map;
 
 public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SeatBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> directionProperty;
     private final SeatConfig[] seats;
 
@@ -64,11 +63,11 @@ public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBloc
         }
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SeatBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SeatBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> directionProperty = null;
             Property<?> facing = block.getProperty("facing");
             if (facing != null && facing.valueClass() == HorizontalDirection.class) {

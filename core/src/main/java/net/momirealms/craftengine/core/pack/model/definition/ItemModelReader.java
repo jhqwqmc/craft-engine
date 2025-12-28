@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.pack.model.definition;
 import com.google.gson.JsonObject;
 
 @FunctionalInterface
-public interface ItemModelReader {
+public interface ItemModelReader<T extends ItemModel> {
 
-    ItemModel read(JsonObject json);
+    T read(JsonObject json);
 }

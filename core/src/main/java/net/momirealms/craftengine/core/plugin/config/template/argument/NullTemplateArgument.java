@@ -4,7 +4,7 @@ import java.util.Map;
 
 public final class NullTemplateArgument implements TemplateArgument {
     public static final NullTemplateArgument INSTANCE = new NullTemplateArgument();
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<NullTemplateArgument> FACTORY = new Factory();
 
     private NullTemplateArgument() {
     }
@@ -14,10 +14,10 @@ public final class NullTemplateArgument implements TemplateArgument {
         return null;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<NullTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public NullTemplateArgument create(Map<String, Object> arguments) {
             return NullTemplateArgument.INSTANCE;
         }
     }

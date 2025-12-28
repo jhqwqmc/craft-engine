@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public final class MergeFontResolution implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<MergeFontResolution> FACTORY = new Factory();
     public static final MergeFontResolution INSTANCE = new MergeFontResolution();
 
     private MergeFontResolution() {}
@@ -43,10 +43,10 @@ public final class MergeFontResolution implements Resolution {
         }
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<MergeFontResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public MergeFontResolution create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

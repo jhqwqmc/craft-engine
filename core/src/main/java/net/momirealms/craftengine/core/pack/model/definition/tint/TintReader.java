@@ -9,9 +9,9 @@ import org.incendo.cloud.type.Either;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface TintReader {
+public interface TintReader<T extends Tint> {
 
-    Tint read(JsonObject json);
+    T read(JsonObject json);
 
     default Either<Integer, List<Float>> parseTintValue(JsonElement element) {
         if (element instanceof JsonPrimitive jsonPrimitive) {

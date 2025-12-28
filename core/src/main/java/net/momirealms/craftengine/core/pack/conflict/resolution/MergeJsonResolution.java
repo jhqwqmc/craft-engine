@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public record MergeJsonResolution(boolean deeply) implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<MergeJsonResolution> FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -29,10 +29,10 @@ public record MergeJsonResolution(boolean deeply) implements Resolution {
         }
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<MergeJsonResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public MergeJsonResolution create(Map<String, Object> arguments) {
             boolean deeply = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("deeply", false), "deeply");
             return new MergeJsonResolution(deeply);
         }

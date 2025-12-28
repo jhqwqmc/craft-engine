@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
@@ -8,11 +7,11 @@ import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 import java.util.List;
 import java.util.Map;
 
-public final class S3HostFactory implements ResourcePackHostFactory {
-    public static final ResourcePackHostFactory INSTANCE = new S3HostFactory();
+public final class S3HostFactory implements ResourcePackHostFactory<S3Host> {
+    public static final ResourcePackHostFactory<S3Host> INSTANCE = new S3HostFactory();
 
     @Override
-    public ResourcePackHost create(Map<String, Object> arguments) {
+    public S3Host create(Map<String, Object> arguments) {
         CraftEngine.instance().dependencyManager().loadDependencies(
                 List.of(
                         Dependencies.NETTY_HTTP2,

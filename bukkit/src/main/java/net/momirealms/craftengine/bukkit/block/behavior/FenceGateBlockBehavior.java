@@ -14,7 +14,6 @@ import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -46,7 +45,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FenceGateBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> inWallProperty;
     private final Property<Boolean> openProperty;
@@ -280,11 +279,11 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
         return facing != null && facing.axis() == direction.toDirection().clockWise().axis();
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FenceGateBlockBehavior> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FenceGateBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.fence_gate.missing_facing");
             Property<Boolean> inWall = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("in_wall"), "warning.config.block.behavior.fence_gate.missing_in_wall");
             Property<Boolean> open = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("open"), "warning.config.block.behavior.fence_gate.missing_open");

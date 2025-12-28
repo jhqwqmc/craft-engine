@@ -11,7 +11,6 @@ import net.momirealms.craftengine.bukkit.util.ParticleUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -29,7 +28,7 @@ import java.util.Optional;
 
 @SuppressWarnings("DuplicatedCode")
 public class GrassBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<GrassBlockBehavior> FACTORY = new Factory();
     private final Key feature;
 
     public GrassBlockBehavior(CustomBlock block, Key feature) {
@@ -155,9 +154,9 @@ public class GrassBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<GrassBlockBehavior> {
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public GrassBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String feature = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "feature", "placed-feature"), "warning.config.block.behavior.grass.missing_feature");
             return new GrassBlockBehavior(block, Key.of(feature));
         }

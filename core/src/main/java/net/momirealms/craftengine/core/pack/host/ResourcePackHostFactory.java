@@ -7,9 +7,9 @@ import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.util.Map;
 
-public interface ResourcePackHostFactory {
+public interface ResourcePackHostFactory<T extends ResourcePackHost> {
 
-    ResourcePackHost create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 
     default ProxySelector getProxySelector(Map<String, Object> proxySetting) {
         ProxySelector proxy = ProxySelector.getDefault();

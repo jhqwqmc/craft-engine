@@ -200,7 +200,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         this.packetIds = VersionHelper.isOrAbove1_20_5() ? new PacketIds1_20_5() : new PacketIds1_20();
         // register packet handlers
         this.registerPacketListeners();
-        PayloadHelper.registerDataTypes();
+        PayloadHelper.init();
         // set up packet senders
         this.packetConsumer = FastNMS.INSTANCE::method$Connection$send;
         this.packetsConsumer = (connection, packets, sendListener) -> {
@@ -1039,6 +1039,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = s2cPacketListeners[user.encoderState().ordinal()];
         if (packetID >= listener.length) { // fixme 为什么会这样
+            this.plugin.logger().warn(
+                    "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
+                            "Bound: CLIENT, Connection state: " + user.encoderState() + ", " +
+                            "Server version: " + VersionHelper.MINECRAFT_VERSION.version(),
+                    new Throwable()
+            );
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];
@@ -1055,6 +1061,12 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
         if (packetID >= listener.length) { // fixme 为什么会这样
+            this.plugin.logger().warn(
+                    "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
+                            "Bound: SERVER, Connection state: " + user.encoderState() + ", " +
+                            "Server version: " + VersionHelper.MINECRAFT_VERSION.version(),
+                    new Throwable()
+            );
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];

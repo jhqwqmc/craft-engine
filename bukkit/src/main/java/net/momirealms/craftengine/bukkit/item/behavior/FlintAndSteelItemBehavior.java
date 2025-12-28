@@ -30,7 +30,7 @@ import java.util.Map;
 
 public class FlintAndSteelItemBehavior extends ItemBehavior {
     public static final FlintAndSteelItemBehavior INSTANCE = new FlintAndSteelItemBehavior();
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<FlintAndSteelItemBehavior> FACTORY = new Factory();
     private static final Key FLINT_SOUND = Key.of("item.flintandsteel.use");
 
     @SuppressWarnings("unchecked")
@@ -159,9 +159,9 @@ public class FlintAndSteelItemBehavior extends ItemBehavior {
         return InteractionResult.PASS;
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<FlintAndSteelItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments) {
+        public FlintAndSteelItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class ConditionItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<ConditionItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<ConditionItemModel> READER = new Reader();
     private final ConditionProperty property;
     private final ItemModel onTrue;
     private final ItemModel onFalse;
@@ -70,10 +70,10 @@ public final class ConditionItemModel implements ItemModel {
         return json;
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<ConditionItemModel> {
 
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public ConditionItemModel create(Map<String, Object> arguments) {
             ConditionProperty property = ConditionProperties.fromMap(arguments);
             ItemModel onTrue = ItemModels.fromObj(ResourceConfigUtils.get(arguments, "on-true", "on_true"));
             if (onTrue == null) {
@@ -87,10 +87,10 @@ public final class ConditionItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<ConditionItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public ConditionItemModel read(JsonObject json) {
             ConditionProperty property = ConditionProperties.fromJson(json);
             ItemModel onTrue = ItemModels.fromJson(json.getAsJsonObject("on_true"));
             ItemModel onFalse = ItemModels.fromJson(json.getAsJsonObject("on_false"));

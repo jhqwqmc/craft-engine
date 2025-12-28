@@ -7,8 +7,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class GrassTint implements Tint {
-    public static final Factory FACTORY = new Factory();
-    public static final Reader READER = new Reader();
+    public static final TintFactory<GrassTint> FACTORY = new Factory();
+    public static final TintReader<GrassTint> READER = new Reader();
     private final float temperature;
     private final float downfall;
 
@@ -34,10 +34,10 @@ public final class GrassTint implements Tint {
         return json;
     }
 
-    private static class Factory implements TintFactory {
+    private static class Factory implements TintFactory<GrassTint> {
 
         @Override
-        public Tint create(Map<String, Object> arguments) {
+        public GrassTint create(Map<String, Object> arguments) {
             float temperature = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("temperature", 0), "temperature");
             float downfall = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("downfall", 0), "downfall");
             if (temperature > 1 || temperature < 0) {
@@ -50,9 +50,9 @@ public final class GrassTint implements Tint {
         }
     }
 
-    public static class Reader implements TintReader {
+    private static class Reader implements TintReader<GrassTint> {
         @Override
-        public Tint read(JsonObject json) {
+        public GrassTint read(JsonObject json) {
             float temperature = json.has("temperature") ? json.get("temperature").getAsFloat() : 0;
             float downfall = json.has("downfall") ? json.get("downfall").getAsFloat() : 0;
             return new GrassTint(temperature, downfall);

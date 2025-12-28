@@ -8,7 +8,6 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<VerticalCropBlockBehavior> FACTORY = new Factory();
     private final int maxHeight;
     private final IntegerProperty ageProperty;
     private final float growSpeed;
@@ -78,11 +77,11 @@ public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<VerticalCropBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public VerticalCropBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Integer> ageProperty = (Property<Integer>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("age"), "warning.config.block.behavior.vertical_crop.missing_age");
             int maxHeight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("max-height", 3), "max-height");
             boolean direction = arguments.getOrDefault("direction", "up").toString().equalsIgnoreCase("up");

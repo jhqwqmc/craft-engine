@@ -7,8 +7,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class MainHandSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<MainHandSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<MainHandSelectProperty> READER = new Reader();
     public static final MainHandSelectProperty INSTANCE = new MainHandSelectProperty();
 
     private MainHandSelectProperty() {}
@@ -29,16 +29,16 @@ public final class MainHandSelectProperty implements SelectProperty, LegacyModel
         return 0;
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<MainHandSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public MainHandSelectProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<MainHandSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public MainHandSelectProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

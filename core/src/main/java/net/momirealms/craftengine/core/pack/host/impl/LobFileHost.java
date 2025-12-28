@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class LobFileHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<LobFileHost> FACTORY = new Factory();
     private final String apiKey;
     private final ProxySelector proxy;
     private AccountInfo accountInfo;
@@ -50,7 +50,7 @@ public final class LobFileHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<LobFileHost> type() {
         return ResourcePackHosts.LOBFILE;
     }
 
@@ -263,10 +263,10 @@ public final class LobFileHost implements ResourcePackHost {
         return sb.toString();
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<LobFileHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public LobFileHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String apiKey = useEnv ? System.getenv("CE_LOBFILE_API_KEY") : Optional.ofNullable(arguments.get("api-key")).map(String::valueOf).orElse(null);
             if (apiKey == null || apiKey.isEmpty()) {

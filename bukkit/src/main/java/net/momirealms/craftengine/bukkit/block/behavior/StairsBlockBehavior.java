@@ -7,7 +7,6 @@ import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SingleBlockHalf;
@@ -25,7 +24,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class StairsBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<StairsBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<SingleBlockHalf> halfProperty;
     private final Property<StairsShape> shapeProperty;
@@ -125,11 +124,11 @@ public class StairsBlockBehavior extends BukkitBlockBehavior {
         return anotherState.get(anotherBehavior.facingProperty) != state.get(this.facingProperty) || anotherState.get(anotherBehavior.halfProperty) != state.get(this.halfProperty);
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<StairsBlockBehavior> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public StairsBlockBehavior  create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.stairs.missing_facing");
             Property<SingleBlockHalf> half = (Property<SingleBlockHalf>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("half"), "warning.config.block.behavior.stairs.missing_half");
             Property<StairsShape> shape = (Property<StairsShape>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("shape"), "warning.config.block.behavior.stairs.missing_shape");

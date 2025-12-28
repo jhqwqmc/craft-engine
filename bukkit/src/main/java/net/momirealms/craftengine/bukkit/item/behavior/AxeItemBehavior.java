@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AxeItemBehavior extends ItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<AxeItemBehavior> FACTORY = new Factory();
     public static final AxeItemBehavior INSTANCE = new AxeItemBehavior();
     private static final Key AXE_STRIP_SOUND = Key.of("minecraft:item.axe.strip");
 
@@ -112,9 +112,9 @@ public class AxeItemBehavior extends ItemBehavior {
         return InteractionResult.SUCCESS_AND_CANCEL;
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<AxeItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public AxeItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

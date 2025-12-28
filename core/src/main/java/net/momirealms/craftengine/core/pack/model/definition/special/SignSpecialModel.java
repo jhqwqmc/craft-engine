@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class SignSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<SignSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<SignSpecialModel> READER = new Reader();
     private final Key type;
     private final String woodType;
     private final String texture;
@@ -48,9 +48,9 @@ public final class SignSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<SignSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public SignSpecialModel create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("type").toString());
             String woodType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("wood-type"), "warning.config.item.model.special.sign.missing_wood_type");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.sign.missing_texture");
@@ -58,9 +58,9 @@ public final class SignSpecialModel implements SpecialModel {
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<SignSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public SignSpecialModel read(JsonObject json) {
             Key type = Key.of(json.get("type").toString());
             String woodType = json.get("wood_type").getAsString();
             String texture = json.get("texture").getAsString();

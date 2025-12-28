@@ -355,6 +355,10 @@ public class BukkitWorldManager implements WorldManager, Listener {
         }
     }
 
+    public void addCraftEngineDecorations(CEWorld ceWorld, Object chunkGenerator, Object worldGenLevel, Object chunkAccess, Object structureManager) {
+
+    }
+
     private void handleChunkLoad(CEWorld ceWorld, Chunk chunk, boolean isNew) {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();

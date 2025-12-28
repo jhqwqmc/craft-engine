@@ -11,7 +11,6 @@ import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -29,7 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ButtonBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<ButtonBlockBehavior> FACTORY = new Factory();
     private final BooleanProperty poweredProperty;
     private final int ticksToStayPressed;
     private final boolean canButtonBeActivatedByArrows;
@@ -197,11 +196,11 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
         FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, player, gameEvent, pos);
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<ButtonBlockBehavior> {
 
         @SuppressWarnings({"unchecked", "DuplicatedCode"})
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ButtonBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty powered = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.button.missing_powered");
             int ticksToStayPressed = ResourceConfigUtils.getAsInt(arguments.getOrDefault("ticks-to-stay-pressed", 30), "ticks-to-stay-pressed");
             boolean canButtonBeActivatedByArrows = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("can-be-activated-by-arrows", true), "can-be-activated-by-arrows");

@@ -8,7 +8,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record FixedNumberProvider(double value) implements NumberProvider {
-    public static final NumberProviderFactory FACTORY = new Factory();
+    public static final NumberProviderFactory<FixedNumberProvider> FACTORY = new Factory();
 
     @Override
     public float getFloat(Context context) {
@@ -24,10 +24,10 @@ public record FixedNumberProvider(double value) implements NumberProvider {
         return new FixedNumberProvider(value);
     }
 
-    private static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<FixedNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public FixedNumberProvider create(Map<String, Object> arguments) {
             String plainOrExpression = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value"), "warning.config.number.fixed.missing_value");
             try {
                 double value = Double.parseDouble(plainOrExpression);

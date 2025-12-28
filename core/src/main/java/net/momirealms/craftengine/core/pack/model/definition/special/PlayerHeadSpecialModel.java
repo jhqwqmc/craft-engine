@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class PlayerHeadSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<PlayerHeadSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<PlayerHeadSpecialModel> READER = new Reader();
     public static final PlayerHeadSpecialModel INSTANCE = new PlayerHeadSpecialModel();
 
     private PlayerHeadSpecialModel() {}
@@ -32,16 +32,16 @@ public final class PlayerHeadSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<PlayerHeadSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public PlayerHeadSpecialModel create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<PlayerHeadSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public PlayerHeadSpecialModel read(JsonObject json) {
             return INSTANCE;
         }
     }

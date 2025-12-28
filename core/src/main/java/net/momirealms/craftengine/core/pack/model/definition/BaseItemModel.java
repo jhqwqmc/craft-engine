@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class BaseItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<BaseItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<BaseItemModel> READER = new Reader();
     private final String path;
     private final List<Tint> tints;
     private final ModelGeneration modelGeneration;
@@ -78,11 +78,11 @@ public final class BaseItemModel implements ItemModel {
         return List.of();
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<BaseItemModel> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public BaseItemModel create(Map<String, Object> arguments) {
             String modelPath = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("path"), "warning.config.item.model.base.missing_path");
             if (!ResourceLocation.isValid(modelPath)) {
                 throw new LocalizedResourceConfigException("warning.config.item.model.base.invalid_path", modelPath);
@@ -105,10 +105,10 @@ public final class BaseItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<BaseItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public BaseItemModel read(JsonObject json) {
             String model = json.get("model").getAsString();
             if (json.has("tints")) {
                 JsonArray array = json.getAsJsonArray("tints");

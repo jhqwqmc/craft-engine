@@ -10,8 +10,8 @@ import java.util.Map;
 
 public final class BundleSelectedItemModel implements ItemModel {
     public static final BundleSelectedItemModel INSTANCE = new BundleSelectedItemModel();
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<BundleSelectedItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<BundleSelectedItemModel> READER = new Reader();
 
     private BundleSelectedItemModel() {}
 
@@ -32,16 +32,16 @@ public final class BundleSelectedItemModel implements ItemModel {
         return json;
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<BundleSelectedItemModel> {
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public BundleSelectedItemModel create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<BundleSelectedItemModel> {
         @Override
-        public ItemModel read(JsonObject json) {
+        public BundleSelectedItemModel read(JsonObject json) {
             return INSTANCE;
         }
     }

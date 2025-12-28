@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.condition;
 
 import java.util.Map;
 
-public interface ConditionPropertyFactory {
+public interface ConditionPropertyFactory<T extends ConditionProperty> {
 
-    ConditionProperty create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.block.CustomBlock;
 
 import java.util.Map;
 
-public interface BlockBehaviorFactory {
+public interface BlockBehaviorFactory<T extends BlockBehavior> {
 
-    BlockBehavior create(CustomBlock block, Map<String, Object> arguments);
+    T create(CustomBlock block, Map<String, Object> arguments);
 }

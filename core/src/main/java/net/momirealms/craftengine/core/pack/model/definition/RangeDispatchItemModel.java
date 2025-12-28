@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public final class RangeDispatchItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<RangeDispatchItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<RangeDispatchItemModel> READER = new Reader();
     private final RangeDispatchProperty property;
     private final float scale;
     private final ItemModel fallBack;
@@ -101,11 +101,11 @@ public final class RangeDispatchItemModel implements ItemModel {
         return models;
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<RangeDispatchItemModel> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public RangeDispatchItemModel create(Map<String, Object> arguments) {
             RangeDispatchProperty property = RangeDispatchProperties.fromMap(arguments);
             float scale = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("scale", 1.0), "scale");
             Object fallback = arguments.get("fallback");
@@ -137,10 +137,10 @@ public final class RangeDispatchItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<RangeDispatchItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public RangeDispatchItemModel read(JsonObject json) {
             JsonArray entriesObj = json.getAsJsonArray("entries");
             if (entriesObj == null) {
                 throw new IllegalArgumentException("entries is expected to be a JsonArray");

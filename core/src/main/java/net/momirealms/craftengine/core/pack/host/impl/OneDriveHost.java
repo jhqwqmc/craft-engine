@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class OneDriveHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<OneDriveHost> FACTORY = new Factory();
     private final String clientId;
     private final String clientSecret;
     private final ProxySelector proxy;
@@ -55,7 +55,7 @@ public final class OneDriveHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<OneDriveHost> type() {
         return ResourcePackHosts.ONEDRIVE;
     }
 
@@ -224,10 +224,10 @@ public final class OneDriveHost implements ResourcePackHost {
         return this.refreshToken.mid();
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<OneDriveHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public OneDriveHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String clientId = useEnv ? System.getenv("CE_ONEDRIVE_CLIENT_ID") : Optional.ofNullable(arguments.get("client-id")).map(String::valueOf).orElse(null);
             if (clientId == null || clientId.isEmpty()) {

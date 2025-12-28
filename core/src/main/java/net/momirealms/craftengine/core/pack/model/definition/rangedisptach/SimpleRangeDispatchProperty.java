@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class SimpleRangeDispatchProperty implements RangeDispatchProperty {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<SimpleRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<SimpleRangeDispatchProperty> READER = new Reader();
     private final Key type;
 
     public SimpleRangeDispatchProperty(Key type) {
@@ -23,17 +23,17 @@ public final class SimpleRangeDispatchProperty implements RangeDispatchProperty 
         jsonObject.addProperty("property", this.type.asMinimalString());
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<SimpleRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public SimpleRangeDispatchProperty create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("property").toString());
             return new SimpleRangeDispatchProperty(type);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<SimpleRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public SimpleRangeDispatchProperty read(JsonObject json) {
             Key type = Key.of(json.get("property").getAsString());
             return new SimpleRangeDispatchProperty(type);
         }

@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class SelfIncreaseIntTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<SelfIncreaseIntTemplateArgument> FACTORY = new Factory();
     private final int min;
     private final int max;
     private int current;
@@ -61,10 +61,10 @@ public final class SelfIncreaseIntTemplateArgument implements TemplateArgument {
         return this.callCount;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<SelfIncreaseIntTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public SelfIncreaseIntTemplateArgument create(Map<String, Object> arguments) {
             int from = ResourceConfigUtils.getAsInt(arguments.get("from"), "from");
             int to = ResourceConfigUtils.getAsInt(arguments.get("to"), "to");
             int step = ResourceConfigUtils.getAsInt(arguments.getOrDefault("step", 1), "step");
