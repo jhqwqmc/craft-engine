@@ -5,9 +5,9 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
 
-public class IdProcessor<I> implements ItemProcessor<I> {
+public class IdProcessor implements ItemProcessor {
     public static final String CRAFT_ENGINE_ID = "craftengine:id";
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+    public static final ItemProcessorFactory<IdProcessor> FACTORY = new Factory();
     private final Key argument;
 
     public IdProcessor(Key argument) {
@@ -19,17 +19,17 @@ public class IdProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public Item<?> apply(Item<?> item, ItemBuildContext context) {
         item.customId(this.argument);
         return item;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<IdProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public IdProcessor create(Object arg) {
             String id = arg.toString();
-            return new IdProcessor<>(Key.of(id));
+            return new IdProcessor(Key.of(id));
         }
     }
 }

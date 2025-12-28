@@ -603,7 +603,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 如果不是原版物品，那么加入ce的标识符
                 if (!isVanillaItem)
-                    itemBuilder.dataModifier(new IdProcessor<>(id));
+                    itemBuilder.dataModifier(new IdProcessor(id));
 
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
