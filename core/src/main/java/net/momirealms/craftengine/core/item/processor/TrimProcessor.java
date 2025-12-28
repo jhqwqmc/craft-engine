@@ -54,7 +54,7 @@ public class TrimProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "trim");
             String material = data.get("material").toString().toLowerCase(Locale.ENGLISH);
             String pattern = data.get("pattern").toString().toLowerCase(Locale.ENGLISH);

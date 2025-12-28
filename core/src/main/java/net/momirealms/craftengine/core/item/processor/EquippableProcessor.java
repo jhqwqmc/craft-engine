@@ -36,7 +36,7 @@ public class EquippableProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "equippable");
             return new EquippableProcessor<>(EquipmentData.fromMap(data));
         }

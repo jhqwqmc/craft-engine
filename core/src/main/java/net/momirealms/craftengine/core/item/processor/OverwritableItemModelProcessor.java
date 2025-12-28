@@ -33,7 +33,7 @@ public class OverwritableItemModelProcessor<I> implements SimpleNetworkItemProce
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             String id = arg.toString();
             return new OverwritableItemModelProcessor<>(Key.of(id));
         }

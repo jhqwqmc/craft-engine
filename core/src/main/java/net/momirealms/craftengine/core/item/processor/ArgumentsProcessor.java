@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ArgumentsProcessor<I> implements ItemProcessor {
+public class ArgumentsProcessor<I> implements ItemProcessor<I> {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final String ARGUMENTS_TAG = "craftengine:arguments";
     private final Map<String, TextProvider> arguments;
@@ -51,7 +51,7 @@ public class ArgumentsProcessor<I> implements ItemProcessor {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "arguments");
             Map<String, TextProvider> arguments = new HashMap<>();
             for (Map.Entry<String, Object> entry : data.entrySet()) {

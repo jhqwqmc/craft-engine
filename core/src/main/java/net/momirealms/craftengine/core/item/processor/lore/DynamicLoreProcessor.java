@@ -54,7 +54,7 @@ public final class DynamicLoreProcessor<I> implements SimpleNetworkItemProcessor
 
     private static class Factory<I> implements ItemProcessorFactory<I> {
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, LoreProcessor<I>> dynamicLore = new LinkedHashMap<>();
             if (arg instanceof Map<?, ?> map) {
                 for (Map.Entry<?, ?> entry : map.entrySet()) {

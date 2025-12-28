@@ -8,7 +8,7 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 
 import java.util.Optional;
 
-public class ItemVersionProcessor<I> implements ItemProcessor {
+public class ItemVersionProcessor<I> implements ItemProcessor<I> {
     public static final String VERSION_TAG = "craftengine:version";
     private final int version;
 

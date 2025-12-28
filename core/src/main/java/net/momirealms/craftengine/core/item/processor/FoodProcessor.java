@@ -52,7 +52,7 @@ public class FoodProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "food");
             int nutrition = ResourceConfigUtils.getAsInt(data.get("nutrition"), "nutrition");
             float saturation = ResourceConfigUtils.getAsFloat(data.get("saturation"), "saturation");

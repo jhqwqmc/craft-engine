@@ -45,7 +45,7 @@ public class EquippableAssetIdProcessor<I> implements SimpleNetworkItemProcessor
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             String id = arg.toString();
             return new EquippableAssetIdProcessor<>(Key.of(id));
         }

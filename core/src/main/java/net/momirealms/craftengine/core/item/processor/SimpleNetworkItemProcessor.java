@@ -9,7 +9,7 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public interface SimpleNetworkItemProcessor<I> extends ItemProcessor {
+public interface SimpleNetworkItemProcessor<I> extends ItemProcessor<I> {
 
     @Override
     default Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {

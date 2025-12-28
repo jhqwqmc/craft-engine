@@ -198,11 +198,11 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
         }
         // 准备阶段
         CompoundTag tag = new CompoundTag();
-        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.prepareNetworkItem(original, context, tag);
         }
         // 应用阶段
-        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.apply(wrapped, context);
         }
         // 如果拦截物品的描述名称等

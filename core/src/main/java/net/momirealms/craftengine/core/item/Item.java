@@ -228,7 +228,7 @@ public interface Item<I> {
 
     void merge(Item<I> another);
 
-    default Item<I> apply(ItemProcessor modifier, ItemBuildContext context) {
+    default Item<I> apply(ItemProcessor<I> modifier, ItemBuildContext context) {
         return modifier.apply(this, context);
     }
 

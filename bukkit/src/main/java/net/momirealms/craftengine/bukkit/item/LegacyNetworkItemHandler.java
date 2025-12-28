@@ -221,11 +221,11 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
             context = NetworkItemBuildContext.of(player);
         }
         // 准备阶段
-        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.prepareNetworkItem(wrapped, context, tag);
         }
         // 应用阶段
-        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
             modifier.apply(wrapped, context);
         }
         // 如果拦截物品的描述名称等

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ExternalSourceProcessor<I> implements ItemProcessor {
+public class ExternalSourceProcessor<I> implements ItemProcessor<I> {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private static final ThreadLocal<Set<Dependency>> BUILD_STACK = ThreadLocal.withInitial(LinkedHashSet::new);
     private final String id;
@@ -68,7 +68,7 @@ public class ExternalSourceProcessor<I> implements ItemProcessor {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "external");
             String plugin = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(data, "plugin", "source"), "warning.config.item.data.external.missing_source");
             String id = ResourceConfigUtils.requireNonEmptyStringOrThrow(data.get("id"), "warning.config.item.data.external.missing_id");

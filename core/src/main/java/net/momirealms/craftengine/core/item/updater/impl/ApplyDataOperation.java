@@ -15,16 +15,16 @@ import java.util.Map;
 
 public final class ApplyDataOperation<I> implements ItemUpdater<I> {
     public static final ItemUpdaterFactory<?> FACTORY = new Factory<>();
-    private final List<ItemProcessor> modifiers;
+    private final List<ItemProcessor<I>> modifiers;
 
-    public ApplyDataOperation(List<ItemProcessor> modifiers) {
+    public ApplyDataOperation(List<ItemProcessor<I>> modifiers) {
         this.modifiers = modifiers;
     }
 
     @Override
     public Item<I> update(Item<I> item, ItemBuildContext context) {
         if (this.modifiers != null) {
-            for (ItemProcessor modifier : this.modifiers) {
+            for (ItemProcessor<I> modifier : this.modifiers) {
                 modifier.apply(item, context);
             }
         }
@@ -36,10 +36,10 @@ public final class ApplyDataOperation<I> implements ItemUpdater<I> {
         @SuppressWarnings("unchecked")
         @Override
         public ItemUpdater<I> create(Key item, Map<String, Object> args) {
-            List<ItemProcessor> modifiers = new ArrayList<>();
+            List<ItemProcessor<I>> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
             ItemProcessors.applyDataModifiers(data, m -> {
-                modifiers.add((ItemProcessor) m);
+                modifiers.add((ItemProcessor<I>) m);
             });
             return new ApplyDataOperation<>(modifiers);
         }

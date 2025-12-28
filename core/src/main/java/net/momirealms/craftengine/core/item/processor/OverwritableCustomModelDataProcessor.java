@@ -45,7 +45,7 @@ public class OverwritableCustomModelDataProcessor<I> implements SimpleNetworkIte
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             int customModelData = ResourceConfigUtils.getAsInt(arg, "custom-model-data");
             return new OverwritableCustomModelDataProcessor<>(customModelData);
         }

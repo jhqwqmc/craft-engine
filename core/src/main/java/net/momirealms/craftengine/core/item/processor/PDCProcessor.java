@@ -12,7 +12,7 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import java.util.Map;
 import java.util.Optional;
 
-public class PDCProcessor<I> implements ItemProcessor {
+public class PDCProcessor<I> implements ItemProcessor<I> {
     public static final String BUKKIT_PDC = "PublicBukkitValues";
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final CompoundTag data;
@@ -36,7 +36,7 @@ public class PDCProcessor<I> implements ItemProcessor {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "pdc");
             CompoundTag tag = (CompoundTag) CraftEngine.instance().platform().javaToSparrowNBT(data);
             return new PDCProcessor<>(tag);

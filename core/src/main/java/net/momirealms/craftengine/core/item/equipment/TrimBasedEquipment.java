@@ -34,7 +34,7 @@ public final class TrimBasedEquipment extends AbstractEquipment {
     }
 
     @Override
-    public <I> List<ItemProcessor> modifiers() {
+    public <I> List<ItemProcessor<I>> modifiers() {
         return List.of(
                 new TrimProcessor<>(Key.of(AbstractPackManager.NEW_TRIM_MATERIAL), this.assetId),
                 new HideTooltipProcessor<>(List.of(DataComponentKeys.TRIM))

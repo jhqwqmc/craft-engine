@@ -18,7 +18,6 @@ import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorType;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.EquipmentType;
-import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.processor.ItemProcessorType;
 import net.momirealms.craftengine.core.item.recipe.CustomSmithingTransformRecipe;
 import net.momirealms.craftengine.core.item.recipe.Recipe;
@@ -69,7 +68,7 @@ public final class Registries {
 
     public static final Key ROOT_REGISTRY = Key.withDefaultNamespace("root");
     public static final ResourceKey<Registry<CustomBlock>> BLOCK = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block"));
-    public static final ResourceKey<Registry<ItemProcessorType<? extends ItemProcessor>>> ITEM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_processor_type"));
+    public static final ResourceKey<Registry<ItemProcessorType<?>>> ITEM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_processor_type"));
     public static final ResourceKey<Registry<PropertyType<? extends Comparable<?>>>> PROPERTY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("property_type"));
     public static final ResourceKey<Registry<BlockBehaviorType<? extends BlockBehavior>>> BLOCK_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_behavior_type"));
     public static final ResourceKey<Registry<ItemBehaviorType<? extends ItemBehavior>>> ITEM_BEHAVIOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_behavior_type"));

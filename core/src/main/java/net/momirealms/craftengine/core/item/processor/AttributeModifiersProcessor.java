@@ -155,7 +155,7 @@ public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcesso
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor create(Object arg) {
+        public ItemProcessor<I> create(Object arg) {
             List<PreModifier> attributeModifiers = ResourceConfigUtils.parseConfigAsList(arg, (map) -> {
                 String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.data.attribute_modifiers.missing_type");
                 Key nativeType = AttributeModifiersProcessor.getNativeAttributeName(Key.of(type));
