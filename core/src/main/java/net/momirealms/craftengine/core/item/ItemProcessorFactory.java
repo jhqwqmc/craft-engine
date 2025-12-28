@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.item;
 
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 
-public interface ItemProcessorFactory<T extends ItemProcessor> {
+public interface ItemProcessorFactory<I> {
 
-    T create(Object arg);
+    ItemProcessor<I> create(Object arg);
 }

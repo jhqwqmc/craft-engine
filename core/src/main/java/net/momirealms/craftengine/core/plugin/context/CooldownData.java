@@ -44,6 +44,10 @@ public class CooldownData {
         this.cooldownMap.clear();
     }
 
+    public Long getCooldown(String key) {
+        return this.cooldownMap.get(key);
+    }
+
     public static byte[] toBytes(CooldownData data) throws IOException {
         CompoundTag tag = new CompoundTag();
         long currentTime = System.currentTimeMillis();
