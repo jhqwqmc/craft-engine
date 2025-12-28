@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class AlistHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<AlistHost> FACTORY = new Factory();
     private final String apiUrl;
     private final String userName;
     private final String password;
@@ -70,7 +70,7 @@ public final class AlistHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<AlistHost> type() {
         return ResourcePackHosts.ALIST;
     }
 
@@ -281,10 +281,10 @@ public final class AlistHost implements ResourcePackHost {
                 new RuntimeException("Failed to obtain resource pack download URL (HTTP " + response.statusCode() + "): " + response.body()));
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<AlistHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public AlistHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String apiUrl = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("api-url"), () -> new LocalizedException("warning.config.host.alist.missing_api_url"));
             String userName = useEnv ? System.getenv("CE_ALIST_USERNAME") : Optional.ofNullable(arguments.get("username")).map(String::valueOf).orElse(null);

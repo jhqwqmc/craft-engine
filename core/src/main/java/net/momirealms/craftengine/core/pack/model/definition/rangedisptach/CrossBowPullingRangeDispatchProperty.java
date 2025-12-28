@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class CrossBowPullingRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<CrossBowPullingRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<CrossBowPullingRangeDispatchProperty> READER = new Reader();
     public static final CrossBowPullingRangeDispatchProperty INSTANCE = new CrossBowPullingRangeDispatchProperty();
 
     private CrossBowPullingRangeDispatchProperty() {}
@@ -30,16 +30,16 @@ public final class CrossBowPullingRangeDispatchProperty implements RangeDispatch
         return value;
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<CrossBowPullingRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public CrossBowPullingRangeDispatchProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<CrossBowPullingRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public CrossBowPullingRangeDispatchProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

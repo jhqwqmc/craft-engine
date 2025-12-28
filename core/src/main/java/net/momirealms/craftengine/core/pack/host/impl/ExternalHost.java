@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class ExternalHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<ExternalHost> FACTORY = new Factory();
     private final ResourcePackDownloadData downloadData;
 
     public ExternalHost(ResourcePackDownloadData downloadData) {
@@ -35,14 +35,14 @@ public final class ExternalHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<ExternalHost> type() {
         return ResourcePackHosts.EXTERNAL;
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<ExternalHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public ExternalHost create(Map<String, Object> arguments) {
             String url = Optional.ofNullable(arguments.get("url")).map(String::valueOf).orElse(null);
             if (url == null || url.isEmpty()) {
                 throw new LocalizedException("warning.config.host.external.missing_url");

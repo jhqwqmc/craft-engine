@@ -13,5 +13,5 @@ public interface ResourcePackHost {
 
     boolean canUpload();
 
-    ResourcePackHostType type();
+    ResourcePackHostType<? extends ResourcePackHost> type();
 }

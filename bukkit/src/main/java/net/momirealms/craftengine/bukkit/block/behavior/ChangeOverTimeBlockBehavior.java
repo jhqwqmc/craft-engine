@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.LazyReference;
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ChangeOverTimeBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<ChangeOverTimeBlockBehavior> FACTORY = new Factory();
     private final float changeSpeed;
     private final String nextBlock;
     private final LazyReference<BlockStateWrapper> lazyState;
@@ -64,10 +63,10 @@ public class ChangeOverTimeBlockBehavior extends BukkitBlockBehavior {
         });
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<ChangeOverTimeBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ChangeOverTimeBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             float changeSpeed = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("change-speed", 0.05688889F), "change-speed");
             String nextBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.getOrDefault("next-block", "minecraft:air"), "warning.config.block.behavior.change_over_time.missing_next_block");
             List<String> excludedProperties = MiscUtils.getAsStringList(arguments.get("excluded-properties"));

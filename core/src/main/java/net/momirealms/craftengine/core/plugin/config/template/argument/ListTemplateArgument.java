@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public final class ListTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<ListTemplateArgument> FACTORY = new Factory();
     private final List<Object> value;
 
     private ListTemplateArgument(List<Object> value) {
@@ -23,10 +23,10 @@ public final class ListTemplateArgument implements TemplateArgument {
         return this.value;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<ListTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public ListTemplateArgument create(Map<String, Object> arguments) {
             Object list = arguments.getOrDefault("list", List.of());
             return new ListTemplateArgument(castToListOrThrow(list, () -> new LocalizedResourceConfigException("warning.config.template.argument.list.invalid_type", list.getClass().getSimpleName())));
         }

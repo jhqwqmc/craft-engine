@@ -12,7 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 public record RetainMatchingResolution(Condition<PathContext> matcher) implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<RetainMatchingResolution> FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -25,10 +25,10 @@ public record RetainMatchingResolution(Condition<PathContext> matcher) implement
         }
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<RetainMatchingResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public RetainMatchingResolution create(Map<String, Object> arguments) {
             Map<String, Object> term = MiscUtils.castToMap(arguments.get("term"), false);
             return new RetainMatchingResolution(PathMatchers.fromMap(term));
         }

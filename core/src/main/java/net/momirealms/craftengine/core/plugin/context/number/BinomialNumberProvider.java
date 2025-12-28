@@ -7,7 +7,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record BinomialNumberProvider(NumberProvider trials, NumberProvider successProbability) implements NumberProvider {
-    public static final NumberProviderFactory FACTORY = new Factory();
+    public static final NumberProviderFactory<BinomialNumberProvider> FACTORY = new Factory();
 
     @Override
     public float getFloat(Context context) {
@@ -33,10 +33,10 @@ public record BinomialNumberProvider(NumberProvider trials, NumberProvider succe
         return successCount;
     }
 
-    private static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<BinomialNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public BinomialNumberProvider create(Map<String, Object> arguments) {
             Object trials = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("extra"), "warning.config.number.binomial.missing_extra");
             Object successProbability = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("probability"), "warning.config.number.binomial.missing_probability");
             return new BinomialNumberProvider(NumberProviders.fromObject(trials), NumberProviders.fromObject(successProbability));

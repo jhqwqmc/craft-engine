@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public final class ExpressionTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<ExpressionTemplateArgument> FACTORY = new Factory();
     private final ArgumentString expression;
     private final ValueType valueType;
 
@@ -50,10 +50,10 @@ public final class ExpressionTemplateArgument implements TemplateArgument {
         }
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<ExpressionTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public ExpressionTemplateArgument create(Map<String, Object> arguments) {
             return new ExpressionTemplateArgument(
                     arguments.getOrDefault("expression", "").toString(),
                     ValueType.valueOf(arguments.getOrDefault("value-type", "double").toString().toUpperCase(Locale.ROOT))

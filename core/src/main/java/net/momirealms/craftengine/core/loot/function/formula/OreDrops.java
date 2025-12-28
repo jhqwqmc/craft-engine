@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.util.RandomUtils;
 import java.util.Map;
 
 public final class OreDrops implements Formula {
-    public static final FormulaFactory FACTORY = new Factory();
+    public static final FormulaFactory<OreDrops> FACTORY = new Factory();
     private static final OreDrops INSTANCE = new OreDrops();
 
     private OreDrops() {}
@@ -23,10 +23,10 @@ public final class OreDrops implements Formula {
         }
     }
 
-    private static class Factory implements FormulaFactory {
+    private static class Factory implements FormulaFactory<OreDrops> {
 
         @Override
-        public Formula create(Map<String, Object> arguments) {
+        public OreDrops create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

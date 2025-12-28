@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CompassRangeDispatchProperty implements RangeDispatchProperty {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<CompassRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<CompassRangeDispatchProperty> READER = new Reader();
     private final String target;
     private final boolean wobble;
 
@@ -33,18 +33,18 @@ public final class CompassRangeDispatchProperty implements RangeDispatchProperty
         }
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<CompassRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public CompassRangeDispatchProperty create(Map<String, Object> arguments) {
             String targetObj = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("target"), "warning.config.item.model.range_dispatch.compass.missing_target");
             boolean wobble = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("wobble", true), "wobble");
             return new CompassRangeDispatchProperty(targetObj, wobble);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<CompassRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public CompassRangeDispatchProperty read(JsonObject json) {
             String target = json.get("target").getAsString();
             boolean wobble = !json.has("wobble") || json.get("wobble").getAsBoolean();
             return new CompassRangeDispatchProperty(target, wobble);

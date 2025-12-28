@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.util.Key;
 import java.nio.file.Path;
 import java.util.Map;
 
-public interface ItemBehaviorFactory {
+public interface ItemBehaviorFactory<T extends ItemBehavior> {
 
-    ItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments);
+    T create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments);
 }

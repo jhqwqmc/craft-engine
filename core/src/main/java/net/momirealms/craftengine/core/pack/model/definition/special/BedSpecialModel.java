@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class BedSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<BedSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<BedSpecialModel> READER = new Reader();
     private final String texture;
 
     public BedSpecialModel(String texture) {
@@ -34,17 +34,17 @@ public final class BedSpecialModel implements SpecialModel {
         return List.of();
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<BedSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public BedSpecialModel create(Map<String, Object> arguments) {
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.bed.missing_texture");
             return new BedSpecialModel(texture);
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<BedSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public BedSpecialModel read(JsonObject json) {
             String texture = json.get("texture").getAsString();
             return new BedSpecialModel(texture);
         }

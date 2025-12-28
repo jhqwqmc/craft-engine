@@ -9,14 +9,14 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class Formulas {
-    public static final FormulaType ORE_DROPS = register(Key.ce("ore_drops"), OreDrops.FACTORY);
-    public static final FormulaType CROP_DROPS = register(Key.ce("binomial_with_bonus_count"), CropDrops.FACTORY);
+    public static final FormulaType<OreDrops> ORE_DROPS = register(Key.ce("ore_drops"), OreDrops.FACTORY);
+    public static final FormulaType<CropDrops> CROP_DROPS = register(Key.ce("binomial_with_bonus_count"), CropDrops.FACTORY);
 
     private Formulas() {}
 
-    public static FormulaType register(Key key, FormulaFactory factory) {
-        FormulaType type = new FormulaType(key, factory);
-        ((WritableRegistry<FormulaType>) BuiltInRegistries.FORMULA_TYPE)
+    public static <T extends Formula> FormulaType<T> register(Key key, FormulaFactory<T> factory) {
+        FormulaType<T> type = new FormulaType<>(key, factory);
+        ((WritableRegistry<FormulaType<? extends Formula>>) BuiltInRegistries.FORMULA_TYPE)
                 .register(ResourceKey.create(Registries.FORMULA_TYPE.location(), key), type);
         return type;
     }
@@ -27,7 +27,7 @@ public final class Formulas {
             throw new NullPointerException("number type cannot be null");
         }
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        FormulaType formulaType = BuiltInRegistries.FORMULA_TYPE.getValue(key);
+        FormulaType<? extends Formula> formulaType = BuiltInRegistries.FORMULA_TYPE.getValue(key);
         if (formulaType == null) {
             throw new IllegalArgumentException("Unknown formula type: " + type);
         }

@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 import java.util.Map;
 
 public final class PlainStringTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<PlainStringTemplateArgument> FACTORY = new Factory();
     private final String value;
 
     private PlainStringTemplateArgument(String value) {
@@ -23,9 +23,9 @@ public final class PlainStringTemplateArgument implements TemplateArgument {
         return this.value;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<PlainStringTemplateArgument> {
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public PlainStringTemplateArgument create(Map<String, Object> arguments) {
             return new PlainStringTemplateArgument(arguments.getOrDefault("value", "").toString());
         }
     }

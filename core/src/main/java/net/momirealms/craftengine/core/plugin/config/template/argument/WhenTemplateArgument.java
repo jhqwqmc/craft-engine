@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class WhenTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<WhenTemplateArgument> FACTORY = new Factory();
     private final TemplateArgument result;
 
     private WhenTemplateArgument(TemplateArgument result) {
@@ -25,10 +25,10 @@ public final class WhenTemplateArgument implements TemplateArgument {
         return this.result.get(arguments);
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<WhenTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public WhenTemplateArgument create(Map<String, Object> arguments) {
             String source = ResourceConfigUtils.getAsStringOrNull(arguments.get("source"));
             TemplateArgument fallback = TemplateArguments.fromObject(arguments.get("fallback"));
             if (source == null) {

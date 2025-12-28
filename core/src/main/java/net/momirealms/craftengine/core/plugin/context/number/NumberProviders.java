@@ -11,18 +11,18 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.Map;
 
 public final class NumberProviders {
-    public static final NumberProviderType FIXED = register(Key.ce("fixed"), FixedNumberProvider.FACTORY);
-    public static final NumberProviderType CONSTANT = register(Key.ce("constant"), FixedNumberProvider.FACTORY);
-    public static final NumberProviderType UNIFORM = register(Key.ce("uniform"), UniformNumberProvider.FACTORY);
-    public static final NumberProviderType EXPRESSION = register(Key.ce("expression"), ExpressionNumberProvider.FACTORY);
-    public static final NumberProviderType GAUSSIAN = register(Key.ce("gaussian"), GaussianNumberProvider.FACTORY);
-    public static final NumberProviderType BINOMIAL = register(Key.ce("binomial"), BinomialNumberProvider.FACTORY);
+    public static final NumberProviderType<FixedNumberProvider> FIXED = register(Key.ce("fixed"), FixedNumberProvider.FACTORY);
+    public static final NumberProviderType<FixedNumberProvider> CONSTANT = register(Key.ce("constant"), FixedNumberProvider.FACTORY);
+    public static final NumberProviderType<UniformNumberProvider> UNIFORM = register(Key.ce("uniform"), UniformNumberProvider.FACTORY);
+    public static final NumberProviderType<ExpressionNumberProvider> EXPRESSION = register(Key.ce("expression"), ExpressionNumberProvider.FACTORY);
+    public static final NumberProviderType<GaussianNumberProvider> GAUSSIAN = register(Key.ce("gaussian"), GaussianNumberProvider.FACTORY);
+    public static final NumberProviderType<BinomialNumberProvider> BINOMIAL = register(Key.ce("binomial"), BinomialNumberProvider.FACTORY);
 
     private NumberProviders() {}
 
-    public static NumberProviderType register(Key key, NumberProviderFactory factory) {
-        NumberProviderType type = new NumberProviderType(key, factory);
-        ((WritableRegistry<NumberProviderType>) BuiltInRegistries.NUMBER_PROVIDER_TYPE)
+    public static <T extends NumberProvider> NumberProviderType<T> register(Key key, NumberProviderFactory<T> factory) {
+        NumberProviderType<T> type = new NumberProviderType<>(key, factory);
+        ((WritableRegistry<NumberProviderType<? extends NumberProvider>>) BuiltInRegistries.NUMBER_PROVIDER_TYPE)
                 .register(ResourceKey.create(Registries.NUMBER_PROVIDER_TYPE.location(), key), type);
         return type;
     }
@@ -34,7 +34,7 @@ public final class NumberProviders {
     public static NumberProvider fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.number.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        NumberProviderType providerType = BuiltInRegistries.NUMBER_PROVIDER_TYPE.getValue(key);
+        NumberProviderType<? extends NumberProvider> providerType = BuiltInRegistries.NUMBER_PROVIDER_TYPE.getValue(key);
         if (providerType == null) {
             throw new LocalizedResourceConfigException("warning.config.number.invalid_type", type);
         }

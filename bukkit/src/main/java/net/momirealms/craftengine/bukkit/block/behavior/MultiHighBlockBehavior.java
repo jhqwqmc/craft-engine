@@ -12,7 +12,6 @@ import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
@@ -28,7 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class MultiHighBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<MultiHighBlockBehavior> FACTORY = new Factory();
     public final IntegerProperty highProperty;
 
     public MultiHighBlockBehavior(CustomBlock customBlock, IntegerProperty highProperty) {
@@ -240,10 +239,10 @@ public class MultiHighBlockBehavior extends BukkitBlockBehavior {
         return state.with(property, property.min);
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<MultiHighBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public MultiHighBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             IntegerProperty high = (IntegerProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("high"), "warning.config.block.behavior.multi_high.missing_high");
             return new MultiHighBlockBehavior(block, high);
         }

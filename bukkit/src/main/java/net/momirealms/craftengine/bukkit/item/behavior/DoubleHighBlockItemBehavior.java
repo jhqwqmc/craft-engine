@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
-import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DoubleHighBlockItemBehavior extends BlockItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<DoubleHighBlockItemBehavior> FACTORY = new Factory();
 
     public DoubleHighBlockItemBehavior(Key blockId) {
         super(blockId);
@@ -36,9 +35,9 @@ public class DoubleHighBlockItemBehavior extends BlockItemBehavior {
         return super.placeBlock(location, blockState, revertState);
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<DoubleHighBlockItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public DoubleHighBlockItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.double_high.missing_block");

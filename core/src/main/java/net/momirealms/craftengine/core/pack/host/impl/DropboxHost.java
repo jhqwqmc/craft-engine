@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class DropboxHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<DropboxHost> FACTORY = new Factory();
     private final String appKey;
     private final String appSecret;
     private final String uploadPath;
@@ -92,7 +92,7 @@ public final class DropboxHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<DropboxHost> type() {
         return ResourcePackHosts.DROPBOX;
     }
 
@@ -257,10 +257,10 @@ public final class DropboxHost implements ResourcePackHost {
         }
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<DropboxHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public DropboxHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String appKey = useEnv ? System.getenv("CE_DROPBOX_APP_KEY") : Optional.ofNullable(arguments.get("app-key")).map(String::valueOf).orElse(null);
             if (appKey == null || appKey.isEmpty()) {

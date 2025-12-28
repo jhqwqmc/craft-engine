@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.item.behavior;
 
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
-import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
@@ -13,7 +12,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class WallBlockItemBehavior extends BlockItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<WallBlockItemBehavior> FACTORY = new Factory();
 
     public WallBlockItemBehavior(Key wallBlockId) {
         super(wallBlockId);
@@ -32,9 +31,9 @@ public class WallBlockItemBehavior extends BlockItemBehavior {
         return super.place(context);
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<WallBlockItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public WallBlockItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.wall_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for wall_block_item behavior"));

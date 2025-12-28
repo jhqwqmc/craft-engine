@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class ComponentConditionProperty implements ConditionProperty {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<ComponentConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<ComponentConditionProperty> READER = new Reader();
     private final String predicate;
     private final JsonElement value;
 
@@ -33,18 +33,18 @@ public final class ComponentConditionProperty implements ConditionProperty {
         jsonObject.add("value", this.value);
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<ComponentConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public ComponentConditionProperty create(Map<String, Object> arguments) {
             String predicate = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("predicate"), "warning.config.item.model.condition.component.missing_predicate");
             JsonElement jsonElement = GsonHelper.get().toJsonTree(ResourceConfigUtils.requireNonNullOrThrow(arguments.get("value"), "warning.config.item.model.condition.component.missing_value"));
             return new ComponentConditionProperty(predicate, jsonElement);
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<ComponentConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public ComponentConditionProperty read(JsonObject json) {
             String predicate = json.get("predicate").getAsString();
             JsonElement value = json.get("value");
             return new ComponentConditionProperty(predicate, value);

@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CropDrops implements Formula {
-    public static final FormulaFactory FACTORY = new Factory();
+    public static final FormulaFactory<CropDrops> FACTORY = new Factory();
     private final int extra;
     private final float probability;
 
@@ -25,10 +25,10 @@ public final class CropDrops implements Formula {
         return initialCount;
     }
 
-    private static class Factory implements FormulaFactory {
+    private static class Factory implements FormulaFactory<CropDrops> {
 
         @Override
-        public Formula create(Map<String, Object> arguments) {
+        public CropDrops create(Map<String, Object> arguments) {
             int extra = ResourceConfigUtils.getAsInt(arguments.getOrDefault("extra", 1), "extra");
             float probability = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("probability", 0.5f), "probability");
             return new CropDrops(extra, probability);

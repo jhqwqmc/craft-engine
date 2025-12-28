@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) implements NumberProvider {
-    public static final NumberProviderFactory FACTORY = new Factory();
+    public static final NumberProviderFactory<GaussianNumberProvider> FACTORY = new Factory();
 
     public GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) {
         this.min = min;
@@ -51,10 +51,10 @@ public record GaussianNumberProvider(double min, double max, double mean, double
         return MiscUtils.clamp(this.mean, this.min, this.max);
     }
 
-    private static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<GaussianNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public GaussianNumberProvider create(Map<String, Object> arguments) {
             double min = ResourceConfigUtils.getAsDouble(ResourceConfigUtils.requireNonNullOrThrow(arguments.get("min"), "warning.config.number.gaussian.missing_min"), "min");
             double max = ResourceConfigUtils.getAsDouble(ResourceConfigUtils.requireNonNullOrThrow(arguments.get("max"), "warning.config.number.gaussian.missing_max"), "max");
             double mean = ResourceConfigUtils.getAsDouble(arguments.getOrDefault("mean", (min + max) / 2.0), "mean");

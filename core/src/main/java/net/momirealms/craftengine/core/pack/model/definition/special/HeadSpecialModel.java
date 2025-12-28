@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class HeadSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<HeadSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<HeadSpecialModel> READER = new Reader();
     private final String kind;
     private final String texture;
     private final float animation;
@@ -53,9 +53,9 @@ public final class HeadSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<HeadSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public HeadSpecialModel create(Map<String, Object> arguments) {
             String kind = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("kind"), "warning.config.item.model.special.head.missing_kind");
             String texture = Optional.ofNullable(arguments.get("texture")).map(String::valueOf).orElse(null);
             float animation = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("animation", 0), "animation");
@@ -63,9 +63,9 @@ public final class HeadSpecialModel implements SpecialModel {
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<HeadSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public HeadSpecialModel read(JsonObject json) {
             String kind = json.get("kind").getAsString();
             String texture = json.has("texture") ? json.get("texture").getAsString() : null;
             float animation = json.has("animation") ? json.get("animation").getAsFloat() : 0f;

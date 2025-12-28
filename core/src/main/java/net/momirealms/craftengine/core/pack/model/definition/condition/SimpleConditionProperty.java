@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class SimpleConditionProperty implements ConditionProperty {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<SimpleConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<SimpleConditionProperty> READER = new Reader();
     private final Key type;
 
     public SimpleConditionProperty(Key type) {
@@ -23,17 +23,17 @@ public final class SimpleConditionProperty implements ConditionProperty {
         jsonObject.addProperty("property", this.type.asMinimalString());
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<SimpleConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public SimpleConditionProperty create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("property").toString());
             return new SimpleConditionProperty(type);
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<SimpleConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public SimpleConditionProperty read(JsonObject json) {
             return new SimpleConditionProperty(Key.of(json.get("property").getAsString()));
         }
     }

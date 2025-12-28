@@ -28,7 +28,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class CompostableItemBehavior extends ItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<CompostableItemBehavior> FACTORY = new Factory();
     private final double chance;
 
     public CompostableItemBehavior(double chance) {
@@ -77,9 +77,9 @@ public class CompostableItemBehavior extends ItemBehavior {
         return InteractionResult.SUCCESS;
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<CompostableItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public CompostableItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             double chance = ResourceConfigUtils.getAsDouble(arguments.getOrDefault("chance", 0.55), "chance");
             return new CompostableItemBehavior(chance);
         }

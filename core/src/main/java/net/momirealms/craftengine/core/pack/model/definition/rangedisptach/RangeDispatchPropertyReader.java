@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.rangedisptach;
 
 import com.google.gson.JsonObject;
 
-public interface RangeDispatchPropertyReader {
+public interface RangeDispatchPropertyReader<T extends RangeDispatchProperty> {
     
-    RangeDispatchProperty read(JsonObject json);
+    T read(JsonObject json);
 }

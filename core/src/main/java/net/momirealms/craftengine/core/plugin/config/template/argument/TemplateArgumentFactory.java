@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 
 import java.util.Map;
 
-public interface TemplateArgumentFactory {
+public interface TemplateArgumentFactory<T extends TemplateArgument> {
 
-    TemplateArgument create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

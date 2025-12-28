@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class RodCastConditionProperty implements ConditionProperty, LegacyModelPredicate<Boolean> {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<RodCastConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<RodCastConditionProperty> READER = new Reader();
     public static final RodCastConditionProperty INSTANCE = new RodCastConditionProperty();
 
     private RodCastConditionProperty() {}
@@ -30,16 +30,16 @@ public final class RodCastConditionProperty implements ConditionProperty, Legacy
         return value ? 1 : 0;
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<RodCastConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public RodCastConditionProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<RodCastConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public RodCastConditionProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class UseCycleRangeDispatchProperty implements RangeDispatchProperty {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<UseCycleRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<UseCycleRangeDispatchProperty> READER = new Reader();
     private final float period;
 
     public UseCycleRangeDispatchProperty(float period) {
@@ -24,17 +24,17 @@ public final class UseCycleRangeDispatchProperty implements RangeDispatchPropert
         jsonObject.addProperty("period", this.period);
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<UseCycleRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public UseCycleRangeDispatchProperty create(Map<String, Object> arguments) {
             float period = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("period", 0), "period");
             return new UseCycleRangeDispatchProperty(period);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<UseCycleRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public UseCycleRangeDispatchProperty read(JsonObject json) {
             float period = json.has("period") ? json.get("period").getAsFloat() : 1.0f;
             return new UseCycleRangeDispatchProperty(period);
         }

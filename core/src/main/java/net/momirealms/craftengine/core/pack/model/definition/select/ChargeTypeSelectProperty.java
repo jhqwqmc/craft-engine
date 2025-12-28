@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class ChargeTypeSelectProperty implements SelectProperty, LegacyModelPredicate<String> {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<ChargeTypeSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<ChargeTypeSelectProperty> READER = new Reader();
     public static final ChargeTypeSelectProperty INSTANCE = new ChargeTypeSelectProperty();
 
     private ChargeTypeSelectProperty() {}
@@ -31,16 +31,16 @@ public final class ChargeTypeSelectProperty implements SelectProperty, LegacyMod
         return 0;
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<ChargeTypeSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public ChargeTypeSelectProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<ChargeTypeSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public ChargeTypeSelectProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

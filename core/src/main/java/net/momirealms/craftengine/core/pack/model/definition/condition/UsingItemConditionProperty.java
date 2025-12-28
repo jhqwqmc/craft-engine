@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class UsingItemConditionProperty implements ConditionProperty, LegacyModelPredicate<Boolean> {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<UsingItemConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<UsingItemConditionProperty> READER = new Reader();
     public static final UsingItemConditionProperty INSTANCE = new UsingItemConditionProperty();
 
     private UsingItemConditionProperty() {}
@@ -33,16 +33,16 @@ public final class UsingItemConditionProperty implements ConditionProperty, Lega
         return value ? 1 : 0;
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<UsingItemConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public UsingItemConditionProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<UsingItemConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public UsingItemConditionProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

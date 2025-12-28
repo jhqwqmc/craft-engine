@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class SpecialItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<SpecialItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<SpecialItemModel> READER = new Reader();
     private final SpecialModel specialModel;
     private final String base;
     private final ModelGeneration modelGeneration;
@@ -65,10 +65,10 @@ public final class SpecialItemModel implements ItemModel {
         return this.specialModel.revisions();
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<SpecialItemModel> {
 
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public SpecialItemModel create(Map<String, Object> arguments) {
             String base = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "base", "path"), "warning.config.item.model.special.missing_path");
             if (!ResourceLocation.isValid(base)) {
                 throw new LocalizedResourceConfigException("warning.config.item.model.special.invalid_path", base);
@@ -83,10 +83,10 @@ public final class SpecialItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<SpecialItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public SpecialItemModel read(JsonObject json) {
             String base = json.get("base").getAsString();
             SpecialModel sm = SpecialModels.fromJson(json.getAsJsonObject("model"));
             return new SpecialItemModel(sm, base, null);

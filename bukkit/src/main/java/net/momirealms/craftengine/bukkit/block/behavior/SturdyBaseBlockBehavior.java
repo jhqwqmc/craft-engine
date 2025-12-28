@@ -6,7 +6,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SturdyBaseBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SturdyBaseBlockBehavior> FACTORY = new Factory();
     private final Direction direction;
     private final boolean stackable;
     private final boolean checkFull;
@@ -60,10 +59,10 @@ public class SturdyBaseBlockBehavior extends AbstractCanSurviveBlockBehavior {
         return optionalCustomState.filter(immutableBlockState -> immutableBlockState.owner().value() == super.customBlock).isPresent();
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SturdyBaseBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SturdyBaseBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             int delay = ResourceConfigUtils.getAsInt(arguments.getOrDefault("delay", 0), "delay");
             Direction direction = Direction.valueOf(arguments.getOrDefault("direction", "down").toString().toUpperCase(Locale.ENGLISH));
             boolean stackable = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("stackable", false), "stackable");

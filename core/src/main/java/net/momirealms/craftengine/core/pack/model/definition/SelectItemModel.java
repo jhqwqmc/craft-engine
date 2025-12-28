@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class SelectItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<SelectItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<SelectItemModel> READER = new Reader();
     private final SelectProperty property;
     private final Map<Either<JsonElement, List<JsonElement>>, ItemModel> whenMap;
     private final ItemModel fallBack;
@@ -121,11 +121,11 @@ public final class SelectItemModel implements ItemModel {
         return models;
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<SelectItemModel> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public SelectItemModel create(Map<String, Object> arguments) {
             SelectProperty property = SelectProperties.fromMap(arguments);
             Object fallback = arguments.get("fallback");
             Object casesObj = arguments.get("cases");
@@ -168,10 +168,10 @@ public final class SelectItemModel implements ItemModel {
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<SelectItemModel> {
 
         @Override
-        public ItemModel read(JsonObject json) {
+        public SelectItemModel read(JsonObject json) {
             JsonArray cases = json.getAsJsonArray("cases");
             if (cases == null) {
                 throw new IllegalArgumentException("cases is expected to be a JsonArray");

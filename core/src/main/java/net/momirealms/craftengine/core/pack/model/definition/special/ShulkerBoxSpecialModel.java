@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class ShulkerBoxSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<ShulkerBoxSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<ShulkerBoxSpecialModel> READER = new Reader();
     private final String texture;
     private final float openness;
     private final Direction orientation;
@@ -55,9 +55,9 @@ public final class ShulkerBoxSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<ShulkerBoxSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public ShulkerBoxSpecialModel create(Map<String, Object> arguments) {
             float openness = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("openness", 0), "openness");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.shulker_box.missing_texture");
             Direction orientation = Optional.ofNullable(arguments.get("orientation")).map(String::valueOf).map(s -> s.toUpperCase(Locale.ROOT)).map(Direction::valueOf).orElse(null);
@@ -68,9 +68,9 @@ public final class ShulkerBoxSpecialModel implements SpecialModel {
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<ShulkerBoxSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public ShulkerBoxSpecialModel read(JsonObject json) {
             float openness = json.has("openness") ? json.get("openness").getAsFloat() : 0f;
             Direction orientation = json.has("orientation") ? Direction.valueOf(json.get("orientation").getAsString().toUpperCase(Locale.ENGLISH)) : null;
             String texture = json.get("texture").getAsString();

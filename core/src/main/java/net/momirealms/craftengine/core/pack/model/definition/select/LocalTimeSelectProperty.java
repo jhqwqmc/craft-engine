@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public final class LocalTimeSelectProperty implements SelectProperty {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<LocalTimeSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<LocalTimeSelectProperty> READER = new Reader();
     private final String pattern;
     private final String locale;
     private final String timeZone;
@@ -46,9 +46,9 @@ public final class LocalTimeSelectProperty implements SelectProperty {
         }
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<LocalTimeSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public LocalTimeSelectProperty create(Map<String, Object> arguments) {
             String pattern = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("pattern"), "warning.config.item.model.select.local_time.missing_pattern");
             String locale = (String) arguments.get("locale");
             String timeZone = (String) arguments.get("time-zone");
@@ -56,9 +56,9 @@ public final class LocalTimeSelectProperty implements SelectProperty {
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<LocalTimeSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public LocalTimeSelectProperty read(JsonObject json) {
             String pattern = json.get("pattern").getAsString();
             String locale = json.has("locale") ? json.get("locale").getAsString() : null;
             String timeZone = json.has("time_zone") ? json.get("time_zone").getAsString() : null;

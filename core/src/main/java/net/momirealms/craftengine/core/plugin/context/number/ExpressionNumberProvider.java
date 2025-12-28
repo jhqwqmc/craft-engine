@@ -11,7 +11,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record ExpressionNumberProvider(String expression) implements NumberProvider {
-    public static final NumberProviderFactory FACTORY = new Factory();
+    public static final NumberProviderFactory<ExpressionNumberProvider> FACTORY = new Factory();
 
     @Override
     public float getFloat(Context context) {
@@ -37,10 +37,10 @@ public record ExpressionNumberProvider(String expression) implements NumberProvi
         }
     }
 
-    private static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<ExpressionNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public ExpressionNumberProvider create(Map<String, Object> arguments) {
             String value = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("expression"), "warning.config.number.expression.missing_expression");
             return new ExpressionNumberProvider(value);
         }

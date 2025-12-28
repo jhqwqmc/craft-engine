@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.rangedisptach;
 
 import java.util.Map;
 
-public interface RangeDispatchPropertyFactory {
+public interface RangeDispatchPropertyFactory<T extends RangeDispatchProperty> {
 
-    RangeDispatchProperty create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

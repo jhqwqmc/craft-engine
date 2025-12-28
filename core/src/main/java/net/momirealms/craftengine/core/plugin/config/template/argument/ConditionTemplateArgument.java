@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class ConditionTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<ConditionTemplateArgument> FACTORY = new Factory();
     private final TemplateArgument result;
 
     private ConditionTemplateArgument(TemplateArgument result) {
@@ -25,10 +25,10 @@ public final class ConditionTemplateArgument implements TemplateArgument {
         return this.result.get(arguments);
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<ConditionTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public ConditionTemplateArgument create(Map<String, Object> arguments) {
             TemplateArgument onTrue = TemplateArguments.fromObject(ResourceConfigUtils.get(arguments, "on-true", "on_true"));
             TemplateArgument onFalse = TemplateArguments.fromObject(ResourceConfigUtils.get(arguments, "on-false", "on_false"));
             return new ConditionTemplateArgument(ResourceConfigUtils.getAsBoolean(arguments.get("condition"), "condition") ? onTrue : onFalse);

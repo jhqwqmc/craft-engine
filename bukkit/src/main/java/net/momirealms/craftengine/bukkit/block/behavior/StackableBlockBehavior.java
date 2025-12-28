@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.CanBeReplacedBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class StackableBlockBehavior extends BukkitBlockBehavior implements CanBeReplacedBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<StackableBlockBehavior> FACTORY = new Factory();
     private final IntegerProperty amountProperty;
     private final List<Key> items;
     private final String propertyName;
@@ -71,10 +70,10 @@ public class StackableBlockBehavior extends BukkitBlockBehavior implements CanBe
         return blockState.cycle(property);
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<StackableBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public StackableBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String propertyName = String.valueOf(arguments.getOrDefault("property", "amount"));
             IntegerProperty amount = (IntegerProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty(propertyName), () -> {
                 throw new LocalizedResourceConfigException("warning.config.block.behavior.stackable.missing_property", propertyName);

@@ -7,8 +7,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class DamagedConditionProperty implements ConditionProperty, LegacyModelPredicate<Boolean> {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<DamagedConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<DamagedConditionProperty> READER = new Reader();
     public static final DamagedConditionProperty INSTANCE = new DamagedConditionProperty();
 
     private DamagedConditionProperty() {}
@@ -28,16 +28,16 @@ public final class DamagedConditionProperty implements ConditionProperty, Legacy
         return value ? 1 : 0;
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<DamagedConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public DamagedConditionProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<DamagedConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public DamagedConditionProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

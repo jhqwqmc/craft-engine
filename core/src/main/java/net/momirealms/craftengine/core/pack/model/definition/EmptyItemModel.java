@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class EmptyItemModel implements ItemModel {
-    public static final ItemModelFactory FACTORY = new Factory();
-    public static final ItemModelReader READER = new Reader();
+    public static final ItemModelFactory<EmptyItemModel> FACTORY = new Factory();
+    public static final ItemModelReader<EmptyItemModel> READER = new Reader();
     private static final EmptyItemModel INSTANCE = new EmptyItemModel();
 
     private EmptyItemModel() {}
@@ -32,16 +32,16 @@ public final class EmptyItemModel implements ItemModel {
         return List.of();
     }
 
-    private static class Factory implements ItemModelFactory {
+    private static class Factory implements ItemModelFactory<EmptyItemModel> {
         @Override
-        public ItemModel create(Map<String, Object> arguments) {
+        public EmptyItemModel create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements ItemModelReader {
+    private static class Reader implements ItemModelReader<EmptyItemModel> {
         @Override
-        public ItemModel read(JsonObject json) {
+        public EmptyItemModel read(JsonObject json) {
             return INSTANCE;
         }
     }

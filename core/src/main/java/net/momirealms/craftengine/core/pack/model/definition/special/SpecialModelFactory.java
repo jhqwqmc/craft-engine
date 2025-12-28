@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.pack.model.definition.special;
 
 import java.util.Map;
 
-public interface SpecialModelFactory {
+public interface SpecialModelFactory<T extends SpecialModel> {
 
-    SpecialModel create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

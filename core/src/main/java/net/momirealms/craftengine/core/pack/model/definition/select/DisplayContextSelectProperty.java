@@ -13,8 +13,8 @@ import java.util.Map;
 
 public final class DisplayContextSelectProperty implements SelectProperty {
     public static final DisplayContextSelectProperty INSTANCE = new DisplayContextSelectProperty();
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<DisplayContextSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<DisplayContextSelectProperty> READER = new Reader();
 
     private DisplayContextSelectProperty() {}
 
@@ -41,16 +41,16 @@ public final class DisplayContextSelectProperty implements SelectProperty {
         return element;
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<DisplayContextSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public DisplayContextSelectProperty create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<DisplayContextSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public DisplayContextSelectProperty read(JsonObject json) {
             return INSTANCE;
         }
     }

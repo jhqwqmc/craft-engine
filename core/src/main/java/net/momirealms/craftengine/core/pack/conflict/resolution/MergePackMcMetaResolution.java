@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class MergePackMcMetaResolution implements Resolution {
-    public static final ResolutionFactory FACTORY = new Factory();
+    public static final ResolutionFactory<MergePackMcMetaResolution> FACTORY = new Factory();
     public static final Set<String> STANDARD_PACK_KEYS = ImmutableSet.of("pack", "features", "filter", "overlays", "language");
     public static final MergePackMcMetaResolution INSTANCE = new MergePackMcMetaResolution();
 
@@ -257,9 +257,9 @@ public final class MergePackMcMetaResolution implements Resolution {
         }
     }
 
-    private static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<MergePackMcMetaResolution> {
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public MergePackMcMetaResolution create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

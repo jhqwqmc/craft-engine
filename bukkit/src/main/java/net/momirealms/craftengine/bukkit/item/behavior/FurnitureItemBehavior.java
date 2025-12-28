@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class FurnitureItemBehavior extends ItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<FurnitureItemBehavior> FACTORY = new Factory();
     protected static final Set<String> ALLOWED_ANCHOR_TYPES = Set.of("wall", "ceiling", "ground");
     private final Key id;
     private final Map<AnchorType, Rule> rules;
@@ -210,10 +210,11 @@ public class FurnitureItemBehavior extends ItemBehavior {
         return InteractionResult.SUCCESS;
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<FurnitureItemBehavior> {
 
+        @SuppressWarnings("DuplicatedCode")
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public FurnitureItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("furniture");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.furniture.missing_furniture", new IllegalArgumentException("Missing required parameter 'furniture' for furniture_item behavior"));

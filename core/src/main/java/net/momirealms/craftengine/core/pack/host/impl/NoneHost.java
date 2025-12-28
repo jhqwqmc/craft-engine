@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class NoneHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<NoneHost> FACTORY = new Factory();
     public static final NoneHost INSTANCE = new NoneHost();
 
     private NoneHost() {}
@@ -25,7 +25,7 @@ public final class NoneHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<NoneHost> type() {
         return ResourcePackHosts.NONE;
     }
 
@@ -34,10 +34,10 @@ public final class NoneHost implements ResourcePackHost {
         return false;
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<NoneHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public NoneHost create(Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

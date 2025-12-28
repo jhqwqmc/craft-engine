@@ -8,8 +8,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CustomModelDataRangeDispatchProperty implements RangeDispatchProperty, LegacyModelPredicate<Number> {
-    public static final RangeDispatchPropertyFactory FACTORY = new Factory();
-    public static final RangeDispatchPropertyReader READER = new Reader();
+    public static final RangeDispatchPropertyFactory<CustomModelDataRangeDispatchProperty> FACTORY = new Factory();
+    public static final RangeDispatchPropertyReader<CustomModelDataRangeDispatchProperty> READER = new Reader();
     private final int index;
 
     public CustomModelDataRangeDispatchProperty(int index) {
@@ -36,17 +36,17 @@ public final class CustomModelDataRangeDispatchProperty implements RangeDispatch
         return value.intValue();
     }
 
-    private static class Factory implements RangeDispatchPropertyFactory {
+    private static class Factory implements RangeDispatchPropertyFactory<CustomModelDataRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty create(Map<String, Object> arguments) {
+        public CustomModelDataRangeDispatchProperty create(Map<String, Object> arguments) {
             int index = ResourceConfigUtils.getAsInt(arguments.getOrDefault("index", 0), "index");
             return new CustomModelDataRangeDispatchProperty(index);
         }
     }
 
-    private static class Reader implements RangeDispatchPropertyReader {
+    private static class Reader implements RangeDispatchPropertyReader<CustomModelDataRangeDispatchProperty> {
         @Override
-        public RangeDispatchProperty read(JsonObject json) {
+        public CustomModelDataRangeDispatchProperty read(JsonObject json) {
             int index = json.has("index") ? json.get("index").getAsInt() : 0;
             return new CustomModelDataRangeDispatchProperty(index);
         }

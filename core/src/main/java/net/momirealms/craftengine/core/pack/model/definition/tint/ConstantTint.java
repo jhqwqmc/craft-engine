@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class ConstantTint implements Tint {
-    public static final TintFactory FACTORY = new Factory();
-    public static final TintReader READER = new Reader();
+    public static final TintFactory<ConstantTint> FACTORY = new Factory();
+    public static final TintReader<ConstantTint> READER = new Reader();
     private final Either<Integer, List<Float>> value;
 
     public ConstantTint(Either<Integer, List<Float>> value) {
@@ -28,17 +28,17 @@ public final class ConstantTint implements Tint {
         return json;
     }
 
-    private static class Factory implements TintFactory {
+    private static class Factory implements TintFactory<ConstantTint> {
         @Override
-        public Tint create(Map<String, Object> arguments) {
+        public ConstantTint create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(arguments, "value", "default"), "warning.config.item.model.tint.constant.missing_value");
             return new ConstantTint(parseTintValue(value));
         }
     }
 
-    private static class Reader implements TintReader {
+    private static class Reader implements TintReader<ConstantTint> {
         @Override
-        public Tint read(JsonObject json) {
+        public ConstantTint read(JsonObject json) {
             return new ConstantTint(parseTintValue(json.get("value")));
         }
     }

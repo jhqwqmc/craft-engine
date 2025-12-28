@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.LazyReference;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class StrippableBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<StrippableBlockBehavior> FACTORY = new Factory();
     private final String stripped;
     private final LazyReference<BlockStateWrapper> lazyState;
     private final List<String> excludedProperties;
@@ -41,10 +40,10 @@ public class StrippableBlockBehavior extends BukkitBlockBehavior {
         return properties;
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<StrippableBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public StrippableBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             String stripped = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("stripped"), "warning.config.block.behavior.strippable.missing_stripped");
             List<String> excludedProperties = MiscUtils.getAsStringList(arguments.get("excluded-properties"));
             return new StrippableBlockBehavior(block, stripped, excludedProperties);

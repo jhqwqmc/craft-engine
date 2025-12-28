@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class CopperGolemStatueSpecialModel implements SpecialModel {
-    public static final SpecialModelFactory FACTORY = new Factory();
-    public static final SpecialModelReader READER = new Reader();
+    public static final SpecialModelFactory<CopperGolemStatueSpecialModel> FACTORY = new Factory();
+    public static final SpecialModelReader<CopperGolemStatueSpecialModel> READER = new Reader();
     private final String pose;
     private final String texture;
 
@@ -41,18 +41,18 @@ public final class CopperGolemStatueSpecialModel implements SpecialModel {
         return json;
     }
 
-    private static class Factory implements SpecialModelFactory {
+    private static class Factory implements SpecialModelFactory<CopperGolemStatueSpecialModel> {
         @Override
-        public SpecialModel create(Map<String, Object> arguments) {
+        public CopperGolemStatueSpecialModel create(Map<String, Object> arguments) {
             String pose = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("pose"), "warning.config.item.model.special.copper_golem_statue.missing_pose");
             String texture = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("texture"), "warning.config.item.model.special.copper_golem_statue.missing_texture");
             return new CopperGolemStatueSpecialModel(pose, texture);
         }
     }
 
-    private static class Reader implements SpecialModelReader {
+    private static class Reader implements SpecialModelReader<CopperGolemStatueSpecialModel> {
         @Override
-        public SpecialModel read(JsonObject json) {
+        public CopperGolemStatueSpecialModel read(JsonObject json) {
             String pose = json.get("pose").getAsString();
             String texture = json.get("texture").getAsString();
             return new CopperGolemStatueSpecialModel(pose, texture);

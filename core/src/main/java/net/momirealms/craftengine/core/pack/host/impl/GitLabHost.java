@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class GitLabHost implements ResourcePackHost {
-    public static final ResourcePackHostFactory FACTORY = new Factory();
+    public static final ResourcePackHostFactory<GitLabHost> FACTORY = new Factory();
     private final String gitlabUrl;
     private final String accessToken;
     private final String projectId;
@@ -162,14 +162,14 @@ public final class GitLabHost implements ResourcePackHost {
     }
 
     @Override
-    public ResourcePackHostType type() {
+    public ResourcePackHostType<GitLabHost> type() {
         return ResourcePackHosts.GITLAB;
     }
 
-    private static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<GitLabHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public GitLabHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String gitlabUrl = Optional.ofNullable(arguments.get("gitlab-url")).map(String::valueOf).orElse(null);
             if (gitlabUrl == null || gitlabUrl.isEmpty()) {

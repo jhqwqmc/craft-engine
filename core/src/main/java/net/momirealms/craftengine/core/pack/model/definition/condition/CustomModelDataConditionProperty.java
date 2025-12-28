@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public final class CustomModelDataConditionProperty implements ConditionProperty {
-    public static final ConditionPropertyFactory FACTORY = new Factory();
-    public static final ConditionPropertyReader READER = new Reader();
+    public static final ConditionPropertyFactory<CustomModelDataConditionProperty> FACTORY = new Factory();
+    public static final ConditionPropertyReader<CustomModelDataConditionProperty> READER = new Reader();
     private final int index;
 
     public CustomModelDataConditionProperty(int index) {
@@ -25,17 +25,17 @@ public final class CustomModelDataConditionProperty implements ConditionProperty
             jsonObject.addProperty("index", this.index);
     }
 
-    private static class Factory implements ConditionPropertyFactory {
+    private static class Factory implements ConditionPropertyFactory<CustomModelDataConditionProperty> {
         @Override
-        public ConditionProperty create(Map<String, Object> arguments) {
+        public CustomModelDataConditionProperty create(Map<String, Object> arguments) {
             int index = ResourceConfigUtils.getAsInt(arguments.getOrDefault("index", 0), "index");
             return new CustomModelDataConditionProperty(index);
         }
     }
 
-    private static class Reader implements ConditionPropertyReader {
+    private static class Reader implements ConditionPropertyReader<CustomModelDataConditionProperty> {
         @Override
-        public ConditionProperty read(JsonObject json) {
+        public CustomModelDataConditionProperty read(JsonObject json) {
             int index = json.has("index") ? json.get("index").getAsInt() : 0;
             return new CustomModelDataConditionProperty(index);
         }

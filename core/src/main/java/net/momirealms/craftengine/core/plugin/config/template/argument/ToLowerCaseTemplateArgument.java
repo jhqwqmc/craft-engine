@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class ToLowerCaseTemplateArgument implements TemplateArgument {
-    public static final TemplateArgumentFactory FACTORY = new Factory();
+    public static final TemplateArgumentFactory<ToLowerCaseTemplateArgument> FACTORY = new Factory();
     private final String result;
 
     private ToLowerCaseTemplateArgument(String result) {
@@ -28,10 +28,10 @@ public final class ToLowerCaseTemplateArgument implements TemplateArgument {
         return this.result;
     }
 
-    private static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<ToLowerCaseTemplateArgument> {
 
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public ToLowerCaseTemplateArgument create(Map<String, Object> arguments) {
             String text = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value"), "warning.config.template.argument.to_lower_case.missing_value");
             String localeName = arguments.containsKey("locale") ? arguments.get("locale").toString() : null;
             Locale locale = localeName != null ? TranslationManager.parseLocale(localeName) : Locale.ROOT;

@@ -11,7 +11,6 @@ import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MultiHighBlockItemBehavior extends BlockItemBehavior {
-    public static final ItemBehaviorFactory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<MultiHighBlockItemBehavior> FACTORY = new Factory();
 
     public MultiHighBlockItemBehavior(Key blockId) {
         super(blockId);
@@ -104,9 +103,9 @@ public class MultiHighBlockItemBehavior extends BlockItemBehavior {
         return super.placeBlock(location, blockState, revertState);
     }
 
-    private static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<MultiHighBlockItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public MultiHighBlockItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.multi_high.missing_block");

@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.Key;
 import java.util.Map;
 
 public final class SimpleSelectProperty implements SelectProperty {
-    public static final SelectPropertyFactory FACTORY = new Factory();
-    public static final SelectPropertyReader READER = new Reader();
+    public static final SelectPropertyFactory<SimpleSelectProperty> FACTORY = new Factory();
+    public static final SelectPropertyReader<SimpleSelectProperty> READER = new Reader();
     private final Key type;
 
     public SimpleSelectProperty(Key type) {
@@ -23,17 +23,17 @@ public final class SimpleSelectProperty implements SelectProperty {
         jsonObject.addProperty("property", this.type.asMinimalString());
     }
 
-    private static class Factory implements SelectPropertyFactory {
+    private static class Factory implements SelectPropertyFactory<SimpleSelectProperty> {
         @Override
-        public SelectProperty create(Map<String, Object> arguments) {
+        public SimpleSelectProperty create(Map<String, Object> arguments) {
             Key type = Key.of(arguments.get("property").toString());
             return new SimpleSelectProperty(type);
         }
     }
 
-    private static class Reader implements SelectPropertyReader {
+    private static class Reader implements SelectPropertyReader<SimpleSelectProperty> {
         @Override
-        public SelectProperty read(JsonObject json) {
+        public SimpleSelectProperty read(JsonObject json) {
             Key type = Key.of(json.get("property").getAsString());
             return new SimpleSelectProperty(type);
         }

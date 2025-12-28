@@ -7,7 +7,6 @@ import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SofaShape;
@@ -23,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class SofaBlockBehavior extends BukkitBlockBehavior {
-    public static final BlockBehaviorFactory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SofaBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<SofaShape> shapeProperty;
 
@@ -99,11 +98,11 @@ public class SofaBlockBehavior extends BukkitBlockBehavior {
         return anotherState.get(anotherBehavior.facingProperty) != state.get(this.facingProperty);
     }
 
-    private static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SofaBlockBehavior> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SofaBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.sofa.missing_facing");
             Property<SofaShape> shape = (Property<SofaShape>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("shape"), "warning.config.block.behavior.sofa.missing_shape");
             return new SofaBlockBehavior(block, facing, shape);
