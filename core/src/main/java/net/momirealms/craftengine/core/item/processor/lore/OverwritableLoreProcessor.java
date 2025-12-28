@@ -49,7 +49,7 @@ public final class OverwritableLoreProcessor<I> implements SimpleNetworkItemProc
 
     private static class Factory<I> implements ItemProcessorFactory<I> {
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             LoreProcessor<I> lore = LoreProcessor.createLoreModifier(arg);
             return new OverwritableLoreProcessor<>(lore);
         }

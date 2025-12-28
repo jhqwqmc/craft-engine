@@ -44,7 +44,7 @@ public class CustomModelDataProcessor<I> implements SimpleNetworkItemProcessor<I
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             int customModelData = ResourceConfigUtils.getAsInt(arg, "custom-model-data");
             return new CustomModelDataProcessor<>(customModelData);
         }

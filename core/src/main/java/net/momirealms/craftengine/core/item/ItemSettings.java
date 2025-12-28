@@ -58,8 +58,8 @@ public class ItemSettings {
 
     private ItemSettings() {}
 
-    public <I> List<ItemProcessor<I>> modifiers() {
-        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
+    public <I> List<ItemProcessor> modifiers() {
+        ArrayList<ItemProcessor> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
@@ -75,8 +75,8 @@ public class ItemSettings {
         return modifiers;
     }
 
-    public <I> List<ItemProcessor<I>> clientBoundModifiers() {
-        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
+    public <I> List<ItemProcessor> clientBoundModifiers() {
+        ArrayList<ItemProcessor> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             if (this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 modifiers.addAll(this.equipment.equipment().modifiers());

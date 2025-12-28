@@ -11,7 +11,7 @@ import net.momirealms.sparrow.nbt.Tag;
 import java.util.Collections;
 import java.util.List;
 
-public class RemoveComponentProcessor<I> implements ItemProcessor<I> {
+public class RemoveComponentProcessor<I> implements ItemProcessor {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final List<String> arguments;
 
@@ -45,7 +45,7 @@ public class RemoveComponentProcessor<I> implements ItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             List<String> data = MiscUtils.getAsStringList(arg);
             return new RemoveComponentProcessor<>(data);
         }

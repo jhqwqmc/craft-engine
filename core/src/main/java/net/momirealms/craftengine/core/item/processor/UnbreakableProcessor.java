@@ -45,7 +45,7 @@ public class UnbreakableProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             boolean value = ResourceConfigUtils.getAsBoolean(arg, "unbreakable");
             return new UnbreakableProcessor<>(value);
         }

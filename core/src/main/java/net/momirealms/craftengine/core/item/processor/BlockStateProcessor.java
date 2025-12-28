@@ -48,7 +48,7 @@ public class BlockStateProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             if (arg instanceof Map<?, ?> map) {
                 Map<String, String> properties = new HashMap<>();
                 for (Map.Entry<?, ?> entry : map.entrySet()) {

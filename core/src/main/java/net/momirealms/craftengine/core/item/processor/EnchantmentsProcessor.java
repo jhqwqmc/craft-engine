@@ -90,7 +90,7 @@ public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             Map<String, Object> enchantData = ResourceConfigUtils.getAsMap(arg, "enchantments");
             List<Enchantment> enchantments = new ArrayList<>();
             boolean merge = false;

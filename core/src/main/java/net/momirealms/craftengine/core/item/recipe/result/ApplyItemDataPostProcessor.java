@@ -12,15 +12,15 @@ import java.util.Map;
 
 public class ApplyItemDataPostProcessor<T> implements PostProcessor<T> {
     public static final PostProcessorFactory<?> FACTORY = new Factory<>();
-    private final ItemProcessor<T>[] modifiers;
+    private final ItemProcessor[] modifiers;
 
-    public ApplyItemDataPostProcessor(ItemProcessor<T>[] modifiers) {
+    public ApplyItemDataPostProcessor(ItemProcessor[] modifiers) {
         this.modifiers = modifiers;
     }
 
     @Override
     public Item<T> process(Item<T> item, ItemBuildContext context) {
-        for (ItemProcessor<T> modifier : this.modifiers) {
+        for (ItemProcessor modifier : this.modifiers) {
             item.apply(modifier, context);
         }
         return item;
@@ -31,7 +31,7 @@ public class ApplyItemDataPostProcessor<T> implements PostProcessor<T> {
         @SuppressWarnings("unchecked")
         @Override
         public PostProcessor<A> create(Map<String, Object> args) {
-            List<ItemProcessor<?>> modifiers = new ArrayList<>();
+            List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
             ItemProcessors.applyDataModifiers(data, modifiers::add);
             return new ApplyItemDataPostProcessor<>(modifiers.toArray(new ItemProcessor[0]));

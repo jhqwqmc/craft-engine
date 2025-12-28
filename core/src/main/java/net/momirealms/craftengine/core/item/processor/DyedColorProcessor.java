@@ -46,7 +46,7 @@ public class DyedColorProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             if (arg instanceof Integer integer) {
                 return new DyedColorProcessor<>(Color.fromDecimal(integer));
             } else {

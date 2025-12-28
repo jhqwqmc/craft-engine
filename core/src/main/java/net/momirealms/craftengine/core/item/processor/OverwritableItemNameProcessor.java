@@ -48,7 +48,7 @@ public class OverwritableItemNameProcessor<I> implements SimpleNetworkItemProces
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             return new OverwritableItemNameProcessor<>(arg.toString());
         }
     }

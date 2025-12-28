@@ -31,7 +31,7 @@ public class MaxDamageProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             NumberProvider numberProvider = NumberProviders.fromObject(arg);
             return new MaxDamageProcessor<>(numberProvider);
         }

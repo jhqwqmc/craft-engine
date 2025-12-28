@@ -56,7 +56,7 @@ public class CustomNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             String name = arg.toString();
             return new CustomNameProcessor<>(name);
         }

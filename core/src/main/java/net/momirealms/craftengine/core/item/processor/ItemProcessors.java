@@ -71,7 +71,7 @@ public final class ItemProcessors {
     }
 
     @SuppressWarnings("unchecked")
-    public static <I> void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemProcessor<I>> callback) {
+    public static <I> void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemProcessor> callback) {
         ExceptionCollector<LocalizedResourceConfigException> errorCollector = new ExceptionCollector<>();
         if (dataSection != null) {
             for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {
@@ -82,7 +82,7 @@ public final class ItemProcessors {
                     try {
                         ItemProcessorFactory<?> factory = processorType.factory();
                         if (factory != null) {
-                            callback.accept((ItemProcessor<I>) factory.create(value));
+                            callback.accept((ItemProcessor) factory.create(value));
                         }
                     } catch (LocalizedResourceConfigException e) {
                         errorCollector.add(e);

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class HideTooltipProcessor<I> implements ItemProcessor<I> {
+public class HideTooltipProcessor<I> implements ItemProcessor {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     public static final Map<Key, Integer> TO_LEGACY;
     public static final List<Key> COMPONENTS = List.of(
@@ -230,7 +230,7 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             List<Key> components = MiscUtils.getAsStringList(arg).stream().map(Key::of).toList();
             return new HideTooltipProcessor<>(components);
         }

@@ -11,7 +11,7 @@ import net.momirealms.sparrow.nbt.Tag;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TagsProcessor<I> implements ItemProcessor<I> {
+public class TagsProcessor<I> implements ItemProcessor {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final Map<String, Object> arguments;
 
@@ -132,7 +132,7 @@ public class TagsProcessor<I> implements ItemProcessor<I> {
 
     private static class Factory<I> implements ItemProcessorFactory<I> {
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "nbt");
             return new TagsProcessor<>(data);
         }

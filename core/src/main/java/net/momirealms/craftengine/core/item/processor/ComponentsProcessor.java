@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ComponentsProcessor<I> implements ItemProcessor<I> {
+public class ComponentsProcessor<I> implements ItemProcessor {
     public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
     private final List<Pair<Key, Tag>> arguments;
     private CompoundTag customData = null;
@@ -85,7 +85,7 @@ public class ComponentsProcessor<I> implements ItemProcessor<I> {
     private static class Factory<I> implements ItemProcessorFactory<I> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ItemProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "components");
             return new ComponentsProcessor<>(data);
         }

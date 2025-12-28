@@ -26,7 +26,7 @@ public final class ComponentBasedEquipment extends AbstractEquipment implements 
     }
 
     @Override
-    public <I> List<ItemProcessor<I>> modifiers() {
+    public <I> List<ItemProcessor> modifiers() {
         return List.of(new EquippableAssetIdProcessor<>(this.assetId));
     }
 
