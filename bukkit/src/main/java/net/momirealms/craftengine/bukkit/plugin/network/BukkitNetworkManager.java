@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
@@ -271,22 +270,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     private void registerByteBufferPacketListener(final ByteBufferPacketListener listener, int id, String name, ConnectionState state, PacketFlow direction) {
         if (id == -1) return;
-        ByteBufferPacketListenerHolder[] listeners = switch (direction) {
-            case SERVERBOUND -> switch (state) {
-                case HANDSHAKING -> c2sHandshakingPacketListeners;
-                case STATUS -> c2sStatusPacketListeners;
-                case LOGIN -> c2sLoginPacketListeners;
-                case PLAY -> c2sPlayPacketListeners;
-                case CONFIGURATION -> c2sConfigurationPacketListeners;
-            };
-            case CLIENTBOUND -> switch (state) {
-                case HANDSHAKING -> s2cHandshakingPacketListeners;
-                case STATUS -> s2cStatusPacketListeners;
-                case LOGIN -> s2cLoginPacketListeners;
-                case PLAY -> s2cPlayPacketListeners;
-                case CONFIGURATION -> s2cConfigurationPacketListeners;
-            };
-        };
+        ByteBufferPacketListenerHolder[] listeners = direction == PacketFlow.SERVERBOUND ? c2sPacketListeners[state.ordinal()] : s2cPacketListeners[state.ordinal()];
         if (id < 0 || id >= listeners.length) {
             throw new IllegalArgumentException("Invalid packet id: " + id);
         }
@@ -412,13 +396,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         registerNMSPacketConsumer(new ServerDataListener(), NetworkReflections.clazz$ClientboundServerDataPacket);
         registerNMSPacketConsumer(new ChatSessionUpdateListener(), NetworkReflections.clazz$ServerboundChatSessionUpdatePacket);
         registerNMSPacketConsumer(new PlayerChatListener(), NetworkReflections.clazz$ClientboundPlayerChatPacket);
-        registerNMSPacketConsumer(new LoginAcknowledgedListener(), NetworkReflections.clazz$ServerboundLoginAcknowledgedPacket);
-        registerNMSPacketConsumer(new ConfigurationAcknowledgedListener(), NetworkReflections.clazz$ServerboundConfigurationAcknowledgedPacket);
-        registerNMSPacketConsumer(new C2SFinishConfigurationListener(), NetworkReflections.clazz$ServerboundFinishConfigurationPacket);
         registerNMSPacketConsumer(new S2CFinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
-        registerNMSPacketConsumer(new LoginFinishedListener(), NetworkReflections.clazz$ClientboundLoginFinishedPacket);
-        registerNMSPacketConsumer(new StartConfigurationListener(), NetworkReflections.clazz$ClientboundStartConfigurationPacket);
-        registerByteBufferPacketListener(new IntentionListener(), this.packetIds.clientIntentionPacket(), "ClientIntentionPacket", ConnectionState.HANDSHAKING, PacketFlow.SERVERBOUND);
+        registerByteBufferPacketListener(new C2SFinishConfigurationListener(), this.packetIds.serverboundFinishConfigurationPacket(), "ServerboundFinishConfigurationPacket", ConnectionState.CONFIGURATION, PacketFlow.SERVERBOUND); // 1.20.2+ c2s to play (configuration)
+        registerByteBufferPacketListener(new ByteBufferLoginListener(), this.packetIds.clientboundLoginPacket(), "ClientboundLoginPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND); // 1.20.2+ c2s to play (configuration -> play)
+        registerByteBufferPacketListener(new LoginAcknowledgedListener(), this.packetIds.serverboundLoginAcknowledgedPacket(), "ServerboundLoginAcknowledgedPacket", ConnectionState.LOGIN, PacketFlow.SERVERBOUND); // 1.20.2+ to configuration (login)
+        registerByteBufferPacketListener(new LoginFinishedListener(), this.packetIds.clientboundLoginFinishedPacket(), "ClientboundLoginFinishedPacket", ConnectionState.LOGIN, PacketFlow.CLIENTBOUND); // 1.20.1 to play (login)
+        registerByteBufferPacketListener(new StartConfigurationListener(), this.packetIds.clientboundStartConfigurationPacket(), "ClientboundStartConfigurationPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND); // 1.20.2+ s2c to configuration (play)
+        registerByteBufferPacketListener(new ConfigurationAcknowledgedListener(), this.packetIds.serverboundConfigurationAcknowledgedPacket(), "ServerboundConfigurationAcknowledgedPacket", ConnectionState.PLAY, PacketFlow.SERVERBOUND); // 1.20.2+ c2s to configuration (play)
+        registerByteBufferPacketListener(new IntentionListener(), this.packetIds.clientIntentionPacket(), "ClientIntentionPacket", ConnectionState.HANDSHAKING, PacketFlow.SERVERBOUND); // to status or login (handshaking)
         registerByteBufferPacketListener(new StatusResponseListener(), this.packetIds.clientboundStatusResponsePacket(), "ClientboundStatusResponsePacket", ConnectionState.STATUS, PacketFlow.CLIENTBOUND);
         registerByteBufferPacketListener(new ForgetLevelChunkListener(), this.packetIds.clientboundForgetLevelChunkPacket(), "ClientboundForgetLevelChunkPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
         registerByteBufferPacketListener(new SetScoreListener1_20_3(), VersionHelper.isOrAbove1_20_3() ? this.packetIds.clientboundSetScorePacket() : -1, "ClientboundSetScorePacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
@@ -1035,10 +1020,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
+    // outbound(encode|s2c)
     protected void handleS2CByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = s2cPacketListeners[user.encoderState().ordinal()];
-        if (packetID >= listener.length) { // fixme 为什么会这样
+        if (packetID >= listener.length) {
             this.plugin.logger().warn(
                     "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
                             "Bound: CLIENT, Connection state: " + user.encoderState() + ", " +
@@ -1057,13 +1043,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
+    // inbound(decode|c2s)
     protected void handleC2SByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
-        if (packetID >= listener.length) { // fixme 为什么会这样
+        if (packetID >= listener.length) {
             this.plugin.logger().warn(
                     "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
-                            "Bound: SERVER, Connection state: " + user.encoderState() + ", " +
+                            "Bound: SERVER, Connection state: " + user.decoderState() + ", " +
                             "Server version: " + VersionHelper.MINECRAFT_VERSION.version(),
                     new Throwable()
             );
@@ -1965,17 +1952,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (!VersionHelper.isOrAbove1_20_2() || !Config.sendPackOnJoin()) {
                 // 防止后期调试进配置阶段造成问题
                 user.setShouldProcessFinishConfiguration(false);
-                user.setEncoderState(ConnectionState.PLAY);
                 return;
             }
 
             if (!user.shouldProcessFinishConfiguration()) {
-                user.setEncoderState(ConnectionState.PLAY);
                 return;
             }
             Object packetListener = FastNMS.INSTANCE.method$Connection$getPacketListener(user.connection());
             if (!CoreReflections.clazz$ServerConfigurationPacketListenerImpl.isInstance(packetListener)) {
-                user.setEncoderState(ConnectionState.PLAY);
                 return;
             }
 
@@ -2014,55 +1998,50 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             // 请求资源包
             ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
             host.requestResourcePackDownloadLink(user.uuid()).whenComplete((dataList, t) -> {
+                Queue<Object> configurationTasks;
                 try {
-                    Queue<Object> configurationTasks;
-                    try {
-                        configurationTasks = (Queue<Object>) CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$configurationTasksGetter.invokeExact(packetListener);
-                    } catch (Throwable e) {
-                        CraftEngine.instance().logger().warn("Failed to get configuration tasks for player " + user.name(), e);
-                        FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
-                        return;
-                    }
-                    if (t != null) {
-                        CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
-                        returnToWorld(user, configurationTasks, packetListener);
-                        return;
-                    }
-                    if (dataList.isEmpty()) {
-                        returnToWorld(user, configurationTasks, packetListener);
-                        return;
-                    }
-                    // 向配置阶段连接的任务重加入资源包的任务
-                    for (ResourcePackDownloadData data : dataList) {
-                        configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
-                        user.addResourcePackUUID(data.uuid());
-                    }
-                    // 最后再加入一个 JoinWorldTask 并开始资源包任务
-                    returnToWorld(user, configurationTasks, packetListener);
-                } finally {
-                    user.setEncoderState(ConnectionState.PLAY);
+                    configurationTasks = (Queue<Object>) CoreReflections.methodHandle$ServerConfigurationPacketListenerImpl$configurationTasksGetter.invokeExact(packetListener);
+                } catch (Throwable e) {
+                    CraftEngine.instance().logger().warn("Failed to get configuration tasks for player " + user.name(), e);
+                    FastNMS.INSTANCE.method$ServerConfigurationPacketListenerImpl$returnToWorld(packetListener);
+                    return;
                 }
+                if (t != null) {
+                    CraftEngine.instance().logger().warn("Failed to get pack data for player " + user.name(), t);
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
+                if (dataList.isEmpty()) {
+                    returnToWorld(user, configurationTasks, packetListener);
+                    return;
+                }
+                // 向配置阶段连接的任务重加入资源包的任务
+                for (ResourcePackDownloadData data : dataList) {
+                    configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
+                    user.addResourcePackUUID(data.uuid());
+                }
+                // 最后再加入一个 JoinWorldTask 并开始资源包任务
+                returnToWorld(user, configurationTasks, packetListener);
             });
         }
     }
 
-    public static class LoginFinishedListener implements NMSPacketListener {
+    public static class LoginFinishedListener implements ByteBufferPacketListener {
 
         @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            if (VersionHelper.isOrAbove1_20_2()) {
-                user.setEncoderState(ConnectionState.CONFIGURATION);
-            } else {
+        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
+            if (!VersionHelper.isOrAbove1_20_2()) {
+                /*
+                发送这个包以后在1.20.1会从login切换到play
+                1. send ClientboundGameProfilePacket
+                2. placeNewPlayer 在 ServerLoginPacketListenerImpl
+                3. new ServerGamePacketListenerImpl 在 PlayerList 的 placeNewPlayer
+                 */
                 user.setConnectionState(ConnectionState.PLAY);
             }
-            GameProfile gameProfile = FastNMS.INSTANCE.field$ClientboundLoginFinishedPacket$gameProfile(packet);
-            if (VersionHelper.isOrAbove1_21_9()) {
-                user.setVerifiedName(gameProfile.name());
-                user.setVerifiedUUID(gameProfile.id());
-            } else {
-                user.setVerifiedName(LegacyAuthLibUtils.getName(gameProfile));
-                user.setVerifiedUUID(LegacyAuthLibUtils.getId(gameProfile));
-            }
+            FriendlyByteBuf buffer = event.getBuffer();
+            user.setVerifiedUUID(buffer.readUUID());
+            user.setVerifiedName(buffer.readUtf(16));
         }
     }
 
@@ -2105,35 +2084,97 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class LoginAcknowledgedListener implements NMSPacketListener {
+    public static class LoginAcknowledgedListener implements ByteBufferPacketListener {
 
         @Override
-        public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            user.setDecoderState(ConnectionState.CONFIGURATION);
+        public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
+            /*
+            1.20.2+
+            1. receive ServerboundLoginAcknowledgedPacket
+            2. new ServerConfigurationPacketListenerImpl 然后直接 startConfiguration
+            3. send ClientboundCustomPayloadPacket(BrandPayload) to client
+
+            1.20.5+
+            1. receive ServerboundLoginAcknowledgedPacket
+            2. set outbound(encode|s2c) to configuration
+            3. set inbound(decode|c2s) to configuration
+            4. startConfiguration
+            5. send ClientboundCustomPayloadPacket(BrandPayload) to client
+             */
+            user.setConnectionState(ConnectionState.CONFIGURATION);
         }
     }
 
-    public static class ConfigurationAcknowledgedListener implements NMSPacketListener {
+    public static class C2SFinishConfigurationListener implements ByteBufferPacketListener {
 
         @Override
-        public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            user.setDecoderState(ConnectionState.CONFIGURATION);
+        public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
+            /*
+            1.20.2+
+            1. receive ServerboundFinishConfigurationPacket
+            2. placeNewPlayer
+            3. new ServerGamePacketListenerImpl 在 PlayerList
+            4. send ClientboundLoginPacket to client
+
+            1.20.5+
+            1. receive ServerboundFinishConfigurationPacket
+            2. set outbound(encode|s2c) to play
+            3. placeNewPlayer
+            4. set inbound(decode|c2s) to play
+            5. send ClientboundLoginPacket to client
+             */
+            user.setEncoderState(ConnectionState.PLAY);
         }
     }
 
-    public static class C2SFinishConfigurationListener implements NMSPacketListener {
+    public static class ByteBufferLoginListener implements ByteBufferPacketListener {
 
         @Override
-        public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            user.setDecoderState(ConnectionState.PLAY);
+        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
+            if (VersionHelper.isOrAbove1_20_2()) {
+                /*
+                1.20.2+
+                1. send ClientboundLoginPacket to client
+
+                1.20.5+
+                1. set inbound(decode|c2s) to play
+                2. send ClientboundLoginPacket to client
+                 */
+                user.setDecoderState(ConnectionState.PLAY);
+            }
         }
     }
 
-    public static class StartConfigurationListener implements NMSPacketListener {
+    public static class ConfigurationAcknowledgedListener implements ByteBufferPacketListener {
 
         @Override
-        public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            user.setEncoderState(ConnectionState.CONFIGURATION);
+        public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
+            /*
+            1.20.2+
+            1. receive ServerboundConfigurationAcknowledgedPacket
+            2. setListener ServerConfigurationPacketListenerImpl
+
+            1.20.5+
+            1. receive ServerboundConfigurationAcknowledgedPacket
+            2. set inbound(decode|c2s) to configuration
+             */
+            user.setDecoderState(ConnectionState.CONFIGURATION); // in
+        }
+    }
+
+    public static class StartConfigurationListener implements ByteBufferPacketListener {
+
+        @Override
+        public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
+            /*
+            1.20.2+
+            1. send ClientboundStartConfigurationPacket
+
+            1.20.5+
+            1. send ClientboundStartConfigurationPacket
+            2. set outbound(encode|s2c) to configuration
+             */
+            user.setEncoderState(ConnectionState.CONFIGURATION); // out
         }
     }
 
@@ -2155,11 +2196,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 };
             } catch (Throwable e) { // 客户端乱发包
                 Debugger.COMMON.warn(() -> "Failed to read intention packet", e);
-                user.forceDisconnect();
+                user.kick(null);
                 return;
             }
             if (nextState == null) { // 如果乱发包直接强行断开连接
-                user.forceDisconnect();
+                user.kick(null);
                 return;
             }
             if (BukkitNetworkManager.instance.hasViaVersion) {
@@ -2169,6 +2210,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 }
             }
             user.setProtocolVersion(ProtocolVersion.getById(protocolVersion));
+            /*
+            1.20+ 直接切换
+             */
             user.setConnectionState(nextState);
         }
     }

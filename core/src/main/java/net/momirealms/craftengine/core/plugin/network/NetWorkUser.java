@@ -56,9 +56,7 @@ public interface NetWorkUser {
 
     void sendCustomPayload(Key channel, byte[] data);
 
-    void kick(Component message);
-
-    void forceDisconnect();
+    void kick(@Nullable Component message);
 
     void simulatePacket(Object packet);
 

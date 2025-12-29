@@ -10,8 +10,6 @@ repositories {
 dependencies {
     // Platform
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    // authlib
-    compileOnly("com.mojang:authlib:6.0.58")
 }
 
 java {

@@ -41,6 +41,7 @@ import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
 import net.momirealms.craftengine.core.plugin.entityculling.EntityCulling;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
 import net.momirealms.craftengine.core.plugin.network.ProtocolVersion;
@@ -94,8 +95,8 @@ public class BukkitServerPlayer extends Player {
     private UUID uuid;
     private boolean isNameVerified;
     private boolean isUUIDVerified;
-    private ConnectionState decoderState;
-    private ConnectionState encoderState;
+    private ConnectionState decoderState; // inbound(decode|c2s)
+    private ConnectionState encoderState; // outbound(encode|s2c)
     private boolean shouldProcessFinishConfiguration = true;
     private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
     // some references
@@ -493,9 +494,18 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public void kick(Component message) {
+    public void kick(@Nullable Component message) {
+        Object reason = message != null ? ComponentUtils.adventureToMinecraft(message) : null;
+        if (this.encoderState == ConnectionState.HANDSHAKING || this.encoderState == ConnectionState.STATUS) {
+            FastNMS.INSTANCE.method$Connection$disconnect(this.connection(), reason);
+            return;
+        }
         try {
-            Object reason = ComponentUtils.adventureToMinecraft(message);
+            if (this.encoderState == ConnectionState.LOGIN) {
+                this.sendPacket(NetworkReflections.constructor$ClientboundLoginDisconnectPacket.newInstance(reason), false);
+                FastNMS.INSTANCE.method$Connection$disconnect(this.connection(), reason);
+                return;
+            }
             Object kickPacket = NetworkReflections.constructor$ClientboundDisconnectPacket.newInstance(reason);
             this.sendPacket(kickPacket, false, () -> FastNMS.INSTANCE.method$Connection$disconnect(this.connection(), reason));
             this.nettyChannel().config().setAutoRead(false);
@@ -504,11 +514,6 @@ public class BukkitServerPlayer extends Player {
         } catch (Exception e) {
             CraftEngine.instance().logger().warn("Failed to kick " + name(), e);
         }
-    }
-
-    @Override
-    public void forceDisconnect() {
-        this.nettyChannel().pipeline().disconnect();
     }
 
     @Override
@@ -534,14 +539,17 @@ public class BukkitServerPlayer extends Player {
     public void setConnectionState(ConnectionState connectionState) {
         this.encoderState = connectionState;
         this.decoderState = connectionState;
+        Debugger.COMMON.warn(() -> "Set connection state to " + connectionState, new Throwable());
     }
 
     public void setDecoderState(ConnectionState decoderState) {
         this.decoderState = decoderState;
+        Debugger.COMMON.warn(() -> "Set decoder state to " + decoderState, new Throwable());
     }
 
     public void setEncoderState(ConnectionState encoderState) {
         this.encoderState = encoderState;
+        Debugger.COMMON.warn(() -> "Set encoder state to " + encoderState, new Throwable());
     }
 
     @Override

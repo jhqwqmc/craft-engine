@@ -81,4 +81,16 @@ public interface PacketIds {
     int clientIntentionPacket();
 
     int clientboundStatusResponsePacket();
+
+    int serverboundFinishConfigurationPacket();
+
+    int clientboundLoginPacket();
+
+    int clientboundLoginFinishedPacket();
+
+    int serverboundLoginAcknowledgedPacket();
+
+    int clientboundStartConfigurationPacket();
+
+    int serverboundConfigurationAcknowledgedPacket();
 }

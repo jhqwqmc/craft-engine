@@ -1,8 +1,10 @@
 package net.momirealms.craftengine.bukkit.plugin.network.id;
 
 import net.momirealms.craftengine.bukkit.plugin.network.PacketIds;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkReflections;
 import net.momirealms.craftengine.core.plugin.network.ConnectionState;
 import net.momirealms.craftengine.core.plugin.network.PacketFlow;
+import net.momirealms.craftengine.core.util.VersionHelper;
 
 public class PacketIds1_20_5 implements PacketIds {
 
@@ -204,5 +206,35 @@ public class PacketIds1_20_5 implements PacketIds {
     @Override
     public int clientboundStatusResponsePacket() {
         return PacketIdHelper.byName("minecraft:status_response", PacketFlow.CLIENTBOUND, ConnectionState.STATUS);
+    }
+
+    @Override
+    public int serverboundFinishConfigurationPacket() {
+        return PacketIdHelper.byName("minecraft:finish_configuration", PacketFlow.SERVERBOUND, ConnectionState.CONFIGURATION);
+    }
+
+    @Override
+    public int clientboundLoginPacket() {
+        return PacketIdHelper.byName("minecraft:login", PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    }
+
+    @Override
+    public int clientboundLoginFinishedPacket() {
+        return PacketIdHelper.byName(VersionHelper.isOrAbove1_21_2() ? "minecraft:login_finished" : "minecraft:game_profile", PacketFlow.CLIENTBOUND, ConnectionState.LOGIN);
+    }
+
+    @Override
+    public int serverboundLoginAcknowledgedPacket() {
+        return PacketIdHelper.byName("minecraft:login_acknowledged", PacketFlow.SERVERBOUND, ConnectionState.LOGIN);
+    }
+
+    @Override
+    public int clientboundStartConfigurationPacket() {
+        return PacketIdHelper.byName("minecraft:start_configuration", PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    }
+
+    @Override
+    public int serverboundConfigurationAcknowledgedPacket() {
+        return PacketIdHelper.byName("minecraft:configuration_acknowledged", PacketFlow.SERVERBOUND, ConnectionState.PLAY);
     }
 }

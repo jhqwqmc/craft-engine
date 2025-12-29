@@ -28,6 +28,9 @@ public final class PacketIdHelper {
     }
 
     public static int byClazz(Class<?> clazz, PacketFlow direction, ConnectionState state) {
+        if (clazz == null) {
+            return -1;
+        }
         return byClazz.getOrDefault(state, Map.of()).getOrDefault(direction, Map.of()).getOrDefault(clazz, -1);
     }
 }

@@ -206,4 +206,34 @@ public class PacketIds1_20 implements PacketIds {
     public int clientboundStatusResponsePacket() {
         return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundStatusResponsePacket, PacketFlow.CLIENTBOUND, ConnectionState.STATUS);
     }
+
+    @Override
+    public int serverboundFinishConfigurationPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ServerboundFinishConfigurationPacket, PacketFlow.SERVERBOUND, ConnectionState.CONFIGURATION);
+    }
+
+    @Override
+    public int clientboundLoginPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundLoginPacket, PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    }
+
+    @Override
+    public int clientboundLoginFinishedPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundLoginFinishedPacket, PacketFlow.CLIENTBOUND, ConnectionState.LOGIN);
+    }
+
+    @Override
+    public int serverboundLoginAcknowledgedPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ServerboundLoginAcknowledgedPacket, PacketFlow.SERVERBOUND, ConnectionState.LOGIN);
+    }
+
+    @Override
+    public int clientboundStartConfigurationPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ClientboundStartConfigurationPacket, PacketFlow.CLIENTBOUND, ConnectionState.PLAY);
+    }
+
+    @Override
+    public int serverboundConfigurationAcknowledgedPacket() {
+        return PacketIdHelper.byClazz(NetworkReflections.clazz$ServerboundConfigurationAcknowledgedPacket, PacketFlow.SERVERBOUND, ConnectionState.PLAY);
+    }
 }
