@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.compatibility.nameplates;
 
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -39,13 +40,12 @@ public final class CustomNameplateHatSettings implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onEquipmentChange(EntityEquipmentChangedEvent event) {
-        if (!(event.getEntity() instanceof Player player)) return;
-        Map<EquipmentSlot, EntityEquipmentChangedEvent.EquipmentChange> equipmentChanges = event.getEquipmentChanges();
-        EntityEquipmentChangedEvent.EquipmentChange equipmentChange = equipmentChanges.get(EquipmentSlot.HEAD);
-        if (equipmentChange == null) return;
-        ItemStack newItem = equipmentChange.newItem();
-        updateHatHeight(player, newItem);
+    public void onPlayerArmorChange(PlayerArmorChangeEvent event) {
+        if (event.getSlot() != EquipmentSlot.HEAD) {
+            return;
+        }
+        ItemStack newItem = event.getNewItem();
+        updateHatHeight(event.getPlayer(), newItem);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

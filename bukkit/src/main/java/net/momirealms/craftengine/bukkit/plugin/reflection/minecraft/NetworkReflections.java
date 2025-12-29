@@ -1817,4 +1817,15 @@ public final class NetworkReflections {
             ),
             VersionHelper.isOrAbove1_20_2()
     );
+
+    public static final Class<?> clazz$ClientboundLoginDisconnectPacket = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "network.protocol.login.PacketLoginOutDisconnect",
+                    "network.protocol.login.ClientboundLoginDisconnectPacket"
+            )
+    );
+
+    public static final Constructor<?> constructor$ClientboundLoginDisconnectPacket = requireNonNull(
+            ReflectionUtils.getDeclaredConstructor(clazz$ClientboundLoginDisconnectPacket, CoreReflections.clazz$Component)
+    );
 }

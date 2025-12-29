@@ -131,7 +131,7 @@ paper {
         // leveler
         register("AuraSkills") { required = false }
         register("AureliumSkills") { required = false }
-        register("McMMO") { required = false }
+        register("mcMMO") { required = false }
         register("MMOCore") { required = false }
         register("Jobs") { required = false }
         register("EcoSkills") { required = false }
