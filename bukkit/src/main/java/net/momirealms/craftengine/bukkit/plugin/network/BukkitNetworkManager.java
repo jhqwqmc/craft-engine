@@ -397,7 +397,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         registerNMSPacketConsumer(new ChatSessionUpdateListener(), NetworkReflections.clazz$ServerboundChatSessionUpdatePacket);
         registerNMSPacketConsumer(new PlayerChatListener(), NetworkReflections.clazz$ClientboundPlayerChatPacket);
         registerNMSPacketConsumer(new S2CFinishConfigurationListener(), NetworkReflections.clazz$ClientboundFinishConfigurationPacket);
-        registerByteBufferPacketListener(new C2SFinishConfigurationListener(), this.packetIds.serverboundFinishConfigurationPacket(), "ServerboundFinishConfigurationPacket", ConnectionState.CONFIGURATION, PacketFlow.SERVERBOUND); // 1.20.2+ c2s to play (configuration)
+        registerByteBufferPacketListener(new C2SFinishConfigurationListener(), this.packetIds.serverboundFinishConfigurationPacket(), "ServerboundFinishConfigurationPacket", ConnectionState.CONFIGURATION, PacketFlow.SERVERBOUND); // 1.20.2+ s2c to play (configuration)
         registerByteBufferPacketListener(new ByteBufferLoginListener(), this.packetIds.clientboundLoginPacket(), "ClientboundLoginPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND); // 1.20.2+ c2s to play (configuration -> play)
         registerByteBufferPacketListener(new LoginAcknowledgedListener(), this.packetIds.serverboundLoginAcknowledgedPacket(), "ServerboundLoginAcknowledgedPacket", ConnectionState.LOGIN, PacketFlow.SERVERBOUND); // 1.20.2+ to configuration (login)
         registerByteBufferPacketListener(new LoginFinishedListener(), this.packetIds.clientboundLoginFinishedPacket(), "ClientboundLoginFinishedPacket", ConnectionState.LOGIN, PacketFlow.CLIENTBOUND); // 1.20.1 to play (login)
