@@ -98,7 +98,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         if (resultItem.isEmpty()) {
             throw new LocalizedResourceConfigException("warning.config.recipe.invalid_result", id);
         }
-        List<PostProcessor<T>> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
+        List<PostProcessor> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
         return new CustomRecipeResult<>(
                 resultItem,
                 count,
@@ -119,7 +119,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         if (resultItem.isEmpty()) {
             throw new LocalizedResourceConfigException("warning.config.recipe.invalid_result", id);
         }
-        List<PostProcessor<T>> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
+        List<PostProcessor> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
         return new CustomRecipeResult<>(
                 resultItem,
                 count,

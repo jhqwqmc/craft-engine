@@ -40,10 +40,12 @@ public class DebugStickListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onUseDebugStick(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK) return;
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock == null) return;
         Player bukkitPlayer = event.getPlayer();
         BukkitServerPlayer player = BukkitAdaptors.adapt(bukkitPlayer);
+        if (player == null) return;
         Item<ItemStack> itemInHand = player.getItemInHand(event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         if (!BukkitItemUtils.isDebugStick(itemInHand)) return;
         if (!(player.canInstabuild() && player.hasPermission("minecraft.debugstick")) && !player.hasPermission("minecraft.debugstick.always")) {

@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.item.recipe.result;
 
 import java.util.Map;
 
-public interface PostProcessorFactory<T> {
+public interface PostProcessorFactory<T extends PostProcessor> {
 
-    PostProcessor<T> create(Map<String, Object> args);
+    T create(Map<String, Object> args);
 }

@@ -27,7 +27,9 @@ import net.momirealms.craftengine.core.item.recipe.network.modern.display.Recipe
 import net.momirealms.craftengine.core.item.recipe.network.modern.display.slot.SlotDisplay;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainder;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainderType;
+import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessorType;
+import net.momirealms.craftengine.core.item.updater.ItemUpdater;
 import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
 import net.momirealms.craftengine.core.loot.entry.LootEntryContainerType;
 import net.momirealms.craftengine.core.loot.function.LootFunctionType;
@@ -96,8 +98,8 @@ public final class Registries {
     public static final ResourceKey<Registry<SlotDisplay.Type<?>>> SLOT_DISPLAY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("slot_display_type"));
     public static final ResourceKey<Registry<RecipeDisplay.Type<?>>> RECIPE_DISPLAY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("recipe_display_type"));
     public static final ResourceKey<Registry<LegacyRecipe.Type<?>>> LEGACY_RECIPE_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("legacy_recipe_type"));
-    public static final ResourceKey<Registry<PostProcessorType<?>>> RECIPE_POST_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("recipe_post_processor_type"));
-    public static final ResourceKey<Registry<ItemUpdaterType<?>>> ITEM_UPDATER_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_updater_type"));
+    public static final ResourceKey<Registry<PostProcessorType<? extends PostProcessor>>> RECIPE_POST_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("recipe_post_processor_type"));
+    public static final ResourceKey<Registry<ItemUpdaterType<? extends ItemUpdater>>> ITEM_UPDATER_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("item_updater_type"));
     public static final ResourceKey<Registry<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>>> MOD_PACKET = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("mod_packet_type"));
     public static final ResourceKey<Registry<BlockEntityType<? extends BlockEntity>>> BLOCK_ENTITY_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_type"));
     public static final ResourceKey<Registry<BlockEntityElementConfigType<? extends BlockEntityElement>>> BLOCK_ENTITY_ELEMENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withDefaultNamespace("block_entity_element_type"));
