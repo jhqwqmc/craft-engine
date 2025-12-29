@@ -539,17 +539,14 @@ public class BukkitServerPlayer extends Player {
     public void setConnectionState(ConnectionState connectionState) {
         this.encoderState = connectionState;
         this.decoderState = connectionState;
-        Debugger.COMMON.warn(() -> "Set connection state to " + connectionState, new Throwable());
     }
 
     public void setDecoderState(ConnectionState decoderState) {
         this.decoderState = decoderState;
-        Debugger.COMMON.warn(() -> "Set decoder state to " + decoderState, new Throwable());
     }
 
     public void setEncoderState(ConnectionState encoderState) {
         this.encoderState = encoderState;
-        Debugger.COMMON.warn(() -> "Set encoder state to " + encoderState, new Throwable());
     }
 
     @Override

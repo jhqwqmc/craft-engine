@@ -244,11 +244,11 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         if (Bukkit.getPluginManager().getPlugin("FreedomChat") != null) {
             plugin.logger().severe("");
             if (Locale.getDefault() == Locale.SIMPLIFIED_CHINESE) {
-                plugin.logger().severe("CraftEngine 与 FreedomChat 不兼容，请立刻卸载 FreedomChat");
-                plugin.logger().severe("同时使用可能会导致物品显示异常或无法正确翻译数据包等情况");
+                plugin.logger().severe("CraftEngine 与 FreedomChat 不兼容，请立即卸载 FreedomChat");
+                plugin.logger().severe("作为替代方案，请在 config.yml 中启用 disable-chat-report 选项");
             } else {
                 plugin.logger().severe("CraftEngine is incompatible with FreedomChat. Please uninstall FreedomChat immediately.");
-                plugin.logger().severe("Simultaneous use may result in item display anomalies or failure to correctly translate network packets.");
+                plugin.logger().severe("As an alternative, enable disable-chat-report in config.yml.");
             }
             plugin.logger().severe("");
         }
@@ -1028,12 +1028,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = s2cPacketListeners[user.encoderState().ordinal()];
         if (packetID >= listener.length) {
-            this.plugin.logger().warn(
-                    "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
-                            "Bound: CLIENT, Connection state: " + user.encoderState() + ", " +
-                            "Server version: " + VersionHelper.MINECRAFT_VERSION.version(),
-                    new Throwable()
-            );
+            Debugger.PACKET.debug(() -> "Failed to convert the packet " + packetID + " for player " + user.name() +
+                    ". Packet Flow: S->C, Encoder State: " + user.decoderState() + ", " +
+                    "Server version: " + VersionHelper.MINECRAFT_VERSION.version() + ", Bytes: " + Arrays.toString(event.getBuffer().array()));
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];
@@ -1051,12 +1048,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
         if (packetID >= listener.length) {
-            this.plugin.logger().warn(
-                    "Failed to map the Packet ID " + packetID + " to a PacketType constant. " +
-                            "Bound: SERVER, Connection state: " + user.decoderState() + ", " +
-                            "Server version: " + VersionHelper.MINECRAFT_VERSION.version(),
-                    new Throwable()
-            );
+            Debugger.PACKET.debug(() -> "Failed to convert the packet " + packetID + " for player " + user.name() +
+                    ". Packet Flow: C->S, Decoder State: " + user.decoderState() + ", " +
+                    "Server version: " + VersionHelper.MINECRAFT_VERSION.version() + ", Bytes: " + Arrays.toString(event.getBuffer().array()));
             return;
         }
         ByteBufferPacketListenerHolder holder = listener[packetID];
