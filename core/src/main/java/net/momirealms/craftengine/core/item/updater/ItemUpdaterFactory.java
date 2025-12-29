@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
 
-public interface ItemUpdaterFactory<I> {
+public interface ItemUpdaterFactory<T extends ItemUpdater> {
 
-    ItemUpdater<I> create(Key item, Map<String, Object> args);
+    T create(Key item, Map<String, Object> args);
 }

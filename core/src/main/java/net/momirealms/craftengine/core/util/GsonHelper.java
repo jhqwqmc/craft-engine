@@ -113,7 +113,7 @@ public final class GsonHelper {
 
     public static JsonElement combine(List<? extends JsonElement> jo) {
         if (jo.size() == 1) {
-            return jo.get(0);
+            return jo.getFirst();
         } else {
             JsonArray ja = new JsonArray();
             for (JsonElement je : jo) {

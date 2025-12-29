@@ -49,11 +49,10 @@ public final class ItemUpdateConfig {
         return new ItemUpdateResult(item, orginalItem != item, true);
     }
 
-    public record Version(int version, ItemUpdater<?>[] updaters) implements Comparable<Version> {
+    public record Version(int version, ItemUpdater[] updaters) implements Comparable<Version> {
 
-        @SuppressWarnings("unchecked")
         public <T> Item<T> apply(Item<T> item, ItemBuildContext context) {
-            for (ItemUpdater<T> updater : (ItemUpdater<T>[]) updaters) {
+            for (ItemUpdater updater : updaters) {
                 item = updater.update(item, context);
             }
             return item;

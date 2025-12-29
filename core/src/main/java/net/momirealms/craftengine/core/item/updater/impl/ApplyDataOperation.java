@@ -13,16 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class ApplyDataOperation<I> implements ItemUpdater<I> {
-    public static final ItemUpdaterFactory<?> FACTORY = new Factory<>();
-    private final List<ItemProcessor<I>> modifiers;
+public final class ApplyDataOperation implements ItemUpdater {
+    public static final ItemUpdaterFactory<ApplyDataOperation> FACTORY = new Factory();
+    private final List<ItemProcessor> modifiers;
 
-    public ApplyDataOperation(List<ItemProcessor<I>> modifiers) {
+    public ApplyDataOperation(List<ItemProcessor> modifiers) {
         this.modifiers = modifiers;
     }
 
     @Override
-    public Item<I> update(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> update(Item<I> item, ItemBuildContext context) {
         if (this.modifiers != null) {
             for (ItemProcessor<I> modifier : this.modifiers) {
                 modifier.apply(item, context);
@@ -31,17 +31,17 @@ public final class ApplyDataOperation<I> implements ItemUpdater<I> {
         return item;
     }
 
-    private static class Factory<I> implements ItemUpdaterFactory<I> {
+    private static class Factory implements ItemUpdaterFactory<ApplyDataOperation> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public ItemUpdater<I> create(Key item, Map<String, Object> args) {
-            List<ItemProcessor<I>> modifiers = new ArrayList<>();
+        public ApplyDataOperation create(Key item, Map<String, Object> args) {
+            List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
             ItemProcessors.applyDataModifiers(data, m -> {
-                modifiers.add((ItemProcessor<I>) m);
+                modifiers.add(m);
             });
-            return new ApplyDataOperation<>(modifiers);
+            return new ApplyDataOperation(modifiers);
         }
     }
 }

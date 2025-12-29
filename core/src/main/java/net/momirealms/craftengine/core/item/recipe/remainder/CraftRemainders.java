@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class CraftRemainders {
-    public static final CraftRemainderType<?> FIXED = register(Key.ce("fixed"), FixedCraftRemainder.FACTORY);
-    public static final CraftRemainderType<?> RECIPE_BASED = register(Key.ce("recipe_based"), RecipeBasedCraftRemainder.FACTORY);
-    public static final CraftRemainderType<?> HURT_AND_BREAK = register(Key.ce("hurt_and_break"), HurtAndBreakRemainder.FACTORY);
+    public static final CraftRemainderType<FixedCraftRemainder> FIXED = register(Key.ce("fixed"), FixedCraftRemainder.FACTORY);
+    public static final CraftRemainderType<RecipeBasedCraftRemainder> RECIPE_BASED = register(Key.ce("recipe_based"), RecipeBasedCraftRemainder.FACTORY);
+    public static final CraftRemainderType<HurtAndBreakRemainder> HURT_AND_BREAK = register(Key.ce("hurt_and_break"), HurtAndBreakRemainder.FACTORY);
 
     private CraftRemainders() {}
 

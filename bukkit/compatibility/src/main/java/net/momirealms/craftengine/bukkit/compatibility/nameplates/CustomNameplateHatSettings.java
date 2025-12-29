@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.compatibility.nameplates;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
-import io.papermc.paper.event.entity.EntityEquipmentChangedEvent;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.item.CustomItem;
@@ -24,7 +23,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 

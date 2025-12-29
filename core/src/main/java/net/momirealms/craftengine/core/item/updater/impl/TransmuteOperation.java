@@ -9,8 +9,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public final class TransmuteOperation<I> implements ItemUpdater<I> {
-    public static final ItemUpdaterFactory<?> FACTORY = new Factory<>();
+public final class TransmuteOperation implements ItemUpdater {
+    public static final ItemUpdaterFactory<TransmuteOperation> FACTORY = new Factory();
     private final Key newMaterial;
 
     public TransmuteOperation(Key newMaterial) {
@@ -18,15 +18,15 @@ public final class TransmuteOperation<I> implements ItemUpdater<I> {
     }
 
     @Override
-    public Item<I> update(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> update(Item<I> item, ItemBuildContext context) {
         return item.transmuteCopy(this.newMaterial, item.count());
     }
 
-    private static class Factory<I> implements ItemUpdaterFactory<I> {
+    private static class Factory implements ItemUpdaterFactory<TransmuteOperation> {
 
         @Override
-        public ItemUpdater<I> create(Key item, Map<String, Object> args) {
-            return new TransmuteOperation<>(Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("material"), "warning.config.item.updater.transmute.missing_material")));
+        public TransmuteOperation create(Key item, Map<String, Object> args) {
+            return new TransmuteOperation(Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("material"), "warning.config.item.updater.transmute.missing_material")));
         }
     }
 }
