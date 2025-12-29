@@ -26,6 +26,10 @@ public class FakeBukkitServerPlayer extends BukkitServerPlayer {
     }
 
     @Override
+    public void forceDisconnect() {
+    }
+
+    @Override
     public boolean isFakePlayer() {
         return true;
     }

@@ -507,6 +507,11 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public void forceDisconnect() {
+        this.nettyChannel().pipeline().disconnect();
+    }
+
+    @Override
     public ConnectionState decoderState() {
         return decoderState;
     }

@@ -2142,19 +2142,24 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         @Override
         public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
             FriendlyByteBuf buf = event.getBuffer();
-            int protocolVersion = buf.readVarInt();
-            buf.readUtf(); // serverAddress
-            buf.readUnsignedShort(); // serverPort
-            ConnectionState nextState = switch (buf.readVarInt()) {
-                case 1 -> ConnectionState.STATUS;
-                case 2, 3 -> ConnectionState.LOGIN;
-                default -> null;
-            };
+            int protocolVersion;
+            ConnectionState nextState;
+            try {
+                protocolVersion = buf.readVarInt();
+                buf.readUtf(); // serverAddress
+                buf.readUnsignedShort(); // serverPort
+                nextState = switch (buf.readVarInt()) {
+                    case 1 -> ConnectionState.STATUS;
+                    case 2, 3 -> ConnectionState.LOGIN;
+                    default -> null;
+                };
+            } catch (Throwable e) { // 客户端乱发包
+                Debugger.COMMON.warn(() -> "Failed to read intention packet", e);
+                user.forceDisconnect();
+                return;
+            }
             if (nextState == null) { // 如果乱发包直接强行断开连接
-                Channel channel = user.nettyChannel();
-                if (channel != null) {
-                    channel.pipeline().disconnect();
-                }
+                user.forceDisconnect();
                 return;
             }
             if (BukkitNetworkManager.instance.hasViaVersion) {

@@ -58,6 +58,8 @@ public interface NetWorkUser {
 
     void kick(Component message);
 
+    void forceDisconnect();
+
     void simulatePacket(Object packet);
 
     @ApiStatus.Internal
