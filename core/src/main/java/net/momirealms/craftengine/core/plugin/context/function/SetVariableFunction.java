@@ -35,18 +35,18 @@ public class SetVariableFunction<CTX extends Context> extends AbstractConditiona
                 .ifRight(number -> contexts.withParameter(ContextKey.direct("var_" + this.variableName), asInt ? number.getInt(ctx) : number.getDouble(ctx)));
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, SetVariableFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, SetVariableFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public SetVariableFunction<CTX> create(Map<String, Object> arguments) {
             String variableName = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("name"), "warning.config.function.set_variable.missing_name");
             if (arguments.containsKey("number")) {
                 return new SetVariableFunction<>(

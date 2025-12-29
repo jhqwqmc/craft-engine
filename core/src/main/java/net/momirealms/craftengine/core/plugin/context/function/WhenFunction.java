@@ -31,18 +31,18 @@ public class WhenFunction<CTX extends Context> extends AbstractConditionalFuncti
         function.run(ctx);
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+    public static <CTX extends Context> FunctionFactory<CTX, WhenFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
         return new Factory<>(f1, f2);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX, WhenFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
             super(functionFactory, conditionFactory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public WhenFunction<CTX> create(Map<String, Object> arguments) {
             TextProvider source = TextProviders.fromString(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("source"), "warning.config.function.when.missing_source"));
             List<Pair<List<String>, Function<CTX>>> list = ResourceConfigUtils.parseConfigAsList(arguments.get("cases"), map -> {
                 List<String> when = MiscUtils.getAsStringList(map.get("when"));

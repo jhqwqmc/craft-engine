@@ -45,18 +45,18 @@ public class PotionEffectFunction<CTX extends Context> extends AbstractCondition
         }
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, PotionEffectFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, PotionEffectFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public PotionEffectFunction<CTX> create(Map<String, Object> arguments) {
             Key effectType = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("potion-effect"), "warning.config.function.potion_effect.missing_potion_effect"));
             NumberProvider duration = NumberProviders.fromObject(arguments.getOrDefault("duration", 20));
             NumberProvider amplifier = NumberProviders.fromObject(arguments.getOrDefault("amplifier", 0));

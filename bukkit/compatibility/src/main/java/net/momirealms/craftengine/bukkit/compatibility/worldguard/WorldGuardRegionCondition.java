@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public class WorldGuardRegionCondition<CTX extends Context> implements Condition<CTX> {
+public final class WorldGuardRegionCondition<CTX extends Context> implements Condition<CTX> {
     private static final Key TYPE = Key.of("worldguard:region");
     private final MatchMode mode;
     private final List<String> regions;

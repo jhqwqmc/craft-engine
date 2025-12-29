@@ -19,18 +19,18 @@ public class RemoveEntityFunction<CTX extends Context> extends AbstractCondition
         ctx.getOptionalParameter(DirectContextParameters.ENTITY).ifPresent(Entity::remove);
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, RemoveEntityFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, RemoveEntityFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public RemoveEntityFunction<CTX> create(Map<String, Object> arguments) {
             return new RemoveEntityFunction<>(getPredicates(arguments));
         }
     }

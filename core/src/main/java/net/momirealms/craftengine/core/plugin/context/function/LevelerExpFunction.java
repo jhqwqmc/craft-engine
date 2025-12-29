@@ -42,18 +42,18 @@ public class LevelerExpFunction<CTX extends Context> extends AbstractConditional
         }
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, LevelerExpFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, LevelerExpFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public LevelerExpFunction<CTX> create(Map<String, Object> arguments) {
             Object count = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.leveler_exp.missing_count");
             String leveler = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("leveler"), "warning.config.function.leveler_exp.missing_leveler").toLowerCase(Locale.ROOT);
             String plugin = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("plugin"), "warning.config.function.leveler_exp.missing_plugin");

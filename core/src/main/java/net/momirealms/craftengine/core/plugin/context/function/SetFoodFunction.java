@@ -38,18 +38,18 @@ public class SetFoodFunction<CTX extends Context> extends AbstractConditionalFun
         }
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, SetFoodFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, SetFoodFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public SetFoodFunction<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("food"), "warning.config.function.set_food.missing_food");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
             return new SetFoodFunction<>(getPredicates(arguments), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(value));

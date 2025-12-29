@@ -28,18 +28,18 @@ public class IfElseFunction<CTX extends Context> extends AbstractConditionalFunc
         }
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+    public static <CTX extends Context> FunctionFactory<CTX, IfElseFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
         return new Factory<>(f1, f2);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX, IfElseFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
             super(functionFactory, conditionFactory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public IfElseFunction<CTX> create(Map<String, Object> arguments) {
             List<Pair<Predicate<CTX>, Function<CTX>>> branches = ResourceConfigUtils.parseConfigAsList(
                     ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(arguments, "rules", "rule"), "warning.config.function.if_else.missing_rules"),
                     map -> {

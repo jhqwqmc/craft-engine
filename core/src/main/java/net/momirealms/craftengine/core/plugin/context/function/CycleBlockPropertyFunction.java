@@ -78,18 +78,18 @@ public class CycleBlockPropertyFunction<CTX extends Context> extends AbstractCon
         return wrapper.withProperty(this.property, mapValue);
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> FunctionFactory<CTX, CycleBlockPropertyFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, CycleBlockPropertyFunction<CTX>> {
 
         public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public CycleBlockPropertyFunction<CTX> create(Map<String, Object> arguments) {
             String property = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("property"), "warning.config.function.cycle_block_property.missing_property");
             Map<String, String> rules;
             if (arguments.containsKey("rules")) {

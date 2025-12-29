@@ -52,11 +52,11 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
         }
     }
 
-    public static <CTX extends Context> FunctionFactory<CTX> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+    public static <CTX extends Context> FunctionFactory<CTX, RunFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
         return new Factory<>(f1, f2);
     }
 
-    private static class Factory<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, RunFunction<CTX>> {
         private final java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory;
 
         public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
@@ -65,7 +65,7 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public RunFunction<CTX> create(Map<String, Object> arguments) {
             NumberProvider delay = NumberProviders.fromObject(arguments.getOrDefault("delay", 0));
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> functions = (List<Map<String, Object>>) ResourceConfigUtils.requireNonNullOrThrow(arguments.get("functions"), "warning.config.function.run.missing_functions");
