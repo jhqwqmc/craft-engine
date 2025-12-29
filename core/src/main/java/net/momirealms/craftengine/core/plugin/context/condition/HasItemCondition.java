@@ -22,14 +22,14 @@ public final class HasItemCondition<CTX extends Context> implements Condition<CT
         return !ItemUtils.isEmpty(itemInHand);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, HasItemCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, HasItemCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public HasItemCondition<CTX> create(Map<String, Object> arguments) {
             return new HasItemCondition<>();
         }
     }

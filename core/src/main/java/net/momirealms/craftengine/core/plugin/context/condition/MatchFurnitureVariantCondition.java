@@ -22,14 +22,14 @@ public final class MatchFurnitureVariantCondition<CTX extends Context> implement
         return furniture.filter(value -> this.variants.contains(value.getCurrentVariant().name())).isPresent();
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, MatchFurnitureVariantCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, MatchFurnitureVariantCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public MatchFurnitureVariantCondition<CTX> create(Map<String, Object> arguments) {
             List<String> variants = MiscUtils.getAsStringList(ResourceConfigUtils.get(arguments, "variant", "variants"));
             return new MatchFurnitureVariantCondition<>(variants);
         }

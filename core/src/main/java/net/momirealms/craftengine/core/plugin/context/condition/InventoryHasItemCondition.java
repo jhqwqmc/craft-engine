@@ -31,14 +31,14 @@ public final class InventoryHasItemCondition<CTX extends Context> implements Con
         return player.clearOrCountMatchingInventoryItems(this.itemId, 0) >= this.count.getInt(ctx);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, InventoryHasItemCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, InventoryHasItemCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public InventoryHasItemCondition<CTX> create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.condition.inventory_has_item.missing_id"));
             NumberProvider count = NumberProviders.fromObject(arguments.getOrDefault("count", 1));
             return new InventoryHasItemCondition<>(itemId, count);

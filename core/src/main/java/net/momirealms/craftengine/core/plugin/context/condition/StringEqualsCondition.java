@@ -22,14 +22,14 @@ public final class StringEqualsCondition<CTX extends Context> implements Conditi
         return this.value1.get(ctx).equals(this.value2.get(ctx));
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, StringEqualsCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, StringEqualsCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public StringEqualsCondition<CTX> create(Map<String, Object> arguments) {
             String value1 = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value1"), "warning.config.condition.string_equals.missing_value1");
             String value2 = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value2"), "warning.config.condition.string_equals.missing_value2");
             return new StringEqualsCondition<>(TextProviders.fromString(value1), TextProviders.fromString(value2));

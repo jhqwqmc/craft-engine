@@ -21,14 +21,14 @@ public final class IsNullCondition<CTX extends Context> implements Condition<CTX
         return optional.isEmpty();
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, IsNullCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, IsNullCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public IsNullCondition<CTX> create(Map<String, Object> arguments) {
             String argument = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("argument"), "warning.config.condition.is_null.missing_argument");
             return new IsNullCondition<>(ContextKey.chain(argument));
         }

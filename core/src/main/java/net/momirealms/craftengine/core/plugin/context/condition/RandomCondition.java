@@ -32,14 +32,14 @@ public final class RandomCondition<CTX extends Context> implements Condition<CTX
         }
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, RandomCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, RandomCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public RandomCondition<CTX> create(Map<String, Object> arguments) {
             NumberProvider provider = NumberProviders.fromObject(arguments.getOrDefault("value", 0.5f));
             boolean useLastRandom = Boolean.parseBoolean(arguments.getOrDefault("use-last", "false").toString());
             return new RandomCondition<>(provider, useLastRandom);

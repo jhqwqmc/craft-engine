@@ -68,14 +68,14 @@ public final class MatchBlockPropertyCondition<CTX extends Context> implements C
         return true;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, MatchBlockPropertyCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, MatchBlockPropertyCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public MatchBlockPropertyCondition<CTX> create(Map<String, Object> arguments) {
             Object propertyObj = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("properties"), "warning.config.condition.match_block_property.missing_properties");
             List<Pair<String, String>> propertyList = new ArrayList<>();
             for (Map.Entry<String, Object> entry : MiscUtils.castToMap(propertyObj, false).entrySet()) {

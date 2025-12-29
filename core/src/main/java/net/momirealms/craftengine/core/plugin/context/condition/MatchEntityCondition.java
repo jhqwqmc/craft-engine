@@ -25,14 +25,14 @@ public final class MatchEntityCondition<CTX extends Context> implements Conditio
         return entity.filter(value -> MiscUtils.matchRegex(value.type().asString(), this.ids, this.regexMatch)).isPresent();
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, MatchEntityCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, MatchEntityCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public MatchEntityCondition<CTX> create(Map<String, Object> arguments) {
             List<String> ids = MiscUtils.getAsStringList(arguments.get("id"));
             if (ids.isEmpty()) {
                 throw new LocalizedResourceConfigException("warning.config.condition.match_entity.missing_id");

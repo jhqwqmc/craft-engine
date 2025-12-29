@@ -10,7 +10,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record ContainsPathMatcher(String path) implements Condition<PathContext> {
-    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final ConditionFactory<PathContext, ContainsPathMatcher> FACTORY = new Factory();
 
     @Override
     public boolean test(PathContext path) {
@@ -18,9 +18,9 @@ public record ContainsPathMatcher(String path) implements Condition<PathContext>
         return pathStr.contains(this.path);
     }
 
-    private static class Factory implements ConditionFactory<PathContext> {
+    private static class Factory implements ConditionFactory<PathContext, ContainsPathMatcher> {
         @Override
-        public Condition<PathContext> create(Map<String, Object> arguments) {
+        public ContainsPathMatcher create(Map<String, Object> arguments) {
             String path = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("path"), () -> new LocalizedException("warning.config.conflict_matcher.contains.missing_path"));
             return new ContainsPathMatcher(path);
         }

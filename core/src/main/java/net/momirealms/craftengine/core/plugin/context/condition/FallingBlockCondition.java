@@ -13,14 +13,14 @@ public final class FallingBlockCondition<CTX extends Context> implements Conditi
         return ctx.getOptionalParameter(DirectContextParameters.FALLING_BLOCK).orElse(false);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, FallingBlockCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, FallingBlockCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public FallingBlockCondition<CTX> create(Map<String, Object> arguments) {
             return new FallingBlockCondition<>();
         }
     }

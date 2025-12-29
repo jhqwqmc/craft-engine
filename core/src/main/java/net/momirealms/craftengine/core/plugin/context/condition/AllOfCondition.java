@@ -24,15 +24,15 @@ public final class AllOfCondition<CTX extends Context> implements Condition<CTX>
         return this.condition.test(ctx);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory(Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> ConditionFactory<CTX, AllOfCondition<CTX>> factory(Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private record Factory<CTX extends Context>(Function<Map<String, Object>, Condition<CTX>> factory) implements ConditionFactory<CTX> {
+    private record Factory<CTX extends Context>(Function<Map<String, Object>, Condition<CTX>> factory) implements ConditionFactory<CTX, AllOfCondition<CTX>> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public AllOfCondition<CTX> create(Map<String, Object> arguments) {
             Object termsArg = ResourceConfigUtils.requireNonNullOrThrow(
                     ResourceConfigUtils.get(arguments, "terms", "term"),
                     "warning.config.condition.all_of.missing_terms"

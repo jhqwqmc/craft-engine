@@ -32,14 +32,14 @@ public final class TableBonusCondition<CTX extends Context> implements Condition
         return RandomUtils.generateRandomFloat(0, 1) < f;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, TableBonusCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, TableBonusCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public TableBonusCondition<CTX> create(Map<String, Object> arguments) {
             Object enchantmentObj = arguments.get("enchantment");
             if (enchantmentObj == null) {
                 throw new LocalizedResourceConfigException("warning.config.condition.table_bonus.missing_enchantment");

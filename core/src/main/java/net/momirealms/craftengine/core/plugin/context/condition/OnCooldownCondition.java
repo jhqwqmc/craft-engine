@@ -26,14 +26,14 @@ public final class OnCooldownCondition<CTX extends Context> implements Condition
         return false;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, OnCooldownCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, OnCooldownCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public OnCooldownCondition<CTX> create(Map<String, Object> arguments) {
             String id = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("id"), "warning.config.condition.on_cooldown.missing_id");
             return new OnCooldownCondition<>(id);
         }

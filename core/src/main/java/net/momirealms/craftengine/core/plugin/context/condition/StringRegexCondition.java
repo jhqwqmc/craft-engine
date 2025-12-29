@@ -22,14 +22,14 @@ public final class StringRegexCondition<CTX extends Context> implements Conditio
         return this.value.get(ctx).matches(this.regex.get(ctx));
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, StringRegexCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, StringRegexCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public StringRegexCondition<CTX> create(Map<String, Object> arguments) {
             String value = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value"), "warning.config.condition.string_regex.missing_value");
             String regex = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("regex"), "warning.config.condition.string_regex.missing_regex");
             return new StringRegexCondition<>(TextProviders.fromString(value), TextProviders.fromString(regex));

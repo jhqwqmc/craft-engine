@@ -19,14 +19,14 @@ public final class HasPlayerCondition<CTX extends Context> implements Condition<
         return false;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, HasPlayerCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, HasPlayerCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public HasPlayerCondition<CTX> create(Map<String, Object> arguments) {
             return new HasPlayerCondition<>();
         }
     }

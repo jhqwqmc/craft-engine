@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public final class PatternPathMatcher implements Condition<PathContext> {
-    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final ConditionFactory<PathContext, PatternPathMatcher> FACTORY = new Factory();
     private final Pattern pattern;
 
     public PatternPathMatcher(String pattern) {
@@ -23,7 +23,7 @@ public final class PatternPathMatcher implements Condition<PathContext> {
     }
 
     public Pattern pattern() {
-        return pattern;
+        return this.pattern;
     }
 
     @Override
@@ -32,9 +32,9 @@ public final class PatternPathMatcher implements Condition<PathContext> {
         return this.pattern.matcher(pathStr).matches();
     }
 
-    private static class Factory implements ConditionFactory<PathContext> {
+    private static class Factory implements ConditionFactory<PathContext, PatternPathMatcher> {
         @Override
-        public Condition<PathContext> create(Map<String, Object> arguments) {
+        public PatternPathMatcher create(Map<String, Object> arguments) {
             String pattern = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("pattern"), () -> new LocalizedException("warning.config.conflict_matcher.pattern.missing_pattern"));
             return new PatternPathMatcher(pattern);
         }

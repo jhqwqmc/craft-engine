@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public record ParentPrefixPathMatcher(String prefix) implements Condition<PathContext> {
-    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final ConditionFactory<PathContext, ParentPrefixPathMatcher> FACTORY = new Factory();
 
     @Override
     public boolean test(PathContext path) {
@@ -21,9 +21,9 @@ public record ParentPrefixPathMatcher(String prefix) implements Condition<PathCo
         return pathStr.startsWith(this.prefix);
     }
 
-    private static class Factory implements ConditionFactory<PathContext> {
+    private static class Factory implements ConditionFactory<PathContext, ParentPrefixPathMatcher> {
         @Override
-        public Condition<PathContext> create(Map<String, Object> arguments) {
+        public ParentPrefixPathMatcher create(Map<String, Object> arguments) {
             String prefix = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("prefix"), () -> new LocalizedException("warning.config.conflict_matcher.parent_prefix.missing_prefix"));
             return new ParentPrefixPathMatcher(prefix);
         }

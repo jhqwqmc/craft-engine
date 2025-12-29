@@ -22,14 +22,14 @@ public final class StringContainsCondition<CTX extends Context> implements Condi
         return this.value1.get(ctx).contains(this.value2.get(ctx));
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, StringContainsCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, StringContainsCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public StringContainsCondition<CTX> create(Map<String, Object> arguments) {
             String value1 = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value1"), "warning.config.condition.string_contains.missing_value1");
             String value2 = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("value2"), "warning.config.condition.string_contains.missing_value2");
             return new StringContainsCondition<>(TextProviders.fromString(value1), TextProviders.fromString(value2));

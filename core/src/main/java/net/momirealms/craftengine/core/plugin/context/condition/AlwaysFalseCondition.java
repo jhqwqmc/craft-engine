@@ -8,16 +8,16 @@ import java.util.Map;
 public final class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
     public static final AlwaysFalseCondition<Context> INSTANCE = new AlwaysFalseCondition<>();
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
-        return new FactoryImpl<>();
+    public static <CTX extends Context> ConditionFactory<CTX, AlwaysFalseCondition<CTX>> factory() {
+        return new Factory<>();
     }
 
-    private static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, AlwaysFalseCondition<CTX>> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
-            return (Condition<CTX>) INSTANCE;
+        public AlwaysFalseCondition<CTX> create(Map<String, Object> arguments) {
+            return (AlwaysFalseCondition<CTX>) INSTANCE;
         }
     }
 }

@@ -13,16 +13,16 @@ public final class AlwaysTrueCondition<CTX extends Context> implements Condition
         return true;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, AlwaysTrueCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, AlwaysTrueCondition<CTX>> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
-            return (Condition<CTX>) INSTANCE;
+        public AlwaysTrueCondition<CTX> create(Map<String, Object> arguments) {
+            return (AlwaysTrueCondition<CTX>) INSTANCE;
         }
     }
 }

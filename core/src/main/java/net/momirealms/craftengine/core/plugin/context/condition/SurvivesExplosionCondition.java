@@ -20,14 +20,14 @@ public final class SurvivesExplosionCondition<CTX extends Context> implements Co
         return true;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, SurvivesExplosionCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, SurvivesExplosionCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public SurvivesExplosionCondition<CTX> create(Map<String, Object> arguments) {
             return new SurvivesExplosionCondition<>();
         }
     }

@@ -22,14 +22,14 @@ public final class PermissionCondition<CTX extends Context> implements Condition
         return player.map(value -> value.hasPermission(this.permission)).orElse(false);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, PermissionCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, PermissionCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public PermissionCondition<CTX> create(Map<String, Object> arguments) {
             String permission = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("permission"), "warning.config.condition.permission.missing_permission");
             return new PermissionCondition<>(permission);
         }

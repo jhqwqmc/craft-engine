@@ -33,7 +33,7 @@ public class WorldGuardRegionCondition<CTX extends Context> implements Condition
         this.regions = regions;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, WorldGuardRegionCondition<CTX>> factory() {
         return new Factory<>();
     }
 
@@ -84,10 +84,10 @@ public class WorldGuardRegionCondition<CTX extends Context> implements Condition
         }
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, WorldGuardRegionCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public WorldGuardRegionCondition<CTX> create(Map<String, Object> arguments) {
             int mode = ResourceConfigUtils.getAsInt(arguments.getOrDefault("mode", 1), "mode") - 1;
             MatchMode matchMode = MatchMode.values()[mode];
             List<String> regions = MiscUtils.getAsStringList(arguments.get("regions"));

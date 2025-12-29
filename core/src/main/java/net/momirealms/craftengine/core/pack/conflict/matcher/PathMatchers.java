@@ -14,36 +14,26 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public final class PathMatchers {
-    public static final PathMatcherType ANY_OF = register(Key.ce("any_of"), AnyOfCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType ALL_OF = register(Key.ce("all_of"), AllOfCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType INVERTED = register(Key.ce("inverted"), InvertedCondition.factory(PathMatchers::fromMap));
-    public static final PathMatcherType CONTAINS = register(Key.ce("contains"), ContainsPathMatcher.FACTORY);
-    public static final PathMatcherType EXACT = register(Key.ce("exact"), ExactPathMatcher.FACTORY);
-    public static final PathMatcherType FILENAME = register(Key.ce("filename"), FilenamePathMatcher.FACTORY);
-    public static final PathMatcherType PATTERN = register(Key.ce("pattern"), PatternPathMatcher.FACTORY);
-    public static final PathMatcherType PARENT_PATH_SUFFIX = register(Key.ce("parent_path_suffix"), ParentSuffixPathMatcher.FACTORY);
-    public static final PathMatcherType PARENT_PATH_PREFIX = register(Key.ce("parent_path_prefix"), ParentPrefixPathMatcher.FACTORY);
+    public static final PathMatcherType<AnyOfCondition<PathContext>> ANY_OF = register(Key.ce("any_of"), AnyOfCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType<AllOfCondition<PathContext>> ALL_OF = register(Key.ce("all_of"), AllOfCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType<InvertedCondition<PathContext>> INVERTED = register(Key.ce("inverted"), InvertedCondition.factory(PathMatchers::fromMap));
+    public static final PathMatcherType<ContainsPathMatcher> CONTAINS = register(Key.ce("contains"), ContainsPathMatcher.FACTORY);
+    public static final PathMatcherType<ExactPathMatcher> EXACT = register(Key.ce("exact"), ExactPathMatcher.FACTORY);
+    public static final PathMatcherType<FilenamePathMatcher> FILENAME = register(Key.ce("filename"), FilenamePathMatcher.FACTORY);
+    public static final PathMatcherType<PatternPathMatcher> PATTERN = register(Key.ce("pattern"), PatternPathMatcher.FACTORY);
+    public static final PathMatcherType<ParentSuffixPathMatcher> PARENT_PATH_SUFFIX = register(Key.ce("parent_path_suffix"), ParentSuffixPathMatcher.FACTORY);
+    public static final PathMatcherType<ParentPrefixPathMatcher> PARENT_PATH_PREFIX = register(Key.ce("parent_path_prefix"), ParentPrefixPathMatcher.FACTORY);
 
     private PathMatchers() {}
 
-    public static PathMatcherType register(Key key, ConditionFactory<PathContext> factory) {
-        PathMatcherType type = new PathMatcherType(key, factory);
-        ((WritableRegistry<PathMatcherType>) BuiltInRegistries.PATH_MATCHER_TYPE)
+    public static <T extends Condition<PathContext>> PathMatcherType<T> register(Key key, ConditionFactory<PathContext, T> factory) {
+        PathMatcherType<T> type = new PathMatcherType<>(key, factory);
+        ((WritableRegistry<PathMatcherType<?>>) BuiltInRegistries.PATH_MATCHER_TYPE)
                 .register(ResourceKey.create(Registries.PATH_MATCHER_TYPE.location(), key), type);
         return type;
-    }
-
-    public static List<Condition<PathContext>> fromMapList(List<Map<String, Object>> arguments) {
-        List<Condition<PathContext>> matchers = new ArrayList<>();
-        for (Map<String, Object> term : arguments) {
-            matchers.add(PathMatchers.fromMap(term));
-        }
-        return matchers;
     }
 
     public static Condition<PathContext> fromMap(Map<String, Object> map) {
@@ -53,7 +43,7 @@ public final class PathMatchers {
             type = type.substring(1);
         }
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        PathMatcherType matcherType = BuiltInRegistries.PATH_MATCHER_TYPE.getValue(key);
+        PathMatcherType<? extends Condition<PathContext>> matcherType = BuiltInRegistries.PATH_MATCHER_TYPE.getValue(key);
         if (matcherType == null) {
             throw new LocalizedException("warning.config.conflict_matcher.invalid_type", type);
         }

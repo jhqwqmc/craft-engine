@@ -50,14 +50,14 @@ public final class DistanceCondition<CTX extends Context> implements Condition<C
         return distanceSquared >= minSquared && distanceSquared <= maxSquared;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, DistanceCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, DistanceCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public DistanceCondition<CTX> create(Map<String, Object> arguments) {
             NumberProvider min = NumberProviders.fromObject(arguments.getOrDefault("min", 0));
             NumberProvider max = NumberProviders.fromObject(arguments.getOrDefault("max", 32));
             return new DistanceCondition<>(min, max);

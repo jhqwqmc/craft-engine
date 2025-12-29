@@ -29,14 +29,14 @@ public final class HandCondition<CTX extends Context> implements Condition<CTX> 
         return false;
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory() {
+    public static <CTX extends Context> ConditionFactory<CTX, HandCondition<CTX>> factory() {
         return new Factory<>();
     }
 
-    private static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, HandCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public HandCondition<CTX> create(Map<String, Object> arguments) {
             String hand = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("hand"), "warning.config.condition.hand.missing_hand");
             try {
                 return new HandCondition<>(InteractionHand.valueOf(hand.toUpperCase(Locale.ENGLISH)));

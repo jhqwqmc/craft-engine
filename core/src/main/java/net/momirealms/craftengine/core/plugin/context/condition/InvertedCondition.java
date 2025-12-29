@@ -23,15 +23,15 @@ public final class InvertedCondition<CTX extends Context> implements Condition<C
         return !this.condition.test(ctx);
     }
 
-    public static <CTX extends Context> ConditionFactory<CTX> factory(Function<Map<String, Object>, Condition<CTX>> factory) {
+    public static <CTX extends Context> ConditionFactory<CTX, InvertedCondition<CTX>> factory(Function<Map<String, Object>, Condition<CTX>> factory) {
         return new Factory<>(factory);
     }
 
-    private record Factory<CTX extends Context>(Function<Map<String, Object>, Condition<CTX>> factory) implements ConditionFactory<CTX> {
+    private record Factory<CTX extends Context>(Function<Map<String, Object>, Condition<CTX>> factory) implements ConditionFactory<CTX, InvertedCondition<CTX>> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public InvertedCondition<CTX> create(Map<String, Object> arguments) {
             Object termObj = ResourceConfigUtils.requireNonNullOrThrow(
                     ResourceConfigUtils.get(arguments, "term", "terms"),
                     "warning.config.condition.inverted.missing_term"

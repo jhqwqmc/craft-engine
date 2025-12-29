@@ -9,7 +9,7 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import java.util.Map;
 
 public record FilenamePathMatcher(String name) implements Condition<PathContext> {
-    public static final ConditionFactory<PathContext> FACTORY = new Factory();
+    public static final ConditionFactory<PathContext, FilenamePathMatcher> FACTORY = new Factory();
 
     @Override
     public boolean test(PathContext path) {
@@ -17,9 +17,9 @@ public record FilenamePathMatcher(String name) implements Condition<PathContext>
         return fileName.equals(name);
     }
 
-    private static class Factory implements ConditionFactory<PathContext> {
+    private static class Factory implements ConditionFactory<PathContext, FilenamePathMatcher> {
         @Override
-        public Condition<PathContext> create(Map<String, Object> arguments) {
+        public FilenamePathMatcher create(Map<String, Object> arguments) {
             String name = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("name"), () -> new LocalizedException("warning.config.conflict_matcher.filename.missing_name"));
             return new FilenamePathMatcher(name);
         }
