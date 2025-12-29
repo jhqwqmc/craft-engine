@@ -7,11 +7,10 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-public class DyedColorProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class DyedColorProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<DyedColorProcessor> FACTORY = new Factory();
     private static final Object[] NBT_PATH = new Object[]{"display", "color"};
     private final Color color;
 
@@ -24,34 +23,34 @@ public class DyedColorProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         return item.dyedColor(this.color);
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.DYED_COLOR;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return NBT_PATH;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "display.color";
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<DyedColorProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public DyedColorProcessor create(Object arg) {
             if (arg instanceof Integer integer) {
-                return new DyedColorProcessor<>(Color.fromDecimal(integer));
+                return new DyedColorProcessor(Color.fromDecimal(integer));
             } else {
                 Vector3f vector3f = ResourceConfigUtils.getAsVector3f(arg, "dyed-color");
-                return new DyedColorProcessor<>(Color.fromVector3f(vector3f));
+                return new DyedColorProcessor(Color.fromVector3f(vector3f));
             }
         }
     }

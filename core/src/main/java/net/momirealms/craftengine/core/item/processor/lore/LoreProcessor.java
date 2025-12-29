@@ -18,30 +18,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
+public sealed interface LoreProcessor extends SimpleNetworkItemProcessor
         permits LoreProcessor.EmptyLoreProcessor, LoreProcessor.CompositeLoreProcessor, LoreProcessor.DoubleLoreProcessor, LoreProcessor.SingleLoreProcessor {
-    ItemProcessorFactory<?> FACTORY = new LoreFactory<>();
+    ItemProcessorFactory<LoreProcessor> FACTORY = new LoreFactory();
 
     @Override
     @Nullable
-    default Key componentType(Item<I> item, ItemBuildContext context) {
+    default <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.LORE;
     }
 
     @Override
     @Nullable
-    default Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    default <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return new Object[]{"display", "Lore"};
     }
 
     @Override
-    default String nbtPathString(Item<I> item, ItemBuildContext context) {
+    default <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "display.Lore";
     }
 
     List<LoreModification> lore();
 
-    static <I> LoreProcessor<I> createLoreModifier(Object arg) {
+    static LoreProcessor createLoreModifier(Object arg) {
         List<Object> rawLoreData = MiscUtils.getAsList(arg, Object.class);
         String[] rawLore = new String[rawLoreData.size()];
         label_all_string_check: {
@@ -53,7 +53,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
                     rawLore[i] = o.toString();
                 }
             }
-            return new SingleLoreProcessor<>(new LoreModification(LoreModification.Operation.APPEND, false,
+            return new SingleLoreProcessor(new LoreModification(LoreModification.Operation.APPEND, false,
                     Arrays.stream(rawLore).map(line -> Config.addNonItalicTag() && !line.startsWith("<!i>") ? FormattedLine.create("<!i>" + line) : FormattedLine.create(line))
                             .toArray(FormattedLine[]::new), c -> true));
         }
@@ -74,17 +74,17 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
         modifications.sort(LoreModificationHolder::compareTo);
         return switch (modifications.size()) {
-            case 0 -> new EmptyLoreProcessor<>();
-            case 1 -> new SingleLoreProcessor<>(modifications.get(0).modification());
-            case 2 -> new DoubleLoreProcessor<>(modifications.get(0).modification(), modifications.get(1).modification());
-            default -> new CompositeLoreProcessor<>(modifications.stream().map(LoreModificationHolder::modification).toArray(LoreModification[]::new));
+            case 0 -> new EmptyLoreProcessor();
+            case 1 -> new SingleLoreProcessor(modifications.get(0).modification());
+            case 2 -> new DoubleLoreProcessor(modifications.get(0).modification(), modifications.get(1).modification());
+            default -> new CompositeLoreProcessor(modifications.stream().map(LoreModificationHolder::modification).toArray(LoreModification[]::new));
         };
     }
 
-    non-sealed class EmptyLoreProcessor<I> implements LoreProcessor<I> {
+    non-sealed class EmptyLoreProcessor implements LoreProcessor {
 
         @Override
-        public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
             return item;
         }
 
@@ -94,7 +94,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
     }
 
-    non-sealed class SingleLoreProcessor<I> implements LoreProcessor<I> {
+    non-sealed class SingleLoreProcessor implements LoreProcessor {
         private final LoreModification modification;
 
         public SingleLoreProcessor(LoreModification modification) {
@@ -102,7 +102,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
 
         @Override
-        public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
             item.loreComponent(this.modification.parseAsList(context));
             return item;
         }
@@ -113,7 +113,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
     }
 
-    non-sealed class DoubleLoreProcessor<I> implements LoreProcessor<I> {
+    non-sealed class DoubleLoreProcessor implements LoreProcessor {
         private final LoreModification modification1;
         private final LoreModification modification2;
 
@@ -123,7 +123,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
 
         @Override
-        public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
             item.loreComponent(this.modification2.apply(this.modification1.apply(Stream.empty(), context), context).toList());
             return item;
         }
@@ -134,7 +134,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
     }
 
-    non-sealed class CompositeLoreProcessor<I> implements LoreProcessor<I> {
+    non-sealed class CompositeLoreProcessor implements LoreProcessor {
         private final LoreModification[] modifications;
 
         public CompositeLoreProcessor(LoreModification... modifications) {
@@ -142,7 +142,7 @@ public sealed interface LoreProcessor<I> extends SimpleNetworkItemProcessor<I>
         }
 
         @Override
-        public Item<I> apply(Item<I> item, ItemBuildContext context) {
+        public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
             item.loreComponent(Arrays.stream(this.modifications).reduce(Stream.<Component>empty(), (stream, modification) -> modification.apply(stream, context), Stream::concat).toList());
             return item;
         }

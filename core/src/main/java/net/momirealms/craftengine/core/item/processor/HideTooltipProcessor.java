@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class HideTooltipProcessor<I> implements ItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class HideTooltipProcessor implements ItemProcessor {
+    public static final ItemProcessorFactory<HideTooltipProcessor> FACTORY = new Factory();
     public static final Map<Key, Integer> TO_LEGACY;
     public static final List<Key> COMPONENTS = List.of(
             DataComponentKeys.UNBREAKABLE,
@@ -51,37 +51,37 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
     }
 
     private final List<Key> components;
-    private final Applier<I> applier;
+    private final Applier applier;
 
     public HideTooltipProcessor(List<Key> components) {
         this.components = components;
         if (VersionHelper.isOrAbove1_21_5()) {
-            this.applier = new ModernApplier<>(components);
+            this.applier = new ModernApplier(components);
         } else if (VersionHelper.isOrAbove1_20_5()) {
             if (components.isEmpty()) {
-                this.applier = new DummyApplier<>();
+                this.applier = new DummyApplier();
             } else if (components.size() == 1) {
                 if (COMPONENTS.contains(components.getFirst())) {
-                    this.applier = new SemiModernApplier<>(components.getFirst());
+                    this.applier = new SemiModernApplier(components.getFirst());
                 } else {
-                    this.applier = new DummyApplier<>();
+                    this.applier = new DummyApplier();
                 }
             } else {
-                List<Applier<I>> appliers = new ArrayList<>();
+                List<Applier> appliers = new ArrayList<>();
                 for (Key key : components) {
                     if (!COMPONENTS.contains(key)) continue;
-                    appliers.add(new SemiModernApplier<>(key));
+                    appliers.add(new SemiModernApplier(key));
                 }
                 if (appliers.isEmpty()) {
-                    this.applier = new DummyApplier<>();
+                    this.applier = new DummyApplier();
                 } else if (appliers.size() == 1) {
                     this.applier = appliers.getFirst();
                 } else {
-                    this.applier = new CompoundApplier<>(appliers);
+                    this.applier = new CompoundApplier(appliers);
                 }
             }
         } else {
-            this.applier = new LegacyApplier<>(components);
+            this.applier = new LegacyApplier(components);
         }
     }
 
@@ -90,13 +90,13 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         this.applier.apply(item);
         return item;
     }
 
     @Override
-    public Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    public <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         if (VersionHelper.isOrAbove1_21_5()) {
             Tag previous = item.getSparrowNBTComponent(DataComponentKeys.TOOLTIP_DISPLAY);
             if (previous != null) {
@@ -124,19 +124,19 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         return item;
     }
 
-    public interface Applier<I> {
+    public interface Applier {
 
-        void apply(Item<I> item);
+        <I> void apply(Item<I> item);
     }
 
-    public static class DummyApplier<T> implements Applier<T> {
+    public static class DummyApplier implements Applier {
 
         @Override
-        public void apply(Item<T> item) {
+        public <I> void apply(Item<I> item) {
         }
     }
 
-    public static class SemiModernApplier<I> implements Applier<I> {
+    public static class SemiModernApplier implements Applier {
         private final Key component;
 
         public SemiModernApplier(Key component) {
@@ -144,7 +144,7 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
 
         @Override
-        public void apply(Item<I> item) {
+        public <I> void apply(Item<I> item) {
             Tag previous = item.getSparrowNBTComponent(this.component);
             if (previous instanceof CompoundTag compoundTag) {
                 compoundTag.putBoolean("show_in_tooltip", false);
@@ -153,17 +153,17 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
     }
 
-    public record CompoundApplier<I>(List<Applier<I>> appliers) implements Applier<I> {
+    public record CompoundApplier(List<Applier> appliers) implements Applier {
 
         @Override
-        public void apply(Item<I> item) {
-            for (Applier<I> applier : appliers) {
+        public <I> void apply(Item<I> item) {
+            for (Applier applier : appliers) {
                 applier.apply(item);
             }
         }
     }
 
-    public static class LegacyApplier<W> implements Applier<W> {
+    public static class LegacyApplier implements Applier {
         private final int legacyValue;
 
         public LegacyApplier(List<Key> components) {
@@ -182,7 +182,7 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
 
         @Override
-        public void apply(Item<W> item) {
+        public <I> void apply(Item<I> item) {
             Integer previousFlags = (Integer) item.getJavaTag("HideFlags");
             if (previousFlags != null) {
                 item.setTag(this.legacyValue | previousFlags, "HideFlags");
@@ -192,7 +192,7 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
     }
 
-    public static class ModernApplier<W> implements Applier<W> {
+    public static class ModernApplier implements Applier {
         private final List<String> components;
 
         public ModernApplier(List<Key> components) {
@@ -204,7 +204,7 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
 
         @Override
-        public void apply(Item<W> item) {
+        public <I> void apply(Item<I> item) {
             Map<String, Object> data = MiscUtils.castToMap(item.getJavaComponent(DataComponentKeys.TOOLTIP_DISPLAY), true);
             if (data == null) {
                 item.setJavaComponent(DataComponentKeys.TOOLTIP_DISPLAY, Map.of("hidden_components", this.components));
@@ -227,12 +227,12 @@ public class HideTooltipProcessor<I> implements ItemProcessor<I> {
         }
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<HideTooltipProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public HideTooltipProcessor create(Object arg) {
             List<Key> components = MiscUtils.getAsStringList(arg).stream().map(Key::of).toList();
-            return new HideTooltipProcessor<>(components);
+            return new HideTooltipProcessor(components);
         }
     }
 }

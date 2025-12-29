@@ -15,20 +15,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class ConditionalProcessor<I> implements ItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class ConditionalProcessor implements ItemProcessor {
+    public static final ItemProcessorFactory<ConditionalProcessor> FACTORY = new Factory();
     private final Predicate<Context> condition;
-    private final ItemProcessor<I>[] modifiers;
+    private final ItemProcessor[] modifiers;
 
-    public ConditionalProcessor(Predicate<Context> condition, ItemProcessor<I>[] modifiers) {
+    public ConditionalProcessor(Predicate<Context> condition, ItemProcessor[] modifiers) {
         this.modifiers = modifiers;
         this.condition = condition;
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         if (this.condition.test(context)) {
-            for (ItemProcessor<I> m : this.modifiers) {
+            for (ItemProcessor m : this.modifiers) {
                 item = item.apply(m, context);
             }
         }
@@ -36,25 +36,24 @@ public class ConditionalProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    public <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         if (this.condition.test(context)) {
-            for (ItemProcessor<I> m : this.modifiers) {
+            for (ItemProcessor m : this.modifiers) {
                 item = m.prepareNetworkItem(item, context, networkData);
             }
         }
         return item;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<ConditionalProcessor> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ConditionalProcessor create(Object arg) {
             Map<String, Object> conditionalData = ResourceConfigUtils.getAsMap(arg, "conditional");
             List<Condition<Context>> conditions = ResourceConfigUtils.parseConfigAsList(conditionalData.get("conditions"), CommonConditions::fromMap);
-            List<ItemProcessor<I>> modifiers = new ArrayList<>();
-            ItemProcessors.applyDataModifiers(ResourceConfigUtils.getAsMap(conditionalData.get("data"), "conditional.data"), m -> modifiers.add((ItemProcessor<I>) m));
-            return new ConditionalProcessor<>(MiscUtils.allOf(conditions), modifiers.toArray(new ItemProcessor[0]));
+            List<ItemProcessor> modifiers = new ArrayList<>();
+            ItemProcessors.applyDataModifiers(ResourceConfigUtils.getAsMap(conditionalData.get("data"), "conditional.data"), modifiers::add);
+            return new ConditionalProcessor(MiscUtils.allOf(conditions), modifiers.toArray(new ItemProcessor[0]));
         }
     }
 }

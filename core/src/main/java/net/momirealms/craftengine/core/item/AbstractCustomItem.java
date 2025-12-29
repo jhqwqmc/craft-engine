@@ -20,8 +20,8 @@ public abstract class AbstractCustomItem<I> implements CustomItem<I> {
     protected final UniqueKey id;
     protected final Key material;
     protected final Key clientBoundMaterial;
-    protected final ItemProcessor<I>[] modifiers;
-    protected final ItemProcessor<I>[] clientBoundModifiers;
+    protected final ItemProcessor[] modifiers;
+    protected final ItemProcessor[] clientBoundModifiers;
     protected final List<ItemBehavior> behaviors;
     protected final ItemSettings settings;
     protected final Map<EventTrigger, List<Function<Context>>> events;
@@ -30,8 +30,8 @@ public abstract class AbstractCustomItem<I> implements CustomItem<I> {
     @SuppressWarnings("unchecked")
     public AbstractCustomItem(boolean isVanillaItem, UniqueKey id, Key material, Key clientBoundMaterial,
                               List<ItemBehavior> behaviors,
-                              List<ItemProcessor<I>> modifiers,
-                              List<ItemProcessor<I>> clientBoundModifiers,
+                              List<ItemProcessor> modifiers,
+                              List<ItemProcessor> clientBoundModifiers,
                               ItemSettings settings,
                               Map<EventTrigger, List<Function<Context>>> events,
                               ItemUpdateConfig updater) {
@@ -82,7 +82,7 @@ public abstract class AbstractCustomItem<I> implements CustomItem<I> {
     }
 
     @Override
-    public ItemProcessor<I>[] dataModifiers() {
+    public ItemProcessor[] dataModifiers() {
         return this.modifiers;
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractCustomItem<I> implements CustomItem<I> {
     }
 
     @Override
-    public ItemProcessor<I>[] clientBoundDataModifiers() {
+    public ItemProcessor[] clientBoundDataModifiers() {
         return this.clientBoundModifiers;
     }
 

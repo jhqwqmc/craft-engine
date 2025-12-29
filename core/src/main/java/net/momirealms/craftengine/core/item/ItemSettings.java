@@ -58,25 +58,25 @@ public class ItemSettings {
 
     private ItemSettings() {}
 
-    public <I> List<ItemProcessor<I>> modifiers() {
-        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
+    public List<ItemProcessor> modifiers() {
+        ArrayList<ItemProcessor> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
-                modifiers.add(new EquippableProcessor<>(data));
+                modifiers.add(new EquippableProcessor(data));
             }
             if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 modifiers.addAll(this.equipment.equipment().modifiers());
             }
         }
         if (VersionHelper.isOrAbove1_20_5() && this.foodData != null) {
-            modifiers.add(new FoodProcessor<>(this.foodData.nutrition(), this.foodData.saturation(), false));
+            modifiers.add(new FoodProcessor(this.foodData.nutrition(), this.foodData.saturation(), false));
         }
         return modifiers;
     }
 
-    public <I> List<ItemProcessor<I>> clientBoundModifiers() {
-        ArrayList<ItemProcessor<I>> modifiers = new ArrayList<>();
+    public List<ItemProcessor> clientBoundModifiers() {
+        ArrayList<ItemProcessor> modifiers = new ArrayList<>();
         if (this.equipment != null) {
             if (this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 modifiers.addAll(this.equipment.equipment().modifiers());

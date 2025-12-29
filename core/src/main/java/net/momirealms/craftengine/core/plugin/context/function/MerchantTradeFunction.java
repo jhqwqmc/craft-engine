@@ -95,10 +95,10 @@ public class MerchantTradeFunction<CTX extends Context> extends AbstractConditio
                     item.count(ResourceConfigUtils.getAsInt(args.get("count"), "count"));
                 }
                 if (VersionHelper.isOrAbove1_20_5() && args.containsKey("components")) {
-                    item = new ComponentsProcessor<>(MiscUtils.castToMap(args.get("components"), false)).apply(item, ItemBuildContext.empty());
+                    item = new ComponentsProcessor(MiscUtils.castToMap(args.get("components"), false)).apply(item, ItemBuildContext.empty());
                 }
                 if (!VersionHelper.isOrAbove1_20_5() && args.containsKey("nbt")) {
-                    item = new TagsProcessor<>(MiscUtils.castToMap(args.get("nbt"), false)).apply(item, ItemBuildContext.empty());
+                    item = new TagsProcessor(MiscUtils.castToMap(args.get("nbt"), false)).apply(item, ItemBuildContext.empty());
                 }
                 return item;
             } else {

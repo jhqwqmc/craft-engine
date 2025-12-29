@@ -6,18 +6,17 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
-import org.jetbrains.annotations.Nullable;
 
-public class OverwritableItemNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
-    private final ItemNameProcessor<I> modifier;
+public final class OverwritableItemNameProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<OverwritableItemNameProcessor> FACTORY = new Factory();
+    private final ItemNameProcessor modifier;
 
     public OverwritableItemNameProcessor(String argument) {
-        this.modifier = new ItemNameProcessor<>(argument);
+        this.modifier = new ItemNameProcessor(argument);
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         if (VersionHelper.COMPONENT_RELEASE) {
             if (item.hasNonDefaultComponent(DataComponentKeys.ITEM_NAME)) {
                 return item;
@@ -31,25 +30,25 @@ public class OverwritableItemNameProcessor<I> implements SimpleNetworkItemProces
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.ITEM_NAME;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return new Object[]{"display", "Name"};
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "display.Name";
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<OverwritableItemNameProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
-            return new OverwritableItemNameProcessor<>(arg.toString());
+        public OverwritableItemNameProcessor create(Object arg) {
+            return new OverwritableItemNameProcessor(arg.toString());
         }
     }
 }

@@ -1,11 +1,10 @@
 package net.momirealms.craftengine.core.item.processor.lore;
 
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
-import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 
-class LoreFactory<I> implements ItemProcessorFactory<I> {
+class LoreFactory implements ItemProcessorFactory<LoreProcessor> {
     @Override
-    public ItemProcessor<I> create(Object arg) {
+    public LoreProcessor create(Object arg) {
         return LoreProcessor.createLoreModifier(arg);
     }
 }

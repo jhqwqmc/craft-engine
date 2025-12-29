@@ -6,12 +6,11 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class FoodProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class FoodProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<FoodProcessor> FACTORY = new Factory();
     private final int nutrition;
     private final float saturation;
     private final boolean canAlwaysEat;
@@ -35,7 +34,7 @@ public class FoodProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         item.setJavaComponent(DataComponentKeys.FOOD, Map.of(
                 "nutrition", this.nutrition,
                 "saturation", this.saturation,
@@ -45,18 +44,18 @@ public class FoodProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.FOOD;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<FoodProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public FoodProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "food");
             int nutrition = ResourceConfigUtils.getAsInt(data.get("nutrition"), "nutrition");
             float saturation = ResourceConfigUtils.getAsFloat(data.get("saturation"), "saturation");
-            return new FoodProcessor<>(nutrition, saturation, ResourceConfigUtils.getAsBoolean(data.getOrDefault("can-always-eat", false), "can-always-eat"));
+            return new FoodProcessor(nutrition, saturation, ResourceConfigUtils.getAsBoolean(data.getOrDefault("can-always-eat", false), "can-always-eat"));
         }
     }
 }

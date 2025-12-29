@@ -9,10 +9,10 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public interface SimpleNetworkItemProcessor<I> extends ItemProcessor<I> {
+public interface SimpleNetworkItemProcessor extends ItemProcessor {
 
     @Override
-    default Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    default <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         if (VersionHelper.COMPONENT_RELEASE) {
             Key componentType= componentType(item, context);
             if (componentType != null) {
@@ -38,16 +38,16 @@ public interface SimpleNetworkItemProcessor<I> extends ItemProcessor<I> {
     }
 
     @Nullable
-    default Key componentType(Item<I> item, ItemBuildContext context) {
+    default <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return null;
     }
 
     @Nullable
-    default Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    default <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return null;
     }
 
-    default String nbtPathString(Item<I> item, ItemBuildContext context) {
+    default <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         Object[] path = nbtPath(item, context);
         if (path != null && path.length > 0) {
             StringBuilder builder = new StringBuilder();

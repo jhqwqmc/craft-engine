@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.item.data.Enchantment;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class EnchantmentsProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<EnchantmentsProcessor> FACTORY = new Factory();
     private static final Object[] STORED_ENCHANTMENTS = new Object[] {"StoredEnchantments"};
     private static final Object[] ENCHANTMENTS = new Object[] {"Enchantments"};
     private final List<Enchantment> enchantments;
@@ -34,7 +33,7 @@ public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         if (item.vanillaId().equals(ItemKeys.ENCHANTED_BOOK)) {
             if (this.merge) {
                 Optional<List<Enchantment>> previousEnchantments = item.storedEnchantments();
@@ -73,24 +72,24 @@ public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return item.vanillaId().equals(ItemKeys.ENCHANTED_BOOK) ? DataComponentKeys.STORED_ENCHANTMENTS : DataComponentKeys.ENCHANTMENTS;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return item.vanillaId().equals(ItemKeys.ENCHANTED_BOOK) ? STORED_ENCHANTMENTS : ENCHANTMENTS;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return item.vanillaId().equals(ItemKeys.ENCHANTED_BOOK) ? "StoredEnchantments" : "Enchantments";
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<EnchantmentsProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public EnchantmentsProcessor create(Object arg) {
             Map<String, Object> enchantData = ResourceConfigUtils.getAsMap(arg, "enchantments");
             List<Enchantment> enchantments = new ArrayList<>();
             boolean merge = false;
@@ -103,7 +102,7 @@ public class EnchantmentsProcessor<I> implements SimpleNetworkItemProcessor<I> {
                     enchantments.add(new Enchantment(Key.of(e.getKey()), number.intValue()));
                 }
             }
-            return new EnchantmentsProcessor<>(enchantments, merge);
+            return new EnchantmentsProcessor(enchantments, merge);
         }
     }
 }

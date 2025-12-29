@@ -9,15 +9,14 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class BlockStateProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class BlockStateProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<BlockStateProcessor> FACTORY = new Factory();
     private static final Object[] NBT_PATH = new Object[]{"BlockStateTag"};
     private final LazyReference<Map<String, String>> wrapper;
 
@@ -26,38 +25,38 @@ public class BlockStateProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         return item.blockState(this.wrapper.get());
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return NBT_PATH;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "BlockStateTag";
     }
 
     @Override
-    public Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.BLOCK_STATE;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<BlockStateProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public BlockStateProcessor create(Object arg) {
             if (arg instanceof Map<?, ?> map) {
                 Map<String, String> properties = new HashMap<>();
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                     properties.put(entry.getKey().toString(), entry.getValue().toString());
                 }
-                return new BlockStateProcessor<>(LazyReference.lazyReference(() -> properties));
+                return new BlockStateProcessor(LazyReference.lazyReference(() -> properties));
             } else {
                 String stateString = arg.toString();
-                return new BlockStateProcessor<>(LazyReference.lazyReference(() -> {
+                return new BlockStateProcessor(LazyReference.lazyReference(() -> {
                     BlockStateWrapper blockState = CraftEngine.instance().blockManager().createBlockState(stateString);
                     if (blockState instanceof CustomBlockStateWrapper customBlockStateWrapper) {
                         blockState = customBlockStateWrapper.visualBlockState();

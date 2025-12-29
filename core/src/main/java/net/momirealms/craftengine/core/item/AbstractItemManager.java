@@ -577,12 +577,12 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 }
 
                 if (customModelData > 0 && (hasModelSection || forceCustomModelData)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataProcessor<>(customModelData));
-                    else itemBuilder.dataModifier(new CustomModelDataProcessor<>(customModelData));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataProcessor(customModelData));
+                    else itemBuilder.dataModifier(new CustomModelDataProcessor(customModelData));
                 }
                 if (itemModel != null && (hasModelSection || forceItemModel)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelProcessor<>(itemModel));
-                    else itemBuilder.dataModifier(new ItemModelProcessor<>(itemModel));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelProcessor(itemModel));
+                    else itemBuilder.dataModifier(new ItemModelProcessor(itemModel));
                 }
 
                 // 应用物品数据
@@ -603,7 +603,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 如果不是原版物品，那么加入ce的标识符
                 if (!isVanillaItem)
-                    itemBuilder.dataModifier(new IdProcessor<>(id));
+                    itemBuilder.dataModifier(new IdProcessor(id));
 
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
@@ -651,7 +651,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                     }
                     ItemUpdateConfig config = new ItemUpdateConfig(versions);
                     itemBuilder.updater(config);
-                    itemBuilder.dataModifier(new ItemVersionProcessor<>(config.maxVersion()));
+                    itemBuilder.dataModifier(new ItemVersionProcessor(config.maxVersion()));
                 }
 
                 // 构建自定义物品

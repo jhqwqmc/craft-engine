@@ -24,7 +24,7 @@ public final class ApplyDataOperation implements ItemUpdater {
     @Override
     public <I> Item<I> update(Item<I> item, ItemBuildContext context) {
         if (this.modifiers != null) {
-            for (ItemProcessor<I> modifier : this.modifiers) {
+            for (ItemProcessor modifier : this.modifiers) {
                 modifier.apply(item, context);
             }
         }
@@ -33,14 +33,11 @@ public final class ApplyDataOperation implements ItemUpdater {
 
     private static class Factory implements ItemUpdaterFactory<ApplyDataOperation> {
 
-        @SuppressWarnings("unchecked")
         @Override
         public ApplyDataOperation create(Key item, Map<String, Object> args) {
             List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            ItemProcessors.applyDataModifiers(data, m -> {
-                modifiers.add(m);
-            });
+            ItemProcessors.applyDataModifiers(data, modifiers::add);
             return new ApplyDataOperation(modifiers);
         }
     }

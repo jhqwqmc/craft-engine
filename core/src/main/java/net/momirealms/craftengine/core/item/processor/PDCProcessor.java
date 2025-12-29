@@ -12,9 +12,9 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 import java.util.Map;
 import java.util.Optional;
 
-public class PDCProcessor<I> implements ItemProcessor<I> {
+public final class PDCProcessor implements ItemProcessor {
     public static final String BUKKIT_PDC = "PublicBukkitValues";
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+    public static final ItemProcessorFactory<PDCProcessor> FACTORY = new Factory();
     private final CompoundTag data;
 
     public PDCProcessor(CompoundTag data) {
@@ -22,7 +22,7 @@ public class PDCProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         if (VersionHelper.isOrAbove1_20_5()) {
             CompoundTag customData = (CompoundTag) Optional.ofNullable(item.getSparrowNBTComponent(DataComponentKeys.CUSTOM_DATA)).orElseGet(CompoundTag::new);
             customData.put(BUKKIT_PDC, this.data);
@@ -33,13 +33,13 @@ public class PDCProcessor<I> implements ItemProcessor<I> {
         return item;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<PDCProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public PDCProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "pdc");
             CompoundTag tag = (CompoundTag) CraftEngine.instance().platform().javaToSparrowNBT(data);
-            return new PDCProcessor<>(tag);
+            return new PDCProcessor(tag);
         }
     }
 }

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ComponentsProcessor<I> implements ItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class ComponentsProcessor implements ItemProcessor {
+    public static final ItemProcessorFactory<ComponentsProcessor> FACTORY = new Factory();
     private final List<Pair<Key, Tag>> arguments;
     private CompoundTag customData = null;
 
@@ -51,7 +51,7 @@ public class ComponentsProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         for (Pair<Key, Tag> entry : this.arguments) {
             item.setNBTComponent(entry.left(), entry.right());
         }
@@ -70,7 +70,7 @@ public class ComponentsProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    public <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         for (Pair<Key, Tag> entry : this.arguments) {
             Tag previous = item.getSparrowNBTComponent(entry.left());
             if (previous != null) {
@@ -82,12 +82,12 @@ public class ComponentsProcessor<I> implements ItemProcessor<I> {
         return item;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<ComponentsProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public ComponentsProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "components");
-            return new ComponentsProcessor<>(data);
+            return new ComponentsProcessor(data);
         }
     }
 }

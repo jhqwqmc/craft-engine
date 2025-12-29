@@ -14,8 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class AttributeModifiersProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<AttributeModifiersProcessor> FACTORY = new Factory();
     public static final Map<Key, Key> CONVERTOR = new HashMap<>();
     private static final Object[] NBT_PATH = new Object[]{"AttributeModifiers"};
 
@@ -100,7 +100,7 @@ public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcesso
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         List<AttributeModifier> results = new ArrayList<>(this.modifiers.size());
         for (PreModifier modifier : this.modifiers) {
             results.add(modifier.toAttributeModifier(item, context));
@@ -109,17 +109,17 @@ public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcesso
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.ATTRIBUTE_MODIFIERS;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return NBT_PATH;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "AttributeModifiers";
     }
 
@@ -152,10 +152,10 @@ public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcesso
         }
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<AttributeModifiersProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public AttributeModifiersProcessor create(Object arg) {
             List<PreModifier> attributeModifiers = ResourceConfigUtils.parseConfigAsList(arg, (map) -> {
                 String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.data.attribute_modifiers.missing_type");
                 Key nativeType = AttributeModifiersProcessor.getNativeAttributeName(Key.of(type));
@@ -179,7 +179,7 @@ public class AttributeModifiersProcessor<I> implements SimpleNetworkItemProcesso
                 return new PreModifier(nativeType.value(), slot, id,
                         amount, operation, display);
             });
-            return new AttributeModifiersProcessor<>(attributeModifiers);
+            return new AttributeModifiersProcessor(attributeModifiers);
         }
     }
 }

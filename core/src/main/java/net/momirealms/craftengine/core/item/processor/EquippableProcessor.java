@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class EquippableProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class EquippableProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<EquippableProcessor> FACTORY = new Factory();
     private final EquipmentData data;
 
     public EquippableProcessor(EquipmentData data) {
@@ -24,21 +24,21 @@ public class EquippableProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         return item.equippable(this.data);
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.EQUIPPABLE;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<EquippableProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public EquippableProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "equippable");
-            return new EquippableProcessor<>(EquipmentData.fromMap(data));
+            return new EquippableProcessor(EquipmentData.fromMap(data));
         }
     }
 }

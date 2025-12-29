@@ -8,7 +8,7 @@ import net.momirealms.sparrow.nbt.CompoundTag;
 
 import java.util.Optional;
 
-public class ItemVersionProcessor<I> implements ItemProcessor<I> {
+public final class ItemVersionProcessor implements ItemProcessor {
     public static final String VERSION_TAG = "craftengine:version";
     private final int version;
 
@@ -21,7 +21,7 @@ public class ItemVersionProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         if (VersionHelper.isOrAbove1_20_5()) {
             CompoundTag customData = (CompoundTag) Optional.ofNullable(item.getSparrowNBTComponent(DataComponentKeys.CUSTOM_DATA)).orElseGet(CompoundTag::new);
             customData.putInt(VERSION_TAG, this.version);

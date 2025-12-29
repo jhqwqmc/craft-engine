@@ -5,10 +5,9 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
-import org.jetbrains.annotations.Nullable;
 
-public class TooltipStyleProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class TooltipStyleProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<TooltipStyleProcessor> FACTORY = new Factory();
     private final Key argument;
 
     public TooltipStyleProcessor(Key argument) {
@@ -20,22 +19,22 @@ public class TooltipStyleProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         item.tooltipStyle(argument.toString());
         return item;
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.TOOLTIP_STYLE;
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<TooltipStyleProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public TooltipStyleProcessor create(Object arg) {
             String id = arg.toString();
-            return new TooltipStyleProcessor<>(Key.of(id));
+            return new TooltipStyleProcessor(Key.of(id));
         }
     }
 }

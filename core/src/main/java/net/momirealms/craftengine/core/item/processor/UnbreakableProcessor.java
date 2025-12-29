@@ -6,10 +6,9 @@ import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.Nullable;
 
-public class UnbreakableProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class UnbreakableProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<UnbreakableProcessor> FACTORY = new Factory();
     private static final Object[] NBT_PATH = new Object[]{"Unbreakable"};
     private final boolean argument;
 
@@ -22,32 +21,32 @@ public class UnbreakableProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         item.unbreakable(this.argument);
         return item;
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.UNBREAKABLE;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return NBT_PATH;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "Unbreakable";
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<UnbreakableProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public UnbreakableProcessor create(Object arg) {
             boolean value = ResourceConfigUtils.getAsBoolean(arg, "unbreakable");
-            return new UnbreakableProcessor<>(value);
+            return new UnbreakableProcessor(value);
         }
     }
 }

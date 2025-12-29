@@ -7,10 +7,9 @@ import net.momirealms.craftengine.core.item.ItemProcessorFactory;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.text.minimessage.FormattedLine;
 import net.momirealms.craftengine.core.util.Key;
-import org.jetbrains.annotations.Nullable;
 
-public class CustomNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class CustomNameProcessor implements SimpleNetworkItemProcessor {
+    public static final ItemProcessorFactory<CustomNameProcessor> FACTORY = new Factory();
     private static final Object[] NBT_PATH = new Object[]{"display", "Name"};
     private final String argument;
     private final FormattedLine line;
@@ -33,32 +32,32 @@ public class CustomNameProcessor<I> implements SimpleNetworkItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         item.customNameComponent(this.line.parse(context));
         return item;
     }
 
     @Override
-    public @Nullable Key componentType(Item<I> item, ItemBuildContext context) {
+    public <I> Key componentType(Item<I> item, ItemBuildContext context) {
         return DataComponentKeys.CUSTOM_NAME;
     }
 
     @Override
-    public @Nullable Object[] nbtPath(Item<I> item, ItemBuildContext context) {
+    public <I> Object[] nbtPath(Item<I> item, ItemBuildContext context) {
         return NBT_PATH;
     }
 
     @Override
-    public String nbtPathString(Item<I> item, ItemBuildContext context) {
+    public <I> String nbtPathString(Item<I> item, ItemBuildContext context) {
         return "display.Name";
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<CustomNameProcessor> {
 
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public CustomNameProcessor create(Object arg) {
             String name = arg.toString();
-            return new CustomNameProcessor<>(name);
+            return new CustomNameProcessor(name);
         }
     }
 }

@@ -11,8 +11,8 @@ import net.momirealms.sparrow.nbt.Tag;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TagsProcessor<I> implements ItemProcessor<I> {
-    public static final ItemProcessorFactory<?> FACTORY = new Factory<>();
+public final class TagsProcessor implements ItemProcessor {
+    public static final ItemProcessorFactory<TagsProcessor> FACTORY = new Factory();
     private final Map<String, Object> arguments;
 
     public TagsProcessor(Map<String, Object> arguments) {
@@ -24,7 +24,7 @@ public class TagsProcessor<I> implements ItemProcessor<I> {
     }
 
     @Override
-    public Item<I> apply(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> apply(Item<I> item, ItemBuildContext context) {
         for (Map.Entry<String, Object> entry : this.arguments.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
@@ -35,7 +35,7 @@ public class TagsProcessor<I> implements ItemProcessor<I> {
 
     // TODO NOT PERFECT
     @Override
-    public Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    public <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         if (VersionHelper.isOrAbove1_20_5()) {
             Tag previous = item.getSparrowNBTComponent(DataComponentKeys.CUSTOM_DATA);
             if (previous != null) {
@@ -130,11 +130,12 @@ public class TagsProcessor<I> implements ItemProcessor<I> {
             static final ParsedValue FAILURE = new ParsedValue(false, null);
     }
 
-    private static class Factory<I> implements ItemProcessorFactory<I> {
+    private static class Factory implements ItemProcessorFactory<TagsProcessor> {
+
         @Override
-        public ItemProcessor<I> create(Object arg) {
+        public TagsProcessor create(Object arg) {
             Map<String, Object> data = ResourceConfigUtils.getAsMap(arg, "nbt");
-            return new TagsProcessor<>(data);
+            return new TagsProcessor(data);
         }
     }
 }

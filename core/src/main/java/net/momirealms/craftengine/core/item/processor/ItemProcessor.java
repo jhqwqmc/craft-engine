@@ -4,11 +4,11 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.sparrow.nbt.CompoundTag;
 
-public interface ItemProcessor<I> {
+public interface ItemProcessor {
 
-    Item<I> apply(Item<I> item, ItemBuildContext context);
+    <I> Item<I> apply(Item<I> item, ItemBuildContext context);
 
-    default Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
+    default <I> Item<I> prepareNetworkItem(Item<I> item, ItemBuildContext context, CompoundTag networkData) {
         return item;
     }
 }
