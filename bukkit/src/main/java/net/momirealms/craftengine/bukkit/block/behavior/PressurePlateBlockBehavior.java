@@ -99,8 +99,8 @@ public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
         if (EventUtils.fireAndCheckCancel(event)) {
             return;
         }
-        boolean canInteract = entity instanceof Player p && !BukkitCraftEngine.instance().antiGriefProvider().canInteract(p, block.getLocation());
-        if (canInteract) {
+        boolean cannotInteract = entity instanceof Player p && !BukkitCraftEngine.instance().antiGriefProvider().canInteract(p, block.getLocation());
+        if (cannotInteract) {
             return;
         }
         Object state = args[0];
