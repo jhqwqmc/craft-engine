@@ -27,6 +27,7 @@ public class UnsetLocaleCommand extends BukkitCommandFeature<CommandSender> {
                 .handler(context -> {
                     Player player = context.get("player");
                     BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                    if (serverPlayer == null) return;
                     serverPlayer.setSelectedLocale(null);
                     handleFeedback(context, MessageConstants.COMMAND_LOCALE_UNSET_SUCCESS, Component.text(player.getName()));
                 });

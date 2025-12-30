@@ -6,6 +6,7 @@ import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
+import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.entity.furniture.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
@@ -122,7 +123,9 @@ public class BukkitFurniture extends Furniture {
         this.location = LocationUtils.toLocation(position);
         Object removePacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(MiscUtils.init(new IntArrayList(), l -> l.add(itemDisplay.getEntityId())));
         for (Player player : itemDisplay.getTrackedPlayers()) {
-            BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
+            BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+            if (serverPlayer == null) continue;
+            serverPlayer.sendPacket(removePacket, false);
         }
         itemDisplay.teleportAsync(this.location).thenAccept(result -> {
             if (result) {
@@ -132,7 +135,9 @@ public class BukkitFurniture extends Furniture {
                 Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
                         itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
                 for (Player player : itemDisplay.getTrackedPlayers()) {
-                    BukkitAdaptors.adapt(player).sendPacket(addPacket, false);
+                    BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                    if (serverPlayer == null) continue;
+                    serverPlayer.sendPacket(addPacket, false);
                 }
                 future.complete(true);
             } else {
@@ -151,8 +156,10 @@ public class BukkitFurniture extends Furniture {
         Object addPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
                 itemDisplay.getX(), itemDisplay.getY(), itemDisplay.getZ(), itemDisplay.getPitch(), itemDisplay.getYaw(), MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0);
         for (Player player : itemDisplay.getTrackedPlayers()) {
-            BukkitAdaptors.adapt(player).sendPacket(removePacket, false);
-            BukkitAdaptors.adapt(player).sendPacket(addPacket, false);
+            BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+            if (serverPlayer == null) continue;
+            serverPlayer.sendPacket(removePacket, false);
+            serverPlayer.sendPacket(addPacket, false);
         }
     }
 

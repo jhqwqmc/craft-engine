@@ -30,6 +30,7 @@ public class SearchRecipePlayerCommand extends BukkitCommandFeature<CommandSende
                 .handler(context -> {
                     Player player = context.sender();
                     BukkitServerPlayer serverPlayer = plugin().adapt(player);
+                    if (serverPlayer == null) return;
                     Item<?> item = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
                     if (ItemUtils.isEmpty(item)) {
                         handleFeedback(context, MessageConstants.COMMAND_SEARCH_RECIPE_NO_ITEM);

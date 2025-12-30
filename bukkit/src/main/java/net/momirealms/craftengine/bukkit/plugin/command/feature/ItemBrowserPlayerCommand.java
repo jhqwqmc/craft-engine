@@ -21,6 +21,7 @@ public class ItemBrowserPlayerCommand extends BukkitCommandFeature<CommandSender
                 .handler(context -> {
                     Player player = context.sender();
                     BukkitServerPlayer serverPlayer = plugin().adapt(player);
+                    if (serverPlayer == null) return;
                     plugin().itemBrowserManager().open(serverPlayer);
                 });
     }

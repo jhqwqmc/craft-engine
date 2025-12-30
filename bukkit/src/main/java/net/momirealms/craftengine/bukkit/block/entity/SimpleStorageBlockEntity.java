@@ -6,6 +6,7 @@ import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
+import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -112,8 +113,8 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         }
     }
 
-    public void onPlayerClose(Player player) {
-        if (!isValidContainer()) return;
+    public void onPlayerClose(@Nullable Player player) {
+        if (player == null || !isValidContainer()) return;
         if (!player.isSpectatorMode()) {
             // 有非观察者的人，那么就不触发关闭音效和事件
             for (HumanEntity viewer : this.inventory.getViewers()) {
@@ -187,7 +188,9 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         int validViewers = 0;
         for (HumanEntity viewer : viewers) {
             if (viewer instanceof org.bukkit.entity.Player player) {
-                maxInteractionDistance = Math.max(BukkitAdaptors.adapt(player).getCachedInteractionRange(), maxInteractionDistance);
+                BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                if (serverPlayer == null) continue;
+                maxInteractionDistance = Math.max(serverPlayer.getCachedInteractionRange(), maxInteractionDistance);
                 if (player.getGameMode() != GameMode.SPECTATOR) {
                     validViewers++;
                 }

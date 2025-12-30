@@ -49,6 +49,7 @@ public class SetLocaleCommand extends BukkitCommandFeature<CommandSender> {
                         return;
                     }
                     BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                    if (serverPlayer == null) return;
                     serverPlayer.setSelectedLocale(locale);
                     handleFeedback(context, MessageConstants.COMMAND_LOCALE_SET_SUCCESS, Component.text(TranslationManager.formatLocale(locale)), Component.text(player.getName()));
                 });

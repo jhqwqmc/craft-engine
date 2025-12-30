@@ -128,6 +128,7 @@ public class FurnitureEventListener implements Listener {
     public void onFurniturePreBreak(FurnitureAttemptBreakEvent event) {
         Player bukkitPlayer = event.getPlayer();
         BukkitServerPlayer player = BukkitAdaptors.adapt(bukkitPlayer);
+        if (player == null) return;
         Item<ItemStack> itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
         if (!BukkitItemUtils.isDebugStick(itemInHand)) return;
         if (!(player.canInstabuild() && player.hasPermission("minecraft.debugstick")) && !player.hasPermission("minecraft.debugstick.always")) {
@@ -159,6 +160,7 @@ public class FurnitureEventListener implements Listener {
     public void onInteractFurniture(FurnitureInteractEvent event) {
         Player bukkitPlayer = event.getPlayer();
         BukkitServerPlayer player = BukkitAdaptors.adapt(bukkitPlayer);
+        if (player == null) return;
         Item<ItemStack> itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
         if (!BukkitItemUtils.isDebugStick(itemInHand)) return;
         if (!(player.canInstabuild() && player.hasPermission("minecraft.debugstick")) && !player.hasPermission("minecraft.debugstick.always")) {
