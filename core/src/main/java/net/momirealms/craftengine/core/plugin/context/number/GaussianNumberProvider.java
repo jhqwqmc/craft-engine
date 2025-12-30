@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.plugin.context.number;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Random;
@@ -65,7 +66,7 @@ public record GaussianNumberProvider(double min, double max, double mean, double
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return String.format("GaussianNumberProvider{min=%.2f, max=%.2f, mean=%.2f, stdDev=%.2f, maxAttempts=%d}",
                 min, max, mean, stdDev, maxAttempts);
     }

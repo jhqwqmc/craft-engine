@@ -171,11 +171,11 @@ public final class SkewNormalNumberProvider implements NumberProvider {
         public SkewNormalNumberProvider create(Map<String, Object> arguments) {
             double min = ResourceConfigUtils.getAsDouble(
                     ResourceConfigUtils.requireNonNullOrThrow(arguments.get("min"),
-                            "warning.config.number.skewed.missing_min"), "min");
+                            "warning.config.number.skew_normal.missing_min"), "min");
 
             double max = ResourceConfigUtils.getAsDouble(
                     ResourceConfigUtils.requireNonNullOrThrow(arguments.get("max"),
-                            "warning.config.number.skewed.missing_max"), "max");
+                            "warning.config.number.skew_normal.missing_max"), "max");
 
             double defaultMean = (min + max) / 2.0;
             double mean = ResourceConfigUtils.getAsDouble(

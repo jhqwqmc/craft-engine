@@ -128,11 +128,11 @@ public record LogNormalNumberProvider(
         public LogNormalNumberProvider create(Map<String, Object> arguments) {
             double rawMin = ResourceConfigUtils.getAsDouble(
                     ResourceConfigUtils.requireNonNullOrThrow(arguments.get("min"),
-                            "warning.config.number.log-normal.missing_min"), "min");
+                            "warning.config.number.log_normal.missing_min"), "min");
 
             double max = ResourceConfigUtils.getAsDouble(
                     ResourceConfigUtils.requireNonNullOrThrow(arguments.get("max"),
-                            "warning.config.number.log-normal.missing_max"), "max");
+                            "warning.config.number.log_normal.missing_max"), "max");
 
             // 自动修正 min <= 0 的情况，防止 Log(0) 崩溃
             // 如果用户配置 min=0，我们将其修正为一个极小的正数
