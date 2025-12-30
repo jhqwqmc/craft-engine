@@ -551,9 +551,11 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public void tick() {
-        // not fully online
+        // 还没上线或是已经离线
         Object serverPlayer = serverPlayer();
         if (serverPlayer == null) return;
+
+        // 更新玩家游戏刻
         org.bukkit.entity.Player bukkitPlayer = platformPlayer();
         if (VersionHelper.isFolia()) {
             try {
@@ -565,10 +567,13 @@ public class BukkitServerPlayer extends Player {
         } else {
             this.gameTicks = FastNMS.INSTANCE.field$MinecraftServer$currentTick();
         }
+
+        // 更新CE UI
         if (this.gameTicks % 20 == 0) {
             this.updateGUI();
         }
 
+        // 家具调试模式
         if (this.enableFurnitureDebug) {
             BukkitFurniture furniture = CraftEngineFurniture.rayTrace(platformPlayer());
             boolean forceShow = furniture != this.lastHitFurniture;
@@ -613,6 +618,7 @@ public class BukkitServerPlayer extends Player {
             this.eyeLocation = unsureEyeLocation;
         }
 
+        // 本tick内有挥手
         if (hasSwingHand()) {
             if (this.isDestroyingBlock) {
                 this.tickBlockDestroy();
@@ -642,6 +648,7 @@ public class BukkitServerPlayer extends Player {
             }
         }
 
+        // 实体剔除更新相机位置
         if (Config.entityCullingRayTracing()) {
             org.bukkit.entity.Player player = platformPlayer();
             Location eyeLocation = this.eyeLocation.clone();
