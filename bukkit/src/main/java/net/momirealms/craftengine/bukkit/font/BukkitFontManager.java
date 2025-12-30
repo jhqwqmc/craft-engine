@@ -230,7 +230,7 @@ public class BukkitFontManager extends AbstractFontManager implements Listener {
                     changed = true;
                 }
             }
-            if (Config.allowEmojiChat() && !Config.disableChatReport()) {
+            if (Config.allowEmojiChat()/* && !Config.disableChatReport()*/) {
                 EmojiTextProcessResult result = replaceJsonEmoji(rawJsonMessage, BukkitAdaptors.adapt(player));
                 if (result.replaced()) {
                     rawJsonMessage = result.text();
