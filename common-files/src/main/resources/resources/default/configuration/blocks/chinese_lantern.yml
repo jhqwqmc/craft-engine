@@ -2,7 +2,7 @@ items:
   default:chinese_lantern:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.chinese_lantern>
+      item-name: <!i><l10n:item.default.chinese_lantern>
     model: minecraft:block/custom/chinese_lantern
     behavior:
       type: block_item

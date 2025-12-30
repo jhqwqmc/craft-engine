@@ -184,12 +184,9 @@ public class BukkitFurniture extends Furniture {
 
     // 获取掉落物的位置，受到家具变种的影响
     public Location getDropLocation() {
-        Optional<Vector3f> dropOffset = this.getCurrentVariant().dropOffset();
-        if (dropOffset.isEmpty()) {
-            return this.location;
-        }
+        Vector3f dropOffset = this.getCurrentVariant().dropOffset();
         Quaternionf conjugated = QuaternionUtils.toQuaternionf(0, Math.toRadians(180 - this.location.getYaw()), 0).conjugate();
-        Vector3f offset = conjugated.transform(new Vector3f(dropOffset.get()));
+        Vector3f offset = conjugated.transform(new Vector3f(dropOffset));
         return new Location(this.location.getWorld(), this.location.getX() + offset.x, this.location.getY() + offset.y, this.location.getZ() - offset.z);
     }
 

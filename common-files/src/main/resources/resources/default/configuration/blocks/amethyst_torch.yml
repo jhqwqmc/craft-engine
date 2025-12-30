@@ -1,7 +1,7 @@
 items:
   default:amethyst_torch:
     data:
-      item-name: <!i><l10n:item.amethyst_torch>
+      item-name: <!i><l10n:item.default.amethyst_torch>
     texture: minecraft:block/custom/amethyst_torch
     behavior:
       - type: wall_block_item
@@ -12,7 +12,7 @@ items:
         block: default:amethyst_wall_torch
   default:amethyst_standing_torch:
     data:
-      item-name: <!i><l10n:item.amethyst_torch>
+      item-name: <!i><l10n:item.default.amethyst_torch>
     model:
       type: minecraft:model
       path: minecraft:block/custom/amethyst_torch
@@ -22,7 +22,7 @@ items:
           torch: minecraft:block/custom/amethyst_torch
   default:amethyst_wall_torch:
     data:
-      item-name: <!i><l10n:item.amethyst_torch>
+      item-name: <!i><l10n:item.default.amethyst_torch>
     model:
       type: minecraft:model
       path: minecraft:block/custom/amethyst_wall_torch
