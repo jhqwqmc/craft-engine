@@ -16,10 +16,7 @@ import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 
 import javax.annotation.Nullable;
@@ -198,13 +195,13 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
 
     private static class Factory implements BlockBehaviorFactory<ButtonBlockBehavior> {
 
-        @SuppressWarnings({"unchecked", "DuplicatedCode"})
+        @SuppressWarnings("DuplicatedCode")
         @Override
         public ButtonBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty powered = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.button.missing_powered");
             int ticksToStayPressed = ResourceConfigUtils.getAsInt(arguments.getOrDefault("ticks-to-stay-pressed", 30), "ticks-to-stay-pressed");
             boolean canButtonBeActivatedByArrows = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("can-be-activated-by-arrows", true), "can-be-activated-by-arrows");
-            Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");
+            Map<String, Object> sounds = MiscUtils.castToMap(arguments.get("sounds"), true);
             SoundData buttonClickOnSound = null;
             SoundData buttonClickOffSound = null;
             if (sounds != null) {

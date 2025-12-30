@@ -38,6 +38,7 @@ public final class PlayerUtils {
     }
 
     public static void giveItem(Player player, Item<ItemStack> original, Item<ItemStack> item) {
+        if (player == null) return;
         Object serverPlayer = player.serverPlayer();
         Object inventory = FastNMS.INSTANCE.method$Player$getInventory(serverPlayer);
         boolean flag = FastNMS.INSTANCE.method$Inventory$add(inventory, item.getLiteralObject());

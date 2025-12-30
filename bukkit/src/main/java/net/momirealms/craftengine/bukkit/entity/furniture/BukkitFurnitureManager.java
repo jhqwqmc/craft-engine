@@ -7,6 +7,7 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
+import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
@@ -271,7 +272,9 @@ public class BukkitFurnitureManager extends AbstractFurnitureManager {
 
         // 补发一次包，修复
         for (Player player : entity.getTrackedPlayers()) {
-            BukkitAdaptors.adapt(player).sendPacket(FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
+            BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+            if (serverPlayer == null) continue;
+            serverPlayer.sendPacket(FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                     entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
                     MEntityTypes.ITEM_DISPLAY, 0, CoreReflections.instance$Vec3$Zero, 0
             ), false);

@@ -481,7 +481,9 @@ public class RecipeEventListener implements Listener {
 
         Player player = InventoryUtils.getPlayerFromInventoryEvent(event);
 
-        if (finalCost >= maxRepairCost && !BukkitAdaptors.adapt(player).canInstabuild()) {
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
+        if (finalCost >= maxRepairCost && !serverPlayer.canInstabuild()) {
             hasResult = false;
         }
 
@@ -663,6 +665,7 @@ public class RecipeEventListener implements Listener {
 
         Player player = InventoryUtils.getPlayerFromInventoryEvent(event);
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
 
         // 对低版本nothing不全的兼容
         if (!VersionHelper.isOrAbove1_20_5() && LegacyInventoryUtils.isHotBarSwapAndReadd(action)) {
@@ -878,6 +881,7 @@ public class RecipeEventListener implements Listener {
         org.bukkit.inventory.Recipe recipe = inventory.getRecipe();
         Player player = InventoryUtils.getPlayerFromInventoryEvent(event);
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
 
         if (recipe instanceof SmithingTransformRecipe transformRecipe) {
             Key recipeId = KeyUtils.namespacedKey2Key(transformRecipe.getKey());

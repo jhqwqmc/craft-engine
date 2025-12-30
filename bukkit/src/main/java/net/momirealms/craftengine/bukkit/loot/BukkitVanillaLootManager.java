@@ -73,7 +73,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
             if (VersionHelper.isOrAbove1_20_5()) {
                 if (event.getDamageSource().getCausingEntity() instanceof Player player) {
                     optionalPlayer = BukkitAdaptors.adapt(player);
-                    builder.withParameter(DirectContextParameters.PLAYER, optionalPlayer);
+                    builder.withOptionalParameter(DirectContextParameters.PLAYER, optionalPlayer);
                 }
             }
             ContextHolder contextHolder = builder.build();

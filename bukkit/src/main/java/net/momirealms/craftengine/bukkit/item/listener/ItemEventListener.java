@@ -192,6 +192,11 @@ public class ItemEventListener implements Listener {
                 boolean flag = player.isSneaking() && hasItem;
                 if (!flag) {
                     if (immutableBlockState.behavior() instanceof AbstractBlockBehavior behavior) {
+                        if (!BukkitCraftEngine.instance().antiGriefProvider().canInteract(player, block.getLocation())) {
+                            serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
+                            event.setCancelled(true);
+                            return;
+                        }
                         InteractionResult result = behavior.useOnBlock(useOnContext, immutableBlockState);
                         if (result.success()) {
                             serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
@@ -373,8 +378,9 @@ public class ItemEventListener implements Listener {
             return;
         Player player = event.getPlayer();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-        if (serverPlayer.isSpectatorMode())
+        if (serverPlayer == null || serverPlayer.isSpectatorMode()) {
             return;
+        }
         // Gets the item in hand
         InteractionHand hand = event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         // prevents duplicated events

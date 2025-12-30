@@ -46,6 +46,7 @@ public class SearchRecipeAdminCommand extends BukkitCommandFeature<CommandSender
                     NamespacedKey namespacedKey = context.get("id");
                     for (Player player : players) {
                         BukkitServerPlayer serverPlayer = plugin().adapt(player);
+                        if (serverPlayer == null) continue;
                         Key itemId = Key.of(namespacedKey.namespace(), namespacedKey.value());
                         List<Recipe<Object>> inRecipes = plugin().recipeManager().recipeByResult(itemId);
                         if (!inRecipes.isEmpty()) {

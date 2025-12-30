@@ -48,10 +48,10 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URL;
@@ -424,8 +424,9 @@ public class BukkitCraftEngine extends CraftEngine {
         }
     }
 
-    public BukkitServerPlayer adapt(@NotNull org.bukkit.entity.Player player) {
-        Objects.requireNonNull(player, "player cannot be null");
+    @Nullable
+    public BukkitServerPlayer adapt(@Nullable Player player) {
+        if (player == null) return null;
         return (BukkitServerPlayer) networkManager().getOnlineUser(player);
     }
 
