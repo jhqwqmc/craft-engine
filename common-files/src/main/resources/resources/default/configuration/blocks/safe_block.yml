@@ -2,7 +2,7 @@ items:
   default:safe_block:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.safe_block>
+      item-name: <!i><l10n:item.default.safe_block>
     model: minecraft:block/custom/safe_block
     behavior:
       type: block_item

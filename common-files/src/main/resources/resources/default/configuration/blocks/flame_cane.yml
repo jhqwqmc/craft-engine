@@ -2,7 +2,7 @@ items:
   default:flame_cane:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.flame_cane>
+      item-name: <!i><l10n:item.default.flame_cane>
     texture: minecraft:item/custom/flame_cane
     behavior:
       type: block_item

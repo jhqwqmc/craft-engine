@@ -4,7 +4,7 @@ items:
     $$<=1.21.1:
       client-bound-material: leather_horse_armor
     data:
-      item-name: <!i><white><l10n:item.cap>
+      item-name: <!i><white><l10n:item.default.cap>
       unbreakable: true
       remove-components:
         - attribute_modifiers

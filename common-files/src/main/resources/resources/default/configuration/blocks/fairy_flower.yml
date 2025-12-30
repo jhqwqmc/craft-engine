@@ -2,7 +2,7 @@ items:
   default:fairy_flower:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.fairy_flower>
+      item-name: <!i><l10n:item.default.fairy_flower>
     texture: minecraft:item/custom/fairy_flower
     behavior:
       type: block_item

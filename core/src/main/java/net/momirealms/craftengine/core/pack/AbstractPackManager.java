@@ -503,6 +503,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/configuration/furniture/bench.yml");
         plugin.saveResource("resources/default/configuration/furniture/wooden_chair.yml");
         plugin.saveResource("resources/default/configuration/furniture/flower_basket.yml");
+        plugin.saveResource("resources/default/configuration/furniture/globe.yml");
         plugin.saveResource("resources/default/configuration/blocks/chessboard_block.yml");
         plugin.saveResource("resources/default/configuration/blocks/chinese_lantern.yml");
         plugin.saveResource("resources/default/configuration/blocks/copper_coil.yml");
@@ -625,6 +626,9 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/flower_basket_ceiling.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/flower_basket_ground.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/flower_basket_wall.json");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/globe.json");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/globe_base.json");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/item/custom/globe_earth.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flower_basket.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/flower_basket_2d.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/gui/sprites/tooltip/topaz_background.png");
@@ -636,6 +640,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/block/custom/hami_melon_top.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/hami_melon_slice.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/hami_melon_seeds.png");
+        plugin.saveResource("resources/default/resourcepack/assets/minecraft/textures/item/custom/globe.png");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/block/custom/fence_side.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/block/custom/magma_plant_stage_0.json");
         plugin.saveResource("resources/default/resourcepack/assets/minecraft/models/block/custom/magma_plant_stage_1.json");
@@ -663,7 +668,9 @@ public abstract class AbstractPackManager implements PackManager {
                                 AbstractPackManager.this.cachedConfigFiles.put(path, cachedFile);
                             } else {
                                 try (InputStreamReader inputStream = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
-                                    Yaml yaml = new Yaml(new StringKeyConstructor(path, new LoaderOptions()));
+                                    LoaderOptions loaderOptions = new LoaderOptions();
+                                    loaderOptions.setNestingDepthLimit(256);
+                                    Yaml yaml = new Yaml(new StringKeyConstructor(path, loaderOptions));
                                     Map<String, Object> data = yaml.load(inputStream);
                                     if (data == null)  return FileVisitResult.CONTINUE;
                                     cachedFile = new CachedConfigFile(data, pack, lastModifiedTime, size);

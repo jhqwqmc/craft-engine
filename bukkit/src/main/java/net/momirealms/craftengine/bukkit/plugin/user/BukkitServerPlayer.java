@@ -845,7 +845,7 @@ public class BukkitServerPlayer extends Player {
                 }
             }
         } catch (Throwable e) {
-            plugin.logger().warn("Failed to set attribute for player " + platformPlayer().getName(), e);
+            this.plugin.logger().warn("Failed to set attribute for player " + platformPlayer().getName(), e);
         }
     }
 

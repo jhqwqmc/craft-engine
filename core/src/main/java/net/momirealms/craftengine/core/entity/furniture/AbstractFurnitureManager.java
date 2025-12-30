@@ -241,7 +241,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     elements.toArray(new FurnitureElementConfig[0]),
                     hitboxes.toArray(new FurnitureHitBoxConfig[0]),
                     externalModel,
-                    optionalLootSpawnOffset
+                    optionalLootSpawnOffset.orElse(new Vector3f(0, 0.5f,0))
                 ));
             }
 

@@ -75,8 +75,6 @@ public final class BuiltInRegistries {
     public static final Registry<ItemProcessorType<? extends ItemProcessor>> ITEM_PROCESSOR_TYPE = createConstantBoundRegistry(Registries.ITEM_PROCESSOR_TYPE, 64);
     public static final Registry<ItemBehaviorType<? extends ItemBehavior>> ITEM_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.ITEM_BEHAVIOR_TYPE, 64);
     public static final Registry<PropertyType<? extends Comparable<?>>> PROPERTY_TYPE = createConstantBoundRegistry(Registries.PROPERTY_TYPE, 16);
-    public static final Registry<LootFunctionType<?>> LOOT_FUNCTION_TYPE = createConstantBoundRegistry(Registries.LOOT_FUNCTION_TYPE, 32);
-    public static final Registry<LootEntryContainerType<?>> LOOT_ENTRY_CONTAINER_TYPE = createConstantBoundRegistry(Registries.LOOT_ENTRY_CONTAINER_TYPE, 16);
     public static final Registry<NumberProviderType<? extends NumberProvider>> NUMBER_PROVIDER_TYPE = createConstantBoundRegistry(Registries.NUMBER_PROVIDER_TYPE, 16);
     public static final Registry<TemplateArgumentType<? extends TemplateArgument>> TEMPLATE_ARGUMENT_TYPE = createConstantBoundRegistry(Registries.TEMPLATE_ARGUMENT_TYPE, 16);
     public static final Registry<ItemModelType<? extends ItemModel>> ITEM_MODEL_TYPE = createConstantBoundRegistry(Registries.ITEM_MODEL_TYPE, 16);
@@ -93,7 +91,6 @@ public final class BuiltInRegistries {
     public static final Registry<ResourcePackHostType<? extends ResourcePackHost>> RESOURCE_PACK_HOST_TYPE = createConstantBoundRegistry(Registries.RESOURCE_PACK_HOST_TYPE, 16);
     public static final Registry<CommonFunctionType<? extends Function<Context>>> COMMON_FUNCTION_TYPE = createConstantBoundRegistry(Registries.COMMON_FUNCTION_TYPE, 128);
     public static final Registry<CommonConditionType<? extends Condition<Context>>> COMMON_CONDITION_TYPE = createConstantBoundRegistry(Registries.COMMON_CONDITION_TYPE, 128);
-    public static final Registry<PlayerSelectorType<? extends Context>> PLAYER_SELECTOR_TYPE = createConstantBoundRegistry(Registries.PLAYER_SELECTOR_TYPE, 16);
     public static final Registry<EquipmentType<? extends Equipment>> EQUIPMENT_TYPE = createConstantBoundRegistry(Registries.EQUIPMENT_TYPE, 8);
     public static final Registry<SlotDisplay.Type<?>> SLOT_DISPLAY_TYPE = createConstantBoundRegistry(Registries.SLOT_DISPLAY_TYPE, 16);
     public static final Registry<RecipeDisplay.Type<?>> RECIPE_DISPLAY_TYPE = createConstantBoundRegistry(Registries.RECIPE_DISPLAY_TYPE, 16);
@@ -107,6 +104,10 @@ public final class BuiltInRegistries {
     public static final Registry<FurnitureElementConfigType<? extends FurnitureElement>> FURNITURE_ELEMENT_TYPE = createConstantBoundRegistry(Registries.FURNITURE_ELEMENT_TYPE, 16);
     public static final Registry<FurnitureHitboxConfigType<? extends FurnitureHitBox>> FURNITURE_HITBOX_TYPE = createConstantBoundRegistry(Registries.FURNITURE_HITBOX_TYPE, 16);
     public static final Registry<FurnitureBehaviorType<? extends FurnitureBehavior>> FURNITURE_BEHAVIOR_TYPE = createConstantBoundRegistry(Registries.FURNITURE_BEHAVIOR_TYPE, 32);
+    // todo 修改
+    public static final Registry<PlayerSelectorType<? extends Context>> PLAYER_SELECTOR_TYPE = createConstantBoundRegistry(Registries.PLAYER_SELECTOR_TYPE, 16);
+    public static final Registry<LootFunctionType<?>> LOOT_FUNCTION_TYPE = createConstantBoundRegistry(Registries.LOOT_FUNCTION_TYPE, 32);
+    public static final Registry<LootEntryContainerType<?>> LOOT_ENTRY_CONTAINER_TYPE = createConstantBoundRegistry(Registries.LOOT_ENTRY_CONTAINER_TYPE, 16);
 
     private BuiltInRegistries() {}
 
