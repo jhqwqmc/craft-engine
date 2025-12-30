@@ -289,12 +289,6 @@ block:
   simplify-adventure-break-check: false
   # Similar to the option above, but designed for block placement
   simplify-adventure-place-check: false
-  # Uses ray-tracing to predict the player's next block break,
-  # enhances mining responsiveness with moderate performance cost.
-  predict-breaking:
-    enable: false
-    interval: 10
-    extended-interaction-range: 0.5
   # Defines the return value of Bukkit Block.getMaterial() for custom blocks
   # If another plugin causes incompatibility due to its reliance on this method, try changing this option to a different vanilla block.
   # A restart is required to apply the changes.
