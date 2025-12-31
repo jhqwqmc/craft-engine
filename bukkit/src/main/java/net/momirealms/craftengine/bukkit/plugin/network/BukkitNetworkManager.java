@@ -1157,7 +1157,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public class PlayerActionListener implements NMSPacketListener {
+    public static class PlayerActionListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1175,7 +1175,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     }
                 }, () -> {});
             } else {
-                BukkitNetworkManager.this.plugin.scheduler().executeSync(() -> handlePlayerActionPacketOnMainThread(player, world, pos, packet));
+                handlePlayerActionPacketOnMainThread(player, world, pos, packet);
             }
         }
 
@@ -1247,9 +1247,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
             BukkitServerPlayer player = (BukkitServerPlayer) user;
-            if (player.isMiningBlock()) {
-                player.stopMiningBlock();
-            }
+            player.stopMiningBlock();
         }
     }
 

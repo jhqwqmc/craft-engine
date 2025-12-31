@@ -785,7 +785,6 @@ public class BukkitServerPlayer extends Player {
                     // 客户端觉得不能秒破有两种情况：
                     // 1. 此时客户端觉得自己挖掘速度为0
                     boolean attributeCannotBreak = VersionHelper.isOrAbove1_20_5() && !this.clientSideCanBreak;
-
                     // 2. 客户端侧的方块就是不能秒破
                     if (attributeCannotBreak || getDestroyProgress(vanillaBlockState.literalObject(), pos) < 1f) {
                         Object levelEventPacket = FastNMS.INSTANCE.constructor$ClientboundLevelEventPacket(
