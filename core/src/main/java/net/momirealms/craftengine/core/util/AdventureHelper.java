@@ -77,6 +77,7 @@ public class AdventureHelper {
                     if (!VersionHelper.isOrAbove1_20_5()) {
                         b.value(NBTSerializerOptions.DATA_COMPONENT_RELEASE, false);
                     }
+                    b.value(NBTSerializerOptions.SERIALIZE_COMPONENT_TYPES, false);
                 }).build();
     }
 
