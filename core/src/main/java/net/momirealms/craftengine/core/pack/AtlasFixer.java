@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.pack;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ class AtlasFixer {
 
     // 理论是从小到大加的
     public void addEntry(int min, int max, JsonObject atlas) {
+        if (!atlas.has("sources")) {
+            atlas.add("sources", new JsonArray());
+        }
         if (this.entries.isEmpty()) {
             this.entries.add(new Entry(min, max, atlas));
         } else {
@@ -30,7 +34,7 @@ class AtlasFixer {
     }
 
     public List<Entry> entries() {
-        return entries;
+        return this.entries;
     }
 
     protected static class Entry {
@@ -52,7 +56,7 @@ class AtlasFixer {
         }
 
         public JsonObject atlas() {
-            return atlas;
+            return this.atlas;
         }
 
         public void setMin(int min) {

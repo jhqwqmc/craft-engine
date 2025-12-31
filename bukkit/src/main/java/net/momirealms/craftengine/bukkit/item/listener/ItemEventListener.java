@@ -57,10 +57,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
 
 import java.util.*;
@@ -580,11 +577,14 @@ public class ItemEventListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onDropItem(PlayerDropItemEvent event) {
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(event.getPlayer());
+        if (serverPlayer == null) return;
+        serverPlayer.stopMiningBlock();
         if (!Config.triggerUpdateDrop()) return;
         org.bukkit.entity.Item itemDrop = event.getItemDrop();
         ItemStack itemStack = itemDrop.getItemStack();
         Item<ItemStack> wrapped = this.itemManager.wrap(itemStack);
-        ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(BukkitAdaptors.adapt(event.getPlayer())));
+        ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(serverPlayer));
         if (result.updated()) {
             itemDrop.setItemStack((ItemStack) result.finalItem().getItem());
         }
@@ -632,6 +632,14 @@ public class ItemEventListener implements Listener {
            return;
         }
         event.setCurrentItem((ItemStack) result.finalItem().getItem());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
+        serverPlayer.stopMiningBlock();
     }
 
     @SuppressWarnings("DuplicatedCode")

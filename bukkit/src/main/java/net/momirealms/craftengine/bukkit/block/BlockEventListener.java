@@ -109,6 +109,7 @@ public final class BlockEventListener implements Listener {
         Location location = block.getLocation();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
         if (serverPlayer == null) return;
+        serverPlayer.updateLastSuccessBreakTick();
         net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(player.getWorld());
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         Item<ItemStack> itemInHand = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);

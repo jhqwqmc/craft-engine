@@ -171,8 +171,10 @@ public class BukkitServerPlayer extends Player {
     // 客户端发送了stop包，但是仍然在继续破坏且未发出start包
     // 这种情况下可能就会卡无限挖掘状态
     private int awfulBreakFixer;
+    // 用于修正与raytrace不统一的情况
+    private int awfulBreakCorrector;
     // 上一次停止挖掘包发出的时间
-    private int lastStopMiningTick;
+    private int preventBreakTick;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -604,27 +606,32 @@ public class BukkitServerPlayer extends Player {
 
         // 本tick内有挥手
         if (hasSwingHand()) {
-            if (this.isDestroyingBlock) {
-                this.tickBlockDestroy();
-            } else {
+            if (this.gameTicks - this.preventBreakTick >= 3) {
                 // 连续挥手且没被重置
-                if (this.gameTicks - this.lastStopMiningTick <= 10) {
-                    if (++this.awfulBreakFixer >= 3) {
-                        this.lastStopMiningTick = 0;
-                        RayTraceResult result = rayTrace(this.eyeLocation, getCachedInteractionRange(), FluidCollisionMode.NEVER);
-                        if (result != null) {
-                            Block hitBlock = result.getHitBlock();
-                            if (hitBlock != null) {
-                                Location location = hitBlock.getLocation();
-                                BlockPos hitPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-                                Object blockState = BlockStateUtils.getBlockState(hitBlock);
-                                ImmutableBlockState customState = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
-                                this.startMiningBlock(hitPos, blockState, customState);
+                // 原版有的，方块挖掘间隔。除非是秒破，否则必走此延迟
+                if (this.gameTicks - this.lastSuccessfulBreak > 5) {
+                    if (this.isDestroyingBlock) {
+                        this.tickBlockDestroy();
+                    } else {
+                        // 连续挥手且没被重置
+                        if (++this.awfulBreakFixer >= 4) {
+                            this.awfulBreakFixer = 0;
+                            RayTraceResult result = rayTrace(this.eyeLocation, getCachedInteractionRange(), FluidCollisionMode.NEVER);
+                            if (result != null) {
+                                Entity hitEntity = result.getHitEntity();
+                                if (hitEntity == null) {
+                                    Block hitBlock = result.getHitBlock();
+                                    if (hitBlock != null) {
+                                        Location location = hitBlock.getLocation();
+                                        BlockPos hitPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+                                        Object blockState = BlockStateUtils.getBlockState(hitBlock);
+                                        ImmutableBlockState customState = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
+                                        this.startMiningBlock(hitPos, blockState, customState);
+                                    }
+                                }
                             }
                         }
                     }
-                } else {
-                    this.awfulBreakFixer = 0;
                 }
             }
             this.swingHandAck = false;
@@ -758,6 +765,10 @@ public class BukkitServerPlayer extends Player {
             this.isDestroyingBlock = false;
             this.isDestroyingCustomBlock = false;
         } else {
+            BlockPos previousPos = this.destroyPos;
+            if (previousPos != null && !pos.equals(previousPos)) {
+                this.broadcastDestroyProgress(this.platformPlayer(), previousPos, -1);
+            }
             this.destroyPos = pos;
             this.destroyedState = state;
             this.isDestroyingBlock = true;
@@ -793,7 +804,7 @@ public class BukkitServerPlayer extends Player {
         }
 
         // 对于原版方块不影响属性，对于自定义方块需要影响
-        setClientSideCanBreakBlock(!custom);
+        setClientSideCanBreakBlock(!custom || canInstantBreak);
     }
 
     @Override
@@ -834,6 +845,18 @@ public class BukkitServerPlayer extends Player {
 
     // 客户端完成破坏方块
     @Override
+    public void finishMiningBlock() {
+        this.miningProgress = 0f;
+        this.isDestroyingBlock = false;
+        this.swingHandAck = false;
+        this.destroyedState = null;
+        this.destroyPos = null;
+        this.isDestroyingCustomBlock = false;
+        this.awfulBreakFixer = 0;
+    }
+
+    // 通过丢弃物品/右键方块/右键实体触发，会给几tick的挖掘冷却期
+    @Override
     public void stopMiningBlock() {
         this.miningProgress = 0f;
         this.isDestroyingBlock = false;
@@ -842,7 +865,7 @@ public class BukkitServerPlayer extends Player {
         this.destroyPos = null;
         this.isDestroyingCustomBlock = false;
         this.awfulBreakFixer = 0;
-        this.lastStopMiningTick = gameTicks();
+        this.preventBreakTick = gameTicks();
     }
 
     // 客户端放弃破坏方块
@@ -856,7 +879,7 @@ public class BukkitServerPlayer extends Player {
         BlockPos pos = this.destroyPos;
         if (pos != null && this.isDestroyingCustomBlock) {
             // 只纠正自定义方块的破坏进度
-            this.broadcastDestroyProgress(platformPlayer(), pos, LocationUtils.toBlockPos(pos), -1);
+            this.broadcastDestroyProgress(platformPlayer(), pos, -1);
         }
     }
 
@@ -883,10 +906,6 @@ public class BukkitServerPlayer extends Player {
 
     private void tickBlockDestroy() {
         int currentTick = gameTicks();
-
-        // 原版有的，方块挖掘间隔。除非是秒破，否则必走此延迟
-        if (currentTick - this.lastSuccessfulBreak <= 5) return;
-
         // 如果没有正在被挖掘的对象，那么不继续
         Object destroyedState = this.destroyedState;
         if (destroyedState == null) return;
@@ -897,12 +916,16 @@ public class BukkitServerPlayer extends Player {
             double range = getCachedInteractionRange();
             RayTraceResult result = rayTrace(this.eyeLocation, range, FluidCollisionMode.NEVER);
             if (result == null) return;
+            if (result.getHitEntity() != null) return;
             Block hitBlock = result.getHitBlock();
             if (hitBlock == null) return;
             Location location = hitBlock.getLocation();
             BlockPos hitPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
             // 如果命中点位和网络包设置的不同，那么不继续tick
             if (!hitPos.equals(this.destroyPos)) {
+                Object blockState = BlockStateUtils.getBlockState(hitBlock);
+                ImmutableBlockState customState = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
+                this.startMiningBlock(hitPos, blockState, customState);
                 return;
             }
 
@@ -951,7 +974,7 @@ public class BukkitServerPlayer extends Player {
                     if (packetStage != this.lastSentState) {
                         this.lastSentState = packetStage;
                         // broadcast changes
-                        broadcastDestroyProgress(player, hitPos, blockPos, packetStage);
+                        broadcastDestroyProgress(platformPlayer(), hitPos, packetStage);
                     }
 
                     // can break now
@@ -976,7 +999,6 @@ public class BukkitServerPlayer extends Player {
                         // send break particle + (removed sounds)
                         if (breakResult) {
                             sendPacket(FastNMS.INSTANCE.constructor$ClientboundLevelEventPacket(WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId(), false), false);
-                            this.lastSuccessfulBreak = currentTick;
                             this.destroyPos = null;
                             this.miningProgress = 0;
                             this.isDestroyingBlock = false;
@@ -997,13 +1019,17 @@ public class BukkitServerPlayer extends Player {
         }
     }
 
+    public void updateLastSuccessBreakTick() {
+        this.lastSuccessfulBreak = this.gameTicks;
+    }
+
     @Override
     public void breakBlock(int x, int y, int z) {
         platformPlayer().breakBlock(new Location(platformPlayer().getWorld(), x, y, z).getBlock());
     }
 
-    private void broadcastDestroyProgress(org.bukkit.entity.Player player, BlockPos hitPos, Object blockPos, int stage) {
-        Object packet = FastNMS.INSTANCE.constructor$ClientboundBlockDestructionPacket(Integer.MAX_VALUE - entityId(), blockPos, stage);
+    private void broadcastDestroyProgress(org.bukkit.entity.Player player, BlockPos hitPos, int stage) {
+        Object packet = FastNMS.INSTANCE.constructor$ClientboundBlockDestructionPacket(Integer.MAX_VALUE - entityId(), LocationUtils.toBlockPos(hitPos), stage);
         for (org.bukkit.entity.Player other : player.getWorld().getPlayers()) {
             Location otherLocation = other.getLocation();
             double d0 = (double) hitPos.x() - otherLocation.getX();

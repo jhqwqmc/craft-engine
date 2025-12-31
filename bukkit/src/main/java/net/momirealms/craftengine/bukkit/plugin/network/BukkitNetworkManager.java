@@ -1157,7 +1157,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class PlayerActionListener implements NMSPacketListener {
+    public class PlayerActionListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1175,7 +1175,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     }
                 }, () -> {});
             } else {
-                handlePlayerActionPacketOnMainThread(player, world, pos, packet);
+                BukkitNetworkManager.this.plugin.scheduler().executeSync(() -> handlePlayerActionPacketOnMainThread(player, world, pos, packet));
             }
         }
 
@@ -1197,7 +1197,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                         }
                     }
                     if (player.isMiningBlock()) {
-                        player.stopMiningBlock();
+                        player.finishMiningBlock();
                     } else {
                         player.setClientSideCanBreakBlock(true);
                     }
@@ -1224,7 +1224,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 }
             } else if (action == NetworkReflections.instance$ServerboundPlayerActionPacket$Action$STOP_DESTROY_BLOCK) {
                 if (player.isMiningBlock()) {
-                    player.stopMiningBlock();
+                    player.finishMiningBlock();
                 }
             }
         }
@@ -3980,13 +3980,16 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, ByteBufPacketEvent event) {
+            BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
+            if (serverPlayer.isSpectatorMode()) return;
+            // 交互实体的时候，应该取消挖掘
+            serverPlayer.stopMiningBlock();
+
             FriendlyByteBuf buf = event.getBuffer();
             int entityId = hasModelEngine() ? plugin.compatibilityManager().interactionToBaseEntity(buf.readVarInt()) : buf.readVarInt();
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
             if (furniture == null) return;
             int actionType = buf.readVarInt();
-            BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
-            if (serverPlayer.isSpectatorMode()) return;
             Player platformPlayer = serverPlayer.platformPlayer();
             Location location = furniture.location();
 

@@ -466,6 +466,8 @@ public final class NetworkReflections {
     public static final Object instance$ServerboundPlayerActionPacket$Action$START_DESTROY_BLOCK;
     public static final Object instance$ServerboundPlayerActionPacket$Action$ABORT_DESTROY_BLOCK;
     public static final Object instance$ServerboundPlayerActionPacket$Action$STOP_DESTROY_BLOCK;
+    public static final Object instance$ServerboundPlayerActionPacket$Action$DROP_ALL_ITEMS;
+    public static final Object instance$ServerboundPlayerActionPacket$Action$DROP_ITEM;
 
     static {
         try {
@@ -473,6 +475,8 @@ public final class NetworkReflections {
             instance$ServerboundPlayerActionPacket$Action$START_DESTROY_BLOCK = values[0];
             instance$ServerboundPlayerActionPacket$Action$ABORT_DESTROY_BLOCK = values[1];
             instance$ServerboundPlayerActionPacket$Action$STOP_DESTROY_BLOCK = values[2];
+            instance$ServerboundPlayerActionPacket$Action$DROP_ALL_ITEMS = values[3];
+            instance$ServerboundPlayerActionPacket$Action$DROP_ITEM = values[4];
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

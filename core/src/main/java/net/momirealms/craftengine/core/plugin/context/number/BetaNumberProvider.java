@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.plugin.context.number;
 
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
