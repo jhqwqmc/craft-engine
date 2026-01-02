@@ -163,8 +163,8 @@ public class BukkitServerPlayer extends Player {
     private int lastHitFurnitureTick;
     // 控制展示实体可见距离
     private double displayEntityViewDistance;
-    // 是否是基岩版
-    private Tristate isBedrock = Tristate.UNDEFINED;
+    // 玩家使用的游戏版本
+    private GameEdition gameEdition = GameEdition.UNKNOWN;
     // 客户端协议
     private ProtocolVersion protocolVersion = ProtocolVersion.UNKNOWN;
     // 有概率出现如下情况
@@ -1558,11 +1558,11 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public boolean isBedrock() {
-        if (this.isBedrock == Tristate.UNDEFINED) {
-            this.isBedrock = Tristate.of(this.plugin.compatibilityManager().isBedrockPlayer(this));
+    public GameEdition gameEdition() {
+        if (this.gameEdition == GameEdition.UNKNOWN) {
+            this.gameEdition = this.plugin.compatibilityManager().isBedrockPlayer(this) ? GameEdition.BEDROCK : GameEdition.JAVA;
         }
-        return this.isBedrock.asBoolean();
+        return this.gameEdition;
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.ContextKey;
 import net.momirealms.craftengine.core.util.Cancellable;
+import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.ExistingBlock;
 import net.momirealms.craftengine.core.world.Position;
@@ -66,5 +67,5 @@ public final class DirectContextParameters {
     public static final ContextKey<Boolean> IS_BLOCK_ITEM = ContextKey.direct("is_block_item");
     public static final ContextKey<GameMode> GAMEMODE = ContextKey.direct("gamemode");
     public static final ContextKey<Integer> COUNT = ContextKey.direct("count");
-    public static final ContextKey<Boolean> IS_BEDROCK_PLAYER = ContextKey.direct("is_bedrock_player");
+    public static final ContextKey<GameEdition> GAME_EDITION = ContextKey.direct("game_edition");
 }

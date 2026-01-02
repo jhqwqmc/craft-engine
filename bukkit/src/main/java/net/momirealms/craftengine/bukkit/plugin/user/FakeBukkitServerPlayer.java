@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
+import net.momirealms.craftengine.core.util.GameEdition;
 import org.jetbrains.annotations.Nullable;
 
 public class FakeBukkitServerPlayer extends BukkitServerPlayer {
@@ -27,8 +28,8 @@ public class FakeBukkitServerPlayer extends BukkitServerPlayer {
     }
 
     @Override
-    public boolean isBedrock() {
-        return false;
+    public GameEdition gameEdition() {
+        return GameEdition.JAVA;
     }
 
     @Override

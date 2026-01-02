@@ -38,6 +38,7 @@ public final class CommonConditions {
     public static final CommonConditionType<OnCooldownCondition<Context>> ON_COOLDOWN = register(Key.ce("on_cooldown"), OnCooldownCondition.factory());
     public static final CommonConditionType<InventoryHasItemCondition<Context>> INVENTORY_HAS_ITEM = register(Key.ce("inventory_has_item"), InventoryHasItemCondition.factory());
     public static final CommonConditionType<MatchFurnitureVariantCondition<Context>> MATCH_FURNITURE_VARIANT = register(Key.ce("match_furniture_variant"), MatchFurnitureVariantCondition.factory());
+    public static final CommonConditionType<IsBedrockPlayerCondition<Context>> IS_BEDROCK_PLAYER = register(Key.ce("is_bedrock_player"), IsBedrockPlayerCondition.factory());
 
     private CommonConditions() {}
 
