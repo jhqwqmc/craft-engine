@@ -3,9 +3,7 @@ package net.momirealms.craftengine.core.util;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -109,6 +107,13 @@ public final class GsonHelper {
         } catch (JsonSyntaxException e) {
             throw new RuntimeException("Invalid JSON response: " + json, e);
         }
+    }
+
+    public static Map<String, Object> parseJsonToMap(Reader json) {
+        return GsonHelper.get().fromJson(
+                json,
+                new TypeToken<Map<String, Object>>() {}.getType()
+        );
     }
 
     public static JsonElement combine(List<? extends JsonElement> jo) {
