@@ -660,7 +660,11 @@ public abstract class AbstractPackManager implements PackManager {
                 Files.walkFileTree(configurationFolderPath, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
                     @Override
                     public @NotNull FileVisitResult visitFile(@NotNull Path path, @NotNull BasicFileAttributes attrs) {
-                        if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".yml")) {
+                        if (!Files.isRegularFile(path)) {
+                            return FileVisitResult.CONTINUE;
+                        }
+                        String fileName = path.getFileName().toString();
+                        if (fileName.endsWith(".yml") || fileName.endsWith(".yaml")) {
                             CachedConfigFile cachedFile = previousFiles.get(path);
                             long lastModifiedTime = attrs.lastModifiedTime().toMillis();
                             long size = attrs.size();
@@ -693,6 +697,33 @@ public abstract class AbstractPackManager implements PackManager {
                                     return FileVisitResult.CONTINUE;
                                 } catch (ParserException e) {
                                     AbstractPackManager.this.plugin.logger().severe("Invalid YAML file found: " + path + ".\n" + e.getMessage() + "\nIt is recommended to use Visual Studio Code as your YAML editor to fix problems more quickly.");
+                                    return FileVisitResult.CONTINUE;
+                                } catch (LocalizedException e) {
+                                    e.setArgument(0, path.toString());
+                                    TranslationManager.instance().log(e.node(), e.arguments());
+                                    return FileVisitResult.CONTINUE;
+                                }
+                            }
+                            for (Map.Entry<String, Object> entry : cachedFile.config().entrySet()) {
+                                processConfigEntry(entry, path, cachedFile.pack(), ConfigParser::addConfig);
+                            }
+                        } else if (fileName.endsWith(".json")) {
+                            CachedConfigFile cachedFile = previousFiles.get(path);
+                            long lastModifiedTime = attrs.lastModifiedTime().toMillis();
+                            long size = attrs.size();
+                            if (cachedFile != null && cachedFile.lastModified() == lastModifiedTime && cachedFile.size() == size) {
+                                AbstractPackManager.this.cachedConfigFiles.put(path, cachedFile);
+                            } else {
+                                try (InputStreamReader inputStream = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
+                                    Map<String, Object> data = GsonHelper.parseJsonToMap(inputStream);
+                                    if (data == null)  return FileVisitResult.CONTINUE;
+                                    cachedFile = new CachedConfigFile(data, pack, lastModifiedTime, size);
+                                    AbstractPackManager.this.cachedConfigFiles.put(path, cachedFile);
+                                } catch (IOException e) {
+                                    AbstractPackManager.this.plugin.logger().severe("Error while reading config file: " + path, e);
+                                    return FileVisitResult.CONTINUE;
+                                } catch (JsonParseException e) {
+                                    AbstractPackManager.this.plugin.logger().severe("Invalid JSON file found: " + path + ".\n" + e.getMessage() + "\nIt is recommended to use Visual Studio Code as your JSON editor to fix problems more quickly.");
                                     return FileVisitResult.CONTINUE;
                                 } catch (LocalizedException e) {
                                     e.setArgument(0, path.toString());
