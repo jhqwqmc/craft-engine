@@ -176,7 +176,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
             if (ItemUtils.isEmpty(item)) {
-                this.plugin.logger().warn("Can't not find item " + it.icon() + " for category icon");
+                this.plugin.logger().warn("Cannot find item " + it.icon() + " for category icon");
                 return null;
             }
             item.customNameJson(AdventureHelper.componentToJson(AdventureHelper.miniMessage().deserialize(it.displayName(), ItemBuildContext.EMPTY_RESOLVERS)));

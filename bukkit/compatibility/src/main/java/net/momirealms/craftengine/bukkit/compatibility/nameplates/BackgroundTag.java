@@ -35,8 +35,7 @@ public class BackgroundTag implements TagResolver {
         double left = arguments.popOr("No argument left provided").asDouble().orElseThrow(() -> ctx.newException("Invalid argument number", arguments));
         double right = arguments.popOr("No argument right provided").asDouble().orElseThrow(() -> ctx.newException("Invalid argument number", arguments));
         String content = arguments.popOr("No argument content provided").toString();
-        String parsed = this.context instanceof PlayerContext playerContext ? CraftEngine.instance().compatibilityManager().parse(playerContext.player(), content) : CraftEngine.instance().compatibilityManager().parse(null, content);
-        String textWithImage = CustomNameplatesAPI.getInstance().createTextWithImage(parsed, background.get(), (float) left, (float) right);
+        String textWithImage = CustomNameplatesAPI.getInstance().createTextWithImage(AdventureHelper.strictMiniMessage().serialize(AdventureHelper.miniMessage().deserialize(content, this.context.tagResolvers())), background.get(), (float) left, (float) right);
         return Tag.selfClosingInserting(AdventureHelper.miniMessage().deserialize(textWithImage, this.context.tagResolvers()));
     }
 
