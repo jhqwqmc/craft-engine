@@ -101,7 +101,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
             try {
                 CEWorld ceWorld = this.worlds.computeIfAbsent(world.getUID(), k -> new BukkitCEWorld(wrappedWorld, this.storageAdaptor));
                 injectChunkGenerator(ceWorld);
-                injectWorldCallback(ceWorld.world.serverWorld());
                 for (Chunk chunk : world.getLoadedChunks()) {
                     handleChunkLoad(ceWorld, chunk, false);
                     CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
@@ -160,7 +159,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
         UUID uuid = world.getUID();
         if (this.worlds.containsKey(uuid)) {
             CEWorld ceWorld = this.worlds.get(uuid);
-            injectWorldCallback(ceWorld.world.serverWorld());
             for (Chunk chunk : world.getLoadedChunks()) {
                 handleChunkLoad(ceWorld, chunk, true);
                 CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
@@ -184,7 +182,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
         this.injectChunkGenerator(ceWorld);
-        injectWorldCallback(ceWorld.world.serverWorld());
         for (Chunk chunk : ((World) world.platformWorld()).getLoadedChunks()) {
             handleChunkLoad(ceWorld, chunk, false);
         }
@@ -203,7 +200,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.worlds.put(uuid, world);
         this.resetWorldArray();
         this.injectChunkGenerator(world);
-        injectWorldCallback(world.world.serverWorld());
         for (Chunk chunk : ((World) world.world().platformWorld()).getLoadedChunks()) {
             handleChunkLoad(world, chunk, false);
         }
@@ -290,7 +286,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
             return;
         }
         handleChunkLoad(world, event.getChunk(), event.isNewChunk());
-        injectWorldCallback(world.world.serverWorld());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
