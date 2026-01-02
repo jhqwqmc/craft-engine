@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
 import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
@@ -4691,4 +4692,29 @@ public final class CoreReflections {
             ReflectionUtils.unreflectSetter(field$DedicatedServerProperties$enforceSecureProfile)
     ).asType(MethodType.methodType(void.class, Object.class, boolean.class));
 
+    public static final Class<?> clazz$LevelCallback = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.level.entity.LevelCallback")
+            )
+    );
+
+    public static final Field field$ChunkMap$entityMap = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ChunkMap, Int2ObjectMap.class, 0
+            )
+    );
+
+    public static final MethodHandle methodHandle$ChunkMap$entityMapGetter;
+    public static final MethodHandle methodHandle$ChunkMap$entityMapSetter;
+
+    static {
+        try {
+            methodHandle$ChunkMap$entityMapGetter = ReflectionUtils.unreflectGetter(field$ChunkMap$entityMap)
+                    .asType(MethodType.methodType(Int2ObjectMap.class, Object.class));
+            methodHandle$ChunkMap$entityMapSetter = requireNonNull(ReflectionUtils.unreflectSetter(field$ChunkMap$entityMap))
+                    .asType(MethodType.methodType(void.class, Object.class, Int2ObjectMap.class));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
