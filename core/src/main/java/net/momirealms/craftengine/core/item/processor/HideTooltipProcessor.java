@@ -231,7 +231,7 @@ public final class HideTooltipProcessor implements ItemProcessor {
 
         @Override
         public HideTooltipProcessor create(Object arg) {
-            List<Key> components = MiscUtils.getAsStringList(arg).stream().map(Key::of).toList();
+            List<Key> components = MiscUtils.getAsStringList(arg).stream().map(it -> it.replace("-", "_")).map(Key::of).toList();
             return new HideTooltipProcessor(components);
         }
     }

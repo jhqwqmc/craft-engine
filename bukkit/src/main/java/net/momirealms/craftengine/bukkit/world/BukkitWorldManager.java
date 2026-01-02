@@ -13,6 +13,7 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.ConcurrentUUID2ReferenceChainedHashTable;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.core.world.SectionPos;
@@ -210,7 +211,9 @@ public class BukkitWorldManager implements WorldManager, Listener {
         Object serverChunkCache = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
         Object chunkMap = FastNMS.INSTANCE.field$ServerChunkCache$chunkMap(serverChunkCache);
         FastNMS.INSTANCE.injectedWorldGen(world, chunkMap);
-        this.injectWorldCallback(serverLevel);
+        if (!VersionHelper.isFolia()) {
+            this.injectWorldCallback(serverLevel);
+        }
     }
 
     // 用于从实体tick列表中移除家具实体以降低遍历开销

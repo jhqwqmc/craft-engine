@@ -440,10 +440,6 @@ public final class CoreReflections {
             ReflectionUtils.getMethod(clazz$IdMapper, Object.class, int.class)
     );
 
-    public static final Method method$Registry$asHolderIdMap = requireNonNull(
-            ReflectionUtils.getMethod(clazz$Registry, clazz$IdMap)
-    );
-
     public static final Class<?> clazz$Direction = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "core.EnumDirection",
