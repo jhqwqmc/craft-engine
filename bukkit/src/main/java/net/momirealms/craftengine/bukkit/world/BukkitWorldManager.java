@@ -100,7 +100,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             BukkitWorld wrappedWorld = wrap(world);
             try {
                 CEWorld ceWorld = this.worlds.computeIfAbsent(world.getUID(), k -> new BukkitCEWorld(wrappedWorld, this.storageAdaptor));
-                injectChunkGenerator(ceWorld);
+                injectWorld(ceWorld);
                 for (Chunk chunk : world.getLoadedChunks()) {
                     handleChunkLoad(ceWorld, chunk, false);
                     CEChunk loadedChunk = ceWorld.getChunkAtIfLoaded(chunk.getChunkKey());
@@ -149,7 +149,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         CEWorld ceWorld = new BukkitCEWorld(wrap(world), this.storageAdaptor);
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
-        this.injectChunkGenerator(ceWorld);
+        this.injectWorld(ceWorld);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -180,7 +180,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         CEWorld ceWorld = new BukkitCEWorld(world, this.storageAdaptor);
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
-        this.injectChunkGenerator(ceWorld);
+        this.injectWorld(ceWorld);
         for (Chunk chunk : ((World) world.platformWorld()).getLoadedChunks()) {
             handleChunkLoad(ceWorld, chunk, false);
         }
@@ -198,19 +198,19 @@ public class BukkitWorldManager implements WorldManager, Listener {
         }
         this.worlds.put(uuid, world);
         this.resetWorldArray();
-        this.injectChunkGenerator(world);
+        this.injectWorld(world);
         for (Chunk chunk : ((World) world.world().platformWorld()).getLoadedChunks()) {
             handleChunkLoad(world, chunk, false);
         }
         world.setTicking(true);
     }
 
-    private void injectChunkGenerator(CEWorld world) {
+    private void injectWorld(CEWorld world) {
         Object serverLevel = world.world.serverWorld();
-        injectWorldCallback(serverLevel);
         Object serverChunkCache = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
         Object chunkMap = FastNMS.INSTANCE.field$ServerChunkCache$chunkMap(serverChunkCache);
         FastNMS.INSTANCE.injectedWorldGen(world, chunkMap);
+        this.injectWorldCallback(serverLevel);
     }
 
     // 用于从实体tick列表中移除家具实体以降低遍历开销
@@ -219,7 +219,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             Object entityLookup = FastNMS.INSTANCE.method$ServerLevel$getEntityLookup(serverLevel);
             Object worldCallback = PaperReflections.methodHandle$EntityLookup$worldCallbackGetter.invokeExact(entityLookup);
             Object injectedWorldCallback = FastNMS.INSTANCE.createInjectedEntityCallbacks(worldCallback, entityLookup);
-            if (worldCallback.equals(injectedWorldCallback)) return;
+            if (worldCallback == injectedWorldCallback) return;
             PaperReflections.methodHandle$EntityLookup$worldCallbackSetter.invokeExact(entityLookup, injectedWorldCallback);
         } catch (Throwable e) {
             this.plugin.logger().warn( "Failed to inject world callback", e);
