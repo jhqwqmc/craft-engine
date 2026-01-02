@@ -150,7 +150,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.worlds.put(uuid, ceWorld);
         this.resetWorldArray();
         this.injectChunkGenerator(ceWorld);
-        injectWorldCallback(ceWorld.world.serverWorld());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -208,6 +207,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
     private void injectChunkGenerator(CEWorld world) {
         Object serverLevel = world.world.serverWorld();
+        injectWorldCallback(serverLevel);
         Object serverChunkCache = FastNMS.INSTANCE.method$ServerLevel$getChunkSource(serverLevel);
         Object chunkMap = FastNMS.INSTANCE.field$ServerChunkCache$chunkMap(serverChunkCache);
         FastNMS.INSTANCE.injectedWorldGen(world, chunkMap);
