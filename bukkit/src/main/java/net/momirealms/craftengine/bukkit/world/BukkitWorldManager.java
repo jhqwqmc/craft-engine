@@ -222,7 +222,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             if (worldCallback.equals(injectedWorldCallback)) return;
             PaperReflections.methodHandle$EntityLookup$worldCallbackSetter.invokeExact(entityLookup, injectedWorldCallback);
         } catch (Throwable e) {
-            plugin.logger().warn( "Failed to inject world callback", e);
+            this.plugin.logger().warn( "Failed to inject world callback", e);
         }
     }
 
