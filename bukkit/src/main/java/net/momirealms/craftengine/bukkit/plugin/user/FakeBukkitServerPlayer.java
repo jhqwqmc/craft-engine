@@ -27,6 +27,11 @@ public class FakeBukkitServerPlayer extends BukkitServerPlayer {
     }
 
     @Override
+    public boolean isBedrock() {
+        return false;
+    }
+
+    @Override
     public boolean isFakePlayer() {
         return true;
     }
