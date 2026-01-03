@@ -1622,4 +1622,12 @@ public class BukkitServerPlayer extends Player {
     private RayTraceResult rayTrace(Location start, double range, FluidCollisionMode mode) {
         return start.getWorld().rayTraceBlocks(start, start.getDirection(), range, mode);
     }
+
+    private Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers() {
+        return trackedBlockEntityRenderers;
+    }
+
+    private Map<Integer, VirtualCullableObject> trackedFurniture() {
+        return trackedFurniture;
+    }
 }
