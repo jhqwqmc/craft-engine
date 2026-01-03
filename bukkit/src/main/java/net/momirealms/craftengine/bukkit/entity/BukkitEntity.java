@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import org.bukkit.entity.Entity;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -87,7 +88,9 @@ public class BukkitEntity extends AbstractEntity {
 
     @Override
     public boolean isValid() {
-        return platformEntity().isValid();
+        Entity bkEntity = platformEntity();
+        if (bkEntity == null) return false;
+        return bkEntity.isValid();
     }
 
     @Override
