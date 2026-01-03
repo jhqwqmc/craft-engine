@@ -1623,11 +1623,11 @@ public class BukkitServerPlayer extends Player {
         return start.getWorld().rayTraceBlocks(start, start.getDirection(), range, mode);
     }
 
-    private Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers() {
-        return trackedBlockEntityRenderers;
+    public Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers() {
+        return Collections.unmodifiableMap(this.trackedBlockEntityRenderers);
     }
 
-    private Map<Integer, VirtualCullableObject> trackedFurniture() {
-        return trackedFurniture;
+    public Map<Integer, VirtualCullableObject> trackedFurniture() {
+        return Collections.unmodifiableMap(this.trackedFurniture);
     }
 }
