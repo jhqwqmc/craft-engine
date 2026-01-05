@@ -22,7 +22,6 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
     public static final ItemBehaviorFactory<RangeMiningItemBehavior> FACTORY = new Factory();
     private final List<Vec3i> miningRange;
 
-    // 定义俯仰状态枚举，方便后续逻辑处理
     private enum PitchState {
         FLAT, // 平视（挖墙）
         UP,   // 仰视（挖天花板）
@@ -41,10 +40,10 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
         BlockStateWrapper blockState = world.getBlockState(pos);
         float destroyProgress = player.getDestroyProgress(blockState.literalObject(), pos);
 
-        // 1. 获取水平朝向 (North, South, East, West)
+        // 获取水平朝向 (North, South, East, West)
         Direction facing = player.getDirection();
 
-        // 2. 获取俯仰角并判断状态 (Flat, Up, Down)
+        // 获取俯仰角并判断状态 (Flat, Up, Down)
         PitchState pitchState = PitchState.FLAT;
         if (player.xRot() < -45) {
             pitchState = PitchState.UP;
@@ -55,10 +54,7 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
         serverPlayer.setRangeMining(true);
         try {
             for (Vec3i offset : this.miningRange) {
-                // 如果偏移量是 (0,0,0)，即中心点，通常由原版逻辑处理，这里可以选择跳过或保留
                 if (offset.x() == 0 && offset.y() == 0 && offset.z() == 0) continue;
-
-                // 核心修改：传入 pitchState 进行三维旋转计算
                 Vec3i rotatedOffset = rotateOffset(offset, facing, pitchState);
 
                 int targetX = pos.x() + rotatedOffset.x();
