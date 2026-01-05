@@ -449,7 +449,6 @@ public abstract class AbstractPackManager implements PackManager {
 
         // internal
         plugin.saveResource("resources/internal/pack.yml");
-        plugin.saveResource("resources/internal/configuration/translations.yml");
         plugin.saveResource("resources/internal/configuration/fix_client_visual.yml");
         plugin.saveResource("resources/internal/configuration/offset_chars.yml");
         plugin.saveResource("resources/internal/configuration/gui.yml");
