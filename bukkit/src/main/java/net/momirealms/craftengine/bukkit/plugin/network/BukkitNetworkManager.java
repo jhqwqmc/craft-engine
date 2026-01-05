@@ -2015,7 +2015,13 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     return;
                 }
                 // 向配置阶段连接的任务重加入资源包的任务
-                for (ResourcePackDownloadData data : dataList) {
+                if (VersionHelper.isOrAbove1_20_3()) {
+                    for (ResourcePackDownloadData data : dataList) {
+                        configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
+                        user.addResourcePackUUID(data.uuid());
+                    }
+                } else { // 1.20.2 只支持一个服务器资源包
+                    ResourcePackDownloadData data = dataList.getFirst();
                     configurationTasks.add(FastNMS.INSTANCE.constructor$ServerResourcePackConfigurationTask(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
                     user.addResourcePackUUID(data.uuid());
                 }

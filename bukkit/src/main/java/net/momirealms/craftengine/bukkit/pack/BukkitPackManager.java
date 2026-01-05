@@ -111,7 +111,7 @@ public class BukkitPackManager extends AbstractPackManager implements Listener {
                 if (dataList.isEmpty()) {
                     return;
                 }
-                if (dataList.size() == 1) {
+                if (dataList.size() == 1 || !VersionHelper.isOrAbove1_20_3()) { // 1.20~1.20.2 只支持一个服务器资源包
                     ResourcePackDownloadData data = dataList.getFirst();
                     player.sendPacket(ResourcePackUtils.createPacket(data.uuid(), data.url(), data.sha1()), true);
                     player.addResourcePackUUID(data.uuid());
