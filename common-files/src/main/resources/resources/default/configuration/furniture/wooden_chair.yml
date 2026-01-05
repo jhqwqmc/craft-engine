@@ -15,9 +15,11 @@ items:
           - template: default:rotatable_furniture_8
         settings:
           item: default:wooden_chair
+          hit-times: 3
           sounds:
             break: minecraft:block.bamboo_wood.break
             place: minecraft:block.bamboo_wood.place
+            hit: minecraft:block.bamboo_wood.hit
         variants:
           ground:
             loot-spawn-offset: 0,0.4,0

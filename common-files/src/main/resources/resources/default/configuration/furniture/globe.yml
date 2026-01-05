@@ -13,9 +13,11 @@ items:
       furniture:
         settings:
           item: default:globe
+          hit-times: 3
           sounds:
             break: minecraft:block.copper.break
             place: minecraft:block.copper.place
+            hit: minecraft:block.copper.hit
         variants:
           ground:
             loot-spawn-offset: 0,0.25,0

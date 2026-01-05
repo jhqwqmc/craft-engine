@@ -28,6 +28,7 @@ import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureHitData;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.GameMode;
@@ -175,6 +176,8 @@ public class BukkitServerPlayer extends Player {
     private int preventBreakTick;
     // 用于辨别是否在范围挖掘
     private boolean isRangeMining;
+    // 家具击打记录
+    private final FurnitureHitData furnitureHitData = new FurnitureHitData();
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1637,5 +1640,9 @@ public class BukkitServerPlayer extends Player {
 
     public void setRangeMining(boolean rangeMining) {
         this.isRangeMining = rangeMining;
+    }
+
+    public FurnitureHitData furnitureHitData() {
+        return furnitureHitData;
     }
 }

@@ -38,9 +38,11 @@ furniture:
             - wall
     settings:
       item: default:flower_basket
+      hit-times: 3
       sounds:
         break: minecraft:block.grass.break
         place: minecraft:block.grass.place
+        hit: minecraft:block.grass.hit
     loot:
       template: default:loot_table/furniture
       arguments:
