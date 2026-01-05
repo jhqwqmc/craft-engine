@@ -32,6 +32,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     @NotNull
     public abstract Item<?> getItemBySlot(int slot);
 
+    public abstract void setItemInHand(InteractionHand hand, Item<?> item);
+
     @Override
     public abstract Object platformPlayer();
 

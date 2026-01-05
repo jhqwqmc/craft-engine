@@ -1115,6 +1115,13 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public void setItemInHand(InteractionHand hand, Item<?> item) {
+        PlayerInventory inventory = platformPlayer().getInventory();
+        EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+        inventory.setItem(slot, (ItemStack) item.getItem());
+    }
+
+    @Override
     public World world() {
         return BukkitAdaptors.adapt(platformPlayer().getWorld());
     }
