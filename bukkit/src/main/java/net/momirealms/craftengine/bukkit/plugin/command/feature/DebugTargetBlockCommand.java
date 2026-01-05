@@ -49,16 +49,17 @@ public class DebugTargetBlockCommand extends BukkitCommandFeature<CommandSender>
                             .clickEvent(ClickEvent.suggestCommand(bData)));
                     int id = BlockStateUtils.blockStateToId(blockState);
                     if (!BlockStateUtils.isVanillaBlock(id)) {
+                        sender.sendMessage(Component.text("name: ").append(Component.translatable(block.translationKey())));
                         Object holder = BukkitBlockManager.instance().getMinecraftBlockHolder(id);
                         ImmutableBlockState immutableBlockState = BukkitBlockManager.instance().getImmutableBlockState(id);
                         if (immutableBlockState != null) {
                             String bState = immutableBlockState.toString();
-                            sender.sendMessage(Component.text(bState)
+                            sender.sendMessage(Component.text("state: " + bState)
                                     .hoverEvent(Component.text("Copy", NamedTextColor.YELLOW))
                                     .clickEvent(ClickEvent.suggestCommand(bState)));
                         }
                         ImmutableBlockState dataInCache = plugin().worldManager().getWorld(block.getWorld().getUID()).getBlockStateAtIfLoaded(LocationUtils.toBlockPos(block.getLocation()));
-                        sender.sendMessage(Component.text("cache-state: " + (dataInCache != null && !dataInCache.isEmpty())));
+                        sender.sendMessage(Component.text("storage: " + (dataInCache != null && !dataInCache.isEmpty())));
                         try {
                             @SuppressWarnings("unchecked")
                             Set<Object> tags = (Set<Object>) CoreReflections.field$Holder$Reference$tags.get(holder);

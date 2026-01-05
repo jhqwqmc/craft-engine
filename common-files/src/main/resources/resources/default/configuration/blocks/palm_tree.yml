@@ -8,7 +8,7 @@ items:
         - minecraft:logs
         - minecraft:logs_that_burn
     data:
-      item-name: <!i><l10n:item.default.palm_log>
+      item-name: <!i><lang:item.default.palm_log>
     model: minecraft:block/custom/palm_log
     behavior:
       type: block_item
@@ -36,7 +36,7 @@ items:
         - minecraft:logs
         - minecraft:logs_that_burn
     data:
-      item-name: <!i><l10n:item.default.stripped_palm_log>
+      item-name: <!i><lang:item.default.stripped_palm_log>
     model: minecraft:block/custom/stripped_palm_log
     behavior:
       type: block_item
@@ -61,7 +61,7 @@ items:
         - minecraft:logs
         - minecraft:logs_that_burn
     data:
-      item-name: <!i><l10n:item.default.palm_wood>
+      item-name: <!i><lang:item.default.palm_wood>
     model: minecraft:block/custom/palm_wood
     behavior:
       type: block_item
@@ -89,7 +89,7 @@ items:
         - minecraft:logs
         - minecraft:logs_that_burn
     data:
-      item-name: <!i><l10n:item.default.stripped_palm_wood>
+      item-name: <!i><lang:item.default.stripped_palm_wood>
     model: minecraft:block/custom/stripped_palm_wood
     behavior:
       type: block_item
@@ -113,7 +113,7 @@ items:
         - minecraft:planks
         - minecraft:wooden_tool_materials
     data:
-      item-name: <!i><l10n:item.default.palm_planks>
+      item-name: <!i><lang:item.default.palm_planks>
     model: minecraft:block/custom/palm_planks
     behavior:
       type: block_item
@@ -133,7 +133,7 @@ items:
     settings:
       fuel-time: 100
     data:
-      item-name: <!i><l10n:item.default.palm_sapling>
+      item-name: <!i><lang:item.default.palm_sapling>
       lore:
         - "<!i><gray>Requires the datapack tree configuration to function."
         - "<!i><gray>If not configured, an oak tree will grow by default."
@@ -173,7 +173,7 @@ items:
   default:palm_leaves:
     material: oak_leaves
     data:
-      item-name: <!i><l10n:item.default.palm_leaves>
+      item-name: <!i><lang:item.default.palm_leaves>
       block-state: default:palm_leaves[persistent=true,waterlogged=false,distance=7]
     model:
       type: minecraft:model
@@ -203,7 +203,7 @@ items:
   default:palm_trapdoor:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.palm_trapdoor>
+      item-name: <!i><lang:item.default.palm_trapdoor>
     settings:
       fuel-time: 300
     model: minecraft:block/custom/palm_trapdoor_bottom
@@ -253,7 +253,7 @@ items:
   default:palm_door:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.palm_door>
+      item-name: <!i><lang:item.default.palm_door>
     settings:
       fuel-time: 200
     texture: minecraft:item/custom/palm_door
@@ -324,7 +324,7 @@ items:
   default:palm_fence_gate:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.palm_fence_gate>
+      item-name: <!i><lang:item.default.palm_fence_gate>
     settings:
       fuel-time: 300
     model: minecraft:block/custom/palm_fence_gate
@@ -376,7 +376,7 @@ items:
   default:palm_slab:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.palm_slab>
+      item-name: <!i><lang:item.default.palm_slab>
     settings:
       fuel-time: 150
     model: minecraft:block/custom/palm_slab
@@ -419,7 +419,7 @@ items:
     material: nether_brick
     model: minecraft:block/custom/palm_stairs
     data:
-      item-name: <!i><l10n:item.default.palm_stairs>
+      item-name: <!i><lang:item.default.palm_stairs>
     settings:
       fuel-time: 300
     behavior:
@@ -464,7 +464,7 @@ items:
     material: nether_brick
     model: minecraft:block/custom/palm_pressure_plate
     data:
-      item-name: <!i><l10n:item.default.palm_pressure_plate>
+      item-name: <!i><lang:item.default.palm_pressure_plate>
     settings:
       fuel-time: 300
     behavior:
@@ -512,7 +512,7 @@ items:
 items#fence:
   default:palm_fence:
     material: nether_brick
-    data::item-name: <!i><l10n:item.default.palm_fence>
+    data::item-name: <!i><lang:item.default.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:item/custom/palm_fence_inventory
@@ -525,7 +525,7 @@ items#fence:
       block: default:palm_fence
   default:palm_fence_post:
     material: nether_brick
-    data::item-name: <!i><l10n:item.default.palm_fence>
+    data::item-name: <!i><lang:item.default.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_post
@@ -535,7 +535,7 @@ items#fence:
           texture: minecraft:block/custom/palm_planks
   default:palm_fence_side:
     material: nether_brick
-    data::item-name: <!i><l10n:item.default.palm_fence>
+    data::item-name: <!i><lang:item.default.palm_fence>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_fence_side
@@ -586,7 +586,7 @@ items#button:
         textures:
           texture: minecraft:block/custom/palm_planks
     data:
-      item-name: <!i><l10n:item.default.palm_button>
+      item-name: <!i><lang:item.default.palm_button>
     settings:
       fuel-time: 100
     behavior:
@@ -594,7 +594,7 @@ items#button:
       block: default:palm_button
   default:palm_button_pressed:
     material: nether_brick
-    data::item-name: <!i><l10n:item.default.palm_button>
+    data::item-name: <!i><lang:item.default.palm_button>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_button_pressed
@@ -604,7 +604,7 @@ items#button:
           texture: minecraft:block/custom/palm_planks
   default:palm_button_not_pressed:
     material: nether_brick
-    data::item-name: <!i><l10n:item.default.palm_button>
+    data::item-name: <!i><lang:item.default.palm_button>
     model:
       type: minecraft:model
       path: minecraft:block/custom/palm_button_not_pressed

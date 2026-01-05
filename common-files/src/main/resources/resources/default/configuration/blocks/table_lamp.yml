@@ -2,7 +2,7 @@ items:
   default:table_lamp:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.table_lamp>
+      item-name: <!i><lang:item.default.table_lamp>
     model: minecraft:item/custom/table_lamp
     behavior:
       type: block_item
@@ -102,7 +102,7 @@ items:
   default:table_lamp_on:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.table_lamp>
+      item-name: <!i><lang:item.default.table_lamp>
     model:
       type: minecraft:model
       path: minecraft:item/custom/table_lamp_on

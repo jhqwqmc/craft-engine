@@ -2,7 +2,7 @@ items:
   default:reed:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.reed>
+      item-name: <!i><lang:item.default.reed>
     texture: minecraft:item/custom/reed
     behavior:
       type: liquid_collision_block_item

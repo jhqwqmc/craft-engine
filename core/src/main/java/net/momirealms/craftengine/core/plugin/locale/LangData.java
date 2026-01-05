@@ -1,10 +1,6 @@
 package net.momirealms.craftengine.core.plugin.locale;
 
-import net.momirealms.craftengine.core.block.CustomBlock;
-import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.parser.BlockStateParser;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
-import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -15,30 +11,7 @@ public class LangData {
     public Map<String, String> translations = new LinkedHashMap<>();
 
     static {
-        LANG_KEY_PROCESSORS.put("block_name", (id) -> {
-            if (id.contains("[") && id.contains("]")) {
-                ImmutableBlockState parsed = BlockStateParser.deserialize(id);
-                if (parsed == null) return List.of(id);
-                return List.of(translationKey(parsed));
-            } else {
-                Key blockId = Key.of(id);
-                Optional<CustomBlock> blockOptional = CraftEngine.instance().blockManager().blockById(blockId);
-                if (blockOptional.isPresent()) {
-                    List<ImmutableBlockState> states = blockOptional.get().variantProvider().states();
-                    if (states.size() == 1) {
-                        return List.of(translationKey(states.getFirst()));
-                    } else {
-                        ArrayList<String> processed = new ArrayList<>();
-                        for (ImmutableBlockState state : states) {
-                            processed.add(translationKey(state));
-                        }
-                        return processed;
-                    }
-                } else {
-                    return List.of(id);
-                }
-            }
-        });
+        LANG_KEY_PROCESSORS.put("block_name", (id) -> List.of("block." + id.replace(":", ".")));
     }
 
     public void processTranslations() {
@@ -89,30 +62,5 @@ public class LangData {
                 return existing;
             });
         });
-    }
-
-    public static String translationKey(ImmutableBlockState state) {
-        String id = state.customBlockState().literalObject().toString();
-        int first = -1, last = -1;
-        for (int i = 0; i < id.length(); i++) {
-            char c = id.charAt(i);
-            if (c == '{' && first == -1) {
-                first = i;
-            } else if (c == '}') {
-                last = i;
-            }
-        }
-        if (first == -1 || last == -1 || last <= first) {
-            throw new IllegalArgumentException("Invalid block state: " + id);
-        }
-        int length = last - first - 1;
-        char[] chars = new char[length];
-        id.getChars(first + 1, last, chars, 0);
-        for (int i = 0; i < length; i++) {
-            if (chars[i] == ':') {
-                chars[i] = '.';
-            }
-        }
-        return  "block." + new String(chars);
     }
 }

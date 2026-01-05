@@ -224,7 +224,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     }
 
     @Override
-    protected void applyPlatformSettings(ImmutableBlockState state) {
+    protected void applyPlatformSettings(CustomBlock block, ImmutableBlockState state) {
         DelegatingBlockState nmsState = (DelegatingBlockState) state.customBlockState().literalObject();
         nmsState.setBlockState(state);
         Object nmsVisualState = state.visualBlockState().literalObject();
@@ -259,7 +259,11 @@ public final class BukkitBlockManager extends AbstractBlockManager {
             shapeHolder.bindValue(new BukkitBlockShape(nmsVisualState, Optional.ofNullable(state.settings().supportShapeBlockState()).map(it -> Objects.requireNonNull(createVanillaBlockState(it), "Illegal block state: " + it).literalObject()).orElse(null)));
             ObjectHolder<BlockBehavior> behaviorHolder = nmsBlock.behaviorDelegate();
             behaviorHolder.bindValue(state.behavior());
-
+            if (VersionHelper.isOrAbove1_21_2()) {
+                CoreReflections.field$BlockBehaviour$descriptionId.set(nmsBlock, block.translationKey());
+            } else {
+                CoreReflections.field$Block$descriptionId.set(nmsBlock, block.translationKey());
+            }
             CoreReflections.field$BlockBehaviour$explosionResistance.set(nmsBlock, settings.resistance());
             CoreReflections.field$BlockBehaviour$friction.set(nmsBlock, settings.friction());
             CoreReflections.field$BlockBehaviour$speedFactor.set(nmsBlock, settings.speedFactor());

@@ -2,7 +2,7 @@ items:
   default:bench:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.bench>
+      item-name: <!i><lang:item.default.bench>
     model: minecraft:item/custom/bench
     behavior:
       type: furniture_item

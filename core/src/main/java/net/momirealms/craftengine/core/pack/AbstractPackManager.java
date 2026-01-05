@@ -494,7 +494,7 @@ public abstract class AbstractPackManager implements PackManager {
         plugin.saveResource("resources/default/configuration/templates/events.yml");
         plugin.saveResource("resources/default/configuration/categories.yml");
         plugin.saveResource("resources/default/configuration/emoji.yml");
-        plugin.saveResource("resources/default/configuration/translations.yml");
+        plugin.saveResource("resources/default/configuration/lang.yml");
         plugin.saveResource("resources/default/configuration/items/cap.yml");
         plugin.saveResource("resources/default/configuration/items/flame_elytra.yml");
         plugin.saveResource("resources/default/configuration/items/gui_head.yml");
