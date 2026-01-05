@@ -1,7 +1,7 @@
 # All the configurations below use a localization system implemented based on the client-side resource pack.
 # https://xiao-momi.github.io/craft-engine-wiki/configuration/lang
 lang#items:
-  en:
+  en_us:
     item.default.default.chinese_lantern: Chinese Lantern
     item.default.fairy_flower: Fairy Flower
     item.default.reed: Reed
