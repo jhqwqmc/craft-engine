@@ -1,6 +1,8 @@
 package net.momirealms.craftengine.bukkit.plugin.user;
 
 import ca.spottedleaf.concurrentutil.map.ConcurrentLong2ReferenceChainedHashTable;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -76,6 +78,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class BukkitServerPlayer extends Player {
@@ -175,6 +178,12 @@ public class BukkitServerPlayer extends Player {
     private int awfulBreakCorrector;
     // 上一次停止挖掘包发出的时间
     private int preventBreakTick;
+    // 缓存的已接收的地图数据
+    private final Cache<Object, Object> receivedMapData = CacheBuilder.newBuilder()
+            .weakKeys()
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .concurrencyLevel(4)
+            .build();
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1593,6 +1602,11 @@ public class BukkitServerPlayer extends Player {
     @Override
     public WorldPosition eyePosition() {
         return LocationUtils.toWorldPosition(this.getEyeLocation());
+    }
+
+    @Override
+    public Cache<Object, Object> receivedMapData() {
+        return this.receivedMapData;
     }
 
     @Override

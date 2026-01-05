@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.entity.renderer;
 
 import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.bukkit.block.entity.ItemDisplayBlockEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
@@ -11,20 +10,13 @@ import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRen
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.MutableBoolean;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import org.joml.Vector3f;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
-    public static final Cache<Object, Cache<Player, MutableBoolean>> MAP_DATA_CACHE = CacheBuilder.newBuilder()
-            .weakKeys()
-            .expireAfterAccess(5, TimeUnit.MINUTES)
-            .concurrencyLevel(4)
-            .build();
     public final ItemDisplayBlockEntity blockEntity;
     public final Config config;
     public final Object cachedSpawnPacket;
@@ -76,10 +68,10 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
             this.blockEntity.mapItemSavedData(savedData);
         }
         try {
-            Cache<Player, MutableBoolean> savedDataCache = MAP_DATA_CACHE.get(savedData, () -> CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).concurrencyLevel(4).build());
-            MutableBoolean sent = savedDataCache.get(player, () -> new MutableBoolean(false));
-            if (sent.booleanValue()) return;
-            sent.set(true);
+            Cache<Object, Object> receivedMapData = player.receivedMapData();
+            Object received = receivedMapData.getIfPresent(savedData);
+            if (received != null) return;
+            receivedMapData.put(savedData, Boolean.TRUE); // 存入用于标记的单例对象
             Object vanillaRender = CoreReflections.methodHandle$MapItemSavedData$vanillaRenderGetter.invokeExact(savedData);
             byte[] buffer = FastNMS.INSTANCE.field$RenderData$buffer(vanillaRender);
             Object patch = createPatch(buffer);
@@ -92,9 +84,6 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
         }
     }
 
-    public record Config(Vector3f position, boolean isGlow, boolean invisible, boolean renderMapItem) {
-    }
-
     private static Object createPatch(byte[] buffer) {
         byte[] mapColors = new byte[128 * 128];
         for (int row = 0; row < 128; row++) {
@@ -103,5 +92,8 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
             }
         }
         return FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, mapColors);
+    }
+
+    public record Config(Vector3f position, boolean isGlow, boolean invisible, boolean renderMapItem) {
     }
 }
