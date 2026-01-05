@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
+import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
@@ -4700,48 +4701,18 @@ public final class CoreReflections {
             )
     );
 
-    public static final Class<?> clazz$MapItemSavedData$HoldingPlayer = requireNonNull(
-            BukkitReflectionUtils.findReobfOrMojmapClass(
-                    "world.level.saveddata.maps.WorldMap$WorldMapHumanTracker",
-                    "world.level.saveddata.maps.MapItemSavedData$HoldingPlayer"
+    public static final Field field$MapItemSavedData$vanillaRender = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$MapItemSavedData, CraftBukkitReflections.clazz$RenderData, 0
             )
     );
 
-    public static final Constructor<?> constructor$MapItemSavedData$HoldingPlayer = requireNonNull(
-            ReflectionUtils.getDeclaredConstructor(
-                    clazz$MapItemSavedData$HoldingPlayer, clazz$MapItemSavedData, clazz$Player
-            )
-    );
-
-    public static final Class<?> clazz$Packet = requireNonNull(
-            ReflectionUtils.getClazz(
-                    BukkitReflectionUtils.assembleMCClass("network.protocol.Packet")
-            )
-    );
-
-    // 1.20.5+
-    public static final Class<?> clazz$MapId = MiscUtils.requireNonNullIf(
-            ReflectionUtils.getClazz(
-                    BukkitReflectionUtils.assembleMCClass("world.level.saveddata.maps.MapId")
-            ),
-            VersionHelper.isOrAbove1_20_5()
-    );
-
-    public static final Method method$MapItemSavedData$HoldingPlayer$nextUpdatePacket = requireNonNull(
-            ReflectionUtils.getDeclaredMethod(
-                    clazz$MapItemSavedData$HoldingPlayer, clazz$Packet, VersionHelper.isOrAbove1_20_5() ? clazz$MapId : int.class
-            )
-    );
-
-    public static final MethodHandle methodHandle$MapItemSavedData$HoldingPlayer$constructor;
-    public static final MethodHandle methodHandle$MapItemSavedData$HoldingPlayer$nextUpdatePacket;
+    public static final MethodHandle methodHandle$MapItemSavedData$vanillaRenderGetter;
 
     static {
         try {
-            methodHandle$MapItemSavedData$HoldingPlayer$constructor = ReflectionUtils.unreflectConstructor(constructor$MapItemSavedData$HoldingPlayer)
-                    .asType(MethodType.methodType(Object.class, Object.class, Object.class));
-            methodHandle$MapItemSavedData$HoldingPlayer$nextUpdatePacket = ReflectionUtils.unreflectMethod(method$MapItemSavedData$HoldingPlayer$nextUpdatePacket)
-                    .asType(MethodType.methodType(Object.class, Object.class, Object.class));
+            methodHandle$MapItemSavedData$vanillaRenderGetter = ReflectionUtils.unreflectGetter(field$MapItemSavedData$vanillaRender)
+                    .asType(MethodType.methodType(Object.class, Object.class));
         } catch (IllegalAccessException e) {
             throw new ReflectionInitException("Failed to init MapItemSavedData$HoldingPlayer", e);
         }

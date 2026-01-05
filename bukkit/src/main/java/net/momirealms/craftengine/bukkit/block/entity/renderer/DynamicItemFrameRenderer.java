@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRen
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
+import net.momirealms.craftengine.core.util.MutableBoolean;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import org.joml.Vector3f;
@@ -19,7 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
-    public static final Cache<Object, Cache<Player, Object>> MAP_DATA_CACHE = CacheBuilder.newBuilder()
+    public static final Cache<Object, Cache<Player, MutableBoolean>> MAP_DATA_CACHE = CacheBuilder.newBuilder()
             .weakKeys()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .concurrencyLevel(4)
@@ -74,18 +75,17 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
             if (savedData == null) return;
             this.blockEntity.mapItemSavedData(savedData);
         }
-        final Object finalSavedData = savedData;
         try {
-            Cache<Player, Object> savedDataCache = MAP_DATA_CACHE.get(finalSavedData, () -> CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).concurrencyLevel(4).build());
-            Object holdingPlayer = savedDataCache.get(player, () -> {
-                try {
-                    return CoreReflections.methodHandle$MapItemSavedData$HoldingPlayer$constructor.invokeExact(finalSavedData, player.serverPlayer());
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            Object packet = CoreReflections.methodHandle$MapItemSavedData$HoldingPlayer$nextUpdatePacket.invokeExact(holdingPlayer, mapId);
-            if (packet == null) return;
+            Cache<Player, MutableBoolean> savedDataCache = MAP_DATA_CACHE.get(savedData, () -> CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).concurrencyLevel(4).build());
+            MutableBoolean sent = savedDataCache.get(player, () -> new MutableBoolean(false));
+            if (sent.booleanValue()) return;
+            sent.set(true);
+            Object vanillaRender = CoreReflections.methodHandle$MapItemSavedData$vanillaRenderGetter.invokeExact(savedData);
+            byte[] buffer = FastNMS.INSTANCE.field$RenderData$buffer(vanillaRender);
+            Object patch = createPatch(buffer);
+            byte scale = FastNMS.INSTANCE.field$MapItemSavedData$scale(savedData);
+            boolean locked = FastNMS.INSTANCE.field$MapItemSavedData$locked(savedData);
+            Object packet = FastNMS.INSTANCE.constructor$ClientboundMapItemDataPacket(mapId, scale, locked, null, patch);
             player.sendPacket(packet, false);
         } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Cannot update map item for player " + player.name(), e);
@@ -93,5 +93,15 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
     }
 
     public record Config(Vector3f position, boolean isGlow, boolean invisible, boolean renderMapItem) {
+    }
+
+    private static Object createPatch(byte[] buffer) {
+        byte[] mapColors = new byte[128 * 128];
+        for (int row = 0; row < 128; row++) {
+            for (int col = 0; col < 128; col++) {
+                mapColors[row + col * 128] = buffer[row + col * 128];
+            }
+        }
+        return FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, mapColors);
     }
 }
