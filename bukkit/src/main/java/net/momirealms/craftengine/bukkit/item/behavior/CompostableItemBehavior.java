@@ -27,11 +27,11 @@ import org.bukkit.util.Vector;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class CompostableItemBehavior extends ItemBehavior {
+public final class CompostableItemBehavior extends ItemBehavior {
     public static final ItemBehaviorFactory<CompostableItemBehavior> FACTORY = new Factory();
     private final double chance;
 
-    public CompostableItemBehavior(double chance) {
+    private CompostableItemBehavior(double chance) {
         this.chance = chance;
     }
 

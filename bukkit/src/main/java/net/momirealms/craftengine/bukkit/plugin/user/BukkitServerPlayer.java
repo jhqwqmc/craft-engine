@@ -171,10 +171,10 @@ public class BukkitServerPlayer extends Player {
     // 客户端发送了stop包，但是仍然在继续破坏且未发出start包
     // 这种情况下可能就会卡无限挖掘状态
     private int awfulBreakFixer;
-    // 用于修正与raytrace不统一的情况
-    private int awfulBreakCorrector;
     // 上一次停止挖掘包发出的时间
     private int preventBreakTick;
+    // 用于辨别是否在范围挖掘
+    private boolean isRangeMining;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1629,5 +1629,13 @@ public class BukkitServerPlayer extends Player {
 
     public Map<Integer, VirtualCullableObject> trackedFurniture() {
         return Collections.unmodifiableMap(this.trackedFurniture);
+    }
+
+    public boolean isRangeMining() {
+        return this.isRangeMining;
+    }
+
+    public void setRangeMining(boolean rangeMining) {
+        this.isRangeMining = rangeMining;
     }
 }
