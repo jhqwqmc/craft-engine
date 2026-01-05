@@ -66,7 +66,6 @@ import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.EmojiTextProcessResult;
 import net.momirealms.craftengine.core.font.FontManager;
-import net.momirealms.craftengine.core.font.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
@@ -133,7 +132,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public class BukkitNetworkManager implements NetworkManager, Listener {
+public class BukkitNetworkManager extends AbstractNetworkManager implements Listener {
     private static BukkitNetworkManager instance;
     private final BukkitCraftEngine plugin;
     private final Map<Class<?>, NMSPacketListener> nmsPacketListeners = new IdentityHashMap<>(128);
@@ -189,6 +188,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
     private int[] modBlockStateRemapper;
 
     public BukkitNetworkManager(BukkitCraftEngine plugin) {
+        super(plugin);
         instance = this;
         Plugin modelEngine = Bukkit.getPluginManager().getPlugin("ModelEngine");
         this.hasModelEngine = modelEngine != null && modelEngine.getPluginMeta().getVersion().startsWith("R4");
@@ -279,6 +279,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
 
     @Override
     public void delayedLoad() {
+        super.delayedLoad();
         this.resendTags();
     }
 
@@ -1251,7 +1252,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class PlayerInfoUpdateListener implements NMSPacketListener {
+    public class PlayerInfoUpdateListener implements NMSPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1277,7 +1278,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     newEntries.add(entry);
                 } else {
                     String json = ComponentUtils.minecraftToJson(mcComponent);
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                    Map<String, ComponentProvider> tokens = matchNetworkTags(json);
                     if (tokens.isEmpty()) {
                         newEntries.add(entry);
                     } else {
@@ -1658,7 +1659,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class RenameItemListener implements NMSPacketListener {
+    public class RenameItemListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1676,7 +1677,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (message != null && !message.isEmpty()) {
                 // check bypass
                 FontManager manager = CraftEngine.instance().fontManager();
-                IllegalCharacterProcessResult result = manager.processIllegalCharacters(message);
+                IllegalCharacterProcessResult result = processIllegalCharacters(message);
                 if (result.has()) {
                     try {
                         NetworkReflections.methodHandle$ServerboundRenameItemPacket$nameSetter.invokeExact(packet, result.text());
@@ -1688,7 +1689,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SignUpdateListener implements NMSPacketListener {
+    public class SignUpdateListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1709,7 +1710,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
                 if (line != null && !line.isEmpty()) {
-                    IllegalCharacterProcessResult result = manager.processIllegalCharacters(line);
+                    IllegalCharacterProcessResult result = processIllegalCharacters(line);
                     if (result.has()) {
                         lines[i] = result.text();
                     }
@@ -2777,7 +2778,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class OpenScreenListener1_20 implements ByteBufferPacketListener {
+    public class OpenScreenListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -2786,7 +2787,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int containerId = buf.readVarInt();
             int type = buf.readVarInt();
             String json = buf.readUtf();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(json);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -2797,7 +2798,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class OpenScreenListener1_20_3 implements ByteBufferPacketListener {
+    public class OpenScreenListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -2807,7 +2808,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int type = buf.readVarInt();
             Tag nbt = buf.readNbt(false);
             if (nbt == null) return;
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt.getAsString());
+            Map<String, ComponentProvider> tokens = matchNetworkTags(nbt.getAsString());
             if (tokens.isEmpty()) return;
             buf.clear();
             buf.writeVarInt(event.packetID());
@@ -2905,7 +2906,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             buf.clear();
             buf.writeVarInt(event.packetID());
             if (Config.interceptSystemChat()) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(jsonOrPlainString);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(jsonOrPlainString);
                 if (!tokens.isEmpty()) {
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
                 }
@@ -2932,7 +2933,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             buf.writeVarInt(event.packetID());
             Component component = AdventureHelper.tagToComponent(nbt);
             if (Config.interceptSystemChat()) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
                 if (!tokens.isEmpty()) {
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
                 }
@@ -2945,7 +2946,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class TabListListener1_20 implements ByteBufferPacketListener {
+    public class TabListListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -2953,8 +2954,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             FriendlyByteBuf buf = event.getBuffer();
             String json1 = buf.readUtf();
             String json2 = buf.readUtf();
-            Map<String, ComponentProvider> tokens1 = CraftEngine.instance().fontManager().matchTags(json1);
-            Map<String, ComponentProvider> tokens2 = CraftEngine.instance().fontManager().matchTags(json2);
+            Map<String, ComponentProvider> tokens1 = matchNetworkTags(json1);
+            Map<String, ComponentProvider> tokens2 = matchNetworkTags(json2);
             if (tokens1.isEmpty() && tokens2.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -2965,7 +2966,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class TabListListener1_20_3 implements ByteBufferPacketListener {
+    public class TabListListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -2975,8 +2976,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (nbt1 == null) return;
             Tag nbt2 = buf.readNbt(false);
             if (nbt2 == null) return;
-            Map<String, ComponentProvider> tokens1 = CraftEngine.instance().fontManager().matchTags(nbt1);
-            Map<String, ComponentProvider> tokens2 = CraftEngine.instance().fontManager().matchTags(nbt2);
+            Map<String, ComponentProvider> tokens1 = matchNetworkTags(nbt1);
+            Map<String, ComponentProvider> tokens2 = matchNetworkTags(nbt2);
             if (tokens1.isEmpty() && tokens2.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -2987,14 +2988,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetActionBarListener1_20 implements ByteBufferPacketListener {
+    public class SetActionBarListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             if (!Config.interceptActionBar()) return;
             FriendlyByteBuf buf = event.getBuffer();
             String json = buf.readUtf();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(json);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3003,7 +3004,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetActionBarListener1_20_3 implements ByteBufferPacketListener {
+    public class SetActionBarListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3011,7 +3012,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             FriendlyByteBuf buf = event.getBuffer();
             Tag nbt = buf.readNbt(false);
             if (nbt == null) return;
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3020,14 +3021,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetTitleListener1_20 implements ByteBufferPacketListener {
+    public class SetTitleListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             if (!Config.interceptTitle()) return;
             FriendlyByteBuf buf = event.getBuffer();
             String json = buf.readUtf();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(json);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3036,7 +3037,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetTitleListener1_20_3 implements ByteBufferPacketListener {
+    public class SetTitleListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3044,7 +3045,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             FriendlyByteBuf buf = event.getBuffer();
             Tag nbt = buf.readNbt(false);
             if (nbt == null) return;
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3053,14 +3054,14 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetSubtitleListener1_20 implements ByteBufferPacketListener {
+    public class SetSubtitleListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             if (!Config.interceptTitle()) return;
             FriendlyByteBuf buf = event.getBuffer();
             String json = buf.readUtf();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(json);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3069,7 +3070,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetSubtitleListener1_20_3 implements ByteBufferPacketListener {
+    public class SetSubtitleListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3077,7 +3078,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             FriendlyByteBuf buf = event.getBuffer();
             Tag nbt = buf.readNbt(false);
             if (nbt == null) return;
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3086,7 +3087,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class BossEventListener1_20 implements ByteBufferPacketListener {
+    public class BossEventListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3096,7 +3097,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int actionType = buf.readVarInt();
             if (actionType == 0) {
                 String json = buf.readUtf();
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(json);
                 if (tokens.isEmpty()) return;
                 float health = buf.readFloat();
                 int color = buf.readVarInt();
@@ -3114,7 +3115,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 buf.writeByte(flag);
             } else if (actionType == 3) {
                 String json = buf.readUtf();
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(json);
                 if (tokens.isEmpty()) return;
                 event.setChanged(true);
                 buf.clear();
@@ -3126,7 +3127,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class BossEventListener1_20_3 implements ByteBufferPacketListener {
+    public class BossEventListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3137,7 +3138,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (actionType == 0) {
                 Tag nbt = buf.readNbt(false);
                 if (nbt == null) return;
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
                 if (tokens.isEmpty()) return;
                 float health = buf.readFloat();
                 int color = buf.readVarInt();
@@ -3156,7 +3157,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             } else if (actionType == 3) {
                 Tag nbt = buf.readNbt(false);
                 if (nbt == null) return;
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nbt);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(nbt);
                 if (tokens.isEmpty()) return;
                 event.setChanged(true);
                 buf.clear();
@@ -3168,7 +3169,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class TeamListener1_20 implements ByteBufferPacketListener {
+    public class TeamListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3186,9 +3187,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             String prefix = buf.readUtf();
             String suffix = buf.readUtf();
 
-            Map<String, ComponentProvider> tokens1 = CraftEngine.instance().fontManager().matchTags(displayName);
-            Map<String, ComponentProvider> tokens2 = CraftEngine.instance().fontManager().matchTags(prefix);
-            Map<String, ComponentProvider> tokens3 = CraftEngine.instance().fontManager().matchTags(suffix);
+            Map<String, ComponentProvider> tokens1 = matchNetworkTags(displayName);
+            Map<String, ComponentProvider> tokens2 = matchNetworkTags(prefix);
+            Map<String, ComponentProvider> tokens3 = matchNetworkTags(suffix);
             if (tokens1.isEmpty() && tokens2.isEmpty() && tokens3.isEmpty()) return;
             event.setChanged(true);
             NetworkTextReplaceContext context = NetworkTextReplaceContext.of((BukkitServerPlayer) user);
@@ -3211,7 +3212,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class TeamListener1_20_3 implements ByteBufferPacketListener {
+    public class TeamListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3230,9 +3231,9 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (prefix == null) return;
             Tag suffix = buf.readNbt(false);
             if (suffix == null) return;
-            Map<String, ComponentProvider> tokens1 = CraftEngine.instance().fontManager().matchTags(displayName);
-            Map<String, ComponentProvider> tokens2 = CraftEngine.instance().fontManager().matchTags(prefix);
-            Map<String, ComponentProvider> tokens3 = CraftEngine.instance().fontManager().matchTags(suffix);
+            Map<String, ComponentProvider> tokens1 = matchNetworkTags(displayName);
+            Map<String, ComponentProvider> tokens2 = matchNetworkTags(prefix);
+            Map<String, ComponentProvider> tokens3 = matchNetworkTags(suffix);
             if (tokens1.isEmpty() && tokens2.isEmpty() && tokens3.isEmpty()) return;
             NetworkTextReplaceContext context = NetworkTextReplaceContext.of((BukkitServerPlayer) user);
             List<String> entities = method == 0 ? buf.readStringList() : null;
@@ -3254,7 +3255,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetObjectiveListener1_20 implements ByteBufferPacketListener {
+    public class SetObjectiveListener1_20 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3265,7 +3266,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (mode != 0 && mode != 2) return;
             String displayName = buf.readUtf();
             int renderType = buf.readVarInt();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(displayName);
+            Map<String, ComponentProvider> tokens = matchNetworkTags(displayName);
             if (tokens.isEmpty()) return;
             event.setChanged(true);
             buf.clear();
@@ -3277,7 +3278,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetObjectiveListener1_20_3 implements ByteBufferPacketListener {
+    public class SetObjectiveListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3293,7 +3294,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             if (optionalNumberFormat) {
                 int format = buf.readVarInt();
                 if (format == 0) {
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(displayName);
+                    Map<String, ComponentProvider> tokens = matchNetworkTags(displayName);
                     if (tokens.isEmpty()) return;
                     event.setChanged(true);
                     buf.clear();
@@ -3305,7 +3306,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     buf.writeBoolean(true);
                     buf.writeVarInt(0);
                 } else if (format == 1) {
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(displayName);
+                    Map<String, ComponentProvider> tokens = matchNetworkTags(displayName);
                     if (tokens.isEmpty()) return;
                     Tag style = buf.readNbt(false);
                     event.setChanged(true);
@@ -3321,8 +3322,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 } else if (format == 2) {
                     Tag fixed = buf.readNbt(false);
                     if (fixed == null) return;
-                    Map<String, ComponentProvider> tokens1 = CraftEngine.instance().fontManager().matchTags(displayName);
-                    Map<String, ComponentProvider> tokens2 = CraftEngine.instance().fontManager().matchTags(fixed);
+                    Map<String, ComponentProvider> tokens1 = matchNetworkTags(displayName);
+                    Map<String, ComponentProvider> tokens2 = matchNetworkTags(fixed);
                     if (tokens1.isEmpty() && tokens2.isEmpty()) return;
                     event.setChanged(true);
                     buf.clear();
@@ -3336,7 +3337,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     buf.writeNbt(tokens2.isEmpty() ? fixed : AdventureHelper.componentToTag(AdventureHelper.replaceText(AdventureHelper.tagToComponent(fixed), tokens2, NetworkTextReplaceContext.of((BukkitServerPlayer) user))), false);
                 }
             } else {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(displayName);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(displayName);
                 if (tokens.isEmpty()) return;
                 event.setChanged(true);
                 buf.clear();
@@ -3350,7 +3351,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetScoreListener1_20_3 implements ByteBufferPacketListener {
+    public class SetScoreListener1_20_3 implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3368,7 +3369,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             }
             outside:
             if (displayName != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(displayName);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(displayName);
                 if (tokens.isEmpty()) break outside;
                 Component component = AdventureHelper.tagToComponent(displayName);
                 component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of(serverPlayer));
@@ -3389,7 +3390,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 } else if (format == 2) {
                     fixed = buf.readNbt(false);
                     if (fixed == null) return;
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(fixed);
+                    Map<String, ComponentProvider> tokens = matchNetworkTags(fixed);
                     if (tokens.isEmpty() && !isChanged) return;
                     if (!tokens.isEmpty()) {
                         Component component = AdventureHelper.tagToComponent(fixed);
@@ -3568,7 +3569,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class UpdateAdvancementsListener implements ByteBufferPacketListener {
+    public class UpdateAdvancementsListener implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -3593,7 +3594,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                 }
                 if (Config.interceptAdvancement()) {
                     holder.replaceNetworkTags(component -> {
-                        Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(AdventureHelper.componentToJson(component));
+                        Map<String, ComponentProvider> tokens = matchNetworkTags(AdventureHelper.componentToJson(component));
                         if (tokens.isEmpty()) return component;
                         changed.set(true);
                         return AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of(player));
@@ -4377,7 +4378,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class SetEntityDataListener implements ByteBufferPacketListener {
+    public class SetEntityDataListener implements ByteBufferPacketListener {
 
         @Override
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
@@ -4401,7 +4402,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
                     if (optionalTextComponent.isEmpty()) continue;
                     Object textComponent = optionalTextComponent.get();
                     String json = ComponentUtils.minecraftToJson(textComponent);
-                    Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                    Map<String, ComponentProvider> tokens = matchNetworkTags(json);
                     if (tokens.isEmpty()) continue;
                     Component component = AdventureHelper.jsonToComponent(json);
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of(serverPlayer));
@@ -4633,7 +4634,8 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             }
         }
     }
-    public static class PlayerChatListener_1_20 implements ByteBufferPacketListener {
+
+    public class PlayerChatListener_1_20 implements ByteBufferPacketListener {
 
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             if (!Config.interceptPlayerChat() || Config.disableChatReport()) return;
@@ -4665,7 +4667,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             // SignedMessageBody.Packed end
             @Nullable String unsignedContent = buf.readNullable(FriendlyByteBuf::readUtf);
             if (unsignedContent != null) {
-                Map<String, ComponentProvider> unsignedContentTokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
+                Map<String, ComponentProvider> unsignedContentTokens = matchNetworkTags(unsignedContent);
                 if (!unsignedContentTokens.isEmpty()) {
                     Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(unsignedContent, JsonElement.class));
                     Component component = AdventureHelper.nbtToComponent(tag);
@@ -4681,7 +4683,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             // ChatType.BoundNetwork start
             int chatType = buf.readVarInt();
             String name = buf.readUtf();
-            Map<String, ComponentProvider> nameTokens = CraftEngine.instance().fontManager().matchTags(name);
+            Map<String, ComponentProvider> nameTokens = matchNetworkTags(name);
             if (!nameTokens.isEmpty()) {
                 Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(name, JsonElement.class));
                 Component component = AdventureHelper.nbtToComponent(tag);
@@ -4691,7 +4693,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             }
             @Nullable String targetName = buf.readNullable(FriendlyByteBuf::readUtf);
             if (targetName != null) {
-                Map<String, ComponentProvider> targetNameTokens = CraftEngine.instance().fontManager().matchTags(targetName);
+                Map<String, ComponentProvider> targetNameTokens = matchNetworkTags(targetName);
                 if (!targetNameTokens.isEmpty()) {
                     Tag tag = MRegistryOps.JSON.convertTo(MRegistryOps.SPARROW_NBT, GsonHelper.get().fromJson(targetName, JsonElement.class));
                     Component component = AdventureHelper.nbtToComponent(tag);
@@ -4727,7 +4729,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
         }
     }
 
-    public static class PlayerChatListener_1_20_3 implements ByteBufferPacketListener {
+    public class PlayerChatListener_1_20_3 implements ByteBufferPacketListener {
 
         public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
             if (!Config.interceptPlayerChat() || Config.disableChatReport()) return;
@@ -4760,7 +4762,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             // SignedMessageBody.Packed end
             @Nullable Tag unsignedContent = buf.readNullable(b -> b.readNbt(false));
             if (unsignedContent != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(unsignedContent);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(unsignedContent);
                 if (!tokens.isEmpty()) {
                     Component component = AdventureHelper.tagToComponent(unsignedContent);
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
@@ -4776,7 +4778,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             int chatType = buf.readVarInt();
             Tag name = buf.readNbt(false);
             if (name != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(name);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(name);
                 if (!tokens.isEmpty()) {
                     Component component = AdventureHelper.tagToComponent(name);
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));
@@ -4786,7 +4788,7 @@ public class BukkitNetworkManager implements NetworkManager, Listener {
             }
             @Nullable Tag targetName = buf.readNullable(b -> b.readNbt(false));
             if (targetName != null) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(targetName);
+                Map<String, ComponentProvider> tokens = matchNetworkTags(targetName);
                 if (!tokens.isEmpty()) {
                     Component component = AdventureHelper.tagToComponent(targetName);
                     component = AdventureHelper.replaceText(component, tokens, NetworkTextReplaceContext.of((BukkitServerPlayer) user));

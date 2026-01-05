@@ -15,6 +15,7 @@ import net.momirealms.craftengine.bukkit.util.LegacyInventoryUtils;
 import net.momirealms.craftengine.core.font.*;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.network.IllegalCharacterProcessResult;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.Bukkit;
@@ -124,7 +125,7 @@ public class BukkitFontManager extends AbstractFontManager implements Listener {
         Player player = event.getPlayer();
         if (!Config.filterCommand()) return;
         if (!player.hasPermission(FontManager.BYPASS_COMMAND)) {
-            IllegalCharacterProcessResult result = processIllegalCharacters(event.getMessage());
+            IllegalCharacterProcessResult result = this.plugin.networkManager().processIllegalCharacters(event.getMessage());
             if (result.has()) {
                 event.setMessage(result.text());
             }
@@ -223,7 +224,7 @@ public class BukkitFontManager extends AbstractFontManager implements Listener {
             String rawJsonMessage = ComponentUtils.paperAdventureToJson(originalMessage);
             boolean changed = false;
             if (!player.hasPermission(FontManager.BYPASS_CHAT)) {
-                IllegalCharacterProcessResult result = processIllegalCharacters(rawJsonMessage);
+                IllegalCharacterProcessResult result = this.plugin.networkManager().processIllegalCharacters(rawJsonMessage);
                 if (result.has()) {
                     rawJsonMessage = result.text();
                     changed = true;

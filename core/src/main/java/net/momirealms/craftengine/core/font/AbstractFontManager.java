@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.font;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
@@ -14,7 +13,6 @@ import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.*;
 import org.ahocorasick.trie.Token;
 import org.ahocorasick.trie.Trie;
@@ -36,13 +34,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class AbstractFontManager implements FontManager {
-    private static final Set<String> NETWORK_TAGS = MiscUtils.init(new HashSet<>(), it -> {
-        it.add("image");
-        it.add("l10n");
-        it.add("shift");
-        it.add("global");
-        it.add("papi");
-    });
     private final CraftEngine plugin;
     // namespace:font font
     private final Map<Key, Font> fonts = new HashMap<>();
@@ -56,7 +47,6 @@ public abstract class AbstractFontManager implements FontManager {
     private OffsetFont offsetFont;
 
     protected Trie emojiKeywordTrie;
-    protected Map<String, ComponentProvider> networkTagMapper;
     protected Map<String, Emoji> emojiMapper;
     protected List<Emoji> emojiList;
     protected List<String> allEmojiSuggestions;
@@ -83,7 +73,6 @@ public abstract class AbstractFontManager implements FontManager {
                 .filter(section -> section.getBoolean("enable", true))
                 .map(OffsetFont::new)
                 .orElse(null);
-        this.networkTagMapper = new HashMap<>(1024);
     }
 
     @Override
@@ -109,9 +98,6 @@ public abstract class AbstractFontManager implements FontManager {
         this.illegalChars.clear();
         this.emojis.clear();
         this.emojiKeywordTrie = null;
-        if (this.networkTagMapper != null) {
-            this.networkTagMapper.clear();
-        }
         if (this.emojiMapper != null) {
             this.emojiMapper.clear();
         }
@@ -130,89 +116,12 @@ public abstract class AbstractFontManager implements FontManager {
     @Override
     public void delayedLoad() {
         Optional.ofNullable(this.fonts.get(DEFAULT_FONT)).ifPresent(font -> this.illegalChars.addAll(font.codepointsInUse()));
-        this.registerImageTags();
-        this.registerShiftTags();
-        this.registerGlobalTags();
-        this.registerL10nTags();
         // global shift l10n image
         this.buildEmojiKeywordsTrie();
         this.emojiList = new ArrayList<>(this.emojis.values());
         this.allEmojiSuggestions = this.emojis.values().stream()
                 .flatMap(emoji -> emoji.keywords().stream())
                 .collect(Collectors.toList());
-    }
-
-    private void registerL10nTags() {
-        for (String key : this.plugin.translationManager().translationKeys()) {
-            String l10nTag = l10nTag(key);
-            this.networkTagMapper.put(l10nTag, ComponentProvider.l10n(key));
-        }
-    }
-
-    private void registerGlobalTags() {
-        for (Map.Entry<String, String> entry : this.plugin.globalVariableManager().globalVariables().entrySet()) {
-            String globalTag = globalTag(entry.getKey());
-            this.networkTagMapper.put(globalTag, ComponentProvider.miniMessageOrConstant(entry.getValue()));
-        }
-    }
-
-    private void registerShiftTags() {
-        if (this.offsetFont == null) return;
-        for (int i = -256; i <= 256; i++) {
-            String shiftTag = "<shift:" + i + ">";
-            this.networkTagMapper.put(shiftTag, ComponentProvider.constant(this.offsetFont.createOffset(i)));
-        }
-    }
-
-    private void registerImageTags() {
-        for (BitmapImage image : this.images.values()) {
-            Key key = image.id();
-            String id = key.toString();
-            String simpleImageTag = imageTag(id);
-            this.networkTagMapper.put(simpleImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
-            String simplerImageTag = imageTag(key.value());
-            this.networkTagMapper.put(simplerImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
-            for (int i = 0; i < image.rows(); i++) {
-                for (int j = 0; j < image.columns(); j++) {
-                    String imageArgs = id + ":" + i + ":" + j;
-                    String imageTag = imageTag(imageArgs);
-                    this.networkTagMapper.put(imageTag, ComponentProvider.constant(image.componentAt(i, j)));
-                }
-            }
-        }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    @Override
-    public Map<String, ComponentProvider> matchTags(String text) {
-        Map<String, ComponentProvider> tags = new HashMap<>();
-        List<net.kyori.adventure.text.minimessage.internal.parser.Token> root = TokenParser.tokenize(text, true);
-        for (final net.kyori.adventure.text.minimessage.internal.parser.Token token : root) {
-            switch (token.type()) {
-                case TEXT: break;
-                case OPEN_TAG:
-                case CLOSE_TAG:
-                case OPEN_CLOSE_TAG:
-                    if (token.childTokens().isEmpty()) {
-                        continue;
-                    }
-                    final String sanitized = TokenParser.TagProvider.sanitizePlaceholderName(token.childTokens().getFirst().get(text).toString());
-                    if (NETWORK_TAGS.contains(sanitized)) {
-                        String tag = text.substring(token.startIndex(), token.endIndex());
-                        tags.computeIfAbsent(tag, k -> {
-                            ComponentProvider provider = this.networkTagMapper.get(k);
-                            if (provider != null) {
-                                return provider;
-                            }
-                            return ComponentProvider.miniMessage(k);
-                        });
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported token type " + token.type());
-            }
-        }
-        return tags;
     }
 
     @Override
@@ -327,43 +236,6 @@ public abstract class AbstractFontManager implements FontManager {
         return EmojiComponentProcessResult.success(text);
     }
 
-    @Override
-    public IllegalCharacterProcessResult processIllegalCharacters(String raw, char replacement) {
-        boolean hasIllegal = false;
-        // replace illegal image usage
-        Map<String, ComponentProvider> tokens = matchTags(raw);
-        if (!tokens.isEmpty()) {
-            for (Map.Entry<String, ComponentProvider> entry : tokens.entrySet()) {
-                raw = raw.replace(entry.getKey(), String.valueOf(replacement));
-                hasIllegal = true;
-            }
-        }
-
-        if (this.isDefaultFontInUse()) {
-            // replace illegal codepoint
-            char[] chars = raw.toCharArray();
-            int[] codepoints = CharacterUtils.charsToCodePoints(chars);
-            int[] newCodepoints = new int[codepoints.length];
-
-            for (int i = 0; i < codepoints.length; i++) {
-                int codepoint = codepoints[i];
-                if (!isIllegalCodepoint(codepoint)) {
-                    newCodepoints[i] = codepoint;
-                } else {
-                    newCodepoints[i] = replacement;
-                    hasIllegal = true;
-                }
-            }
-
-            if (hasIllegal) {
-                return IllegalCharacterProcessResult.has(new String(newCodepoints, 0, newCodepoints.length));
-            }
-        } else if (hasIllegal) {
-            return IllegalCharacterProcessResult.has(raw);
-        }
-        return IllegalCharacterProcessResult.not();
-    }
-
     private void buildEmojiKeywordsTrie() {
         this.emojiMapper = new HashMap<>();
         for (Emoji emoji : this.emojis.values()) {
@@ -375,18 +247,6 @@ public abstract class AbstractFontManager implements FontManager {
                 .ignoreOverlaps()
                 .addKeywords(this.emojiMapper.keySet())
                 .build();
-    }
-
-    private static String imageTag(String text) {
-        return "<image:" + text + ">";
-    }
-
-    private static String globalTag(String text) {
-        return "<global:" + text + ">";
-    }
-
-    private static String l10nTag(String text) {
-        return "<l10n:" + text + ">";
     }
 
     @Override
@@ -430,7 +290,6 @@ public abstract class AbstractFontManager implements FontManager {
     public Optional<Font> fontById(Key id) {
         return Optional.ofNullable(this.fonts.get(id));
     }
-
 
     @Override
     public Collection<Suggestion> cachedImagesSuggestions() {

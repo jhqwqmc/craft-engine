@@ -249,7 +249,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
         Optional<String> optionalCustomName = item.customNameJson();
         if (optionalCustomName.isPresent()) {
             String line = optionalCustomName.get();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
             if (!tokens.isEmpty()) {
                 item.customNameJson(AdventureHelper.componentToJson(AdventureHelper.replaceText(AdventureHelper.jsonToComponent(line), tokens, context)));
                 callback.accept("display.Name", NetworkItemHandler.pack(Operation.ADD, new StringTag(line)));
@@ -266,7 +266,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
             List<String> lore = optionalLore.get();
             List<String> newLore = new ArrayList<>(lore.size());
             for (String line : lore) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
                 if (tokens.isEmpty()) {
                     newLore.add(line);
                 } else {

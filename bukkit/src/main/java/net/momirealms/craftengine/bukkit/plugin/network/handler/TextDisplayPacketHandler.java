@@ -37,7 +37,7 @@ public class TextDisplayPacketHandler implements EntityPacketHandler {
             Object textComponent = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$value(packedItem);
             if (textComponent == CoreReflections.instance$Component$empty) break;
             String json = ComponentUtils.minecraftToJson(textComponent);
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(json);
             if (tokens.isEmpty()) continue;
             Component component = AdventureHelper.replaceText(AdventureHelper.jsonToComponent(json), tokens, NetworkTextReplaceContext.of(user));
             Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);

@@ -236,7 +236,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
             List<String> lore = optionalLore.get();
             List<String> newLore = new ArrayList<>(lore.size());
             for (String line : lore) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
                 if (tokens.isEmpty()) {
                     newLore.add(line);
                 } else {
@@ -261,7 +261,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
         Optional<String> optionalCustomName = item.customNameJson();
         if (optionalCustomName.isPresent()) {
             String line = optionalCustomName.get();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
             if (!tokens.isEmpty()) {
                 item.customNameJson(AdventureHelper.componentToJson(AdventureHelper.replaceText(AdventureHelper.jsonToComponent(line), tokens, context)));
                 tag.get().put(DataComponentIds.CUSTOM_NAME, NetworkItemHandler.pack(Operation.ADD, new StringTag(line)));
@@ -275,7 +275,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
         Optional<String> optionalItemName = item.itemNameJson();
         if (optionalItemName.isPresent()) {
             String line = optionalItemName.get();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
             if (!tokens.isEmpty()) {
                 item.itemNameJson(AdventureHelper.componentToJson(AdventureHelper.replaceText(AdventureHelper.jsonToComponent(line), tokens, context)));
                 tag.get().put(DataComponentIds.ITEM_NAME, NetworkItemHandler.pack(Operation.ADD, new StringTag(line)));
@@ -288,7 +288,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
     public static boolean processModernItemName(Item<ItemStack> item, Supplier<CompoundTag> tag, Context context) {
         Tag nameTag = item.getSparrowNBTComponent(DataComponentTypes.ITEM_NAME);
         if (nameTag == null) return false;
-        Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nameTag);
+        Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(nameTag);
         if (!tokens.isEmpty()) {
             item.setNBTComponent(DataComponentKeys.ITEM_NAME, AdventureHelper.componentToNbt(AdventureHelper.replaceText(AdventureHelper.nbtToComponent(nameTag), tokens, context)));
             tag.get().put(DataComponentIds.ITEM_NAME, NetworkItemHandler.pack(Operation.ADD, nameTag));
@@ -300,7 +300,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
     public static boolean processModernCustomName(Item<ItemStack> item, Supplier<CompoundTag> tag, Context context) {
         Tag nameTag = item.getSparrowNBTComponent(DataComponentTypes.CUSTOM_NAME);
         if (nameTag == null) return false;
-        Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(nameTag);
+        Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(nameTag);
         if (!tokens.isEmpty()) {
             item.setNBTComponent(DataComponentKeys.CUSTOM_NAME, AdventureHelper.componentToNbt(AdventureHelper.replaceText(AdventureHelper.nbtToComponent(nameTag), tokens, context)));
             tag.get().put(DataComponentIds.CUSTOM_NAME, NetworkItemHandler.pack(Operation.ADD, nameTag));
@@ -317,7 +317,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
         }
         ListTag newLore = new ListTag();
         for (Tag tag : listTag) {
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(tag);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(tag);
             if (tokens.isEmpty()) {
                 newLore.add(tag);
             } else {

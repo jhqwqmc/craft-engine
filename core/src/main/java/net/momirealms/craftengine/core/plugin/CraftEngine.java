@@ -176,6 +176,7 @@ public abstract class CraftEngine implements Plugin {
         this.projectileManager.reload();
         this.seatManager.reload();
         this.entityCullingManager.reload();
+        this.networkManager.reload();
     }
 
     private void runDelayTasks(boolean reloadRecipe) {

@@ -51,7 +51,7 @@ public class EndermanPacketHandler implements EntityPacketHandler {
                 if (optionalTextComponent.isEmpty()) continue;
                 Object textComponent = optionalTextComponent.get();
                 String json = ComponentUtils.minecraftToJson(textComponent);
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(json);
                 if (tokens.isEmpty()) continue;
                 Component component = AdventureHelper.replaceText(AdventureHelper.jsonToComponent(json), tokens, NetworkTextReplaceContext.of(user));
                 Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);
