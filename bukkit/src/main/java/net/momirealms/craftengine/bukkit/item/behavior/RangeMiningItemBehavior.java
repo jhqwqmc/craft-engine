@@ -22,6 +22,13 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
     public static final ItemBehaviorFactory<RangeMiningItemBehavior> FACTORY = new Factory();
     private final List<Vec3i> miningRange;
 
+    // 定义俯仰状态枚举，方便后续逻辑处理
+    private enum PitchState {
+        FLAT, // 平视（挖墙）
+        UP,   // 仰视（挖天花板）
+        DOWN  // 俯视（挖地板）
+    }
+
     private RangeMiningItemBehavior(List<Vec3i> miningRange) {
         this.miningRange = miningRange;
     }
@@ -30,30 +37,40 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
     public void breakBlock(World world, Player player, BlockPos pos) {
         BukkitServerPlayer serverPlayer = (BukkitServerPlayer) player;
         if (serverPlayer.isRangeMining()) return;
+
         BlockStateWrapper blockState = world.getBlockState(pos);
         float destroyProgress = player.getDestroyProgress(blockState.literalObject(), pos);
+
+        // 1. 获取水平朝向 (North, South, East, West)
         Direction facing = player.getDirection();
-        if (player.xRot() > 45) {
-            facing = Direction.UP;
-        } else if (player.xRot() < -45) {
-            facing = Direction.DOWN;
+
+        // 2. 获取俯仰角并判断状态 (Flat, Up, Down)
+        PitchState pitchState = PitchState.FLAT;
+        if (player.xRot() < -45) {
+            pitchState = PitchState.UP;
+        } else if (player.xRot() > 45) {
+            pitchState = PitchState.DOWN;
         }
+
         serverPlayer.setRangeMining(true);
         try {
             for (Vec3i offset : this.miningRange) {
-                // 根据玩家朝向旋转偏移量
-                Vec3i rotatedOffset = rotateOffsetByFacing(offset, facing);
-                // 计算目标位置
+                // 如果偏移量是 (0,0,0)，即中心点，通常由原版逻辑处理，这里可以选择跳过或保留
+                if (offset.x() == 0 && offset.y() == 0 && offset.z() == 0) continue;
+
+                // 核心修改：传入 pitchState 进行三维旋转计算
+                Vec3i rotatedOffset = rotateOffset(offset, facing, pitchState);
+
                 int targetX = pos.x() + rotatedOffset.x();
                 int targetY = pos.y() + rotatedOffset.y();
                 int targetZ = pos.z() + rotatedOffset.z();
-                // 获取目标位置的方块状态
+
                 BlockPos targetPos = new BlockPos(targetX, targetY, targetZ);
                 BlockStateWrapper targetBlockState = world.getBlockState(targetPos);
+
                 if (targetBlockState != null && !targetBlockState.isAir()) {
-                    // 获取目标方块的硬度
                     float targetHardness = player.getDestroyProgress(targetBlockState.literalObject(), targetPos);
-                    // 如果方块的硬度小于或等于破坏进度，则执行破坏
+                    // 只有当目标方块比原方块更“脆”或硬度相当时才挖掘
                     if (targetHardness <= destroyProgress) {
                         player.breakBlock(targetX, targetY, targetZ);
                     }
@@ -65,44 +82,53 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
     }
 
     /**
-     * 根据玩家朝向旋转偏移量
-     *
-     * @param offset 原始偏移量
-     * @param facing 玩家朝向
-     * @return 旋转后的偏移量
+     * 根据 玩家水平朝向 + 俯仰角状态 计算绝对坐标偏移
+     * * @param offset 原始配置偏移 (x=右, y=上, z=深)
+     * @param facing 水平朝向 (NSEW)
+     * @param pitchState 俯仰状态 (FLAT/UP/DOWN)
      */
-    private Vec3i rotateOffsetByFacing(Vec3i offset, Direction facing) {
-        int x = offset.x();
-        int y = offset.y();
-        int z = offset.z();
-        return switch (facing) {
-            case NORTH ->
-                // 北方向，默认朝向，不需要旋转
-                    new Vec3i(x, y, z);
-            case SOUTH ->
-                // 南方向，180度旋转
-                    new Vec3i(-x, y, -z);
-            case EAST ->
-                // 东方向，顺时针90度旋转
-                    new Vec3i(-z, y, x);
-            case WEST ->
-                // 西方向，逆时针90度旋转
-                    new Vec3i(z, y, -x);
-            case UP ->
-                // 上方向（特殊情况，可能处理挖掘上方）
-                    new Vec3i(x, z, y);
-            case DOWN ->
-                // 下方向（特殊情况，可能处理挖掘下方）
-                    new Vec3i(x, -z, -y);
-            default -> offset;
+    private Vec3i rotateOffset(Vec3i offset, Direction facing, PitchState pitchState) {
+        int x = offset.x(); // 相对右
+        int y = offset.y(); // 相对上
+        int z = offset.z(); // 相对深
+
+        return switch (pitchState) {
+            // Case 1: 平视（挖墙）
+            // 逻辑：Y轴不变，XZ平面旋转
+            case FLAT -> switch (facing) {
+                case NORTH -> new Vec3i(x, y, -z);  // 北: z轴向里是-Z
+                case SOUTH -> new Vec3i(-x, y, z);  // 南: z轴向里是+Z，x翻转
+                case EAST  -> new Vec3i(-z, y, x);  // 东: z轴向里是+X
+                case WEST  -> new Vec3i(z, y, -x);  // 西: z轴向里是-X
+                default -> offset;
+            };
+
+            // Case 2: 仰视（挖天花板）
+            // 逻辑：相对深度(z) 变为 世界高度(+Y)。
+            // 相对高度(y) 贴合天花板平面。
+            // 当你面朝北看天花板时，屏幕上方(相对y)其实是指向南边(背后的天花板)。
+            case UP -> switch (facing) {
+                case NORTH -> new Vec3i(x, z, y);   // 面向北看天：右是东(+X)，上是南(+Z)
+                case SOUTH -> new Vec3i(-x, z, -y); // 面向南看天：右是西(-X)，上是北(-Z)
+                case EAST  -> new Vec3i(-y, z, x);  // 面向东看天：右是南(+Z)，上是西(-X)
+                case WEST  -> new Vec3i(y, z, -x);  // 面向西看天：右是北(-Z)，上是东(+X)
+                default -> new Vec3i(x, z, y);
+            };
+
+            // Case 3: 俯视（挖地板）
+            // 逻辑：相对深度(z) 变为 世界深度(-Y)。
+            // 相对高度(y) 贴合地板平面。
+            // 当你面朝北看地板时，屏幕上方(相对y)是指向北边(前方的地板)。
+            case DOWN -> switch (facing) {
+                case NORTH -> new Vec3i(x, -z, -y); // 面向北看地：右是东(+X)，上是北(-Z)
+                case SOUTH -> new Vec3i(-x, -z, y); // 面向南看地：右是西(-X)，上是南(+Z)
+                case EAST  -> new Vec3i(y, -z, x);  // 面向东看地：右是南(+Z)，上是东(+X)
+                case WEST  -> new Vec3i(-y, -z, -x);// 面向西看地：右是北(-Z)，上是西(-X)
+                default -> new Vec3i(x, -z, -y);
+            };
         };
     }
 
-    /**
-     * 获取挖掘范围（用于调试或显示）
-     *
-     * @return 挖掘范围列表
-     */
     public List<Vec3i> getMiningRange() {
         return this.miningRange;
     }
@@ -113,10 +139,12 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
             List<String> poses = MiscUtils.getAsStringList(arguments.get("range"));
             List<Vec3i> range = poses.stream().map(it -> {
                 String[] split = it.split(",", 3);
-                if (split.length != 3) {
+                if (split.length != 3) return null;
+                try {
+                    return new Vec3i(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+                } catch (NumberFormatException e) {
                     return null;
                 }
-                return new Vec3i(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
             }).filter(Objects::nonNull).toList();
             return new RangeMiningItemBehavior(range);
         }
