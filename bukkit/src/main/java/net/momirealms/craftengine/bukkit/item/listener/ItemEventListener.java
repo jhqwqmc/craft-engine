@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.item.listener;
 
 import io.papermc.paper.event.block.CompostItemEvent;
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.event.CustomBlockInteractEvent;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
@@ -189,11 +190,6 @@ public class ItemEventListener implements Listener {
                 boolean flag = player.isSneaking() && hasItem;
                 if (!flag) {
                     if (immutableBlockState.behavior() instanceof AbstractBlockBehavior behavior) {
-                        if (!BukkitCraftEngine.instance().antiGriefProvider().canInteract(player, block.getLocation())) {
-                            serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
-                            event.setCancelled(true);
-                            return;
-                        }
                         InteractionResult result = behavior.useOnBlock(useOnContext, immutableBlockState);
                         if (result.success()) {
                             serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());

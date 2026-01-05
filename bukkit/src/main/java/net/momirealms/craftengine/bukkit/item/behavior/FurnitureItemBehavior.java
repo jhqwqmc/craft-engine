@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.item.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.api.event.FurnitureAttemptPlaceEvent;
 import net.momirealms.craftengine.bukkit.api.event.FurniturePlaceEvent;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
@@ -158,7 +159,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
             }
         }
         // 检查其他插件兼容性
-        if (!BukkitCraftEngine.instance().antiGriefProvider().canPlace(bukkitPlayer, furnitureLocation)) {
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test(bukkitPlayer, Flag.PLACE, furnitureLocation)) {
             return InteractionResult.FAIL;
         }
         // 触发尝试放置的事件

@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
@@ -32,6 +33,7 @@ import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
@@ -273,7 +275,16 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
         if (!this.canOpenWithHand) {
             return InteractionResult.PASS;
         }
-        setOpen(context.getPlayer(), context.getLevel().serverWorld(), state, context.getClickedPos(), !state.get(this.openProperty));
+        Player player = context.getPlayer();
+        BlockPos pos = context.getClickedPos();
+        World world = context.getLevel();
+        if (player != null) {
+            Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+            if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.OPEN_DOOR, location)) {
+                return InteractionResult.SUCCESS_AND_CANCEL;
+            }
+        }
+        setOpen(player, world.serverWorld(), state, pos, !state.get(this.openProperty));
         return InteractionResult.SUCCESS_AND_CANCEL;
     }
 
