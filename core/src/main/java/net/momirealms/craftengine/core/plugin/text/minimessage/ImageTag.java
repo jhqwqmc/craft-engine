@@ -13,12 +13,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class ImageTag implements TagResolver {
+public final class ImageTag implements TagResolver {
     public static final ImageTag INSTANCE = new ImageTag();
 
-    public static ImageTag instance() {
-        return INSTANCE;
-    }
+    private ImageTag() {}
 
     @Override
     public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {

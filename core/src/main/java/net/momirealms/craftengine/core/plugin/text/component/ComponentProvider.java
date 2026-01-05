@@ -26,6 +26,10 @@ public sealed interface ComponentProvider extends Function<Context, Component>
         }
     }
 
+    static ComponentProvider miniMessage(String line) {
+        return new MiniMessage(line);
+    }
+
     static ComponentProvider l10n(String translationKey) {
         return new L10N(translationKey);
     }

@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.font;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
@@ -35,6 +36,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class AbstractFontManager implements FontManager {
+    private static final Set<String> NETWORK_TAGS = MiscUtils.init(new HashSet<>(), it -> {
+        it.add("image");
+        it.add("l10n");
+        it.add("shift");
+        it.add("global");
+        it.add("papi");
+    });
     private final CraftEngine plugin;
     // namespace:font font
     private final Map<Key, Font> fonts = new HashMap<>();
@@ -47,7 +55,6 @@ public abstract class AbstractFontManager implements FontManager {
     private final EmojiParser emojiParser;
     private OffsetFont offsetFont;
 
-    protected Trie networkTagTrie;
     protected Trie emojiKeywordTrie;
     protected Map<String, ComponentProvider> networkTagMapper;
     protected Map<String, Emoji> emojiMapper;
@@ -101,7 +108,6 @@ public abstract class AbstractFontManager implements FontManager {
         this.cachedImagesSuggestions.clear();
         this.illegalChars.clear();
         this.emojis.clear();
-        this.networkTagTrie = null;
         this.emojiKeywordTrie = null;
         if (this.networkTagMapper != null) {
             this.networkTagMapper.clear();
@@ -128,7 +134,7 @@ public abstract class AbstractFontManager implements FontManager {
         this.registerShiftTags();
         this.registerGlobalTags();
         this.registerL10nTags();
-        this.buildNetworkTagTrie();
+        // global shift l10n image
         this.buildEmojiKeywordsTrie();
         this.emojiList = new ArrayList<>(this.emojis.values());
         this.allEmojiSuggestions = this.emojis.values().stream()
@@ -140,7 +146,6 @@ public abstract class AbstractFontManager implements FontManager {
         for (String key : this.plugin.translationManager().translationKeys()) {
             String l10nTag = l10nTag(key);
             this.networkTagMapper.put(l10nTag, ComponentProvider.l10n(key));
-            this.networkTagMapper.put("\\" + l10nTag, ComponentProvider.constant(Component.text(l10nTag)));
         }
     }
 
@@ -148,7 +153,6 @@ public abstract class AbstractFontManager implements FontManager {
         for (Map.Entry<String, String> entry : this.plugin.globalVariableManager().globalVariables().entrySet()) {
             String globalTag = globalTag(entry.getKey());
             this.networkTagMapper.put(globalTag, ComponentProvider.miniMessageOrConstant(entry.getValue()));
-            this.networkTagMapper.put("\\" + globalTag, ComponentProvider.constant(Component.text(entry.getValue())));
         }
     }
 
@@ -157,7 +161,6 @@ public abstract class AbstractFontManager implements FontManager {
         for (int i = -256; i <= 256; i++) {
             String shiftTag = "<shift:" + i + ">";
             this.networkTagMapper.put(shiftTag, ComponentProvider.constant(this.offsetFont.createOffset(i)));
-            this.networkTagMapper.put("\\" + shiftTag, ComponentProvider.constant(Component.text(shiftTag)));
         }
     }
 
@@ -167,30 +170,46 @@ public abstract class AbstractFontManager implements FontManager {
             String id = key.toString();
             String simpleImageTag = imageTag(id);
             this.networkTagMapper.put(simpleImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
-            this.networkTagMapper.put("\\" + simpleImageTag, ComponentProvider.constant(Component.text(simpleImageTag)));
             String simplerImageTag = imageTag(key.value());
             this.networkTagMapper.put(simplerImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
-            this.networkTagMapper.put("\\" + simplerImageTag, ComponentProvider.constant(Component.text(simplerImageTag)));
             for (int i = 0; i < image.rows(); i++) {
                 for (int j = 0; j < image.columns(); j++) {
                     String imageArgs = id + ":" + i + ":" + j;
                     String imageTag = imageTag(imageArgs);
                     this.networkTagMapper.put(imageTag, ComponentProvider.constant(image.componentAt(i, j)));
-                    this.networkTagMapper.put("\\" + imageTag, ComponentProvider.constant(Component.text(imageTag)));
                 }
             }
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public Map<String, ComponentProvider> matchTags(String text) {
-        if (this.networkTagTrie == null) {
-            return Collections.emptyMap();
-        }
         Map<String, ComponentProvider> tags = new HashMap<>();
-        for (Token token : this.networkTagTrie.tokenize(text)) {
-            if (token.isMatch()) {
-                tags.put(token.getFragment(), this.networkTagMapper.get(token.getFragment()));
+        List<net.kyori.adventure.text.minimessage.internal.parser.Token> root = TokenParser.tokenize(text, true);
+        for (final net.kyori.adventure.text.minimessage.internal.parser.Token token : root) {
+            switch (token.type()) {
+                case TEXT: break;
+                case OPEN_TAG:
+                case CLOSE_TAG:
+                case OPEN_CLOSE_TAG:
+                    if (token.childTokens().isEmpty()) {
+                        continue;
+                    }
+                    final String sanitized = TokenParser.TagProvider.sanitizePlaceholderName(token.childTokens().getFirst().get(text).toString());
+                    if (NETWORK_TAGS.contains(sanitized)) {
+                        String tag = text.substring(token.startIndex(), token.endIndex());
+                        tags.computeIfAbsent(tag, k -> {
+                            ComponentProvider provider = this.networkTagMapper.get(k);
+                            if (provider != null) {
+                                return provider;
+                            }
+                            return ComponentProvider.miniMessage(k);
+                        });
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported token type " + token.type());
             }
         }
         return tags;
@@ -355,13 +374,6 @@ public abstract class AbstractFontManager implements FontManager {
         this.emojiKeywordTrie = Trie.builder()
                 .ignoreOverlaps()
                 .addKeywords(this.emojiMapper.keySet())
-                .build();
-    }
-
-    private void buildNetworkTagTrie() {
-        this.networkTagTrie = Trie.builder()
-                .ignoreOverlaps()
-                .addKeywords(this.networkTagMapper.keySet())
                 .build();
     }
 
