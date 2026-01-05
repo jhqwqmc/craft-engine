@@ -4393,7 +4393,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             if (Config.interceptEntityName()) {
                 boolean isChanged = false;
                 List<Object> packedItems = FastNMS.INSTANCE.method$ClientboundSetEntityDataPacket$unpack(buf);
-                for (int i = 0; i < packedItems.size(); i++) {
+                for (int i = packedItems.size() - 1; i >= 0; i--) {
                     Object packedItem = packedItems.get(i);
                     int entityDataId = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$id(packedItem);
                     if (entityDataId != BaseEntityData.CustomName.id()) continue;
