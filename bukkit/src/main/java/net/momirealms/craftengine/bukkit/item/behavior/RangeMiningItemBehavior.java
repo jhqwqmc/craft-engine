@@ -65,9 +65,9 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
                 BlockStateWrapper targetBlockState = world.getBlockState(targetPos);
 
                 if (targetBlockState != null && !targetBlockState.isAir()) {
-                    float targetHardness = player.getDestroyProgress(targetBlockState.literalObject(), targetPos);
+                    float targetProgress = player.getDestroyProgress(targetBlockState.literalObject(), targetPos);
                     // 只有当目标方块比原方块更“脆”或硬度相当时才挖掘
-                    if (targetHardness <= destroyProgress) {
+                    if (targetProgress >= destroyProgress) {
                         player.breakBlock(targetX, targetY, targetZ);
                     }
                 }
