@@ -1,5 +1,7 @@
-translations:
-  en:
+# All the configurations below use a localization system implemented based on the client-side resource pack.
+# https://xiao-momi.github.io/craft-engine-wiki/configuration/lang
+lang#items:
+  en_us:
     item.default.default.chinese_lantern: Chinese Lantern
     item.default.fairy_flower: Fairy Flower
     item.default.reed: Reed
@@ -56,14 +58,6 @@ translations:
     item.default.hami_melon_seeds: Hami Melon Seeds
     item.default.magma_fruit: Magma Fruit
     item.default.globe: Globe
-    category.default.name: Default Assets
-    category.default.lore: Contains the default configuration of CraftEngine
-    category.palm_tree: Palm Tree
-    category.topaz: Topaz
-    category.misc: Misc
-    emoji.tip: Use <yellow>'<arg:keyword>'</yellow> to send the '<arg:emoji>' emoji
-    emoji.time: '<bold>Current time: <papi:player_world_time_12></bold>'
-    emoji.location: '<bold>Current coordinates: <papi:player_x>,<papi:player_y>,<papi:player_z></bold>'
   zh_cn:
     item.default.chinese_lantern: 灯笼
     item.default.fairy_flower: 仙灵花
@@ -121,14 +115,6 @@ translations:
     item.default.hami_melon_seeds: 哈密瓜种子
     item.default.magma_fruit: 岩浆果实
     item.default.globe: 地球仪
-    category.default.name: 默认资产
-    category.default.lore: 包含了CraftEngine的默认配置
-    category.palm_tree: 棕榈树
-    category.topaz: 黄玉
-    category.misc: 杂项
-    emoji.tip: 使用<yellow>'<arg:keyword>'</yellow>来发送表情'<arg:emoji>'
-    emoji.time: '<bold>当前时间: <papi:player_world_time_12></bold>'
-    emoji.location: '<bold>当前坐标: <papi:player_x>,<papi:player_y>,<papi:player_z></bold>'
   fr_fr:
     item.default.chinese_lantern: Lanterne Chinoise
     item.default.fairy_flower: Fleur Fée
@@ -186,18 +172,8 @@ translations:
     item.default.hami_melon_seeds: Graines de Melon de Hami
     item.default.magma_fruit: Fruit de Magma
     item.default.globe: Globe
-    category.default.name: Ressources par Défaut
-    category.default.lore: Contient la configuration par défaut de CraftEngine
-    category.palm_tree: Palmier
-    category.topaz: Topaze
-    category.misc: Divers
-    emoji.tip: Utilisez <yellow>'<arg:keyword>'</yellow> pour envoyer l'emoji '<arg:emoji>'
-    emoji.time: '<bold>Heure actuelle: <papi:player_world_time_12></bold>'
-    emoji.location: '<bold>Coordonnées actuelles: <papi:player_x>,<papi:player_y>,<papi:player_z></bold>'
-# This section is for localizing internal block IDs (craftengine:xxx_xx).
-# Some other plugins support displaying block names using lang components.
-# This might be useful for the client-side, but it's not mandatory.
-lang:
+# Providing translations for blocks is particularly effective for plugins that retrieve server-side block translation keys.
+lang#blocks:
   en_us:
     block_name:default:chinese_lantern: Chinese Lantern
     block_name:default:netherite_anvil: Netherite Anvil
@@ -306,3 +282,16 @@ lang:
     block_name:default:hami_melon_stem: Tige de Melon de Hami
     block_name:default:attached_hami_melon_stem: Tige de Melon de Hami
     block_name:default:magma_plant: Plante de Magma
+# Translations for furniture are typically designed for the API.
+# If you are using a plugin that supports displaying furniture names, you will most likely need to configure the translations for the furniture.
+lang#furniture:
+  en_us:
+    furniture.default.bench: Bench
+    furniture.default.flower_basket: Flower Basket
+    furniture.default.globe: Globe
+    furniture.default.wooden_chair: Wooden Chair
+  zh_cn:
+    furniture.default.bench: 长椅
+    furniture.default.flower_basket: 花篮
+    furniture.default.globe: 地球仪
+    furniture.default.wooden_chair: 木椅

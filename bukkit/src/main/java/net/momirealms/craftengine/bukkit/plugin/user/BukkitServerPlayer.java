@@ -30,6 +30,7 @@ import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureHitData;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.GameMode;
@@ -174,10 +175,12 @@ public class BukkitServerPlayer extends Player {
     // 客户端发送了stop包，但是仍然在继续破坏且未发出start包
     // 这种情况下可能就会卡无限挖掘状态
     private int awfulBreakFixer;
-    // 用于修正与raytrace不统一的情况
-    private int awfulBreakCorrector;
     // 上一次停止挖掘包发出的时间
     private int preventBreakTick;
+    // 用于辨别是否在范围挖掘
+    private boolean isRangeMining;
+    // 家具击打记录
+    private final FurnitureHitData furnitureHitData = new FurnitureHitData();
     // 缓存的已接收的地图数据
     private final Cache<Object, Object> receivedMapData = CacheBuilder.newBuilder()
             .weakKeys()
@@ -1650,5 +1653,17 @@ public class BukkitServerPlayer extends Player {
 
     public Map<Integer, VirtualCullableObject> trackedFurniture() {
         return Collections.unmodifiableMap(this.trackedFurniture);
+    }
+
+    public boolean isRangeMining() {
+        return this.isRangeMining;
+    }
+
+    public void setRangeMining(boolean rangeMining) {
+        this.isRangeMining = rangeMining;
+    }
+
+    public FurnitureHitData furnitureHitData() {
+        return furnitureHitData;
     }
 }

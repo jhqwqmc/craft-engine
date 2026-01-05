@@ -2,7 +2,7 @@ items:
   default:safe_block:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.safe_block>
+      item-name: <!i><lang:item.default.safe_block>
     model: minecraft:block/custom/safe_block
     behavior:
       type: block_item
@@ -27,7 +27,7 @@ items:
             step: minecraft:block.stone.step
         behavior:
           type: simple_storage_block
-          title: "<l10n:item.safe_block>"
+          title: "<lang:item.safe_block>"
           rows: 1
           sounds:
             open: minecraft:block.iron_trapdoor.open

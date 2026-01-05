@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.font;
+package net.momirealms.craftengine.core.plugin.network;
 
 public record IllegalCharacterProcessResult(boolean has, String text) {
 

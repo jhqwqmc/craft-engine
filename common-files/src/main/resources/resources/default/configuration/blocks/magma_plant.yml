@@ -3,7 +3,7 @@ items:
     material: carrot
     texture: minecraft:item/custom/magma_fruit
     data:
-      item-name: <!i><white><l10n:item.default.magma_fruit>
+      item-name: <!i><white><lang:item.default.magma_fruit>
       $$>=1.20.5:
         food:
           nutrition: 3

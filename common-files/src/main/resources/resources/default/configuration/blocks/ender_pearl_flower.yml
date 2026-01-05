@@ -2,7 +2,7 @@ items:
   default:ender_pearl_flower_seeds:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.ender_pearl_flower_seeds>
+      item-name: <!i><lang:item.default.ender_pearl_flower_seeds>
     texture: minecraft:item/custom/ender_pearl_flower_seeds
     behavior:
       type: block_item

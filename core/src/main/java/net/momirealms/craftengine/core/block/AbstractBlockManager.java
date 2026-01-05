@@ -174,7 +174,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         return this.blockStateArranger;
     }
 
-    protected abstract void applyPlatformSettings(ImmutableBlockState state);
+    protected abstract void applyPlatformSettings(CustomBlock block, ImmutableBlockState state);
 
     @Override
     public ConfigParser[] parsers() {
@@ -698,7 +698,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         AbstractBlockManager.this.appearanceToRealState.computeIfAbsent(appearanceId, k -> new IntArrayList()).add(internalId);
                         AbstractBlockManager.this.tempVisualBlockStatesInUse.add(visualState);
                         AbstractBlockManager.this.tempVisualBlocksInUse.add(getBlockOwnerId(visualState));
-                        AbstractBlockManager.this.applyPlatformSettings(state);
+                        AbstractBlockManager.this.applyPlatformSettings(customBlock, state);
                         // generate mod assets
                         if (Config.generateModAssets()) {
                             AbstractBlockManager.this.modBlockStateOverrides.put(BlockManager.createCustomBlockKey(index), Optional.ofNullable(AbstractBlockManager.this.tempVanillaBlockStateModels[appearanceId])

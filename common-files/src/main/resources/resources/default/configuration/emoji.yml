@@ -1,6 +1,34 @@
+# The term "translation" here specifically refers to localization on the server-side.
+# This means that the content you write will not be directly included in the client-side resource pack.
+# The server will translate the keys you set and then send the already-localized text to the client.
+# https://xiao-momi.github.io/craft-engine-wiki/configuration/i18n
+translations:
+  en_us:
+    emoji.tip: Use <yellow>'<arg:0>'</yellow> to send the '<arg:1>' emoji
+  zh_cn:
+    emoji.tip: 使用<yellow>'<arg:0>'</yellow>来发送表情'<arg:1>'
+  fr_fr:
+    emoji.tip: Utilisez <yellow>'<arg:0>'</yellow> pour envoyer l'emoji '<arg:1>'
+
+# An emoji is always an image, but an image is not necessarily an emoji.
+# You need to configure the corresponding image for your emoji first. Here, I have configured a 4x4 bitmap for it.
+# https://xiao-momi.github.io/craft-engine-wiki/configuration/image
+images:
+  default:emojis:
+    height: 11
+    ascent: 9
+    font: minecraft:default # If your chat plugin supports custom font, better using a custom font here
+    file: minecraft:font/image/emojis.png
+    grid-size: 4,4
+
+# https://xiao-momi.github.io/craft-engine-wiki/reference/template
 templates:
   default:emoji/basic:
-    content: <hover:show_text:'<i18n:emoji.tip>'><!shadow><white><arg:emoji></white></!shadow></hover>
+    content: <hover:show_text:'<l10n:emoji.tip:"<arg:keyword>":"<arg:emoji>">'><!shadow><white><arg:emoji></white></!shadow></hover>
+
+# Here are the specific configurations for the emoji.
+# However, I have used templates in this section. If you would like to see the complete configuration, please refer to the wiki.
+# https://xiao-momi.github.io/craft-engine-wiki/configuration/emoji
 emoji:
   default:emoji_smiley:
     template: default:emoji/basic
@@ -116,10 +144,3 @@ emoji:
       permission: emoji.confounded
       keywords:
         - ':confounded:'
-images:
-  default:emojis:
-    height: 11
-    ascent: 9
-    font: minecraft:default # If your chat plugin supports custom font, better using a custom font here
-    file: minecraft:font/image/emojis.png
-    grid-size: 4,4

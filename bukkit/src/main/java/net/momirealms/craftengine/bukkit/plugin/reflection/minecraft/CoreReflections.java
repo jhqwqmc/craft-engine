@@ -1211,6 +1211,16 @@ public final class CoreReflections {
             ReflectionUtils.getDeclaredField(clazz$Block, clazz$StateDefinition, 0)
     );
 
+    public static final Field field$Block$descriptionId = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$Block, String.class, 0),
+            !VersionHelper.isOrAbove1_21_2()
+    );
+
+    public static final Field field$BlockBehaviour$descriptionId = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$BlockBehaviour, String.class, 0),
+            VersionHelper.isOrAbove1_21_2()
+    );
+
     public static final Field field$StateDefinition$states = requireNonNull(
             ReflectionUtils.getDeclaredField(clazz$StateDefinition, ImmutableList.class, 0)
     );

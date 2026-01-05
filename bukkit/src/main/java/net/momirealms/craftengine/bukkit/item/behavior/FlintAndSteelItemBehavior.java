@@ -28,10 +28,12 @@ import org.bukkit.inventory.ItemStack;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class FlintAndSteelItemBehavior extends ItemBehavior {
+public final class FlintAndSteelItemBehavior extends ItemBehavior {
     public static final FlintAndSteelItemBehavior INSTANCE = new FlintAndSteelItemBehavior();
     public static final ItemBehaviorFactory<FlintAndSteelItemBehavior> FACTORY = new Factory();
     private static final Key FLINT_SOUND = Key.of("item.flintandsteel.use");
+
+    private FlintAndSteelItemBehavior() {}
 
     @SuppressWarnings("unchecked")
     @Override

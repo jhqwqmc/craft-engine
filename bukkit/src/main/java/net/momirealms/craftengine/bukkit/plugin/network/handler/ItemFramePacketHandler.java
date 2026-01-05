@@ -18,7 +18,6 @@ import java.util.Optional;
 
 public class ItemFramePacketHandler implements EntityPacketHandler {
     public static final ItemFramePacketHandler INSTANCE = new ItemFramePacketHandler();
-    private static long LAST_WARN_TIME = 0;
 
     @Override
     public void handleSetEntityData(Player user, ByteBufPacketEvent event) {
@@ -27,24 +26,14 @@ public class ItemFramePacketHandler implements EntityPacketHandler {
         int id = buf.readVarInt();
         boolean changed = false;
         List<Object> packedItems = FastNMS.INSTANCE.method$ClientboundSetEntityDataPacket$unpack(buf);
-        for (int i = 0; i < packedItems.size(); i++) {
+        for (int i = packedItems.size() - 1; i >= 0; i--) {
             Object packedItem = packedItems.get(i);
             int entityDataId = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$id(packedItem);
             if (entityDataId != ItemFrameData.Item.id()) continue;
             Object nmsItemStack = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$value(packedItem);
-            if (!CoreReflections.clazz$ItemStack.isInstance(nmsItemStack)) {
-                long time = System.currentTimeMillis();
-                if (time - LAST_WARN_TIME > 5000) {
-                    BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
-                    CraftEngine.instance().logger().severe("An issue was detected while applying item-related entity data for '" + serverPlayer.name() +
-                            "'. Please execute the command '/ce debug entity-id " + serverPlayer.world().name() + " " + id + "' and provide a screenshot for further investigation.");
-                    LAST_WARN_TIME = time;
-                }
-                continue;
-            }
             ItemStack itemStack = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsItemStack);
             Optional<ItemStack> optional = BukkitItemManager.instance().s2c(itemStack, user);
-            if (optional.isEmpty()) continue;
+            if (optional.isEmpty()) break;
             changed = true;
             itemStack = optional.get();
             Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);

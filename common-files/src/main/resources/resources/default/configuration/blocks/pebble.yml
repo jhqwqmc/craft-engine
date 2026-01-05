@@ -2,7 +2,7 @@ items:
   default:pebble:
     material: nether_brick
     data:
-      item-name: <!i><l10n:item.default.pebble>
+      item-name: <!i><lang:item.default.pebble>
     texture: minecraft:item/custom/pebble
     behavior:
       - type: block_item
