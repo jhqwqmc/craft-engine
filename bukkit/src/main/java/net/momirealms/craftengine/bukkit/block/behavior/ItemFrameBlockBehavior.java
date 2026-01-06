@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
-import net.momirealms.craftengine.bukkit.block.entity.DisplayItemBlockEntity;
+import net.momirealms.craftengine.bukkit.block.entity.ItemFrameBlockEntity;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -27,46 +27,46 @@ import org.joml.Vector3f;
 import java.util.Map;
 import java.util.Optional;
 
-public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final BlockBehaviorFactory<DisplayItemBlockBehavior> FACTORY = new Factory();
+public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
+    public static final BlockBehaviorFactory<ItemFrameBlockBehavior> FACTORY = new Factory();
     public final Vector3f position;
-    public final boolean isGlow;
+    public final boolean glow;
     public final boolean invisible;
     public final boolean renderMapItem;
-    public final SoundData addItemSound;
-    public final SoundData removeItemSound;
-    public final SoundData rotateItemSound;
+    public final SoundData putSound;
+    public final SoundData takeSound;
+    public final SoundData rotateSound;
     public final Property<Direction> directionProperty;
 
-    public DisplayItemBlockBehavior(
+    public ItemFrameBlockBehavior(
             CustomBlock customBlock,
             Vector3f position,
-            boolean isGlow,
+            boolean glow,
             boolean invisible,
             boolean renderMapItem,
-            SoundData addItemSound,
-            SoundData removeItemSound,
-            SoundData rotateItemSound,
+            SoundData putSound,
+            SoundData takeSound,
+            SoundData rotateSound,
             Property<Direction> directionProperty) {
         super(customBlock);
         this.position = position;
-        this.isGlow = isGlow;
+        this.glow = glow;
         this.invisible = invisible;
         this.renderMapItem = renderMapItem;
-        this.addItemSound = addItemSound;
-        this.removeItemSound = removeItemSound;
-        this.rotateItemSound = rotateItemSound;
+        this.putSound = putSound;
+        this.takeSound = takeSound;
+        this.rotateSound = rotateSound;
         this.directionProperty = directionProperty;
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityType<T> blockEntityType(ImmutableBlockState state) {
-        return EntityBlockBehavior.blockEntityTypeHelper(BukkitBlockEntityTypes.DISPLAY_ITEM);
+        return EntityBlockBehavior.blockEntityTypeHelper(BukkitBlockEntityTypes.ITEM_FRAME);
     }
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, ImmutableBlockState state) {
-        return new DisplayItemBlockEntity(pos, state);
+        return new ItemFrameBlockEntity(pos, state);
     }
 
     @Override
@@ -76,13 +76,13 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
         World world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockEntity blockEntity = world.storageWorld().getBlockEntityAtIfLoaded(pos);
-        if (!(blockEntity instanceof DisplayItemBlockEntity itemDisplay && itemDisplay.isValid())) {
+        if (!(blockEntity instanceof ItemFrameBlockEntity itemDisplay && itemDisplay.isValid())) {
             return InteractionResult.PASS;
         }
         // 方块实体内部有物品的时候在shift时旋转
         if (player.isSecondaryUseActive() && !ItemUtils.isEmpty(itemDisplay.item())) {
             itemDisplay.rotation(itemDisplay.rotation() + 1);
-            playSound(world, pos, this.rotateItemSound);
+            playSound(world, pos, this.rotateSound);
             player.swingHand(context.getHand());
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
@@ -96,7 +96,7 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
             if (!player.canInstabuild()) {
                 player.setItemInHand(InteractionHand.MAIN_HAND, item); // 然后给玩家
             }
-            playSound(world, pos, this.removeItemSound);
+            playSound(world, pos, this.takeSound);
             player.swingHand(context.getHand());
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
@@ -109,7 +109,7 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
                 item.shrink(1); // 先扣物品
             }
             itemDisplay.updateItem(copied); // 然后放进去
-            playSound(world, pos, this.addItemSound);
+            playSound(world, pos, this.putSound);
             player.swingHand(context.getHand());
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
@@ -122,26 +122,26 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
         world.playBlockSound(location, soundData);
     }
 
-    private static class Factory implements BlockBehaviorFactory<DisplayItemBlockBehavior> {
+    private static class Factory implements BlockBehaviorFactory<ItemFrameBlockBehavior> {
 
         @Override
-        public DisplayItemBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ItemFrameBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             @SuppressWarnings("unchecked")
-            Property<Direction> directionProperty = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.display_item.missing_facing");
+            Property<Direction> directionProperty = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.item_frame.missing_facing");
             Vector3f position = ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0), "position");
-            boolean isGlow = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-glow", false), "is-glow");
+            boolean glow = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("glow", false), "glow");
             boolean invisible = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("invisible", false), "invisible");
             boolean renderMapItem = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("render-map-item", true), "render-map-item"); // 地图渲染有少量开销可选启用
             Map<String, Object> sounds = ResourceConfigUtils.getAsMapOrNull(arguments.get("sounds"), "sounds");
-            SoundData addItemSound = null;
-            SoundData removeItemSound = null;
-            SoundData rotateItemSound = null;
+            SoundData putSound = null;
+            SoundData takeSound = null;
+            SoundData rotateSound = null;
             if (sounds != null) {
-                addItemSound = Optional.ofNullable(sounds.get("add-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
-                removeItemSound = Optional.ofNullable(sounds.get("remove-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
-                rotateItemSound = Optional.ofNullable(sounds.get("rotate-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
+                putSound = Optional.ofNullable(sounds.get("put")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
+                takeSound = Optional.ofNullable(sounds.get("take")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
+                rotateSound = Optional.ofNullable(sounds.get("rotate")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
             }
-            return new DisplayItemBlockBehavior(block, position, isGlow, invisible, renderMapItem, addItemSound, removeItemSound, rotateItemSound, directionProperty);
+            return new ItemFrameBlockBehavior(block, position, glow, invisible, renderMapItem, putSound, takeSound, rotateSound, directionProperty);
         }
     }
 }

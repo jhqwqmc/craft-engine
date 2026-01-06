@@ -12,5 +12,5 @@ public final class BlockEntityTypeKeys {
     public static final Key SIMPLE_PARTICLE = Key.ce("simple_particle");
     public static final Key WALL_TORCH_PARTICLE = Key.ce("wall_torch_particle");
     public static final Key SEAT = Key.ce("seat");
-    public static final Key DISPLAY_ITEM = Key.ce("display_item");
+    public static final Key ITEM_FRAME = Key.ce("item_frame");
 }

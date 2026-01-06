@@ -2,7 +2,7 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer;
 
 import com.google.common.cache.Cache;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.momirealms.craftengine.bukkit.block.entity.DisplayItemBlockEntity;
+import net.momirealms.craftengine.bukkit.block.entity.ItemFrameBlockEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
@@ -17,19 +17,19 @@ import org.joml.Vector3f;
 import java.util.UUID;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
-    public final DisplayItemBlockEntity blockEntity;
+    public final ItemFrameBlockEntity blockEntity;
     public final Object cachedSpawnPacket;
     public final Object cachedDespawnPacket;
     public final int entityId;
 
-    public DynamicItemFrameRenderer(DisplayItemBlockEntity blockEntity, BlockPos pos) {
+    public DynamicItemFrameRenderer(ItemFrameBlockEntity blockEntity, BlockPos pos) {
         this.entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         this.blockEntity = blockEntity;
         Vector3f position = this.blockEntity.behavior.position;
         Direction direction = blockEntity.blockState().get(blockEntity.behavior.directionProperty);
         this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                 this.entityId, UUID.randomUUID(), pos.x() + position.x, pos.y() + position.y, pos.z() + position.z,
-                0, 0, this.blockEntity.behavior.isGlow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME,
+                0, 0, this.blockEntity.behavior.glow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME,
                 direction.ordinal(), CoreReflections.instance$Vec3$Zero, 0
         );
         this.cachedDespawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(IntList.of(entityId));

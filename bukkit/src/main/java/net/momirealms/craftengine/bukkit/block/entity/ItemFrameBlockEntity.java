@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
-import net.momirealms.craftengine.bukkit.block.behavior.DisplayItemBlockBehavior;
+import net.momirealms.craftengine.bukkit.block.behavior.ItemFrameBlockBehavior;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
 import net.momirealms.craftengine.bukkit.entity.data.ItemFrameData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
@@ -28,17 +28,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DisplayItemBlockEntity extends BlockEntity {
-    public final DisplayItemBlockBehavior behavior;
+public class ItemFrameBlockEntity extends BlockEntity {
+    public final ItemFrameBlockBehavior behavior;
     private int rotation = 0;
     private @NotNull Item<ItemStack> item = BukkitItemManager.instance().uniqueEmptyItem().item();
     private @NotNull List<Object> cacheMetadata = List.of();
     private @Nullable Object mapId;
     private @Nullable Object mapItemSavedData;
 
-    public DisplayItemBlockEntity(BlockPos pos, ImmutableBlockState blockState) {
-        super(BukkitBlockEntityTypes.DISPLAY_ITEM, pos, blockState);
-        this.behavior = blockState.behavior().getAs(DisplayItemBlockBehavior.class).orElseThrow();
+    public ItemFrameBlockEntity(BlockPos pos, ImmutableBlockState blockState) {
+        super(BukkitBlockEntityTypes.ITEM_FRAME, pos, blockState);
+        this.behavior = blockState.behavior().getAs(ItemFrameBlockBehavior.class).orElseThrow();
         super.blockEntityRenderer = new DynamicItemFrameRenderer(this, super.pos);
         this.updateMetadata();
     }
