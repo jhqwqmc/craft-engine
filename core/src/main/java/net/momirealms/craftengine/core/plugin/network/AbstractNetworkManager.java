@@ -87,6 +87,8 @@ public abstract class AbstractNetworkManager implements NetworkManager {
             this.networkTagMapper.put(simplerImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
             if (image instanceof BitmapImage bitmapImage) {
                 for (int i = 0; i < bitmapImage.rows(); i++) {
+                    String partialArgs = id + ":" + i;
+                    this.networkTagMapper.put(imageTag(partialArgs), ComponentProvider.constant(image.componentAt(i, 0)));
                     for (int j = 0; j < bitmapImage.columns(); j++) {
                         String imageArgs = id + ":" + i + ":" + j;
                         String imageTag = imageTag(imageArgs);

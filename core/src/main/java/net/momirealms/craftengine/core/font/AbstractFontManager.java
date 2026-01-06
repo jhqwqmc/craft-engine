@@ -102,6 +102,7 @@ public abstract class AbstractFontManager implements FontManager {
         this.fonts.clear();
         this.bitmapImages.clear();
         this.images.clear();
+        this.imagesByValue.clear();
         this.cachedImagesSuggestions.clear();
         this.illegalChars.clear();
         this.emojis.clear();
