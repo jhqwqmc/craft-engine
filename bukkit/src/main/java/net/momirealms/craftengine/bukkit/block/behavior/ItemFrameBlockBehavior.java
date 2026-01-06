@@ -1,7 +1,9 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.ItemFrameBlockEntity;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -21,6 +23,7 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector3f;
 
@@ -78,6 +81,10 @@ public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements Entit
         BlockEntity blockEntity = world.storageWorld().getBlockEntityAtIfLoaded(pos);
         if (!(blockEntity instanceof ItemFrameBlockEntity itemFrame && itemFrame.isValid())) {
             return InteractionResult.PASS;
+        }
+        Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+            return InteractionResult.SUCCESS_AND_CANCEL;
         }
         // 方块实体内部有物品的时候在shift时旋转
         if (player.isSecondaryUseActive() && !ItemUtils.isEmpty(itemFrame.item())) {
