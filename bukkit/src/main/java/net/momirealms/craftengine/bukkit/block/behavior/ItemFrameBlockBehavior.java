@@ -83,7 +83,7 @@ public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements Entit
             return InteractionResult.PASS;
         }
         Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
-        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.OPEN_CONTAINER, location)) {
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
         // 方块实体内部有物品的时候在shift时旋转
