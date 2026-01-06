@@ -24,7 +24,7 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ItemSettings {
+public final class ItemSettings {
     int fuelTime;
     Set<Key> tags = Set.of();
     Repairable repairable = Repairable.UNDEFINED;
@@ -54,10 +54,11 @@ public class ItemSettings {
     String dropDisplay = Config.defaultDropDisplayFormat();
     @Nullable
     LegacyChatFormatter glowColor = null;
-    Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
+    Map<CustomItemSettingType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private ItemSettings() {}
 
+    @SuppressWarnings("unchecked")
     public List<ItemProcessor> processors() {
         ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
@@ -72,15 +73,24 @@ public class ItemSettings {
         if (VersionHelper.isOrAbove1_20_5() && this.foodData != null) {
             processors.add(new FoodProcessor(this.foodData.nutrition(), this.foodData.saturation(), false));
         }
+        for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
+            CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
+            type.dataProcessor().accept(entry.getValue(), processors::add);
+        }
         return processors;
     }
 
+    @SuppressWarnings("unchecked")
     public List<ItemProcessor> clientBoundProcessors() {
         ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
             if (this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
                 processors.addAll(this.equipment.equipment().modifiers());
             }
+        }
+        for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
+            CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
+            type.clientBoundDataProcessor().accept(entry.getValue(), processors::add);
         }
         return processors;
     }
@@ -137,7 +147,7 @@ public class ItemSettings {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getCustomData(CustomDataType<T> type) {
+    public <T> T getCustomData(CustomItemSettingType<T> type) {
         return (T) this.customData.get(type);
     }
 
@@ -147,11 +157,11 @@ public class ItemSettings {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T> T removeCustomData(CustomDataType<?> type) {
+    public <T> T removeCustomData(CustomItemSettingType<?> type) {
         return (T) this.customData.remove(type);
     }
 
-    public <T> void addCustomData(CustomDataType<T> key, T value) {
+    public <T> void addCustomData(CustomItemSettingType<T> key, T value) {
         this.customData.put(key, value);
     }
 
