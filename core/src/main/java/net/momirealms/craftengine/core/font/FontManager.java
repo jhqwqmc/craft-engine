@@ -42,8 +42,6 @@ public interface FontManager extends Manageable {
 
     OffsetFont offsetFont();
 
-    Map<Key, BitmapImage> loadedImages();
-
     Map<Key, Emoji> emojis();
 
     ConfigParser[] parsers();
@@ -66,13 +64,19 @@ public interface FontManager extends Manageable {
 
     Collection<Font> fonts();
 
+    Map<Key, BitmapImage> loadedBitmapImages();
+
+    Map<Key, Image> loadedImages();
+
     Optional<BitmapImage> bitmapImageByCodepoint(Key font, int codepoint);
 
     default Optional<BitmapImage> bitmapImageByChars(Key font, char[] chars) {
         return bitmapImageByCodepoint(font, CharacterUtils.charsToCodePoint(chars));
     }
 
-    Optional<BitmapImage> bitmapImageByImageId(Key imageId);
+    Optional<BitmapImage> bitmapImageById(Key imageId);
+
+    Optional<Image> imageById(Key id);
 
     Optional<Font> fontById(Key font);
 

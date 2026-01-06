@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.plugin.network;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
 import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.momirealms.craftengine.core.font.BitmapImage;
+import net.momirealms.craftengine.core.font.Image;
 import net.momirealms.craftengine.core.font.OffsetFont;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
@@ -77,18 +78,20 @@ public abstract class AbstractNetworkManager implements NetworkManager {
     }
 
     private void registerImageTags() {
-        for (BitmapImage image : this.plugin.fontManager().loadedImages().values()) {
+        for (Image image : this.plugin.fontManager().loadedImages().values()) {
             Key key = image.id();
             String id = key.toString();
             String simpleImageTag = imageTag(id);
             this.networkTagMapper.put(simpleImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
             String simplerImageTag = imageTag(key.value());
             this.networkTagMapper.put(simplerImageTag, ComponentProvider.constant(image.componentAt(0, 0)));
-            for (int i = 0; i < image.rows(); i++) {
-                for (int j = 0; j < image.columns(); j++) {
-                    String imageArgs = id + ":" + i + ":" + j;
-                    String imageTag = imageTag(imageArgs);
-                    this.networkTagMapper.put(imageTag, ComponentProvider.constant(image.componentAt(i, j)));
+            if (image instanceof BitmapImage bitmapImage) {
+                for (int i = 0; i < bitmapImage.rows(); i++) {
+                    for (int j = 0; j < bitmapImage.columns(); j++) {
+                        String imageArgs = id + ":" + i + ":" + j;
+                        String imageTag = imageTag(imageArgs);
+                        this.networkTagMapper.put(imageTag, ComponentProvider.constant(image.componentAt(i, j)));
+                    }
                 }
             }
         }

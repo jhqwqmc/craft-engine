@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.bukkit.item.listener;
 
 import io.papermc.paper.event.block.CompostItemEvent;
-import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.event.CustomBlockInteractEvent;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;

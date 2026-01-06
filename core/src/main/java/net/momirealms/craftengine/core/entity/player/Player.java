@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.MutableBoolean;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import org.jetbrains.annotations.NotNull;

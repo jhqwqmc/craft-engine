@@ -40,7 +40,9 @@ public abstract class AbstractFontManager implements FontManager {
     // namespace:id emoji
     private final Map<Key, Emoji> emojis = new HashMap<>();
     // namespace:id image
-    private final Map<Key, BitmapImage> images = new HashMap<>();
+    private final Map<Key, BitmapImage> bitmapImages = new HashMap<>();
+    private final Map<Key, Image> images = new HashMap<>();
+    private final Map<String, Image> imagesByValue = new HashMap<>();
     private final Set<Integer> illegalChars = new HashSet<>();
     private final ImageParser imageParser;
     private final EmojiParser emojiParser;
@@ -77,11 +79,16 @@ public abstract class AbstractFontManager implements FontManager {
 
     @Override
     public OffsetFont offsetFont() {
-        return offsetFont;
+        return this.offsetFont;
     }
 
     @Override
-    public Map<Key, BitmapImage> loadedImages() {
+    public Map<Key, BitmapImage> loadedBitmapImages() {
+        return Collections.unmodifiableMap(this.bitmapImages);
+    }
+
+    @Override
+    public Map<Key, Image> loadedImages() {
         return Collections.unmodifiableMap(this.images);
     }
 
@@ -93,6 +100,7 @@ public abstract class AbstractFontManager implements FontManager {
     @Override
     public void unload() {
         this.fonts.clear();
+        this.bitmapImages.clear();
         this.images.clear();
         this.cachedImagesSuggestions.clear();
         this.illegalChars.clear();
@@ -270,13 +278,22 @@ public abstract class AbstractFontManager implements FontManager {
     }
 
     @Override
-    public Optional<BitmapImage> bitmapImageByImageId(Key id) {
+    public Optional<BitmapImage> bitmapImageById(Key id) {
+        return Optional.ofNullable(this.bitmapImages.get(id));
+    }
+
+    @Override
+    public Optional<Image> imageById(Key id) {
         return Optional.ofNullable(this.images.get(id));
+    }
+
+    public Optional<Image> imageByIdValue(String value) {
+        return Optional.ofNullable(this.imagesByValue.get(value));
     }
 
     @Override
     public int codepointByImageId(Key key, int x, int y) {
-        BitmapImage image = this.images.get(key);
+        Image image = this.images.get(key);
         if (image == null) return -1;
         return image.codepointAt(x, y);
     }
@@ -345,16 +362,16 @@ public abstract class AbstractFontManager implements FontManager {
                 String[] split = rawImage.split(":");
                 if (split.length == 2) {
                     Key imageId = new Key(split[0], split[1]);
-                    Optional<BitmapImage> bitmapImage = bitmapImageByImageId(imageId);
-                    if (bitmapImage.isPresent()) {
+                    Optional<Image> bitmapImage = imageById(imageId);
+                    if (bitmapImage.isPresent() && bitmapImage.get() != DummyImage.INSTANCE) {
                         image = bitmapImage.get().miniMessageAt(0, 0);
                     } else {
                         throw new LocalizedResourceConfigException("warning.config.emoji.invalid_image", rawImage);
                     }
                 } else if (split.length == 4) {
                     Key imageId = new Key(split[0], split[1]);
-                    Optional<BitmapImage> bitmapImage = bitmapImageByImageId(imageId);
-                    if (bitmapImage.isPresent()) {
+                    Optional<Image> bitmapImage = imageById(imageId);
+                    if (bitmapImage.isPresent() && bitmapImage.get() != DummyImage.INSTANCE) {
                         try {
                             image = bitmapImage.get().miniMessageAt(Integer.parseInt(split[2]), Integer.parseInt(split[3]));
                         } catch (ArrayIndexOutOfBoundsException e) {
@@ -368,7 +385,7 @@ public abstract class AbstractFontManager implements FontManager {
                 }
             }
             Emoji emoji = new Emoji(content, permission, image, keywords);
-            emojis.put(id, emoji);
+            AbstractFontManager.this.emojis.put(id, emoji);
         }
     }
 
@@ -388,7 +405,7 @@ public abstract class AbstractFontManager implements FontManager {
 
         @Override
         public int count() {
-            return AbstractFontManager.this.images.size();
+            return AbstractFontManager.this.bitmapImages.size();
         }
 
         @Override
@@ -423,8 +440,59 @@ public abstract class AbstractFontManager implements FontManager {
 
         @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
-            if (AbstractFontManager.this.images.containsKey(id)) {
+            if (AbstractFontManager.this.bitmapImages.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.image.duplicate");
+            }
+
+            // 引用类型的
+            Object ref = section.get("ref");
+            boolean special = false;
+            if (ref != null) {
+                String rawRef = ref.toString();
+                String[] param = rawRef.split(":", 4);
+                int row;
+                int col;
+                Key refId;
+                if (param.length == 4) {
+                    row = Integer.parseInt(param[2]);
+                    col = Integer.parseInt(param[3]);
+                    refId = Key.of(param[0], param[1]);
+                } else if (param.length == 3) {
+                    row = Integer.parseInt(param[2]);
+                    col = 0;
+                    refId = Key.of(param[0], param[1]);
+                } else {
+                    row = ResourceConfigUtils.getAsInt(section.get("row"), "row");
+                    col = ResourceConfigUtils.getAsInt(section.get("column"), "column");
+                    if (param.length == 1) {
+                        refId = Key.of(param[0]);
+                        special = true;
+                    } else {
+                        refId = Key.of(param[0], param[1]);
+                    }
+                }
+                ReferenceImage referenceImage;
+                if (special) {
+                    referenceImage = new ReferenceImage(LazyReference.lazyReference(() -> {
+                        Image image = AbstractFontManager.this.imagesByValue.get(refId.value());
+                        if (image instanceof BitmapImage bitmapImage) {
+                            return bitmapImage;
+                        }
+                        return DummyImage.INSTANCE;
+                    }), row, col);
+                } else {
+                    referenceImage = new ReferenceImage(LazyReference.lazyReference(() -> {
+                        Optional<BitmapImage> bitmapImage = bitmapImageById(refId);
+                        if (bitmapImage.isPresent()) {
+                            return bitmapImage.get();
+                        }
+                        return DummyImage.INSTANCE;
+                    }), row, col);
+                }
+                AbstractFontManager.this.images.put(id, referenceImage);
+                AbstractFontManager.this.imagesByValue.put(id.value(), referenceImage);
+                AbstractFontManager.this.cachedImagesSuggestions.add(Suggestion.suggestion(id.asString()));
+                return;
             }
 
             Object file = section.get("file");
@@ -602,7 +670,9 @@ public abstract class AbstractFontManager implements FontManager {
                     }
                 }
 
+                AbstractFontManager.this.bitmapImages.put(id, bitmapImage);
                 AbstractFontManager.this.images.put(id, bitmapImage);
+                AbstractFontManager.this.imagesByValue.put(id.value(), bitmapImage);
                 AbstractFontManager.this.cachedImagesSuggestions.add(Suggestion.suggestion(id.asString()));
 
             }, () -> GsonHelper.get().toJson(section)));
