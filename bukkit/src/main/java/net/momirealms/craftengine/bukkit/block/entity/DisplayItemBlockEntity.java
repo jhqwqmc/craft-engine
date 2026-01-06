@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
-import net.momirealms.craftengine.bukkit.block.behavior.ItemDisplayBlockBehavior;
+import net.momirealms.craftengine.bukkit.block.behavior.DisplayItemBlockBehavior;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
 import net.momirealms.craftengine.bukkit.entity.data.ItemFrameData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
@@ -28,41 +28,41 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemDisplayBlockEntity extends BlockEntity {
+public class DisplayItemBlockEntity extends BlockEntity {
     public final DynamicItemFrameRenderer.Config config;
-    public final ItemDisplayBlockBehavior behavior;
+    public final DisplayItemBlockBehavior behavior;
     private int rotation = 0;
     private @NotNull Item<ItemStack> item = BukkitItemManager.instance().uniqueEmptyItem().item();
     private @NotNull List<Object> cacheMetadata = List.of();
     private @Nullable Object mapId;
     private @Nullable Object mapItemSavedData;
 
-    public ItemDisplayBlockEntity(BlockPos pos, ImmutableBlockState blockState, DynamicItemFrameRenderer.Config config) {
-        super(BukkitBlockEntityTypes.ITEM_DISPLAY, pos, blockState);
+    public DisplayItemBlockEntity(BlockPos pos, ImmutableBlockState blockState, DynamicItemFrameRenderer.Config config) {
+        super(BukkitBlockEntityTypes.DISPLAY_ITEM, pos, blockState);
         this.config = config;
-        this.behavior = blockState.behavior().getAs(ItemDisplayBlockBehavior.class).orElseThrow();
+        this.behavior = blockState.behavior().getAs(DisplayItemBlockBehavior.class).orElseThrow();
         super.blockEntityRenderer = new DynamicItemFrameRenderer(this, super.pos);
         this.updateMetadata();
     }
 
     @Override
     protected void saveCustomData(CompoundTag tag) {
-        tag.putInt("Rotation", this.rotation);
+        tag.putInt("rotation", this.rotation);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
         if (VersionHelper.isOrAbove1_20_5()) {
             CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, item.getLiteralObject())
-                    .ifSuccess(success -> tag.put("Item", success))
+                    .ifSuccess(success -> tag.put("item", success))
                     .ifError(error -> CraftEngine.instance().logger().severe("Error while saving item: " + error));
         } else {
             Object nmsTag = FastNMS.INSTANCE.method$itemStack$save(item.getLiteralObject(), FastNMS.INSTANCE.constructor$CompoundTag());
-            tag.put("Item", MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, nmsTag));
+            tag.put("item", MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, nmsTag));
         }
     }
 
     @Override
     public void loadCustomData(CompoundTag tag) {
-        this.rotation = tag.getInt("Rotation");
-        Tag itemTag = tag.get("Item");
+        this.rotation = tag.getInt("rotation");
+        Tag itemTag = tag.get("item");
         if (itemTag == null) return;
         if (VersionHelper.isOrAbove1_20_5()) {
             CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, itemTag)

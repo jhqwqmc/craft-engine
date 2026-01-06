@@ -2,7 +2,7 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer;
 
 import com.google.common.cache.Cache;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.momirealms.craftengine.bukkit.block.entity.ItemDisplayBlockEntity;
+import net.momirealms.craftengine.bukkit.block.entity.DisplayItemBlockEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
@@ -17,13 +17,13 @@ import org.joml.Vector3f;
 import java.util.UUID;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
-    public final ItemDisplayBlockEntity blockEntity;
+    public final DisplayItemBlockEntity blockEntity;
     public final Config config;
     public final Object cachedSpawnPacket;
     public final Object cachedDespawnPacket;
     public final int entityId;
 
-    public DynamicItemFrameRenderer(ItemDisplayBlockEntity blockEntity, BlockPos pos) {
+    public DynamicItemFrameRenderer(DisplayItemBlockEntity blockEntity, BlockPos pos) {
         this.entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         this.blockEntity = blockEntity;
         this.config = blockEntity.config;

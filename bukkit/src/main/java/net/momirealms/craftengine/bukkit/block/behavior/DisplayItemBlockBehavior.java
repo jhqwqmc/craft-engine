@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
-import net.momirealms.craftengine.bukkit.block.entity.ItemDisplayBlockEntity;
+import net.momirealms.craftengine.bukkit.block.entity.DisplayItemBlockEntity;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -27,15 +27,15 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Map;
 import java.util.Optional;
 
-public class ItemDisplayBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final BlockBehaviorFactory<ItemDisplayBlockBehavior> FACTORY = new Factory();
+public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
+    public static final BlockBehaviorFactory<DisplayItemBlockBehavior> FACTORY = new Factory();
     public final DynamicItemFrameRenderer.Config config;
     public final SoundData addItemSound;
     public final SoundData removeItemSound;
     public final SoundData rotateItemSound;
     public final Property<Direction> directionProperty;
 
-    public ItemDisplayBlockBehavior(
+    public DisplayItemBlockBehavior(
             CustomBlock customBlock,
             DynamicItemFrameRenderer.Config config,
             SoundData addItemSound,
@@ -52,12 +52,12 @@ public class ItemDisplayBlockBehavior extends BukkitBlockBehavior implements Ent
 
     @Override
     public <T extends BlockEntity> BlockEntityType<T> blockEntityType(ImmutableBlockState state) {
-        return EntityBlockBehavior.blockEntityTypeHelper(BukkitBlockEntityTypes.ITEM_DISPLAY);
+        return EntityBlockBehavior.blockEntityTypeHelper(BukkitBlockEntityTypes.DISPLAY_ITEM);
     }
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, ImmutableBlockState state) {
-        return new ItemDisplayBlockEntity(pos, state, this.config);
+        return new DisplayItemBlockEntity(pos, state, this.config);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ItemDisplayBlockBehavior extends BukkitBlockBehavior implements Ent
         World world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockEntity blockEntity = world.storageWorld().getBlockEntityAtIfLoaded(pos);
-        if (!(blockEntity instanceof ItemDisplayBlockEntity itemDisplay && itemDisplay.isValid())) {
+        if (!(blockEntity instanceof DisplayItemBlockEntity itemDisplay && itemDisplay.isValid())) {
             return InteractionResult.PASS;
         }
         // 方块实体内部有物品的时候在shift时旋转
@@ -113,12 +113,12 @@ public class ItemDisplayBlockBehavior extends BukkitBlockBehavior implements Ent
         world.playBlockSound(location, soundData);
     }
 
-    private static class Factory implements BlockBehaviorFactory<ItemDisplayBlockBehavior> {
+    private static class Factory implements BlockBehaviorFactory<DisplayItemBlockBehavior> {
 
         @Override
-        public ItemDisplayBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public DisplayItemBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             @SuppressWarnings("unchecked")
-            Property<Direction> directionProperty = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.item_display.missing_facing");
+            Property<Direction> directionProperty = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.display_item.missing_facing");
             DynamicItemFrameRenderer.Config config = new DynamicItemFrameRenderer.Config(
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0), "position"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-glow", false), "is-glow"),
@@ -134,7 +134,7 @@ public class ItemDisplayBlockBehavior extends BukkitBlockBehavior implements Ent
                 removeItemSound = Optional.ofNullable(sounds.get("remove-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
                 rotateItemSound = Optional.ofNullable(sounds.get("rotate-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
             }
-            return new ItemDisplayBlockBehavior(block, config, addItemSound, removeItemSound, rotateItemSound, directionProperty);
+            return new DisplayItemBlockBehavior(block, config, addItemSound, removeItemSound, rotateItemSound, directionProperty);
         }
     }
 }
