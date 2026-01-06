@@ -76,23 +76,23 @@ public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements Entit
         World world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockEntity blockEntity = world.storageWorld().getBlockEntityAtIfLoaded(pos);
-        if (!(blockEntity instanceof ItemFrameBlockEntity itemDisplay && itemDisplay.isValid())) {
+        if (!(blockEntity instanceof ItemFrameBlockEntity itemFrame && itemFrame.isValid())) {
             return InteractionResult.PASS;
         }
         // 方块实体内部有物品的时候在shift时旋转
-        if (player.isSecondaryUseActive() && !ItemUtils.isEmpty(itemDisplay.item())) {
-            itemDisplay.rotation(itemDisplay.rotation() + 1);
+        if (player.isSecondaryUseActive() && !ItemUtils.isEmpty(itemFrame.item())) {
+            itemFrame.rotation(itemFrame.rotation() + 1);
             playSound(world, pos, this.rotateSound);
             player.swingHand(context.getHand());
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
         // 当主手为空的时候右键取下
         if (context.getHand() == InteractionHand.MAIN_HAND && ItemUtils.isEmpty(context.getItem())) {
-            Item<ItemStack> item = itemDisplay.item();
+            Item<ItemStack> item = itemFrame.item();
             if (ItemUtils.isEmpty(item)) { // 空的不管
                 return InteractionResult.SUCCESS_AND_CANCEL;
             }
-            itemDisplay.updateItem(null); // 先取出来
+            itemFrame.updateItem(null); // 先取出来
             if (!player.canInstabuild()) {
                 player.setItemInHand(InteractionHand.MAIN_HAND, item); // 然后给玩家
             }
@@ -101,14 +101,14 @@ public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements Entit
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
         // 当方块实体内部没有物品切换手上物品不为空则放入
-        if (ItemUtils.isEmpty(itemDisplay.item()) && !ItemUtils.isEmpty(context.getItem())) {
+        if (ItemUtils.isEmpty(itemFrame.item()) && !ItemUtils.isEmpty(context.getItem())) {
             @SuppressWarnings("unchecked")
             Item<ItemStack> item = (Item<ItemStack>) context.getItem();
             Item<ItemStack> copied = item.copyWithCount(1);
             if (!player.canInstabuild()) {
                 item.shrink(1); // 先扣物品
             }
-            itemDisplay.updateItem(copied); // 然后放进去
+            itemFrame.updateItem(copied); // 然后放进去
             playSound(world, pos, this.putSound);
             player.swingHand(context.getHand());
             return InteractionResult.SUCCESS_AND_CANCEL;
