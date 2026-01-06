@@ -117,10 +117,10 @@ public class ItemFrameBlockEntity extends BlockEntity {
     }
 
     private void update() {
+        super.world.blockEntityChanged(this.pos);
+        if (super.blockEntityRenderer == null) return;
         CEChunk chunk = super.world.getChunkAtIfLoaded(super.pos.x >> 4, super.pos.z >> 4);
         if (chunk == null) return;
-        chunk.setDirty(true); // 一定要标记脏数据不然不会保存
-        if (super.blockEntityRenderer == null) return;
         this.updateMetadata();
         for (Player player : chunk.getTrackedBy()) {
             super.blockEntityRenderer.update(player);

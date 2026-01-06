@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.chunk.CEChunk;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
 import org.bukkit.GameEvent;
@@ -172,6 +173,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     }
 
     public void updateOpenBlockState(boolean open) {
+        super.world.blockEntityChanged(this.pos);
         ImmutableBlockState state = super.world.getBlockStateAtIfLoaded(this.pos);
         if (state == null) return;
         SimpleStorageBlockBehavior behavior = state.behavior().getAs(SimpleStorageBlockBehavior.class).orElse(null);
