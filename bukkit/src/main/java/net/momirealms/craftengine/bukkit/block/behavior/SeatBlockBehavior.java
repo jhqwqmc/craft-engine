@@ -1,7 +1,9 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.SeatBlockEntity;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -15,7 +17,9 @@ import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
+import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
 
 import java.util.Map;
 
@@ -50,9 +54,15 @@ public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBloc
         if (player == null || player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         }
+        BlockPos pos = context.getClickedPos();
+        World level = context.getLevel();
+        Location location = new Location((org.bukkit.World) level.platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test(player.platformPlayer(), Flag.INTERACT, location)) {
+            return InteractionResult.SUCCESS_AND_CANCEL;
+        }
         player.swingHand(context.getHand());
         CEWorld world = context.getLevel().storageWorld();
-        BlockEntity blockEntity = world.getBlockEntityAtIfLoaded(context.getClickedPos());
+        BlockEntity blockEntity = world.getBlockEntityAtIfLoaded(pos);
         if (!(blockEntity instanceof SeatBlockEntity seatBlockEntity)) {
             return InteractionResult.PASS;
         }
