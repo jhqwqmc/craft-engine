@@ -12,6 +12,7 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
+import net.momirealms.craftengine.core.world.Vec3i;
 import org.joml.Vector3f;
 
 import java.util.UUID;
@@ -27,9 +28,21 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
         this.blockEntity = blockEntity;
         Vector3f position = this.blockEntity.behavior.position;
         Direction direction = blockEntity.blockState().get(blockEntity.behavior.directionProperty);
+        Vec3i axisZ = direction.vector();
+        Vec3i axisX = direction.axis().isVertical() ? Direction.EAST.vector() : direction.clockWise().vector();
+        double worldX, worldY, worldZ;
+        if (direction.axis().isVertical()) {
+            worldX = pos.x + position.x * axisX.x;
+            worldY = pos.y + position.z * axisZ.y;
+            worldZ = pos.z + position.y * (direction == Direction.UP ? -1 : 1);
+        } else {
+            worldX = pos.x + (axisX.x * position.x) + (axisZ.x * position.z);
+            worldY = pos.y + position.y;
+            worldZ = pos.z + (axisX.z * position.x) + (axisZ.z * position.z);
+        }
         this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                this.entityId, UUID.randomUUID(), pos.x() + position.x, pos.y() + position.y, pos.z() + position.z,
-                0, 0, this.blockEntity.behavior.glow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME,
+                this.entityId, UUID.randomUUID(), worldX, worldY, worldZ, 0, 0,
+                this.blockEntity.behavior.glow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME,
                 direction.ordinal(), CoreReflections.instance$Vec3$Zero, 0
         );
         this.cachedDespawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(IntList.of(entityId));
