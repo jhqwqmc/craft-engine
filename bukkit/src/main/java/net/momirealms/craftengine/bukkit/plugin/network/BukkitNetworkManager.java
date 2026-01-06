@@ -23,6 +23,7 @@ import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.DataComponentValue;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
@@ -4034,7 +4035,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     if (EventUtils.fireAndCheckCancel(hitEvent))
                         return;
 
-                    if (!BukkitCraftEngine.instance().antiGriefProvider().canBreak(platformPlayer, location))
+                    if (!BukkitCraftEngine.instance().antiGriefProvider().test(platformPlayer, Flag.BREAK, location))
                         return;
 
                     int hitTimes = furniture.config.settings().hitTimes();
