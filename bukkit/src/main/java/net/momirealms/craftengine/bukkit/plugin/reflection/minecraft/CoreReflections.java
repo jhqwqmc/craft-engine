@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
+import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
@@ -4703,4 +4704,27 @@ public final class CoreReflections {
             )
     );
 
+    public static final Class<?> clazz$MapItemSavedData = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "world.level.saveddata.maps.WorldMap",
+                    "world.level.saveddata.maps.MapItemSavedData"
+            )
+    );
+
+    public static final Field field$MapItemSavedData$vanillaRender = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$MapItemSavedData, CraftBukkitReflections.clazz$RenderData, 0
+            )
+    );
+
+    public static final MethodHandle methodHandle$MapItemSavedData$vanillaRenderGetter;
+
+    static {
+        try {
+            methodHandle$MapItemSavedData$vanillaRenderGetter = ReflectionUtils.unreflectGetter(field$MapItemSavedData$vanillaRender)
+                    .asType(MethodType.methodType(Object.class, Object.class));
+        } catch (IllegalAccessException e) {
+            throw new ReflectionInitException("Failed to init MapItemSavedData$HoldingPlayer", e);
+        }
+    }
 }

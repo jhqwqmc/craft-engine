@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.entity.player;
 
+import com.google.common.cache.Cache;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
@@ -12,6 +13,7 @@ import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.MutableBoolean;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +33,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     @NotNull
     public abstract Item<?> getItemBySlot(int slot);
+
+    public abstract void setItemInHand(InteractionHand hand, Item<?> item);
 
     @Override
     public abstract Object platformPlayer();
@@ -248,6 +252,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     public abstract void clearTrackedFurniture();
 
     public abstract WorldPosition eyePosition();
+
+    public abstract Cache<Object, Boolean> receivedMapData();
 
     @Override
     public boolean isValid() {

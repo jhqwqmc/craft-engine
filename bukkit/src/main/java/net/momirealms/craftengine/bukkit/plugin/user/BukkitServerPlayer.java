@@ -1,6 +1,8 @@
 package net.momirealms.craftengine.bukkit.plugin.user;
 
 import ca.spottedleaf.concurrentutil.map.ConcurrentLong2ReferenceChainedHashTable;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -77,6 +79,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class BukkitServerPlayer extends Player {
@@ -178,6 +181,12 @@ public class BukkitServerPlayer extends Player {
     private boolean isRangeMining;
     // 家具击打记录
     private final FurnitureHitData furnitureHitData = new FurnitureHitData();
+    // 缓存的已接收的地图数据，为了防止动态物品展示框渲染器在渲染地图物品的时候重复发送地图数据导致服务器带宽消耗过大
+    private final Cache<Object, Boolean> receivedMapData = CacheBuilder.newBuilder()
+            .weakKeys()
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .concurrencyLevel(4)
+            .build();
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -1118,6 +1127,13 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
+    public void setItemInHand(InteractionHand hand, Item<?> item) {
+        PlayerInventory inventory = platformPlayer().getInventory();
+        EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+        inventory.setItem(slot, (ItemStack) item.getItem());
+    }
+
+    @Override
     public World world() {
         return BukkitAdaptors.adapt(platformPlayer().getWorld());
     }
@@ -1589,6 +1605,11 @@ public class BukkitServerPlayer extends Player {
     @Override
     public WorldPosition eyePosition() {
         return LocationUtils.toWorldPosition(this.getEyeLocation());
+    }
+
+    @Override
+    public Cache<Object, Boolean> receivedMapData() {
+        return this.receivedMapData;
     }
 
     @Override
