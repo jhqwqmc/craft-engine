@@ -253,7 +253,7 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract WorldPosition eyePosition();
 
-    public abstract Cache<Object, Object> receivedMapData();
+    public abstract Cache<Object, Boolean> receivedMapData();
 
     @Override
     public boolean isValid() {

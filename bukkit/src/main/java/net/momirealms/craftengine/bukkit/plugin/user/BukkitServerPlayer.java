@@ -182,7 +182,7 @@ public class BukkitServerPlayer extends Player {
     // 家具击打记录
     private final FurnitureHitData furnitureHitData = new FurnitureHitData();
     // 缓存的已接收的地图数据，为了防止动态物品展示框渲染器在渲染地图物品的时候重复发送地图数据导致服务器带宽消耗过大
-    private final Cache<Object, Object> receivedMapData = CacheBuilder.newBuilder()
+    private final Cache<Object, Boolean> receivedMapData = CacheBuilder.newBuilder()
             .weakKeys()
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .concurrencyLevel(4)
@@ -1608,7 +1608,7 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public Cache<Object, Object> receivedMapData() {
+    public Cache<Object, Boolean> receivedMapData() {
         return this.receivedMapData;
     }
 

@@ -14,6 +14,7 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
@@ -68,13 +69,13 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
             this.blockEntity.mapItemSavedData(savedData);
         }
         try {
-            Cache<Object, Object> receivedMapData = player.receivedMapData();
+            Cache<Object, Boolean> receivedMapData = player.receivedMapData();
             Object received = receivedMapData.getIfPresent(savedData);
-            if (received != null) return;
+            if (received != null) return; // 节约带宽静态渲染
             receivedMapData.put(savedData, Boolean.TRUE); // 存入用于标记的单例对象
             Object vanillaRender = CoreReflections.methodHandle$MapItemSavedData$vanillaRenderGetter.invokeExact(savedData);
             byte[] buffer = FastNMS.INSTANCE.field$RenderData$buffer(vanillaRender);
-            Object patch = createPatch(buffer);
+            Object patch = FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, buffer);
             byte scale = FastNMS.INSTANCE.field$MapItemSavedData$scale(savedData);
             boolean locked = FastNMS.INSTANCE.field$MapItemSavedData$locked(savedData);
             Object packet = FastNMS.INSTANCE.constructor$ClientboundMapItemDataPacket(mapId, scale, locked, null, patch);
@@ -82,16 +83,6 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
         } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Cannot update map item for player " + player.name(), e);
         }
-    }
-
-    private static Object createPatch(byte[] buffer) {
-        byte[] mapColors = new byte[128 * 128];
-        for (int row = 0; row < 128; row++) {
-            for (int col = 0; col < 128; col++) {
-                mapColors[row + col * 128] = buffer[row + col * 128];
-            }
-        }
-        return FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, mapColors);
     }
 
     public record Config(Vector3f position, boolean isGlow, boolean invisible, boolean renderMapItem) {
