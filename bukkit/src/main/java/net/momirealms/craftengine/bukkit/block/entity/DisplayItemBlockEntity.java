@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DisplayItemBlockEntity extends BlockEntity {
-    public final DynamicItemFrameRenderer.Config config;
     public final DisplayItemBlockBehavior behavior;
     private int rotation = 0;
     private @NotNull Item<ItemStack> item = BukkitItemManager.instance().uniqueEmptyItem().item();
@@ -37,9 +36,8 @@ public class DisplayItemBlockEntity extends BlockEntity {
     private @Nullable Object mapId;
     private @Nullable Object mapItemSavedData;
 
-    public DisplayItemBlockEntity(BlockPos pos, ImmutableBlockState blockState, DynamicItemFrameRenderer.Config config) {
+    public DisplayItemBlockEntity(BlockPos pos, ImmutableBlockState blockState) {
         super(BukkitBlockEntityTypes.DISPLAY_ITEM, pos, blockState);
-        this.config = config;
         this.behavior = blockState.behavior().getAs(DisplayItemBlockBehavior.class).orElseThrow();
         super.blockEntityRenderer = new DynamicItemFrameRenderer(this, super.pos);
         this.updateMetadata();
@@ -137,11 +135,11 @@ public class DisplayItemBlockEntity extends BlockEntity {
         if (VersionHelper.isOrAbove1_21_6()) {
             ItemFrameData.Direction.addEntityData(direction, metadataValues);
         }
-        if (this.config.invisible()) {
+        if (this.behavior.invisible) {
             ItemFrameData.SharedFlags.addEntityData((byte) 0x20, metadataValues);
         }
         this.cacheMetadata = metadataValues;
-        if (this.config.renderMapItem()) {
+        if (this.behavior.renderMapItem) {
             this.mapId = FastNMS.INSTANCE.method$MapItem$getMapId(this.item.getLiteralObject());
             this.mapItemSavedData = this.mapId != null && super.world != null
                     ? FastNMS.INSTANCE.method$MapItem$getSavedData(mapId, super.world.world.serverWorld())

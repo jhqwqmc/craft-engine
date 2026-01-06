@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.DisplayItemBlockEntity;
-import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -23,13 +22,17 @@ import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.inventory.ItemStack;
+import org.joml.Vector3f;
 
 import java.util.Map;
 import java.util.Optional;
 
 public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
     public static final BlockBehaviorFactory<DisplayItemBlockBehavior> FACTORY = new Factory();
-    public final DynamicItemFrameRenderer.Config config;
+    public final Vector3f position;
+    public final boolean isGlow;
+    public final boolean invisible;
+    public final boolean renderMapItem;
     public final SoundData addItemSound;
     public final SoundData removeItemSound;
     public final SoundData rotateItemSound;
@@ -37,13 +40,19 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
 
     public DisplayItemBlockBehavior(
             CustomBlock customBlock,
-            DynamicItemFrameRenderer.Config config,
+            Vector3f position,
+            boolean isGlow,
+            boolean invisible,
+            boolean renderMapItem,
             SoundData addItemSound,
             SoundData removeItemSound,
             SoundData rotateItemSound,
             Property<Direction> directionProperty) {
         super(customBlock);
-        this.config = config;
+        this.position = position;
+        this.isGlow = isGlow;
+        this.invisible = invisible;
+        this.renderMapItem = renderMapItem;
         this.addItemSound = addItemSound;
         this.removeItemSound = removeItemSound;
         this.rotateItemSound = rotateItemSound;
@@ -57,7 +66,7 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, ImmutableBlockState state) {
-        return new DisplayItemBlockEntity(pos, state, this.config);
+        return new DisplayItemBlockEntity(pos, state);
     }
 
     @Override
@@ -119,12 +128,10 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
         public DisplayItemBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             @SuppressWarnings("unchecked")
             Property<Direction> directionProperty = (Property<Direction>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.display_item.missing_facing");
-            DynamicItemFrameRenderer.Config config = new DynamicItemFrameRenderer.Config(
-                    ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0), "position"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-glow", false), "is-glow"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("invisible", false), "invisible"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("render-map-item", true), "render-map-item") // 地图渲染有少量开销可选启用
-            );
+            Vector3f position = ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0), "position");
+            boolean isGlow = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-glow", false), "is-glow");
+            boolean invisible = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("invisible", false), "invisible");
+            boolean renderMapItem = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("render-map-item", true), "render-map-item"); // 地图渲染有少量开销可选启用
             Map<String, Object> sounds = ResourceConfigUtils.getAsMapOrNull(arguments.get("sounds"), "sounds");
             SoundData addItemSound = null;
             SoundData removeItemSound = null;
@@ -134,7 +141,7 @@ public class DisplayItemBlockBehavior extends BukkitBlockBehavior implements Ent
                 removeItemSound = Optional.ofNullable(sounds.get("remove-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
                 rotateItemSound = Optional.ofNullable(sounds.get("rotate-item")).map(obj -> SoundData.create(obj, SoundData.SoundValue.FIXED_1, SoundData.SoundValue.ranged(0.9f, 1f))).orElse(null);
             }
-            return new DisplayItemBlockBehavior(block, config, addItemSound, removeItemSound, rotateItemSound, directionProperty);
+            return new DisplayItemBlockBehavior(block, position, isGlow, invisible, renderMapItem, addItemSound, removeItemSound, rotateItemSound, directionProperty);
         }
     }
 }

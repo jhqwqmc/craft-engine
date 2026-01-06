@@ -14,12 +14,10 @@ import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import org.joml.Vector3f;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
     public final DisplayItemBlockEntity blockEntity;
-    public final Config config;
     public final Object cachedSpawnPacket;
     public final Object cachedDespawnPacket;
     public final int entityId;
@@ -27,12 +25,12 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
     public DynamicItemFrameRenderer(DisplayItemBlockEntity blockEntity, BlockPos pos) {
         this.entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         this.blockEntity = blockEntity;
-        this.config = blockEntity.config;
-        Vector3f position = this.config.position;
+        Vector3f position = this.blockEntity.behavior.position;
         Direction direction = blockEntity.blockState().get(blockEntity.behavior.directionProperty);
         this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
                 this.entityId, UUID.randomUUID(), pos.x() + position.x, pos.y() + position.y, pos.z() + position.z,
-                0, 0, this.config.isGlow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME, direction.ordinal(), CoreReflections.instance$Vec3$Zero, 0
+                0, 0, this.blockEntity.behavior.isGlow ? MEntityTypes.GLOW_ITEM_FRAME : MEntityTypes.ITEM_FRAME,
+                direction.ordinal(), CoreReflections.instance$Vec3$Zero, 0
         );
         this.cachedDespawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(IntList.of(entityId));
     }
@@ -51,7 +49,7 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
     @Override
     public void update(Player player) {
         player.sendPacket(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(this.entityId, this.blockEntity.cacheMetadata()), false);
-        if (this.config.renderMapItem) {
+        if (this.blockEntity.behavior.renderMapItem) {
             updateMapItem(player);
         }
     }
@@ -83,8 +81,5 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
         } catch (Throwable e) {
             CraftEngine.instance().logger().warn("Cannot update map item for player " + player.name(), e);
         }
-    }
-
-    public record Config(Vector3f position, boolean isGlow, boolean invisible, boolean renderMapItem) {
     }
 }

@@ -444,7 +444,7 @@ warning.config.block.behavior.hangable.missing_hanging: "<yellow>在文件 <arg:
 warning.config.block.behavior.multi_high.missing_property_name: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'multi_high_block' 行为缺少必需的 'property' 选项</yellow>"
 warning.config.block.behavior.multi_high.missing_property: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'multi_high_block' 行为缺少必需的 '<arg:2>' 属性</yellow>"
 warning.config.block.behavior.spreading.missing_target_block: "<yellow>在文件 <arg:0> 发现问题 - 方块 '<arg:1>' 的 'spreading_block' 行为缺少必需的 'target-block' 选项</yellow>"
-warning.config.block.behavior.item_display.missing_facing: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 的 'item_display_block' 行为缺少必需的 'facing' 属性</yellow>"
+warning.config.block.behavior.display_item.missing_facing: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 的 'display_item_block' 行为缺少必需的 'facing' 属性</yellow>"
 warning.config.model.generation.missing_parent: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 的 'generation' 段落缺少必需的 'parent' 参数</yellow>"
 warning.config.model.generation.conflict: "<yellow>在文件 <arg:0> 发现问题 - 无法为 '<arg:1>' 生成模型 存在多个配置尝试使用相同路径 '<arg:2>' 生成不同的 JSON 模型</yellow>"
 warning.config.model.generation.invalid_display_position: "<yellow>在文件 <arg:0> 发现问题 - 配置项 '<arg:1>' 在 'generation.display' 区域使用了无效的 display 位置类型 '<arg:2>'. 可用展示类型: [<arg:3>]</yellow>"
