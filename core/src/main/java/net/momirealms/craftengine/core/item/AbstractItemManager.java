@@ -446,8 +446,9 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
             if (!isVanillaItem) {
                 // 如果用户指定了，说明要手动分配，不管他是什么版本，都强制设置模型值
-                if (section.containsKey("custom-model-data")) {
-                    int customModelData = ResourceConfigUtils.getAsInt(section.getOrDefault("custom-model-data", 0), "custom-model-data");
+                Object rawCustomModelData = section.get("custom-model-data");
+                if (rawCustomModelData != null) {
+                    int customModelData = ResourceConfigUtils.getAsInt(rawCustomModelData, "custom-model-data");
                     if (customModelData < 0) {
                         throw new LocalizedResourceConfigException("warning.config.item.invalid_custom_model_data", String.valueOf(customModelData));
                     }

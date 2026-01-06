@@ -75,7 +75,9 @@ public final class ItemSettings {
         }
         for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
             CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
-            type.dataProcessor().accept(entry.getValue(), processors::add);
+            Optional.ofNullable(type.dataProcessor()).ifPresent(it -> {
+                it.accept(entry.getValue(), processors::add);
+            });
         }
         return processors;
     }
@@ -90,7 +92,9 @@ public final class ItemSettings {
         }
         for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
             CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
-            type.clientBoundDataProcessor().accept(entry.getValue(), processors::add);
+            Optional.ofNullable(type.clientBoundDataProcessor()).ifPresent(it -> {
+                it.accept(entry.getValue(), processors::add);
+            });
         }
         return processors;
     }
