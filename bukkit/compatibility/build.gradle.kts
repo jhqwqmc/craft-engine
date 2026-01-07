@@ -33,7 +33,7 @@ dependencies {
     // ModelEngine
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
     // BetterModel
-    compileOnly("io.github.toxicity188:bettermodel:1.14.0")
+    compileOnly("io.github.toxicity188:bettermodel:1.15.0")
     compileOnly("com.mojang:authlib:${rootProject.properties["authlib_version"]}")
     // LuckPerms
     compileOnly("net.luckperms:api:5.4")

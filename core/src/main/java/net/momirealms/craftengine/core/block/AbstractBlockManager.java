@@ -623,7 +623,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         }
                         BlockStateAppearance blockStateAppearance = new BlockStateAppearance(
                                 visualBlockState,
-                                parseBlockEntityRender(appearanceSection.get("entity-renderer")),
+                                parseBlockEntityRender(ResourceConfigUtils.get(appearanceSection, "entity-renderer", "entity-render")),
                                 parseCullingData(appearanceSection.get("entity-culling"))
                         );
                         appearances.put(appearanceName, blockStateAppearance);
