@@ -4703,28 +4703,4 @@ public final class CoreReflections {
                     BukkitReflectionUtils.assembleMCClass("world.level.entity.LevelCallback")
             )
     );
-
-    public static final Class<?> clazz$MapItemSavedData = requireNonNull(
-            BukkitReflectionUtils.findReobfOrMojmapClass(
-                    "world.level.saveddata.maps.WorldMap",
-                    "world.level.saveddata.maps.MapItemSavedData"
-            )
-    );
-
-    public static final Field field$MapItemSavedData$vanillaRender = requireNonNull(
-            ReflectionUtils.getDeclaredField(
-                    clazz$MapItemSavedData, CraftBukkitReflections.clazz$RenderData, 0
-            )
-    );
-
-    public static final MethodHandle methodHandle$MapItemSavedData$vanillaRenderGetter;
-
-    static {
-        try {
-            methodHandle$MapItemSavedData$vanillaRenderGetter = ReflectionUtils.unreflectGetter(field$MapItemSavedData$vanillaRender)
-                    .asType(MethodType.methodType(Object.class, Object.class));
-        } catch (IllegalAccessException e) {
-            throw new ReflectionInitException("Failed to init MapItemSavedData$HoldingPlayer", e);
-        }
-    }
 }
