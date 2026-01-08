@@ -49,8 +49,8 @@ public class CachedStorage<T extends WorldDataStorage> implements WorldDataStora
 
     @Override
     public void clearChunkAt(@NotNull ChunkPos pos) throws IOException {
-        this.storage.clearChunkAt(pos);
         this.chunkCache.invalidate(pos);
+        this.storage.clearChunkAt(pos);
     }
 
     @Override

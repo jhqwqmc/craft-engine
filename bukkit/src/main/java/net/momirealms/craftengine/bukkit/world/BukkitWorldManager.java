@@ -141,7 +141,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.lastWorldUUID = null;
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onWorldInit(WorldInitEvent event) {
         World world = event.getWorld();
         UUID uuid = world.getUID();
@@ -281,7 +281,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onChunkLoad(ChunkLoadEvent event) {
-        CEWorld world = worlds.get(event.getWorld().getUID());
+        CEWorld world = this.worlds.get(event.getWorld().getUID());
         if (world == null) {
             return;
         }
@@ -290,7 +290,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onChunkUnload(ChunkUnloadEvent event) {
-        CEWorld world = worlds.get(event.getWorld().getUID());
+        CEWorld world = this.worlds.get(event.getWorld().getUID());
         if (world == null) {
             return;
         }
