@@ -126,7 +126,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
                     newItems.add(FastNMS.INSTANCE.field$CraftItemStack$handle(itemStack.get()));
                     changed = true;
                 } else {
-                    newItems.add(previousItem);
+                    newItems.add(FastNMS.INSTANCE.field$CraftItemStack$handle(cloned));
                 }
             }
             if (changed) {
@@ -147,7 +147,7 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
                     newItems.add(FastNMS.INSTANCE.field$CraftItemStack$handle(itemStack.get()));
                     changed = true;
                 } else {
-                    newItems.add(previousItem);
+                    newItems.add(FastNMS.INSTANCE.field$CraftItemStack$handle(cloned));
                 }
                 if (changed) {
                     wrapped.setExactComponent(DataComponentTypes.CONTAINER, FastNMS.INSTANCE.method$ItemContainerContents$fromItems(newItems));
