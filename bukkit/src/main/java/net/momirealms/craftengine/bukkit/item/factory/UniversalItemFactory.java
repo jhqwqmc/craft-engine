@@ -124,7 +124,10 @@ public class UniversalItemFactory extends BukkitItemFactory<LegacyItemWrapper> {
         if (skullData == null) {
             item.remove("SkullOwner");
         } else {
-            item.setTag(UUID.nameUUIDFromBytes(SkullUtils.identifierFromBase64(skullData).getBytes(StandardCharsets.UTF_8)), "SkullOwner", "Id");
+            UUID id = UUID.nameUUIDFromBytes(SkullUtils.identifierFromBase64(skullData).getBytes(StandardCharsets.UTF_8));
+            long most = id.getMostSignificantBits();
+            long least = id.getLeastSignificantBits();
+            item.setTag(List.of((int) (most >> 32), (int) most, (int) (least >> 32), (int) least), "SkullOwner", "Id");
             item.setTag(
                     List.of(Map.of("Value", skullData)),
                     "SkullOwner", "Properties", "textures"
