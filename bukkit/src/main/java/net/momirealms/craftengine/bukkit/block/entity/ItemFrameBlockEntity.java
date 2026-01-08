@@ -8,7 +8,9 @@ import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
+import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -117,7 +119,12 @@ public class ItemFrameBlockEntity extends BlockEntity {
     }
 
     private void update() {
-        super.world.blockEntityChanged(this.pos);
+        super.world.blockEntityChanged(super.pos);
+        FastNMS.INSTANCE.method$Level$updateNeighbourForOutputSignal(
+                super.world.world.serverWorld(),
+                LocationUtils.toBlockPos(super.pos),
+                BlockStateUtils.getBlockOwner(super.blockState.customBlockState().literalObject())
+        );
         if (super.blockEntityRenderer == null) return;
         CEChunk chunk = super.world.getChunkAtIfLoaded(super.pos.x >> 4, super.pos.z >> 4);
         if (chunk == null) return;
