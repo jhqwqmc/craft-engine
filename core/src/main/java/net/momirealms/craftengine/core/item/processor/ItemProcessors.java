@@ -58,6 +58,7 @@ public final class ItemProcessors {
     public static final ItemProcessorType<BlockStateProcessor> BLOCK_STATE = register(Key.ce("blockstate"), BlockStateProcessor.FACTORY);
     public static final ItemProcessorType<ConditionalProcessor> CONDITIONAL = register(Key.ce("conditional"), ConditionalProcessor.FACTORY, VersionHelper.PREMIUM);
     public static final ItemProcessorType<ConditionalProcessor> CONDITION = register(Key.ce("condition"), ConditionalProcessor.FACTORY, VersionHelper.PREMIUM);
+    public static final ItemProcessorType<ProfileProcessor> PROFILE = register(Key.ce("profile"), ProfileProcessor.FACTORY);
 
     public static <T extends ItemProcessor> ItemProcessorType<T> register(Key key, ItemProcessorFactory<T> factory) {
         ItemProcessorType<T> type = new ItemProcessorType<>(key, factory);
