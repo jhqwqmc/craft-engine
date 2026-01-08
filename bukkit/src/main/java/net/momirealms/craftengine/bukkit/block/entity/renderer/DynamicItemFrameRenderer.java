@@ -4,52 +4,20 @@ import com.google.common.cache.Cache;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.bukkit.block.entity.ItemFrameBlockEntity;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
-import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntityTypes;
-import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
 import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.ReflectionUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.Vec3i;
 import org.joml.Vector3f;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import java.util.UUID;
 
-import static java.util.Objects.requireNonNull;
-
 public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
-    public static final Class<?> clazz$MapItemSavedData = requireNonNull(
-            BukkitReflectionUtils.findReobfOrMojmapClass(
-                    "world.level.saveddata.maps.WorldMap",
-                    "world.level.saveddata.maps.MapItemSavedData"
-            )
-    );
-
-    public static final Field field$MapItemSavedData$vanillaRender = requireNonNull(
-            ReflectionUtils.getDeclaredField(
-                    clazz$MapItemSavedData, CraftBukkitReflections.clazz$RenderData, 0
-            )
-    );
-
-    public static final MethodHandle methodHandle$MapItemSavedData$vanillaRenderGetter;
-    static {
-        try {
-            methodHandle$MapItemSavedData$vanillaRenderGetter = ReflectionUtils.unreflectGetter(field$MapItemSavedData$vanillaRender)
-                    .asType(MethodType.methodType(Object.class, Object.class));
-        } catch (IllegalAccessException e) {
-            throw new ReflectionInitException("Failed to init MapItemSavedData$vanillaRenderGetter", e);
-        }
-    }
-
     public final ItemFrameBlockEntity blockEntity;
     public final Object cachedSpawnPacket;
     public final Object cachedDespawnPacket;
@@ -116,9 +84,8 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
             Object received = receivedMapData.getIfPresent(savedData);
             if (received != null) return; // 节约带宽静态渲染
             receivedMapData.put(savedData, Boolean.TRUE); // 存入用于标记的单例对象
-            Object vanillaRender = methodHandle$MapItemSavedData$vanillaRenderGetter.invokeExact(savedData);
-            byte[] buffer = FastNMS.INSTANCE.field$RenderData$buffer(vanillaRender);
-            Object patch = FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, buffer);
+            byte[] colors = FastNMS.INSTANCE.field$MapItemSavedData$colors(savedData);
+            Object patch = FastNMS.INSTANCE.constructor$MapItemSavedData$MapPatch(0, 0, 128, 128, colors);
             byte scale = FastNMS.INSTANCE.field$MapItemSavedData$scale(savedData);
             boolean locked = FastNMS.INSTANCE.field$MapItemSavedData$locked(savedData);
             Object packet = FastNMS.INSTANCE.constructor$ClientboundMapItemDataPacket(mapId, scale, locked, null, patch);

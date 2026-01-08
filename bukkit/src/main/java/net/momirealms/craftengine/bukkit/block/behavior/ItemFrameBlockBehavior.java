@@ -1,9 +1,16 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.antigrieflib.Flag;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.ItemFrameBlockEntity;
+import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
+import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.DirectionUtils;
+import net.momirealms.craftengine.bukkit.util.LocationUtils;
+import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -29,6 +36,7 @@ import org.joml.Vector3f;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
     public static final BlockBehaviorFactory<ItemFrameBlockBehavior> FACTORY = new Factory();
@@ -70,6 +78,47 @@ public class ItemFrameBlockBehavior extends BukkitBlockBehavior implements Entit
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, ImmutableBlockState state) {
         return new ItemFrameBlockEntity(pos, state);
+    }
+
+    @Override
+    public int getSignal(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        return getSignal(args[0], args[1], args[2], args[3]);
+    }
+
+    @Override
+    public int getDirectSignal(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        return getSignal(args[0], args[1], args[2], args[3]);
+    }
+
+    private static int getSignal(Object blockState, Object blockAccess, Object pos, Object side) {
+        if (!CoreReflections.clazz$Level.isInstance(blockAccess)) {
+            return 0;
+        }
+        ImmutableBlockState state = BlockStateUtils.getOptionalCustomBlockState(blockState).orElse(null);
+        if (state == null) {
+            return 0;
+        }
+        ItemFrameBlockBehavior blockBehavior = state.behavior().getAs(ItemFrameBlockBehavior.class).orElse(null);
+        if (blockBehavior == null) {
+            return 0;
+        }
+        if (state.get(blockBehavior.directionProperty) != DirectionUtils.fromNMSDirection(side)) {
+            return 0;
+        }
+        BukkitWorld world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(blockAccess));
+        BlockEntity blockEntity = world.storageWorld().getBlockEntityAtIfLoaded(LocationUtils.fromBlockPos(pos));
+        if (!(blockEntity instanceof ItemFrameBlockEntity itemFrame && itemFrame.isValid())) {
+            return 0;
+        }
+        if (ItemUtils.isEmpty(itemFrame.item())) {
+            return 0;
+        }
+        return itemFrame.rotation() + 1;
+    }
+
+    @Override
+    public boolean isSignalSource(Object thisBlock, Object[] args, Callable<Object> superMethod) {
+        return true;
     }
 
     @Override

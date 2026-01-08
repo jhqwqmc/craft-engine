@@ -401,10 +401,6 @@ public final class CraftBukkitReflections {
             ReflectionUtils.getDeclaredField(clazz$CraftTeam, CoreReflections.clazz$PlayerTeam, 0)
     );
 
-    public static final Class<?> clazz$RenderData = requireNonNull(
-            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleCBClass("map.RenderData"))
-    );
-
     public static final Method method$CraftEventFactory$callInventoryOpenEvent = requireNonNull(
             ReflectionUtils.getStaticMethod(clazz$CraftEventFactory, CoreReflections.clazz$AbstractContainerMenu, CoreReflections.clazz$ServerPlayer, CoreReflections.clazz$AbstractContainerMenu)
     );
