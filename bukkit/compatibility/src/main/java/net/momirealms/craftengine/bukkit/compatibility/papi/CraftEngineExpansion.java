@@ -5,7 +5,7 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
-import net.momirealms.craftengine.core.util.CountdownFormatter;
+import net.momirealms.craftengine.core.util.DurationFormatter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,12 +72,13 @@ public class CraftEngineExpansion extends PlaceholderExpansion {
         if (cooldown == null) {
             return null;
         }
-        Long ms = cooldown.getCooldown(param[0]);
+        Long ms = cooldown.getExpirationTime(param[0]);
         if (ms == null) {
-            return null;
+            return "-1";
         }
+        ms -= System.currentTimeMillis();
         if (param.length >= 2) {
-            return CountdownFormatter.of(param[1]).format(ms);
+            return DurationFormatter.of(param[1]).format(ms);
         }
         return String.valueOf(ms);
     }
