@@ -404,4 +404,8 @@ public final class CraftBukkitReflections {
     public static final Class<?> clazz$RenderData = requireNonNull(
             ReflectionUtils.getClazz(BukkitReflectionUtils.assembleCBClass("map.RenderData"))
     );
+
+    public static final Method method$CraftEventFactory$callInventoryOpenEvent = requireNonNull(
+            ReflectionUtils.getStaticMethod(clazz$CraftEventFactory, CoreReflections.clazz$AbstractContainerMenu, CoreReflections.clazz$ServerPlayer, CoreReflections.clazz$AbstractContainerMenu)
+    );
 }
