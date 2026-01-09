@@ -203,24 +203,24 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler<ItemSt
         for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
             modifier.prepareNetworkItem(original, context, tag);
         }
-        // 应用阶段
-        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
-            modifier.apply(wrapped, context);
-        }
         // 如果拦截物品的描述名称等
         if (Config.interceptItem()) {
-            if (!tag.containsKey(DataComponentIds.ITEM_NAME)) {
+            if (wrapped.hasComponent(DataComponentTypes.ITEM_NAME)) {
                 if (VersionHelper.isOrAbove1_21_5()) processModernItemName(wrapped, () -> tag, context);
                 else processLegacyItemName(wrapped, () -> tag, context);
             }
-            if (!tag.containsKey(DataComponentIds.CUSTOM_NAME)) {
+            if (wrapped.hasComponent(DataComponentTypes.CUSTOM_NAME)) {
                 if (VersionHelper.isOrAbove1_21_5()) processModernCustomName(wrapped, () -> tag, context);
                 else processLegacyCustomName(wrapped, () -> tag, context);
             }
-            if (!tag.containsKey(DataComponentIds.LORE)) {
+            if (wrapped.hasComponent(DataComponentTypes.LORE)) {
                 if (VersionHelper.isOrAbove1_21_5()) processModernLore(wrapped, () -> tag, context);
                 else processLegacyLore(wrapped, () -> tag, context);
             }
+        }
+        // 应用阶段
+        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+            modifier.apply(wrapped, context);
         }
         // 如果tag不空，则需要返回
         if (!tag.isEmpty()) {
