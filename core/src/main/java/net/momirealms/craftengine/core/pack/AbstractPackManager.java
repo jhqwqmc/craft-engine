@@ -882,7 +882,7 @@ public abstract class AbstractPackManager implements PackManager {
         {
             JsonObject packJson = new JsonObject();
             rawMeta.add("pack", packJson);
-            JsonElement description = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(Config.packDescription()));
+            JsonElement description = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(AdventureHelper.legacyToMiniMessage(Config.packDescription())));
             packJson.add("description", description);
             // 需要旧版本兼容性
             // https://minecraft.wiki/w/Java_Edition_25w31a
