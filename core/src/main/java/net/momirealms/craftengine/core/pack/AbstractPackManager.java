@@ -101,6 +101,8 @@ public abstract class AbstractPackManager implements PackManager {
     public static final Set<String> ALLOWED_VANILLA_EQUIPMENT = Set.of("chainmail", "diamond", "gold", "iron", "netherite");
     public static final Set<String> ALLOWED_MODEL_TAGS = Set.of("parent", "ambientocclusion", "display", "textures", "elements", "gui_light", "overrides");
 
+    private static final Key MISSING_NO = Key.of("missingno");
+
     private static final byte[] EMPTY_1X1_IMAGE;
     private static final byte[] EMPTY_EQUIPMENT_IMAGE;
     private static final byte[] EMPTY_16X16_IMAGE;
@@ -211,7 +213,7 @@ public abstract class AbstractPackManager implements PackManager {
         for (int i = 0; i < 256; i++) {
             VANILLA_TEXTURES.add(Key.of("minecraft", "font/unicode_page_" + String.format("%02x", i)));
         }
-        VANILLA_TEXTURES.add(Key.of("minecraft", "missingno"));
+        VANILLA_TEXTURES.add(MISSING_NO);
         loadInternalList("internal/textures/processed.json", VANILLA_TEXTURES::add);
         loadInternalList("internal/sounds/processed.json", VANILLA_SOUNDS::add);
 
@@ -310,7 +312,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
             TranslationManager.instance().log(e.node(), e.arguments());
             this.resourcePackHost = NoneHost.INSTANCE;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             this.plugin.logger().warn("Failed to load resource pack host", e);
             this.resourcePackHost = NoneHost.INSTANCE;
         }
@@ -1798,6 +1800,7 @@ public abstract class AbstractPackManager implements PackManager {
             boolean shouldRemove = false;
             for (Map.Entry<String, Key> texture : textures.entrySet()) {
                 Key spritePath = texture.getValue();
+                if (spritePath.equals(MISSING_NO)) continue;
 
                 // 方块纹理不应该在item图集内，这样必然出问题
                 boolean definedInItemAtlas = itemAtlas != null && itemAtlas.isDefined(spritePath);
@@ -1849,6 +1852,8 @@ public abstract class AbstractPackManager implements PackManager {
 
             for (Map.Entry<String, Key> texture : textures.entrySet()) {
                 Key spritePath = texture.getValue();
+                if (spritePath.equals(MISSING_NO)) continue;
+
                 boolean definedInBlockAtlas = blockAtlas.isDefined(spritePath);
                 boolean definedInItemAtlas = itemAtlas != null && itemAtlas.isDefined(spritePath);
 
