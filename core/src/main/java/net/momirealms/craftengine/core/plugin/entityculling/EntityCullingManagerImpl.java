@@ -5,8 +5,10 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityCullingManagerImpl implements EntityCullingManager {
+public final class EntityCullingManagerImpl implements EntityCullingManager {
     private final List<EntityCullingThread> threads = new ArrayList<>();
+
+    public EntityCullingManagerImpl() {}
 
     @Override
     public void load() {

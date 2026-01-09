@@ -175,7 +175,6 @@ public abstract class CraftEngine implements Plugin {
         this.advancementManager.reload();
         this.projectileManager.reload();
         this.seatManager.reload();
-        this.entityCullingManager.reload();
         this.networkManager.reload();
     }
 
@@ -285,6 +284,8 @@ public abstract class CraftEngine implements Plugin {
         this.vanillaLootManager.delayedInit();
         // 注册脱离坐骑监听器
         this.seatManager.delayedInit();
+        // 加载实体剔除线程
+        this.entityCullingManager.load();
 
         if (!Config.delayConfigurationLoad()) {
             // 注册世界加载相关监听器
