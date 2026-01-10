@@ -103,6 +103,11 @@ public abstract class AbstractPackManager implements PackManager {
 
     private static final Key MISSING_NO = Key.of("missingno");
 
+    public static final Set<Key> DYEABLE_LEATHER_ARMOR = Set.of(
+            ItemKeys.LEATHER_HELMET, ItemKeys.LEATHER_CHESTPLATE, ItemKeys.LEATHER_LEGGINGS, ItemKeys.LEATHER_BOOTS,
+            ItemKeys.WOLF_ARMOR, ItemKeys.LEATHER_HORSE_ARMOR
+    );
+
     private static final byte[] EMPTY_1X1_IMAGE;
     private static final byte[] EMPTY_EQUIPMENT_IMAGE;
     private static final byte[] EMPTY_16X16_IMAGE;
@@ -230,7 +235,11 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                 }
             }
-            SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.GENERATED);
+            if (DYEABLE_LEATHER_ARMOR.contains(item)) {
+                SIMPLIFIED_MODEL_READERS.put(item, DyeableModelReader.INSTANCE);
+            } else {
+                SIMPLIFIED_MODEL_READERS.put(item, GeneratedModelReader.GENERATED);
+            }
         }
 
         SIMPLIFIED_MODEL_READERS.put(ItemKeys.FISHING_ROD, ConditionModelReader.FISHING_ROD);
@@ -238,6 +247,7 @@ public abstract class AbstractPackManager implements PackManager {
         SIMPLIFIED_MODEL_READERS.put(ItemKeys.SHIELD, ConditionModelReader.SHIELD);
         SIMPLIFIED_MODEL_READERS.put(ItemKeys.BOW, BowModelReader.INSTANCE);
         SIMPLIFIED_MODEL_READERS.put(ItemKeys.CROSSBOW, CrossbowModelReader.INSTANCE);
+        SIMPLIFIED_MODEL_READERS.put(ItemKeys.FIREWORK_STAR, FireworkStarModelReader.INSTANCE);
     }
 
     private void loadModernItemModel(String path, BiConsumer<Key, ModernItemModel> callback) {

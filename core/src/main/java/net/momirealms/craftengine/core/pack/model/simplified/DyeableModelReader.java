@@ -8,15 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class GeneratedModelReader implements SimplifiedModelReader {
-    public static final GeneratedModelReader GENERATED = new GeneratedModelReader("generated");
-    public static final GeneratedModelReader HANDHELD = new GeneratedModelReader("handheld");
+public final class DyeableModelReader implements SimplifiedModelReader {
+    public static final DyeableModelReader INSTANCE = new DyeableModelReader();
 
-    private final String model;
-
-    private GeneratedModelReader(String model) {
-        this.model = model;
-    }
+    private DyeableModelReader() {}
 
     @Override
     public Map<String, Object> convert(List<String> textures, List<String> optionalModelPaths, Key id) {
@@ -42,21 +37,31 @@ public final class GeneratedModelReader implements SimplifiedModelReader {
                 "type", "model",
                 "path", autoModelPath ? id.namespace() + ":item/" + id.value() : optionalModelPaths.getFirst(),
                 "generation", Map.of(
-                        "parent", "item/" + this.model,
+                        "parent", "item/generated",
                         "textures", texturesProperty
+                ),
+                "tints", List.of(
+                        Map.of(
+                                "type", "minecraft:dye",
+                                "default", -6265536
+                        )
                 )
         );
     }
 
     @Override
-    public @NotNull Map<String, Object> convert(List<String> optionalModelPaths) {
-        if (optionalModelPaths.size() >= 2) {
-            return Map.of(
-                    "type", "composite",
-                    "models", optionalModelPaths
-            );
-        } else {
-            return Map.of("path", optionalModelPaths.getFirst());
+    public @NotNull Map<String, Object> convert(List<String> models) {
+        if (models.size() != 1) {
+            throw new LocalizedResourceConfigException("warning.config.item.simplified_model.invalid_model", "1", String.valueOf(models.size()));
         }
+        return Map.of(
+                "path", models.getFirst(),
+                "tints", List.of(
+                        Map.of(
+                                "type", "minecraft:dye",
+                                "default", -6265536
+                        )
+                )
+        );
     }
 }
