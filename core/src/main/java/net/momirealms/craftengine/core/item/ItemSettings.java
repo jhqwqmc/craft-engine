@@ -64,6 +64,7 @@ public final class ItemSettings {
         if (this.equipment != null) {
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
+                data.setAssetId(null);
                 processors.add(new EquippableProcessor(data));
             }
             if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {

@@ -2,7 +2,7 @@ package net.momirealms.craftengine.core.item.equipment;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.item.processor.EquippableAssetIdProcessor;
+import net.momirealms.craftengine.core.item.processor.OverwritableEquippableAssetIdProcessor;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -27,7 +27,7 @@ public final class ComponentBasedEquipment extends AbstractEquipment implements 
 
     @Override
     public List<ItemProcessor> modifiers() {
-        return List.of(new EquippableAssetIdProcessor(this.assetId));
+        return List.of(new OverwritableEquippableAssetIdProcessor(this.assetId));
     }
 
     public EnumMap<EquipmentLayerType, List<Layer>> layers() {

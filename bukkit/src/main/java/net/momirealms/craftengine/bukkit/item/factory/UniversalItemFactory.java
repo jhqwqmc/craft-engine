@@ -6,6 +6,7 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.attribute.AttributeModifier;
+import net.momirealms.craftengine.core.item.ItemType;
 import net.momirealms.craftengine.core.item.data.Enchantment;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.item.data.Trim;
@@ -65,6 +66,11 @@ public class UniversalItemFactory extends BukkitItemFactory<LegacyItemWrapper> {
     @Override
     protected boolean removeTag(LegacyItemWrapper item, Object... path) {
         return item.remove(path);
+    }
+
+    @Override
+    protected ItemType type(LegacyItemWrapper item) {
+        return item.itemType();
     }
 
     @Override
