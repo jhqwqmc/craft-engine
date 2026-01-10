@@ -39,7 +39,7 @@ items:
         loot:
           template: default:loot_table/furniture
           arguments:
-            item: default:bench
+            item: default:globe
   default:globe_earth:
     data::item-name: <!i><lang:item.default.globe>
     model: minecraft:item/custom/globe_earth
