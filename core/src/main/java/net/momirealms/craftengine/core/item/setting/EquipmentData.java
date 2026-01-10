@@ -72,6 +72,7 @@ public class EquipmentData {
         return slot;
     }
 
+    @Nullable
     public Key assetId() {
         return assetId;
     }
@@ -92,6 +93,7 @@ public class EquipmentData {
         return equipOnInteract;
     }
 
+    @Nullable
     public Key cameraOverlay() {
         return cameraOverlay;
     }
