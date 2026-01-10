@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 @SuppressWarnings("DuplicatedCode")
-public class TemplateManagerImpl implements TemplateManager {
+public final class TemplateManagerImpl implements TemplateManager {
     private static final ArgumentString TEMPLATE = ArgumentString.Literal.literal("template");
     private static final ArgumentString TEMPLATES = ArgumentString.Literal.literal("templates");
     private static final ArgumentString OVERRIDES = ArgumentString.Literal.literal("overrides");
@@ -26,7 +26,7 @@ public class TemplateManagerImpl implements TemplateManager {
     private final Map<Key, Object> templates = new HashMap<>();
     private final TemplateParser templateParser;
 
-    protected TemplateManagerImpl() {
+    TemplateManagerImpl() {
         this.templateParser = new TemplateParser();
     }
 
