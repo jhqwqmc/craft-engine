@@ -5,6 +5,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
+import net.momirealms.craftengine.core.block.AutoStateGroup;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.pack.allocator.VisualBlockStateAllocator;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -25,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class DebugAppearanceStateUsageCommand extends BukkitCommandFeature<CommandSender> {
+public class DebugVisualStateUsageCommand extends BukkitCommandFeature<CommandSender> {
 
-    public DebugAppearanceStateUsageCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
+    public DebugVisualStateUsageCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
         super(commandManager, plugin);
     }
 
@@ -101,6 +102,6 @@ public class DebugAppearanceStateUsageCommand extends BukkitCommandFeature<Comma
 
     @Override
     public String getFeatureID() {
-        return "debug_appearance_state_usage";
+        return "debug_visual_state_usage";
     }
 }
