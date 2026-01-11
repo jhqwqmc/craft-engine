@@ -14,12 +14,14 @@ import java.util.Map;
 public final class ProfileProcessor implements SimpleNetworkItemProcessor {
     public static final ItemProcessorFactory<ProfileProcessor> FACTORY = new Factory();
     private static final Object[] NBT_PATH = new Object[] {"SkullOwner"};
-    private final String profileName;
-    private final String base64Data;
+    private final @Nullable String profileName;
+    private final @Nullable String base64Data;
+    private final @Nullable String texture;
 
-    public ProfileProcessor(String profileName, String base64Data) {
+    public ProfileProcessor(@Nullable String profileName, @Nullable String base64Data, @Nullable String texture) {
         this.profileName = profileName;
         this.base64Data = base64Data;
+        this.texture = texture;
     }
 
     @Override
@@ -32,8 +34,10 @@ public final class ProfileProcessor implements SimpleNetworkItemProcessor {
             } else {
                 item.setTag(resultString, "SkullOwner");
             }
-        } else {
+        } else if (this.base64Data != null) {
             item.skull(this.base64Data);
+        } else if (VersionHelper.isOrAbove1_20_5() && this.texture != null) {
+            item.setJavaComponent(DataComponentKeys.PROFILE, Map.of("texture", this.texture));
         }
         return item;
     }
@@ -50,22 +54,33 @@ public final class ProfileProcessor implements SimpleNetworkItemProcessor {
                     base64Data = guess;
                 }
                 if (base64Data != null) {
-                    return new ProfileProcessor(null, base64Data);
+                    return new ProfileProcessor(null, base64Data, null);
+                } else if (VersionHelper.isOrAbove1_20_5() && (guess.contains(":") || guess.contains("/")) && !guess.contains("<") && !guess.contains(">")) {
+                    return new ProfileProcessor(null, null, guess);
                 } else {
-                    return new ProfileProcessor(guess, null);
+                    return new ProfileProcessor(guess, null, null);
                 }
             } else {
                 Map<String, Object> profile = ResourceConfigUtils.getAsMap(arg, "profile");
-                String base64Data = ResourceConfigUtils.getAsStringOrNull(profile.get("base64"));
+                Object base64Raw = profile.get("base64");
+                String base64Data = ResourceConfigUtils.getAsStringOrNull(base64Raw);
                 if (base64Data == null && profile.containsKey("url")) {
                     String url = ResourceConfigUtils.getAsStringOrNull(profile.get("url"));
                     base64Data = Base64Utils.encode("{\"textures\":{\"SKIN\":{\"url\":\"" + url + "\"}}}");
+                } else if (base64Data != null && base64Raw instanceof Map<?,?>) {
+                    base64Data = Base64Utils.encode(GsonHelper.get().toJson(base64Raw));
                 }
                 if (base64Data != null) {
-                    return new ProfileProcessor(null, base64Data);
+                    return new ProfileProcessor(null, base64Data, null);
+                }
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    String texture = ResourceConfigUtils.getAsStringOrNull(profile.get("texture"));
+                    if (texture != null) {
+                        return new ProfileProcessor(null, null, texture);
+                    }
                 }
                 String profileName = ResourceConfigUtils.getAsStringOrNull(profile.getOrDefault("name", "<arg:player.name>"));
-                return new ProfileProcessor(profileName, null);
+                return new ProfileProcessor(profileName, null, null);
             }
         }
     }
