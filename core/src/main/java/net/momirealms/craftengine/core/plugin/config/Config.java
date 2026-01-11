@@ -201,6 +201,7 @@ public class Config {
     protected int item$custom_model_data_starting_value$default;
     protected Map<Key, Integer> item$custom_model_data_starting_value$overrides;
     protected boolean item$always_use_item_model;
+    protected boolean item$always_use_custom_model_data;
     protected String item$default_material = "";
     protected boolean item$default_drop_display$enable = false;
     protected String item$default_drop_display$format = null;
@@ -497,6 +498,7 @@ public class Config {
         item$update_triggers$pick_up = config.getBoolean("item.update-triggers.pick-up", false);
         item$custom_model_data_starting_value$default = config.getInt("item.custom-model-data-starting-value.default", 10000);
         item$always_use_item_model = config.getBoolean("item.always-use-item-model", true) && VersionHelper.isOrAbove1_21_2();
+        item$always_use_custom_model_data = config.getBoolean("item.always-use-custom-model-data", false) && VersionHelper.isOrAbove1_21_2();
         item$default_material = config.getString("item.default-material", "");
         item$default_drop_display$enable = config.getBoolean("item.default-drop-display.enable", false);
         item$default_drop_display$format = item$default_drop_display$enable ? config.getString("item.default-drop-display.format", "<arg:count>x <name>"): null;
@@ -692,6 +694,10 @@ public class Config {
 
     public static boolean alwaysUseItemModel() {
         return instance.item$always_use_item_model;
+    }
+
+    public static boolean alwaysUseCustomModelData() {
+        return instance.item$always_use_custom_model_data;
     }
 
     public static boolean filterConfigurationPhaseDisconnect() {

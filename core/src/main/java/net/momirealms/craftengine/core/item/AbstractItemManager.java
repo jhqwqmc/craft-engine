@@ -373,7 +373,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
 
         private boolean needsCustomModelDataCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_2);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_2) || Config.alwaysUseCustomModelData();
         }
 
         private boolean needsItemModelCompatibility() {
@@ -449,14 +449,16 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 Object rawCustomModelData = section.get("custom-model-data");
                 if (rawCustomModelData != null) {
                     int customModelData = ResourceConfigUtils.getAsInt(rawCustomModelData, "custom-model-data");
-                    if (customModelData < 0) {
-                        throw new LocalizedResourceConfigException("warning.config.item.invalid_custom_model_data", String.valueOf(customModelData));
+                    if (customModelData > 0) {
+                        if (customModelData > 16_777_216) {
+                            throw new LocalizedResourceConfigException("warning.config.item.bad_custom_model_data", String.valueOf(customModelData));
+                        }
+                        forceCustomModelData = true;
+                        customModelDataFuture = getOrCreateIdAllocator(clientBoundMaterial).assignFixedId(id.asString(), customModelData);
+                    } else {
+                        forceCustomModelData = false;
+                        customModelDataFuture = CompletableFuture.completedFuture(0);
                     }
-                    if (customModelData > 16_777_216) {
-                        throw new LocalizedResourceConfigException("warning.config.item.bad_custom_model_data", String.valueOf(customModelData));
-                    }
-                    customModelDataFuture = getOrCreateIdAllocator(clientBoundMaterial).assignFixedId(id.asString(), customModelData);
-                    forceCustomModelData = true;
                 }
                 // 用户没指定custom-model-data，则看当前资源包版本兼容需求
                 else {
@@ -522,7 +524,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 boolean clientBoundModel = VersionHelper.PREMIUM && (section.containsKey("client-bound-model") ? ResourceConfigUtils.getAsBoolean(section.get("client-bound-model"), "client-bound-model") : Config.globalClientboundModel());
 
                 CustomItem.Builder<I> itemBuilder = createPlatformItemBuilder(uniqueId, material, clientBoundMaterial);
-
 
                 // 对于不重要的配置，可以仅警告，不返回
                 ExceptionCollector<LocalizedResourceConfigException> collector = new ExceptionCollector<>();

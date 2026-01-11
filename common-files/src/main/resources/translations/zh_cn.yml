@@ -279,7 +279,6 @@ warning.config.item.data.external.missing_id: "<yellow>在文件 <arg:0> 发现�
 warning.config.item.data.external.invalid_source: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 在 'external' 数据中使用了无效的物品来源 '<arg:2>'</yellow>"
 warning.config.item.missing_material: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 缺少必需的 'material' 参数</yellow>"
 warning.config.item.invalid_material: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的材料类型 '<arg:2>'</yellow>"
-warning.config.item.invalid_custom_model_data: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的负数模型值 '<arg:2>'</yellow>"
 warning.config.item.bad_custom_model_data: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用的自定义模型数据 '<arg:2>' 数值过大 建议使用小于 16,777,216 的值</yellow>"
 warning.config.item.item_model.conflict: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用了无效的 'item-model' 选项. 这个 item-model 已经存在对应的原版物品</yellow>"
 warning.config.item.custom_model_data.conflict: "<yellow>在文件 <arg:0> 发现问题 - 物品 '<arg:1>' 使用的自定义模型数据 '<arg:2>' 已被物品 '<arg:3>' 占用</yellow>"

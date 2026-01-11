@@ -219,15 +219,12 @@ item:
   # You can override this global setting per item using the
   # client-bound-model option.
   client-bound-model: true
-  # When enabled (recommended), this option adds both custom-model-data
-  # and an item-model to optimize client-side rendering.
-  #
-  # If disabled, the system falls back to using only custom-model-data.
-  # You can override this behavior by setting the item-model option
-  # on a per-item basis.
-  #
-  # This option only works if your resource pack supports 1.21.1 or below
+  # When enabled (recommended), this option adds both custom-model-data and an item-model
+  # to optimize client-side rendering if your resource pack supports 1.21.1 or below.
   always-use-item-model: true
+  # When enabled, custom model data will be applied to items even if your resource pack only supports 1.21.2 and above.
+  # You can decide whether to enable this feature based on your needs (for example, if Geyser support is required).
+  always-use-custom-model-data: false
   # Since Minecraft renders lore text in italics by default, you can
   # optionally prefix any lore with <!i> to remove the italic formatting.
   non-italic-tag: false
