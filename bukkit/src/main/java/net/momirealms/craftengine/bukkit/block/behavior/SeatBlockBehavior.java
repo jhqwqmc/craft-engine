@@ -55,17 +55,12 @@ public class SeatBlockBehavior extends BukkitBlockBehavior implements EntityBloc
             return InteractionResult.PASS;
         }
         BlockPos pos = context.getClickedPos();
-        World level = context.getLevel();
-        Location location = new Location((org.bukkit.World) level.platformWorld(), pos.x, pos.y, pos.z);
-        if (!BukkitCraftEngine.instance().antiGriefProvider().test(player.platformPlayer(), Flag.INTERACT, location)) {
-            return InteractionResult.SUCCESS_AND_CANCEL;
-        }
-        player.swingHand(context.getHand());
         CEWorld world = context.getLevel().storageWorld();
         BlockEntity blockEntity = world.getBlockEntityAtIfLoaded(pos);
         if (!(blockEntity instanceof SeatBlockEntity seatBlockEntity)) {
             return InteractionResult.PASS;
         }
+        player.swingHand(context.getHand());
         if (seatBlockEntity.spawnSeat(player)) {
             return InteractionResult.SUCCESS_AND_CANCEL;
         } else {
