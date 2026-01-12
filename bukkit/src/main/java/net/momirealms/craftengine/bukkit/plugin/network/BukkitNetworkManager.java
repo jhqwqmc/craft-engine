@@ -1380,7 +1380,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
         private static void handlePickItemFromEntityOnMainThread(Player player, BukkitFurniture furniture) throws Throwable {
             Key itemId = furniture.config().settings().itemId();
             if (itemId == null) return;
-            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.getBukkitEntity()));
+            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.bukkitEntity()));
         }
     }
 

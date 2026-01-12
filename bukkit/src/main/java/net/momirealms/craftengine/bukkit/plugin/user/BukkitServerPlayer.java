@@ -168,7 +168,7 @@ public class BukkitServerPlayer extends Player {
     // 控制展示实体可见距离
     private double displayEntityViewDistance;
     // 玩家使用的游戏版本
-    private GameEdition gameEdition = GameEdition.UNKNOWN;
+    private GameEdition gameEdition;
     // 客户端协议
     private ProtocolVersion protocolVersion = ProtocolVersion.UNKNOWN;
     // 有概率出现如下情况
@@ -591,7 +591,7 @@ public class BukkitServerPlayer extends Player {
             }
             this.lastHitFurniture = furniture;
             if (furniture != null && forceShow) {
-                FurnitureVariant currentVariant = furniture.getCurrentVariant();
+                FurnitureVariant currentVariant = furniture.currentVariant();
                 List<AABB> aabbs = new ArrayList<>();
                 for (FurnitureHitBoxConfig<?> config : currentVariant.hitBoxConfigs()) {
                     config.prepareBoundingBox(furniture.position(), aabbs::add, true);
@@ -1578,7 +1578,7 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public GameEdition gameEdition() {
-        if (this.gameEdition == GameEdition.UNKNOWN) {
+        if (this.gameEdition == null) {
             this.gameEdition = this.plugin.compatibilityManager().isBedrockPlayer(this) ? GameEdition.BEDROCK : GameEdition.JAVA;
         }
         return this.gameEdition;
