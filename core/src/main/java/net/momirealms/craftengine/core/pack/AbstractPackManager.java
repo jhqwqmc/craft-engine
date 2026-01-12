@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.font.Font;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
+import net.momirealms.craftengine.core.item.equipment.EquipmentLayerType;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
 import net.momirealms.craftengine.core.pack.atlas.Atlas;
 import net.momirealms.craftengine.core.pack.atlas.TexturedModel;
@@ -45,6 +46,7 @@ import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.sound.AbstractSoundManager;
 import net.momirealms.craftengine.core.sound.SoundEvent;
 import net.momirealms.craftengine.core.util.*;
+import org.incendo.cloud.component.CommandComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -2451,6 +2453,35 @@ public abstract class AbstractPackManager implements PackManager {
         if (assetId == null) {
             this.plugin.logger().severe("Asset id is null for equipment " + componentBasedEquipment);
             return;
+        }
+
+        // 纠正路径
+        for (Map.Entry<EquipmentLayerType, List<ComponentBasedEquipment.Layer>> entry : componentBasedEquipment.layers().entrySet()) {
+            for (ComponentBasedEquipment.Layer layer : entry.getValue()) {
+                Key texture = layer.texture();
+                Path badPath = generatedPackPath
+                        .resolve("assets")
+                        .resolve(texture.namespace())
+                        .resolve("textures")
+                        .resolve(texture.value() + ".png");
+                Path correctPath = generatedPackPath
+                        .resolve("assets")
+                        .resolve(texture.namespace())
+                        .resolve("textures")
+                        .resolve("entity")
+                        .resolve("equipment")
+                        .resolve(entry.getKey().id())
+                        .resolve(texture.value() + ".png");
+                if (Files.exists(badPath) && !Files.exists(correctPath)) {
+                    try {
+                        Files.createDirectories(correctPath.getParent());
+                        Files.move(badPath, correctPath);
+                    } catch (IOException e) {
+                        plugin.logger().severe("Error creating " + correctPath.toAbsolutePath());
+                        return;
+                    }
+                }
+            }
         }
 
         if (Config.packMaxVersion().isAtOrAbove(MinecraftVersion.V1_21_4)) {
