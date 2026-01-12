@@ -55,7 +55,6 @@ public abstract class Furniture implements Cullable {
     protected int[] virtualEntityIds;
     /** IDs of entities specifically acting as physics colliders */
     protected int[] colliderEntityIds;
-
     private boolean hasExternalModel;
 
     protected Furniture(Entity metaDataEntity, FurnitureDataAccessor data, CustomFurniture config) {

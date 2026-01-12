@@ -106,15 +106,17 @@ public class ItemFrameBlockEntity extends BlockEntity {
         return this.cacheMetadata;
     }
 
-    public @Nullable Object mapId() {
+    @Nullable
+    public Object mapId() {
         return this.mapId;
     }
 
-    public @Nullable Object mapItemSavedData() {
+    @Nullable
+    public Object mapItemSavedData() {
         return this.mapItemSavedData;
     }
 
-    public void mapItemSavedData(@Nullable Object data) {
+    public void setMapItemSavedData(@Nullable Object data) {
         this.mapItemSavedData = data;
     }
 

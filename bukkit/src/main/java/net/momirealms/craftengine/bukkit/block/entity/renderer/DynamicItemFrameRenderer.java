@@ -77,7 +77,7 @@ public class DynamicItemFrameRenderer implements DynamicBlockEntityRenderer {
         if (savedData == null) {
             savedData = FastNMS.INSTANCE.method$MapItem$getSavedData(mapId, world.world.serverWorld());
             if (savedData == null) return;
-            this.blockEntity.mapItemSavedData(savedData);
+            this.blockEntity.setMapItemSavedData(savedData);
         }
         try {
             Cache<Object, Boolean> receivedMapData = player.receivedMapData();

@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.world.chunk.client;
 import net.momirealms.craftengine.core.entity.Cullable;
 import net.momirealms.craftengine.core.entity.player.Player;
 
-public class VirtualCullableObject {
+public final class VirtualCullableObject {
     public Cullable cullable;
     public boolean isShown;
 
