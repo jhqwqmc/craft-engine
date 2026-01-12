@@ -30,12 +30,22 @@ public final class ImageTag implements TagResolver {
             Optional<Image> optional = CraftEngine.instance().fontManager().imageById(Key.of(namespaceOrId, id));
             if (optional.isPresent()) {
                 if (arguments.hasNext()) {
-                    int row = arguments.popOr("No argument row provided").asInt().orElseThrow(() -> ctx.newException("Invalid argument number", arguments));
-                    if (arguments.hasNext()) {
-                        int column = arguments.popOr("No argument column provided").asInt().orElseThrow(() -> ctx.newException("Invalid argument number", arguments));
-                        return Tag.selfClosingInserting(optional.get().componentAt(row, column));
-                    } else {
-                        return Tag.selfClosingInserting(optional.get().componentAt(row, 0));
+                    String rowOrFormat = arguments.popOr("No argument row provided").toString();
+                    try {
+                        int row = Integer.parseInt(rowOrFormat);
+                        if (arguments.hasNext()) {
+                            int column = arguments.popOr("No argument column provided").asInt().orElseThrow(() -> ctx.newException("Invalid argument number", arguments));
+                            if (arguments.hasNext()) {
+                                String format = arguments.popOr("No argument format provided").toString();
+                                return Tag.selfClosingInserting(ctx.deserialize(format + optional.get().miniMessageAt(row, column)));
+                            } else {
+                                return Tag.selfClosingInserting(optional.get().componentAt(row, column));
+                            }
+                        } else {
+                            return Tag.selfClosingInserting(optional.get().componentAt(row, 0));
+                        }
+                    } catch (NumberFormatException e) {
+                        return Tag.selfClosingInserting(ctx.deserialize(rowOrFormat + optional.get().miniMessageAt(0, 0)));
                     }
                 } else {
                     return Tag.selfClosingInserting(optional.get().componentAt(0,0));
