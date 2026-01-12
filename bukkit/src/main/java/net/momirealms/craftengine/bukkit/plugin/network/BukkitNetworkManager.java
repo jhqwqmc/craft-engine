@@ -61,9 +61,11 @@ import net.momirealms.craftengine.bukkit.world.score.BukkitTeamManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
+import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.font.EmojiTextProcessResult;
 import net.momirealms.craftengine.core.font.FontManager;
@@ -103,6 +105,7 @@ import net.momirealms.craftengine.core.world.chunk.client.PackedOcclusionStorage
 import net.momirealms.craftengine.core.world.chunk.client.SingularOcclusionStorage;
 import net.momirealms.craftengine.core.world.chunk.packet.BlockEntityData;
 import net.momirealms.craftengine.core.world.chunk.packet.MCSection;
+import net.momirealms.craftengine.core.world.context.InteractEntityContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
@@ -1298,11 +1301,11 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
         }
     }
 
-    public static class PickItemFromBlockListener implements NMSPacketListener {
+    public class PickItemFromBlockListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
-            Player player = (Player) user.platformPlayer();
+            BukkitServerPlayer player = (BukkitServerPlayer) user;
             if (player == null) return;
             Object pos;
             try {
@@ -1311,20 +1314,25 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 CraftEngine.instance().logger().warn("Failed to get pos from ServerboundPickItemFromBlockPacket", e);
                 return;
             }
+            int x = FastNMS.INSTANCE.field$Vec3i$x(pos);
+            int y = FastNMS.INSTANCE.field$Vec3i$y(pos);
+            int z = FastNMS.INSTANCE.field$Vec3i$z(pos);
+            // 太远了，有挂
+            if (!player.canInteractPoint(new Vec3d(x, y, z), 4)) {
+                return;
+            }
             if (VersionHelper.isFolia()) {
-                int x = FastNMS.INSTANCE.field$Vec3i$x(pos);
-                int z = FastNMS.INSTANCE.field$Vec3i$z(pos);
-                BukkitCraftEngine.instance().scheduler().sync().run(() -> {
+                player.platformPlayer().getScheduler().run(BukkitNetworkManager.this.plugin.javaPlugin(), (t) -> {
                     try {
-                        handlePickItemFromBlockPacketOnMainThread(player, pos);
+                        handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
                     } catch (Throwable e) {
                         CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromBlockPacket on region thread", e);
                     }
-                }, player.getWorld(), x >> 4, z >> 4);
+                }, null);
             } else {
                 BukkitCraftEngine.instance().scheduler().sync().run(() -> {
                     try {
-                        handlePickItemFromBlockPacketOnMainThread(player, pos);
+                        handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
                     } catch (Throwable e) {
                         CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromBlockPacket on main thread", e);
                     }
@@ -1332,14 +1340,23 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             }
         }
 
-        private static void handlePickItemFromBlockPacketOnMainThread(Player player, Object pos) throws Throwable {
-            Object serverLevel = FastNMS.INSTANCE.field$CraftWorld$ServerLevel(player.getWorld());
+        private static void handlePickItemFromBlockPacketOnMainThread(BukkitServerPlayer player, Object pos) throws Throwable {
+            Object serverLevel = player.world().serverWorld();
             Object blockState = FastNMS.INSTANCE.method$BlockGetter$getBlockState(serverLevel, pos);
-            ImmutableBlockState state = BukkitBlockManager.instance().getImmutableBlockState(BlockStateUtils.blockStateToId(blockState));
-            if (state == null) return;
-            Key itemId = state.settings().itemId();
-            if (itemId == null) return;
-            pickItem(player, itemId, pos, null);
+            Optional<ImmutableBlockState> optionalState = BlockStateUtils.getOptionalCustomBlockState(blockState);
+            if (optionalState.isEmpty()) return;
+            ImmutableBlockState customBlockState = optionalState.get();
+            Item<?> item = customBlockState.behavior().itemToPickup(player.world(), LocationUtils.fromBlockPos(pos), customBlockState, player);
+            ItemStack itemStack;
+            if (item == null) {
+                Key itemId = customBlockState.settings().itemId();
+                if (itemId == null) return;
+                itemStack = BukkitCraftEngine.instance().itemManager().buildItemStack(itemId, player);
+                if (itemStack == null) return;
+            } else {
+                itemStack = (ItemStack) item.getItem();
+            }
+            pickItem(player.platformPlayer(), itemStack, pos, null);
         }
     }
 
@@ -1347,6 +1364,8 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
+            BukkitServerPlayer player = (BukkitServerPlayer) user;
+            if (player == null) return;
             int entityId;
             try {
                 entityId = (int) NetworkReflections.methodHandle$ServerboundPickItemFromEntityPacket$idGetter.invokeExact(packet);
@@ -1355,13 +1374,13 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 return;
             }
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
-            if (furniture == null) return;
-            Player player = (Player) user.platformPlayer();
-            if (player == null) return;
+            if (furniture == null || !player.canInteractPoint(furniture.position().toVec3d(), 16)) {
+                return;
+            }
             if (VersionHelper.isFolia()) {
-                player.getScheduler().run(BukkitCraftEngine.instance().javaPlugin(), (t) -> {
+                player.platformPlayer().getScheduler().run(BukkitCraftEngine.instance().javaPlugin(), (t) -> {
                     try {
-                        handlePickItemFromEntityOnMainThread(player, furniture);
+                        handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
                     } catch (Throwable e) {
                         CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromEntityPacket on region thread", e);
                     }
@@ -1369,7 +1388,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             } else {
                 BukkitCraftEngine.instance().scheduler().sync().run(() -> {
                     try {
-                        handlePickItemFromEntityOnMainThread(player, furniture);
+                        handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
                     } catch (Throwable e) {
                         CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromEntityPacket on main thread", e);
                     }
@@ -1377,19 +1396,22 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             }
         }
 
-        private static void handlePickItemFromEntityOnMainThread(Player player, BukkitFurniture furniture) throws Throwable {
-            Key itemId = furniture.config().settings().itemId();
-            if (itemId == null) return;
-            pickItem(player, itemId, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.bukkitEntity()));
+        private static void handlePickItemFromEntityOnMainThread(BukkitServerPlayer player, BukkitFurniture furniture) throws Throwable {
+            Item<?> item = furniture.config().behavior().itemToPickup(furniture, player);
+            ItemStack itemStack;
+            if (item == null) {
+                Key itemId = furniture.config().settings().itemId();
+                if (itemId == null) return;
+                itemStack = BukkitCraftEngine.instance().itemManager().buildItemStack(itemId, player);
+                if (itemStack == null) return;
+            } else {
+                itemStack = (ItemStack) item.getItem();
+            }
+            pickItem(player.platformPlayer(), itemStack, null, FastNMS.INSTANCE.method$CraftEntity$getHandle(furniture.bukkitEntity()));
         }
     }
 
-    private static void pickItem(Player player, Key itemId, @Nullable Object blockPos, @Nullable Object entity) throws Throwable {
-        ItemStack itemStack = BukkitCraftEngine.instance().itemManager().buildItemStack(itemId, BukkitCraftEngine.instance().adapt(player));
-        if (itemStack == null) {
-            CraftEngine.instance().logger().warn("Item: " + itemId + " is not a valid item");
-            return;
-        }
+    private static void pickItem(Player player, ItemStack itemStack, @Nullable Object blockPos, @Nullable Object entity) throws Throwable {
         assert CoreReflections.method$ServerGamePacketListenerImpl$tryPickItem != null;
         if (VersionHelper.isOrAbove1_21_5()) {
             CoreReflections.method$ServerGamePacketListenerImpl$tryPickItem.invoke(
@@ -4117,11 +4139,11 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     Vector direction = eyeLocation.getDirection();
                     Location endLocation = eyeLocation.clone();
                     endLocation.add(direction.multiply(serverPlayer.getCachedInteractionRange()));
-                    Optional<EntityHitResult> result = part.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
-                    if (result.isEmpty()) {
+                    Optional<EntityHitResult> optionalHitResult = part.aabb().clip(LocationUtils.toVec3d(eyeLocation), LocationUtils.toVec3d(endLocation));
+                    if (optionalHitResult.isEmpty()) {
                         return;
                     }
-                    EntityHitResult hitResult = result.get();
+                    EntityHitResult hitResult = optionalHitResult.get();
                     Vec3d hitLocation = hitResult.hitLocation();
 
                     // 获取正确的交互点
@@ -4129,6 +4151,25 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     // 触发事件
                     FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitBox);
                     if (EventUtils.fireAndCheckCancel(interactEvent)) {
+                        return;
+                    }
+
+                    // 执行家具行为
+                    FurnitureBehavior behavior = furniture.config.behavior();
+                    InteractEntityContext interactEntityContext = new InteractEntityContext(serverPlayer, hand, hitResult);
+                    InteractionResult result = behavior.useOnFurniture(interactEntityContext, furniture);
+                    if (result.success()) {
+                        serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
+                        return;
+                    }
+                    if (result == InteractionResult.TRY_EMPTY_HAND && hand == InteractionHand.MAIN_HAND) {
+                        result = behavior.useWithoutItem(interactEntityContext, furniture);
+                        if (result.success()) {
+                            serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
+                            return;
+                        }
+                    }
+                    if (result == InteractionResult.FAIL) {
                         return;
                     }
 
@@ -4159,9 +4200,9 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     if (serverPlayer.isSecondaryUseActive() && !itemInHand.isEmpty() && hitBox.config().canUseItemOn()) {
                         Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
                         if (optionalCustomItem.isPresent() && !optionalCustomItem.get().behaviors().isEmpty()) {
-                            for (ItemBehavior behavior : optionalCustomItem.get().behaviors()) {
-                                if (behavior instanceof FurnitureItemBehavior) {
-                                    behavior.useOnBlock(new UseOnContext(serverPlayer, InteractionHand.MAIN_HAND, new BlockHitResult(hitResult.hitLocation(), hitResult.direction(), BlockPos.fromVec3d(hitResult.hitLocation()), false)));
+                            for (ItemBehavior itemBehavior : optionalCustomItem.get().behaviors()) {
+                                if (itemBehavior instanceof FurnitureItemBehavior) {
+                                    itemBehavior.useOnBlock(new UseOnContext(serverPlayer, InteractionHand.MAIN_HAND, new BlockHitResult(hitResult.hitLocation(), hitResult.direction(), BlockPos.fromVec3d(hitResult.hitLocation()), false)));
                                     return;
                                 }
                             }

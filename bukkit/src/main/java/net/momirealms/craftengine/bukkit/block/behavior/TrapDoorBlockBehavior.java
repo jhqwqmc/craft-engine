@@ -92,9 +92,9 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
         Object level = context.getLevel().serverWorld();
         Object clickedPos = LocationUtils.toBlockPos(context.getClickedPos());
         Direction clickedFace = context.getClickedFace();
-        if (!context.replacingClickedOnBlock() && clickedFace.axis().isHorizontal()) {
+        if (!context.replacingClickedBlock() && clickedFace.axis().isHorizontal()) {
             state = state.with(this.facingProperty, clickedFace.toHorizontalDirection())
-                    .with(this.halfProperty, context.getClickLocation().y - context.getClickedPos().y() > 0.5 ? SingleBlockHalf.TOP : SingleBlockHalf.BOTTOM);
+                    .with(this.halfProperty, context.getClickedLocation().y - context.getClickedPos().y() > 0.5 ? SingleBlockHalf.TOP : SingleBlockHalf.BOTTOM);
         } else {
             state = state.with(this.facingProperty, context.getHorizontalDirection().opposite().toHorizontalDirection())
                     .with(this.halfProperty, clickedFace == Direction.UP ? SingleBlockHalf.BOTTOM : SingleBlockHalf.TOP);

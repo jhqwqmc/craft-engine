@@ -104,7 +104,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
             return InteractionResult.FAIL;
         }
 
-        Vec3d clickedPosition = context.getClickLocation();
+        Vec3d clickedPosition = context.getClickedLocation();
 
         // get position and rotation for placement
         Vec3d finalPlacePosition;

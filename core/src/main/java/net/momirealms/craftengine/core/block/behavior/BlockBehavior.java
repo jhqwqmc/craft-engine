@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.block.behavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.BlockBoundItemBehavior;
@@ -11,6 +12,7 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.BlockAccessor;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -20,6 +22,15 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public abstract class BlockBehavior {
+    protected final CustomBlock customBlock;
+
+    public BlockBehavior(CustomBlock customBlock) {
+        this.customBlock = customBlock;
+    }
+
+    public CustomBlock block() {
+        return this.customBlock;
+    }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getAs(Class<T> tClass) {
@@ -202,6 +213,10 @@ public abstract class BlockBehavior {
         return false;
     }
 
+    public Item<?> itemToPickup(World world, BlockPos pos, ImmutableBlockState state, Player player) {
+        return null;
+    }
+
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
         return state;
     }
@@ -230,6 +245,4 @@ public abstract class BlockBehavior {
     public InteractionResult useWithoutItem(UseOnContext context, ImmutableBlockState state) {
         return InteractionResult.PASS;
     }
-
-    public abstract CustomBlock block();
 }

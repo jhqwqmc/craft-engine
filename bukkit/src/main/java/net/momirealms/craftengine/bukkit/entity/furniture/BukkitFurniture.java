@@ -174,9 +174,13 @@ public class BukkitFurniture extends Furniture {
 
     @Override
     public void destroy() {
-        Optional.ofNullable(this.metaEntity.get()).ifPresent(Entity::remove);
-        for (Collider entity : super.colliders) {
-            entity.destroy();
+        try {
+            this.config.behavior().onRemove(this);
+        } finally {
+            Optional.ofNullable(this.metaEntity.get()).ifPresent(Entity::remove);
+            for (Collider entity : super.colliders) {
+                entity.destroy();
+            }
         }
     }
 

@@ -15,7 +15,7 @@ import net.momirealms.craftengine.bukkit.util.*;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.CustomItem;
@@ -188,7 +188,7 @@ public class ItemEventListener implements Listener {
                 boolean hasItem = player.getInventory().getItemInMainHand().getType() != Material.AIR || player.getInventory().getItemInOffHand().getType() != Material.AIR;
                 boolean flag = player.isSneaking() && hasItem;
                 if (!flag) {
-                    if (immutableBlockState.behavior() instanceof AbstractBlockBehavior behavior) {
+                    if (immutableBlockState.behavior() instanceof BlockBehavior behavior) {
                         InteractionResult result = behavior.useOnBlock(useOnContext, immutableBlockState);
                         if (result.success()) {
                             serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
@@ -224,7 +224,7 @@ public class ItemEventListener implements Listener {
                             SoundSet soundSet = SoundSet.getByBlock(blockOwner);
                             if (soundSet != null) {
                                 serverPlayer.playSound(
-                                        Vec3d.atCenterOf(hitResult.getBlockPos()),
+                                        Vec3d.atCenterOf(hitResult.blockPos()),
                                         openable.isOpen() ? soundSet.closeSound() : soundSet.openSound(),
                                         SoundSource.BLOCK,
                                         1, RandomUtils.generateRandomFloat(0.9f, 1));
@@ -233,7 +233,7 @@ public class ItemEventListener implements Listener {
                             SoundSet soundSet = SoundSet.getByBlock(blockOwner);
                             if (soundSet != null) {
                                 serverPlayer.playSound(
-                                        Vec3d.atCenterOf(hitResult.getBlockPos()),
+                                        Vec3d.atCenterOf(hitResult.blockPos()),
                                         soundSet.openSound(),
                                         SoundSource.BLOCK,
                                         1, RandomUtils.generateRandomFloat(0.9f, 1));

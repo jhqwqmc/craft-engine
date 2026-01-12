@@ -232,7 +232,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
             if ((!anotherDoor2 || anotherDoor1) && i == 0) {
                 int stepX = horizontalDirection.stepX();
                 int stepZ = horizontalDirection.stepZ();
-                Vec3d clickLocation = context.getClickLocation();
+                Vec3d clickLocation = context.getClickedLocation();
                 double d = clickLocation.x - (double) clickedPos.x();
                 double d1 = clickLocation.z - (double) clickedPos.z();
                 return stepX < 0 && d1 < (double) 0.5F || stepX > 0 && d1 > (double) 0.5F || stepZ < 0 && d > (double) 0.5F || stepZ > 0 && d < (double) 0.5F ? DoorHinge.RIGHT : DoorHinge.LEFT;
