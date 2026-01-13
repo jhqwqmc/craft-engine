@@ -13,6 +13,7 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.BlockAccessor;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.WorldAccessor;
 import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -205,7 +206,7 @@ public abstract class BlockBehavior {
     public void placeMultiState(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
     }
 
-    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+    public boolean canPlaceMultiState(WorldAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         return true;
     }
 

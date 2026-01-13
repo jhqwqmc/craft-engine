@@ -167,7 +167,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
     }
 
     @Override
-    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+    public boolean canPlaceMultiState(WorldAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         if (pos.y() >= accessor.worldHeight().getMaxBuildHeight() - 1) {
             return false;
         }

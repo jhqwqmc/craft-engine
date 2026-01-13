@@ -6,6 +6,7 @@ import net.momirealms.craftengine.core.block.behavior.*;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.world.BlockAccessor;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.WorldAccessor;
 import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.jetbrains.annotations.Nullable;
@@ -405,7 +406,7 @@ public class UnsafeCompositeBlockBehavior extends BukkitBlockBehavior
     }
 
     @Override
-    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+    public boolean canPlaceMultiState(WorldAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         for (BlockBehavior behavior : this.behaviors) {
             if (!behavior.canPlaceMultiState(accessor, pos, state)) {
                 return false;

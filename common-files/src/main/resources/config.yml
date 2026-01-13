@@ -120,6 +120,9 @@ resource-pack:
   # [Premium Exclusive]
   # Protect your resource pack from being cracked by others
   protection:
+    # Create a copy without any protection applied. This copy is entirely created using the standard Java library
+    # and maintains good compatibility with other programs (such as bedrock resource pack converters).
+    unprotected-copy: false
     # Prevent thieves from extracting your resource pack. These options will crash their software.
     # Some of these options may impact your resource pack size.
     crash-tools:
@@ -223,8 +226,11 @@ item:
   # to optimize client-side rendering if your resource pack supports 1.21.1 or below.
   always-use-item-model: true
   # When enabled, custom model data will be applied to items even if your resource pack only supports 1.21.2 and above.
-  # You can decide whether to enable this feature based on your needs (for example, if Geyser support is required).
+  # You can decide whether to enable this feature based on your needs
   always-use-custom-model-data: false
+  # Even if your resource pack only supports version 1.21.2+, also generate overrides for older versions.
+  # This may be helpful for some Bedrock resource pack converters working based on this.
+  always-generate-model-overrides: false
   # Since Minecraft renders lore text in italics by default, you can
   # optionally prefix any lore with <!i> to remove the italic formatting.
   non-italic-tag: false

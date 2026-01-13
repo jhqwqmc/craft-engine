@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.util;
+package net.momirealms.craftengine.core.util.random;
 
 import java.util.concurrent.ThreadLocalRandom;
 

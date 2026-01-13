@@ -70,6 +70,7 @@ public class Config {
     protected Path resource_pack$path;
     protected String resource_pack$description;
 
+    protected boolean resource_pack$protection$unprotected_copy;
     protected boolean resource_pack$protection$crash_tools$method_1;
     protected boolean resource_pack$protection$crash_tools$method_2;
     protected boolean resource_pack$protection$crash_tools$method_3;
@@ -202,6 +203,7 @@ public class Config {
     protected Map<Key, Integer> item$custom_model_data_starting_value$overrides;
     protected boolean item$always_use_item_model;
     protected boolean item$always_use_custom_model_data;
+    protected boolean item$always_generate_model_overrides;
     protected String item$default_material = "";
     protected boolean item$default_drop_display$enable = false;
     protected String item$default_drop_display$format = null;
@@ -357,7 +359,7 @@ public class Config {
         resource_pack$delivery$strict_player_uuid_validation = config.getBoolean("resource-pack.delivery.strict-player-uuid-validation", true);
         resource_pack$delivery$file_to_upload = resolvePath(config.getString("resource-pack.delivery.file-to-upload", "./generated/resource_pack.zip"));
         resource_pack$send$prompt = AdventureHelper.miniMessage().deserialize(config.getString("resource-pack.delivery.prompt", "<yellow>To fully experience our server, please accept our custom resource pack.</yellow>"));
-        resource_pack$protection$crash_tools$method_1 = config.getBoolean("resource-pack.protection.crash-tools.method-1", false);
+        resource_pack$protection$unprotected_copy = config.getBoolean("resource-pack.protection.unprotected-copy", false);
         resource_pack$protection$crash_tools$method_2 = config.getBoolean("resource-pack.protection.crash-tools.method-2", false);
         resource_pack$protection$crash_tools$method_3 = config.getBoolean("resource-pack.protection.crash-tools.method-3", false);
         resource_pack$protection$crash_tools$method_4 = config.getBoolean("resource-pack.protection.crash-tools.method-4", false);
@@ -498,7 +500,8 @@ public class Config {
         item$update_triggers$pick_up = config.getBoolean("item.update-triggers.pick-up", false);
         item$custom_model_data_starting_value$default = config.getInt("item.custom-model-data-starting-value.default", 10000);
         item$always_use_item_model = config.getBoolean("item.always-use-item-model", true) && VersionHelper.isOrAbove1_21_2();
-        item$always_use_custom_model_data = config.getBoolean("item.always-use-custom-model-data", false) && VersionHelper.isOrAbove1_21_2();
+        item$always_generate_model_overrides = config.getBoolean("item.always-generate-model-overrides", false);
+        item$always_use_custom_model_data = item$always_generate_model_overrides || (config.getBoolean("item.always-use-custom-model-data", false) && VersionHelper.isOrAbove1_21_2());
         item$default_material = config.getString("item.default-material", "");
         item$default_drop_display$enable = config.getBoolean("item.default-drop-display.enable", false);
         item$default_drop_display$format = item$default_drop_display$enable ? config.getString("item.default-drop-display.format", "<arg:count>x <name>"): null;
@@ -698,6 +701,10 @@ public class Config {
 
     public static boolean alwaysUseCustomModelData() {
         return instance.item$always_use_custom_model_data;
+    }
+
+    public static boolean alwaysGenerateModelOverrides() {
+        return instance.item$always_generate_model_overrides;
     }
 
     public static boolean filterConfigurationPhaseDisconnect() {
@@ -1291,6 +1298,10 @@ public class Config {
 
     public static String bedrockEditionPlayerPrefix() {
         return instance.bedrock_edition_support$player_prefix;
+    }
+
+    public static boolean createUnprotectedCopy() {
+        return instance.resource_pack$protection$unprotected_copy;
     }
 
     public YamlDocument loadOrCreateYamlData(String fileName) {

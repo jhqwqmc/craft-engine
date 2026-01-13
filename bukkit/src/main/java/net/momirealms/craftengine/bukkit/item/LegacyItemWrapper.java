@@ -9,7 +9,7 @@ import net.momirealms.craftengine.core.entity.EquipmentSlot;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.ItemType;
 import net.momirealms.craftengine.core.item.ItemWrapper;
-import net.momirealms.craftengine.core.util.RandomUtils;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;

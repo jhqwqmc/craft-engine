@@ -369,7 +369,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
 
         private boolean needsLegacyCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_4);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_4) || Config.alwaysGenerateModelOverrides();
         }
 
         private boolean needsCustomModelDataCompatibility() {

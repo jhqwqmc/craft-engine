@@ -146,32 +146,10 @@ public abstract class AbstractPackManager implements PackManager {
         this.cacheEventDispatcher = cacheEventDispatcher;
         this.generationEventDispatcher = generationEventDispatcher;
         this.zipGenerator = (p1, p2) -> {
-            try (FileOutputStream fos = new FileOutputStream(p2.toFile());
-                 ZipOutputStream zos = new ZipOutputStream(fos)) {
-                Files.walkFileTree(p1, new SimpleFileVisitor<>() {
-                    @Override
-                    public @NotNull FileVisitResult preVisitDirectory(@NotNull Path dir, @NotNull BasicFileAttributes attrs) throws IOException {
-                        if (!dir.equals(p1)) {
-                            String relativePath = p1.relativize(dir).toString().replace("\\", "/") + "/";
-                            ZipEntry entry = new ZipEntry(relativePath);
-                            zos.putNextEntry(entry);
-                            zos.closeEntry();
-                        }
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-                        String relativePath = p1.relativize(file).toString().replace("\\", "/");
-                        ZipEntry entry = new ZipEntry(relativePath);
-                        zos.putNextEntry(entry);
-                        Files.copy(file, zos);
-                        zos.closeEntry();
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+            try {
+                ZipUtils.compress(p1, p2);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to generate resource pack", e);
+                throw new RuntimeException("Failed to compress resource pack.", e);
             }
         };
         Path resourcesFolder = this.plugin.dataFolderPath().resolve("resources");
@@ -881,6 +859,14 @@ public abstract class AbstractPackManager implements PackManager {
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.create.start"));
             Path finalPath = resourcePackPath();
             Files.createDirectories(finalPath.getParent());
+            if (VersionHelper.PREMIUM && Config.createUnprotectedCopy()) {
+                Path newPath = finalPath.resolveSibling("unprotected_" + finalPath.getFileName());
+                try {
+                    ZipUtils.compress(generatedPackPath, newPath);
+                } catch (IOException e) {
+                    this.plugin.logger().severe("Error zipping unprotected resource pack", e);
+                }
+            }
             try {
                 this.zipGenerator.accept(generatedPackPath, finalPath);
             } catch (Exception e) {
@@ -3162,7 +3148,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void generateLegacyItemOverrides(Path generatedPackPath) {
-        if (Config.packMinVersion().isAtOrAbove(MinecraftVersion.V1_21_4)) return;
+        if (Config.packMinVersion().isAtOrAbove(MinecraftVersion.V1_21_4) && !Config.alwaysGenerateModelOverrides()) return;
         for (Map.Entry<Key, TreeSet<LegacyOverridesModel>> entry : this.plugin.itemManager().legacyItemOverrides().entrySet()) {
             Key vanillaLegacyModel = entry.getKey();
             Path overridedItemPath = generatedPackPath
