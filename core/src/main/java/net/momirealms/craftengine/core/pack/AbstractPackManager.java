@@ -13,6 +13,7 @@ import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.EquipmentLayerType;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
 import net.momirealms.craftengine.core.pack.atlas.Atlas;
+import net.momirealms.craftengine.core.pack.atlas.SimplifiedModelFile;
 import net.momirealms.craftengine.core.pack.atlas.TexturedModel;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ConditionalResolution;
@@ -70,8 +71,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import static net.momirealms.craftengine.core.util.MiscUtils.castToMap;
 
@@ -84,7 +83,7 @@ public abstract class AbstractPackManager implements PackManager {
     // 全版本的方块模型
     public static final Map<Key, JsonObject> PRESET_MODELS_BLOCK = new HashMap<>();
     // 全版本全模型
-    public static final Map<Key, TexturedModel> PRESET_MODELS = new HashMap<>();
+    public static final Map<Key, SimplifiedModelFile> PRESET_MODELS = new HashMap<>();
     // 1.21.4+物品模型定义
     public static final Map<Key, ModernItemModel> PRESET_ITEMS = new HashMap<>();
 
@@ -182,17 +181,18 @@ public abstract class AbstractPackManager implements PackManager {
         loadInternalData("internal/models/item/_all.json", ((key, jsonObject) -> {
             PRESET_MODERN_MODELS_ITEM.put(key, jsonObject);
             VANILLA_MODELS.add(Key.of(key.namespace(), "item/" + key.value()));
-            PRESET_MODELS.put(Key.of(key.namespace(), "item/" + key.value()), new TexturedModel(jsonObject));
+            PRESET_MODELS.put(Key.of(key.namespace(), "item/" + key.value()), new SimplifiedModelFile(jsonObject));
         }));
         loadInternalData("internal/models/block/_all.json", ((key, jsonObject) -> {
             PRESET_MODELS_BLOCK.put(key, jsonObject);
-            PRESET_MODELS.put(Key.of(key.namespace(), "block/" + key.value()), new TexturedModel(jsonObject));
+            PRESET_MODELS.put(Key.of(key.namespace(), "block/" + key.value()), new SimplifiedModelFile(jsonObject));
             Key modelKey = Key.of(key.namespace(), "block/" + key.value());
             VANILLA_MODELS.add(modelKey);
             VANILLA_BLOCK_MODELS.add(modelKey);
         }));
         loadModernItemModel("internal/items/_all.json", (PRESET_ITEMS::put));
         VANILLA_MODELS.add(Key.of("minecraft", "builtin/entity"));
+        VANILLA_MODELS.add(Key.of("minecraft", "builtin/generated"));
         VANILLA_MODELS.add(Key.of("minecraft", "item/player_head"));
         for (int i = 0; i < 256; i++) {
             VANILLA_TEXTURES.add(Key.of("minecraft", "font/unicode_page_" + String.format("%02x", i)));
@@ -1750,7 +1750,7 @@ public abstract class AbstractPackManager implements PackManager {
                         TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
                         continue;
                     }
-                    TexturedModel texturedModel = getTexturedModel(modelPath, modelJson, rootPaths, blockModelsCache);
+                    TexturedModel texturedModel = getTexturedModel(modelPath, TexturedModel.getParent(modelJson), TexturedModel.getTextures(modelJson), rootPaths, blockModelsCache);
                     blockModels.put(modelPath, texturedModel);
                     continue label;
                 }
@@ -1776,7 +1776,7 @@ public abstract class AbstractPackManager implements PackManager {
                         TranslationManager.instance().log("warning.config.resource_pack.generation.malformatted_json", modelJsonPath.toAbsolutePath().toString());
                         continue;
                     }
-                    TexturedModel texturedModel = getTexturedModel(modelPath, modelJson, rootPaths, itemModelsCache);
+                    TexturedModel texturedModel = getTexturedModel(modelPath, TexturedModel.getParent(modelJson), TexturedModel.getTextures(modelJson), rootPaths, itemModelsCache);
                     itemModels.put(modelPath, texturedModel);
                     continue label;
                 }
@@ -2095,49 +2095,49 @@ public abstract class AbstractPackManager implements PackManager {
                                    JsonObject originalBlockAtlas) {
     }
 
-    // 经过这一步拿到的模型为包含全部父贴图的模型
     @SuppressWarnings("all")
-    public TexturedModel getTexturedModel(Key path, JsonObject modelJson, Path[] rootPaths, Map<Key, TexturedModel> models) {
-        TexturedModel texturedModel = new TexturedModel(modelJson);
+    public TexturedModel getTexturedModel(Key currentRL, @Nullable Key parentRL, Map<String, Key> textures, Path[] rootPaths, Map<Key, TexturedModel> cached) {
+        TexturedModel texturedModel = new TexturedModel(textures);
         // 放这里防止parent互相引用造成死循环
-        models.put(path, texturedModel);
-        if (modelJson.has("parent")) {
-            Key parentModelPath = Key.from(modelJson.get("parent").getAsString());
-            TexturedModel parent = models.get(parentModelPath);
-            if (parent == null) {
-                String parentModelStringPath = "assets/" + parentModelPath.namespace() + "/models/" + parentModelPath.value() + ".json";
+        cached.put(currentRL, texturedModel);
+        if (parentRL != null) {
+            TexturedModel parentModel = cached.get(parentRL);
+            if (parentModel == null) {
+                String parentModelStringPath = "assets/" + parentRL.namespace() + "/models/" + parentRL.value() + ".json";
                 // 找一下有没有自定义的父模型
-                JsonObject parentModel = getParentModel(parentModelStringPath, rootPaths);
-                if (parentModel != null) {
-                    // 有自定义父模型，递归调用，以缓存到models里
-                    parent = getTexturedModel(parentModelPath, parentModel, rootPaths, models);
+                JsonObject parentModelJson = getParentModel(parentModelStringPath, rootPaths);
+                if (parentModelJson != null) {
+                    parentModel = getTexturedModel(parentRL, TexturedModel.getParent(parentModelJson), TexturedModel.getTextures(parentModelJson), rootPaths, cached);
                 } else {
-                    // 否则只从缓存里拿一份用于归并
-                    if (VANILLA_MODELS.contains(parentModelPath)) {
+                    if (VANILLA_MODELS.contains(parentRL)) {
                         // 可能为空，因为存在built-in模型
-                        parent = PRESET_MODELS.get(parentModelPath);
-                        if (parent == null) {
-                           parent = TexturedModel.BUILTIN;
+                        SimplifiedModelFile simplifiedModelFile = PRESET_MODELS.get(parentRL);
+                        if (simplifiedModelFile == null) {
+                            parentModel = TexturedModel.BUILTIN;
+                            cached.put(parentRL, parentModel);
+                        } else {
+                            parentModel = getTexturedModel(parentRL, simplifiedModelFile.parent, simplifiedModelFile.textures, rootPaths, cached);
                         }
-                        models.put(parentModelPath, parent);
                     } else {
-                        parent = TexturedModel.EMPTY;
-                        models.put(parentModelPath, parent);
+                        parentModel = TexturedModel.EMPTY;
+                        cached.put(parentRL, parentModel);
                     }
                 }
             }
-            if (parent == TexturedModel.EMPTY) {
-                String parentModelStringPath = "assets/" + parentModelPath.namespace() + "/models/" + parentModelPath.value() + ".json";
-                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", path.asString(), parentModelStringPath);
+            if (parentModel == TexturedModel.EMPTY) {
+                String parentModelStringPath = "assets/" + parentRL.namespace() + "/models/" + parentRL.value() + ".json";
+                TranslationManager.instance().log("warning.config.resource_pack.generation.missing_parent_model", currentRL.asString(), parentModelStringPath);
             } else {
-                texturedModel.addParent(parent);
+                texturedModel.addParent(parentModel);
             }
         }
         return texturedModel;
     }
 
     private JsonObject getParentModel(String path, Path[] rootPaths) {
-        for (Path rootPath : rootPaths) {
+        // 倒序遍历数组
+        for (int i = rootPaths.length - 1; i >= 0; i--) {
+            Path rootPath = rootPaths[i];
             Path modelJsonPath = rootPath.resolve(path);
             if (Files.exists(modelJsonPath)) {
                 JsonObject parentModelJson;
