@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 public class VanillaRecipeReader26_1 extends VanillaRecipeReader1_21_2 {
 
     @Override
-    public @NotNull DatapackRecipeResult craftingResult(JsonElement je) {
-        if (je instanceof JsonPrimitive primitive) {
-            return new DatapackRecipeResult(primitive.getAsString(), 1, null);
+    public @NotNull DatapackRecipeResult craftingResult(JsonElement resultElement) {
+        if (resultElement instanceof JsonPrimitive singleLine) {
+            return new DatapackRecipeResult(singleLine.getAsString(), 1, null);
         }
-        return super.craftingResult(je);
+        return super.craftingResult(resultElement);
     }
 }

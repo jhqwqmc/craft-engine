@@ -8,16 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TexturedModel {
-    public static final TexturedModel EMPTY = new TexturedModel(Map.of());
-    public static final TexturedModel BUILTIN = new TexturedModel(Map.of());
+    public static final TexturedModel EMPTY = new TexturedModel(Key.of("minecraft:missingno"), Map.of());
+    public static final TexturedModel BUILTIN = new TexturedModel(Key.of("minecraft:builtin"), Map.of());
+    public final Key path;
     public final Map<String, Key> textures;
 
-    public TexturedModel(Map<String, Key> textures) {
+    public TexturedModel(Key path, Map<String, Key> textures) {
         this.textures = new HashMap<>(textures);
-    }
-
-    public static TexturedModel fromJson(final JsonObject json) {
-        return new TexturedModel(getTextures(json));
+        this.path = path;
     }
 
     public static Map<String, Key> getTextures(JsonObject json) {

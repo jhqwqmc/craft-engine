@@ -96,7 +96,6 @@ resource-pack:
     enable: true
     # Fix textures that are not within the atlas. It is unreasonable to always rely on plugins to fix your mistakes.
     # You should strive to make your resource pack more standardized after gaining some experience with resource packs.
-    # The fix-atlas feature is not all-powerful since 1.21.11. In some cases, CraftEngine cannot fix it for you, and you will need to fix your model yourself.
     fix-atlas: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:
