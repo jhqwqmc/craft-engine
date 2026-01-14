@@ -216,8 +216,8 @@ items:
       texture: get_item
       name: <!i><#DAA520><l10n:internal.get_item>
       lore:
-        - <!i><gray><l10n:internal.get_item.0:'<arg:cooking_time>'>
-        - <!i><gray><l10n:internal.get_item.1:'<arg:cooking_experience>'>
+        - <!i><gray><l10n:internal.get_item.0>
+        - <!i><gray><l10n:internal.get_item.1>
   internal:cooking_info:
     template: internal:icon/2d
     arguments:
