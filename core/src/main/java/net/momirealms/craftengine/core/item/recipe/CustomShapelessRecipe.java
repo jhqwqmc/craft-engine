@@ -106,7 +106,7 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
         public CustomShapelessRecipe<A> readJson(Key id, JsonObject json) {
             return new CustomShapelessRecipe<>(id,
                     true,
-                    parseResult(VANILLA_RECIPE_HELPER.craftingResult(json.getAsJsonObject("result"))),
+                    parseResult(VANILLA_RECIPE_HELPER.craftingResult(json.get("result"))),
                     null,
                     VANILLA_RECIPE_HELPER.readGroup(json), VANILLA_RECIPE_HELPER.craftingCategory(json),
                     VANILLA_RECIPE_HELPER.shapelessIngredients(json.getAsJsonArray("ingredients")).stream().map(this::toIngredient).toList(),

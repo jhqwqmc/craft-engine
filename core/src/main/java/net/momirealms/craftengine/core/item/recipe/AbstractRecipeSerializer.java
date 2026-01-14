@@ -1,10 +1,7 @@
 package net.momirealms.craftengine.core.item.recipe;
 
 import net.momirealms.craftengine.core.item.*;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_20;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_20_5;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_21_2;
+import net.momirealms.craftengine.core.item.recipe.reader.*;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessors;
@@ -24,6 +21,8 @@ import java.util.*;
 
 public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implements RecipeSerializer<T, R> {
     protected static final VanillaRecipeReader VANILLA_RECIPE_HELPER =
+            VersionHelper.isOrAbove26_1() ?
+            new VanillaRecipeReader26_1() :
             VersionHelper.isOrAbove1_21_2() ?
             new VanillaRecipeReader1_21_2() :
             VersionHelper.isOrAbove1_20_5() ?

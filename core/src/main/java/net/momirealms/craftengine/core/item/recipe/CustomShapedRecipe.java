@@ -206,7 +206,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
             Map<Character, Ingredient<A>> ingredients = Maps.transformValues(VANILLA_RECIPE_HELPER.shapedIngredientMap(json.getAsJsonObject("key")), this::toIngredient);
             return new CustomShapedRecipe<>(id,
                     true,
-                    parseResult(VANILLA_RECIPE_HELPER.craftingResult(json.getAsJsonObject("result"))),
+                    parseResult(VANILLA_RECIPE_HELPER.craftingResult(json.get("result"))),
                     null,
                     VANILLA_RECIPE_HELPER.readGroup(json),
                     VANILLA_RECIPE_HELPER.craftingCategory(json),
