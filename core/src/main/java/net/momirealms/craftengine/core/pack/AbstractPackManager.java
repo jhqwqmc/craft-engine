@@ -1792,8 +1792,8 @@ public abstract class AbstractPackManager implements PackManager {
             if (above1_21_11) {
 
                 // 并查集联通贴图
-                Map<Key, Key> parent = new HashMap<>();
-                Map<Key, TextureStatus> textureStatuses = new HashMap<>(256);
+                Map<Key, Key> parent = new HashMap<>(512);
+                Map<Key, TextureStatus> textureStatuses = new HashMap<>(512);
                 Set<Key> notInAtlasTextures = new HashSet<>();
 
                 // 对全部方块状态的模型的贴图进行归类
