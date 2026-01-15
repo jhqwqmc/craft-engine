@@ -1165,7 +1165,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
         }
     }
 
-    public static class PlayerActionListener implements NMSPacketListener {
+    public class PlayerActionListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1174,17 +1174,16 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             World world = platformPlayer.getWorld();
             Object blockPos = FastNMS.INSTANCE.field$ServerboundPlayerActionPacket$pos(packet);
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
-            if (VersionHelper.isFolia()) {
-                platformPlayer.getScheduler().run(BukkitCraftEngine.instance().javaPlugin(), (t) -> {
-                    try {
-                        handlePlayerActionPacketOnMainThread(player, world, pos, packet);
-                    } catch (Exception e) {
-                        CraftEngine.instance().logger().warn("Failed to handle ServerboundPlayerActionPacket", e);
-                    }
-                }, () -> {});
-            } else {
-                handlePlayerActionPacketOnMainThread(player, world, pos, packet);
-            }
+            BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(new Vec3d(pos.x, pos.y, pos.z), 4)) {
+                    return;
+                }
+                try {
+                    handlePlayerActionPacketOnMainThread(player, world, pos, packet);
+                } catch (Exception e) {
+                    CraftEngine.instance().logger().warn("Failed to handle ServerboundPlayerActionPacket", e);
+                }
+            }, world, pos.x >> 4, pos.z >> 4);
         }
 
         private static void handlePlayerActionPacketOnMainThread(BukkitServerPlayer player, World world, BlockPos pos, Object packet) {
@@ -1319,26 +1318,16 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             int y = FastNMS.INSTANCE.field$Vec3i$y(pos);
             int z = FastNMS.INSTANCE.field$Vec3i$z(pos);
             // 太远了，有挂
-            if (!player.canInteractPoint(new Vec3d(x, y, z), 4)) {
-                return;
-            }
-            if (VersionHelper.isFolia()) {
-                player.platformPlayer().getScheduler().run(BukkitNetworkManager.this.plugin.javaPlugin(), (t) -> {
-                    try {
-                        handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
-                    } catch (Throwable e) {
-                        CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromBlockPacket on region thread", e);
-                    }
-                }, null);
-            } else {
-                BukkitCraftEngine.instance().scheduler().sync().run(() -> {
-                    try {
-                        handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
-                    } catch (Throwable e) {
-                        CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromBlockPacket on main thread", e);
-                    }
-                });
-            }
+            BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(new Vec3d(x, y, z), 4)) {
+                    return;
+                }
+                try {
+                    handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
+                } catch (Throwable e) {
+                    CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromBlockPacket on region thread", e);
+                }
+            }, player.platformPlayer().getWorld(), x >> 4, z >> 4);
         }
 
         private static void handlePickItemFromBlockPacketOnMainThread(BukkitServerPlayer player, Object pos) throws Throwable {
@@ -1361,7 +1350,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
         }
     }
 
-    public static class PickItemFromEntityListener implements NMSPacketListener {
+    public class PickItemFromEntityListener implements NMSPacketListener {
 
         @Override
         public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
@@ -1375,26 +1364,20 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 return;
             }
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByVirtualEntityId(entityId);
-            if (furniture == null || !player.canInteractPoint(furniture.position().toVec3d(), 16)) {
+            if (furniture == null) {
                 return;
             }
-            if (VersionHelper.isFolia()) {
-                player.platformPlayer().getScheduler().run(BukkitCraftEngine.instance().javaPlugin(), (t) -> {
-                    try {
-                        handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
-                    } catch (Throwable e) {
-                        CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromEntityPacket on region thread", e);
-                    }
-                }, () -> {});
-            } else {
-                BukkitCraftEngine.instance().scheduler().sync().run(() -> {
-                    try {
-                        handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
-                    } catch (Throwable e) {
-                        CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromEntityPacket on main thread", e);
-                    }
-                });
-            }
+            Location location = furniture.location();
+            BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(furniture.position().toVec3d(), 16)) {
+                    return;
+                }
+                try {
+                    handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
+                } catch (Throwable e) {
+                    CraftEngine.instance().logger().warn("Failed to handle ServerboundPickItemFromEntityPacket on region thread", e);
+                }
+            }, location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
         }
 
         private static void handlePickItemFromEntityOnMainThread(BukkitServerPlayer player, BukkitFurniture furniture) throws Throwable {
@@ -4041,17 +4024,13 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     // todo 冒险模式破坏工具白名单
                     if (serverPlayer.isAdventureMode() || !furniture.isValid()) return;
 
+                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
+                        return;
+                    }
+
                     // 先检查碰撞箱部分是否存在
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
                     if (hitBox == null) return;
-                    for (FurnitureHitboxPart part : hitBox.parts()) {
-                        if (part.entityId() == entityId) {
-                            // 检查玩家是否能破坏此点
-                            if (!serverPlayer.canInteractPoint(part.pos(), 16d)) {
-                                return;
-                            }
-                        }
-                    }
 
                     FurnitureHitEvent hitEvent = new FurnitureHitEvent(serverPlayer.platformPlayer(), furniture);
                     if (EventUtils.fireAndCheckCancel(hitEvent))
@@ -4117,18 +4096,18 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                         return;
                     }
 
+                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
+                        return;
+                    }
+
                     // 先检查碰撞箱部分是否存在
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
                     if (hitBox == null) return;
                     FurnitureHitboxPart part = null;
                     for (FurnitureHitboxPart p : hitBox.parts()) {
                         if (p.entityId() == entityId) {
-                            Vec3d pos = p.pos();
-                            // 检测距离
-                            if (!serverPlayer.canInteractPoint(pos, 16d)) {
-                                return;
-                            }
                             part = p;
+                            break;
                         }
                     }
                     if (part == null) {
@@ -4249,7 +4228,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             }
 
             if (VersionHelper.isFolia()) {
-                platformPlayer.getScheduler().run(BukkitCraftEngine.instance().javaPlugin(), t -> mainThreadTask.run(), () -> {});
+                BukkitNetworkManager.this.plugin.scheduler().sync().run(mainThreadTask, location.getWorld(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
             } else {
                 BukkitCraftEngine.instance().scheduler().executeSync(mainThreadTask);
             }

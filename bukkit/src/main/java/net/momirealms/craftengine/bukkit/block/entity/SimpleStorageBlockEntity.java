@@ -52,6 +52,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         this.inventory.close();
         ListTag itemsTag = new ListTag();
         @Nullable ItemStack[] storageContents = this.inventory.getStorageContents();
+        // todo 版本升级
         for (int i = 0; i < storageContents.length; i++) {
             if (storageContents[i] != null) {
                 if (VersionHelper.isOrAbove1_20_5()) {

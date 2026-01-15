@@ -49,6 +49,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
     protected void saveCustomData(CompoundTag tag) {
         tag.putInt("rotation", this.rotation);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
+        // todo 版本升级
         if (VersionHelper.isOrAbove1_20_5()) {
             CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, item.getLiteralObject())
                     .ifSuccess(success -> tag.put("item", success))
