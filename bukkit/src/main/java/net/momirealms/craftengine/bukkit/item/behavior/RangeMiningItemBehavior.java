@@ -94,8 +94,8 @@ public final class RangeMiningItemBehavior extends ItemBehavior {
             case FLAT -> switch (facing) {
                 case NORTH -> new Vec3i(x, y, -z);  // 北: z轴向里是-Z
                 case SOUTH -> new Vec3i(-x, y, z);  // 南: z轴向里是+Z，x翻转
-                case EAST  -> new Vec3i(-z, y, x);  // 东: z轴向里是+X
-                case WEST  -> new Vec3i(z, y, -x);  // 西: z轴向里是-X
+                case EAST  -> new Vec3i(z, y, x);  // 东: z轴向里是+X
+                case WEST  -> new Vec3i(-z, y, -x);  // 西: z轴向里是-X
                 default -> offset;
             };
 

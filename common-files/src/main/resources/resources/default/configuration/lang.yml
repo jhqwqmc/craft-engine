@@ -58,6 +58,7 @@ lang#items:
     item.default.hami_melon_seeds: Hami Melon Seeds
     item.default.magma_fruit: Magma Fruit
     item.default.globe: Globe
+    item.default.drill: Drill
   zh_cn:
     item.default.chinese_lantern: 灯笼
     item.default.fairy_flower: 仙灵花
@@ -115,6 +116,7 @@ lang#items:
     item.default.hami_melon_seeds: 哈密瓜种子
     item.default.magma_fruit: 岩浆果实
     item.default.globe: 地球仪
+    item.default.drill: 钻头
   fr_fr:
     item.default.chinese_lantern: Lanterne Chinoise
     item.default.fairy_flower: Fleur Fée
@@ -172,6 +174,7 @@ lang#items:
     item.default.hami_melon_seeds: Graines de Melon de Hami
     item.default.magma_fruit: Fruit de Magma
     item.default.globe: Globe
+    item.default.drill: La perceuse
 # Providing translations for blocks is particularly effective for plugins that retrieve server-side block translation keys.
 lang#blocks:
   en_us:
