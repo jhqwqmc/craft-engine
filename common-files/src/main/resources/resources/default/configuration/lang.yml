@@ -2,7 +2,7 @@
 # https://xiao-momi.github.io/craft-engine-wiki/configuration/lang
 lang#items:
   en_us:
-    item.default.default.chinese_lantern: Chinese Lantern
+    item.default.chinese_lantern: Chinese Lantern
     item.default.fairy_flower: Fairy Flower
     item.default.reed: Reed
     item.default.flame_cane: Flame Cane
