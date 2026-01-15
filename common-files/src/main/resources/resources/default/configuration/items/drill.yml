@@ -26,3 +26,9 @@ items:
           parent: minecraft:item/handheld
           textures:
             layer0: minecraft:item/custom/drill_selected
+    legacy-model:
+      path: minecraft:item/custom/drill_selected
+      generation:
+        parent: minecraft:item/handheld
+        textures:
+          layer0: minecraft:item/custom/drill_selected
