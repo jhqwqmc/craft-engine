@@ -1790,14 +1790,18 @@ public abstract class AbstractPackManager implements PackManager {
         if (!Config.enableObfuscation()) {
 
             if (above1_21_11) {
+
+                // 并查集联通贴图
+                Map<Key, Key> parent = new HashMap<>();
                 Map<Key, TextureStatus> textureStatuses = new HashMap<>(256);
                 Set<Key> notInAtlasTextures = new HashSet<>();
 
                 // 对全部方块状态的模型的贴图进行归类
                 for (Map.Entry<Key, TexturedModel> entry : blockModels.entrySet()) {
                     Map<String, Key> textures = entry.getValue().textures;
-                    for (Map.Entry<String, Key> texture : textures.entrySet()) {
-                        Key spritePath = texture.getValue();
+                    Key[] paths = textures.values().toArray(new Key[0]);
+                    for (Key spritePath : paths) {
+                        parent.putIfAbsent(spritePath, spritePath);
                         textureStatuses.compute(spritePath, (path, status) -> {
                             if (status == null) {
                                 status = new TextureStatus();
@@ -1831,14 +1835,18 @@ public abstract class AbstractPackManager implements PackManager {
                             return status;
                         });
                     }
+                    for (int i = 1; i < paths.length; i++) {
+                        union(parent, paths[0], paths[i]);
+                    }
                 }
 
                 // 对全部物品的模型的贴图进行归类
                 for (Map.Entry<Key, TexturedModel> entry : itemModels.entrySet()) {
                     Map<String, Key> textures = entry.getValue().textures;
+                    Key[] paths = textures.values().toArray(new Key[0]);
+
                     boolean hasBlockAtlas = false;
-                    for (Map.Entry<String, Key> texture : textures.entrySet()) {
-                        Key spritePath = texture.getValue();
+                    for (Key spritePath : paths) {
                         TextureStatus status = textureStatuses.computeIfAbsent(spritePath, (path) -> {
                             TextureStatus newStatus = new TextureStatus();
                             if (itemAtlas.isDefined(spritePath)) {
@@ -1856,8 +1864,8 @@ public abstract class AbstractPackManager implements PackManager {
                     }
 
                     boolean finalHasBlockAtlas = hasBlockAtlas;
-                    for (Map.Entry<String, Key> texture : textures.entrySet()) {
-                        Key spritePath = texture.getValue();
+                    for (Key spritePath : paths) {
+                        parent.putIfAbsent(spritePath, spritePath);
                         textureStatuses.compute(spritePath, (path, status) -> {
                             if (status == null) {
                                 status = new TextureStatus();
@@ -1892,9 +1900,28 @@ public abstract class AbstractPackManager implements PackManager {
                             return status;
                         });
                     }
+                    for (int i = 1; i < paths.length; i++) {
+                        union(parent, paths[0], paths[i]);
+                    }
                 }
 
                 if (Config.fixTextureAtlas()) {
+
+                    // 使用并查集处理
+                    // 按根节点汇总结果
+                    Map<Key, Set<Key>> groups = new HashMap<>();
+                    for (Key element : parent.keySet()) {
+                        Key root = find(parent, element);
+                        groups.computeIfAbsent(root, k -> new HashSet<>()).add(element);
+                    }
+                    Map<Key, MutableBoolean> groupedTextures = new HashMap<>();
+                    for (Set<Key> set : groups.values()) {
+                        MutableBoolean bool = new MutableBoolean(false);
+                        for (Key key : set) {
+                            groupedTextures.put(key, bool);
+                        }
+                    }
+
                     // 收集剩余未处理过的
                     for (Map.Entry<Key, SimplifiedModelFile> entry : PRESET_MODELS.entrySet()) {
                         Key modelPath = entry.getKey();
@@ -1916,6 +1943,8 @@ public abstract class AbstractPackManager implements PackManager {
                     Set<Key> itemAtlasToAdd = new HashSet<>();
                     Set<Key> itemAtlasToRemove = new HashSet<>();
 
+                    // 分配不在图集内的贴图到适合的图集内
+                    List<Key> lateInitTexture = new ArrayList<>();
                     for (Map.Entry<Key, TextureStatus> entry : textureStatuses.entrySet()) {
                         Key spritePath = entry.getKey();
                         TextureStatus status = entry.getValue();
@@ -1926,6 +1955,7 @@ public abstract class AbstractPackManager implements PackManager {
                             }
                             if (!status.inBlockAtlas()) {
                                 blockAtlasToAdd.add(spritePath);
+                                groupedTextures.get(spritePath).set(true);
                             }
                         } else {
                             if (status.inItemAtlas()) {
@@ -1934,6 +1964,15 @@ public abstract class AbstractPackManager implements PackManager {
                             if (status.inBlockAtlas()) {
                                 continue;
                             }
+                            lateInitTexture.add(spritePath);
+                        }
+                    }
+
+                    for (Key spritePath : lateInitTexture) {
+                        MutableBoolean inBlockAtlas = groupedTextures.get(spritePath);
+                        if (inBlockAtlas.booleanValue()) {
+                            blockAtlasToAdd.add(spritePath);
+                        } else {
                             itemAtlasToAdd.add(spritePath);
                         }
                     }
@@ -2116,6 +2155,23 @@ public abstract class AbstractPackManager implements PackManager {
 
         // todo 验证 unstitch 和 paletted permutations
         return result;
+    }
+
+    private static Key find(Map<Key, Key> parent, Key i) {
+        if (parent.get(i).equals(i)) {
+            return i;
+        }
+        Key root = find(parent, parent.get(i));
+        parent.put(i, root); // 路径压缩
+        return root;
+    }
+
+    private static void union(Map<Key, Key> parent, Key i, Key j) {
+        Key rootI = find(parent, i);
+        Key rootJ = find(parent, j);
+        if (!rootI.equals(rootJ)) {
+            parent.put(rootI, rootJ);
+        }
     }
 
     protected record ValidationResult(JsonObject fixedItemAtlas,
