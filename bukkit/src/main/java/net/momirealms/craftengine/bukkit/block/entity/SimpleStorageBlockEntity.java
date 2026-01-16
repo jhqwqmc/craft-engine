@@ -57,7 +57,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         @Nullable ItemStack[] storageContents = this.inventory.getStorageContents();
         for (int i = 0; i < storageContents.length; i++) {
             if (storageContents[i] != null) {
-                if (VersionHelper.isOrAbove1_20_5()) {
+                if (VersionHelper.COMPONENT_RELEASE) {
                     int slot = i;
                     CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, FastNMS.INSTANCE.field$CraftItemStack$handle(storageContents[i]))
                             .ifSuccess(success -> {
@@ -95,7 +95,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
             } else {
                 finalItemTag = itemTag;
             }
-            if (VersionHelper.isOrAbove1_20_5()) {
+            if (VersionHelper.COMPONENT_RELEASE) {
                 CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, finalItemTag)
                         .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + finalItemTag + "'. " + error))
                         .ifPresent(nmsStack -> storageContents[slot] = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsStack));

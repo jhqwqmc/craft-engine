@@ -52,7 +52,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
         tag.putInt("rotation", this.rotation);
         tag.putInt("data_version", VersionHelper.WORLD_VERSION);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
-        if (VersionHelper.isOrAbove1_20_5()) {
+        if (VersionHelper.COMPONENT_RELEASE) {
             CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, item.getLiteralObject())
                     .ifSuccess(success -> tag.put("item", success))
                     .ifError(error -> CraftEngine.instance().logger().severe("Error while saving item: " + error));
@@ -74,7 +74,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
         } else {
             finalItemTag = itemTag;
         }
-        if (VersionHelper.isOrAbove1_20_5()) {
+        if (VersionHelper.COMPONENT_RELEASE) {
             CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, finalItemTag)
                     .resultOrPartial(error -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + finalItemTag + "'. " + error))
                     .ifPresent(itemStack -> this.item = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack)));
