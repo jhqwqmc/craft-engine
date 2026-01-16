@@ -1338,6 +1338,7 @@ public abstract class AbstractPackManager implements PackManager {
             hasNonOverlaySupport = segments.getFirst().min() <= MinecraftVersion.V1_20_1.packFormat().major();
         }
 
+        Set<Path> fixedModels = new HashSet<>();
         for (int i = 0, size = segments.size(); i < size; i++) {
             OverlayCombination.Segment segment = segments.get(i);
             List<Path> rootPathList = new ArrayList<>();
@@ -1354,7 +1355,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.validate.start",
                     String.valueOf(i + 1), String.valueOf(size), String.valueOf(segment.min()), String.valueOf(segment.max()), overlayInOrder.stream().map(Overlay::directory).toList().toString()));
-            ValidationResult result = validateOverlayedResourcePack(rootPathList.toArray(new Path[0]), segment.max() >= MinecraftVersion.V1_21_11.packFormat().major());
+            ValidationResult result = validateOverlayedResourcePack(rootPathList.toArray(new Path[0]), segment.max() >= MinecraftVersion.V1_21_11.packFormat().major(), fixedModels);
             if (Config.fixTextureAtlas() && !Config.enableObfuscation()) {
                 // 有修复物品
                 if (result.fixedItemAtlas != null) {
@@ -1447,7 +1448,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private ValidationResult validateOverlayedResourcePack(Path[] rootPaths, boolean above1_21_11) {
+    private ValidationResult validateOverlayedResourcePack(Path[] rootPaths, boolean above1_21_11, Set<Path> fixedModels) {
         Multimap<Key, Key> glyphToFonts = HashMultimap.create(128, 32); // 图片到字体的映射
         Multimap<Key, Key> modelToItemDefinitions = HashMultimap.create(128, 4); // 模型到物品的映射
         Multimap<Key, String> modelToBlockStates = HashMultimap.create(128, 32); // 模型到方块的映射
@@ -1749,6 +1750,38 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                     TexturedModel texturedModel = getTexturedModel(modelPath, TexturedModel.getParent(modelJson), TexturedModel.getTextures(modelJson), rootPaths, modelsCache);
                     blockModels.put(modelPath, texturedModel);
+                    if (Config.fixMissingTexture() && fixedModels.add(modelJsonPath)) {
+                        if (modelJson.get("elements") instanceof JsonArray elements) {
+                            boolean changed = false;
+                            for (JsonElement e : elements) {
+                                if (e instanceof JsonObject element) {
+                                    if (element.get("faces") instanceof JsonObject faces) {
+                                        for (Map.Entry<String, JsonElement> faceEntry : faces.entrySet()) {
+                                            if (faceEntry.getValue() instanceof JsonObject face) {
+                                                if (face.get("texture") instanceof JsonPrimitive texturePrimitive) {
+                                                    String texture = texturePrimitive.getAsString();
+                                                    if (texture.equals("#missing")) {
+                                                        Optional<String> first = texturedModel.textures.keySet().stream().findFirst();
+                                                        if (first.isPresent()) {
+                                                            face.addProperty("texture", "#" + first.get());
+                                                            changed = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (changed) {
+                                try {
+                                    GsonHelper.writeJsonFile(modelJson, modelJsonPath);
+                                } catch (IOException e) {
+                                    this.plugin.logger().warn("Failed to write JSON file", e);
+                                }
+                            }
+                        }
+                    }
                     continue label;
                 }
             }
@@ -1776,6 +1809,38 @@ public abstract class AbstractPackManager implements PackManager {
                     }
                     TexturedModel texturedModel = getTexturedModel(modelPath, TexturedModel.getParent(modelJson), TexturedModel.getTextures(modelJson), rootPaths, modelsCache);
                     itemModels.put(modelPath, texturedModel);
+                    if (Config.fixMissingTexture() && fixedModels.add(modelJsonPath)) {
+                        if (modelJson.get("elements") instanceof JsonArray elements) {
+                            boolean changed = false;
+                            for (JsonElement e : elements) {
+                                if (e instanceof JsonObject element) {
+                                    if (element.get("faces") instanceof JsonObject faces) {
+                                        for (Map.Entry<String, JsonElement> faceEntry : faces.entrySet()) {
+                                            if (faceEntry.getValue() instanceof JsonObject face) {
+                                                if (face.get("texture") instanceof JsonPrimitive texturePrimitive) {
+                                                    String texture = texturePrimitive.getAsString();
+                                                    if (texture.equals("#missing")) {
+                                                        Optional<String> first = texturedModel.textures.keySet().stream().findFirst();
+                                                        if (first.isPresent()) {
+                                                            face.addProperty("texture", "#" + first.get());
+                                                            changed = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (changed) {
+                                try {
+                                    GsonHelper.writeJsonFile(modelJson, modelJsonPath);
+                                } catch (IOException e) {
+                                    this.plugin.logger().warn("Failed to write JSON file", e);
+                                }
+                            }
+                        }
+                    }
                     continue label;
                 }
             }

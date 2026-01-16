@@ -4195,6 +4195,9 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                                 hitResult.hitLocation().x, hitResult.hitLocation().y, hitResult.hitLocation().z,
                                 LocationUtils.toBlockPos(hitResult.blockPos())
                         );
+                        if (!part.interactive()) {
+                            serverPlayer.swingHand(InteractionHand.MAIN_HAND);
+                        }
                     } else {
                         if (!serverPlayer.isSecondaryUseActive()) {
                             for (Seat<FurnitureHitBox> seat : hitBox.seats()) {

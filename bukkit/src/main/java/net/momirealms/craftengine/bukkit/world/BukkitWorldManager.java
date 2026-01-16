@@ -139,7 +139,11 @@ public class BukkitWorldManager implements WorldManager, Listener {
             CEWorld ceWorld = getWorld(world.getUID());
             ceWorld.setTicking(false);
             for (Chunk chunk : world.getLoadedChunks()) {
-                handleChunkUnload(ceWorld, chunk);
+                try {
+                    handleChunkUnload(ceWorld, chunk);
+                } catch (Throwable t) {
+                    this.plugin.logger().warn("Failed to unload chunk " + chunk.getX() + "," + chunk.getZ(), t);
+                }
             }
             try {
                 ceWorld.worldDataStorage().close();
@@ -266,7 +270,11 @@ public class BukkitWorldManager implements WorldManager, Listener {
         this.resetWorldArray();
         ceWorld.setTicking(false);
         for (Chunk chunk : ((World) world.platformWorld()).getLoadedChunks()) {
-            handleChunkUnload(ceWorld, chunk);
+            try {
+                handleChunkUnload(ceWorld, chunk);
+            } catch (Throwable t) {
+                this.plugin.logger().warn("Failed to unload chunk " + chunk.getX() + "," + chunk.getZ(), t);
+            }
         }
         if (uuid.equals(this.lastWorldUUID)) {
             this.lastWorld = null;
@@ -275,7 +283,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
         try {
             ceWorld.worldDataStorage().close();
         } catch (IOException e) {
-            CraftEngine.instance().logger().warn("Failed to close world storage", e);
+            this.plugin.logger().warn("Failed to close world storage", e);
         }
     }
 

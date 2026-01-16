@@ -97,6 +97,8 @@ resource-pack:
     # Fix textures that are not within the atlas. It is unreasonable to always rely on plugins to fix your mistakes.
     # You should strive to make your resource pack more standardized after gaining some experience with resource packs.
     fix-atlas: true
+    # Fixing model errors in the atlas caused by #missing.
+    fix-missing-texture: true
   # Optimize your resource pack by reducing its size without any quality loss.
   optimization:
     enable: false
