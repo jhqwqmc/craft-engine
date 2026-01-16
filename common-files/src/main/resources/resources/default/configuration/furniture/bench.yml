@@ -1,6 +1,5 @@
 items:
   default:bench:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.bench>
     model: minecraft:item/custom/bench

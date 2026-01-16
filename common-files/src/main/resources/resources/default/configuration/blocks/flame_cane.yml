@@ -1,6 +1,5 @@
 items:
   default:flame_cane:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.flame_cane>
     texture: minecraft:item/custom/flame_cane

@@ -1,6 +1,5 @@
 items:
   default:globe:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.globe>
     model: minecraft:item/custom/globe
@@ -41,8 +40,10 @@ items:
           arguments:
             item: default:globe
   default:globe_earth:
-    data::item-name: <!i><lang:item.default.globe>
+    data:
+      item-name: <!i><lang:item.default.globe>
     model: minecraft:item/custom/globe_earth
   default:globe_base:
-    data::item-name: <!i><lang:item.default.globe>
+    data:
+      item-name: <!i><lang:item.default.globe>
     model: minecraft:item/custom/globe_base

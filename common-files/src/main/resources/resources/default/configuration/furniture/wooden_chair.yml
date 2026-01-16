@@ -1,6 +1,5 @@
 items:
   default:wooden_chair:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.wooden_chair>
     model: minecraft:item/custom/wooden_chair

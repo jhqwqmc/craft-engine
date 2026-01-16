@@ -15,7 +15,6 @@ items:
           nutrition: 2
           saturation: 1.0
   default:hami_melon:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.hami_melon>
     model: minecraft:block/custom/hami_melon
@@ -23,7 +22,6 @@ items:
       type: block_item
       block: default:hami_melon
   default:hami_melon_seeds:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.hami_melon_seeds>
     texture: minecraft:item/custom/hami_melon_seeds

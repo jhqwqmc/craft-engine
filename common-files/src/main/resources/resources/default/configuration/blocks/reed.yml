@@ -1,6 +1,5 @@
 items:
   default:reed:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.reed>
     texture: minecraft:item/custom/reed

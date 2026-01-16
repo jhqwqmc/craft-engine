@@ -1,6 +1,5 @@
 items:
   default:fairy_flower:
-    material: nether_brick
     data:
       item-name: <!i><lang:item.default.fairy_flower>
     texture: minecraft:item/custom/fairy_flower
