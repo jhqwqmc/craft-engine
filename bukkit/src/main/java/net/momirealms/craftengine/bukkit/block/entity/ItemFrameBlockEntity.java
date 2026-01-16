@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
+import com.mojang.serialization.Dynamic;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.ItemFrameBlockBehavior;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
@@ -7,6 +8,7 @@ import net.momirealms.craftengine.bukkit.entity.data.ItemFrameData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MReferences;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
@@ -48,8 +50,8 @@ public class ItemFrameBlockEntity extends BlockEntity {
     @Override
     protected void saveCustomData(CompoundTag tag) {
         tag.putInt("rotation", this.rotation);
+        tag.putInt("data_version", VersionHelper.WORLD_VERSION);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
-        // todo 版本升级
         if (VersionHelper.isOrAbove1_20_5()) {
             CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, item.getLiteralObject())
                     .ifSuccess(success -> tag.put("item", success))
@@ -63,14 +65,21 @@ public class ItemFrameBlockEntity extends BlockEntity {
     @Override
     public void loadCustomData(CompoundTag tag) {
         this.rotation = tag.getInt("rotation");
-        Tag itemTag = tag.get("item");
+        int dataVersion = tag.getInt("data_version", VersionHelper.v1_20_WORLD_VERSION);
+        CompoundTag itemTag = tag.getCompound("item");
         if (itemTag == null) return;
+        final Tag finalItemTag;
+        if (dataVersion != VersionHelper.WORLD_VERSION) {
+            finalItemTag = CoreReflections.instance$DataFixer.update(MReferences.ITEM_STACK, new Dynamic<>(MRegistryOps.SPARROW_NBT, itemTag), dataVersion, VersionHelper.WORLD_VERSION).getValue();
+        } else {
+            finalItemTag = itemTag;
+        }
         if (VersionHelper.isOrAbove1_20_5()) {
-            CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, itemTag)
-                    .resultOrPartial(error -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + itemTag + "'. " + error))
+            CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, finalItemTag)
+                    .resultOrPartial(error -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + finalItemTag + "'. " + error))
                     .ifPresent(itemStack -> this.item = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack)));
         } else {
-            Object nmsTag = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, itemTag);
+            Object nmsTag = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, finalItemTag);
             Object itemStack = FastNMS.INSTANCE.method$ItemStack$of(nmsTag);
             this.item = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack));
         }
