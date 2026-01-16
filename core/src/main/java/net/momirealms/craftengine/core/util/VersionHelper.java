@@ -13,7 +13,6 @@ public class VersionHelper {
     public static final MinecraftVersion MINECRAFT_VERSION;
     public static final boolean COMPONENT_RELEASE;
     public static final int WORLD_VERSION;
-    public static final int v1_20_WORLD_VERSION = 3463;
     private static final int version;
     private static final int majorVersion;
     private static final int minorVersion;

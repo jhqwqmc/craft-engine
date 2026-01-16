@@ -65,7 +65,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
     @Override
     public void loadCustomData(CompoundTag tag) {
         this.rotation = tag.getInt("rotation");
-        int dataVersion = tag.getInt("data_version", VersionHelper.v1_20_WORLD_VERSION);
+        int dataVersion = tag.getInt("data_version", VersionHelper.WORLD_VERSION);
         CompoundTag itemTag = tag.getCompound("item");
         if (itemTag == null) return;
         final Tag finalItemTag;

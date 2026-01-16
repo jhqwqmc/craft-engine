@@ -81,7 +81,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     @Override
     public void loadCustomData(CompoundTag tag) {
         ListTag itemsTag = Optional.ofNullable(tag.getList("items")).orElseGet(ListTag::new);
-        int dataVersion = tag.getInt("data_version", VersionHelper.v1_20_WORLD_VERSION);
+        int dataVersion = tag.getInt("data_version", VersionHelper.WORLD_VERSION);
         ItemStack[] storageContents = new ItemStack[this.behavior.rows() * 9];
         for (int i = 0; i < itemsTag.size(); i++) {
             CompoundTag itemTag = itemsTag.getCompound(i);
