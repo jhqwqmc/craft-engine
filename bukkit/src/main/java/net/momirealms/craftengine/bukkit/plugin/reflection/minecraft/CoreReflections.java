@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.plugin.reflection.minecraft;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
@@ -10,6 +11,7 @@ import io.netty.channel.ChannelFuture;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitException;
 import net.momirealms.craftengine.bukkit.util.BukkitReflectionUtils;
+import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ReflectionUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -4702,4 +4704,25 @@ public final class CoreReflections {
                     BukkitReflectionUtils.assembleMCClass("world.level.entity.LevelCallback")
             )
     );
+
+    public static final Class<?> clazz$DataFixers = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "util.datafix.DataConverterRegistry",
+                    "util.datafix.DataFixers"
+            )
+    );
+
+    public static final Method method$DataFixers$getDataFixer = requireNonNull(
+            ReflectionUtils.getDeclaredMethod(clazz$DataFixers, DataFixer.class)
+    );
+
+    public static final DataFixer instance$DataFixer;
+
+    static {
+        try {
+            instance$DataFixer = (DataFixer) method$DataFixers$getDataFixer.invoke(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to get DataFixer", e);
+        }
+    }
 }
