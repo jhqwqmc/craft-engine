@@ -63,7 +63,7 @@ dependencies {
     compileOnly("com.github.ben-manes.caffeine:caffeine:${rootProject.properties["caffeine_version"]}")
     // Compression
     compileOnly("com.github.luben:zstd-jni:${rootProject.properties["zstd_version"]}")
-    compileOnly("org.lz4:lz4-java:${rootProject.properties["lz4_version"]}")
+    compileOnly("at.yawk.lz4:lz4-java:${rootProject.properties["lz4_version"]}")
     // Commons IO
     compileOnly("commons-io:commons-io:${rootProject.properties["commons_io_version"]}")
     // Data Fixer Upper
