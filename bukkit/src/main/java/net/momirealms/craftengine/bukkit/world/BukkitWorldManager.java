@@ -556,7 +556,8 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 feature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection))
                         .resultOrPartial(error -> {
                             throw new LocalizedResourceConfigException("warning.config.configured_feature.invalid_feature", error);
-                        });
+                        })
+                        .orElse(null);
             } else {
                 feature = LegacyDFUUtils.parse(CoreReflections.instance$ConfiguredFeature$CODEC, MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection), (error) -> {
                     throw new LocalizedResourceConfigException("warning.config.configured_feature.invalid_feature", error);
@@ -610,7 +611,8 @@ public class BukkitWorldManager implements WorldManager, Listener {
                     configuredFeature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(rawFeature))
                             .resultOrPartial(error -> {
                                 throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_feature", error);
-                            });
+                            })
+                            .orElse(null);
                 } else {
                     configuredFeature = LegacyDFUUtils.parse(CoreReflections.instance$ConfiguredFeature$CODEC, MRegistryOps.JSON, GsonHelper.get().toJsonTree(rawFeature), (error) -> {
                         throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_feature", error);
@@ -627,7 +629,8 @@ public class BukkitWorldManager implements WorldManager, Listener {
                     return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
                             .resultOrPartial(error -> {
                                 throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
-                            });
+                            })
+                            .orElse(null);
                 } else {
                     return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
                         throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
