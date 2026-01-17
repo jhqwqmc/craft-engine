@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.world;
 
+import com.google.gson.JsonElement;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -8,6 +9,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflect
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.plugin.reflection.paper.PaperReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.LegacyDFUUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
@@ -20,6 +22,7 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
+import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.ChunkPos;
@@ -169,19 +172,22 @@ public class BukkitWorldManager implements WorldManager, Listener {
             HandlerList.unregisterAll(listener);
         }
         for (World world : Bukkit.getWorlds()) {
-            CEWorld ceWorld = getWorld(world.getUID());
-            ceWorld.setTicking(false);
-            for (Chunk chunk : world.getLoadedChunks()) {
-                try {
-                    handleChunkUnload(ceWorld, chunk);
-                } catch (Throwable t) {
-                    this.plugin.logger().warn("Failed to unload chunk " + chunk.getX() + "," + chunk.getZ(), t);
+            //避免触发load world
+            if (this.worlds.containsKey(world.getUID())) {
+                CEWorld ceWorld = getWorld(world.getUID());
+                ceWorld.setTicking(false);
+                for (Chunk chunk : world.getLoadedChunks()) {
+                    try {
+                        handleChunkUnload(ceWorld, chunk);
+                    } catch (Throwable t) {
+                        this.plugin.logger().warn("Failed to unload chunk " + chunk.getX() + "," + chunk.getZ(), t);
+                    }
                 }
-            }
-            try {
-                ceWorld.worldDataStorage().close();
-            } catch (IOException e) {
-                this.plugin.logger().warn("Error unloading world: " + world.getName(), e);
+                try {
+                    ceWorld.worldDataStorage().close();
+                } catch (IOException e) {
+                    this.plugin.logger().warn("Error unloading world: " + world.getName(), e);
+                }
             }
         }
         this.worlds.clear();
@@ -545,10 +551,17 @@ public class BukkitWorldManager implements WorldManager, Listener {
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
             Map<String, Object> processedSection = replaceDashToUnderscore(section);
-            Object feature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection))
-                    // todo 自定义异常
-                    .resultOrPartial(error -> CraftEngine.instance().logger().severe("Invalid configured feature '" + id + "': " + error))
-                    .orElse(null);
+            Object feature;
+            if (VersionHelper.isOrAbove1_20_5()) {
+                feature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection))
+                        .resultOrPartial(error -> {
+                            throw new LocalizedResourceConfigException("warning.config.configured_feature.invalid_feature", error);
+                        });
+            } else {
+                feature = LegacyDFUUtils.parse(CoreReflections.instance$ConfiguredFeature$CODEC, MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection), (error) -> {
+                    throw new LocalizedResourceConfigException("warning.config.configured_feature.invalid_feature", error);
+                });
+            }
             if (feature != null) {
                 BukkitWorldManager.this.configuredFeatures.put(id, feature);
             }
@@ -593,29 +606,36 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 configuredFeature = BukkitWorldManager.this.configuredFeatures.get(Key.of(name));
             }
             if (configuredFeature == null) {
-                configuredFeature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(rawFeature))
-                        .ifError((error) -> {
-                            // todo 自定义异常
-                            System.out.println(error.message());
-                        })
-                        .result()
-                        .orElseThrow(() -> new IllegalStateException("Invalid configured feature '" + id + "': " + rawFeature));
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    configuredFeature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(rawFeature))
+                            .resultOrPartial(error -> {
+                                throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_feature", error);
+                            });
+                } else {
+                    configuredFeature = LegacyDFUUtils.parse(CoreReflections.instance$ConfiguredFeature$CODEC, MRegistryOps.JSON, GsonHelper.get().toJsonTree(rawFeature), (error) -> {
+                        throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_feature", error);
+                    });
+                }
             }
             if (configuredFeature == null) {
-                throw new IllegalStateException("Missing configured feature");
+                throw new LocalizedResourceConfigException("warning.config.placed_feature.missing_feature");
             }
             Object rawPlacement = ResourceConfigUtils.get(processedSection, "placement");
             List<Object> placements = ResourceConfigUtils.parseConfigAsList(rawPlacement, map -> {
-                return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(map))
-                        .ifError((error) -> {
-                            System.out.println(error.message());
-                        })
-                        .result()
-                        .orElseThrow(() -> new IllegalStateException("Invalid placement '" + id + "': " + map));
+                JsonElement json = GsonHelper.get().toJsonTree(map);
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
+                            .resultOrPartial(error -> {
+                                throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                            });
+                } else {
+                    return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
+                        throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                    });
+                }
             });
-            // todo 自定义异常
             if (placements.isEmpty()) {
-                throw new IllegalStateException("Missing placement");
+                throw new LocalizedResourceConfigException("warning.config.placed_feature.missing_placement");
             }
             try {
                 Object placedFeature = CoreReflections.constructor$PlacedFeature.newInstance(configuredFeature, placements);

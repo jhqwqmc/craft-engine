@@ -591,3 +591,7 @@ warning.config.equipment.duplicate: "<yellow>Issue found in file <arg:0> - Dupli
 warning.config.equipment.missing_type: "<yellow>Issue found in file <arg:0> - The equipment '<arg:1>' is missing the required 'type' argument.</yellow>"
 warning.config.equipment.invalid_type: "<yellow>Issue found in file <arg:0> - The equipment '<arg:1>' is using an invalid 'type' argument.</yellow>"
 warning.config.equipment.invalid_sacrificed_armor: "<yellow>Issue found in config.yml at 'equipment.sacrificed-vanilla-armor' - Invalid vanilla armor type '<arg:0>'.</yellow>"
+warning.config.placed_feature.invalid_feature: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' contains an invalid configured feature. Cause: <arg:2>.</yellow>"
+warning.config.placed_feature.missing_feature: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' is missing the required 'feature' argument.</yellow>"
+warning.config.placed_feature.invalid_placement: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' contains an invalid configured feature. Input: <arg:2>. Cause: <arg:3>.</yellow>"
+warning.config.placed_feature.missing_placement: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' is missing the required 'placement' argument.</yellow>"
