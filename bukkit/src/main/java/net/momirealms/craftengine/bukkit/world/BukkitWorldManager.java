@@ -697,8 +697,6 @@ public class BukkitWorldManager implements WorldManager, Listener {
                             } else {
                                 blockState = ImmutableBlockState.with(blockState, property, optionalValue.get());
                             }
-                        } else {
-                            return null;
                         }
                     }
                 }
