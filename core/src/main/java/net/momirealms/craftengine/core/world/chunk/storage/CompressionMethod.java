@@ -20,7 +20,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-public class CompressionMethod {
+public final class CompressionMethod {
     public static final int METHOD_COUNT = 5;
     public static final CompressionMethod[] METHODS = new CompressionMethod[METHOD_COUNT +1];
     public static final CompressionMethod NONE = register(new CompressionMethod(1, (stream) -> stream, (stream) -> stream));

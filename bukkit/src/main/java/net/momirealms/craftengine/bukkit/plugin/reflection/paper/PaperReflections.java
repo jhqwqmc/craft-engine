@@ -27,6 +27,10 @@ public final class PaperReflections {
             ReflectionUtils.getDeclaredField(AsyncChatDecorateEvent.class, clazz$AdventureComponent, 0)
     );
 
+    public static final Field field$AsyncChatDecorateEvent$result = requireNonNull(
+            ReflectionUtils.getDeclaredField(AsyncChatDecorateEvent.class, clazz$AdventureComponent, 1)
+    );
+
     public static final Class<?> clazz$ComponentSerializer = requireNonNull(
             ReflectionUtils.getClazz("net{}kyori{}adventure{}text{}serializer{}ComponentSerializer".replace("{}", "."))
     );

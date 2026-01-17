@@ -220,7 +220,7 @@ public class BukkitFontManager extends AbstractFontManager implements Listener {
         Player player = event.player();
         if (player == null) return;
         try {
-            Object originalMessage = PaperReflections.field$AsyncChatDecorateEvent$originalMessage.get(event);
+            Object originalMessage = PaperReflections.field$AsyncChatDecorateEvent$result.get(event);
             String rawJsonMessage = ComponentUtils.paperAdventureToJson(originalMessage);
             boolean changed = false;
             if (!player.hasPermission(FontManager.BYPASS_CHAT)) {

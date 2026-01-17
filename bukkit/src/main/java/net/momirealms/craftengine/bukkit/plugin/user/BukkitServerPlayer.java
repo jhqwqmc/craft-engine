@@ -52,7 +52,7 @@ import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
-import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
+import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -150,8 +150,8 @@ public class BukkitServerPlayer extends Player {
     // 客户端选择的语言
     private Locale clientLocale;
     // 跟踪到的方块实体渲染器
-    private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
-    private final Map<Integer, VirtualCullableObject> trackedEntities = new ConcurrentHashMap<>();
+    private final Map<BlockPos, CullableHolder> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
+    private final Map<Integer, CullableHolder> trackedEntities = new ConcurrentHashMap<>();
     private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
@@ -673,23 +673,23 @@ public class BukkitServerPlayer extends Player {
         }
         boolean useRayTracing = Config.entityCullingRayTracing();
         if (this.enableEntityCulling) {
-            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+            for (CullableHolder cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullEntity(useRayTracing, cullableObject);
             }
-            for (VirtualCullableObject cullableObject : this.trackedEntities.values()) {
+            for (CullableHolder cullableObject : this.trackedEntities.values()) {
                 cullEntity(useRayTracing, cullableObject);
             }
         } else {
-            for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
+            for (CullableHolder cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullableObject.setShown(this, true);
             }
-            for (VirtualCullableObject cullableObject : this.trackedEntities.values()) {
+            for (CullableHolder cullableObject : this.trackedEntities.values()) {
                 cullableObject.setShown(this, true);
             }
         }
     }
 
-    private void cullEntity(boolean useRayTracing, VirtualCullableObject cullableObject) {
+    private void cullEntity(boolean useRayTracing, CullableHolder cullableObject) {
         CullingData cullingData = cullableObject.cullable.cullingData();
         if (cullingData != null) {
             boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
@@ -1538,26 +1538,26 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders) {
         for (Map.Entry<BlockPos, ConstantBlockEntityRenderer> entry : renders.entrySet()) {
-            this.trackedBlockEntityRenderers.put(entry.getKey(), new VirtualCullableObject(entry.getValue()));
+            this.trackedBlockEntityRenderers.put(entry.getKey(), new CullableHolder(entry.getValue()));
         }
     }
 
     @Override
     public void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer) {
-        this.trackedBlockEntityRenderers.put(blockPos, new VirtualCullableObject(renderer));
+        this.trackedBlockEntityRenderers.put(blockPos, new CullableHolder(renderer));
     }
 
     @Override
-    public VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos) {
+    public CullableHolder getTrackedBlockEntity(BlockPos blockPos) {
         return this.trackedBlockEntityRenderers.get(blockPos);
     }
 
     @Override
     public void removeTrackedBlockEntities(Collection<BlockPos> renders) {
         for (BlockPos render : renders) {
-            VirtualCullableObject remove = this.trackedBlockEntityRenderers.remove(render);
-            if (remove != null && remove.isShown()) {
-                remove.cullable().hide(this);
+            CullableHolder remove = this.trackedBlockEntityRenderers.remove(render);
+            if (remove != null && remove.isShown) {
+                remove.cullable.hide(this);
             }
         }
     }
@@ -1586,14 +1586,14 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public void addTrackedEntity(int entityId, Cullable cullable) {
-        this.trackedEntities.put(entityId, new VirtualCullableObject(cullable));
+        this.trackedEntities.put(entityId, new CullableHolder(cullable));
     }
 
     @Override
     public void removeTrackedEntity(int entityId) {
-        VirtualCullableObject remove = this.trackedEntities.remove(entityId);
-        if (remove != null && remove.isShown()) {
-            remove.cullable().hide(this);
+        CullableHolder remove = this.trackedEntities.remove(entityId);
+        if (remove != null && remove.isShown) {
+            remove.cullable.hide(this);
         }
     }
 
@@ -1647,11 +1647,11 @@ public class BukkitServerPlayer extends Player {
         return start.getWorld().rayTraceBlocks(start, start.getDirection(), range, mode);
     }
 
-    public Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers() {
+    public Map<BlockPos, CullableHolder> trackedBlockEntityRenderers() {
         return Collections.unmodifiableMap(this.trackedBlockEntityRenderers);
     }
 
-    public Map<Integer, VirtualCullableObject> trackedFurniture() {
+    public Map<Integer, CullableHolder> trackedFurniture() {
         return Collections.unmodifiableMap(this.trackedEntities);
     }
 

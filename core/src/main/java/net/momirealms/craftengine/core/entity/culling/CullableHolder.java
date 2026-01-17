@@ -1,27 +1,15 @@
-package net.momirealms.craftengine.core.world.chunk.client;
+package net.momirealms.craftengine.core.entity.culling;
 
 import net.momirealms.craftengine.core.entity.Cullable;
 import net.momirealms.craftengine.core.entity.player.Player;
 
-public final class VirtualCullableObject {
+public final class CullableHolder {
     public Cullable cullable;
     public boolean isShown;
 
-    public VirtualCullableObject(Cullable cullable) {
+    public CullableHolder(Cullable cullable) {
         this.cullable = cullable;
         this.isShown = false;
-    }
-
-    public void setCullable(Cullable cullable) {
-        this.cullable = cullable;
-    }
-
-    public Cullable cullable() {
-        return cullable;
-    }
-
-    public boolean isShown() {
-        return isShown;
     }
 
     public void setShown(Player player, boolean shown) {

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class CachedStorage<T extends WorldDataStorage> implements WorldDataStorage {
+public final class CachedStorage<T extends WorldDataStorage> implements WorldDataStorage {
     private final T storage;
     private final Cache<ChunkPos, CEChunk> chunkCache;
 

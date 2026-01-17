@@ -14,7 +14,7 @@ import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.*;
-import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
+import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -228,7 +228,7 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
 
-    public abstract VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos);
+    public abstract CullableHolder getTrackedBlockEntity(BlockPos blockPos);
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
