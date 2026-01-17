@@ -624,19 +624,26 @@ public class BukkitWorldManager implements WorldManager, Listener {
             }
             Object rawPlacement = ResourceConfigUtils.get(processedSection, "placement");
             List<Object> placements = ResourceConfigUtils.parseConfigAsList(rawPlacement, map -> {
-                JsonElement json = GsonHelper.get().toJsonTree(map);
-                if (VersionHelper.isOrAbove1_20_5()) {
-                    return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
-                            .resultOrPartial(error -> {
-                                throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
-                            })
-                            .orElse(null);
-                } else {
-                    return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
-                        throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
-                    });
+                if (map.get("type") instanceof String type) {
+                    if (type.equals("biome") || type.equals("minecraft:biome")) {
+                        throw new IllegalArgumentException("'minecraft:biome' is not allowed in placement");
+                    }
+                    JsonElement json = GsonHelper.get().toJsonTree(map);
+                    if (VersionHelper.isOrAbove1_20_5()) {
+                        return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
+                                .resultOrPartial(error -> {
+                                    throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                                })
+                                .orElse(null);
+                    } else {
+                        return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
+                            throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                        });
+                    }
                 }
+                return null;
             });
+            placements.removeIf(Objects::isNull);
             if (placements.isEmpty()) {
                 throw new LocalizedResourceConfigException("warning.config.placed_feature.missing_placement");
             }
