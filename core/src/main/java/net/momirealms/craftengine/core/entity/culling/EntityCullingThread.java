@@ -53,8 +53,8 @@ public class EntityCullingThread {
                             this.id, processed, String.format("%.2f", duration / 1_000_000.0));
                     Debugger.ENTITY_CULLING.debug(() -> value);
                 }
-            } catch (Exception e) {
-                CraftEngine.instance().logger().severe("Failed to run entity culling tick", e);
+            } catch (Throwable t) {
+                CraftEngine.instance().logger().severe("Failed to run entity culling tick", t);
             } finally {
                 this.isRunning.set(false);
             }

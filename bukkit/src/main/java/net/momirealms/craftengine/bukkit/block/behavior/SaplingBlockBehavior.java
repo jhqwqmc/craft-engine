@@ -10,6 +10,7 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.FeatureUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.util.ParticleUtils;
+import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -83,15 +84,19 @@ public class SaplingBlockBehavior extends BukkitBlockBehavior {
     }
 
     private void generateTree(Object world, Object blockPos, Object blockState, Object randomSource) throws Exception {
-        Object registry = FastNMS.INSTANCE.method$RegistryAccess$lookupOrThrow(FastNMS.INSTANCE.registryAccess(), MRegistries.CONFIGURED_FEATURE);
-        if (registry == null) return;
-        Optional<Object> holder = FastNMS.INSTANCE.method$Registry$getHolderByResourceKey(registry, FeatureUtils.createConfiguredFeatureKey(treeFeature()));
-        if (holder.isEmpty()) {
-            CraftEngine.instance().logger().warn("Configured feature not found: " + treeFeature());
-            return;
+        Object holder = BukkitWorldManager.instance().configuredFeatureById(treeFeature());
+        if (holder == null) {
+            Object registry = FastNMS.INSTANCE.method$RegistryAccess$lookupOrThrow(FastNMS.INSTANCE.registryAccess(), MRegistries.CONFIGURED_FEATURE);
+            if (registry == null) return;
+            Optional<Object> optionalHolder = FastNMS.INSTANCE.method$Registry$getHolderByResourceKey(registry, FeatureUtils.createConfiguredFeatureKey(treeFeature()));
+            if (optionalHolder.isEmpty()) {
+                CraftEngine.instance().logger().warn("Configured feature not found: " + treeFeature());
+                return;
+            }
+            holder = optionalHolder.get();
         }
         Object chunkGenerator = CoreReflections.method$ServerChunkCache$getGenerator.invoke(FastNMS.INSTANCE.method$ServerLevel$getChunkSource(world));
-        Object configuredFeature = FastNMS.INSTANCE.method$Holder$value(holder.get());
+        Object configuredFeature = FastNMS.INSTANCE.method$Holder$value(holder);
         Object fluidState = FastNMS.INSTANCE.method$BlockGetter$getFluidState(world, blockPos);
         Object legacyState = CoreReflections.method$FluidState$createLegacyBlock.invoke(fluidState);
         FastNMS.INSTANCE.method$LevelWriter$setBlock(world, blockPos, legacyState, UpdateOption.UPDATE_NONE.flags());

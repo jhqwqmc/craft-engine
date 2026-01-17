@@ -1158,9 +1158,51 @@ public final class CoreReflections {
             )
     );
 
+    public static final Field field$ConfiguredFeature$DIRECT_CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$ConfiguredFeature, Codec.class, 0)
+    );
+
+    public static final Field field$ConfiguredFeature$CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$ConfiguredFeature, Codec.class, 1)
+    );
+
+    @SuppressWarnings("unchecked")
+    public static Codec<Object> getConfiguredFeature$CODEC() {
+        try {
+            return (Codec<Object>) field$ConfiguredFeature$CODEC.get(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init instance$ConfiguredFeature$CODEC", e);
+        }
+    }
+
+    public static final Codec<Object> instance$ConfiguredFeature$CODEC = getConfiguredFeature$CODEC();
+
     public static final Class<?> clazz$PlacedFeature = requireNonNull(
             ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("world.level.levelgen.placement.PlacedFeature"))
     );
+
+    public static final Constructor<?> constructor$PlacedFeature = requireNonNull(
+            ReflectionUtils.getConstructor(clazz$PlacedFeature, clazz$Holder, List.class)
+    );
+
+    public static final Class<?> clazz$PlacementModifier = requireNonNull(
+            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("world.level.levelgen.placement.PlacementModifier"))
+    );
+
+    public static final Field field$PlacementModifier$CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$PlacementModifier, Codec.class, 0)
+    );
+
+    @SuppressWarnings("unchecked")
+    public static Codec<Object> getPlacementModifier$CODEC() {
+        try {
+            return (Codec<Object>) field$PlacementModifier$CODEC.get(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init instance$ConfiguredFeature$CODEC", e);
+        }
+    }
+
+    public static final Codec<Object> instance$PlacementModifier$CODEC = getPlacementModifier$CODEC();
 
     // 1.21+
     public static final Class<?> clazz$JukeboxSong = ReflectionUtils.getClazz(
