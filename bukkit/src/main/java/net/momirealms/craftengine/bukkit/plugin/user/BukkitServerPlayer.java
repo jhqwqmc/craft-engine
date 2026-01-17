@@ -28,8 +28,8 @@ import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
+import net.momirealms.craftengine.core.entity.Cullable;
 import net.momirealms.craftengine.core.entity.data.EntityData;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureHitData;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
@@ -151,7 +151,7 @@ public class BukkitServerPlayer extends Player {
     private Locale clientLocale;
     // 跟踪到的方块实体渲染器
     private final Map<BlockPos, VirtualCullableObject> trackedBlockEntityRenderers = new ConcurrentHashMap<>();
-    private final Map<Integer, VirtualCullableObject> trackedFurniture = new ConcurrentHashMap<>();
+    private final Map<Integer, VirtualCullableObject> trackedEntities = new ConcurrentHashMap<>();
     private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
@@ -676,14 +676,14 @@ public class BukkitServerPlayer extends Player {
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullEntity(useRayTracing, cullableObject);
             }
-            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+            for (VirtualCullableObject cullableObject : this.trackedEntities.values()) {
                 cullEntity(useRayTracing, cullableObject);
             }
         } else {
             for (VirtualCullableObject cullableObject : this.trackedBlockEntityRenderers.values()) {
                 cullableObject.setShown(this, true);
             }
-            for (VirtualCullableObject cullableObject : this.trackedFurniture.values()) {
+            for (VirtualCullableObject cullableObject : this.trackedEntities.values()) {
                 cullableObject.setShown(this, true);
             }
         }
@@ -1585,21 +1585,21 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public void addTrackedFurniture(int entityId, Furniture furniture) {
-        this.trackedFurniture.put(entityId, new VirtualCullableObject(furniture));
+    public void addTrackedEntity(int entityId, Cullable cullable) {
+        this.trackedEntities.put(entityId, new VirtualCullableObject(cullable));
     }
 
     @Override
-    public void removeTrackedFurniture(int entityId) {
-        VirtualCullableObject remove = this.trackedFurniture.remove(entityId);
+    public void removeTrackedEntity(int entityId) {
+        VirtualCullableObject remove = this.trackedEntities.remove(entityId);
         if (remove != null && remove.isShown()) {
             remove.cullable().hide(this);
         }
     }
 
     @Override
-    public void clearTrackedFurniture() {
-        this.trackedFurniture.clear();
+    public void clearTrackedEntities() {
+        this.trackedEntities.clear();
     }
 
     @Override
@@ -1652,7 +1652,7 @@ public class BukkitServerPlayer extends Player {
     }
 
     public Map<Integer, VirtualCullableObject> trackedFurniture() {
-        return Collections.unmodifiableMap(this.trackedFurniture);
+        return Collections.unmodifiableMap(this.trackedEntities);
     }
 
     public boolean isRangeMining() {

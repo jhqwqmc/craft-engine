@@ -1648,7 +1648,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 player.setClientSideWorld(BukkitAdaptors.adapt(world));
                 player.clearTrackedChunks();
                 player.clearTrackedBlockEntities();
-                player.clearTrackedFurniture();
+                player.clearTrackedEntities();
             } else {
                 CraftEngine.instance().logger().warn("Failed to handle ClientboundRespawnPacket: World " + location + " does not exist");
             }
@@ -4333,7 +4333,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 if (furniture != null) {
                     EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, new FurniturePacketHandler(id, furniture.virtualEntityIds()));
                     if (Config.enableEntityCulling()) {
-                        serverPlayer.addTrackedFurniture(id, furniture);
+                        serverPlayer.addTrackedEntity(id, furniture);
                     } else {
                         // 修复addEntityToWorld，包比事件先发的问题 (WE)
                         if (previous == null || previous instanceof ItemDisplayPacketHandler) {

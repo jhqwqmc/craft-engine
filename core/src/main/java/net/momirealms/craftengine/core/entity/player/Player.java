@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.Cullable;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
@@ -232,7 +232,7 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
-    public abstract void addTrackedFurniture(int entityId, Furniture furniture);
+    public abstract void addTrackedEntity(int entityId, Cullable cullable);
 
     public abstract void clearTrackedBlockEntities();
 
@@ -246,9 +246,9 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void playParticle(Key particleId, double x, double y, double z);
 
-    public abstract void removeTrackedFurniture(int entityId);
+    public abstract void removeTrackedEntity(int entityId);
 
-    public abstract void clearTrackedFurniture();
+    public abstract void clearTrackedEntities();
 
     public abstract WorldPosition eyePosition();
 
