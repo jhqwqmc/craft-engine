@@ -1,23 +1,20 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
-import com.mojang.serialization.Dynamic;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.ItemFrameBlockBehavior;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.DynamicItemFrameRenderer;
 import net.momirealms.craftengine.bukkit.entity.data.ItemFrameData;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MReferences;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
+import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.ItemUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
@@ -52,37 +49,20 @@ public class ItemFrameBlockEntity extends BlockEntity {
         tag.putInt("rotation", this.rotation);
         tag.putInt("data_version", VersionHelper.WORLD_VERSION);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
-        if (VersionHelper.COMPONENT_RELEASE) {
-            CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, item.getLiteralObject())
-                    .ifSuccess(success -> tag.put("item", success))
-                    .ifError(error -> CraftEngine.instance().logger().severe("Error while saving item: " + error));
-        } else {
-            Object nmsTag = FastNMS.INSTANCE.method$itemStack$save(item.getLiteralObject(), FastNMS.INSTANCE.constructor$CompoundTag());
-            tag.put("item", MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, nmsTag));
-        }
+        Tag itemTag = ItemStackUtils.encode2Tag(this.item.getLiteralObject());
+        if (itemTag == null) return;
+        tag.put("item", itemTag);
     }
 
     @Override
     public void loadCustomData(CompoundTag tag) {
         this.rotation = tag.getInt("rotation");
-        int dataVersion = tag.getInt("data_version", VersionHelper.WORLD_VERSION);
-        CompoundTag itemTag = tag.getCompound("item");
+        int dataVersion = tag.getInt("data_version", Config.itemDataFixerUpperFallbackVersion());
+        Tag itemTag = tag.get("item");
         if (itemTag == null) return;
-        final Tag finalItemTag;
-        if (dataVersion != VersionHelper.WORLD_VERSION) {
-            finalItemTag = CoreReflections.instance$DataFixer.update(MReferences.ITEM_STACK, new Dynamic<>(MRegistryOps.SPARROW_NBT, itemTag), dataVersion, VersionHelper.WORLD_VERSION).getValue();
-        } else {
-            finalItemTag = itemTag;
-        }
-        if (VersionHelper.COMPONENT_RELEASE) {
-            CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, finalItemTag)
-                    .resultOrPartial(error -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + finalItemTag + "'. " + error))
-                    .ifPresent(itemStack -> this.item = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack)));
-        } else {
-            Object nmsTag = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, finalItemTag);
-            Object itemStack = FastNMS.INSTANCE.method$ItemStack$of(nmsTag);
-            this.item = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack));
-        }
+        ItemStack itemStack = ItemStackUtils.decode2ItemStack(itemTag, dataVersion);
+        if (itemStack == null) return;
+        this.item = BukkitAdaptors.adapt(itemStack);
         this.updateMetadata();
     }
 

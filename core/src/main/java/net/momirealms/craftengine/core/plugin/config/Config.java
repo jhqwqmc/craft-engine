@@ -208,6 +208,8 @@ public class Config {
     protected String item$default_material = "";
     protected boolean item$default_drop_display$enable = false;
     protected String item$default_drop_display$format = null;
+    protected boolean item$data_fixer_upper$enable = true;
+    protected int item$data_fixer_upper$fallback_version = 3463;
 
     protected String equipment$sacrificed_vanilla_armor$type;
     protected Key equipment$sacrificed_vanilla_armor$asset_id;
@@ -507,6 +509,8 @@ public class Config {
         item$default_material = config.getString("item.default-material", "");
         item$default_drop_display$enable = config.getBoolean("item.default-drop-display.enable", false);
         item$default_drop_display$format = item$default_drop_display$enable ? config.getString("item.default-drop-display.format", "<arg:count>x <name>"): null;
+        item$data_fixer_upper$enable = config.getBoolean("item.data-fixer-upper.enable", true);
+        item$data_fixer_upper$fallback_version = config.getInt("item.data-fixer-upper.fallback-version", 3463);
 
         Section customModelDataOverridesSection = config.getSection("item.custom-model-data-starting-value.overrides");
         if (customModelDataOverridesSection != null) {
@@ -1264,6 +1268,14 @@ public class Config {
 
     public static String defaultDropDisplayFormat() {
         return instance.item$default_drop_display$format;
+    }
+
+    public static boolean enableItemDataFixerUpper() {
+        return instance.item$data_fixer_upper$enable;
+    }
+
+    public static int itemDataFixerUpperFallbackVersion() {
+        return instance.item$data_fixer_upper$fallback_version;
     }
 
     public static boolean enableEntityCulling() {

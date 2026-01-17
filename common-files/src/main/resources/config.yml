@@ -256,6 +256,9 @@ item:
   default-drop-display:
     enable: false
     format: "<arg:count>x <name>"
+  data-fixer-upper:
+    enable: true
+    fallback-version: 3463 # https://minecraft.wiki/w/Data_version#Java_Edition
 
 equipment:
   # The sacrificed-vanilla-armor argument determines which vanilla armor gets completely removed (loses all its trims)

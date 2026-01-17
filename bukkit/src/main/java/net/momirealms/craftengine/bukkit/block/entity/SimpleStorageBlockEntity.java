@@ -1,29 +1,25 @@
 package net.momirealms.craftengine.bukkit.block.entity;
 
-import com.mojang.serialization.Dynamic;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.SimpleStorageBlockBehavior;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MReferences;
-import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
-import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
 import org.bukkit.entity.HumanEntity;
@@ -56,23 +52,11 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         ListTag itemsTag = new ListTag();
         @Nullable ItemStack[] storageContents = this.inventory.getStorageContents();
         for (int i = 0; i < storageContents.length; i++) {
-            if (storageContents[i] != null) {
-                if (VersionHelper.COMPONENT_RELEASE) {
-                    int slot = i;
-                    CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, FastNMS.INSTANCE.field$CraftItemStack$handle(storageContents[i]))
-                            .ifSuccess(success -> {
-                                CompoundTag itemTag = (CompoundTag) success;
-                                itemTag.putInt("slot", slot);
-                                itemsTag.add(itemTag);
-                            })
-                            .ifError(error -> CraftEngine.instance().logger().severe("Error while saving storage item: " + error));
-                } else {
-                    Object nmsTag = FastNMS.INSTANCE.method$itemStack$save(FastNMS.INSTANCE.field$CraftItemStack$handle(storageContents[i]), FastNMS.INSTANCE.constructor$CompoundTag());
-                    CompoundTag itemTag = (CompoundTag) MRegistryOps.NBT.convertTo(MRegistryOps.SPARROW_NBT, nmsTag);
-                    itemTag.putInt("slot", i);
-                    itemsTag.add(itemTag);
-                }
+            if (storageContents[i] == null || !(ItemStackUtils.encode2Tag(storageContents[i]) instanceof CompoundTag itemTag)) {
+                continue;
             }
+            itemTag.putInt("slot", i);
+            itemsTag.add(itemTag);
         }
         tag.put("items", itemsTag);
         tag.putInt("data_version", VersionHelper.WORLD_VERSION);
@@ -81,7 +65,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     @Override
     public void loadCustomData(CompoundTag tag) {
         ListTag itemsTag = Optional.ofNullable(tag.getList("items")).orElseGet(ListTag::new);
-        int dataVersion = tag.getInt("data_version", VersionHelper.WORLD_VERSION);
+        int dataVersion = tag.getInt("data_version", Config.itemDataFixerUpperFallbackVersion());
         ItemStack[] storageContents = new ItemStack[this.behavior.rows() * 9];
         for (int i = 0; i < itemsTag.size(); i++) {
             CompoundTag itemTag = itemsTag.getCompound(i);
@@ -89,21 +73,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
             if (slot < 0 || slot >= storageContents.length) {
                 continue;
             }
-            final Tag finalItemTag;
-            if (dataVersion != VersionHelper.WORLD_VERSION) {
-                finalItemTag = CoreReflections.instance$DataFixer.update(MReferences.ITEM_STACK, new Dynamic<>(MRegistryOps.SPARROW_NBT, itemTag), dataVersion, VersionHelper.WORLD_VERSION).getValue();
-            } else {
-                finalItemTag = itemTag;
-            }
-            if (VersionHelper.COMPONENT_RELEASE) {
-                CoreReflections.instance$ItemStack$CODEC.parse(MRegistryOps.SPARROW_NBT, finalItemTag)
-                        .resultOrPartial((error) -> CraftEngine.instance().logger().severe("Tried to load invalid item: '" + finalItemTag + "'. " + error))
-                        .ifPresent(nmsStack -> storageContents[slot] = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(nmsStack));
-            } else {
-                Object nmsTag = MRegistryOps.SPARROW_NBT.convertTo(MRegistryOps.NBT, finalItemTag);
-                Object itemStack = FastNMS.INSTANCE.method$ItemStack$of(nmsTag);
-                storageContents[slot] = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(itemStack);
-            }
+            storageContents[slot] = ItemStackUtils.decode2ItemStack(itemTag, dataVersion);
         }
         this.inventory.setStorageContents(storageContents);
     }
