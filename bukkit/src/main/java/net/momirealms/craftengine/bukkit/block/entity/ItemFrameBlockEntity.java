@@ -49,7 +49,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
         tag.putInt("rotation", this.rotation);
         tag.putInt("data_version", VersionHelper.WORLD_VERSION);
         if (ItemUtils.isEmpty(this.item)) return; // 无法保存空的物品
-        Tag itemTag = ItemStackUtils.encode2Tag(this.item.getLiteralObject());
+        Tag itemTag = ItemStackUtils.saveItemStackAsTag(this.item.getItem());
         if (itemTag == null) return;
         tag.put("item", itemTag);
     }
@@ -60,7 +60,7 @@ public class ItemFrameBlockEntity extends BlockEntity {
         int dataVersion = tag.getInt("data_version", Config.itemDataFixerUpperFallbackVersion());
         Tag itemTag = tag.get("item");
         if (itemTag == null) return;
-        ItemStack itemStack = ItemStackUtils.decode2ItemStack(itemTag, dataVersion);
+        ItemStack itemStack = ItemStackUtils.parseItemStack(itemTag, dataVersion);
         if (itemStack == null) return;
         this.item = BukkitAdaptors.adapt(itemStack);
         this.updateMetadata();

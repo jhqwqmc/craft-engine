@@ -12,7 +12,6 @@ import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.VersionHelper;
-import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.Tag;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -67,7 +66,7 @@ public final class ItemStackUtils {
 
     @SuppressWarnings("DataFlowIssue")
     @Nullable
-    public static Tag encode2Tag(Object nmsStack) {
+    public static Tag saveNMSItemStackAsTag(Object nmsStack) {
         if (VersionHelper.COMPONENT_RELEASE) {
             return CoreReflections.instance$ItemStack$CODEC.encodeStart(MRegistryOps.SPARROW_NBT, nmsStack)
                     .resultOrPartial(error -> CraftEngine.instance().logger().severe("Error while saving item: " + error))
@@ -79,13 +78,13 @@ public final class ItemStackUtils {
     }
 
     @Nullable
-    public static Tag encode2Tag(ItemStack itemStack) {
-        return encode2Tag(FastNMS.INSTANCE.field$CraftItemStack$handle(itemStack));
+    public static Tag saveItemStackAsTag(ItemStack itemStack) {
+        return saveNMSItemStackAsTag(FastNMS.INSTANCE.field$CraftItemStack$handle(ensureCraftItemStack(itemStack)));
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Nullable
-    public static Object decode2NMSStack(Tag tag, int dataVersion) {
+    public static Object parseNMSItemStack(Tag tag, int dataVersion) {
         Tag itemTag = tag;
         int currentVersion = VersionHelper.WORLD_VERSION;
         if (Config.enableItemDataFixerUpper() && dataVersion != currentVersion) {
@@ -104,7 +103,7 @@ public final class ItemStackUtils {
     }
 
     @Nullable
-    public static ItemStack decode2ItemStack(Tag tag, int dataVersion) {
-        return asCraftMirror(decode2NMSStack(tag, dataVersion));
+    public static ItemStack parseItemStack(Tag tag, int dataVersion) {
+        return asCraftMirror(parseNMSItemStack(tag, dataVersion));
     }
 }

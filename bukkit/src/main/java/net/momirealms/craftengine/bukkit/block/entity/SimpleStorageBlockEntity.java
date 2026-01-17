@@ -52,7 +52,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         ListTag itemsTag = new ListTag();
         @Nullable ItemStack[] storageContents = this.inventory.getStorageContents();
         for (int i = 0; i < storageContents.length; i++) {
-            if (storageContents[i] == null || !(ItemStackUtils.encode2Tag(storageContents[i]) instanceof CompoundTag itemTag)) {
+            if (storageContents[i] == null || !(ItemStackUtils.saveItemStackAsTag(storageContents[i]) instanceof CompoundTag itemTag)) {
                 continue;
             }
             itemTag.putInt("slot", i);
@@ -73,7 +73,7 @@ public class SimpleStorageBlockEntity extends BlockEntity {
             if (slot < 0 || slot >= storageContents.length) {
                 continue;
             }
-            storageContents[slot] = ItemStackUtils.decode2ItemStack(itemTag, dataVersion);
+            storageContents[slot] = ItemStackUtils.parseItemStack(itemTag, dataVersion);
         }
         this.inventory.setStorageContents(storageContents);
     }
