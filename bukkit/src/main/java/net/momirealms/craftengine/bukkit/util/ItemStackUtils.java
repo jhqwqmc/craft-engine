@@ -85,9 +85,8 @@ public final class ItemStackUtils {
 
     @SuppressWarnings("DataFlowIssue")
     @Nullable
-    public static Object decode2NMSStack(CompoundTag tag, int dataVersion) {
-        Tag itemTag = tag.getCompound("item");
-        if (itemTag == null) return null;
+    public static Object decode2NMSStack(Tag tag, int dataVersion) {
+        Tag itemTag = tag;
         int currentVersion = VersionHelper.WORLD_VERSION;
         if (Config.enableItemDataFixerUpper() && dataVersion != currentVersion) {
             Dynamic<Tag> input = new Dynamic<>(MRegistryOps.SPARROW_NBT, itemTag);
@@ -105,7 +104,7 @@ public final class ItemStackUtils {
     }
 
     @Nullable
-    public static ItemStack decode2ItemStack(CompoundTag tag, int dataVersion) {
+    public static ItemStack decode2ItemStack(Tag tag, int dataVersion) {
         return asCraftMirror(decode2NMSStack(tag, dataVersion));
     }
 }

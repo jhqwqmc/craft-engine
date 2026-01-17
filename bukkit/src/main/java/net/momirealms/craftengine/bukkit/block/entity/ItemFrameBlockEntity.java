@@ -58,7 +58,9 @@ public class ItemFrameBlockEntity extends BlockEntity {
     public void loadCustomData(CompoundTag tag) {
         this.rotation = tag.getInt("rotation");
         int dataVersion = tag.getInt("data_version", Config.itemDataFixerUpperFallbackVersion());
-        ItemStack itemStack = ItemStackUtils.decode2ItemStack(tag, dataVersion);
+        Tag itemTag = tag.get("item");
+        if (itemTag == null) return;
+        ItemStack itemStack = ItemStackUtils.decode2ItemStack(itemTag, dataVersion);
         if (itemStack == null) return;
         this.item = BukkitAdaptors.adapt(itemStack);
         this.updateMetadata();
