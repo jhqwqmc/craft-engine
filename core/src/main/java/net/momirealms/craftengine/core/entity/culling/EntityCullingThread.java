@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.plugin.entityculling;
+package net.momirealms.craftengine.core.entity.culling;
 
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;

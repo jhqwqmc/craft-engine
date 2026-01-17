@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.entity;
 
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import net.momirealms.craftengine.core.entity.culling.CullingData;
 import org.jetbrains.annotations.Nullable;
 
 public interface Cullable {
