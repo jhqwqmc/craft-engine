@@ -147,3 +147,4 @@ blocks:
             target: self
             amount: 1.0
             damage-type: on_fire
+          - type: update_interaction_tick

@@ -76,6 +76,7 @@ blocks:
             add: true
             count: -1
           - type: swing_hand
+          - type: update_interaction_tick
     states:
       properties:
         age:
