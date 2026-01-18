@@ -4,6 +4,7 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.behavior.SimpleStorageBlockBehavior;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.nms.StorageContainer;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
@@ -17,6 +18,7 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.ListTag;
@@ -43,6 +45,12 @@ public class SimpleStorageBlockEntity extends BlockEntity {
         BlockEntityHolder holder = new BlockEntityHolder(this);
         this.inventory = FastNMS.INSTANCE.createSimpleStorageContainer(holder, this.behavior.rows() * 9, this.behavior.canPlaceItem(), this.behavior.canTakeItem());
         holder.setInventory(this.inventory);
+        StorageContainer container = (StorageContainer) FastNMS.INSTANCE.method$CraftInventory$getInventory(this.inventory);
+        container.onContentsChanged($ -> {
+            CEWorld ceWorld = super.world;
+            if (ceWorld == null) return;
+            ceWorld.blockEntityChanged(pos);
+        });
     }
 
     @Override
@@ -153,7 +161,6 @@ public class SimpleStorageBlockEntity extends BlockEntity {
     }
 
     public void updateOpenBlockState(boolean open) {
-        super.world.blockEntityChanged(this.pos);
         ImmutableBlockState state = super.world.getBlockStateAtIfLoaded(this.pos);
         if (state == null) return;
         SimpleStorageBlockBehavior behavior = state.behavior().getAs(SimpleStorageBlockBehavior.class).orElse(null);

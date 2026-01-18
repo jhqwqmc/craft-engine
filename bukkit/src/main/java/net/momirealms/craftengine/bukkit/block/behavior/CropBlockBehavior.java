@@ -34,7 +34,6 @@ import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -81,16 +80,16 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         return minGrowLight;
     }
 
-    public static int getRawBrightness(Object level, Object pos) throws InvocationTargetException, IllegalAccessException {
-        return (int) CoreReflections.method$BlockAndTintGetter$getRawBrightness.invoke(level, pos, 0);
+    public static int getRawBrightness(Object level, Object pos) {
+        return FastNMS.INSTANCE.method$BlockAndTintGetter$getRawBrightness(level, pos, 0);
     }
 
-    private boolean hasSufficientLight(Object level, Object pos) throws InvocationTargetException, IllegalAccessException {
+    private boolean hasSufficientLight(Object level, Object pos) {
         return getRawBrightness(level, pos) >= this.minGrowLight - 1;
     }
 
     @Override
-    public void randomTick(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    public void randomTick(Object thisBlock, Object[] args, Callable<Object> superMethod) {
         Object state = args[0];
         Object level = args[1];
         Object pos = args[2];
