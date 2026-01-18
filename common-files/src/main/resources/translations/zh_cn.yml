@@ -595,4 +595,4 @@ warning.config.placed_feature.invalid_feature: "<yellow>在文件 <arg:0> 发现
 warning.config.placed_feature.missing_feature: "<yellow>在文件 <arg:0> 发现问题 - 已放置的地物 '<arg:1>' 缺少必需的 'feature' 参数</yellow>"
 warning.config.placed_feature.invalid_placement: "<yellow>在文件 <arg:0> 发现问题 - 已放置的地物 '<arg:1>' 包含无效的已配置的地物. 内容: <arg:2>. 原因: <arg:3></yellow>"
 warning.config.placed_feature.missing_placement: "<yellow>在文件 <arg:0> 发现问题 - 已放置的地物 '<arg:1>' 缺少必需的 'placement' 参数</yellow>"
-warning.config.configured_feature.invalid_feature: "<yellow>在文件 <arg:0> 发现问题 - 已配置的地物 '<arg:1>' 包含无效的地物类型. 原因: <arg:2></yellow>"
+warning.config.configured_feature.invalid_feature: "<yellow>在文件 <arg:0> 发现问题 - 已配置的地物 '<arg:1>' 无效. 原因: <arg:2></yellow>"

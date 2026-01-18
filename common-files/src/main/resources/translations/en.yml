@@ -595,4 +595,4 @@ warning.config.placed_feature.invalid_feature: "<yellow>Issue found in file <arg
 warning.config.placed_feature.missing_feature: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' is missing the required 'feature' argument.</yellow>"
 warning.config.placed_feature.invalid_placement: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' contains an invalid configured feature. Input: <arg:2>. Cause: <arg:3>.</yellow>"
 warning.config.placed_feature.missing_placement: "<yellow>Issue found in file <arg:0> - The placed feature '<arg:1>' is missing the required 'placement' argument.</yellow>"
-warning.config.configured_feature.invalid_feature: "<yellow>Issue found in file <arg:0> - The configured feature '<arg:1>' contains an invalid feature type. Cause: <arg:2>.</yellow>"
+warning.config.configured_feature.invalid_feature: "<yellow>Issue found in file <arg:0> - The configured feature '<arg:1>' is invalid. Cause: <arg:2>.</yellow>"
