@@ -151,6 +151,8 @@ blocks:
           - type: update_interaction_tick
 placed-features:
   default:reed:
+    environment:
+      - minecraft:the_nether
     feature:
       type: 'minecraft:random_patch'
       config:
@@ -207,6 +209,6 @@ placed-features:
         height:
           type: 'minecraft:uniform'
           min_inclusive:
-            absolute: 0
+            absolute: 10
           max_inclusive:
-            absolute: 50
+            absolute: 100

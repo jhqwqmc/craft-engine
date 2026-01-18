@@ -769,10 +769,14 @@ configured-feature:
       decorators: []
 placed-features:
   default:palm_tree:
+    biome:
+      - minecraft:beach
+    environment:
+      - minecraft:overworld
     feature: default:palm_tree
     placement:
       - type: 'minecraft:rarity_filter'
-        chance: 8
+        chance: 7
       - type: 'minecraft:count'
         count:
           type: 'minecraft:weighted_list'
@@ -793,5 +797,6 @@ placed-features:
       - type: 'minecraft:block_predicate_filter'
         predicate:
           type: 'minecraft:matching_blocks'
-          blocks: '#minecraft:sand'
+          blocks: 'minecraft:sand'
           offset: [0,-1,0]
+      - type: 'minecraft:biome'

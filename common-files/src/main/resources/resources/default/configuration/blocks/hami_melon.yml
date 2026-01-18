@@ -211,6 +211,8 @@ recipes:
       count: 1
 placed-features:
   default:hami_melon:
+    environment:
+      - minecraft:overworld
     feature:
       type: 'minecraft:random_patch'
       config:
@@ -235,7 +237,7 @@ placed-features:
                       - 0
                       - -1
                       - 0
-        tries: 96
+        tries: 75
         xz_spread: 7
         y_spread: 3
     placement:

@@ -734,7 +734,7 @@ public final class CoreReflections {
             )
     );
 
-    public static final Method method$$LevelReader$dimensionType = requireNonNull(
+    public static final Method method$LevelReader$dimensionType = requireNonNull(
             ReflectionUtils.getMethod(
                     clazz$LevelReader, clazz$DimensionType
             )

@@ -36,6 +36,10 @@ recipes:
       count: 3
 placed-features:
   default:reed:
+    biome:
+      - minecraft:river
+    environment:
+      - minecraft:overworld
     feature:
       type: 'minecraft:random_patch'
       config:
@@ -70,3 +74,4 @@ placed-features:
       - type: 'minecraft:in_square'
       - type: 'minecraft:heightmap'
         heightmap: WORLD_SURFACE
+      - type: 'minecraft:biome'

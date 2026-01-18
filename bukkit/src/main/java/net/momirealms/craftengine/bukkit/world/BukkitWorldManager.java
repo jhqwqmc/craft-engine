@@ -9,8 +9,11 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflect
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.plugin.reflection.paper.PaperReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
+import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.LegacyDFUUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
+import net.momirealms.craftengine.bukkit.world.gen.ConditionalFeature;
+import net.momirealms.craftengine.bukkit.world.gen.CraftEngineFeatures;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -47,6 +50,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class BukkitWorldManager implements WorldManager, Listener {
     private static BukkitWorldManager instance;
@@ -60,7 +65,8 @@ public class BukkitWorldManager implements WorldManager, Listener {
     private final ConfiguredFeatureParser configuredFeatureParser;
     private final PlacedFeatureParser placedFeatureParser;
     private final Map<Key, Object> configuredFeatures;
-    private List<Object> placedFeatures;
+    private List<ConditionalFeature> placedFeatures;
+    public long lastReloadFeatureTime;
 
     public BukkitWorldManager(BukkitCraftEngine plugin) {
         instance = this;
@@ -91,8 +97,25 @@ public class BukkitWorldManager implements WorldManager, Listener {
         return getWorld(world.getUID());
     }
 
-    public List<Object> placedFeatures() {
-        return this.placedFeatures;
+    public boolean hasCustomFeatures() {
+        return !this.placedFeatures.isEmpty();
+    }
+
+    public synchronized CraftEngineFeatures fetchFeatures(Object serverLevel) {
+        World world = FastNMS.INSTANCE.method$Level$getCraftWorld(serverLevel);
+        String name = world.getName();
+        Key dimension = KeyUtils.resourceLocationToKey(FastNMS.INSTANCE.field$ResourceKey$location(FastNMS.INSTANCE.method$Level$dimension(serverLevel)));
+        List<ConditionalFeature> features = new ArrayList<>();
+        for (ConditionalFeature feature : this.placedFeatures) {
+            if (feature.isAllowedWorld(name) && feature.isAllowedEnvironment(dimension)) {
+                features.add(feature);
+            }
+        }
+        return new CraftEngineFeatures(this.placedFeatures, features);
+    }
+
+    public long lastReloadFeatureTime() {
+        return this.lastReloadFeatureTime;
     }
 
     public Object configuredFeatureById(Key id) {
@@ -586,21 +609,28 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
     public class PlacedFeatureParser extends IdSectionConfigParser {
         public static final String[] CONFIG_SECTION_NAME = new String[] {"placed-feature", "placed-features"};
-        private List<Object> tempFeatures = null;
+        private List<ConditionalFeature> tempFeatures = null;
+        private int id;
 
         @Override
         public void preProcess() {
             this.tempFeatures = new ArrayList<>();
+            this.id = 0;
         }
 
         @Override
         public void postProcess() {
             BukkitWorldManager.this.placedFeatures = this.tempFeatures;
+            BukkitWorldManager.this.lastReloadFeatureTime = System.currentTimeMillis();
         }
 
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
             Map<String, Object> processedSection = replaceDashToUnderscore(section);
+            Predicate<Key> biomeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "biome", "biomes"), Key::of);
+            Predicate<String> worldFilter = parseFilter(ResourceConfigUtils.get(processedSection, "world", "worlds"), Function.identity());
+            Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "environment", "environments"), Key::of);
+
             Object rawFeature = processedSection.get("feature");
             Object configuredFeature = null;
             if (rawFeature instanceof String name) {
@@ -626,30 +656,28 @@ public class BukkitWorldManager implements WorldManager, Listener {
             List<Object> placements = ResourceConfigUtils.parseConfigAsList(rawPlacement, map -> {
                 if (map.get("type") instanceof String type) {
                     if (type.equals("biome") || type.equals("minecraft:biome")) {
-                        throw new IllegalArgumentException("'minecraft:biome' is not allowed in placement");
-                    }
-                    JsonElement json = GsonHelper.get().toJsonTree(map);
-                    if (VersionHelper.isOrAbove1_20_5()) {
-                        return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
-                                .resultOrPartial(error -> {
-                                    throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
-                                })
-                                .orElse(null);
-                    } else {
-                        return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
-                            throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
-                        });
+                        return FastNMS.INSTANCE.createBiomePlacementFilter(biomeFilter);
                     }
                 }
-                return null;
+                JsonElement json = GsonHelper.get().toJsonTree(map);
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    return CoreReflections.instance$PlacementModifier$CODEC.parse(MRegistryOps.JSON, json)
+                            .resultOrPartial(error -> {
+                                throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                            })
+                            .orElse(null);
+                } else {
+                    return LegacyDFUUtils.parse(CoreReflections.instance$PlacementModifier$CODEC, MRegistryOps.JSON, json, (error) -> {
+                        throw new LocalizedResourceConfigException("warning.config.placed_feature.invalid_placement", json.toString(), error);
+                    });
+                }
             });
-            placements.removeIf(Objects::isNull);
             if (placements.isEmpty()) {
                 throw new LocalizedResourceConfigException("warning.config.placed_feature.missing_placement");
             }
             try {
                 Object placedFeature = CoreReflections.constructor$PlacedFeature.newInstance(configuredFeature, placements);
-                this.tempFeatures.add(placedFeature);
+                this.tempFeatures.add(new ConditionalFeature(this.id++, placedFeature, biomeFilter, worldFilter, environmentFilter));
             } catch (ReflectiveOperationException e) {
                 BukkitWorldManager.this.plugin.logger().warn("Failed to create placed feature '" + id + "': " + e, e);
             }
@@ -668,6 +696,27 @@ public class BukkitWorldManager implements WorldManager, Listener {
         @Override
         public int loadingSequence() {
             return LoadingSequence.PLACED_FEATURE;
+        }
+
+        private <T> Predicate<T> parseFilter(Object config, Function<String, T> mapper) {
+            List<T> items = MiscUtils.getAsStringList(config).stream()
+                    .map(mapper)
+                    .toList();
+            if (items.isEmpty()) {
+                return k -> true;
+            } else if (items.size() <= 3) {
+                return k -> {
+                    for (T item : items) {
+                        if (item.equals(k)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+            } else {
+                Set<T> itemSet = new HashSet<>(items);
+                return itemSet::contains;
+            }
         }
     }
 

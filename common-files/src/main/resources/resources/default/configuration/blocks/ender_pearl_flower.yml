@@ -136,6 +136,8 @@ vanilla-loots:
               item: default:ender_pearl_flower_seeds
 placed-features:
   default:ender_pearl_flower:
+    environment:
+      - minecraft:the_end
     feature:
       type: 'minecraft:random_patch'
       config:
