@@ -5,7 +5,6 @@ repositories {
     maven("https://repo.gtemc.net/releases/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // papi
     maven("https://maven.enginehub.org/repo/") // worldguard worldedit
-    maven("https://repo.rapture.pw/repository/maven-releases/")  // slime world
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/")  // slime world
     maven("https://mvn.lumine.io/repository/maven-public/") // model engine mythic mobs
     maven("https://repo.viaversion.com") // via
