@@ -50,6 +50,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class BukkitCompatibilityManager implements CompatibilityManager {
     private final BukkitCraftEngine plugin;
     private final Map<String, ModelProvider> modelProviders;
@@ -99,7 +100,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     @Override
     public void onEnable() {
-        this.initSlimeWorldHook();
+        runCatchingHook(this::initSlimeWorldHook, "AdvancedSlimePaper");
         // WorldEdit
         // FastAsyncWorldEdit
         if (this.isPluginEnabled("FastAsyncWorldEdit")) {
@@ -123,9 +124,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         }
         Key worldGuardRegion = Key.of("worldguard:region");
         if (this.hasPlugin("WorldGuard")) {
-            runCatchingHook(() -> {
-                CommonConditions.register(worldGuardRegion, WorldGuardRegionCondition.factory());
-            }, "WorldGuard");
+            runCatchingHook(() -> CommonConditions.register(worldGuardRegion, WorldGuardRegionCondition.factory()), "WorldGuard");
         } else {
             CommonConditions.register(worldGuardRegion, AlwaysFalseCondition.factory());
         }
@@ -140,9 +139,10 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     @Override
     public void onDelayedEnable() {
         if (this.isPluginEnabled("PlaceholderAPI")) {
-            PlaceholderAPIUtils.registerExpansions(this.plugin);
-            this.hasPlaceholderAPI = true;
-            logHook("PlaceholderAPI");
+            runCatchingHook(() -> {
+                PlaceholderAPIUtils.registerExpansions(this.plugin);
+                this.hasPlaceholderAPI = true;
+            }, "PlaceholderAPI");
         }
         if (this.isPluginEnabled("LuckPerms")) {
             runCatchingHook(this::initLuckPermsHook, "LuckPerms");
@@ -234,7 +234,6 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 SlimeFormatStorageAdaptor adaptor = new SlimeFormatStorageAdaptor(worldManager);
                 worldManager.setStorageAdaptor(adaptor);
                 Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
-                logHook("AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
             }
         } else {
@@ -243,13 +242,11 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 1);
                 worldManager.setStorageAdaptor(adaptor);
                 Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
-                logHook("AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
                 if (hasPlugin("SlimeWorldPlugin")) {
                     LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 2);
                     worldManager.setStorageAdaptor(adaptor);
                     Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
-                    logHook("AdvancedSlimePaper");
                 }
             }
         }
