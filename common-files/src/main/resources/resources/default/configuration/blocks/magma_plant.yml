@@ -12,6 +12,7 @@ items:
     settings:
       invulnerable:
         - lava
+        - fire
         - fire_tick
       $$<1.20.5:
         food:
