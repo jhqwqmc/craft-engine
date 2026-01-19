@@ -162,9 +162,10 @@ public class FurnitureItemBehavior extends ItemBehavior {
         if (!BukkitCraftEngine.instance().antiGriefProvider().test(bukkitPlayer, Flag.PLACE, furnitureLocation)) {
             return InteractionResult.FAIL;
         }
+        ContextHolder.Builder contextBuilder = ContextHolder.builder();
         // 触发尝试放置的事件
         if (player != null) {
-            FurnitureAttemptPlaceEvent attemptPlaceEvent = new FurnitureAttemptPlaceEvent(bukkitPlayer, customFurniture, variant, furnitureLocation.clone(), context.getHand(), world.getBlockAt(context.getClickedPos().x(), context.getClickedPos().y(), context.getClickedPos().z()));
+            FurnitureAttemptPlaceEvent attemptPlaceEvent = new FurnitureAttemptPlaceEvent(bukkitPlayer, customFurniture, variant, furnitureLocation.clone(), context.getHand(), world.getBlockAt(context.getClickedPos().x(), context.getClickedPos().y(), context.getClickedPos().z()), contextBuilder);
             if (EventUtils.fireAndCheckCancel(attemptPlaceEvent)) {
                 return InteractionResult.FAIL;
             }
@@ -181,7 +182,7 @@ public class FurnitureItemBehavior extends ItemBehavior {
         BukkitFurniture bukkitFurniture = BukkitFurnitureManager.instance().place(furnitureLocation.clone(), customFurniture, dataAccessor, false);
         // 触发放置事件
         if (player != null) {
-            FurniturePlaceEvent placeEvent = new FurniturePlaceEvent(bukkitPlayer, bukkitFurniture, furnitureLocation, context.getHand());
+            FurniturePlaceEvent placeEvent = new FurniturePlaceEvent(bukkitPlayer, bukkitFurniture, furnitureLocation, context.getHand(), contextBuilder);
             if (EventUtils.fireAndCheckCancel(placeEvent)) {
                 bukkitFurniture.destroy();
                 return InteractionResult.FAIL;
@@ -189,7 +190,8 @@ public class FurnitureItemBehavior extends ItemBehavior {
         }
         // 触发ce事件
         Cancellable dummy = Cancellable.dummy();
-        PlayerOptionalContext functionContext = PlayerOptionalContext.of(player, ContextHolder.builder()
+        PlayerOptionalContext functionContext = PlayerOptionalContext.of(player,
+                contextBuilder
                 .withParameter(DirectContextParameters.FURNITURE, bukkitFurniture)
                 .withParameter(DirectContextParameters.POSITION, LocationUtils.toWorldPosition(furnitureLocation))
                 .withParameter(DirectContextParameters.EVENT, dummy)

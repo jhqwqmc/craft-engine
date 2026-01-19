@@ -149,7 +149,8 @@ public final class BlockEventListener implements Listener {
                     }
 
                     // trigger api event
-                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state, event.isDropItems());
+                    ContextHolder.Builder contextBuilder = ContextHolder.builder();
+                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state, event.isDropItems(), contextBuilder);
                     boolean isCancelled = EventUtils.fireAndCheckCancel(customBreakEvent);
                     if (isCancelled) {
                         event.setCancelled(true);
@@ -161,7 +162,7 @@ public final class BlockEventListener implements Listener {
 
                     // execute functions
                     Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
-                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
+                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, contextBuilder
                             .withParameter(DirectContextParameters.BLOCK, new BukkitExistingBlock(block))
                             .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, state)
                             .withParameter(DirectContextParameters.EVENT, cancellable)

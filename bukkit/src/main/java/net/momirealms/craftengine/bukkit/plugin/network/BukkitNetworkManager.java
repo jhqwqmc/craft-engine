@@ -61,6 +61,7 @@ import net.momirealms.craftengine.bukkit.world.score.BukkitTeamManager;
 import net.momirealms.craftengine.core.advancement.network.AdvancementHolder;
 import net.momirealms.craftengine.core.advancement.network.AdvancementProgress;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureHitData;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
@@ -4032,16 +4033,35 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
                     if (hitBox == null) return;
 
-                    FurnitureHitEvent hitEvent = new FurnitureHitEvent(serverPlayer.platformPlayer(), furniture);
+                    ContextHolder.Builder contextBuilder = ContextHolder.builder()
+                            .withParameter(DirectContextParameters.FURNITURE, furniture)
+                            .withParameter(DirectContextParameters.HAND, InteractionHand.MAIN_HAND)
+                            .withParameter(DirectContextParameters.ITEM_IN_HAND, serverPlayer.getItemInHand(InteractionHand.MAIN_HAND))
+                            .withParameter(DirectContextParameters.POSITION, furniture.position());
+                    FurnitureHitEvent hitEvent = new FurnitureHitEvent(serverPlayer.platformPlayer(), furniture, contextBuilder);
                     if (EventUtils.fireAndCheckCancel(hitEvent))
                         return;
-
                     if (!BukkitCraftEngine.instance().antiGriefProvider().test(platformPlayer, Flag.BREAK, location))
                         return;
 
                     int hitTimes = furniture.config.settings().hitTimes();
                     if (hitTimes > 1) {
-                        int alreadyHit = serverPlayer.furnitureHitData().hit(furniture.entityId());
+                        FurnitureHitData furnitureHitData = serverPlayer.furnitureHitData();
+                        int previousTimes = furnitureHitData.times(furniture.entityId());
+                        int alreadyHit = furnitureHitData.hit(furniture.entityId());
+
+                        // execute functions
+                        PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer,
+                                contextBuilder
+                                        .withParameter(DirectContextParameters.EVENT, Cancellable.of(hitEvent::isCancelled, hitEvent::setCancelled))
+                                        .withParameter(DirectContextParameters.HIT_TIMES, alreadyHit)
+                        );
+                        furniture.config().execute(context, EventTrigger.LEFT_CLICK);
+                        if (hitEvent.isCancelled()) {
+                            furnitureHitData.setTimes(previousTimes);
+                            return;
+                        }
+
                         if (alreadyHit < hitTimes) {
                             SoundData soundData = furniture.config.settings().sounds().hitSound();
                             serverPlayer.world().playSound(furniture.position(), soundData.id(), soundData.volume().get(), soundData.pitch().get(), SoundSource.PLAYER);
@@ -4051,26 +4071,18 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                         }
                     }
 
-                    FurnitureBreakEvent breakEvent = new FurnitureBreakEvent(serverPlayer.platformPlayer(), furniture);
+                    FurnitureBreakEvent breakEvent = new FurnitureBreakEvent(serverPlayer.platformPlayer(), furniture, contextBuilder);
                     breakEvent.setDropItems(!serverPlayer.isCreativeMode());
                     if (EventUtils.fireAndCheckCancel(breakEvent))
                         return;
 
-                    Cancellable cancellable = Cancellable.of(breakEvent::isCancelled, breakEvent::setCancelled);
                     // execute functions
-                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
-                            .withParameter(DirectContextParameters.FURNITURE, furniture)
-                            .withParameter(DirectContextParameters.EVENT, cancellable)
-                            .withParameter(DirectContextParameters.HAND, InteractionHand.MAIN_HAND)
-                            .withParameter(DirectContextParameters.ITEM_IN_HAND, serverPlayer.getItemInHand(InteractionHand.MAIN_HAND))
-                            .withParameter(DirectContextParameters.POSITION, furniture.position())
-                    );
-                    furniture.config().execute(context, EventTrigger.LEFT_CLICK);
+                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer,
+                            contextBuilder.withParameter(DirectContextParameters.EVENT, Cancellable.of(breakEvent::isCancelled, breakEvent::setCancelled)));
                     furniture.config().execute(context, EventTrigger.BREAK);
-                    if (cancellable.isCancelled()) {
+                    if (breakEvent.isCancelled()) {
                         return;
                     }
-
                     CraftEngineFurniture.remove(furniture, serverPlayer, breakEvent.dropItems(), true);
                 };
             } else if (actionType == 2) {
@@ -4129,7 +4141,8 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     // 获取正确的交互点
                     Location interactionPoint = new Location(platformPlayer.getWorld(), hitLocation.x, hitLocation.y, hitLocation.z);
                     // 触发事件
-                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitBox);
+                    ContextHolder.Builder contextBuilder = ContextHolder.builder();
+                    FurnitureInteractEvent interactEvent = new FurnitureInteractEvent(serverPlayer.platformPlayer(), furniture, hand, interactionPoint, hitBox, contextBuilder);
                     if (EventUtils.fireAndCheckCancel(interactEvent)) {
                         return;
                     }
@@ -4157,7 +4170,8 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                     Item<ItemStack> itemInHand = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
                     Cancellable cancellable = Cancellable.of(interactEvent::isCancelled, interactEvent::setCancelled);
                     // execute functions
-                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
+                    PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer,
+                            contextBuilder
                             .withParameter(DirectContextParameters.EVENT, cancellable)
                             .withParameter(DirectContextParameters.FURNITURE, furniture)
                             .withParameter(DirectContextParameters.ITEM_IN_HAND, itemInHand)

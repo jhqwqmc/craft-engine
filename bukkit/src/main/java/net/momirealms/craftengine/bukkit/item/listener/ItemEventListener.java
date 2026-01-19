@@ -145,16 +145,12 @@ public class ItemEventListener implements Listener {
         // 处理自定义方块
         if (immutableBlockState != null) {
             // call the event if it's custom
+            ContextHolder.Builder contextBuilder = ContextHolder.builder();
             CustomBlockInteractEvent interactEvent = new CustomBlockInteractEvent(
-                    player,
-                    block.getLocation(),
-                    interactionPoint,
-                    immutableBlockState,
-                    block,
-                    event.getBlockFace(),
-                    hand,
+                    player, block.getLocation(), interactionPoint, immutableBlockState,
+                    block, event.getBlockFace(), hand,
                     action.isRightClick() ? CustomBlockInteractEvent.Action.RIGHT_CLICK : CustomBlockInteractEvent.Action.LEFT_CLICK,
-                    event.getItem()
+                    event.getItem(), contextBuilder
             );
             if (EventUtils.fireAndCheckCancel(interactEvent)) {
                 event.setCancelled(true);
@@ -170,7 +166,7 @@ public class ItemEventListener implements Listener {
             Cancellable dummy = Cancellable.dummy();
             // run custom functions
             CustomBlock customBlock = immutableBlockState.owner().value();
-            PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
+            PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, contextBuilder
                     .withParameter(DirectContextParameters.BLOCK, new BukkitExistingBlock(block))
                     .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, immutableBlockState)
                     .withParameter(DirectContextParameters.HAND, hand)

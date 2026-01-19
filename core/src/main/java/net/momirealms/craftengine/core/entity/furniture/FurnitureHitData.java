@@ -17,6 +17,15 @@ public class FurnitureHitData {
         return this.times;
     }
 
+    public int times(int hitFurniture) {
+        if (hitFurniture != this.lastHitFurniture) return 0;
+        return this.times;
+    }
+
+    public void setTimes(int times) {
+        this.times = times;
+    }
+
     public void reset() {
         this.times = 0;
         this.lastHitTime = 0;

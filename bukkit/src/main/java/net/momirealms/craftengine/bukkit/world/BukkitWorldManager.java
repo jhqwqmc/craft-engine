@@ -629,7 +629,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             Map<String, Object> processedSection = replaceDashToUnderscore(section);
             Predicate<Key> biomeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "biome", "biomes"), Key::of);
             Predicate<String> worldFilter = parseFilter(ResourceConfigUtils.get(processedSection, "world", "worlds"), Function.identity());
-            Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "environment", "environments"), Key::of);
+            Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "dimension", "dimensions", "environment", "environments"), Key::of);
 
             Object rawFeature = processedSection.get("feature");
             Object configuredFeature = null;
