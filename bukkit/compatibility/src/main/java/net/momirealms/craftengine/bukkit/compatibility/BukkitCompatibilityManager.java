@@ -231,22 +231,28 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
         if (VersionHelper.isOrAbove1_21_4()) {
             try {
                 Class.forName("com.infernalsuite.asp.api.AdvancedSlimePaperAPI");
-                SlimeFormatStorageAdaptor adaptor = new SlimeFormatStorageAdaptor(worldManager);
-                worldManager.setStorageAdaptor(adaptor);
-                Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                runCatchingHook(() -> {
+                    SlimeFormatStorageAdaptor adaptor = new SlimeFormatStorageAdaptor(worldManager);
+                    worldManager.setStorageAdaptor(adaptor);
+                    Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                }, "AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
             }
         } else {
             try {
                 Class.forName("com.infernalsuite.aswm.api.SlimePlugin");
-                LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 1);
-                worldManager.setStorageAdaptor(adaptor);
-                Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
-            } catch (ClassNotFoundException ignored) {
-                if (hasPlugin("SlimeWorldPlugin")) {
-                    LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 2);
+                runCatchingHook(() -> {
+                    LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 1);
                     worldManager.setStorageAdaptor(adaptor);
                     Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                }, "AdvancedSlimePaper");
+            } catch (ClassNotFoundException ignored) {
+                if (hasPlugin("SlimeWorldPlugin")) {
+                    runCatchingHook(() -> {
+                        LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 2);
+                        worldManager.setStorageAdaptor(adaptor);
+                        Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                    }, "AdvancedSlimePaper");
                 }
             }
         }
