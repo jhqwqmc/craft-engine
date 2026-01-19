@@ -119,7 +119,10 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                     hasAdditionalInput = true;
                 }
             }
-            ingredients.sort(Comparator.comparingInt(Ingredient::count));
+            // 按照数量从多到少排序
+            if (hasAdditionalInput) {
+                ingredients.sort((o1, o2) -> Integer.compare(o2.count(), o1.count()));
+            }
             return new CustomShapelessRecipe(id,
                     showNotification(arguments),
                     parseResult(arguments),

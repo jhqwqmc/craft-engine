@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.item.recipe.remainder;
 
+import net.momirealms.craftengine.core.plugin.context.number.FixedNumberProvider;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Registries;
@@ -43,7 +44,7 @@ public final class CraftRemainders {
             List<CraftRemainder> remainderList = ResourceConfigUtils.parseConfigAsList(list, map -> fromMap(MiscUtils.castToMap(map, false)));
             return new CompositeCraftRemainder(remainderList.toArray(new CraftRemainder[0]));
         } else if (obj != null) {
-            return new FixedCraftRemainder(Key.of(obj.toString()));
+            return new FixedCraftRemainder(Key.of(obj.toString()), FixedNumberProvider.of(1));
         } else {
             return null;
         }
