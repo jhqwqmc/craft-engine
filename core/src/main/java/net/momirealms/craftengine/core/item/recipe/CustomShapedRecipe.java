@@ -20,6 +20,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<CustomShapedRecipe<?>>();
     private final ParsedPattern<T> parsedPattern;
     private final Pattern<T> pattern;
+    private final boolean takeAdditionalIngredients;
 
     public CustomShapedRecipe(Key id,
                               boolean showNotification,
@@ -34,6 +35,13 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
         super(id, showNotification, result, visualResult, group, category, craftingFunctions, craftingCondition, alwaysRebuildOutput);
         this.pattern = pattern;
         this.parsedPattern = pattern.parse();
+        boolean has = false;
+        for (Optional<Ingredient<T>> ingredient : this.parsedPattern.ingredients()) {
+            if (ingredient.isPresent() && ingredient.get().count() > 1) {
+                has = true;
+            }
+        }
+        this.takeAdditionalIngredients = has;
     }
 
     public ParsedPattern<T> parsedPattern() {
@@ -44,6 +52,14 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
     @Override
     public boolean matches(RecipeInput input) {
         return this.parsedPattern.matches((CraftingInput<T>) input);
+    }
+
+    public boolean takeAdditionalIngredients() {
+        return this.takeAdditionalIngredients;
+    }
+
+    public void takeAdditionalIngredients(CraftingInput<T> input, int left) {
+        this.parsedPattern.matchesAndTake(input, left);
     }
 
     @Override
@@ -128,24 +144,45 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
         }
 
         private boolean matches(CraftingInput<T> input, boolean mirrored) {
-            if (mirrored) {
-                for (int i = 0, size = input.size(); i < size; i++) {
-                    Optional<Ingredient<T>> optional = this.mirroredIngredients[i];
-                    UniqueIdItem<T> itemStack = input.getItem(i);
-                    if (!Ingredient.isInstance(optional, itemStack)) {
-                        return false;
-                    }
-                }
-            } else {
-                for (int i = 0, size = input.size(); i < size; i++) {
-                    Optional<Ingredient<T>> optional = this.ingredients[i];
-                    UniqueIdItem<T> itemStack = input.getItem(i);
-                    if (!Ingredient.isInstance(optional, itemStack)) {
-                        return false;
-                    }
+            Optional<Ingredient<T>>[] ingredients = mirrored ? this.mirroredIngredients : this.ingredients;
+            for (int i = 0, size = input.size(); i < size; i++) {
+                Optional<Ingredient<T>> optional = ingredients[i];
+                UniqueIdItem<T> itemStack = input.getItem(i);
+                if (!Ingredient.isInstance(optional, itemStack)) {
+                    return false;
                 }
             }
             return true;
+        }
+
+        private void takeIngredients(CraftingInput<T> input, boolean mirrored, int left) {
+            Optional<Ingredient<T>>[] ingredients = mirrored ? this.mirroredIngredients : this.ingredients;
+            for (int i = 0, size = input.size(); i < size; i++) {
+                Optional<Ingredient<T>> optional = ingredients[i];
+                UniqueIdItem<T> itemStack = input.getItem(i);
+                if (optional.isPresent() && Ingredient.isInstance(optional, itemStack)) {
+                    int toTake = optional.get().count() - left;
+                    if (toTake > 0) {
+                        itemStack.item().shrink(toTake);
+                    }
+                }
+            }
+        }
+
+        public boolean matchesAndTake(CraftingInput<T> input, int left) {
+            if (input.ingredientCount == this.ingredientCount) {
+                if (input.width == this.width && input.height == this.height) {
+                    if (!this.symmetrical && this.matches(input, true)) {
+                        takeIngredients(input, true, left);
+                        return true;
+                    }
+                    if (this.matches(input, false)) {
+                        takeIngredients(input, false, left);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private static <T> boolean isSymmetrical(int width, int height, T[] list) {
