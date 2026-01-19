@@ -55,6 +55,17 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         return toIngredient(ingredients);
     }
 
+    protected Ingredient<T> parseIngredient(Object rawIngredient) {
+        if (rawIngredient instanceof Map<?,?> map) {
+            List<String> ingredients = MiscUtils.getAsStringList(map.get("items"));
+            int count = ResourceConfigUtils.getAsInt(map.get("count"), "count");
+            return toIngredient(ingredients, Math.max(count, 1));
+        } else {
+            List<String> ingredients = MiscUtils.getAsStringList(rawIngredient);
+            return toIngredient(ingredients, 1);
+        }
+    }
+
     // 不确定的类型
     protected Object getIngredientOrThrow(Map<String, Object> arguments) {
         Object ingredient = ResourceConfigUtils.get(arguments, "ingredient", "ingredients");
@@ -133,12 +144,22 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
     }
 
     @NotNull
+    protected Ingredient<T> toIngredient(String item, int count) {
+        return toIngredient(List.of(item), count);
+    }
+
+    @NotNull
     protected Ingredient<T> toIngredient(String item) {
-        return toIngredient(List.of(item));
+        return toIngredient(List.of(item), 1);
     }
 
     @NotNull
     protected Ingredient<T> toIngredient(List<String> items) {
+        return toIngredient(items, 1);
+    }
+
+    @NotNull
+    protected Ingredient<T> toIngredient(List<String> items, int count) {
         Set<UniqueKey> itemIds = new HashSet<>();
         Set<UniqueKey> minecraftItemIds = new HashSet<>();
         ItemManager<T> itemManager = CraftEngine.instance().itemManager();
@@ -195,6 +216,9 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
             }
             minecraftItemIds.add(vanillaItem);
         }
-        return itemIds.isEmpty() ? null : Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem);
+        if (itemIds.isEmpty()) {
+            throw new IllegalArgumentException("ingredients must contain at least one item");
+        }
+        return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem, count);
     }
 }
