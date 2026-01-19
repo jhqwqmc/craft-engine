@@ -220,8 +220,8 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
     }
 
     private void initLuckPermsHook() {
-        new LuckPermsEventListeners(plugin.javaPlugin(), (uuid) -> {
-            BukkitFontManager fontManager = plugin.fontManager();
+        new LuckPermsEventListeners(this.plugin.javaPlugin(), (uuid) -> {
+            BukkitFontManager fontManager = this.plugin.fontManager();
             fontManager.refreshEmojiSuggestions(uuid);
         });
     }
@@ -234,7 +234,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 runCatchingHook(() -> {
                     SlimeFormatStorageAdaptor adaptor = new SlimeFormatStorageAdaptor(worldManager);
                     worldManager.setStorageAdaptor(adaptor);
-                    Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                    Bukkit.getPluginManager().registerEvents(adaptor, this.plugin.javaPlugin());
                 }, "AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
             }
@@ -244,14 +244,14 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
                 runCatchingHook(() -> {
                     LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 1);
                     worldManager.setStorageAdaptor(adaptor);
-                    Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                    Bukkit.getPluginManager().registerEvents(adaptor, this.plugin.javaPlugin());
                 }, "AdvancedSlimePaper");
             } catch (ClassNotFoundException ignored) {
                 if (hasPlugin("SlimeWorldPlugin")) {
                     runCatchingHook(() -> {
                         LegacySlimeFormatStorageAdaptor adaptor = new LegacySlimeFormatStorageAdaptor(worldManager, 2);
                         worldManager.setStorageAdaptor(adaptor);
-                        Bukkit.getPluginManager().registerEvents(adaptor, plugin.javaPlugin());
+                        Bukkit.getPluginManager().registerEvents(adaptor, this.plugin.javaPlugin());
                     }, "AdvancedSlimePaper");
                 }
             }
