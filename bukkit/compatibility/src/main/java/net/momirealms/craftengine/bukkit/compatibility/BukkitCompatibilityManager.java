@@ -100,7 +100,7 @@ public class BukkitCompatibilityManager implements CompatibilityManager {
 
     @Override
     public void onEnable() {
-        runCatchingHook(this::initSlimeWorldHook, "AdvancedSlimePaper");
+        this.initSlimeWorldHook();
         // WorldEdit
         // FastAsyncWorldEdit
         if (this.isPluginEnabled("FastAsyncWorldEdit")) {
