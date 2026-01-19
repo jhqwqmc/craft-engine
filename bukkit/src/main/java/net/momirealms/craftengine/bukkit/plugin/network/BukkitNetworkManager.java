@@ -1175,10 +1175,10 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             World world = platformPlayer.getWorld();
             Object blockPos = FastNMS.INSTANCE.field$ServerboundPlayerActionPacket$pos(packet);
             BlockPos pos = LocationUtils.fromBlockPos(blockPos);
-            if (!player.canInteractPoint(new Vec3d(pos.x, pos.y, pos.z), 4)) {
-                return;
-            }
             BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(new Vec3d(pos.x, pos.y, pos.z), 4)) {
+                    return;
+                }
                 try {
                     handlePlayerActionPacketOnMainThread(player, world, pos, packet);
                 } catch (Exception e) {
@@ -1319,10 +1319,10 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             int y = FastNMS.INSTANCE.field$Vec3i$y(pos);
             int z = FastNMS.INSTANCE.field$Vec3i$z(pos);
             // 太远了，有挂
-            if (!player.canInteractPoint(new Vec3d(x, y, z), 4)) {
-                return;
-            }
             BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(new Vec3d(x, y, z), 4)) {
+                    return;
+                }
                 try {
                     handlePickItemFromBlockPacketOnMainThread((BukkitServerPlayer) user, pos);
                 } catch (Throwable e) {
@@ -1369,10 +1369,10 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 return;
             }
             Location location = furniture.location();
-            if (!player.canInteractPoint(LocationUtils.toVec3d(location), 16)) {
-                return;
-            }
             BukkitNetworkManager.this.plugin.scheduler().sync().run(() -> {
+                if (!player.canInteractPoint(furniture.position().toVec3d(), 16)) {
+                    return;
+                }
                 try {
                     handlePickItemFromEntityOnMainThread((BukkitServerPlayer) user, furniture);
                 } catch (Throwable e) {
@@ -4007,10 +4007,6 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
             int actionType = buf.readVarInt();
             Player platformPlayer = serverPlayer.platformPlayer();
             Location location = furniture.location();
-            // 太远就是挂
-            if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
-                return;
-            }
 
             Runnable mainThreadTask;
             if (actionType == 1) {
@@ -4028,6 +4024,10 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                 mainThreadTask = () -> {
                     // todo 冒险模式破坏工具白名单
                     if (serverPlayer.isAdventureMode() || !furniture.isValid()) return;
+
+                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
+                        return;
+                    }
 
                     // 先检查碰撞箱部分是否存在
                     FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
@@ -4105,6 +4105,10 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
 
                 mainThreadTask = () -> {
                     if (!furniture.isValid()) {
+                        return;
+                    }
+
+                    if (!serverPlayer.canInteractPoint(new Vec3d(location.getX(), location.getY(), location.getZ()), 16d)) {
                         return;
                     }
 
