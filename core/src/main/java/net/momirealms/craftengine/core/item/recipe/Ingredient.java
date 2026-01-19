@@ -23,10 +23,6 @@ public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContent
         this.count = count;
     }
 
-    public int count() {
-        return count;
-    }
-
     public static <T> boolean isInstance(Optional<Ingredient<T>> optionalIngredient, UniqueIdItem<T> stack) {
         return optionalIngredient.map((ingredient) -> ingredient.test(stack))
                 .orElseGet(stack::isEmpty);

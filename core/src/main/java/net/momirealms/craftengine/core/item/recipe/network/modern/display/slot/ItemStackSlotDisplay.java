@@ -29,7 +29,7 @@ public class ItemStackSlotDisplay<I> implements SlotDisplay<I> {
     }
 
     public Item<I> item() {
-        return this.item;
+        return item;
     }
 
     @Override

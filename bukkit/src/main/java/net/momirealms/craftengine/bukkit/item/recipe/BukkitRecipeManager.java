@@ -13,7 +13,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.ReflectionInitExcepti
 import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistries;
-import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.item.BuildableItem;
 import net.momirealms.craftengine.core.item.Item;
@@ -113,13 +112,13 @@ public class BukkitRecipeManager extends AbstractRecipeManager<ItemStack> {
     );
 
     // nms 模块需要使用此方法
-    public static List<Object> getIngredientLooks(Ingredient<ItemStack> ingredient) {
+    public static List<Object> getIngredientLooks(List<UniqueKey> holders) {
         List<Object> itemStacks = new ArrayList<>();
-        for (UniqueKey holder : ingredient.items()) {
+        for (UniqueKey holder : holders) {
             Optional<? extends BuildableItem<ItemStack>> buildableItem = BukkitItemManager.instance().getBuildableItem(holder.key());
             if (buildableItem.isPresent()) {
-                ItemStack itemStack = buildableItem.get().buildItemStack(ItemBuildContext.empty(), ingredient.count());
-                Object nmsStack = FastNMS.INSTANCE.field$CraftItemStack$handle(ItemStackUtils.ensureCraftItemStack(itemStack));
+                ItemStack itemStack = buildableItem.get().buildItemStack(ItemBuildContext.empty(), 1);
+                Object nmsStack = FastNMS.INSTANCE.method$CraftItemStack$asNMSCopy(itemStack);
                 itemStacks.add(nmsStack);
             } else {
                 Item<ItemStack> barrier = BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null);

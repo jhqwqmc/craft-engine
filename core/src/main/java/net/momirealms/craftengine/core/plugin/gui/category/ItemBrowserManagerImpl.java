@@ -1194,7 +1194,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                         } else {
                             List<Item<?>> ingredients = new ArrayList<>();
                             for (UniqueKey in : ingredient.items()) {
-                                ingredients.add(this.plugin.itemManager().createWrappedItem(in.key(), player).count(ingredient.count()));
+                                ingredients.add(this.plugin.itemManager().createWrappedItem(in.key(), player));
                             }
                             layout.addIngredient(currentChar, GuiElement.recipeIngredient(ingredients, (e, c) -> {
                                 c.cancel();
