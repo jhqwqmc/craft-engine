@@ -37,7 +37,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
     }
 
     public ParsedPattern<T> parsedPattern() {
-        return parsedPattern;
+        return this.parsedPattern;
     }
 
     @SuppressWarnings("unchecked")
@@ -57,15 +57,15 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
     }
 
     public Pattern<T> pattern() {
-        return pattern;
+        return this.pattern;
     }
 
     public record Pattern<T>(String[] pattern, Map<Character, Ingredient<T>> ingredients) {
 
         public ParsedPattern<T> parse() {
-                String[] shrunk = shrink(pattern);
+                String[] shrunk = shrink(this.pattern);
                 return new ParsedPattern<>(shrunk[0].length(), shrunk.length,
-                        toIngredientArray(shrunk, ingredients));
+                        toIngredientArray(shrunk, this.ingredients));
         }
     }
 
