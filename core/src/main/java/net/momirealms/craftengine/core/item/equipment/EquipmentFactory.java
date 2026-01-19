@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
 
-public interface EquipmentFactory {
+public interface EquipmentFactory<E extends Equipment> {
 
-    Equipment create(Key id, Map<String, Object> args);
+    E create(Key id, Map<String, Object> args);
 }

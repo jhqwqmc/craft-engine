@@ -2,10 +2,7 @@ package net.momirealms.craftengine.core.pack.host.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
@@ -29,8 +26,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class OneDriveHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class OneDriveHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<OneDriveHost> FACTORY = new Factory();
     private final String clientId;
     private final String clientSecret;
     private final ProxySelector proxy;
@@ -58,7 +55,7 @@ public class OneDriveHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType<OneDriveHost> type() {
         return ResourcePackHosts.ONEDRIVE;
     }
 
@@ -227,10 +224,10 @@ public class OneDriveHost implements ResourcePackHost {
         return this.refreshToken.mid();
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<OneDriveHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public OneDriveHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String clientId = useEnv ? System.getenv("CE_ONEDRIVE_CLIENT_ID") : Optional.ofNullable(arguments.get("client-id")).map(String::valueOf).orElse(null);
             if (clientId == null || clientId.isEmpty()) {

@@ -3,19 +3,18 @@ package net.momirealms.craftengine.core.plugin.config.template.argument;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
 import net.momirealms.craftengine.core.plugin.config.template.ArgumentString;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ExpressionTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class ExpressionTemplateArgument implements TemplateArgument {
+    public static final TemplateArgumentFactory<ExpressionTemplateArgument> FACTORY = new Factory();
     private final ArgumentString expression;
     private final ValueType valueType;
 
-    protected ExpressionTemplateArgument(String expression, ValueType valueType) {
+    private ExpressionTemplateArgument(String expression, ValueType valueType) {
         this.expression = ArgumentString.preParse(expression);
         this.valueType = valueType;
     }
@@ -29,11 +28,6 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process expression argument: " + this.expression, e);
         }
-    }
-
-    @Override
-    public Key type() {
-        return TemplateArguments.EXPRESSION;
     }
 
     protected enum ValueType {
@@ -56,9 +50,10 @@ public class ExpressionTemplateArgument implements TemplateArgument {
         }
     }
 
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<ExpressionTemplateArgument> {
+
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public ExpressionTemplateArgument create(Map<String, Object> arguments) {
             return new ExpressionTemplateArgument(
                     arguments.getOrDefault("expression", "").toString(),
                     ValueType.valueOf(arguments.getOrDefault("value-type", "double").toString().toUpperCase(Locale.ROOT))

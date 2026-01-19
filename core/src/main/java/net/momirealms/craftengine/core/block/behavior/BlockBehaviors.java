@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.block.behavior;
 
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.registry.BuiltInRegistries;
@@ -14,21 +13,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class BlockBehaviors {
-    public static final Key EMPTY = Key.from("craftengine:empty");
+    public static final BlockBehaviorType<EmptyBlockBehavior> EMPTY = register(Key.ce("empty"), (block, args) -> EmptyBlockBehavior.INSTANCE);
 
-    public static void register(Key key, BlockBehaviorFactory factory) {
-        ((WritableRegistry<BlockBehaviorFactory>) BuiltInRegistries.BLOCK_BEHAVIOR_FACTORY)
-                .register(ResourceKey.create(Registries.BLOCK_BEHAVIOR_FACTORY.location(), key), factory);
+    protected BlockBehaviors() {
+    }
+
+    public static <T extends BlockBehavior> BlockBehaviorType<T> register(Key key, BlockBehaviorFactory<T> factory) {
+        BlockBehaviorType<T> type = new BlockBehaviorType<>(key, factory);
+        ((WritableRegistry<BlockBehaviorType<? extends BlockBehavior>>) BuiltInRegistries.BLOCK_BEHAVIOR_TYPE)
+                .register(ResourceKey.create(Registries.BLOCK_BEHAVIOR_TYPE.location(), key), type);
+        return type;
     }
 
     public static BlockBehavior fromMap(CustomBlock block, @Nullable Map<String, Object> map) {
         if (map == null || map.isEmpty()) return EmptyBlockBehavior.INSTANCE;
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.block.behavior.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        BlockBehaviorFactory factory = BuiltInRegistries.BLOCK_BEHAVIOR_FACTORY.getValue(key);
+        BlockBehaviorType<? extends BlockBehavior> factory = BuiltInRegistries.BLOCK_BEHAVIOR_TYPE.getValue(key);
         if (factory == null) {
             throw new LocalizedResourceConfigException("warning.config.block.behavior.invalid_type", type);
         }
-        return factory.create(block, map);
+        return factory.factory().create(block, map);
     }
 }

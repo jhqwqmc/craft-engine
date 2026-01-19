@@ -2,6 +2,8 @@ package net.momirealms.craftengine.core.plugin.network;
 
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.network.event.ByteBufPacketEvent;
+import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
 
 public interface EntityPacketHandler {
 

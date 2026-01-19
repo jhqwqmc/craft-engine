@@ -5,7 +5,7 @@ import com.google.gson.JsonPrimitive;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviors;
 import net.momirealms.craftengine.core.item.equipment.*;
-import net.momirealms.craftengine.core.item.modifier.*;
+import net.momirealms.craftengine.core.item.processor.*;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateConfig;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
@@ -13,24 +13,25 @@ import net.momirealms.craftengine.core.item.updater.ItemUpdaters;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
-import net.momirealms.craftengine.core.pack.ResourceLocation;
 import net.momirealms.craftengine.core.pack.allocator.IdAllocator;
-import net.momirealms.craftengine.core.pack.model.*;
+import net.momirealms.craftengine.core.pack.model.definition.*;
+import net.momirealms.craftengine.core.pack.model.definition.select.ChargeTypeSelectProperty;
+import net.momirealms.craftengine.core.pack.model.definition.select.TrimMaterialSelectProperty;
 import net.momirealms.craftengine.core.pack.model.generation.AbstractModelGenerator;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
-import net.momirealms.craftengine.core.pack.model.select.ChargeTypeSelectProperty;
-import net.momirealms.craftengine.core.pack.model.select.TrimMaterialSelectProperty;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyItemModel;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyModelPredicate;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyOverridesModel;
 import net.momirealms.craftengine.core.pack.model.simplified.SimplifiedModelReader;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
-import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.util.*;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.incendo.cloud.type.Either;
@@ -39,7 +40,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -50,7 +50,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
     private final ItemParser itemParser;
     private final EquipmentParser equipmentParser;
-    protected final Map<String, ExternalItemSource<I>> externalItemSources = new HashMap<>();
     protected final Map<Key, CustomItem<I>> customItemsById = new LinkedHashMap<>();
     protected final Map<String, CustomItem<I>> customItemsByPath = new HashMap<>();
     protected final Map<Key, List<UniqueKey>> customItemTags = new HashMap<>();
@@ -74,7 +73,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         super(plugin);
         this.itemParser = new ItemParser();
         this.equipmentParser = new EquipmentParser();
-        ItemDataModifiers.init();
+        ItemProcessors.init();
     }
 
     public ItemParser itemParser() {
@@ -91,46 +90,9 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemDataModifier<I>> callback) {
-        ExceptionCollector<LocalizedResourceConfigException> errorCollector = new ExceptionCollector<>();
-        if (dataSection != null) {
-            for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {
-                Object value = dataEntry.getValue();
-                if (value == null) continue;
-                String key = dataEntry.getKey();
-                int idIndex = key.indexOf('#');
-                if (idIndex != -1) {
-                    key = key.substring(0, idIndex);
-                }
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(key, Key.DEFAULT_NAMESPACE))).ifPresent(factory -> {
-                    try {
-                        callback.accept((ItemDataModifier<I>) factory.create(value));
-                    } catch (LocalizedResourceConfigException e) {
-                        errorCollector.add(e);
-                    }
-                });
-            }
-        }
-        errorCollector.throwIfPresent();
-    }
-
     @Override
     public ConfigParser[] parsers() {
         return new ConfigParser[]{this.itemParser, this.equipmentParser};
-    }
-
-    @Override
-    public ExternalItemSource<I> getExternalItemSource(String name) {
-        return this.externalItemSources.get(name);
-    }
-
-    @Override
-    public boolean registerExternalItemSource(ExternalItemSource<I> externalItemSource) {
-        if (!ResourceLocation.isValidNamespace(externalItemSource.plugin())) return false;
-        if (this.externalItemSources.containsKey(externalItemSource.plugin())) return false;
-        this.externalItemSources.put(externalItemSource.plugin(), externalItemSource);
-        return true;
     }
 
     @Override
@@ -233,9 +195,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
             }
             if (settings.destroyOnDeathChance != 0) {
                 this.featureFlag$destroyOnDeathChance = true;
-            }
-            if (settings.glowColor != null) {
-                this.plugin.teamManager().setColorInUse(settings.glowColor);
             }
         }
         return true;
@@ -406,19 +365,19 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
         }
 
         private boolean isModernFormatRequired() {
-            return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_4);
+            return Config.packMaxVersion().isAtOrAbove(MinecraftVersion.V1_21_4);
         }
 
         private boolean needsLegacyCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersions.V1_21_4);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_4) || Config.alwaysGenerateModelOverrides();
         }
 
         private boolean needsCustomModelDataCompatibility() {
-            return Config.packMinVersion().isBelow(MinecraftVersions.V1_21_2);
+            return Config.packMinVersion().isBelow(MinecraftVersion.V1_21_2) || Config.alwaysUseCustomModelData();
         }
 
         private boolean needsItemModelCompatibility() {
-            return Config.packMaxVersion().isAtOrAbove(MinecraftVersions.V1_21_2) && VersionHelper.isOrAbove1_21_2(); //todo 能否通过客户端包解决问题
+            return Config.packMaxVersion().isAtOrAbove(MinecraftVersion.V1_21_2) && VersionHelper.isOrAbove1_21_2(); //todo 能否通过客户端包解决问题
         }
 
         public Map<Key, IdAllocator> idAllocators() {
@@ -487,16 +446,19 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
             if (!isVanillaItem) {
                 // 如果用户指定了，说明要手动分配，不管他是什么版本，都强制设置模型值
-                if (section.containsKey("custom-model-data")) {
-                    int customModelData = ResourceConfigUtils.getAsInt(section.getOrDefault("custom-model-data", 0), "custom-model-data");
-                    if (customModelData < 0) {
-                        throw new LocalizedResourceConfigException("warning.config.item.invalid_custom_model_data", String.valueOf(customModelData));
+                Object rawCustomModelData = section.get("custom-model-data");
+                if (rawCustomModelData != null) {
+                    int customModelData = ResourceConfigUtils.getAsInt(rawCustomModelData, "custom-model-data");
+                    if (customModelData > 0) {
+                        if (customModelData > 16_777_216) {
+                            throw new LocalizedResourceConfigException("warning.config.item.bad_custom_model_data", String.valueOf(customModelData));
+                        }
+                        forceCustomModelData = true;
+                        customModelDataFuture = getOrCreateIdAllocator(clientBoundMaterial).assignFixedId(id.asString(), customModelData);
+                    } else {
+                        forceCustomModelData = false;
+                        customModelDataFuture = CompletableFuture.completedFuture(0);
                     }
-                    if (customModelData > 16_777_216) {
-                        throw new LocalizedResourceConfigException("warning.config.item.bad_custom_model_data", String.valueOf(customModelData));
-                    }
-                    customModelDataFuture = getOrCreateIdAllocator(clientBoundMaterial).assignFixedId(id.asString(), customModelData);
-                    forceCustomModelData = true;
                 }
                 // 用户没指定custom-model-data，则看当前资源包版本兼容需求
                 else {
@@ -563,7 +525,6 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 CustomItem.Builder<I> itemBuilder = createPlatformItemBuilder(uniqueId, material, clientBoundMaterial);
 
-
                 // 对于不重要的配置，可以仅警告，不返回
                 ExceptionCollector<LocalizedResourceConfigException> collector = new ExceptionCollector<>();
 
@@ -618,17 +579,17 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 }
 
                 if (customModelData > 0 && (hasModelSection || forceCustomModelData)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataModifier<>(customModelData));
-                    else itemBuilder.dataModifier(new CustomModelDataModifier<>(customModelData));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableCustomModelDataProcessor(customModelData));
+                    else itemBuilder.dataModifier(new CustomModelDataProcessor(customModelData));
                 }
                 if (itemModel != null && (hasModelSection || forceItemModel)) {
-                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelModifier<>(itemModel));
-                    else itemBuilder.dataModifier(new ItemModelModifier<>(itemModel));
+                    if (clientBoundModel) itemBuilder.clientBoundDataModifier(new OverwritableItemModelProcessor(itemModel));
+                    else itemBuilder.dataModifier(new ItemModelProcessor(itemModel));
                 }
 
                 // 应用物品数据
                 try {
-                    applyDataModifiers(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
+                    ItemProcessors.applyDataModifiers(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                 }
@@ -636,7 +597,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 应用客户端侧数据
                 try {
                     if (VersionHelper.PREMIUM) {
-                        applyDataModifiers(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
+                        ItemProcessors.applyDataModifiers(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
                     }
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
@@ -644,12 +605,12 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 如果不是原版物品，那么加入ce的标识符
                 if (!isVanillaItem)
-                    itemBuilder.dataModifier(new IdModifier<>(id));
+                    itemBuilder.dataModifier(new IdProcessor(id));
 
                 // 事件
                 Map<EventTrigger, List<net.momirealms.craftengine.core.plugin.context.function.Function<Context>>> eventTriggerListMap;
                 try {
-                    eventTriggerListMap = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
+                    eventTriggerListMap = CommonFunctions.parseEvents(ResourceConfigUtils.get(section, "event", "events"));
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                     eventTriggerListMap = Map.of();
@@ -692,7 +653,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                     }
                     ItemUpdateConfig config = new ItemUpdateConfig(versions);
                     itemBuilder.updater(config);
-                    itemBuilder.dataModifier(new ItemVersionModifier<>(config.maxVersion()));
+                    itemBuilder.dataModifier(new ItemVersionProcessor(config.maxVersion()));
                 }
 
                 // 构建自定义物品

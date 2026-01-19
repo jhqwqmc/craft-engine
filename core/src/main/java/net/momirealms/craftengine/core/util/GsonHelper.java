@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -111,9 +112,16 @@ public final class GsonHelper {
         }
     }
 
+    public static Map<String, Object> parseJsonToMap(Reader json) {
+        return GsonHelper.get().fromJson(
+                json,
+                new TypeToken<Map<String, Object>>() {}.getType()
+        );
+    }
+
     public static JsonElement combine(List<? extends JsonElement> jo) {
         if (jo.size() == 1) {
-            return jo.get(0);
+            return jo.getFirst();
         } else {
             JsonArray ja = new JsonArray();
             for (JsonElement je : jo) {

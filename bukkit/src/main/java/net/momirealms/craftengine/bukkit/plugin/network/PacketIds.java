@@ -77,4 +77,20 @@ public interface PacketIds {
     int serverboundCustomPayloadPacket();
 
     int clientboundPlayerChatPacket();
+
+    int clientIntentionPacket();
+
+    int clientboundStatusResponsePacket();
+
+    int serverboundFinishConfigurationPacket();
+
+    int clientboundLoginPacket();
+
+    int clientboundLoginFinishedPacket();
+
+    int serverboundLoginAcknowledgedPacket();
+
+    int clientboundStartConfigurationPacket();
+
+    int serverboundConfigurationAcknowledgedPacket();
 }

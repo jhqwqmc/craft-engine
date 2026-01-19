@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.item.updater;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 
-public interface ItemUpdater<I> {
+public interface ItemUpdater {
 
-    Item<I> update(Item<I> item, ItemBuildContext context);
+    <I> Item<I> update(Item<I> item, ItemBuildContext context);
 }

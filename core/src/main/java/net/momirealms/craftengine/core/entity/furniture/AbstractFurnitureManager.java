@@ -1,11 +1,11 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTypes;
+import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviors;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigs;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
-import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxes;
 import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurniture;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
@@ -14,12 +14,11 @@ import net.momirealms.craftengine.core.pack.PendingConfigSection;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
-import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
+import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerTask;
 import net.momirealms.craftengine.core.util.*;
-import net.momirealms.craftengine.core.world.Glowing;
 import org.incendo.cloud.suggestion.Suggestion;
 import org.joml.Vector3f;
 
@@ -220,13 +219,6 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 Optional<Vector3f> optionalLootSpawnOffset = Optional.ofNullable(variantArguments.get("loot-spawn-offset")).map(it -> ResourceConfigUtils.getAsVector3f(it, "loot-spawn-offset"));
                 List<FurnitureElementConfig<?>> elements = ResourceConfigUtils.parseConfigAsList(variantArguments.get("elements"), FurnitureElementConfigs::fromMap);
 
-                // 收集颜色
-                for (FurnitureElementConfig<?> element : elements) {
-                    if (element instanceof Glowing glowing && glowing.glowColor() != null) {
-                        AbstractFurnitureManager.this.plugin.teamManager().setColorInUse(glowing.glowColor());
-                    }
-                }
-
                 // 外部模型
                 Optional<ExternalModel> externalModel;
                 if (variantArguments.containsKey("model-engine")) {
@@ -238,7 +230,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                 }
 
                 // 碰撞箱配置
-                List<FurnitureHitBoxConfig<?>> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), FurnitureHitBoxTypes::fromMap);
+                List<FurnitureHitBoxConfig<?>> hitboxes = ResourceConfigUtils.parseConfigAsList(variantArguments.get("hitboxes"), FurnitureHitBoxes::fromMap);
                 if (hitboxes.isEmpty() && externalModel.isEmpty()) {
                     hitboxes = List.of(defaultHitBox());
                 }
@@ -249,7 +241,7 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     elements.toArray(new FurnitureElementConfig[0]),
                     hitboxes.toArray(new FurnitureHitBoxConfig[0]),
                     externalModel,
-                    optionalLootSpawnOffset
+                    optionalLootSpawnOffset.orElse(new Vector3f(0f, 0f,0f))
                 ));
             }
 
@@ -257,10 +249,11 @@ public abstract class AbstractFurnitureManager implements FurnitureManager {
                     .id(id)
                     .settings(FurnitureSettings.fromMap(MiscUtils.castToMap(section.get("settings"), true)))
                     .variants(variants)
-                    .events(EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event")))
+                    .events(CommonFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event")))
                     .lootTable(LootTable.fromMap(MiscUtils.castToMap(section.get("loot"), true)))
-                    .behavior(FurnitureBehaviorTypes.fromMap(ResourceConfigUtils.getAsMapOrNull(ResourceConfigUtils.get(section, "behaviors", "behavior"), "behavior")))
                     .build();
+            ((CustomFurnitureImpl) furniture).setBehavior(FurnitureBehaviors.fromMap(furniture, ResourceConfigUtils.getAsMapOrNull(ResourceConfigUtils.get(section, "behaviors", "behavior"), "behavior")));
+
             AbstractFurnitureManager.this.byId.put(id, furniture);
         }
 

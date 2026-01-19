@@ -1,15 +1,16 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.InteractUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -21,15 +22,16 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +44,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<TrapDoorBlockBehavior> FACTORY = new Factory();
     private final Property<SingleBlockHalf> halfProperty;
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> poweredProperty;
@@ -90,9 +92,9 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
         Object level = context.getLevel().serverWorld();
         Object clickedPos = LocationUtils.toBlockPos(context.getClickedPos());
         Direction clickedFace = context.getClickedFace();
-        if (!context.replacingClickedOnBlock() && clickedFace.axis().isHorizontal()) {
+        if (!context.replacingClickedBlock() && clickedFace.axis().isHorizontal()) {
             state = state.with(this.facingProperty, clickedFace.toHorizontalDirection())
-                    .with(this.halfProperty, context.getClickLocation().y - context.getClickedPos().y() > 0.5 ? SingleBlockHalf.TOP : SingleBlockHalf.BOTTOM);
+                    .with(this.halfProperty, context.getClickedLocation().y - context.getClickedPos().y() > 0.5 ? SingleBlockHalf.TOP : SingleBlockHalf.BOTTOM);
         } else {
             state = state.with(this.facingProperty, context.getHorizontalDirection().opposite().toHorizontalDirection())
                     .with(this.halfProperty, clickedFace == Direction.UP ? SingleBlockHalf.BOTTOM : SingleBlockHalf.TOP);
@@ -119,7 +121,13 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
     private void playerToggle(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
         if (player == null) return;
-        this.toggle(state, context.getLevel(), context.getClickedPos(), player);
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+            return;
+        }
+        this.toggle(state, world, pos, player);
         if (!InteractUtils.isInteractable((org.bukkit.entity.Player) player.platformPlayer(), BlockStateUtils.fromBlockData(state.visualBlockState().literalObject()), context.getHitResult(), (Item<ItemStack>) context.getItem())) {
             player.swingHand(context.getHand());
         }
@@ -144,7 +152,7 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
         if (this.canOpenByWindCharge && FastNMS.INSTANCE.method$Explosion$canTriggerBlocks(args[3])) {
             Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(args[0]);
             if (optionalCustomState.isEmpty()) return;
-            this.toggle(optionalCustomState.get(), new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(args[1])), LocationUtils.fromBlockPos(args[2]), null);
+            this.toggle(optionalCustomState.get(), BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(args[1])), LocationUtils.fromBlockPos(args[2]), null);
         }
     }
 
@@ -171,7 +179,7 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
             hasSignal = event.getNewCurrent() > 0;
         }
 
-        World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+        World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
         boolean changed = customState.get(this.openProperty) != hasSignal;
         if (hasSignal && changed) {
             Object abovePos = LocationUtils.above(blockPos);
@@ -228,9 +236,10 @@ public class TrapDoorBlockBehavior extends BukkitBlockBehavior implements IsPath
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<TrapDoorBlockBehavior> {
+
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public TrapDoorBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<SingleBlockHalf> half = (Property<SingleBlockHalf>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("half"), "warning.config.block.behavior.trapdoor.missing_half");
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.trapdoor.missing_facing");
             Property<Boolean> open = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("open"), "warning.config.block.behavior.trapdoor.missing_open");

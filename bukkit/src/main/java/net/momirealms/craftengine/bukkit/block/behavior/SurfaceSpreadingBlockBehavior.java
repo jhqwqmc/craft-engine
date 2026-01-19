@@ -5,16 +5,15 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.LazyReference;
-import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -22,7 +21,7 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SurfaceSpreadingBlockBehavior> FACTORY = new Factory();
     private final int requiredLight;
     private final LazyReference<Object> baseBlock;
     private final Property<Boolean> snowyProperty;
@@ -101,11 +100,11 @@ public class SurfaceSpreadingBlockBehavior extends BukkitBlockBehavior {
         return canBeGrass(state, level, pos) && !FastNMS.INSTANCE.method$FluidState$is(FastNMS.INSTANCE.method$BlockGetter$getFluidState(level, blockPos), MTagKeys.Fluid$WATER);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SurfaceSpreadingBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SurfaceSpreadingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             int requiredLight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("required-light", 9), "required-light");
             String baseBlock = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.getOrDefault("base-block", "minecraft:dirt"), "warning.config.block.behavior.surface_spreading.missing_base_block");
             return new SurfaceSpreadingBlockBehavior(block, requiredLight, baseBlock, (Property<Boolean>) block.getProperty("snowy"));

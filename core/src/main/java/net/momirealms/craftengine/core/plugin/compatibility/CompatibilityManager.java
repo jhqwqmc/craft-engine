@@ -4,8 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.momirealms.craftengine.core.entity.furniture.ExternalModel;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Context;
-
-import java.util.UUID;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
 public interface CompatibilityManager {
 
@@ -15,13 +14,7 @@ public interface CompatibilityManager {
 
     void onDelayedEnable();
 
-    void registerLevelerProvider(String plugin, LevelerProvider provider);
-
     void registerTagResolverProvider(TagResolverProvider provider);
-
-    void addLevelerExp(Player player, String plugin, String target, double value);
-
-    int getLevel(Player player, String plugin, String target);
 
     ExternalModel createModel(String plugin, String id);
 
@@ -37,11 +30,19 @@ public interface CompatibilityManager {
 
     String parse(Player player1, Player player2, String text);
 
-    int getPlayerProtocolVersion(UUID uuid);
+    int getViaVersionProtocolVersion(NetWorkUser user);
 
     void executeMMSkill(String skill, float power, Player player);
 
     TagResolver[] createExternalTagResolvers(Context context);
 
     boolean isBedrockPlayer(Player player);
+
+    ItemSource<?> getItemSource(String id);
+
+    void registerItemSource(ItemSource<?> itemSource);
+
+    LevelerProvider getLevelerProvider(String id);
+
+    void registerLevelerProvider(LevelerProvider provider);
 }

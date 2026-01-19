@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class ModelGeneration implements Supplier<JsonObject> {
+public final class ModelGeneration implements Supplier<JsonObject> {
     private static final Map<String, BiConsumer<Builder, Object>> BUILDER_FUNCTIONS = new HashMap<>();
     static {
         BUILDER_FUNCTIONS.put("textures", (b, data) -> {

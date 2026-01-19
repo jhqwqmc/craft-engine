@@ -1,15 +1,17 @@
 package net.momirealms.craftengine.core.plugin.config.template.argument;
 
-import net.momirealms.craftengine.core.util.Key;
-
 import java.util.Map;
 
-public class PlainStringTemplateArgument implements TemplateArgument {
-    public static final Factory FACTORY = new Factory();
+public final class PlainStringTemplateArgument implements TemplateArgument {
+    public static final TemplateArgumentFactory<PlainStringTemplateArgument> FACTORY = new Factory();
     private final String value;
 
-    public PlainStringTemplateArgument(String value) {
+    private PlainStringTemplateArgument(String value) {
         this.value = value;
+    }
+
+    public String value() {
+        return this.value;
     }
 
     public static PlainStringTemplateArgument plain(final String value) {
@@ -18,17 +20,12 @@ public class PlainStringTemplateArgument implements TemplateArgument {
 
     @Override
     public String get(Map<String, TemplateArgument> arguments) {
-        return value;
+        return this.value;
     }
 
-    @Override
-    public Key type() {
-        return TemplateArguments.PLAIN;
-    }
-
-    public static class Factory implements TemplateArgumentFactory {
+    private static class Factory implements TemplateArgumentFactory<PlainStringTemplateArgument> {
         @Override
-        public TemplateArgument create(Map<String, Object> arguments) {
+        public PlainStringTemplateArgument create(Map<String, Object> arguments) {
             return new PlainStringTemplateArgument(arguments.getOrDefault("value", "").toString());
         }
     }

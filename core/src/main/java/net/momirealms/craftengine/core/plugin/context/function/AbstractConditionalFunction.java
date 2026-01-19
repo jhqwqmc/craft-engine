@@ -27,7 +27,7 @@ public abstract class AbstractConditionalFunction<CTX extends Context> implement
 
     protected abstract void runInternal(CTX ctx);
 
-    public static abstract class AbstractFactory<CTX extends Context> implements FunctionFactory<CTX> {
+    public static abstract class AbstractFactory<CTX extends Context, T extends Function<CTX>> implements FunctionFactory<CTX, T> {
         protected final java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory;
 
         public AbstractFactory(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
@@ -60,10 +60,10 @@ public abstract class AbstractConditionalFunction<CTX extends Context> implement
         }
     }
 
-    public static abstract class AbstractFunctionalFactory<CTX extends Context> extends AbstractFactory<CTX> {
+    public static abstract class AbstractFunctionalFactory<CTX extends Context, T extends Function<CTX>> extends AbstractFactory<CTX, T> {
         protected final java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory;
 
-        public AbstractFunctionalFactory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
+        public AbstractFunctionalFactory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
             this.functionFactory = functionFactory;
         }

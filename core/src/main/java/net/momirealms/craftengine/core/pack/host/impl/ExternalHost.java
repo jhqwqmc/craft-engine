@@ -1,11 +1,7 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -15,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ExternalHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class ExternalHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<ExternalHost> FACTORY = new Factory();
     private final ResourcePackDownloadData downloadData;
 
     public ExternalHost(ResourcePackDownloadData downloadData) {
@@ -39,14 +35,14 @@ public class ExternalHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType<ExternalHost> type() {
         return ResourcePackHosts.EXTERNAL;
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<ExternalHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public ExternalHost create(Map<String, Object> arguments) {
             String url = Optional.ofNullable(arguments.get("url")).map(String::valueOf).orElse(null);
             if (url == null || url.isEmpty()) {
                 throw new LocalizedException("warning.config.host.external.missing_url");

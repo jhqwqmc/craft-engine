@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class HurtAndBreakRemainder implements CraftRemainder {
-    public static final Factory FACTORY = new Factory();
+public final class HurtAndBreakRemainder implements CraftRemainder {
+    public static final CraftRemainderFactory<HurtAndBreakRemainder> FACTORY = new Factory();
     private final int amount;
 
     public HurtAndBreakRemainder(int amount) {
@@ -28,7 +28,7 @@ public class HurtAndBreakRemainder implements CraftRemainder {
         }
     }
 
-    public static class Factory implements CraftRemainderFactory<HurtAndBreakRemainder> {
+    private static class Factory implements CraftRemainderFactory<HurtAndBreakRemainder> {
 
         @Override
         public HurtAndBreakRemainder create(Map<String, Object> args) {

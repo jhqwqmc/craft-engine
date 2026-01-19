@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -51,7 +50,8 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
             BlockStateWrapper existingBlockState = world.getBlock(x, y, z).blockState().withProperties(this.properties);
             CompoundTag newProperties = new CompoundTag();
             for (String propertyName : existingBlockState.getPropertyNames()) {
-                newProperties.putString(propertyName, String.valueOf(existingBlockState.getProperty(propertyName)).toLowerCase(Locale.ROOT));
+                Object property = existingBlockState.getProperty(propertyName);
+                newProperties.putString(propertyName, String.valueOf(property).toLowerCase(Locale.ROOT));
             }
             if (!this.properties.isEmpty()) {
                 for (Map.Entry<String, Tag> tagEntry : this.properties.entrySet()) {
@@ -62,19 +62,18 @@ public class TransformBlockFunction<CTX extends Context> extends AbstractConditi
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.TRANSFORM_BLOCK;
+    public static <CTX extends Context> FunctionFactory<CTX, TransformBlockFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, TransformBlockFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public TransformBlockFunction<CTX> create(Map<String, Object> arguments) {
             String block = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("block"), "warning.config.function.transform_block.missing_block");
             CompoundTag properties = new CompoundTag();
             Map<String, Object> propertiesMap = MiscUtils.castToMap(arguments.get("properties"), true);

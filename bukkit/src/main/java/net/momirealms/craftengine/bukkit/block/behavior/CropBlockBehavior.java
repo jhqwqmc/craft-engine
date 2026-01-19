@@ -1,12 +1,13 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.util.ParticleUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -17,28 +18,29 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.SimpleContext;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.util.ItemUtils;
-import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
+import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.Vec3i;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
 import org.bukkit.World;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class CropBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<CropBlockBehavior> FACTORY = new Factory();
     private final IntegerProperty ageProperty;
     private final float growSpeed;
     private final int minGrowLight;
@@ -78,16 +80,16 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         return minGrowLight;
     }
 
-    public static int getRawBrightness(Object level, Object pos) throws InvocationTargetException, IllegalAccessException {
-        return (int) CoreReflections.method$BlockAndTintGetter$getRawBrightness.invoke(level, pos, 0);
+    public static int getRawBrightness(Object level, Object pos) {
+        return FastNMS.INSTANCE.method$BlockAndTintGetter$getRawBrightness(level, pos, 0);
     }
 
-    private boolean hasSufficientLight(Object level, Object pos) throws InvocationTargetException, IllegalAccessException {
+    private boolean hasSufficientLight(Object level, Object pos) {
         return getRawBrightness(level, pos) >= this.minGrowLight - 1;
     }
 
     @Override
-    public void randomTick(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
+    public void randomTick(Object thisBlock, Object[] args, Callable<Object> superMethod) {
         Object state = args[0];
         Object level = args[1];
         Object pos = args[2];
@@ -132,13 +134,19 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         Player player = context.getPlayer();
         if (ItemUtils.isEmpty(item) || !item.vanillaId().equals(ItemKeys.BONE_MEAL) || player == null || player.isAdventureMode())
             return InteractionResult.PASS;
+        BlockPos pos = context.getClickedPos();
+        net.momirealms.craftengine.core.world.World world = context.getLevel();
+        Location location = new Location((World) world.platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+            return InteractionResult.SUCCESS_AND_CANCEL;
+        }
         if (isMaxAge(state))
             return InteractionResult.PASS;
         boolean sendSwing = false;
         Object visualState = state.visualBlockState().literalObject();
         Object visualStateBlock = BlockStateUtils.getBlockOwner(visualState);
         if (CoreReflections.clazz$BonemealableBlock.isInstance(visualStateBlock)) {
-            boolean is = FastNMS.INSTANCE.method$BonemealableBlock$isValidBonemealTarget(visualStateBlock, context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos()), visualState);
+            boolean is = FastNMS.INSTANCE.method$BonemealableBlock$isValidBonemealTarget(visualStateBlock, world.serverWorld(), LocationUtils.toBlockPos(pos), visualState);
             if (!is) {
                 sendSwing = true;
             }
@@ -175,7 +183,7 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         int i = this.getAge(customState) + this.boneMealBonus.getInt(
                 SimpleContext.of(ContextHolder.builder()
                             .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, customState)
-                            .withParameter(DirectContextParameters.POSITION, new WorldPosition(new BukkitWorld(world), Vec3d.atCenterOf(new Vec3i(x, y, z))))
+                            .withParameter(DirectContextParameters.POSITION, new WorldPosition(BukkitAdaptors.adapt(world), Vec3d.atCenterOf(new Vec3i(x, y, z))))
                             .build())
         );
         int maxAge = this.ageProperty.max;
@@ -188,11 +196,11 @@ public class CropBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<CropBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public CropBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Integer> ageProperty = (Property<Integer>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("age"), "warning.config.block.behavior.crop.missing_age");
             int minGrowLight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("light-requirement", 9), "light-requirement");
             float growSpeed = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("grow-speed", 0.125f), "grow-speed");

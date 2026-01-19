@@ -1,8 +1,7 @@
 items:
   default:pebble:
-    material: nether_brick
     data:
-      item-name: <!i><l10n:item.pebble>
+      item-name: <!i><lang:item.default.pebble>
     texture: minecraft:item/custom/pebble
     behavior:
       - type: block_item
@@ -24,8 +23,6 @@ items:
               property: pebble
               items:
                 - default:pebble
-              sounds:
-                stack: minecraft:block.stone.fall
           loot:
             pools:
               - rolls: 1

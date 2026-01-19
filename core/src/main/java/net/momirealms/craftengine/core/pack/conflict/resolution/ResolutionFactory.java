@@ -2,8 +2,7 @@ package net.momirealms.craftengine.core.pack.conflict.resolution;
 
 import java.util.Map;
 
-@FunctionalInterface
-public interface ResolutionFactory {
+public interface ResolutionFactory<T extends Resolution> {
 
-    Resolution create(Map<String, Object> arguments);
+    T create(Map<String, Object> arguments);
 }

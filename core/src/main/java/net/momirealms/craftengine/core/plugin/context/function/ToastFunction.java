@@ -49,19 +49,18 @@ public class ToastFunction<CTX extends Context> extends AbstractConditionalFunct
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.TOAST;
+    public static <CTX extends Context> FunctionFactory<CTX, ToastFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, ToastFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public ToastFunction<CTX> create(Map<String, Object> arguments) {
             AdvancementType advancementType;
             String advancementName = arguments.getOrDefault("advancement-type", "goal").toString();
             try {
@@ -69,7 +68,7 @@ public class ToastFunction<CTX extends Context> extends AbstractConditionalFunct
             } catch (IllegalArgumentException e) {
                 throw new LocalizedResourceConfigException("warning.config.function.toast.invalid_advancement_type", advancementName, EnumUtils.toString(AdvancementType.values()));
             }
-            String toast = ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "toast", "message"), "warning.config.function.toast.missing_toast");
+            String toast = AdventureHelper.legacyToMiniMessage(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "toast", "message"), "warning.config.function.toast.missing_toast"));
             Key item = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "item", "icon"), "warning.config.function.toast.missing_icon"));
             return new ToastFunction<>(
                     getPredicates(arguments),

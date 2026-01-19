@@ -9,9 +9,13 @@ import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
+import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
+import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.Color;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig<TextDisplayFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class TextDisplayFurnitureElementConfig implements FurnitureElementConfig<TextDisplayFurnitureElement> {
+    public static final FurnitureElementConfigFactory<TextDisplayFurnitureElement> FACTORY = new Factory();
     public final Function<Player, List<Object>> metadata;
     public final String text;
     public final Vector3f scale;
@@ -49,8 +54,10 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
     public final boolean isSeeThrough;
     public final boolean useDefaultBackgroundColor;
     public final TextDisplayAlignment alignment;
+    public final Predicate<PlayerContext> predicate;
+    public final boolean hasCondition;
 
-    public TextDisplayFurnitureElementConfig(String text,
+    private TextDisplayFurnitureElementConfig(String text,
                                              Vector3f scale,
                                              Vector3f position,
                                              Vector3f translation,
@@ -71,7 +78,9 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
                                              boolean hasShadow,
                                              boolean isSeeThrough,
                                              boolean useDefaultBackgroundColor,
-                                             TextDisplayAlignment alignment) {
+                                             TextDisplayAlignment alignment,
+                                             Predicate<PlayerContext> predicate,
+                                             boolean hasCondition) {
         this.text = text;
         this.scale = scale;
         this.position = position;
@@ -94,6 +103,8 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
         this.useDefaultBackgroundColor = useDefaultBackgroundColor;
         this.alignment = alignment;
         this.isSeeThrough = isSeeThrough;
+        this.hasCondition = hasCondition;
+        this.predicate = predicate;
         this.metadata = (player) -> {
             List<Object> dataValues = new ArrayList<>();
             if (glowColor != null) {
@@ -119,109 +130,17 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
         };
     }
 
-    public Vector3f scale() {
-        return this.scale;
-    }
-
-    public Vector3f position() {
-        return this.position;
-    }
-
-    public Vector3f translation() {
-        return this.translation;
-    }
-
-    public float xRot() {
-        return this.xRot;
-    }
-
-    public float yRot() {
-        return this.yRot;
-    }
-
-    public Quaternionf rotation() {
-        return this.rotation;
-    }
-
-    public ItemDisplayContext displayContext() {
-        return this.displayContext;
-    }
-
-    public Billboard billboard() {
-        return this.billboard;
-    }
-
-    public float shadowRadius() {
-        return this.shadowRadius;
-    }
-
-    public float shadowStrength() {
-        return this.shadowStrength;
-    }
-
-    public Function<Player, List<Object>> metadata() {
-        return this.metadata;
-    }
-
-    @Nullable
-    public Color glowColor() {
-        return this.glowColor;
-    }
-
-    public int blockLight() {
-        return this.blockLight;
-    }
-
-    public int skyLight() {
-        return this.skyLight;
-    }
-
-    public float viewRange() {
-        return this.viewRange;
-    }
-
-    public String text() {
-        return this.text;
-    }
-
-    public int lineWidth() {
-        return this.lineWidth;
-    }
-
-    public int backgroundColor() {
-        return this.backgroundColor;
-    }
-
-    public byte opacity() {
-        return this.opacity;
-    }
-
-    public boolean hasShadow() {
-        return this.hasShadow;
-    }
-
-    public boolean isSeeThrough() {
-        return this.isSeeThrough;
-    }
-
-    public boolean useDefaultBackgroundColor() {
-        return this.useDefaultBackgroundColor;
-    }
-
-    public TextDisplayAlignment alignment() {
-        return this.alignment;
-    }
-
     @Override
     public TextDisplayFurnitureElement create(@NotNull Furniture furniture) {
         return new TextDisplayFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<TextDisplayFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<TextDisplayFurnitureElement> {
 
         @Override
         public TextDisplayFurnitureElementConfig create(Map<String, Object> arguments) {
             Map<String, Object> brightness = ResourceConfigUtils.getAsMap(arguments.getOrDefault("brightness", Map.of()), "brightness");
+            List<Condition<PlayerContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new TextDisplayFurnitureElementConfig(
                     ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("text"), "warning.config.furniture.element.text_display.missing_text"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("scale", 1f), "scale"),
@@ -244,7 +163,9 @@ public class TextDisplayFurnitureElementConfig implements FurnitureElementConfig
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("has-shadow", false), "has-shadow"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("is-see-through", false), "is-see-through"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-default-background-color", false), "use-default-background-color"),
-                    ResourceConfigUtils.getAsEnum(arguments.get("alignment"), TextDisplayAlignment.class, TextDisplayAlignment.CENTER)
+                    ResourceConfigUtils.getAsEnum(arguments.get("alignment"), TextDisplayAlignment.class, TextDisplayAlignment.CENTER),
+                    MiscUtils.allOf(conditions),
+                    !conditions.isEmpty()
             );
         }
     }

@@ -1,10 +1,10 @@
 package net.momirealms.craftengine.core.item;
 
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateConfig;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.UniqueKey;
@@ -26,15 +26,20 @@ public interface CustomItem<I> extends BuildableItem<I> {
 
     UniqueKey uniqueId();
 
+    default String translationKey() {
+        Key id = this.id();
+        return "item." + id.namespace() + "." + id.value();
+    }
+
     Key material();
 
     Key clientBoundMaterial();
 
-    ItemDataModifier<I>[] dataModifiers();
+    ItemProcessor[] dataModifiers();
 
     boolean hasClientBoundDataModifier();
 
-    ItemDataModifier<I>[] clientBoundDataModifiers();
+    ItemProcessor[] clientBoundDataModifiers();
 
     ItemSettings settings();
 
@@ -58,13 +63,13 @@ public interface CustomItem<I> extends BuildableItem<I> {
 
         Builder<I> material(Key material);
 
-        Builder<I> dataModifier(ItemDataModifier<I> modifier);
+        Builder<I> dataModifier(ItemProcessor modifier);
 
-        Builder<I> dataModifiers(List<ItemDataModifier<I>> modifiers);
+        Builder<I> dataModifiers(List<ItemProcessor> modifiers);
 
-        Builder<I> clientBoundDataModifier(ItemDataModifier<I> modifier);
+        Builder<I> clientBoundDataModifier(ItemProcessor modifier);
 
-        Builder<I> clientBoundDataModifiers(List<ItemDataModifier<I>> modifiers);
+        Builder<I> clientBoundDataModifiers(List<ItemProcessor> modifiers);
 
         Builder<I> behavior(ItemBehavior behavior);
 

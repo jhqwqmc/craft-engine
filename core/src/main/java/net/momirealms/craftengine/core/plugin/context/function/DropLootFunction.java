@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.World;
@@ -54,19 +53,18 @@ public class DropLootFunction<CTX extends Context> extends AbstractConditionalFu
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.DROP_LOOT;
+    public static <CTX extends Context> FunctionFactory<CTX, DropLootFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, DropLootFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public DropLootFunction<CTX> create(Map<String, Object> arguments) {
             NumberProvider x = NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>"));
             NumberProvider y = NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>"));
             NumberProvider z = NumberProviders.fromObject(arguments.getOrDefault("z", "<arg:position.z>"));

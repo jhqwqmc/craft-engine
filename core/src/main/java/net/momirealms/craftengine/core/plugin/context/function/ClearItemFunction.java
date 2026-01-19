@@ -33,19 +33,18 @@ public class ClearItemFunction<CTX extends Context> extends AbstractConditionalF
         player.clearOrCountMatchingInventoryItems(itemId, count.getInt(ctx));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.CLEAR_ITEM;
+    public static <CTX extends Context> FunctionFactory<CTX, ClearItemFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, ClearItemFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public ClearItemFunction<CTX> create(Map<String, Object> arguments) {
             Key itemId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(ResourceConfigUtils.get(arguments, "id", "item"), "warning.config.function.clear_item.missing_id"));
             NumberProvider count = NumberProviders.fromObject(arguments.getOrDefault("count", 1));
             return new ClearItemFunction<>(getPredicates(arguments), itemId, count);

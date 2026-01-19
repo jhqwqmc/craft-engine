@@ -3,13 +3,12 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +16,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class LampBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<LampBlockBehavior> FACTORY = new Factory();
     private final Property<Boolean> litProperty;
 
     public LampBlockBehavior(CustomBlock block, Property<Boolean> litProperty) {
@@ -70,9 +69,9 @@ public class LampBlockBehavior extends BukkitBlockBehavior {
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<LampBlockBehavior> {
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public LampBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Boolean> lit = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("lit"), "warning.config.block.behavior.lamp.missing_lit");
             return new LampBlockBehavior(block, lit);
         }

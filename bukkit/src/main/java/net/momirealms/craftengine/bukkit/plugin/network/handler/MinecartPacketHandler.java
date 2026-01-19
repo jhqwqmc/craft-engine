@@ -11,9 +11,9 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
-import net.momirealms.craftengine.core.plugin.network.ByteBufPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
+import net.momirealms.craftengine.core.plugin.network.event.ByteBufPacketEvent;
 import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
@@ -33,7 +33,7 @@ public class MinecartPacketHandler implements EntityPacketHandler {
         int id = buf.readVarInt();
         boolean isChanged = false;
         List<Object> packedItems = FastNMS.INSTANCE.method$ClientboundSetEntityDataPacket$unpack(buf);
-        for (int i = 0; i < packedItems.size(); i++) {
+        for (int i = packedItems.size() - 1; i >= 0; i--) {
             Object packedItem = packedItems.get(i);
             int entityDataId = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$id(packedItem);
             Object blockState = BLOCK_STATE_HANDLER.handle(user, packedItem, entityDataId);
@@ -46,7 +46,7 @@ public class MinecartPacketHandler implements EntityPacketHandler {
                 if (optionalTextComponent.isEmpty()) continue;
                 Object textComponent = optionalTextComponent.get();
                 String json = ComponentUtils.minecraftToJson(textComponent);
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(json);
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(json);
                 if (tokens.isEmpty()) continue;
                 Component component = AdventureHelper.replaceText(AdventureHelper.jsonToComponent(json), tokens, NetworkTextReplaceContext.of(user));
                 Object serializer = FastNMS.INSTANCE.field$SynchedEntityData$DataValue$serializer(packedItem);

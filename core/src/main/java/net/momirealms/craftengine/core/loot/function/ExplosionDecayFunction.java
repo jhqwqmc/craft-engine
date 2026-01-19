@@ -1,20 +1,19 @@
 package net.momirealms.craftengine.core.loot.function;
 
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.loot.LootContext;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.RandomUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ExplosionDecayFunction<T> extends AbstractLootConditionalFunction<T> {
-    public static final Factory<?> FACTORY = new Factory<>();
+public final class ExplosionDecayFunction<T> extends AbstractLootConditionalFunction<T> {
+    public static final LootFunctionFactory<?> FACTORY = new Factory<>();
 
     public ExplosionDecayFunction(List<Condition<LootContext>> predicates) {
         super(predicates);
@@ -37,18 +36,11 @@ public class ExplosionDecayFunction<T> extends AbstractLootConditionalFunction<T
         return item;
     }
 
-    @Override
-    public Key type() {
-        return LootFunctions.EXPLOSION_DECAY;
-    }
+    private static class Factory<T> implements LootFunctionFactory<T> {
 
-    public static class Factory<T> implements LootFunctionFactory<T> {
-        @SuppressWarnings("unchecked")
         @Override
         public LootFunction<T> create(Map<String, Object> arguments) {
-            List<Condition<LootContext>> conditions = Optional.ofNullable(arguments.get("conditions"))
-                    .map(it -> LootConditions.fromMapList((List<Map<String, Object>>) it))
-                    .orElse(Collections.emptyList());
+            List<Condition<LootContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new ExplosionDecayFunction<>(conditions);
         }
     }

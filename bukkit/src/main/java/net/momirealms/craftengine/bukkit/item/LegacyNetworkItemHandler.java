@@ -6,8 +6,8 @@ import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.NetworkItemBuildContext;
 import net.momirealms.craftengine.core.item.NetworkItemHandler;
-import net.momirealms.craftengine.core.item.modifier.ArgumentsModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ArgumentsProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
@@ -209,7 +209,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
         // 应用client-bound-data
         CompoundTag tag = new CompoundTag();
         // 创建context
-        Tag argumentTag = wrapped.getTag(ArgumentsModifier.ARGUMENTS_TAG);
+        Tag argumentTag = wrapped.getTag(ArgumentsProcessor.ARGUMENTS_TAG);
         NetworkItemBuildContext context;
         if (argumentTag instanceof CompoundTag arguments) {
             ContextHolder.Builder builder = ContextHolder.builder();
@@ -221,21 +221,21 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
             context = NetworkItemBuildContext.of(player);
         }
         // 准备阶段
-        for (ItemDataModifier<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
+        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
             modifier.prepareNetworkItem(wrapped, context, tag);
-        }
-        // 应用阶段
-        for (ItemDataModifier<ItemStack> modifier : customItem.clientBoundDataModifiers()) {
-            modifier.apply(wrapped, context);
         }
         // 如果拦截物品的描述名称等
         if (Config.interceptItem()) {
-            if (!tag.containsKey("display.Name")) {
+            if (wrapped.hasTag("display", "Name")) {
                 processCustomName(wrapped, tag::put, context);
             }
-            if (!tag.containsKey("display.Lore")) {
+            if (wrapped.hasTag("display", "Lore")) {
                 processLore(wrapped, tag::put, context);
             }
+        }
+        // 应用阶段
+        for (ItemProcessor modifier : customItem.clientBoundDataModifiers()) {
+            modifier.apply(wrapped, context);
         }
         // 如果tag不空，则需要返回
         if (!tag.isEmpty()) {
@@ -249,7 +249,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
         Optional<String> optionalCustomName = item.customNameJson();
         if (optionalCustomName.isPresent()) {
             String line = optionalCustomName.get();
-            Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+            Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
             if (!tokens.isEmpty()) {
                 item.customNameJson(AdventureHelper.componentToJson(AdventureHelper.replaceText(AdventureHelper.jsonToComponent(line), tokens, context)));
                 callback.accept("display.Name", NetworkItemHandler.pack(Operation.ADD, new StringTag(line)));
@@ -266,7 +266,7 @@ public final class LegacyNetworkItemHandler implements NetworkItemHandler<ItemSt
             List<String> lore = optionalLore.get();
             List<String> newLore = new ArrayList<>(lore.size());
             for (String line : lore) {
-                Map<String, ComponentProvider> tokens = CraftEngine.instance().fontManager().matchTags(line);
+                Map<String, ComponentProvider> tokens = CraftEngine.instance().networkManager().matchNetworkTags(line);
                 if (tokens.isEmpty()) {
                     newLore.add(line);
                 } else {

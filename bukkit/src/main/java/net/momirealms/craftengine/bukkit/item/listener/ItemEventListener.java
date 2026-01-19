@@ -15,7 +15,7 @@ import net.momirealms.craftengine.bukkit.util.*;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.CustomItem;
@@ -23,21 +23,22 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.ItemSettings;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.item.setting.FoodData;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.sound.SoundSet;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import net.momirealms.craftengine.core.world.BlockHitResult;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -57,10 +58,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
 
 import java.util.*;
@@ -123,7 +121,8 @@ public class ItemEventListener implements Listener {
         InteractionHand hand = event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         // 如果本tick内主手已被处理，则不处理副手
         // 这是因为客户端可能会同时发主副手交互包，但实际上只能处理其中一个
-        if (this.cancelEventIfHasInteraction(event, serverPlayer, hand)) {
+        if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+            event.setCancelled(true);
             return;
         }
 
@@ -186,12 +185,17 @@ public class ItemEventListener implements Listener {
                 return;
             }
 
+            // 事件里已经有交互了
+            if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+                return;
+            }
+
             if (hitResult != null) {
                 UseOnContext useOnContext = new UseOnContext(serverPlayer, hand, itemInHand, hitResult);
                 boolean hasItem = player.getInventory().getItemInMainHand().getType() != Material.AIR || player.getInventory().getItemInOffHand().getType() != Material.AIR;
                 boolean flag = player.isSneaking() && hasItem;
                 if (!flag) {
-                    if (immutableBlockState.behavior() instanceof AbstractBlockBehavior behavior) {
+                    if (immutableBlockState.behavior() instanceof BlockBehavior behavior) {
                         InteractionResult result = behavior.useOnBlock(useOnContext, immutableBlockState);
                         if (result.success()) {
                             serverPlayer.updateLastSuccessfulInteractionTick(serverPlayer.gameTicks());
@@ -227,7 +231,7 @@ public class ItemEventListener implements Listener {
                             SoundSet soundSet = SoundSet.getByBlock(blockOwner);
                             if (soundSet != null) {
                                 serverPlayer.playSound(
-                                        Vec3d.atCenterOf(hitResult.getBlockPos()),
+                                        Vec3d.atCenterOf(hitResult.blockPos()),
                                         openable.isOpen() ? soundSet.closeSound() : soundSet.openSound(),
                                         SoundSource.BLOCK,
                                         1, RandomUtils.generateRandomFloat(0.9f, 1));
@@ -236,7 +240,7 @@ public class ItemEventListener implements Listener {
                             SoundSet soundSet = SoundSet.getByBlock(blockOwner);
                             if (soundSet != null) {
                                 serverPlayer.playSound(
-                                        Vec3d.atCenterOf(hitResult.getBlockPos()),
+                                        Vec3d.atCenterOf(hitResult.blockPos()),
                                         soundSet.openSound(),
                                         SoundSource.BLOCK,
                                         1, RandomUtils.generateRandomFloat(0.9f, 1));
@@ -293,6 +297,11 @@ public class ItemEventListener implements Listener {
                         }
                     }
                 }
+            }
+
+            // 事件里已经有交互了
+            if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+                return;
             }
 
             // 优先检查物品行为，再执行自定义事件
@@ -373,8 +382,9 @@ public class ItemEventListener implements Listener {
             return;
         Player player = event.getPlayer();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-        if (serverPlayer.isSpectatorMode())
+        if (serverPlayer == null || serverPlayer.isSpectatorMode()) {
             return;
+        }
         // Gets the item in hand
         InteractionHand hand = event.getHand() == EquipmentSlot.HAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         // prevents duplicated events
@@ -386,11 +396,6 @@ public class ItemEventListener implements Listener {
         // should never be null
         if (ItemUtils.isEmpty(itemInHand)) return;
 
-        // TODO 有必要存在吗？
-        if (cancelEventIfHasInteraction(event, serverPlayer, hand)) {
-            return;
-        }
-
         Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
         if (optionalCustomItem.isPresent()) {
             PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
@@ -401,6 +406,11 @@ public class ItemEventListener implements Listener {
             CustomItem<ItemStack> customItem = optionalCustomItem.get();
             if (action.isRightClick()) customItem.execute(context, EventTrigger.RIGHT_CLICK);
             else customItem.execute(context, EventTrigger.LEFT_CLICK);
+        }
+
+        // 事件里已经有交互了
+        if (serverPlayer.lastSuccessfulInteractionTick() == serverPlayer.gameTicks()) {
+            return;
         }
 
         if (action.isRightClick()) {
@@ -485,19 +495,6 @@ public class ItemEventListener implements Listener {
         if (foodData.saturation() != 0) player.setSaturation(MiscUtils.clamp(oldSaturation, 0, 10));
     }
 
-    private boolean cancelEventIfHasInteraction(PlayerInteractEvent event, BukkitServerPlayer player, InteractionHand hand) {
-        if (hand == InteractionHand.OFF_HAND) {
-            int currentTicks = player.gameTicks();
-            // The client will send multiple packets to the server if the client thinks it should
-            // However, if the main hand item interaction is successful, the off-hand item should be blocked.
-            if (player.lastSuccessfulInteractionTick() == currentTicks) {
-                event.setCancelled(true);
-                return true;
-            }
-        }
-        return false;
-    }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof org.bukkit.entity.Item item) {
@@ -574,11 +571,14 @@ public class ItemEventListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onDropItem(PlayerDropItemEvent event) {
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(event.getPlayer());
+        if (serverPlayer == null) return;
+        serverPlayer.stopMiningBlock();
         if (!Config.triggerUpdateDrop()) return;
         org.bukkit.entity.Item itemDrop = event.getItemDrop();
         ItemStack itemStack = itemDrop.getItemStack();
         Item<ItemStack> wrapped = this.itemManager.wrap(itemStack);
-        ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(BukkitAdaptors.adapt(event.getPlayer())));
+        ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(serverPlayer));
         if (result.updated()) {
             itemDrop.setItemStack((ItemStack) result.finalItem().getItem());
         }
@@ -626,6 +626,14 @@ public class ItemEventListener implements Listener {
            return;
         }
         event.setCurrentItem((ItemStack) result.finalItem().getItem());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
+        serverPlayer.stopMiningBlock();
     }
 
     @SuppressWarnings("DuplicatedCode")

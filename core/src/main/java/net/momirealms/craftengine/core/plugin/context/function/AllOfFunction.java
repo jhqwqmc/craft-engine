@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.plugin.context.function;
 
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Collection;
 
@@ -22,10 +21,5 @@ public class AllOfFunction<CTX extends Context> implements Function<CTX> {
         for (Function<CTX> function : this.functions) {
             function.run(ctx);
         }
-    }
-
-    @Override
-    public Key type() {
-        return CommonFunctions.ALL_OF;
     }
 }

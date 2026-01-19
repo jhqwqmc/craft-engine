@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -44,19 +43,18 @@ public class RemoveCooldownFunction<CTX extends Context> extends AbstractConditi
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.REMOVE_COOLDOWN;
+    public static <CTX extends Context> FunctionFactory<CTX, RemoveCooldownFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, RemoveCooldownFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public RemoveCooldownFunction<CTX> create(Map<String, Object> arguments) {
             boolean all = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("all", false), "all");
             if (all) {
                 return new RemoveCooldownFunction<>(getPredicates(arguments), true, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), null);

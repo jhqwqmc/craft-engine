@@ -2,16 +2,18 @@ package net.momirealms.craftengine.core.pack.model.simplified;
 
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 
-public class CrossbowModelReader implements SimplifiedModelReader {
+public final class CrossbowModelReader implements SimplifiedModelReader {
     public static final CrossbowModelReader INSTANCE = new CrossbowModelReader();
 
+    private CrossbowModelReader() {}
+
     @Override
-    public @Nullable Map<String, Object> convert(List<String> textures, List<String> optionalModelPaths, Key id) {
+    public @NotNull Map<String, Object> convert(List<String> textures, List<String> optionalModelPaths, Key id) {
         if (textures.size() != 6) {
             throw new LocalizedResourceConfigException("warning.config.item.simplified_model.invalid_texture", "6", String.valueOf(textures.size()));
         }
@@ -110,7 +112,7 @@ public class CrossbowModelReader implements SimplifiedModelReader {
     }
 
     @Override
-    public @Nullable Map<String, Object> convert(List<String> models) {
+    public @NotNull Map<String, Object> convert(List<String> models) {
         if (models.size() != 6) {
             throw new LocalizedResourceConfigException("warning.config.item.simplified_model.invalid_model", "6", String.valueOf(models.size()));
         }

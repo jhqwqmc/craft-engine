@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class StringProperty extends Property<String> {
-    public static final Factory FACTORY = new Factory();
+public final class StringProperty extends Property<String> {
+    public static final PropertyFactory<String> FACTORY = new Factory();
     private final List<String> values;
     private final ImmutableMap<String, String> names;
 
-    public StringProperty(String name, List<String> values, String defaultValue) {
+    private StringProperty(String name, List<String> values, String defaultValue) {
         super(name, String.class, defaultValue);
 
         this.values = List.copyOf(values);
@@ -90,10 +90,10 @@ public class StringProperty extends Property<String> {
         return new StringProperty(name, values, defaultValue);
     }
 
-    public static class Factory implements PropertyFactory {
+    private static class Factory implements PropertyFactory<String> {
 
         @Override
-        public Property<?> create(String name, Map<String, Object> arguments) {
+        public Property<String> create(String name, Map<String, Object> arguments) {
             List<String> values = MiscUtils.getAsStringList(arguments.get("values"))
                     .stream()
                     .toList();

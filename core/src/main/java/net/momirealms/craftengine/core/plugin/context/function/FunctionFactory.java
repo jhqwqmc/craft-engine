@@ -4,7 +4,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 
 import java.util.Map;
 
-public interface FunctionFactory<CTX extends Context> {
+public interface FunctionFactory<CTX extends Context, T extends Function<CTX>> {
 
-    Function<CTX> create(Map<String, Object> args);
+    T create(Map<String, Object> args);
 }

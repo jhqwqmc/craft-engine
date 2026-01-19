@@ -1,14 +1,14 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
 import com.google.gson.reflect.TypeToken;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.GsonHelper;
+import net.momirealms.craftengine.core.util.HashUtils;
+import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +26,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class GitLabHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class GitLabHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<GitLabHost> FACTORY = new Factory();
     private final String gitlabUrl;
     private final String accessToken;
     private final String projectId;
@@ -89,11 +89,6 @@ public class GitLabHost implements ResourcePackHost {
     @Override
     public boolean canUpload() {
         return true;
-    }
-
-    @Override
-    public Key type() {
-        return ResourcePackHosts.GITLAB;
     }
 
     @Override
@@ -166,10 +161,15 @@ public class GitLabHost implements ResourcePackHost {
         return HttpRequest.BodyPublishers.ofByteArrays(parts);
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    @Override
+    public ResourcePackHostType<GitLabHost> type() {
+        return ResourcePackHosts.GITLAB;
+    }
+
+    private static class Factory implements ResourcePackHostFactory<GitLabHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public GitLabHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String gitlabUrl = Optional.ofNullable(arguments.get("gitlab-url")).map(String::valueOf).orElse(null);
             if (gitlabUrl == null || gitlabUrl.isEmpty()) {

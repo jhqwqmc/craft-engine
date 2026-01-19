@@ -8,10 +8,10 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class LevelerExpFunction<CTX extends Context> extends AbstractConditionalFunction<CTX> {
@@ -32,31 +32,30 @@ public class LevelerExpFunction<CTX extends Context> extends AbstractConditional
     public void runInternal(CTX ctx) {
         if (this.selector == null) {
             ctx.getOptionalParameter(DirectContextParameters.PLAYER).ifPresent(it -> {
-                CraftEngine.instance().compatibilityManager().addLevelerExp(it, this.plugin, this.leveler, this.count.getDouble(ctx));
+                CraftEngine.instance().compatibilityManager().getLevelerProvider(this.plugin).addExp(it, this.leveler, this.count.getDouble(ctx));
             });
         } else {
             for (Player target : this.selector.get(ctx)) {
                 RelationalContext relationalContext = ViewerContext.of(ctx, PlayerOptionalContext.of(target));
-                CraftEngine.instance().compatibilityManager().addLevelerExp(target, this.plugin, this.leveler, this.count.getDouble(relationalContext));
+                CraftEngine.instance().compatibilityManager().getLevelerProvider(this.plugin).addExp(target, this.leveler, this.count.getDouble(relationalContext));
             }
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.LEVELER_EXP;
+    public static <CTX extends Context> FunctionFactory<CTX, LevelerExpFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, LevelerExpFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public LevelerExpFunction<CTX> create(Map<String, Object> arguments) {
             Object count = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.leveler_exp.missing_count");
-            String leveler = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("leveler"), "warning.config.function.leveler_exp.missing_leveler");
+            String leveler = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("leveler"), "warning.config.function.leveler_exp.missing_leveler").toLowerCase(Locale.ROOT);
             String plugin = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("plugin"), "warning.config.function.leveler_exp.missing_plugin");
             return new LevelerExpFunction<>(getPredicates(arguments), leveler, plugin, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(count));
         }

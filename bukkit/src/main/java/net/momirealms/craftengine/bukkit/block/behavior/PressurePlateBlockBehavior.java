@@ -1,7 +1,9 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntitySelectors;
@@ -10,19 +12,18 @@ import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.PressurePlateSensitivity;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldEvents;
 import org.bukkit.GameEvent;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<PressurePlateBlockBehavior> FACTORY = new Factory();
     private final Property<Boolean> poweredProperty;
     private final SoundData onSound;
     private final SoundData offSound;
@@ -93,8 +94,14 @@ public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public void entityInside(Object thisBlock, Object[] args, Callable<Object> superMethod) {
-        EntityInsideBlockEvent event = new EntityInsideBlockEvent(FastNMS.INSTANCE.method$Entity$getBukkitEntity(args[3]), FastNMS.INSTANCE.method$CraftBlock$at(args[1], args[2]));
+        Entity entity = FastNMS.INSTANCE.method$Entity$getBukkitEntity(args[3]);
+        Block block = FastNMS.INSTANCE.method$CraftBlock$at(args[1], args[2]);
+        EntityInsideBlockEvent event = new EntityInsideBlockEvent(entity, block);
         if (EventUtils.fireAndCheckCancel(event)) {
+            return;
+        }
+        boolean cannotInteract = entity instanceof Player p && !BukkitCraftEngine.instance().antiGriefProvider().test(p, Flag.USE_PRESSURE_PLATE, block.getLocation());
+        if (cannotInteract) {
             return;
         }
         Object state = args[0];
@@ -220,15 +227,15 @@ public class PressurePlateBlockBehavior extends BukkitBlockBehavior {
         return true;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<PressurePlateBlockBehavior> {
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "DuplicatedCode"})
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public PressurePlateBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Boolean> powered = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.pressure_plate.missing_powered");
             PressurePlateSensitivity pressurePlateSensitivity = PressurePlateSensitivity.byName(arguments.getOrDefault("sensitivity", "everything").toString());
             int pressedTime = ResourceConfigUtils.getAsInt(arguments.getOrDefault("pressed-time", 20), "pressed-time");
-            Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");
+            Map<String, Object> sounds = MiscUtils.castToMap(arguments.get("sounds"), true);
             SoundData onSound = null;
             SoundData offSound = null;
             if (sounds != null) {

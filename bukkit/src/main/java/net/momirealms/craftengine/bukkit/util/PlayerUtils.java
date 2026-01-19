@@ -14,8 +14,8 @@ import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.sound.Sounds;
-import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +38,7 @@ public final class PlayerUtils {
     }
 
     public static void giveItem(Player player, Item<ItemStack> original, Item<ItemStack> item) {
+        if (player == null) return;
         Object serverPlayer = player.serverPlayer();
         Object inventory = FastNMS.INSTANCE.method$Player$getInventory(serverPlayer);
         boolean flag = FastNMS.INSTANCE.method$Inventory$add(inventory, item.getLiteralObject());

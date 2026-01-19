@@ -13,16 +13,16 @@ import java.util.Map;
 
 public class EquipmentData {
     @NotNull
-    private final EquipmentSlot slot;
+    private EquipmentSlot slot;
     @Nullable
-    private final Key assetId;
-    private final boolean dispensable;
-    private final boolean swappable;
-    private final boolean damageOnHurt;
+    private Key assetId;
+    private boolean dispensable;
+    private boolean swappable;
+    private boolean damageOnHurt;
     // 1.21.5+
-    private final boolean equipOnInteract;
+    private boolean equipOnInteract;
     @Nullable
-    private final Key cameraOverlay;
+    private Key cameraOverlay;
 
     public EquipmentData(@NotNull EquipmentSlot slot,
                          @Nullable Key assetId,
@@ -45,8 +45,7 @@ public class EquipmentData {
         if (slot == null) {
             throw new IllegalArgumentException("slot cannot be null");
         }
-        // todo 重新写判断，不应该支持手部
-        EquipmentSlot slotEnum = EquipmentSlot.valueOf(slot.toUpperCase(Locale.ENGLISH));
+        EquipmentSlot slotEnum = EquipmentSlot.valueOf(slot.toUpperCase(Locale.ENGLISH).replace("_", ""));
         EquipmentData.Builder builder = EquipmentData.builder().slot(slotEnum);
         if (data.containsKey("asset-id")) {
             builder.assetId(Key.of(data.get("asset-id").toString()));
@@ -73,6 +72,7 @@ public class EquipmentData {
         return slot;
     }
 
+    @Nullable
     public Key assetId() {
         return assetId;
     }
@@ -93,8 +93,37 @@ public class EquipmentData {
         return equipOnInteract;
     }
 
+    @Nullable
     public Key cameraOverlay() {
         return cameraOverlay;
+    }
+
+    public void setSlot(@NotNull EquipmentSlot slot) {
+        this.slot = slot;
+    }
+
+    public void setAssetId(@Nullable Key assetId) {
+        this.assetId = assetId;
+    }
+
+    public void setDispensable(boolean dispensable) {
+        this.dispensable = dispensable;
+    }
+
+    public void setSwappable(boolean swappable) {
+        this.swappable = swappable;
+    }
+
+    public void setDamageOnHurt(boolean damageOnHurt) {
+        this.damageOnHurt = damageOnHurt;
+    }
+
+    public void setEquipOnInteract(boolean equipOnInteract) {
+        this.equipOnInteract = equipOnInteract;
+    }
+
+    public void setCameraOverlay(@Nullable Key cameraOverlay) {
+        this.cameraOverlay = cameraOverlay;
     }
 
     public CompoundTag toNBT() {

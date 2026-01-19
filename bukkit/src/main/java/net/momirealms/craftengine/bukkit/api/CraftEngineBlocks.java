@@ -6,7 +6,6 @@ import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -198,7 +197,7 @@ public final class CraftEngineBlocks {
                                  boolean sendLevelEvent) {
         ImmutableBlockState state = getCustomBlockState(block);
         if (state == null || state.isEmpty()) return false;
-        World world = new BukkitWorld(block.getWorld());
+        World world = BukkitAdaptors.adapt(block.getWorld());
         Location location = block.getLocation();
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         if (dropLoot) {

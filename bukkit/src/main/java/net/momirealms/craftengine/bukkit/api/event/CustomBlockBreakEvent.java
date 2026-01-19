@@ -12,25 +12,26 @@ import org.jetbrains.annotations.NotNull;
 
 public final class CustomBlockBreakEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
-    private boolean cancelled;
     private final CustomBlock customBlock;
     private final ImmutableBlockState state;
     private final Location location;
     private final Block bukkitBlock;
-    private boolean dropItems;
     private final BukkitServerPlayer player;
+    private boolean cancelled;
+    private boolean dropItems = true;
 
     public CustomBlockBreakEvent(@NotNull BukkitServerPlayer player,
                                  @NotNull Location location,
                                  @NotNull Block bukkitBlock,
-                                 @NotNull ImmutableBlockState state) {
+                                 @NotNull ImmutableBlockState state,
+                                 boolean dropItems) {
         super(player.platformPlayer());
         this.customBlock = state.owner().value();
         this.state = state;
         this.bukkitBlock = bukkitBlock;
         this.location = location;
-        this.dropItems = true;
         this.player = player;
+        this.dropItems = dropItems;
     }
 
     public BukkitServerPlayer player() {

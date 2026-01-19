@@ -8,7 +8,6 @@ import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextPar
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -53,21 +52,20 @@ public class TitleFunction<CTX extends Context> extends AbstractConditionalFunct
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.TITLE;
+    public static <CTX extends Context> FunctionFactory<CTX, TitleFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, TitleFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
-            String title = arguments.getOrDefault("title", "").toString();
-            String subtitle = arguments.getOrDefault("subtitle", "").toString();
+        public TitleFunction<CTX> create(Map<String, Object> arguments) {
+            String title = AdventureHelper.legacyToMiniMessage(arguments.getOrDefault("title", "").toString());
+            String subtitle = AdventureHelper.legacyToMiniMessage(arguments.getOrDefault("subtitle", "").toString());
             NumberProvider fadeIn = NumberProviders.fromObject(arguments.getOrDefault("fade-in", 10));
             NumberProvider stay = NumberProviders.fromObject(arguments.getOrDefault("stay", 20));
             NumberProvider fadeOut = NumberProviders.fromObject(arguments.getOrDefault("fade-out", 5));

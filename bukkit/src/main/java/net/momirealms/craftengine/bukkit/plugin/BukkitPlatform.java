@@ -7,6 +7,7 @@ import net.momirealms.craftengine.bukkit.util.ParticleUtils;
 import net.momirealms.craftengine.bukkit.world.particle.BukkitParticleType;
 import net.momirealms.craftengine.core.plugin.Platform;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.particle.ParticleType;
 import net.momirealms.sparrow.nbt.Tag;
@@ -22,7 +23,11 @@ public class BukkitPlatform implements Platform {
 
     @Override
     public void dispatchCommand(String command) {
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+        if (VersionHelper.isFolia()) {
+            Bukkit.getGlobalRegionScheduler().run(this.plugin.javaPlugin(), (t) -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command));
+        } else {
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
     }
 
     @Override

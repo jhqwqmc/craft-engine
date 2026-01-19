@@ -1,12 +1,13 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistries;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
 import net.momirealms.craftengine.bukkit.util.*;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
@@ -16,8 +17,6 @@ import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
@@ -25,6 +24,9 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
 
 import java.util.Locale;
 import java.util.Map;
@@ -32,7 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class FenceBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FenceBlockBehavior> FACTORY = new Factory();
     private final BooleanProperty northProperty;
     private final BooleanProperty eastProperty;
     private final BooleanProperty southProperty;
@@ -81,7 +83,13 @@ public class FenceBlockBehavior extends BukkitBlockBehavior implements IsPathFin
         if (!this.canLeash) return InteractionResult.PASS;
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
-        if (FastNMS.INSTANCE.method$LeadItem$bindPlayerMobs(player.serverPlayer(), context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos()))) {
+        BlockPos pos = context.getClickedPos();
+        World world = context.getLevel();
+        Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+            return InteractionResult.SUCCESS_AND_CANCEL;
+        }
+        if (FastNMS.INSTANCE.method$LeadItem$bindPlayerMobs(player.serverPlayer(), context.getLevel().serverWorld(), LocationUtils.toBlockPos(pos))) {
             player.swingHand(InteractionHand.MAIN_HAND);
             return InteractionResult.SUCCESS;
         }
@@ -137,10 +145,10 @@ public class FenceBlockBehavior extends BukkitBlockBehavior implements IsPathFin
         return superMethod.call();
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FenceBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FenceBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty north = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("north"), "warning.config.block.behavior.fence.missing_north");
             BooleanProperty east = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("east"), "warning.config.block.behavior.fence.missing_east");
             BooleanProperty south = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("south"), "warning.config.block.behavior.fence.missing_south");

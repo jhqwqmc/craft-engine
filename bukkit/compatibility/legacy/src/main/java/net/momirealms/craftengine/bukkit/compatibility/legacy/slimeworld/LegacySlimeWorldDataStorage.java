@@ -28,10 +28,7 @@ public class LegacySlimeWorldDataStorage implements WorldDataStorage {
 
     @Override
     public CEChunk readNewChunkAt(CEWorld world, ChunkPos pos) {
-        SlimeChunk slimeChunk = getWorld().getChunk(pos.x, pos.z);
-        if (slimeChunk == null) return new CEChunk(world, pos);
-        slimeChunk.getExtraData().getValue().remove("craftengine");
-        return new CEChunk(world, pos);
+        return readChunkAt(world, pos);
     }
 
     @Override

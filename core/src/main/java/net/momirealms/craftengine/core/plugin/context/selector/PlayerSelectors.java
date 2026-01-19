@@ -15,44 +15,50 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
-public class PlayerSelectors {
-    public static final Key ALL = Key.of("craftengine:all");
-    public static final Key SELF = Key.of("craftengine:self");
+public final class PlayerSelectors {
+    public static final PlayerSelectorType<? extends Context> ALL = register(Key.ce("all"), AllPlayerSelector.factory());
+    public static final PlayerSelectorType<? extends Context> SELF = register(Key.ce("self"), SelfPlayerSelector.factory());
 
-    static {
-        register(ALL, new AllPlayerSelector.FactoryImpl<>());
-        register(SELF, new SelfPlayerSelector.FactoryImpl<>());
-    }
+    private PlayerSelectors() {}
 
-    public static void register(Key key, PlayerSelectorFactory<?> factory) {
-        ((WritableRegistry<PlayerSelectorFactory<?>>) BuiltInRegistries.PLAYER_SELECTOR_FACTORY)
-                .register(ResourceKey.create(Registries.PLAYER_SELECTOR_FACTORY.location(), key), factory);
+    public static <CTX extends Context> PlayerSelectorType<CTX> register(Key key, PlayerSelectorFactory<CTX> factory) {
+        PlayerSelectorType<CTX> type = new PlayerSelectorType<>(key, factory);
+        ((WritableRegistry<PlayerSelectorType<? extends Context>>) BuiltInRegistries.PLAYER_SELECTOR_TYPE)
+                .register(ResourceKey.create(Registries.PLAYER_SELECTOR_TYPE.location(), key), type);
+        return type;
     }
 
     @Nullable
     public static <CTX extends Context> PlayerSelector<CTX> fromObject(Object object, Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
-        if (object == null) return null;
-        if (object instanceof Map<?,?> map) {
-            Map<String, Object> selectorMap = MiscUtils.castToMap(map, false);
-            return fromMap(selectorMap, conditionFactory);
-        } else if (object instanceof String target) {
-            if (target.equals("all") || target.equals("@a")) {
-                return new AllPlayerSelector<>();
-            } else if (target.equals("self") || target.equals("@s")) {
-                return new SelfPlayerSelector<>();
+        switch (object) {
+            case null -> {
+                return null;
+            }
+            case Map<?, ?> map -> {
+                Map<String, Object> selectorMap = MiscUtils.castToMap(map, false);
+                return fromMap(selectorMap, conditionFactory);
+            }
+            case String target -> {
+                if (target.equals("all") || target.equals("@a")) {
+                    return AllPlayerSelector.all();
+                } else if (target.equals("self") || target.equals("@s")) {
+                    return SelfPlayerSelector.self();
+                }
+            }
+            default -> {
             }
         }
         throw new LocalizedResourceConfigException("warning.config.selector.invalid_target", object.toString());
     }
 
+    @SuppressWarnings("unchecked")
     public static <CTX extends Context> PlayerSelector<CTX> fromMap(Map<String, Object> map, Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.selector.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        @SuppressWarnings("unchecked")
-        PlayerSelectorFactory<CTX> factory = (PlayerSelectorFactory<CTX>) BuiltInRegistries.PLAYER_SELECTOR_FACTORY.getValue(key);
-        if (factory == null) {
+        PlayerSelectorType<CTX> selectorType = (PlayerSelectorType<CTX>) BuiltInRegistries.PLAYER_SELECTOR_TYPE.getValue(key);
+        if (selectorType == null) {
             throw new LocalizedResourceConfigException("warning.config.selector.invalid_type", type);
         }
-        return factory.create(map, conditionFactory);
+        return selectorType.factory().create(map, conditionFactory);
     }
 }

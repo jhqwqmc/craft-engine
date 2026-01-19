@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.SimpleParticleBlockEntity;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SimpleParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SimpleParticleBlockBehavior> FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;
 
@@ -53,9 +52,10 @@ public class SimpleParticleBlockBehavior extends BukkitBlockBehavior implements 
         return EntityBlockBehavior.createTickerHelper(SimpleParticleBlockEntity::tick);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SimpleParticleBlockBehavior> {
+
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SimpleParticleBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             List<ParticleConfig> particles = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "particles", "particle"), ParticleConfig::fromMap$blockEntity);
             int tickInterval = ResourceConfigUtils.getAsInt(arguments.getOrDefault("tick-interval", 10), "tick-interval");
             return new SimpleParticleBlockBehavior(block, particles.toArray(new ParticleConfig[0]), tickInterval);

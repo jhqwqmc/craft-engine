@@ -1,21 +1,14 @@
 package net.momirealms.craftengine.core.plugin.context.number;
 
-import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.random.RandomSource;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
-public class GaussianNumberProvider implements NumberProvider {
-    public static final Factory FACTORY = new Factory();
-    private final double min;
-    private final double max;
-    private final double mean;
-    private final double stdDev;
-    private final int maxAttempts;
+public record GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) implements NumberProvider {
+    public static final NumberProviderFactory<GaussianNumberProvider> FACTORY = new Factory();
 
     public GaussianNumberProvider(double min, double max, double mean, double stdDev, int maxAttempts) {
         this.min = min;
@@ -39,13 +32,12 @@ public class GaussianNumberProvider implements NumberProvider {
     }
 
     @Override
-    public float getFloat(Context context) {
-        return (float) getDouble(context);
+    public float getFloat(RandomSource random) {
+        return (float) getDouble(random);
     }
 
     @Override
-    public double getDouble(Context context) {
-        Random random = ThreadLocalRandom.current();
+    public double getDouble(RandomSource random) {
         int attempts = 0;
         while (attempts < maxAttempts) {
             double value = random.nextGaussian() * stdDev + mean;
@@ -57,35 +49,10 @@ public class GaussianNumberProvider implements NumberProvider {
         return MiscUtils.clamp(this.mean, this.min, this.max);
     }
 
-    @Override
-    public Key type() {
-        return NumberProviders.GAUSSIAN;
-    }
-
-    public double min() {
-        return min;
-    }
-
-    public double max() {
-        return max;
-    }
-
-    public int maxAttempts() {
-        return maxAttempts;
-    }
-
-    public double mean() {
-        return mean;
-    }
-
-    public double stdDev() {
-        return stdDev;
-    }
-
-    public static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<GaussianNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public GaussianNumberProvider create(Map<String, Object> arguments) {
             double min = ResourceConfigUtils.getAsDouble(ResourceConfigUtils.requireNonNullOrThrow(arguments.get("min"), "warning.config.number.gaussian.missing_min"), "min");
             double max = ResourceConfigUtils.getAsDouble(ResourceConfigUtils.requireNonNullOrThrow(arguments.get("max"), "warning.config.number.gaussian.missing_max"), "max");
             double mean = ResourceConfigUtils.getAsDouble(arguments.getOrDefault("mean", (min + max) / 2.0), "mean");
@@ -96,7 +63,7 @@ public class GaussianNumberProvider implements NumberProvider {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return String.format("GaussianNumberProvider{min=%.2f, max=%.2f, mean=%.2f, stdDev=%.2f, maxAttempts=%d}",
                 min, max, mean, stdDev, maxAttempts);
     }

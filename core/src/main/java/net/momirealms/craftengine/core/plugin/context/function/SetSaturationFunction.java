@@ -7,7 +7,6 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -39,19 +38,18 @@ public class SetSaturationFunction<CTX extends Context> extends AbstractConditio
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.SET_SATURATION;
+    public static <CTX extends Context> FunctionFactory<CTX, SetSaturationFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, SetSaturationFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public SetSaturationFunction<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("saturation"), "warning.config.function.set_saturation.missing_saturation");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
             return new SetSaturationFunction<>(getPredicates(arguments), add, PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), NumberProviders.fromObject(value));

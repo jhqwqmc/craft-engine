@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -36,19 +35,18 @@ public class SetCountFunction<CTX extends Context> extends AbstractConditionalFu
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.SET_COUNT;
+    public static <CTX extends Context> FunctionFactory<CTX, SetCountFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, SetCountFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public SetCountFunction<CTX> create(Map<String, Object> arguments) {
             Object value = ResourceConfigUtils.requireNonNullOrThrow(arguments.get("count"), "warning.config.function.set_count.missing_count");
             boolean add = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("add", false), "add");
             return new SetCountFunction<>(getPredicates(arguments), add, NumberProviders.fromObject(value));

@@ -10,16 +10,16 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.*;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
@@ -59,6 +59,7 @@ public final class BlockEventListener implements Listener {
         if (!VersionHelper.isOrAbove1_20_5()) {
             if (event.getDamager() instanceof Player player) {
                 BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                if (serverPlayer == null) return;
                 serverPlayer.setClientSideCanBreakBlock(true);
             }
         }
@@ -68,6 +69,7 @@ public final class BlockEventListener implements Listener {
     public void onPlaceBlock(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
         // send swing if player is clicking a replaceable block
         if (serverPlayer.shouldResendSwing()) {
             player.swingHand(event.getHand());
@@ -107,15 +109,19 @@ public final class BlockEventListener implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-        net.momirealms.craftengine.core.world.World world = new BukkitWorld(player.getWorld());
+        if (serverPlayer == null) return;
+        serverPlayer.updateLastSuccessBreakTick();
+        net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(player.getWorld());
+        BlockPos blockPos = LocationUtils.toBlockPos(location);
         WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
         Item<ItemStack> itemInHand = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
 
         if (!event.isCancelled() && !ItemUtils.isEmpty(itemInHand)) {
             Optional<CustomItem<ItemStack>> optionalCustomItem = itemInHand.getCustomItem();
             if (optionalCustomItem.isPresent()) {
+                CustomItem<ItemStack> customItem = optionalCustomItem.get();
                 Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
-                optionalCustomItem.get().execute(
+                customItem.execute(
                         PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
                             .withParameter(DirectContextParameters.BLOCK, new BukkitExistingBlock(block))
                             .withParameter(DirectContextParameters.POSITION, position)
@@ -127,6 +133,9 @@ public final class BlockEventListener implements Listener {
                 if (cancellable.isCancelled()) {
                     return;
                 }
+                for (ItemBehavior behavior : customItem.behaviors()) {
+                    behavior.breakBlock(world, serverPlayer, blockPos);
+                }
             }
         }
 
@@ -135,17 +144,20 @@ public final class BlockEventListener implements Listener {
             if (!state.isEmpty()) {
                 if (!event.isCancelled()) {
                     // double check adventure mode to prevent dupe
-                    if (!FastNMS.INSTANCE.field$Player$mayBuild(serverPlayer.serverPlayer()) && !serverPlayer.canBreak(LocationUtils.toBlockPos(location), null)) {
+                    if (!FastNMS.INSTANCE.field$Player$mayBuild(serverPlayer.serverPlayer()) && !serverPlayer.canBreak(blockPos, null)) {
                         return;
                     }
 
                     // trigger api event
-                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state);
+                    CustomBlockBreakEvent customBreakEvent = new CustomBlockBreakEvent(serverPlayer, location, block, state, event.isDropItems());
                     boolean isCancelled = EventUtils.fireAndCheckCancel(customBreakEvent);
                     if (isCancelled) {
                         event.setCancelled(true);
                         return;
                     }
+
+                    // 同步选项
+                    event.setDropItems(customBreakEvent.dropItems());
 
                     // execute functions
                     Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
@@ -167,6 +179,7 @@ public final class BlockEventListener implements Listener {
                 // Restore sounds in cancelled events
                 else {
                     if (Config.processCancelledBreak()) {
+                        if (BukkitItemUtils.isDebugStick(itemInHand)) return;
                         serverPlayer.playSound(position, state.settings().sounds().breakSound(), SoundSource.BLOCK);
                     }
                 }
@@ -196,6 +209,7 @@ public final class BlockEventListener implements Listener {
             }
             // sound system
             if (Config.enableSoundSystem() && (!event.isCancelled() || Config.processCancelledBreak())) {
+                if (BukkitItemUtils.isDebugStick(itemInHand)) return;
                 Object soundType = FastNMS.INSTANCE.method$BlockBehaviour$BlockStateBase$getSoundType(blockState);
                 Object soundEvent = FastNMS.INSTANCE.field$SoundType$breakSound(soundType);
                 Object soundId = FastNMS.INSTANCE.field$SoundEvent$location(soundEvent);
@@ -219,7 +233,7 @@ public final class BlockEventListener implements Listener {
                     event.setExpToDrop(0);
                 }
                 Location location = block.getLocation();
-                net.momirealms.craftengine.core.world.World world = new BukkitWorld(location.getWorld());
+                net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(location.getWorld());
                 WorldPosition position = new WorldPosition(world, location.getBlockX() + 0.5, location.getBlockY() + 0.5, location.getBlockZ() + 0.5);
                 ContextHolder.Builder builder = ContextHolder.builder()
                         .withParameter(DirectContextParameters.POSITION, position)
@@ -250,7 +264,7 @@ public final class BlockEventListener implements Listener {
             Cancellable cancellable = Cancellable.of(event::isCancelled, event::setCancelled);
             state.owner().value().execute(PlayerOptionalContext.of(BukkitAdaptors.adapt(player), ContextHolder.builder()
                     .withParameter(DirectContextParameters.EVENT, cancellable)
-                    .withParameter(DirectContextParameters.POSITION, new WorldPosition(new BukkitWorld(event.getWorld()), LocationUtils.toVec3d(location)))
+                    .withParameter(DirectContextParameters.POSITION, new WorldPosition(BukkitAdaptors.adapt(event.getWorld()), LocationUtils.toVec3d(location)))
                     .withParameter(DirectContextParameters.BLOCK, new BukkitExistingBlock(block))
                     .withParameter(DirectContextParameters.CUSTOM_BLOCK_STATE, state)
             ), EventTrigger.STEP);

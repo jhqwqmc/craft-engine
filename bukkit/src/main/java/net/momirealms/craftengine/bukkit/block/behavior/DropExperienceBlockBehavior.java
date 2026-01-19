@@ -5,17 +5,16 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.BlockSettings;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.LootContext;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
@@ -33,7 +32,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<DropExperienceBlockBehavior> FACTORY = new Factory();
     private final NumberProvider amount;
     private final Predicate<Context> condition;
 
@@ -87,12 +86,12 @@ public class DropExperienceBlockBehavior extends BukkitBlockBehavior {
         world.dropExp(dropPos, finalAmount);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<DropExperienceBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public DropExperienceBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             NumberProvider amount = NumberProviders.fromObject(ResourceConfigUtils.get(arguments, "amount", "count"));
-            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "conditions", "condition"), EventConditions::fromMap);
+            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "conditions", "condition"), CommonConditions::fromMap);
             return new DropExperienceBlockBehavior(block, amount, MiscUtils.allOf(conditionList));
         }
     }

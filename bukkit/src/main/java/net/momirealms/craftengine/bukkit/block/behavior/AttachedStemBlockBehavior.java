@@ -5,7 +5,6 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class AttachedStemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<AttachedStemBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Key fruit;
     private final Key stem;
@@ -85,10 +84,10 @@ public class AttachedStemBlockBehavior extends BukkitBlockBehavior implements Is
         return null;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<AttachedStemBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public AttachedStemBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
 
             @SuppressWarnings("unchecked")
             Property<HorizontalDirection> facingProperty = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.attached_stem.missing_facing");

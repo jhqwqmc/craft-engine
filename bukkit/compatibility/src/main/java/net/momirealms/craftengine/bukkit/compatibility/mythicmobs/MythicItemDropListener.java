@@ -1,13 +1,15 @@
 package net.momirealms.craftengine.bukkit.compatibility.mythicmobs;
 
-import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.bukkit.events.MythicDropLoadEvent;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.LazyReference;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+
+import java.util.Locale;
 
 public class MythicItemDropListener implements Listener {
     private final BukkitCraftEngine plugin;
@@ -17,15 +19,35 @@ public class MythicItemDropListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin.javaPlugin());
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onMythicDropLoad(MythicDropLoadEvent event)	{
-        if (!event.getDropName().equalsIgnoreCase("craftengine")) return;
-        String argument = event.getArgument();
-        Key itemId = Key.of(argument);
-        this.plugin.itemManager().getCustomItem(itemId).ifPresent(customItem -> {
-            String line = event.getContainer().getConfigLine();
-            MythicLineConfig config = event.getConfig();
-            event.register(new MythicItemDrop(line, config, customItem));
-        });
+        if (!"craftengine".equalsIgnoreCase(event.getDropName())) {
+            return;
+        }
+        String line = event.getContainer().getLine().toLowerCase(Locale.ROOT);
+        String itemId = extractItemId(line);
+        if (itemId == null || itemId.isEmpty()) {
+            return;
+        }
+        event.register(new MythicItemDrop(line, event.getConfig(),
+                LazyReference.lazyReference(() -> this.plugin.itemManager().getCustomItem(Key.of(itemId)).orElse(null)),
+                itemId
+        ));
+    }
+
+    private static String extractItemId(String line) {
+        if (line.startsWith("craftengine ")) {
+            int nextSpaceIndex = line.indexOf(' ', 12);
+            return nextSpaceIndex == -1
+                    ? line.substring(12)
+                    : line.substring(12, nextSpaceIndex);
+        }
+        if (line.startsWith("craftengine:")) {
+            int spaceIndex = line.indexOf(' ', 12);
+            return spaceIndex == -1
+                    ? line.substring(12)
+                    : line.substring(12, spaceIndex);
+        }
+        return null;
     }
 }

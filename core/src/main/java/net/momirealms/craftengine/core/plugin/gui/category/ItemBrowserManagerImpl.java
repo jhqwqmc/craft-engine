@@ -14,11 +14,7 @@ import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
-import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.ContextHolder;
-import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
+import net.momirealms.craftengine.core.plugin.context.*;
 import net.momirealms.craftengine.core.plugin.gui.*;
 import net.momirealms.craftengine.core.plugin.gui.Ingredient;
 import net.momirealms.craftengine.core.util.*;
@@ -133,7 +129,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             int priority = ResourceConfigUtils.getAsInt(section.getOrDefault("priority", 0), "priority");
             List<String> lore = MiscUtils.getAsStringList(section.getOrDefault("lore", List.of()));
             boolean hidden = ResourceConfigUtils.getAsBoolean(section.getOrDefault("hidden", false), "hidden");
-            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(section, "conditions", "condition"), EventConditions::fromMap);
+            List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(section, "conditions", "condition"), CommonConditions::fromMap);
             Category category = new Category(id, name, lore, icon, new ArrayList<>(members), priority, hidden, MiscUtils.allOf(conditionList));
             if (ItemBrowserManagerImpl.this.byId.containsKey(id)) {
                 ItemBrowserManagerImpl.this.byId.get(id).merge(category);
@@ -180,7 +176,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
             }
             Item<?> item = this.plugin.itemManager().createWrappedItem(it.icon(), player);
             if (ItemUtils.isEmpty(item)) {
-                this.plugin.logger().warn("Can't not find item " + it.icon() + " for category icon");
+                this.plugin.logger().warn("Cannot find item " + it.icon() + " for category icon");
                 return null;
             }
             item.customNameJson(AdventureHelper.componentToJson(AdventureHelper.miniMessage().deserialize(it.displayName(), ItemBuildContext.EMPTY_RESOLVERS)));

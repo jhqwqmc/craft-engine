@@ -4,7 +4,6 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.BlockTags;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -20,7 +19,7 @@ import org.bukkit.Registry;
 import java.util.*;
 
 public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<BushBlockBehavior> FACTORY = new Factory();
     protected final List<Object> tagsCanSurviveOn;
     protected final Set<Object> blockStatesCanSurviveOn;
     protected final Set<String> customBlocksCansSurviveOn;
@@ -28,7 +27,8 @@ public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
     protected final boolean stackable;
     protected final int maxHeight;
 
-    public BushBlockBehavior(CustomBlock block, int delay, boolean blacklist, boolean stackable, int maxHeight, List<Object> tagsCanSurviveOn, Set<Object> blockStatesCanSurviveOn, Set<String> customBlocksCansSurviveOn) {
+    public BushBlockBehavior(CustomBlock block, int delay, boolean blacklist, boolean stackable, int maxHeight,
+                             List<Object> tagsCanSurviveOn, Set<Object> blockStatesCanSurviveOn, Set<String> customBlocksCansSurviveOn) {
         super(block, delay);
         this.blacklistMode = blacklist;
         this.stackable = stackable;
@@ -38,10 +38,10 @@ public class BushBlockBehavior extends AbstractCanSurviveBlockBehavior {
         this.customBlocksCansSurviveOn = customBlocksCansSurviveOn;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<BushBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public BushBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Tuple<List<Object>, Set<Object>, Set<String>> tuple = readTagsAndState(arguments, false);
             boolean stackable = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("stackable", false), "stackable");
             int maxHeight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("max-height", 0), "max-height");

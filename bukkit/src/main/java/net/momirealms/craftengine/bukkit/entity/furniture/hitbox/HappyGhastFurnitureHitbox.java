@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class HappyGhastFurnitureHitbox extends AbstractFurnitureHitBox {
+public final class HappyGhastFurnitureHitbox extends AbstractFurnitureHitBox {
     private final HappyGhastFurnitureHitboxConfig config;
     private final Collider collider;
     private final Object despawnPacket;
@@ -29,7 +29,7 @@ public class HappyGhastFurnitureHitbox extends AbstractFurnitureHitBox {
     private final int entityId;
     private final float yaw;
 
-    public HappyGhastFurnitureHitbox(Furniture furniture, HappyGhastFurnitureHitboxConfig config) {
+    HappyGhastFurnitureHitbox(Furniture furniture, HappyGhastFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();

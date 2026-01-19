@@ -19,8 +19,7 @@ public final class RegistryUtils {
 
     public static int currentBiomeRegistrySize() {
         try {
-            Object idMap = CoreReflections.method$Registry$asHolderIdMap.invoke(FastNMS.INSTANCE.method$RegistryAccess$lookupOrThrow(FastNMS.INSTANCE.registryAccess(), MRegistries.BIOME));
-            return (int) CoreReflections.method$IdMap$size.invoke(idMap);
+            return (int) CoreReflections.method$IdMap$size.invoke(FastNMS.INSTANCE.method$RegistryAccess$lookupOrThrow(FastNMS.INSTANCE.registryAccess(), MRegistries.BIOME));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -28,8 +27,7 @@ public final class RegistryUtils {
 
     public static int currentEntityTypeRegistrySize() {
         try {
-            Object idMap = CoreReflections.method$Registry$asHolderIdMap.invoke(MBuiltInRegistries.ENTITY_TYPE);
-            return (int) CoreReflections.method$IdMap$size.invoke(idMap);
+            return (int) CoreReflections.method$IdMap$size.invoke(MBuiltInRegistries.ENTITY_TYPE);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

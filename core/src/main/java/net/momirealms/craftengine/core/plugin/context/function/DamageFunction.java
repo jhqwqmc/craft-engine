@@ -29,19 +29,18 @@ public class DamageFunction<CTX extends Context> extends AbstractConditionalFunc
         selector.get(ctx).forEach(p -> p.damage(amount.getDouble(ctx), damageType, null));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.DAMAGE;
+    public static <CTX extends Context> FunctionFactory<CTX, DamageFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, DamageFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public DamageFunction<CTX> create(Map<String, Object> arguments) {
             PlayerSelector<CTX> selector = PlayerSelectors.fromObject(arguments.getOrDefault("target", "self"), conditionFactory());
             Key damageType = Key.of(ResourceConfigUtils.getAsStringOrNull(arguments.getOrDefault("damage-type", "generic")));
             NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 1f));

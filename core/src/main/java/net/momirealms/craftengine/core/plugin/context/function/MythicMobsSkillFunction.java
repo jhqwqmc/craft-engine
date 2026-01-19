@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.List;
@@ -27,19 +26,18 @@ public class MythicMobsSkillFunction<CTX extends Context> extends AbstractCondit
         });
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.MYTHIC_MOBS_SKILL;
+    public static <CTX extends Context> FunctionFactory<CTX, MythicMobsSkillFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, MythicMobsSkillFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> args) {
+        public MythicMobsSkillFunction<CTX> create(Map<String, Object> args) {
             String skill = ResourceConfigUtils.requireNonEmptyStringOrThrow(args.get("skill"), "warning.config.function.mythic_mobs_skill.missing_skill");
             float power = ResourceConfigUtils.getAsFloat(args.getOrDefault("power", 1.0), "power");
             return new MythicMobsSkillFunction<>(getPredicates(args), power, skill);

@@ -5,9 +5,10 @@ import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
-import net.momirealms.craftengine.core.item.modifier.EquippableModifier;
-import net.momirealms.craftengine.core.item.modifier.FoodModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.equipment.Equipments;
+import net.momirealms.craftengine.core.item.processor.EquippableProcessor;
+import net.momirealms.craftengine.core.item.processor.FoodProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainder;
 import net.momirealms.craftengine.core.item.recipe.remainder.CraftRemainders;
 import net.momirealms.craftengine.core.item.setting.*;
@@ -23,7 +24,7 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ItemSettings {
+public final class ItemSettings {
     int fuelTime;
     Set<Key> tags = Set.of();
     Repairable repairable = Repairable.UNDEFINED;
@@ -53,35 +54,50 @@ public class ItemSettings {
     String dropDisplay = Config.defaultDropDisplayFormat();
     @Nullable
     LegacyChatFormatter glowColor = null;
-    Map<CustomDataType<?>, Object> customData = new IdentityHashMap<>(4);
+    Map<CustomItemSettingType<?>, Object> customData = new IdentityHashMap<>(4);
 
     private ItemSettings() {}
 
-    public <I> List<ItemDataModifier<I>> modifiers() {
-        ArrayList<ItemDataModifier<I>> modifiers = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public List<ItemProcessor> processors() {
+        ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
-                modifiers.add(new EquippableModifier<>(data));
+                data.setAssetId(null);
+                processors.add(new EquippableProcessor(data));
             }
             if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
-                modifiers.addAll(this.equipment.equipment().modifiers());
+                processors.addAll(this.equipment.equipment().modifiers());
             }
         }
         if (VersionHelper.isOrAbove1_20_5() && this.foodData != null) {
-            modifiers.add(new FoodModifier<>(this.foodData.nutrition(), this.foodData.saturation(), false));
+            processors.add(new FoodProcessor(this.foodData.nutrition(), this.foodData.saturation(), false));
         }
-        return modifiers;
+        for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
+            CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
+            Optional.ofNullable(type.dataProcessor()).ifPresent(it -> {
+                it.accept(entry.getValue(), processors::add);
+            });
+        }
+        return processors;
     }
 
-    public <I> List<ItemDataModifier<I>> clientBoundModifiers() {
-        ArrayList<ItemDataModifier<I>> modifiers = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public List<ItemProcessor> clientBoundProcessors() {
+        ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
             if (this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
-                modifiers.addAll(this.equipment.equipment().modifiers());
+                processors.addAll(this.equipment.equipment().modifiers());
             }
         }
-        return modifiers;
+        for (Map.Entry<CustomItemSettingType<?>, Object> entry : this.customData.entrySet()) {
+            CustomItemSettingType<Object> type = (CustomItemSettingType<Object>) entry.getKey();
+            Optional.ofNullable(type.clientBoundDataProcessor()).ifPresent(it -> {
+                it.accept(entry.getValue(), processors::add);
+            });
+        }
+        return processors;
     }
 
     public static ItemSettings of() {
@@ -136,7 +152,7 @@ public class ItemSettings {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getCustomData(CustomDataType<T> type) {
+    public <T> T getCustomData(CustomItemSettingType<T> type) {
         return (T) this.customData.get(type);
     }
 
@@ -146,11 +162,11 @@ public class ItemSettings {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T> T removeCustomData(CustomDataType<?> type) {
+    public <T> T removeCustomData(CustomItemSettingType<?> type) {
         return (T) this.customData.remove(type);
     }
 
-    public <T> void addCustomData(CustomDataType<T> key, T value) {
+    public <T> void addCustomData(CustomItemSettingType<T> key, T value) {
         this.customData.put(key, value);
     }
 
@@ -473,7 +489,7 @@ public class ItemSettings {
                 if (data.assetId() == null) {
                     throw new IllegalArgumentException("Please move 'equippable' option to 'data' section.");
                 }
-                ComponentBasedEquipment componentBasedEquipment = ComponentBasedEquipment.FACTORY.create(data.assetId(), args);
+                ComponentBasedEquipment componentBasedEquipment = Equipments.COMPONENT.factory().create(data.assetId(), args);
                 ((AbstractItemManager<?>) CraftEngine.instance().itemManager()).addOrMergeEquipment(componentBasedEquipment);
                 ItemEquipment itemEquipment = new ItemEquipment(Tristate.FALSE, data, componentBasedEquipment);
                 return settings -> settings.equipment(itemEquipment);

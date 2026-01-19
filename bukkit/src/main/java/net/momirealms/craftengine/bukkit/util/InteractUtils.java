@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.util;
 
 import io.papermc.paper.entity.Shearable;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BlockItemBehavior;
 import net.momirealms.craftengine.bukkit.item.behavior.FlintAndSteelItemBehavior;
@@ -15,8 +16,7 @@ import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.modifier.AttributeModifiersModifier;
+import net.momirealms.craftengine.core.item.processor.AttributeModifiersProcessor;
 import net.momirealms.craftengine.core.item.recipe.RecipeType;
 import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.item.recipe.input.SingleItemInput;
@@ -25,6 +25,7 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockHitResult;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Registry;
@@ -61,7 +62,7 @@ public final class InteractUtils {
 
     // 方块
     static {
-        registerInteraction(BlockKeys.NOTE_BLOCK, (player, item, blockState, result) -> result.getDirection() != Direction.UP || !item.hasItemTag(NOTE_BLOCK_TOP_INSTRUMENTS));
+        registerInteraction(BlockKeys.NOTE_BLOCK, (player, item, blockState, result) -> result.direction() != Direction.UP || !item.hasItemTag(NOTE_BLOCK_TOP_INSTRUMENTS));
         registerInteraction(BlockKeys.POWDER_SNOW, (player, item, blockState, result) -> {
             Key id = item.vanillaId();
             return ItemKeys.BUCKET.equals(id);
@@ -112,10 +113,10 @@ public final class InteractUtils {
             return ItemKeys.GLASS_BOTTLE.equals(id) || ItemKeys.WATER_BUCKET.equals(id) || ItemKeys.LAVA_BUCKET.equals(id);
         });
         registerInteraction(BlockKeys.BELL, (player, item, blockState, result) -> {
-            Direction direction = result.getDirection();
-            BlockPos pos = result.getBlockPos();
+            Direction direction = result.direction();
+            BlockPos pos = result.blockPos();
             if (blockState instanceof Bell bell) {
-                double y = result.getLocation().y() - pos.y();
+                double y = result.location().y() - pos.y();
                 if (direction.axis() != Direction.Axis.Y && !(y > 0.8124F)) {
                     Direction facing = DirectionUtils.toDirection(bell.getFacing());
                     Bell.Attachment attachment = bell.getAttachment();
@@ -156,7 +157,7 @@ public final class InteractUtils {
         registerInteraction(BlockKeys.DECORATED_POT, (player, item, blockState, result) -> true);
         registerInteraction(BlockKeys.CHISELED_BOOKSHELF, (player, item, blockState, result) -> {
             if (!(blockState instanceof ChiseledBookshelf chiseledBookshelf)) return false;
-            return DirectionUtils.toDirection(chiseledBookshelf.getFacing()) == result.getDirection();
+            return DirectionUtils.toDirection(chiseledBookshelf.getFacing()) == result.direction();
         });
         registerInteraction(BlockKeys.LECTERN, (player, item, blockState, result) -> true);
         registerInteraction(BlockKeys.CHEST, (player, item, blockState, result) -> true);
@@ -194,8 +195,8 @@ public final class InteractUtils {
                         && redstoneWire.getFace(BlockFace.SOUTH).equals(RedstoneWire.Connection.NONE)
                         && redstoneWire.getFace(BlockFace.WEST).equals(RedstoneWire.Connection.NONE);
                 if (isCross || isDot) {
-                    BlockPos blockPos = result.getBlockPos();
-                    BukkitWorld bukkitWorld = new BukkitWorld(player.getWorld());
+                    BlockPos blockPos = result.blockPos();
+                    BukkitWorld bukkitWorld = BukkitAdaptors.adapt(player.getWorld());
                     World world = bukkitWorld.platformWorld();
 
                     Direction[] directions = {Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH};
@@ -714,18 +715,18 @@ public final class InteractUtils {
         registerInteraction(BlockKeys.CRIMSON_WALL_HANGING_SIGN, (player, item, blockState, result) -> true);
         registerInteraction(BlockKeys.WARPED_WALL_HANGING_SIGN, (player, item, blockState, result) -> true);
         // 展示柜
-        registerInteraction(BlockKeys.OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.SPRUCE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.BIRCH_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.JUNGLE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.ACACIA_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.DARK_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.MANGROVE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.CHERRY_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.PALE_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.BAMBOO_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.CRIMSON_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
-        registerInteraction(BlockKeys.WARPED_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.getDirection()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.SPRUCE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.BIRCH_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.JUNGLE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.ACACIA_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.DARK_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.MANGROVE_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.CHERRY_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.PALE_OAK_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.BAMBOO_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.CRIMSON_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
+        registerInteraction(BlockKeys.WARPED_SHELF, (player, item, blockState, result) -> blockState instanceof Directional directional && DirectionUtils.toBlockFace(result.direction()).equals(directional.getFacing()));
         // 铜傀儡雕像
         registerInteraction(BlockKeys.COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
         registerInteraction(BlockKeys.EXPOSED_COPPER_GOLEM_STATUE, ((player, item, blockData, result) -> true));
@@ -749,11 +750,11 @@ public final class InteractUtils {
     static {
         registerCanPlace(BlockKeys.CACTUS, (player, item, blockState, result) -> {
             Key id = item.vanillaId();
-            return result.getDirection() == Direction.UP && ItemKeys.CACTUS.equals(id);
+            return result.direction() == Direction.UP && ItemKeys.CACTUS.equals(id);
         });
         registerCanPlace(BlockKeys.SUGAR_CANE, (player, item, blockState, result) -> {
             Key id = item.vanillaId();
-            return result.getDirection() == Direction.UP && ItemKeys.SUGAR_CANE.equals(id);
+            return result.direction() == Direction.UP && ItemKeys.SUGAR_CANE.equals(id);
         });
     }
 
@@ -1050,7 +1051,7 @@ public final class InteractUtils {
 
     public static boolean isFullHealth(Entity entity) {
         if (entity instanceof LivingEntity living) {
-            Key key = AttributeModifiersModifier.getNativeAttributeName(Key.of("max_health"));
+            Key key = AttributeModifiersProcessor.getNativeAttributeName(Key.of("max_health"));
             Attribute maxHealthAttr = Registry.ATTRIBUTE.get(KeyUtils.toNamespacedKey(key));
             if (maxHealthAttr == null) return false;
             AttributeInstance attribute = living.getAttribute(maxHealthAttr);
@@ -1090,9 +1091,9 @@ public final class InteractUtils {
 
     private static Object toNMSHitResult(BlockHitResult result) {
         return FastNMS.INSTANCE.constructor$BlockHitResult(
-                LocationUtils.toVec(result.getLocation()),
-                DirectionUtils.toNMSDirection(result.getDirection()),
-                LocationUtils.toBlockPos(result.getBlockPos()),
+                LocationUtils.toVec(result.location()),
+                DirectionUtils.toNMSDirection(result.direction()),
+                LocationUtils.toBlockPos(result.blockPos()),
                 result.isInside()
         );
     }

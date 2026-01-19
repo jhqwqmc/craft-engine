@@ -56,7 +56,7 @@ public interface NetWorkUser {
 
     void sendCustomPayload(Key channel, byte[] data);
 
-    void kick(Component message);
+    void kick(@Nullable Component message);
 
     void simulatePacket(Object packet);
 
@@ -100,4 +100,14 @@ public interface NetWorkUser {
     IntIdentityList clientBlockList();
 
     void setClientBlockList(IntIdentityList integers);
+
+    ProtocolVersion protocolVersion();
+
+    void setProtocolVersion(ProtocolVersion protocolVersion);
+
+    void setConnectionState(ConnectionState connectionState);
+
+    void setDecoderState(ConnectionState decoderState);
+
+    void setEncoderState(ConnectionState encoderState);
 }

@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextPar
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
@@ -44,21 +43,20 @@ public class MessageFunction<CTX extends Context> extends AbstractConditionalFun
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.MESSAGE;
+    public static <CTX extends Context> FunctionFactory<CTX, MessageFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, MessageFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public MessageFunction<CTX> create(Map<String, Object> arguments) {
             Object message = ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(arguments, "messages", "message"), "warning.config.function.command.missing_message");
-            List<String> messages = MiscUtils.getAsStringList(message);
+            List<String> messages = MiscUtils.getAsStringList(message).stream().map(AdventureHelper::legacyToMiniMessage).toList();
             boolean overlay = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("overlay", false), "overlay");
             return new MessageFunction<>(getPredicates(arguments), PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), messages, overlay);
         }

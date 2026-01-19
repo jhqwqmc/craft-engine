@@ -3,10 +3,7 @@ package net.momirealms.craftengine.core.pack.host.impl;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
@@ -32,8 +29,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class AlistHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class AlistHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<AlistHost> FACTORY = new Factory();
     private final String apiUrl;
     private final String userName;
     private final String password;
@@ -73,7 +70,7 @@ public class AlistHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType<AlistHost> type() {
         return ResourcePackHosts.ALIST;
     }
 
@@ -284,10 +281,10 @@ public class AlistHost implements ResourcePackHost {
                 new RuntimeException("Failed to obtain resource pack download URL (HTTP " + response.statusCode() + "): " + response.body()));
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<AlistHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public AlistHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String apiUrl = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("api-url"), () -> new LocalizedException("warning.config.host.alist.missing_api_url"));
             String userName = useEnv ? System.getenv("CE_ALIST_USERNAME") : Optional.ofNullable(arguments.get("username")).map(String::valueOf).orElse(null);

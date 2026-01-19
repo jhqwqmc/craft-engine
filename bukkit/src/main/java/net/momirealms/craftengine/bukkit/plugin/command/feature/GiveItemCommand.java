@@ -14,6 +14,7 @@ import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import net.momirealms.craftengine.core.plugin.command.FlagKeys;
 import net.momirealms.craftengine.core.plugin.locale.MessageConstants;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -65,12 +66,25 @@ public class GiveItemCommand extends BukkitCommandFeature<CommandSender> {
                             itemId = customItem.id();
                         }
                     }
+                    CustomItem<ItemStack> finalCustomItem = customItem;
                     Collection<Player> players = selector.values();
                     for (Player player : players) {
-                        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-                        Item<ItemStack> builtItem = customItem.buildItem(serverPlayer);
-                        if (builtItem != null) {
-                            PlayerUtils.giveItem(serverPlayer, amount, builtItem);
+                        if (VersionHelper.isFolia()) {
+                            player.getScheduler().run(plugin().javaPlugin(), t -> {
+                                BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                                if (serverPlayer != null) {
+                                    Item<ItemStack> builtItem = finalCustomItem.buildItem(serverPlayer);
+                                    if (builtItem != null) {
+                                        PlayerUtils.giveItem(serverPlayer, amount, builtItem);
+                                    }
+                                }
+                            }, null);
+                        } else {
+                            BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                            Item<ItemStack> builtItem = finalCustomItem.buildItem(serverPlayer);
+                            if (builtItem != null) {
+                                PlayerUtils.giveItem(serverPlayer, amount, builtItem);
+                            }
                         }
                     }
                     if (players.size() == 1) {

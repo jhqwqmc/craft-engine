@@ -8,21 +8,15 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.Map;
 
-public class ExpressionCondition<CTX extends Context> implements Condition<CTX> {
+public final class ExpressionCondition<CTX extends Context> implements Condition<CTX> {
     private final TextProvider expression;
 
     public ExpressionCondition(TextProvider expression) {
         this.expression = expression;
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.EXPRESSION;
     }
 
     @Override
@@ -37,10 +31,14 @@ public class ExpressionCondition<CTX extends Context> implements Condition<CTX> 
         }
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX, ExpressionCondition<CTX>> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, ExpressionCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public ExpressionCondition<CTX> create(Map<String, Object> arguments) {
             String value = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("expression"), "warning.config.condition.expression.missing_expression");
             return new ExpressionCondition<>(TextProviders.fromString(value));
         }

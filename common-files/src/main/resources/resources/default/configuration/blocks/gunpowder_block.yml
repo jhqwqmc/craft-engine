@@ -1,8 +1,7 @@
 items:
   default:gunpowder_block:
-    material: nether_brick
     data:
-      item-name: <!i><l10n:item.gunpowder_block>
+      item-name: <!i><lang:item.default.gunpowder_block>
     model: minecraft:block/custom/gunpowder_block
     behavior:
       type: block_item
@@ -31,9 +30,8 @@ items:
               textures:
                 all: minecraft:block/custom/gunpowder_block
   default:solid_gunpowder_block:
-    material: nether_brick
     data:
-      item-name: <!i><l10n:item.solid_gunpowder_block>
+      item-name: <!i><lang:item.default.solid_gunpowder_block>
     model:
       type: minecraft:model
       path: minecraft:item/custom/solid_gunpowder_block

@@ -11,6 +11,7 @@ public final class MItems {
     public static final Object AIR;
     public static final Object WATER_BUCKET;
     public static final Object BARRIER;
+    public static final Object DEBUG_STICK;
 
     @Nullable
     private static Object getById(String id) {
@@ -27,5 +28,6 @@ public final class MItems {
         AIR = getById("air");
         WATER_BUCKET = getById("water_bucket");
         BARRIER = getById("barrier");
+        DEBUG_STICK = getById("debug_stick");
     }
 }

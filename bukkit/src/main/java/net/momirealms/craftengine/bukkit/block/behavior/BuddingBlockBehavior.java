@@ -6,20 +6,20 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.*;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BuddingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<BuddingBlockBehavior> FACTORY = new Factory();
     private final float growthChance;
     private final List<Key> blocks;
 
@@ -86,10 +86,10 @@ public class BuddingBlockBehavior extends BukkitBlockBehavior {
                 && FastNMS.INSTANCE.field$FluidState$amount(FastNMS.INSTANCE.field$BlockBehaviour$BlockStateBase$fluidState(state)) == 8;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<BuddingBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public BuddingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             float growthChance = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("growth-chance", 0.2), "growth-chance");
             List<Key> blocks = new ObjectArrayList<>();
             MiscUtils.getAsStringList(arguments.get("blocks")).forEach(s -> blocks.add(Key.of(s)));

@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.List;
 import java.util.Map;
@@ -33,23 +32,22 @@ public class DamageItemFunction<CTX extends Context> extends AbstractConditional
         } else if (item == null) {
             return;
         }
-        EquipmentSlot slot = hand == null ? null : hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAIN_HAND : EquipmentSlot.OFF_HAND;
+        EquipmentSlot slot = hand == null ? null : hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
         item.hurtAndBreak(amount.getInt(ctx), player, slot);
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.DAMAGE_ITEM;
+    public static <CTX extends Context> FunctionFactory<CTX, DamageItemFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, DamageItemFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public DamageItemFunction<CTX> create(Map<String, Object> arguments) {
             NumberProvider amount = NumberProviders.fromObject(arguments.getOrDefault("amount", 1));
             return new DamageItemFunction<>(getPredicates(arguments), amount);
         }

@@ -1,7 +1,7 @@
 items:
   default:netherite_anvil:
     data:
-      item-name: <!i><l10n:item.netherite_anvil>
+      item-name: <!i><lang:item.default.netherite_anvil>
     model: minecraft:block/custom/netherite_anvil
     behavior:
       type: block_item

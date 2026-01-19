@@ -8,7 +8,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistries
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -16,14 +15,18 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.HorizontalDirection;
+import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class StemBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<StemBlockBehavior> FACTORY = new Factory();
     private final IntegerProperty ageProperty;
     private final Key fruit;
     private final Key attachedStem;
@@ -124,10 +127,10 @@ public class StemBlockBehavior extends BukkitBlockBehavior implements IsPathFind
         return flag1 || flag2;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<StemBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public StemBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             IntegerProperty ageProperty = (IntegerProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("age"), "warning.config.block.behavior.stem.missing_age");
             Key fruit = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("fruit"), "warning.config.block.behavior.stem.missing_fruit"));
             Key attachedStem = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("attached-stem"), "warning.config.block.behavior.stem.missing_attached_stem"));

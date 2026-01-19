@@ -8,8 +8,6 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -23,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class FallingBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FallingBlockBehavior> FACTORY = new Factory();
     private final float hurtAmount;
     private final int maxHurt;
     private final SoundData landSound;
@@ -57,7 +55,7 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
         Object blockPos = args[2];
         int y = FastNMS.INSTANCE.field$Vec3i$y(blockPos);
         Object world = args[1];
-        Object dimension = CoreReflections.method$$LevelReader$dimensionType.invoke(world);
+        Object dimension = CoreReflections.method$LevelReader$dimensionType.invoke(world);
         int minY = CoreReflections.field$DimensionType$minY.getInt(dimension);
         if (y < minY) {
             return;
@@ -87,7 +85,7 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
             Object blockState = CoreReflections.field$FallingBlockEntity$blockState.get(fallingBlockEntity);
             Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(blockState);
             if (optionalCustomState.isEmpty()) return;
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
             WorldPosition position = new WorldPosition(world, CoreReflections.field$Entity$xo.getDouble(fallingBlockEntity), CoreReflections.field$Entity$yo.getDouble(fallingBlockEntity), CoreReflections.field$Entity$zo.getDouble(fallingBlockEntity));
             if (this.destroySound != null) {
                 world.playBlockSound(position, this.destroySound);
@@ -106,18 +104,18 @@ public class FallingBlockBehavior extends BukkitBlockBehavior {
         ImmutableBlockState immutableBlockState = BukkitBlockManager.instance().getImmutableBlockState(stateId);
         if (immutableBlockState == null || immutableBlockState.isEmpty()) return;
         if (!entity.getEntityData(BaseEntityData.Silent)) {
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
             if (this.landSound != null) {
                 world.playBlockSound(Vec3d.atCenterOf(LocationUtils.fromBlockPos(pos)), this.landSound);
             }
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FallingBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FallingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             float hurtAmount = ResourceConfigUtils.getAsFloat(arguments.getOrDefault("hurt-amount", -1f), "hurt-amount");
             int hurtMax = ResourceConfigUtils.getAsInt(arguments.getOrDefault("max-hurt", -1), "max-hurt");
             Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");

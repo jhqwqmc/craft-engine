@@ -13,21 +13,23 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class ItemBehaviors {
-    public static final Key EMPTY = Key.withDefaultNamespace("empty", Key.DEFAULT_NAMESPACE);
+    public static final ItemBehaviorType<EmptyItemBehavior> EMPTY = register(Key.withDefaultNamespace("empty", Key.DEFAULT_NAMESPACE), EmptyItemBehavior.FACTORY);
 
-    public static void register(Key key, ItemBehaviorFactory factory) {
-        ((WritableRegistry<ItemBehaviorFactory>) BuiltInRegistries.ITEM_BEHAVIOR_FACTORY)
-                .register(ResourceKey.create(Registries.ITEM_BEHAVIOR_FACTORY.location(), key), factory);
+    public static <T extends ItemBehavior> ItemBehaviorType<T> register(Key key, ItemBehaviorFactory<T> factory) {
+        ItemBehaviorType<T> type = new ItemBehaviorType<>(key, factory);
+        ((WritableRegistry<ItemBehaviorType<? extends ItemBehavior>>) BuiltInRegistries.ITEM_BEHAVIOR_TYPE)
+                .register(ResourceKey.create(Registries.ITEM_BEHAVIOR_TYPE.location(), key), type);
+        return type;
     }
 
     public static ItemBehavior fromMap(Pack pack, Path path, String node, Key id, Map<String, Object> map) {
         if (map == null || map.isEmpty()) return EmptyItemBehavior.INSTANCE;
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.behavior.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        ItemBehaviorFactory factory = BuiltInRegistries.ITEM_BEHAVIOR_FACTORY.getValue(key);
-        if (factory == null) {
+        ItemBehaviorType<? extends ItemBehavior> behaviorType = BuiltInRegistries.ITEM_BEHAVIOR_TYPE.getValue(key);
+        if (behaviorType == null) {
             throw new LocalizedResourceConfigException("warning.config.item.behavior.invalid_type", type);
         }
-        return factory.create(pack, path, node, id, map);
+        return behaviorType.factory().create(pack, path, node, id, map);
     }
 }

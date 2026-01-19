@@ -57,19 +57,18 @@ public class SpawnFurnitureFunction<CTX extends Context> extends AbstractConditi
         CraftEngine.instance().furnitureManager().furnitureById(furnitureId).ifPresent(furniture -> CraftEngine.instance().furnitureManager().place(position, furniture, FurnitureDataAccessor.ofVariant(variant), playSound));
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.SPAWN_FURNITURE;
+    public static <CTX extends Context> FunctionFactory<CTX, SpawnFurnitureFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, SpawnFurnitureFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public SpawnFurnitureFunction<CTX> create(Map<String, Object> arguments) {
             Key furnitureId = Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("furniture-id"), "warning.config.function.spawn_furniture.missing_furniture_id"));
             NumberProvider x = NumberProviders.fromObject(arguments.getOrDefault("x", "<arg:position.x>"));
             NumberProvider y = NumberProviders.fromObject(arguments.getOrDefault("y", "<arg:position.y>"));

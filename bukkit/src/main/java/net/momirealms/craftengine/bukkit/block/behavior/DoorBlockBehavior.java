@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -9,8 +11,6 @@ import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -23,16 +23,17 @@ import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
@@ -48,7 +49,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<DoorBlockBehavior> FACTORY = new Factory();
     private final Property<DoubleBlockHalf> halfProperty;
     private final Property<HorizontalDirection> facingProperty;
     private final Property<DoorHinge> hingeProperty;
@@ -114,11 +115,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
         } else {
             if (half == DoubleBlockHalf.LOWER && direction == CoreReflections.instance$Direction$DOWN
                     && !canSurvive(thisBlock, blockState, level, blockPos)) {
-                BlockPos pos = LocationUtils.fromBlockPos(blockPos);
-                net.momirealms.craftengine.core.world.World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
-                WorldPosition position = new WorldPosition(world, Vec3d.atCenterOf(pos));
-                world.playBlockSound(position, customState.settings().sounds().breakSound());
-                FastNMS.INSTANCE.method$LevelAccessor$levelEvent(level, WorldEvents.BLOCK_BREAK_EFFECT, blockPos, customState.customBlockState().registryId());
+                MultiHighBlockBehavior.playBreakEffect(customState, blockPos, level);
                 return MBlocks.AIR$defaultState;
             }
             return blockState;
@@ -170,7 +167,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
     }
 
     @Override
-    public boolean canPlaceMultiState(BlockAccessor accessor, BlockPos pos, ImmutableBlockState state) {
+    public boolean canPlaceMultiState(WorldAccessor accessor, BlockPos pos, ImmutableBlockState state) {
         if (pos.y() >= accessor.worldHeight().getMaxBuildHeight() - 1) {
             return false;
         }
@@ -235,7 +232,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
             if ((!anotherDoor2 || anotherDoor1) && i == 0) {
                 int stepX = horizontalDirection.stepX();
                 int stepZ = horizontalDirection.stepZ();
-                Vec3d clickLocation = context.getClickLocation();
+                Vec3d clickLocation = context.getClickedLocation();
                 double d = clickLocation.x - (double) clickedPos.x();
                 double d1 = clickLocation.z - (double) clickedPos.z();
                 return stepX < 0 && d1 < (double) 0.5F || stepX > 0 && d1 > (double) 0.5F || stepZ < 0 && d > (double) 0.5F || stepZ > 0 && d < (double) 0.5F ? DoorHinge.RIGHT : DoorHinge.LEFT;
@@ -265,7 +262,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
             world.sendGameEvent(player == null ? null : (org.bukkit.entity.Player) player.platformPlayer(), isOpen ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, new Vector(pos.x(), pos.y(), pos.z()));
             SoundData soundData = isOpen ? this.openSound : this.closeSound;
             if (soundData != null) {
-                new BukkitWorld(world).playBlockSound(
+                BukkitAdaptors.adapt(world).playBlockSound(
                         new Vec3d(pos.x() + 0.5, pos.y() + 0.5, pos.z() + 0.5),
                         soundData
                 );
@@ -278,7 +275,16 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
         if (!this.canOpenWithHand) {
             return InteractionResult.PASS;
         }
-        setOpen(context.getPlayer(), context.getLevel().serverWorld(), state, context.getClickedPos(), !state.get(this.openProperty));
+        Player player = context.getPlayer();
+        BlockPos pos = context.getClickedPos();
+        World world = context.getLevel();
+        if (player != null) {
+            Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+            if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.OPEN_DOOR, location)) {
+                return InteractionResult.SUCCESS_AND_CANCEL;
+            }
+        }
+        setOpen(player, world.serverWorld(), state, pos, !state.get(this.openProperty));
         return InteractionResult.SUCCESS_AND_CANCEL;
     }
 
@@ -317,7 +323,7 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
                 world.sendGameEvent(null, flag ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, new Vector(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ()));
                 SoundData soundData = flag ? this.openSound : this.closeSound;
                 if (soundData != null) {
-                    new BukkitWorld(world).playBlockSound(
+                    BukkitAdaptors.adapt(world).playBlockSound(
                             new Vec3d(FastNMS.INSTANCE.field$Vec3i$x(blockPos) + 0.5, FastNMS.INSTANCE.field$Vec3i$y(blockPos) + 0.5, FastNMS.INSTANCE.field$Vec3i$z(blockPos) + 0.5),
                             soundData
                     );
@@ -348,9 +354,9 @@ public class DoorBlockBehavior extends AbstractCanSurviveBlockBehavior implement
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<DoorBlockBehavior> {
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public DoorBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<DoubleBlockHalf> half = (Property<DoubleBlockHalf>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("half"), "warning.config.block.behavior.door.missing_half");
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.door.missing_facing");
             Property<DoorHinge> hinge = (Property<DoorHinge>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("hinge"), "warning.config.block.behavior.door.missing_hinge");

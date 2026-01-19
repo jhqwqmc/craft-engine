@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class HangingBlockBehavior extends BushBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<HangingBlockBehavior> FACTORY = new Factory();
 
     public HangingBlockBehavior(CustomBlock block, int delay, boolean blacklist, boolean stackable, List<Object> tagsCanSurviveOn, Set<Object> blocksCansSurviveOn, Set<String> customBlocksCansSurviveOn) {
         super(block, delay, blacklist, stackable, -1, tagsCanSurviveOn, blocksCansSurviveOn, customBlocksCansSurviveOn);
@@ -26,10 +25,10 @@ public class HangingBlockBehavior extends BushBlockBehavior {
         return mayPlaceOn(belowState, world, belowPos);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<HangingBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public HangingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Tuple<List<Object>, Set<Object>, Set<String>> tuple = readTagsAndState(arguments, true);
             boolean stackable = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("stackable", false), "stackable");
             int delay = ResourceConfigUtils.getAsInt(arguments.getOrDefault("delay", 0), "delay");

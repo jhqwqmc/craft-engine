@@ -2,22 +2,22 @@ package net.momirealms.craftengine.core.plugin.context.condition;
 
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Map;
 
-public class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
+public final class AlwaysFalseCondition<CTX extends Context> implements Condition<CTX> {
+    public static final AlwaysFalseCondition<Context> INSTANCE = new AlwaysFalseCondition<>();
 
-    @Override
-    public Key type() {
-        return CommonConditions.ALWAYS_FALSE;
+    public static <CTX extends Context> ConditionFactory<CTX, AlwaysFalseCondition<CTX>> factory() {
+        return new Factory<>();
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, AlwaysFalseCondition<CTX>> {
 
+        @SuppressWarnings("unchecked")
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
-            return new AlwaysFalseCondition<>();
+        public AlwaysFalseCondition<CTX> create(Map<String, Object> arguments) {
+            return (AlwaysFalseCondition<CTX>) INSTANCE;
         }
     }
 }

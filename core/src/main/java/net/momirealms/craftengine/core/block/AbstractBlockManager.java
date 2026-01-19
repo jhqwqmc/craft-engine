@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElement;
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
@@ -27,11 +28,11 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.config.SectionConfigParser;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
-import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
@@ -39,7 +40,6 @@ import net.momirealms.craftengine.core.registry.BuiltInRegistries;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.registry.WritableRegistry;
 import net.momirealms.craftengine.core.util.*;
-import net.momirealms.craftengine.core.world.Glowing;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import org.incendo.cloud.suggestion.Suggestion;
@@ -174,7 +174,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         return this.blockStateArranger;
     }
 
-    protected abstract void applyPlatformSettings(ImmutableBlockState state);
+    protected abstract void applyPlatformSettings(CustomBlock block, ImmutableBlockState state);
 
     @Override
     public ConfigParser[] parsers() {
@@ -523,7 +523,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
 
                 Map<EventTrigger, List<Function<Context>>> events;
                 try {
-                    events = EventFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
+                    events = CommonFunctions.parseEvents(ResourceConfigUtils.get(section, "events", "event"));
                 } catch (LocalizedResourceConfigException e) {
                     eCollector1.add(e);
                     events = Map.of();
@@ -623,7 +623,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         }
                         BlockStateAppearance blockStateAppearance = new BlockStateAppearance(
                                 visualBlockState,
-                                parseBlockEntityRender(appearanceSection.get("entity-renderer")),
+                                parseBlockEntityRender(ResourceConfigUtils.get(appearanceSection, "entity-renderer", "entity-render")),
                                 parseCullingData(appearanceSection.get("entity-culling"))
                         );
                         appearances.put(appearanceName, blockStateAppearance);
@@ -698,7 +698,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                         AbstractBlockManager.this.appearanceToRealState.computeIfAbsent(appearanceId, k -> new IntArrayList()).add(internalId);
                         AbstractBlockManager.this.tempVisualBlockStatesInUse.add(visualState);
                         AbstractBlockManager.this.tempVisualBlocksInUse.add(getBlockOwnerId(visualState));
-                        AbstractBlockManager.this.applyPlatformSettings(state);
+                        AbstractBlockManager.this.applyPlatformSettings(customBlock, state);
                         // generate mod assets
                         if (Config.generateModAssets()) {
                             AbstractBlockManager.this.modBlockStateOverrides.put(BlockManager.createCustomBlockKey(index), Optional.ofNullable(AbstractBlockManager.this.tempVanillaBlockStateModels[appearanceId])
@@ -745,11 +745,6 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
             if (arguments == null) return Optional.empty();
             List<BlockEntityElementConfig<? extends BlockEntityElement>> blockEntityElementConfigs = ResourceConfigUtils.parseConfigAsList(arguments, BlockEntityElementConfigs::fromMap);
             if (blockEntityElementConfigs.isEmpty()) return Optional.empty();
-            for (BlockEntityElementConfig<? extends BlockEntityElement> blockEntityElementConfig : blockEntityElementConfigs) {
-                if (blockEntityElementConfig instanceof Glowing glowing && glowing.glowColor() != null) {
-                    AbstractBlockManager.this.plugin.teamManager().setColorInUse(glowing.glowColor());
-                }
-            }
             return Optional.of(blockEntityElementConfigs.toArray(new BlockEntityElementConfig[0]));
         }
 

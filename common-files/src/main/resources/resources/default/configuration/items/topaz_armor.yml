@@ -2,7 +2,7 @@ templates:
   default:armor/topaz:
     material: chainmail_${part}
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_${part}>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_${part}>
       tooltip-style: minecraft:topaz
     settings:
       tags:
@@ -49,8 +49,8 @@ equipments:
   $$>=1.21.2:
     default:topaz:
       type: component
-      humanoid: minecraft:topaz
-      humanoid-leggings: minecraft:topaz
+      humanoid: minecraft:entity/equipment/humanoid/topaz
+      humanoid-leggings: minecraft:entity/equipment/humanoid_leggings/topaz
   $$<1.21.2:
     default:topaz:
       type: trim

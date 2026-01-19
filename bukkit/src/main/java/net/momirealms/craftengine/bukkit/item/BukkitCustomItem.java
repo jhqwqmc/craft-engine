@@ -4,10 +4,10 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateConfig;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.UniqueKey;
@@ -24,7 +24,7 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
 
     public BukkitCustomItem(boolean isVanillaItem, UniqueKey id, Object item, Object clientItem, Key materialKey, Key clientBoundMaterialKey,
                             List<ItemBehavior> behaviors,
-                            List<ItemDataModifier<ItemStack>> modifiers, List<ItemDataModifier<ItemStack>> clientBoundModifiers,
+                            List<ItemProcessor> modifiers, List<ItemProcessor> clientBoundModifiers,
                             ItemSettings settings,
                             Map<EventTrigger, List<Function<Context>>> events,
                             ItemUpdateConfig updater) {
@@ -37,7 +37,7 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
     public ItemStack buildItemStack(ItemBuildContext context, int count) {
         ItemStack item = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(FastNMS.INSTANCE.constructor$ItemStack(this.item, count));
         Item<ItemStack> wrapped = BukkitCraftEngine.instance().itemManager().wrap(item);
-        for (ItemDataModifier<ItemStack> modifier : this.modifiers) {
+        for (ItemProcessor modifier : this.modifiers) {
             modifier.apply(wrapped, context);
         }
         return wrapped.getItem();
@@ -47,7 +47,7 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
     public Item<ItemStack> buildItem(ItemBuildContext context, int count) {
         ItemStack item = FastNMS.INSTANCE.method$CraftItemStack$asCraftMirror(FastNMS.INSTANCE.constructor$ItemStack(this.item, count));
         Item<ItemStack> wrapped = BukkitCraftEngine.instance().itemManager().wrap(item);
-        for (ItemDataModifier<ItemStack> modifier : dataModifiers()) {
+        for (ItemProcessor modifier : dataModifiers()) {
             modifier.apply(wrapped, context);
         }
         return wrapped;
@@ -78,8 +78,8 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
         private final Object clientBoundItem;
         private final Map<EventTrigger, List<Function<Context>>> events = new EnumMap<>(EventTrigger.class);
         private final List<ItemBehavior> behaviors = new ArrayList<>(4);
-        private final List<ItemDataModifier<ItemStack>> modifiers = new ArrayList<>(4);
-        private final List<ItemDataModifier<ItemStack>> clientBoundModifiers = new ArrayList<>(4);
+        private final List<ItemProcessor> modifiers = new ArrayList<>(4);
+        private final List<ItemProcessor> clientBoundModifiers = new ArrayList<>(4);
         private ItemSettings settings;
         private ItemUpdateConfig updater;
 
@@ -113,25 +113,25 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
         }
 
         @Override
-        public Builder<ItemStack> dataModifier(ItemDataModifier<ItemStack> modifier) {
+        public Builder<ItemStack> dataModifier(ItemProcessor modifier) {
             this.modifiers.add(modifier);
             return this;
         }
 
         @Override
-        public Builder<ItemStack> dataModifiers(List<ItemDataModifier<ItemStack>> modifiers) {
+        public Builder<ItemStack> dataModifiers(List<ItemProcessor> modifiers) {
             this.modifiers.addAll(modifiers);
             return this;
         }
 
         @Override
-        public Builder<ItemStack> clientBoundDataModifier(ItemDataModifier<ItemStack> modifier) {
+        public Builder<ItemStack> clientBoundDataModifier(ItemProcessor modifier) {
             this.clientBoundModifiers.add(modifier);
             return this;
         }
 
         @Override
-        public Builder<ItemStack> clientBoundDataModifiers(List<ItemDataModifier<ItemStack>> modifiers) {
+        public Builder<ItemStack> clientBoundDataModifiers(List<ItemProcessor> modifiers) {
             this.clientBoundModifiers.addAll(modifiers);
             return null;
         }
@@ -168,8 +168,8 @@ public class BukkitCustomItem extends AbstractCustomItem<ItemStack> {
 
         @Override
         public CustomItem<ItemStack> build() {
-            this.modifiers.addAll(this.settings.modifiers());
-            this.clientBoundModifiers.addAll(this.settings.clientBoundModifiers());
+            this.modifiers.addAll(this.settings.processors());
+            this.clientBoundModifiers.addAll(this.settings.clientBoundProcessors());
             return new BukkitCustomItem(this.isVanillaItem, this.id, this.item, this.clientBoundItem, this.itemKey, this.clientBoundItemKey, List.copyOf(this.behaviors),
                     List.copyOf(this.modifiers), List.copyOf(this.clientBoundModifiers), this.settings, this.events, updater);
         }

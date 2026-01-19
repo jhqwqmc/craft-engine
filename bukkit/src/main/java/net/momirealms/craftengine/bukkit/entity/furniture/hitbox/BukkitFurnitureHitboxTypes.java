@@ -1,18 +1,14 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
-import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxTypes;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxes;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxConfigType;
+import net.momirealms.craftengine.core.util.Key;
 
-public class BukkitFurnitureHitboxTypes extends FurnitureHitBoxTypes {
+public final class BukkitFurnitureHitboxTypes extends FurnitureHitBoxes {
+    public static final FurnitureHitboxConfigType<InteractionFurnitureHitbox> INTERACTION = register(Key.ce("interaction"), InteractionFurnitureHitboxConfig.FACTORY);
+    public static final FurnitureHitboxConfigType<ShulkerFurnitureHitbox> SHULKER = register(Key.ce("shulker"), ShulkerFurnitureHitboxConfig.FACTORY);
+    public static final FurnitureHitboxConfigType<HappyGhastFurnitureHitbox> HAPPY_GHAST = register(Key.ce("happy_ghast"), HappyGhastFurnitureHitboxConfig.FACTORY);
+    public static final FurnitureHitboxConfigType<CustomFurnitureHitbox> CUSTOM = register(Key.ce("custom"), CustomFurnitureHitboxConfig.FACTORY);
 
     public static void init() {}
-
-    static {
-        register(INTERACTION, InteractionFurnitureHitboxConfig.FACTORY);
-        register(SHULKER, ShulkerFurnitureHitboxConfig.FACTORY);
-        register(CUSTOM, CustomFurnitureHitboxConfig.FACTORY);
-        if (VersionHelper.isOrAbove1_21_6()) {
-            register(HAPPY_GHAST, HappyGhastFurnitureHitboxConfig.FACTORY);
-        }
-    }
 }

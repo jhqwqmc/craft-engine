@@ -12,6 +12,7 @@ public class VersionHelper {
     public static final boolean PREMIUM = false;
     public static final MinecraftVersion MINECRAFT_VERSION;
     public static final boolean COMPONENT_RELEASE;
+    public static final int WORLD_VERSION;
     private static final int version;
     private static final int majorVersion;
     private static final int minorVersion;
@@ -38,6 +39,7 @@ public class VersionHelper {
     private static final boolean v1_21_9;
     private static final boolean v1_21_10;
     private static final boolean v1_21_11;
+    private static final boolean v26_1;
     private static final Class<?> UNOBFUSCATED_CLAZZ = Objects.requireNonNull(ReflectionUtils.getClazz(
             "net.minecraft.obfuscate.DontObfuscate", // 因为无混淆版本没有这个类所以说多写几个防止找不到了
             "net.minecraft.data.Main",
@@ -53,11 +55,15 @@ public class VersionHelper {
                 throw new IOException("Failed to load version.json");
             }
             JsonObject json = GsonHelper.parseJsonToJsonObject(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            WORLD_VERSION = GsonHelper.getAsInt(json.get("world_version"), -1);
+            if (WORLD_VERSION == -1) {
+                throw new IllegalStateException("Failed to get world_version from version.json");
+            }
             String versionString = json.getAsJsonPrimitive("id").getAsString()
                     .split("-", 2)[0]  // 1.21.10-rc1          -> 1.21.10
                     .split("_", 2)[0]; // 1.21.11_unobfuscated -> 1.21.11
 
-            MINECRAFT_VERSION = new MinecraftVersion(versionString);
+            MINECRAFT_VERSION = MinecraftVersion.byName(versionString);
 
             String[] split = versionString.split("\\.");
             int major = Integer.parseInt(split[1]);
@@ -86,13 +92,14 @@ public class VersionHelper {
             v1_21_9 = version >= 12109;
             v1_21_10 = version >= 12110;
             v1_21_11 = version >= 12111;
+            v26_1 = version >= 12601;
 
             majorVersion = major;
             minorVersion = minor;
 
             COMPONENT_RELEASE = v1_20_5;
 
-            mojmap = checkMojMap();
+            mojmap = checkMojMap() || v26_1;
             folia = checkFolia();
             paper = checkPaper();
             leaves = checkLeaves();
@@ -102,8 +109,9 @@ public class VersionHelper {
     }
 
     public static int parseVersionToInteger(String versionString) {
-        int major = 0;
-        int minor = 0;
+        int v1 = 0;
+        int v2 = 0;
+        int v3 = 0;
         int currentNumber = 0;
         int part = 0;
         for (int i = 0; i < versionString.length(); i++) {
@@ -111,8 +119,11 @@ public class VersionHelper {
             if (c >= '0' && c <= '9') {
                 currentNumber = currentNumber * 10 + (c - '0');
             } else if (c == '.') {
+                if (part == 0) {
+                    v1 = currentNumber;
+                }
                 if (part == 1) {
-                    major = currentNumber;
+                    v2 = currentNumber;
                 }
                 part++;
                 currentNumber = 0;
@@ -121,12 +132,23 @@ public class VersionHelper {
                 }
             }
         }
-        if (part == 1) {
-            major = currentNumber;
-        } else if (part == 2) {
-            minor = currentNumber;
+        // 处理最后一个数字部分
+        if (part == 0) {  // 没有点号：如 "26"
+            v1 = currentNumber;
+        } else if (part == 1) {  // 一个点号：如 "26.1"
+            v2 = currentNumber;
+        } else if (part == 2) {  // 两个点号：如 "1.2.3"
+            v3 = currentNumber;
         }
-        return 10000 + major * 100 + minor;
+
+        // 新版命名法
+        if (v1 >= 26) {
+            return 10000 + v1 * 100 + v2;
+        }
+        // 旧版命名法
+        else {
+            return 10000 + v2 * 100 + v3;
+        }
     }
 
     public static int majorVersion() {
@@ -268,5 +290,9 @@ public class VersionHelper {
 
     public static boolean isOrAbove1_21_11() {
         return v1_21_11;
+    }
+
+    public static boolean isOrAbove26_1() {
+        return v26_1;
     }
 }

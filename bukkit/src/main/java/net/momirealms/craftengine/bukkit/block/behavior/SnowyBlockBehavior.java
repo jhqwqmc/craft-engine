@@ -5,19 +5,18 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflect
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class SnowyBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<SnowyBlockBehavior> FACTORY = new Factory();
     private final BooleanProperty snowyProperty;
 
     public SnowyBlockBehavior(CustomBlock customBlock, BooleanProperty snowyProperty) {
@@ -44,10 +43,10 @@ public class SnowyBlockBehavior extends BukkitBlockBehavior {
         return FastNMS.INSTANCE.method$BlockStateBase$is(state, MTagKeys.Block$SNOW);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SnowyBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SnowyBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty snowyProperty = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("snowy"), "warning.config.block.behavior.snowy.missing_snowy");
             return new SnowyBlockBehavior(block, snowyProperty);
         }

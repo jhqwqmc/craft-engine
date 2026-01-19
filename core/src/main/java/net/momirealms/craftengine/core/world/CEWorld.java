@@ -90,7 +90,7 @@ public abstract class CEWorld {
     }
 
     public boolean isChunkLoaded(final long chunkPos) {
-        return loadedChunkMap.containsKey(chunkPos);
+        return this.loadedChunkMap.containsKey(chunkPos);
     }
 
     public void addLoadedChunk(CEChunk chunk) {
@@ -246,5 +246,12 @@ public abstract class CEWorld {
             this.asyncTickingBlockEntities.removeMarkedEntries();
         }
         this.isTickingAsyncBlockEntities = false;
+    }
+
+    public void blockEntityChanged(BlockPos pos) {
+        CEChunk chunk = this.getChunkAtIfLoaded(pos.x >> 4, pos.z >> 4);
+        if (chunk != null) {
+            chunk.setDirty(true);
+        }
     }
 }

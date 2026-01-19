@@ -10,36 +10,31 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 import java.util.Map;
 
-public class Resolutions {
-    public static final Key RETAIN_MATCHING = Key.of("craftengine:retain_matching");
-    public static final Key MERGE_JSON = Key.of("craftengine:merge_json");
-    public static final Key MERGE_ATLAS = Key.of("craftengine:merge_atlas");
-    public static final Key MERGE_FONT = Key.of("craftengine:merge_font");
-    public static final Key CONDITIONAL = Key.of("craftengine:conditional");
-    public static final Key MERGE_PACK_MCMETA = Key.of("craftengine:merge_pack_mcmeta");
-    public static final Key MERGE_LEGACY_MODEL = Key.of("craftengine:merge_legacy_model");
+public final class Resolutions {
+    public static final ResolutionType<RetainMatchingResolution> RETAIN_MATCHING = register(Key.ce("retain_matching"), RetainMatchingResolution.FACTORY);
+    public static final ResolutionType<MergeJsonResolution> MERGE_JSON = register(Key.ce("merge_json"), MergeJsonResolution.FACTORY);
+    public static final ResolutionType<MergeAltasResolution> MERGE_ATLAS = register(Key.ce("merge_atlas"), MergeAltasResolution.FACTORY);
+    public static final ResolutionType<MergeFontResolution> MERGE_FONT = register(Key.ce("merge_font"), MergeFontResolution.FACTORY);
+    public static final ResolutionType<ConditionalResolution> CONDITIONAL = register(Key.ce("conditional"), ConditionalResolution.FACTORY);
+    public static final ResolutionType<MergePackMcMetaResolution> MERGE_PACK_MCMETA = register(Key.ce("merge_pack_mcmeta"), MergePackMcMetaResolution.FACTORY);
+    public static final ResolutionType<MergeLegacyModelResolution> MERGE_LEGACY_MODEL = register(Key.ce("merge_legacy_model"), MergeLegacyModelResolution.FACTORY);
 
-    static {
-        register(RETAIN_MATCHING, RetainMatchingResolution.FACTORY);
-        register(MERGE_JSON, ResolutionMergeJson.FACTORY);
-        register(CONDITIONAL, ResolutionConditional.FACTORY);
-        register(MERGE_PACK_MCMETA, ResolutionMergePackMcMeta.FACTORY);
-        register(MERGE_ATLAS, ResolutionMergeAltas.FACTORY);
-        register(MERGE_LEGACY_MODEL, ResolutionMergeLegacyModel.FACTORY);
-        register(MERGE_FONT, ResolutionMergeFont.FACTORY);
-    }
+    private Resolutions() {}
 
-    public static void register(Key key, ResolutionFactory factory) {
-        ((WritableRegistry<ResolutionFactory>) BuiltInRegistries.RESOLUTION_FACTORY).register(ResourceKey.create(Registries.RESOLUTION_FACTORY.location(), key), factory);
+    public static <T extends Resolution> ResolutionType<T> register(Key key, ResolutionFactory<T> factory) {
+        ResolutionType<T> type = new ResolutionType<>(key, factory);
+        ((WritableRegistry<ResolutionType<? extends Resolution>>) BuiltInRegistries.RESOLUTION_TYPE)
+                .register(ResourceKey.create(Registries.RESOLUTION_TYPE.location(), key), type);
+        return type;
     }
 
     public static Resolution fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), () -> new LocalizedException("warning.config.conflict_resolution.missing_type"));
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        ResolutionFactory factory = BuiltInRegistries.RESOLUTION_FACTORY.getValue(key);
-        if (factory == null) {
+        ResolutionType<? extends Resolution> resolutionType = BuiltInRegistries.RESOLUTION_TYPE.getValue(key);
+        if (resolutionType == null) {
             throw new LocalizedException("warning.config.conflict_resolution.invalid_type", type);
         }
-        return factory.create(map);
+        return resolutionType.factory().create(map);
     }
 }

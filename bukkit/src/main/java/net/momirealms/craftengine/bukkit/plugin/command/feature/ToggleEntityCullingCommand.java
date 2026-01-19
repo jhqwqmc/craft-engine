@@ -37,6 +37,7 @@ public class ToggleEntityCullingCommand extends BukkitCommandFeature<CommandSend
                     }
                     Player player = context.get("player");
                     BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                    if (serverPlayer == null) return;
                     Optional<Boolean> state = context.optional("state");
                     boolean isEnabled = serverPlayer.enableEntityCulling();
                     if (state.isPresent()) {

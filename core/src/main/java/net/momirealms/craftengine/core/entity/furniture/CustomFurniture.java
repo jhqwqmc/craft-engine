@@ -3,7 +3,7 @@ package net.momirealms.craftengine.core.entity.furniture;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavior;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +21,11 @@ public interface CustomFurniture {
     Key id();
 
     FurnitureSettings settings();
+
+    default String translationKey() {
+        Key id = this.id();
+        return "furniture." + id.namespace() + "." + id.value();
+    }
 
     @Nullable
     LootTable<?> lootTable();
@@ -81,8 +86,6 @@ public interface CustomFurniture {
         Builder lootTable(LootTable<?> lootTable);
 
         Builder events(Map<EventTrigger, List<Function<Context>>> events);
-
-        Builder behavior(FurnitureBehavior behavior);
 
         CustomFurniture build();
     }

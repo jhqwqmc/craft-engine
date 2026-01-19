@@ -6,9 +6,9 @@ import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.recipe.DatapackRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
-import net.momirealms.craftengine.core.pack.model.LegacyOverridesModel;
-import net.momirealms.craftengine.core.pack.model.ModernItemModel;
+import net.momirealms.craftengine.core.pack.model.definition.ModernItemModel;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGenerator;
+import net.momirealms.craftengine.core.pack.model.legacy.LegacyOverridesModel;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.util.Key;
@@ -59,10 +59,6 @@ public interface ItemManager<T> extends Manageable, ModelGenerator {
     default Collection<Key> items() {
         return loadedItems().keySet();
     }
-
-    ExternalItemSource<T> getExternalItemSource(String name);
-
-    boolean registerExternalItemSource(ExternalItemSource<T> externalItemSource);
 
     Optional<Equipment> getEquipment(Key key);
 

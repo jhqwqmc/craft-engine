@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -32,19 +31,18 @@ public class WhenFunction<CTX extends Context> extends AbstractConditionalFuncti
         function.run(ctx);
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.IF_ELSE;
+    public static <CTX extends Context> FunctionFactory<CTX, WhenFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+        return new Factory<>(f1, f2);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX, WhenFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
-            super(conditionFactory, functionFactory);
+        public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
+            super(functionFactory, conditionFactory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public WhenFunction<CTX> create(Map<String, Object> arguments) {
             TextProvider source = TextProviders.fromString(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("source"), "warning.config.function.when.missing_source"));
             List<Pair<List<String>, Function<CTX>>> list = ResourceConfigUtils.parseConfigAsList(arguments.get("cases"), map -> {
                 List<String> when = MiscUtils.getAsStringList(map.get("when"));

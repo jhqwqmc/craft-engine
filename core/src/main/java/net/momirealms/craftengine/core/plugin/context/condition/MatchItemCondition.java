@@ -5,13 +5,12 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.*;
 
-public class MatchItemCondition<CTX extends Context> implements Condition<CTX> {
+public final class MatchItemCondition<CTX extends Context> implements Condition<CTX> {
     private final Set<String> ids;
     private final boolean regexMatch;
 
@@ -21,20 +20,19 @@ public class MatchItemCondition<CTX extends Context> implements Condition<CTX> {
     }
 
     @Override
-    public Key type() {
-        return CommonConditions.MATCH_ITEM;
-    }
-
-    @Override
     public boolean test(CTX ctx) {
         Optional<Item<?>> item = ctx.getOptionalParameter(DirectContextParameters.ITEM_IN_HAND);
         return item.filter(value -> MiscUtils.matchRegex(value.id().asString(), this.ids, this.regexMatch)).isPresent();
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX, MatchItemCondition<CTX>> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, MatchItemCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public MatchItemCondition<CTX> create(Map<String, Object> arguments) {
             List<String> ids = MiscUtils.getAsStringList(ResourceConfigUtils.get(arguments, "id", "item"));
             if (ids.isEmpty()) {
                 throw new LocalizedResourceConfigException("warning.config.condition.match_item.missing_id");

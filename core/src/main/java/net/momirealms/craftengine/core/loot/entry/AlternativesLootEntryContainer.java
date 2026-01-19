@@ -1,17 +1,17 @@
 package net.momirealms.craftengine.core.loot.entry;
 
-import net.momirealms.craftengine.core.loot.LootConditions;
 import net.momirealms.craftengine.core.loot.LootContext;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-public class AlternativesLootEntryContainer<T> extends AbstractCompositeLootEntryContainer<T> {
-    public static final Factory<?> FACTORY = new Factory<>();
+public final class AlternativesLootEntryContainer<T> extends AbstractCompositeLootEntryContainer<T> {
+    public static final LootEntryContainerFactory<?> FACTORY = new Factory<>();
 
-    protected AlternativesLootEntryContainer(List<Condition<LootContext>> conditions, List<LootEntryContainer<T>> children) {
+    private AlternativesLootEntryContainer(List<Condition<LootContext>> conditions, List<LootEntryContainer<T>> children) {
         super(conditions, children);
     }
 
@@ -32,21 +32,12 @@ public class AlternativesLootEntryContainer<T> extends AbstractCompositeLootEntr
         };
     }
 
-    @Override
-    public Key type() {
-        return LootEntryContainers.ALTERNATIVES;
-    }
+    private static class Factory<A> implements LootEntryContainerFactory<A> {
 
-    public static class Factory<A> implements LootEntryContainerFactory<A> {
-        @SuppressWarnings("unchecked")
         @Override
         public LootEntryContainer<A> create(Map<String, Object> arguments) {
-            List<LootEntryContainer<A>> containers = Optional.ofNullable(ResourceConfigUtils.get(arguments, "children", "terms", "branches"))
-                    .map(it -> (List<LootEntryContainer<A>>) new ArrayList<LootEntryContainer<A>>(LootEntryContainers.fromMapList((List<Map<String, Object>>) it)))
-                    .orElse(Collections.emptyList());
-            List<Condition<LootContext>> conditions = Optional.ofNullable(arguments.get("conditions"))
-                    .map(it -> LootConditions.fromMapList((List<Map<String, Object>>) it))
-                    .orElse(Collections.emptyList());
+            List<LootEntryContainer<A>> containers = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "children", "terms", "branches"), LootEntryContainers::fromMap);
+            List<Condition<LootContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new AlternativesLootEntryContainer<>(conditions, containers);
         }
     }

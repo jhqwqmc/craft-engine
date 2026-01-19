@@ -93,6 +93,7 @@ public class TotemAnimationCommand extends BukkitCommandFeature<CommandSender> {
                     Collection<Player> players = selector.values();
                     for (Player player : players) {
                         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+                        if (serverPlayer == null) continue;
                         Item<ItemStack> item = customItem.buildItem(serverPlayer);
                         if (VersionHelper.isOrAbove1_21_2()) {
                             item.setJavaComponent(DataComponentTypes.DEATH_PROTECTION, Map.of());

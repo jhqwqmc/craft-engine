@@ -1,24 +1,29 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<ToggleableLampBlockBehavior> FACTORY = new Factory();
     private final Property<Boolean> litProperty;
     private final Property<Boolean> poweredProperty;
     private final boolean canOpenWithHand;
@@ -35,15 +40,24 @@ public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
         if (!this.canOpenWithHand) {
             return InteractionResult.PASS;
         }
+        Player player = context.getPlayer();
+        BlockPos pos = context.getClickedPos();
+        World world = context.getLevel();
+        if (player != null) {
+            Location location = new Location((org.bukkit.World) world.platformWorld(), pos.x, pos.y, pos.z);
+            if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.INTERACT, location)) {
+                return InteractionResult.SUCCESS_AND_CANCEL;
+            }
+        }
         ToggleableLampBlockBehavior behavior = state.behavior().getAs(ToggleableLampBlockBehavior.class).orElse(null);
         if (behavior == null) return InteractionResult.PASS;
         FastNMS.INSTANCE.method$LevelWriter$setBlock(
-                context.getLevel().serverWorld(),
-                LocationUtils.toBlockPos(context.getClickedPos()),
+                world.serverWorld(),
+                LocationUtils.toBlockPos(pos),
                 state.cycle(behavior.litProperty).customBlockState().literalObject(),
                 2
         );
-        Optional.ofNullable(context.getPlayer()).ifPresent(p -> p.swingHand(context.getHand()));
+        Optional.ofNullable(player).ifPresent(p -> p.swingHand(context.getHand()));
         return InteractionResult.SUCCESS_AND_CANCEL;
     }
 
@@ -88,9 +102,10 @@ public class ToggleableLampBlockBehavior extends BukkitBlockBehavior {
     }
 
     @SuppressWarnings("unchecked")
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<ToggleableLampBlockBehavior> {
+
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ToggleableLampBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             boolean canOpenWithHand = ResourceConfigUtils.getAsBoolean(ResourceConfigUtils.get(arguments, "can-open-with-hand", "can-toggle-with-hand"), "can-toggle-with-hand");
             Property<Boolean> lit = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("lit"), "warning.config.block.behavior.toggleable_lamp.missing_lit");
             Property<Boolean> powered = (Property<Boolean>) (canOpenWithHand ? block.getProperty("powered") : ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.toggleable_lamp.missing_powered"));

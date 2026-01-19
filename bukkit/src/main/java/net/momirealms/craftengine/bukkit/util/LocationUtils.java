@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.util;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
@@ -18,7 +18,7 @@ public final class LocationUtils {
     }
 
     public static WorldPosition toWorldPosition(Location location) {
-        return new WorldPosition(new BukkitWorld(location.getWorld()), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
+        return new WorldPosition(BukkitAdaptors.adapt(location.getWorld()), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
     }
 
     public static Object toVec(Vec3d vec) {
@@ -45,8 +45,16 @@ public final class LocationUtils {
         return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) + 1, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
     }
 
+    public static Object above(Object blockPos, int y) {
+        return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) + y, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
+    }
+
     public static Object below(Object blockPos) {
         return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) - 1, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
+    }
+
+    public static Object below(Object blockPos, int y) {
+        return toBlockPos(FastNMS.INSTANCE.field$Vec3i$x(blockPos), FastNMS.INSTANCE.field$Vec3i$y(blockPos) - y, FastNMS.INSTANCE.field$Vec3i$z(blockPos));
     }
 
     public static Object toBlockPos(int x, int y, int z) {

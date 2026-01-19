@@ -8,8 +8,8 @@ public final class EquipmentSlotUtils {
 
     public static Object toNMSEquipmentSlot(EquipmentSlot equipmentSlot) {
         return switch (equipmentSlot) {
-            case MAIN_HAND -> CoreReflections.instance$EquipmentSlot$MAINHAND;
-            case OFF_HAND -> CoreReflections.instance$EquipmentSlot$OFFHAND;
+            case MAINHAND -> CoreReflections.instance$EquipmentSlot$MAINHAND;
+            case OFFHAND -> CoreReflections.instance$EquipmentSlot$OFFHAND;
             case FEET -> CoreReflections.instance$EquipmentSlot$FEET;
             case LEGS -> CoreReflections.instance$EquipmentSlot$LEGS;
             case CHEST -> CoreReflections.instance$EquipmentSlot$CHEST;

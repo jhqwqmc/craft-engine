@@ -52,9 +52,9 @@ public final class NetworkReflections {
             )
     );
 
-    public static final Constructor<?> constructor$ClientboundSystemChatPacket = requireNonNull(
-            ReflectionUtils.getConstructor(clazz$ClientboundSystemChatPacket, CoreReflections.clazz$Component, boolean.class)
-    );
+//    public static final Constructor<?> constructor$ClientboundSystemChatPacket = requireNonNull(
+//            ReflectionUtils.getConstructor(clazz$ClientboundSystemChatPacket, CoreReflections.clazz$Component, boolean.class)
+//    );
 
     public static final Field field$ClientboundSystemChatPacket$overlay = requireNonNull(
             ReflectionUtils.getDeclaredField(
@@ -466,6 +466,8 @@ public final class NetworkReflections {
     public static final Object instance$ServerboundPlayerActionPacket$Action$START_DESTROY_BLOCK;
     public static final Object instance$ServerboundPlayerActionPacket$Action$ABORT_DESTROY_BLOCK;
     public static final Object instance$ServerboundPlayerActionPacket$Action$STOP_DESTROY_BLOCK;
+    public static final Object instance$ServerboundPlayerActionPacket$Action$DROP_ALL_ITEMS;
+    public static final Object instance$ServerboundPlayerActionPacket$Action$DROP_ITEM;
 
     static {
         try {
@@ -473,6 +475,8 @@ public final class NetworkReflections {
             instance$ServerboundPlayerActionPacket$Action$START_DESTROY_BLOCK = values[0];
             instance$ServerboundPlayerActionPacket$Action$ABORT_DESTROY_BLOCK = values[1];
             instance$ServerboundPlayerActionPacket$Action$STOP_DESTROY_BLOCK = values[2];
+            instance$ServerboundPlayerActionPacket$Action$DROP_ALL_ITEMS = values[3];
+            instance$ServerboundPlayerActionPacket$Action$DROP_ITEM = values[4];
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -1662,6 +1666,11 @@ public final class NetworkReflections {
             .map(it -> ReflectionUtils.getDeclaredField(it, ByteBuf.class, 0))
             .orElse(null);
 
+    // 1.20.2~1.20.4 可能打了 https://github.com/PaperMC/Paper/commit/9b1798d.patch 补丁
+    public static final Field field$ServerboundCustomPayloadPacket$UnknownPayload$dataByteArray = Optional.ofNullable(clazz$ServerboundCustomPayloadPacket$UnknownPayload)
+            .map(it -> ReflectionUtils.getDeclaredField(it, byte[].class, 0))
+            .orElse(null);
+
     // 1.20.2~1.20.4
     public static final Constructor<?> constructor$ServerboundCustomPayloadPacket$UnknownPayload = Optional.ofNullable(clazz$ServerboundCustomPayloadPacket$UnknownPayload)
             .map(it -> ReflectionUtils.getConstructor(it, CoreReflections.clazz$ResourceLocation, ByteBuf.class))
@@ -1742,5 +1751,85 @@ public final class NetworkReflections {
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundPlayerChatPacket")
             )
+    );
+
+    // 1.20.5+
+    public static final Field field$ClientboundLoginPacket$enforcesSecureChat = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ClientboundLoginPacket, boolean.class, 4
+            ),
+            VersionHelper.isOrAbove1_20_5()
+    );
+
+    // 1.20.5+
+    public static final MethodHandle methodHandle$ClientboundLoginPacket$enforcesSecureChatSetter = Optional.ofNullable(field$ClientboundLoginPacket$enforcesSecureChat)
+            .map(it -> requireNonNull(ReflectionUtils.unreflectSetter(it)).asType(MethodType.methodType(void.class, Object.class, boolean.class)))
+            .orElse(null);
+
+    public static final Class<?> clazz$ClientboundStatusResponsePacket = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "network.protocol.status.PacketStatusOutServerInfo",
+                    "network.protocol.status.ClientboundStatusResponsePacket"
+            )
+    );
+
+    public static final Class<?> clazz$ClientboundServerDataPacket = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundServerDataPacket")
+            )
+    );
+
+    // 1.20~1.20.4
+    public static final Field field$ClientboundServerDataPacket$enforcesSecureChat = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(
+                    clazz$ClientboundServerDataPacket, boolean.class, 0
+            ),
+            !VersionHelper.isOrAbove1_20_5()
+    );
+
+    // 1.20~1.20.4
+    public static final MethodHandle methodHandle$ClientboundServerDataPacket$enforcesSecureChatSetter = Optional.ofNullable(field$ClientboundServerDataPacket$enforcesSecureChat)
+            .map(it -> requireNonNull(ReflectionUtils.unreflectSetter(it)).asType(MethodType.methodType(void.class, Object.class, boolean.class)))
+            .orElse(null);
+
+    public static final Class<?> clazz$ServerboundChatSessionUpdatePacket = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ServerboundChatSessionUpdatePacket")
+            )
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerboundConfigurationAcknowledgedPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ServerboundConfigurationAcknowledgedPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ServerboundFinishConfigurationPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.configuration.ServerboundFinishConfigurationPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    // 1.20.2+
+    public static final Class<?> clazz$ClientboundStartConfigurationPacket = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("network.protocol.game.ClientboundStartConfigurationPacket")
+            ),
+            VersionHelper.isOrAbove1_20_2()
+    );
+
+    public static final Class<?> clazz$ClientboundLoginDisconnectPacket = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "network.protocol.login.PacketLoginOutDisconnect",
+                    "network.protocol.login.ClientboundLoginDisconnectPacket"
+            )
+    );
+
+    public static final Constructor<?> constructor$ClientboundLoginDisconnectPacket = requireNonNull(
+            ReflectionUtils.getDeclaredConstructor(clazz$ClientboundLoginDisconnectPacket, CoreReflections.clazz$Component)
     );
 }

@@ -24,6 +24,7 @@ public class ItemBrowserAdminCommand extends BukkitCommandFeature<CommandSender>
                     MultiplePlayerSelector selector = context.get("players");
                     for (Player player : selector.values()) {
                         BukkitServerPlayer serverPlayer = plugin().adapt(player);
+                        if (serverPlayer == null) return;
                         plugin().itemBrowserManager().open(serverPlayer);
                     }
                 });

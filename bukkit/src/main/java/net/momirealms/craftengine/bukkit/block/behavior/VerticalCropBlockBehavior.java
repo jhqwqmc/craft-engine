@@ -5,16 +5,15 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.bukkit.CraftBukkitRef
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.IntegerProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
 
 import java.util.Map;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<VerticalCropBlockBehavior> FACTORY = new Factory();
     private final int maxHeight;
     private final IntegerProperty ageProperty;
     private final float growSpeed;
@@ -78,11 +77,11 @@ public class VerticalCropBlockBehavior extends BukkitBlockBehavior {
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<VerticalCropBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public VerticalCropBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<Integer> ageProperty = (Property<Integer>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("age"), "warning.config.block.behavior.vertical_crop.missing_age");
             int maxHeight = ResourceConfigUtils.getAsInt(arguments.getOrDefault("max-height", 3), "max-height");
             boolean direction = arguments.getOrDefault("direction", "up").toString().equalsIgnoreCase("up");

@@ -6,42 +6,37 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import org.jetbrains.annotations.Nullable;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
-    private final BooleanProperty hanging;
+    public static final BlockBehaviorFactory<HangableBlockBehavior> FACTORY = new Factory();
+    private final BooleanProperty hangingProperty;
 
-    public HangableBlockBehavior(CustomBlock customBlock, BooleanProperty hanging) {
+    public HangableBlockBehavior(CustomBlock customBlock, BooleanProperty hangingProperty) {
         super(customBlock);
-        this.hanging = hanging;
+        this.hangingProperty = hangingProperty;
     }
 
     @Override
     public ImmutableBlockState updateStateForPlacement(BlockPlaceContext context, ImmutableBlockState state) {
-        BooleanProperty hanging = (BooleanProperty) state.owner().value().getProperty("hanging");
-        if (hanging == null) return state;
-        @Nullable BooleanProperty waterlogged = (BooleanProperty) state.owner().value().getProperty("waterlogged");
         Object world = context.getLevel().serverWorld();
         Object blockPos = LocationUtils.toBlockPos(context.getClickedPos());
         Object fluidType = FastNMS.INSTANCE.method$FluidState$getType(FastNMS.INSTANCE.method$BlockGetter$getFluidState(world, blockPos));
         for (Direction direction : context.getNearestLookingDirections()) {
             if (direction.axis() != Direction.Axis.Y) continue;
-            ImmutableBlockState blockState = state.with(hanging, direction == Direction.UP);
+            ImmutableBlockState blockState = state.with(this.hangingProperty, direction == Direction.UP);
             if (!FastNMS.INSTANCE.method$BlockStateBase$canSurvive(blockState.customBlockState().literalObject(), world, blockPos)) continue;
-            return waterlogged != null ? blockState.with(waterlogged, fluidType == MFluids.WATER) : blockState;
+            return super.waterloggedProperty != null ? blockState.with(super.waterloggedProperty, fluidType == MFluids.WATER) : blockState;
         }
         return state;
     }
@@ -64,13 +59,10 @@ public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPath
     public Object updateShape(Object thisBlock, Object[] args, Callable<Object> superMethod) throws Exception {
         ImmutableBlockState state = BlockStateUtils.getOptionalCustomBlockState(args[0]).orElse(null);
         if (state == null) return MBlocks.AIR$defaultState;
-        @Nullable BooleanProperty waterlogged = (BooleanProperty) state.owner().value().getProperty("waterlogged");
-        if (waterlogged != null && state.get(waterlogged)) {
+        if (super.waterloggedProperty != null && state.get(super.waterloggedProperty)) {
             FastNMS.INSTANCE.method$ScheduledTickAccess$scheduleFluidTick(args[updateShape$level], args[updateShape$blockPos], MFluids.WATER, 5);
         }
-        BooleanProperty hanging = (BooleanProperty) state.owner().value().getProperty("hanging");
-        if (hanging == null) return MBlocks.AIR$defaultState;
-        if ((state.get(hanging) ? CoreReflections.instance$Direction$UP : CoreReflections.instance$Direction$DOWN) == args[updateShape$direction]
+        if ((state.get(this.hangingProperty) ? CoreReflections.instance$Direction$UP : CoreReflections.instance$Direction$DOWN) == args[updateShape$direction]
                 && !FastNMS.INSTANCE.method$BlockStateBase$canSurvive(args[0], args[updateShape$level], args[updateShape$blockPos])) {
             return MBlocks.AIR$defaultState;
         }
@@ -82,10 +74,10 @@ public class HangableBlockBehavior extends BukkitBlockBehavior implements IsPath
         return false;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<HangableBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public HangableBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty hanging = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("hanging"), "warning.config.block.behavior.hangable.missing_hanging");
             return new HangableBlockBehavior(block, hanging);
         }

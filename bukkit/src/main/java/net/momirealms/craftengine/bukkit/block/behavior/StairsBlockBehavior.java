@@ -5,19 +5,18 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SingleBlockHalf;
 import net.momirealms.craftengine.core.block.properties.type.StairsShape;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +24,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class StairsBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<StairsBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<SingleBlockHalf> halfProperty;
     private final Property<StairsShape> shapeProperty;
@@ -43,7 +42,7 @@ public class StairsBlockBehavior extends BukkitBlockBehavior {
         BlockPos clickedPos = context.getClickedPos();
         ImmutableBlockState blockState = state.owner().value().defaultState()
                 .with(this.facingProperty, context.getHorizontalDirection().toHorizontalDirection())
-                .with(this.halfProperty, clickedFace != Direction.DOWN && (clickedFace == Direction.UP || !(context.getClickLocation().y - clickedPos.y() > 0.5)) ? SingleBlockHalf.BOTTOM : SingleBlockHalf.TOP);
+                .with(this.halfProperty, clickedFace != Direction.DOWN && (clickedFace == Direction.UP || !(context.getClickedLocation().y - clickedPos.y() > 0.5)) ? SingleBlockHalf.BOTTOM : SingleBlockHalf.TOP);
         if (super.waterloggedProperty != null) {
             Object fluidState = FastNMS.INSTANCE.method$BlockGetter$getFluidState(context.getLevel().serverWorld(), LocationUtils.toBlockPos(clickedPos));
             blockState = blockState.with(this.waterloggedProperty, FastNMS.INSTANCE.method$FluidState$getType(fluidState) == MFluids.WATER);
@@ -125,11 +124,11 @@ public class StairsBlockBehavior extends BukkitBlockBehavior {
         return anotherState.get(anotherBehavior.facingProperty) != state.get(this.facingProperty) || anotherState.get(anotherBehavior.halfProperty) != state.get(this.halfProperty);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<StairsBlockBehavior> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public StairsBlockBehavior  create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.stairs.missing_facing");
             Property<SingleBlockHalf> half = (Property<SingleBlockHalf>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("half"), "warning.config.block.behavior.stairs.missing_half");
             Property<StairsShape> shape = (Property<StairsShape>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("shape"), "warning.config.block.behavior.stairs.missing_shape");

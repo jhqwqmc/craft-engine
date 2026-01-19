@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelector;
 import net.momirealms.craftengine.core.plugin.context.selector.PlayerSelectors;
 import net.momirealms.craftengine.core.plugin.context.text.TextProvider;
 import net.momirealms.craftengine.core.plugin.context.text.TextProviders;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
@@ -63,19 +62,18 @@ public class CommandFunction<CTX extends Context> extends AbstractConditionalFun
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.COMMAND;
+    public static <CTX extends Context> FunctionFactory<CTX, CommandFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, CommandFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public CommandFunction<CTX> create(Map<String, Object> arguments) {
             Object command = ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(arguments, "command", "commands"), "warning.config.function.command.missing_command");
             List<TextProvider> commands = MiscUtils.getAsStringList(command).stream().map(TextProviders::fromString).toList();
             boolean asPlayer = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("as-player", false), "as-player");

@@ -6,56 +6,62 @@ import com.ezylang.evalex.parser.ParseException;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.util.AdventureHelper;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.random.RandomSource;
 
 import java.util.Map;
 
-public class ExpressionNumberProvider implements NumberProvider {
-    public static final Factory FACTORY = new Factory();
-    private final String expr;
-
-    public ExpressionNumberProvider(String expr) {
-        this.expr = expr;
-    }
+public record ExpressionNumberProvider(String expression) implements NumberProvider {
+    public static final NumberProviderFactory<ExpressionNumberProvider> FACTORY = new Factory();
 
     @Override
     public float getFloat(Context context) {
-        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expr, context.tagResolvers());
+        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expression, context.tagResolvers());
         String resultString = AdventureHelper.plainTextContent(resultComponent);
         Expression expression = new Expression(resultString);
         try {
             return expression.evaluate().getNumberValue().floatValue();
         } catch (EvaluationException | ParseException e) {
-            throw new RuntimeException("Invalid expression: " + this.expr + " -> " + resultString + " -> Cannot parse", e);
+            throw new RuntimeException("Invalid expression: " + this.expression + " -> " + resultString + " -> Cannot parse", e);
+        }
+    }
+
+    @Override
+    public float getFloat(RandomSource random) {
+        Expression expression = new Expression(this.expression);
+        try {
+            return expression.evaluate().getNumberValue().floatValue();
+        } catch (EvaluationException | ParseException e) {
+            throw new RuntimeException("Invalid expression: " + this.expression, e);
         }
     }
 
     @Override
     public double getDouble(Context context) {
-        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expr, context.tagResolvers());
+        Component resultComponent = AdventureHelper.customMiniMessage().deserialize(this.expression, context.tagResolvers());
         String resultString = AdventureHelper.plainTextContent(resultComponent);
         Expression expression = new Expression(resultString);
         try {
             return expression.evaluate().getNumberValue().doubleValue();
         } catch (EvaluationException | ParseException e) {
-            throw new RuntimeException("Invalid expression: " + this.expr + " -> " + resultString + " -> Cannot parse", e);
+            throw new RuntimeException("Invalid expression: " + this.expression + " -> " + resultString + " -> Cannot parse", e);
         }
     }
 
     @Override
-    public Key type() {
-        return NumberProviders.EXPRESSION;
+    public double getDouble(RandomSource random) {
+        Expression expression = new Expression(this.expression);
+        try {
+            return expression.evaluate().getNumberValue().doubleValue();
+        } catch (EvaluationException | ParseException e) {
+            throw new RuntimeException("Invalid expression: " + this.expression, e);
+        }
     }
 
-    public String expression() {
-        return this.expr;
-    }
-
-    public static class Factory implements NumberProviderFactory {
+    private static class Factory implements NumberProviderFactory<ExpressionNumberProvider> {
 
         @Override
-        public NumberProvider create(Map<String, Object> arguments) {
+        public ExpressionNumberProvider create(Map<String, Object> arguments) {
             String value = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("expression"), "warning.config.number.expression.missing_expression");
             return new ExpressionNumberProvider(value);
         }

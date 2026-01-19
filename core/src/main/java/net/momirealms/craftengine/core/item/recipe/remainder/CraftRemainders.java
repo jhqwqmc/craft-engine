@@ -12,30 +12,28 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 import java.util.List;
 import java.util.Map;
 
-public class CraftRemainders {
-    public static final Key FIXED = Key.of("craftengine:fixed");
-    public static final Key RECIPE_BASED = Key.of("craftengine:recipe_based");
-    public static final Key HURT_AND_BREAK = Key.of("craftengine:hurt_and_break");
+public final class CraftRemainders {
+    public static final CraftRemainderType<FixedCraftRemainder> FIXED = register(Key.ce("fixed"), FixedCraftRemainder.FACTORY);
+    public static final CraftRemainderType<RecipeBasedCraftRemainder> RECIPE_BASED = register(Key.ce("recipe_based"), RecipeBasedCraftRemainder.FACTORY);
+    public static final CraftRemainderType<HurtAndBreakRemainder> HURT_AND_BREAK = register(Key.ce("hurt_and_break"), HurtAndBreakRemainder.FACTORY);
 
-    static {
-        register(FIXED, FixedCraftRemainder.FACTORY);
-        register(RECIPE_BASED, RecipeBasedCraftRemainder.FACTORY);
-        register(HURT_AND_BREAK, HurtAndBreakRemainder.FACTORY);
-    }
+    private CraftRemainders() {}
 
-    public static void register(Key key, CraftRemainderFactory<?> factory) {
-        ((WritableRegistry<CraftRemainderFactory<?>>) BuiltInRegistries.CRAFT_REMAINDER_FACTORY)
-                .register(ResourceKey.create(Registries.CRAFT_REMAINDER_FACTORY.location(), key), factory);
+    public static <T extends CraftRemainder> CraftRemainderType<T> register(Key key, CraftRemainderFactory<T> factory) {
+        CraftRemainderType<T> type = new CraftRemainderType<>(key, factory);
+        ((WritableRegistry<CraftRemainderType<?>>) BuiltInRegistries.CRAFT_REMAINDER_TYPE)
+                .register(ResourceKey.create(Registries.CRAFT_REMAINDER_TYPE.location(), key), type);
+        return type;
     }
 
     public static CraftRemainder fromMap(Map<String, Object> map) {
         String type = ResourceConfigUtils.requireNonEmptyStringOrThrow(map.get("type"), "warning.config.item.settings.craft_remainder.missing_type");
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        CraftRemainderFactory<?> factory = BuiltInRegistries.CRAFT_REMAINDER_FACTORY.getValue(key);
-        if (factory == null) {
+        CraftRemainderType<?> craftRemainderType = BuiltInRegistries.CRAFT_REMAINDER_TYPE.getValue(key);
+        if (craftRemainderType == null) {
             throw new LocalizedResourceConfigException("warning.config.item.settings.craft_remainder.invalid_type", type);
         }
-        return factory.create(map);
+        return craftRemainderType.factory().create(map);
     }
 
     public static CraftRemainder fromObject(Object obj) {

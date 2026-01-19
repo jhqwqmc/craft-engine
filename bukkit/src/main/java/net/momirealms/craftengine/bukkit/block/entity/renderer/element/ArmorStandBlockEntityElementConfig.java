@@ -13,10 +13,8 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
-import net.momirealms.craftengine.core.world.Glowing;
 import net.momirealms.craftengine.core.world.World;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -24,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ArmorStandBlockEntityElementConfig implements BlockEntityElementConfig<ArmorStandBlockEntityElement>, Glowing {
+public class ArmorStandBlockEntityElementConfig implements BlockEntityElementConfig<ArmorStandBlockEntityElement> {
     public static final Factory FACTORY = new Factory();
     public final Function<Player, List<Object>> lazyMetadataPacket;
     public final Key itemId;
@@ -61,12 +59,6 @@ public class ArmorStandBlockEntityElementConfig implements BlockEntityElementCon
             }
             return dataValues;
         };
-    }
-
-    @Nullable
-    @Override
-    public LegacyChatFormatter glowColor() {
-        return this.glowColor;
     }
 
     @Override

@@ -5,10 +5,10 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflect
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
+import net.momirealms.craftengine.core.block.behavior.CanBeReplacedBlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.SlabType;
@@ -16,17 +16,17 @@ import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.BlockBoundItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior, CanBeReplacedBlockBehavior {
+    public static final BlockBehaviorFactory<SlabBlockBehavior> FACTORY = new Factory();
     private final Property<SlabType> typeProperty;
 
     public SlabBlockBehavior(CustomBlock block, Property<SlabType> typeProperty) {
@@ -50,8 +50,8 @@ public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFind
             }
         }
         if (blockId == null || !blockId.equals(super.customBlock.id())) return false;
-        if (!context.replacingClickedOnBlock()) return true;
-        boolean upper = context.getClickLocation().y - (double) context.getClickedPos().y() > (double) 0.5F;
+        if (!context.replacingClickedBlock()) return true;
+        boolean upper = context.getClickedLocation().y - (double) context.getClickedPos().y() > (double) 0.5F;
         Direction clickedFace = context.getClickedFace();
         return type == SlabType.BOTTOM ?
                 clickedFace == Direction.UP || (upper && clickedFace.axis().isHorizontal()) :
@@ -71,7 +71,7 @@ public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFind
             if (super.waterloggedProperty != null)
                 state = state.with(super.waterloggedProperty, FastNMS.INSTANCE.method$FluidState$getType(fluidState) == MFluids.WATER);
             Direction clickedFace = context.getClickedFace();
-            return clickedFace == Direction.DOWN || clickedFace != Direction.UP && context.getClickLocation().y - (double) clickedPos.y() > (double) 0.5F ? state.with(this.typeProperty, SlabType.TOP) : state.with(this.typeProperty, SlabType.BOTTOM);
+            return clickedFace == Direction.DOWN || clickedFace != Direction.UP && context.getClickedLocation().y - (double) clickedPos.y() > (double) 0.5F ? state.with(this.typeProperty, SlabType.TOP) : state.with(this.typeProperty, SlabType.BOTTOM);
         }
     }
 
@@ -113,11 +113,11 @@ public class SlabBlockBehavior extends BukkitBlockBehavior implements IsPathFind
         return false;
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<SlabBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public SlabBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<SlabType> type = (Property<SlabType>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("type"), "warning.config.block.behavior.slab.missing_type");
             return new SlabBlockBehavior(block, type);
         }

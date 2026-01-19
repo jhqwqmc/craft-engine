@@ -2,7 +2,6 @@ package net.momirealms.craftengine.core.plugin.context.function;
 
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
@@ -29,19 +28,18 @@ public class IfElseFunction<CTX extends Context> extends AbstractConditionalFunc
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.IF_ELSE;
+    public static <CTX extends Context> FunctionFactory<CTX, IfElseFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+        return new Factory<>(f1, f2);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFunctionalFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFunctionalFactory<CTX, IfElseFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory, java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory) {
-            super(conditionFactory, functionFactory);
+        public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
+            super(functionFactory, conditionFactory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public IfElseFunction<CTX> create(Map<String, Object> arguments) {
             List<Pair<Predicate<CTX>, Function<CTX>>> branches = ResourceConfigUtils.parseConfigAsList(
                     ResourceConfigUtils.requireNonNullOrThrow(ResourceConfigUtils.get(arguments, "rules", "rule"), "warning.config.function.if_else.missing_rules"),
                     map -> {

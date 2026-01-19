@@ -2,22 +2,19 @@ package net.momirealms.craftengine.core.item.equipment;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.item.modifier.EquippableAssetIdModifier;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
+import net.momirealms.craftengine.core.item.processor.OverwritableEquippableAssetIdProcessor;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
-public class ComponentBasedEquipment extends AbstractEquipment implements Supplier<JsonObject> {
-    public static final Factory FACTORY = new Factory();
+public final class ComponentBasedEquipment extends AbstractEquipment implements Supplier<JsonObject> {
+    public static final EquipmentFactory<ComponentBasedEquipment> FACTORY = new Factory();
     private final EnumMap<EquipmentLayerType, List<Layer>> layers;
 
     public ComponentBasedEquipment(Key assetId) {
@@ -26,13 +23,8 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
     }
 
     @Override
-    public Key type() {
-        return Equipments.COMPONENT;
-    }
-
-    @Override
-    public <I> List<ItemDataModifier<I>> modifiers() {
-        return List.of(new EquippableAssetIdModifier<>(this.assetId));
+    public List<ItemProcessor> modifiers() {
+        return List.of(new OverwritableEquippableAssetIdProcessor(this.assetId));
     }
 
     public EnumMap<EquipmentLayerType, List<Layer>> layers() {
@@ -65,7 +57,7 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
         layersJson.add(key, layersArray);
     }
 
-    public static class Factory implements EquipmentFactory {
+    private static class Factory implements EquipmentFactory<ComponentBasedEquipment> {
 
         @Override
         public ComponentBasedEquipment create(Key id, Map<String, Object> args) {
@@ -73,25 +65,27 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
             for (Map.Entry<String, Object> entry : args.entrySet()) {
                 EquipmentLayerType layerType = EquipmentLayerType.byId(entry.getKey());
                 if (layerType != null) {
-                    equipment.addLayer(layerType, Layer.fromConfig(entry.getValue()));
+                    equipment.addLayer(layerType, Layer.fromConfig(layerType, entry.getValue()));
                 }
             }
             return equipment;
         }
     }
 
-    public record Layer(String texture, DyeableData data, boolean usePlayerTexture) implements Supplier<JsonObject> {
+    public record Layer(Key texture, DyeableData data, boolean usePlayerTexture) implements Supplier<JsonObject> {
 
         @NotNull
-        public static List<Layer> fromConfig(Object obj) {
+        public static List<Layer> fromConfig(EquipmentLayerType layer, Object obj) {
             switch (obj) {
                 case String texture -> {
-                    return List.of(new Layer(texture, null, false));
+                    Key textureKey = Key.of(texture);
+                    return List.of(new Layer(getCorrectTexturePath(textureKey, layer), null, false));
                 }
                 case Map<?, ?> map -> {
                     Map<String, Object> data = MiscUtils.castToMap(map, false);
-                    String texture = data.get("texture").toString();
-                    return List.of(new Layer(texture,
+                    String texture = Objects.requireNonNull(ResourceConfigUtils.getAsStringOrNull(data.get("texture")), "missing texture");
+                    Key textureKey = Key.of(texture);
+                    return List.of(new Layer(getCorrectTexturePath(textureKey, layer),
                             DyeableData.fromObj(data.get("dyeable")),
                             ResourceConfigUtils.getAsBoolean(data.getOrDefault("use-player-texture", false), "use-player-texture")
                     ));
@@ -99,7 +93,7 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
                 case List<?> list -> {
                     List<Layer> layers = new ArrayList<>();
                     for (Object inner : list) {
-                        layers.addAll(fromConfig(inner));
+                        layers.addAll(fromConfig(layer, inner));
                     }
                     return layers;
                 }
@@ -112,7 +106,7 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
         @Override
         public JsonObject get() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("texture", texture);
+            jsonObject.addProperty("texture", this.texture.asMinimalString());
             if (this.data != null) {
                 jsonObject.add("dyeable", this.data.get());
             }
@@ -120,6 +114,14 @@ public class ComponentBasedEquipment extends AbstractEquipment implements Suppli
                 jsonObject.addProperty("use_player_texture", true);
             }
             return jsonObject;
+        }
+
+        private static Key getCorrectTexturePath(Key path, EquipmentLayerType layerType) {
+            String prefix = "entity/equipment/" + layerType.id() + "/";
+            if (path.value().startsWith(prefix)) {
+                return Key.of(path.namespace(), path.value().substring(prefix.length()));
+            }
+            return path;
         }
 
         public record DyeableData(@Nullable Integer colorWhenUndyed) implements Supplier<JsonObject> {

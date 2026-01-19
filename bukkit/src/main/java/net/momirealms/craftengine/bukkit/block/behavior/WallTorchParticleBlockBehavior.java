@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.behavior;
 
 import net.momirealms.craftengine.bukkit.block.entity.BukkitBlockEntityTypes;
 import net.momirealms.craftengine.bukkit.block.entity.WallTorchParticleBlockEntity;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WallTorchParticleBlockBehavior extends BukkitBlockBehavior implements EntityBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<WallTorchParticleBlockBehavior> FACTORY = new Factory();
     public final ParticleConfig[] particles;
     public final int tickInterval;
     public final Property<HorizontalDirection> facingProperty;
@@ -62,10 +61,11 @@ public class WallTorchParticleBlockBehavior extends BukkitBlockBehavior implemen
         return EntityBlockBehavior.createTickerHelper(WallTorchParticleBlockEntity::tick);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<WallTorchParticleBlockBehavior> {
+
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public WallTorchParticleBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             List<ParticleConfig> particles = ResourceConfigUtils.parseConfigAsList(ResourceConfigUtils.get(arguments, "particles", "particle"), ParticleConfig::fromMap$blockEntity);
             int tickInterval = ResourceConfigUtils.getAsInt(arguments.getOrDefault("tick-interval", 10), "tick-interval");
             Property<HorizontalDirection> directionProperty = (Property<HorizontalDirection>) block.getProperty("facing");

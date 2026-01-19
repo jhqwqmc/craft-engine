@@ -1,10 +1,10 @@
 package net.momirealms.craftengine.core.block.properties;
 
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.util.SegmentedAngle;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.sparrow.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,18 +1,20 @@
 package net.momirealms.craftengine.core.entity.player;
 
+import com.google.common.cache.Cache;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
+import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.*;
-import net.momirealms.craftengine.core.world.chunk.client.VirtualCullableObject;
+import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +33,8 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
     @NotNull
     public abstract Item<?> getItemBySlot(int slot);
 
+    public abstract void setItemInHand(InteractionHand hand, Item<?> item);
+
     @Override
     public abstract Object platformPlayer();
 
@@ -45,9 +49,11 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void setClientSideCanBreakBlock(boolean canBreak);
 
-    public abstract void stopMiningBlock();
+    public abstract void finishMiningBlock();
 
     public abstract void preventMiningBlock();
+
+    public abstract void stopMiningBlock();
 
     public abstract void abortMiningBlock();
 
@@ -222,17 +228,17 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
 
-    public abstract VirtualCullableObject getTrackedBlockEntity(BlockPos blockPos);
+    public abstract CullableHolder getTrackedBlockEntity(BlockPos blockPos);
 
     public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
-    public abstract void addTrackedFurniture(int entityId, Furniture furniture);
+    public abstract void addTrackedEntity(int entityId, Cullable cullable);
 
     public abstract void clearTrackedBlockEntities();
 
     public abstract int clearOrCountMatchingInventoryItems(Key itemId, int count);
 
-    public abstract boolean isBedrock();
+    public abstract GameEdition gameEdition();
 
     @Override
     public void remove() {
@@ -240,11 +246,13 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void playParticle(Key particleId, double x, double y, double z);
 
-    public abstract void removeTrackedFurniture(int entityId);
+    public abstract void removeTrackedEntity(int entityId);
 
-    public abstract void clearTrackedFurniture();
+    public abstract void clearTrackedEntities();
 
     public abstract WorldPosition eyePosition();
+
+    public abstract Cache<Object, Boolean> receivedMapData();
 
     @Override
     public boolean isValid() {

@@ -1,7 +1,10 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MTagKeys;
@@ -9,8 +12,10 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.InteractUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
-import net.momirealms.craftengine.core.block.*;
+import net.momirealms.craftengine.core.block.BlockStateWrapper;
+import net.momirealms.craftengine.core.block.CustomBlock;
+import net.momirealms.craftengine.core.block.ImmutableBlockState;
+import net.momirealms.craftengine.core.block.UpdateOption;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.IsPathFindableBlockBehavior;
 import net.momirealms.craftengine.core.block.properties.Property;
@@ -18,8 +23,6 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
@@ -28,8 +31,11 @@ import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +48,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("DuplicatedCode")
 public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPathFindableBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FenceGateBlockBehavior> FACTORY = new Factory();
     private final Property<HorizontalDirection> facingProperty;
     private final Property<Boolean> inWallProperty;
     private final Property<Boolean> openProperty;
@@ -105,11 +111,10 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
         boolean neighborStateIsWall = this.isWall(neighborState);
         boolean relativeStateIsWall = this.isWall(relativeState);
         boolean flag = neighborStateIsWall || relativeStateIsWall;
+        // TODO: 连接原版方块
         if (neighborStateIsWall) {
-            // TODO: 连接原版方块
         }
         if (relativeStateIsWall) {
-            // TODO: 连接原版方块
         }
         return customState.with(this.inWallProperty, flag).customBlockState().literalObject();
     }
@@ -146,7 +151,12 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
     private void playerToggle(UseOnContext context, ImmutableBlockState state) {
         Player player = context.getPlayer();
         if (player == null) return;
-        this.toggle(state, context.getLevel(), context.getClickedPos(), player);
+        BlockPos pos = context.getClickedPos();
+        Location location = new Location((org.bukkit.World) player.world().platformWorld(), pos.x, pos.y, pos.z);
+        if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.OPEN_DOOR, location)) {
+            return;
+        }
+        this.toggle(state, context.getLevel(), pos, player);
         if (!InteractUtils.isInteractable((org.bukkit.entity.Player) player.platformPlayer(), BlockStateUtils.fromBlockData(state.visualBlockState().literalObject()), context.getHitResult(), (Item<ItemStack>) context.getItem())) {
             player.swingHand(context.getHand());
         }
@@ -169,7 +179,7 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
         if (this.canOpenByWindCharge && FastNMS.INSTANCE.method$Explosion$canTriggerBlocks(args[3])) {
             Optional<ImmutableBlockState> optionalCustomState = BlockStateUtils.getOptionalCustomBlockState(args[0]);
             if (optionalCustomState.isEmpty()) return;
-            this.toggle(optionalCustomState.get(), new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(args[1])), LocationUtils.fromBlockPos(args[2]), null);
+            this.toggle(optionalCustomState.get(), BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(args[1])), LocationUtils.fromBlockPos(args[2]), null);
         }
     }
 
@@ -196,7 +206,7 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
             hasSignal = event.getNewCurrent() > 0;
         }
 
-        World world = new BukkitWorld(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
+        World world = BukkitAdaptors.adapt(FastNMS.INSTANCE.method$Level$getCraftWorld(level));
         boolean changed = isOpen(customState) != hasSignal;
         if (hasSignal && changed) {
             Object abovePos = LocationUtils.above(blockPos);
@@ -277,11 +287,11 @@ public class FenceGateBlockBehavior extends BukkitBlockBehavior implements IsPat
         return facing != null && facing.axis() == direction.toDirection().clockWise().axis();
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FenceGateBlockBehavior> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FenceGateBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.fence_gate.missing_facing");
             Property<Boolean> inWall = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("in_wall"), "warning.config.block.behavior.fence_gate.missing_in_wall");
             Property<Boolean> open = (Property<Boolean>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("open"), "warning.config.block.behavior.fence_gate.missing_open");

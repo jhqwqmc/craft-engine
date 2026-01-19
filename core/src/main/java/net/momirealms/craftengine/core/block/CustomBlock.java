@@ -1,11 +1,11 @@
 package net.momirealms.craftengine.core.block;
 
 import net.momirealms.craftengine.core.block.properties.Property;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +19,12 @@ public interface CustomBlock {
 
     @Nullable
     LootTable<?> lootTable();
+
+    @NotNull
+    default String translationKey() {
+        Key id = id();
+        return "block." + id.namespace() + "." + id.value();
+    }
 
     void execute(Context context, EventTrigger trigger);
 

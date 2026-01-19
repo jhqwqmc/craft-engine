@@ -10,7 +10,6 @@ import net.momirealms.craftengine.core.plugin.gui.GuiType;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.EnumUtils;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,24 +50,23 @@ public class OpenWindowFunction<CTX extends Context> extends AbstractConditional
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.OPEN_WINDOW;
+    public static <CTX extends Context> FunctionFactory<CTX, OpenWindowFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        return new Factory<>(factory);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, OpenWindowFunction<CTX>> {
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Condition<CTX>> factory) {
             super(factory);
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public OpenWindowFunction<CTX> create(Map<String, Object> arguments) {
             String title = Optional.ofNullable(arguments.get("title")).map(String::valueOf).orElse(null);
             String rawType = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("gui-type"), "warning.config.function.open_window.missing_gui_type");
             try {
                 GuiType type = GuiType.valueOf(rawType.toUpperCase(Locale.ENGLISH));
-                return new OpenWindowFunction<>(getPredicates(arguments), PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), type, title);
+                return new OpenWindowFunction<>(getPredicates(arguments), PlayerSelectors.fromObject(arguments.get("target"), conditionFactory()), type, title == null ? null : AdventureHelper.legacyToMiniMessage(title));
             } catch (IllegalArgumentException e) {
                 throw new LocalizedResourceConfigException("warning.config.function.open_window.invalid_gui_type", e, rawType, EnumUtils.toString(GuiType.values()));
             }

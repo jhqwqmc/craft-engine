@@ -14,7 +14,7 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.*;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.*;
 import net.momirealms.craftengine.core.block.*;
-import net.momirealms.craftengine.core.block.behavior.AbstractBlockBehavior;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviors;
 import net.momirealms.craftengine.core.block.behavior.EmptyBlockBehavior;
 import net.momirealms.craftengine.core.block.parser.BlockStateParser;
@@ -22,7 +22,7 @@ import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.Context;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.registry.Holder;
@@ -140,13 +140,13 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     @Override
     public BlockBehavior createBlockBehavior(CustomBlock customBlock, List<Map<String, Object>> behaviorConfig) {
         if (behaviorConfig == null || behaviorConfig.isEmpty()) {
-            return new EmptyBlockBehavior();
+            return new EmptyBlockBehavior(customBlock);
         } else if (behaviorConfig.size() == 1) {
             return BlockBehaviors.fromMap(customBlock, behaviorConfig.getFirst());
         } else {
-            List<AbstractBlockBehavior> behaviors = new ArrayList<>();
+            List<BlockBehavior> behaviors = new ArrayList<>();
             for (Map<String, Object> config : behaviorConfig) {
-                behaviors.add((AbstractBlockBehavior) BlockBehaviors.fromMap(customBlock, config));
+                behaviors.add(BlockBehaviors.fromMap(customBlock, config));
             }
             return new UnsafeCompositeBlockBehavior(customBlock, behaviors);
         }
@@ -223,7 +223,7 @@ public final class BukkitBlockManager extends AbstractBlockManager {
     }
 
     @Override
-    protected void applyPlatformSettings(ImmutableBlockState state) {
+    protected void applyPlatformSettings(CustomBlock block, ImmutableBlockState state) {
         DelegatingBlockState nmsState = (DelegatingBlockState) state.customBlockState().literalObject();
         nmsState.setBlockState(state);
         Object nmsVisualState = state.visualBlockState().literalObject();
@@ -258,7 +258,11 @@ public final class BukkitBlockManager extends AbstractBlockManager {
             shapeHolder.bindValue(new BukkitBlockShape(nmsVisualState, Optional.ofNullable(state.settings().supportShapeBlockState()).map(it -> Objects.requireNonNull(createVanillaBlockState(it), "Illegal block state: " + it).literalObject()).orElse(null)));
             ObjectHolder<BlockBehavior> behaviorHolder = nmsBlock.behaviorDelegate();
             behaviorHolder.bindValue(state.behavior());
-
+            if (VersionHelper.isOrAbove1_21_2()) {
+                CoreReflections.field$BlockBehaviour$descriptionId.set(nmsBlock, block.translationKey());
+            } else {
+                CoreReflections.field$Block$descriptionId.set(nmsBlock, block.translationKey());
+            }
             CoreReflections.field$BlockBehaviour$explosionResistance.set(nmsBlock, settings.resistance());
             CoreReflections.field$BlockBehaviour$friction.set(nmsBlock, settings.friction());
             CoreReflections.field$BlockBehaviour$speedFactor.set(nmsBlock, settings.speedFactor());

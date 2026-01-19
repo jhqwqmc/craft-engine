@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.block;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.block.behavior.EntityBlockBehavior;
 import net.momirealms.craftengine.core.block.entity.BlockEntity;
 import net.momirealms.craftengine.core.block.entity.BlockEntityType;
@@ -13,7 +14,7 @@ import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.LootTable;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.plugin.entityculling.CullingData;
+import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.registry.Holder;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.CEWorld;

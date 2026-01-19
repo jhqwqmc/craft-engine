@@ -11,7 +11,11 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
+import net.momirealms.craftengine.core.plugin.context.Condition;
+import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -22,20 +26,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
-public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFurnitureElement> {
-    public static final Factory FACTORY = new Factory();
+public final class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFurnitureElement> {
+    public static final FurnitureElementConfigFactory<ItemFurnitureElement> FACTORY = new Factory();
     public final BiFunction<Player, FurnitureColorSource, List<Object>> metadata;
     public final Key itemId;
     public final boolean applyDyedColor;
     public final Vector3f position;
+    public final Predicate<PlayerContext> predicate;
+    public final boolean hasCondition;
 
-    public ItemFurnitureElementConfig(Key itemId,
+    private ItemFurnitureElementConfig(Key itemId,
                                       Vector3f position,
-                                      boolean applyDyedColor) {
+                                      boolean applyDyedColor,
+                                      Predicate<PlayerContext> predicate,
+                                      boolean hasCondition) {
         this.position = position;
         this.applyDyedColor = applyDyedColor;
         this.itemId = itemId;
+        this.hasCondition = hasCondition;
+        this.predicate = predicate;
         BiFunction<Player, FurnitureColorSource, Item<?>> itemFunction = (player, colorSource) -> {
             Item<ItemStack> wrappedItem = BukkitItemManager.instance().createWrappedItem(itemId, player);
             if (applyDyedColor && colorSource != null && wrappedItem != null) {
@@ -58,35 +69,22 @@ public class ItemFurnitureElementConfig implements FurnitureElementConfig<ItemFu
         };
     }
 
-    public Vector3f position() {
-        return this.position;
-    }
-
-    public boolean applyDyedColor() {
-        return this.applyDyedColor;
-    }
-
-    public BiFunction<Player, FurnitureColorSource, List<Object>> metadata() {
-        return this.metadata;
-    }
-
-    public Key itemId() {
-        return this.itemId;
-    }
-
     @Override
     public ItemFurnitureElement create(@NotNull Furniture furniture) {
         return new ItemFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<ItemFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<ItemFurnitureElement> {
 
         @Override
         public ItemFurnitureElementConfig create(Map<String, Object> arguments) {
+            List<Condition<PlayerContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new ItemFurnitureElementConfig(
                     Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.item.missing_item")),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color")
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color"),
+                    MiscUtils.allOf(conditions),
+                    !conditions.isEmpty()
             );
         }
     }

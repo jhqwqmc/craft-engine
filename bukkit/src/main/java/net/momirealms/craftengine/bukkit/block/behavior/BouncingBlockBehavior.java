@@ -4,7 +4,6 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.behavior.FallOnBlockBehavior;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class BouncingBlockBehavior extends BukkitBlockBehavior implements FallOnBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<BouncingBlockBehavior> FACTORY = new Factory();
     private final double bounceHeight;
     private final boolean syncPlayerPosition;
     private final double fallDamageMultiplier;
@@ -77,10 +76,10 @@ public class BouncingBlockBehavior extends BukkitBlockBehavior implements FallOn
         }
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<BouncingBlockBehavior> {
 
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public BouncingBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             double bounceHeight = ResourceConfigUtils.getAsDouble(arguments.getOrDefault("bounce-height", 0.66), "bounce-height");
             boolean syncPlayerPosition = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("sync-player-position", true), "sync-player-position");
             double fallDamageMultiplier = ResourceConfigUtils.getAsDouble(arguments.getOrDefault("fall-damage-multiplier", 0.5), "fall-damage-multiplier");

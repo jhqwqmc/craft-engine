@@ -1,14 +1,10 @@
 package net.momirealms.craftengine.core.pack.host.impl;
 
 import io.github.bucket4j.Bandwidth;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.nio.file.Path;
@@ -18,8 +14,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class SelfHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class SelfHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<SelfHost> FACTORY = new Factory();
     private static final SelfHost INSTANCE = new SelfHost();
 
     public SelfHost() {
@@ -53,14 +49,14 @@ public class SelfHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType<SelfHost> type() {
         return ResourcePackHosts.SELF;
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<SelfHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public SelfHost create(Map<String, Object> arguments) {
             SelfHostHttpServer selfHostHttpServer = SelfHostHttpServer.instance();
             String ip = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("ip"), () -> new LocalizedException("warning.config.host.self.missing_ip"));
             int port = ResourceConfigUtils.getAsInt(arguments.getOrDefault("port", 8163), "port");

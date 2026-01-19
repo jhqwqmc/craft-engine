@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.plugin.reflection.minecraft;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
@@ -66,7 +67,7 @@ public final class CoreReflections {
     
     public static final Class<?> clazz$ResourceLocation = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("resources.MinecraftKey", "resources.Identifier"),  // todo 确认 spigot 映射命名
+                    List.of("resources.MinecraftKey"),
                     List.of("resources.ResourceLocation", "resources.Identifier")
             )
     );
@@ -440,10 +441,6 @@ public final class CoreReflections {
             ReflectionUtils.getMethod(clazz$IdMapper, Object.class, int.class)
     );
 
-    public static final Method method$Registry$asHolderIdMap = requireNonNull(
-            ReflectionUtils.getMethod(clazz$Registry, clazz$IdMap)
-    );
-
     public static final Class<?> clazz$Direction = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
                     "core.EnumDirection",
@@ -737,7 +734,7 @@ public final class CoreReflections {
             )
     );
 
-    public static final Method method$$LevelReader$dimensionType = requireNonNull(
+    public static final Method method$LevelReader$dimensionType = requireNonNull(
             ReflectionUtils.getMethod(
                     clazz$LevelReader, clazz$DimensionType
             )
@@ -1161,9 +1158,51 @@ public final class CoreReflections {
             )
     );
 
+    public static final Field field$ConfiguredFeature$DIRECT_CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$ConfiguredFeature, Codec.class, 0)
+    );
+
+    public static final Field field$ConfiguredFeature$CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$ConfiguredFeature, Codec.class, 1)
+    );
+
+    @SuppressWarnings("unchecked")
+    public static Codec<Object> getConfiguredFeature$CODEC() {
+        try {
+            return (Codec<Object>) field$ConfiguredFeature$CODEC.get(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init instance$ConfiguredFeature$CODEC", e);
+        }
+    }
+
+    public static final Codec<Object> instance$ConfiguredFeature$CODEC = getConfiguredFeature$CODEC();
+
     public static final Class<?> clazz$PlacedFeature = requireNonNull(
             ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("world.level.levelgen.placement.PlacedFeature"))
     );
+
+    public static final Constructor<?> constructor$PlacedFeature = requireNonNull(
+            ReflectionUtils.getConstructor(clazz$PlacedFeature, clazz$Holder, List.class)
+    );
+
+    public static final Class<?> clazz$PlacementModifier = requireNonNull(
+            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("world.level.levelgen.placement.PlacementModifier"))
+    );
+
+    public static final Field field$PlacementModifier$CODEC = requireNonNull(
+            ReflectionUtils.getDeclaredField(clazz$PlacementModifier, Codec.class, 0)
+    );
+
+    @SuppressWarnings("unchecked")
+    public static Codec<Object> getPlacementModifier$CODEC() {
+        try {
+            return (Codec<Object>) field$PlacementModifier$CODEC.get(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to init instance$ConfiguredFeature$CODEC", e);
+        }
+    }
+
+    public static final Codec<Object> instance$PlacementModifier$CODEC = getPlacementModifier$CODEC();
 
     // 1.21+
     public static final Class<?> clazz$JukeboxSong = ReflectionUtils.getClazz(
@@ -1212,6 +1251,16 @@ public final class CoreReflections {
 
     public static final Field field$Block$StateDefinition = requireNonNull(
             ReflectionUtils.getDeclaredField(clazz$Block, clazz$StateDefinition, 0)
+    );
+
+    public static final Field field$Block$descriptionId = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$Block, String.class, 0),
+            !VersionHelper.isOrAbove1_21_2()
+    );
+
+    public static final Field field$BlockBehaviour$descriptionId = MiscUtils.requireNonNullIf(
+            ReflectionUtils.getDeclaredField(clazz$BlockBehaviour, String.class, 0),
+            VersionHelper.isOrAbove1_21_2()
     );
 
     public static final Field field$StateDefinition$states = requireNonNull(
@@ -2956,7 +3005,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$AbstractArrow = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("world.entity.projectile.EntityArrow", "world.entity.projectile.arrow.AbstractArrow"),  // todo 确认 spigot 映射命名
+                    List.of("world.entity.projectile.EntityArrow", "world.entity.projectile.arrow.EntityArrow"),
                     List.of("world.entity.projectile.AbstractArrow", "world.entity.projectile.arrow.AbstractArrow")
             )
     );
@@ -2995,7 +3044,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$AbstractArrow$Pickup = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("world.entity.projectile.EntityArrow$PickupStatus", "world.entity.projectile.arrow.AbstractArrow$a"), // todo 确认 spigot 映射命名
+                    List.of("world.entity.projectile.EntityArrow$PickupStatus", "world.entity.projectile.arrow.EntityArrow$PickupStatus"),
                     List.of("world.entity.projectile.AbstractArrow$Pickup", "world.entity.projectile.arrow.AbstractArrow$Pickup")
             )
     );
@@ -4405,7 +4454,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$ImpossibleTrigger = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("advancements.critereon.CriterionTriggerImpossible", "advancements.criterion.CriterionTriggerImpossible"),  // todo 确认 spigot 映射命名
+                    List.of("advancements.critereon.CriterionTriggerImpossible", "advancements.criterion.CriterionTriggerImpossible"),
                     List.of("advancements.critereon.ImpossibleTrigger", "advancements.criterion.ImpossibleTrigger")
             )
     );
@@ -4416,7 +4465,7 @@ public final class CoreReflections {
 
     public static final Class<?> clazz$ImpossibleTrigger$TriggerInstance = requireNonNull(
             BukkitReflectionUtils.findReobfOrMojmapClass(
-                    List.of("advancements.critereon.CriterionTriggerImpossible$a", "advancements.criterion.CriterionTriggerImpossible$a"),  // todo 确认 spigot 映射命名
+                    List.of("advancements.critereon.CriterionTriggerImpossible$a", "advancements.criterion.CriterionTriggerImpossible$a"),
                     List.of("advancements.critereon.ImpossibleTrigger$TriggerInstance", "advancements.criterion.ImpossibleTrigger$TriggerInstance")
             )
     );
@@ -4673,6 +4722,48 @@ public final class CoreReflections {
             instance$ArmorStand$DEFAULT_RIGHT_LEG_POSE = constructor$Rotations.newInstance(1.0F, 0.0F, 1.0F);
         } catch (ReflectiveOperationException e) {
             throw new ReflectionInitException("Failed to init ArmorStand", e);
+        }
+    }
+
+    public static final Field field$DedicatedServerProperties$enforceSecureProfile = requireNonNull(
+            ReflectionUtils.getDeclaredField(
+                    clazz$DedicatedServerProperties, VersionHelper.isOrAbove1_21_11() ? new String[]{"enforceSecureProfile", "ag"}
+                            : VersionHelper.isOrAbove1_21_9() ? new String[]{"enforceSecureProfile", "af"}
+                            : VersionHelper.isOrAbove1_21_2() ? new String[]{"enforceSecureProfile", "X"}
+                            : VersionHelper.isOrAbove1_21() ? new String[]{"enforceSecureProfile", "Y"}
+                            : VersionHelper.isOrAbove1_20_5() ? new String[]{"enforceSecureProfile", "X"}
+                            : new String[]{"enforceSecureProfile", "W"}
+            )
+    );
+
+    public static final MethodHandle methodHandle$DedicatedServerProperties$enforceSecureProfileSetter = requireNonNull(
+            ReflectionUtils.unreflectSetter(field$DedicatedServerProperties$enforceSecureProfile)
+    ).asType(MethodType.methodType(void.class, Object.class, boolean.class));
+
+    public static final Class<?> clazz$LevelCallback = requireNonNull(
+            ReflectionUtils.getClazz(
+                    BukkitReflectionUtils.assembleMCClass("world.level.entity.LevelCallback")
+            )
+    );
+
+    public static final Class<?> clazz$DataFixers = requireNonNull(
+            BukkitReflectionUtils.findReobfOrMojmapClass(
+                    "util.datafix.DataConverterRegistry",
+                    "util.datafix.DataFixers"
+            )
+    );
+
+    public static final Method method$DataFixers$getDataFixer = requireNonNull(
+            ReflectionUtils.getDeclaredMethod(clazz$DataFixers, DataFixer.class)
+    );
+
+    public static final DataFixer instance$DataFixer;
+
+    static {
+        try {
+            instance$DataFixer = (DataFixer) method$DataFixers$getDataFixer.invoke(null);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionInitException("Failed to get DataFixer", e);
         }
     }
 }

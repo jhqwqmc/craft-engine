@@ -22,16 +22,24 @@ public enum Debugger {
 
     public void debug(Supplier<String> message) {
         if (this.condition.get()) {
-            CraftEngine.instance().logger().info("[DEBUG] " + message.get());
+            String s = message.get();
+            if (s != null) {
+                CraftEngine.instance().logger().info("[DEBUG] " + s);
+            }
         }
     }
 
     public void warn(Supplier<String> message, Throwable e) {
         if (this.condition.get()) {
+            String s = message.get();
             if (e != null) {
-                CraftEngine.instance().logger().warn("[DEBUG] " + message.get(), e);
+                if (s != null) {
+                    CraftEngine.instance().logger().warn("[DEBUG] " + s, e);
+                }
             } else {
-                CraftEngine.instance().logger().warn("[DEBUG] " + message.get());
+                if (s != null) {
+                    CraftEngine.instance().logger().warn("[DEBUG] " + s);
+                }
             }
         }
     }

@@ -4,7 +4,6 @@ import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.matcher.PathMatchers;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.context.Condition;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 
 import java.io.IOException;
@@ -12,13 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
-public class RetainMatchingResolution implements Resolution {
-    public static final Factory FACTORY = new Factory();
-    private final Condition<PathContext> matcher;
-
-    public RetainMatchingResolution(Condition<PathContext> matcher) {
-        this.matcher = matcher;
-    }
+public record RetainMatchingResolution(Condition<PathContext> matcher) implements Resolution {
+    public static final ResolutionFactory<RetainMatchingResolution> FACTORY = new Factory();
 
     @Override
     public void run(PathContext existing, PathContext conflict) {
@@ -31,15 +25,10 @@ public class RetainMatchingResolution implements Resolution {
         }
     }
 
-    @Override
-    public Key type() {
-        return Resolutions.RETAIN_MATCHING;
-    }
-
-    public static class Factory implements ResolutionFactory {
+    private static class Factory implements ResolutionFactory<RetainMatchingResolution> {
 
         @Override
-        public Resolution create(Map<String, Object> arguments) {
+        public RetainMatchingResolution create(Map<String, Object> arguments) {
             Map<String, Object> term = MiscUtils.castToMap(arguments.get("term"), false);
             return new RetainMatchingResolution(PathMatchers.fromMap(term));
         }

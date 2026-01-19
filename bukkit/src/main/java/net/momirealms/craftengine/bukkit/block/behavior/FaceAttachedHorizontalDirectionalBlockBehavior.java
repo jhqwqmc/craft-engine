@@ -6,17 +6,16 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.block.properties.type.AnchorType;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.Tuple;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class FaceAttachedHorizontalDirectionalBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<FaceAttachedHorizontalDirectionalBlockBehavior> FACTORY = new Factory();
     private final Property<AnchorType> anchorTypeProperty;
     private final Property<HorizontalDirection> facingProperty;
     private final List<Object> tagsCanSurviveOn;
@@ -135,11 +134,11 @@ public class FaceAttachedHorizontalDirectionalBlockBehavior extends BukkitBlockB
         };
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<FaceAttachedHorizontalDirectionalBlockBehavior> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public FaceAttachedHorizontalDirectionalBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             Property<AnchorType> anchorType = (Property<AnchorType>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("face"), "warning.config.block.behavior.face_attached_horizontal_directional.missing_face");
             Property<HorizontalDirection> facing = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.face_attached_horizontal_directional.missing_facing");
             Tuple<List<Object>, Set<Object>, Set<String>> tuple = DirectionalAttachedBlockBehavior.readTagsAndState(arguments);

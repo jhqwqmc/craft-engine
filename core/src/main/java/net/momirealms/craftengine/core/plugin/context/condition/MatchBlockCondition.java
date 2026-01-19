@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.world.ExistingBlock;
@@ -15,7 +14,7 @@ import net.momirealms.craftengine.core.world.WorldPosition;
 
 import java.util.*;
 
-public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> {
+public final class MatchBlockCondition<CTX extends Context> implements Condition<CTX> {
     private final Set<String> ids;
     private final boolean regexMatch;
     private final NumberProvider x;
@@ -31,11 +30,6 @@ public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> 
     }
 
     @Override
-    public Key type() {
-        return CommonConditions.MATCH_BLOCK;
-    }
-
-    @Override
     public boolean test(CTX ctx) {
         Optional<WorldPosition> optionalWorldPosition = ctx.getOptionalParameter(DirectContextParameters.POSITION);
         if (optionalWorldPosition.isPresent()) {
@@ -46,10 +40,14 @@ public class MatchBlockCondition<CTX extends Context> implements Condition<CTX> 
         return false;
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX, MatchBlockCondition<CTX>> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, MatchBlockCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public MatchBlockCondition<CTX> create(Map<String, Object> arguments) {
             List<String> ids = MiscUtils.getAsStringList(arguments.get("id"));
             if (ids.isEmpty()) {
                 throw new LocalizedResourceConfigException("warning.config.condition.match_block.missing_id");

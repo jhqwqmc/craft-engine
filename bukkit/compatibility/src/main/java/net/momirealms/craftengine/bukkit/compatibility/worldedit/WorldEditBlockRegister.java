@@ -8,7 +8,7 @@ import com.sk89q.worldedit.util.concurrency.LazyReference;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
-import net.momirealms.craftengine.core.block.AbstractBlockManager;
+import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.parser.BlockStateParser;
 import net.momirealms.craftengine.core.util.Key;
@@ -20,39 +20,55 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class WorldEditBlockRegister {
-    private final Field field$BlockType$blockMaterial;
-    private final AbstractBlockManager manager;
-    private final boolean isFAWE;
+public final class WorldEditBlockRegister {
+    private static final Field field$BlockType$blockMaterial = ReflectionUtils.getDeclaredField(BlockType.class, "blockMaterial");
+    private static boolean init = false;
 
-    public WorldEditBlockRegister(AbstractBlockManager manager, boolean isFAWE) {
-        this.field$BlockType$blockMaterial = ReflectionUtils.getDeclaredField(BlockType.class, "blockMaterial");
-        this.manager = manager;
-        this.isFAWE = isFAWE;
-        CEBlockParser blockParser = new CEBlockParser(WorldEdit.getInstance());
-        WorldEdit.getInstance().getBlockFactory().register(blockParser);
+    public static void init(boolean isFAWE) {
+        if (init) {
+            throw new IllegalStateException("WorldEditBlockRegister has already been initialized");
+        }
+        init = true;
+        WorldEdit.getInstance().getBlockFactory().register(new CEBlockParser(isFAWE));
         if (isFAWE) {
             FastAsyncWorldEditDelegate.init();
         }
     }
 
-    @SuppressWarnings("deprecation")
-    public void register(Key id) throws ReflectiveOperationException {
-        BlockType blockType = new BlockType(id.toString(), blockState -> blockState);
-        this.field$BlockType$blockMaterial.set(blockType, LazyReference.from(() -> new BukkitBlockRegistry.BukkitBlockMaterial(null, Material.STONE)));
-        BlockType.REGISTRY.register(id.toString(), blockType);
+    public static boolean checkFAWECompatible(String version) {
+        BlockType blockType = BlockType.REGISTRY.get("craftengine:custom_0");
+        if (blockType != null) { // 通过其他办法兼容直接返回成功
+            return true;
+        }
+        String cleanVersion = version.split("-")[0];
+        String[] parts = cleanVersion.split("\\.");
+        int first = Integer.parseInt(parts[0]);
+        int second = Integer.parseInt(parts[1]);
+        return first >= 2 && second >= 13;
     }
 
-    private final class CEBlockParser extends InputParser<BaseBlock> {
+    @SuppressWarnings("deprecation")
+    public static void register(Key id) throws ReflectiveOperationException {
+        String string = id.asString();
+        BlockType blockType = new BlockType(string, blockState -> blockState);
+        field$BlockType$blockMaterial.set(blockType, LazyReference.from(() -> new BukkitBlockRegistry.BukkitBlockMaterial(null, Material.STONE)));
+        if (BlockType.REGISTRY.get(string) != null) { // already registered
+            return;
+        }
+        BlockType.REGISTRY.register(string, blockType);
+    }
 
-        private CEBlockParser(WorldEdit worldEdit) {
-            super(worldEdit);
+    private static final class CEBlockParser extends InputParser<BaseBlock> {
+        private final boolean isFAWE;
+
+        private CEBlockParser(boolean isFAWE) {
+            super(WorldEdit.getInstance());
+            this.isFAWE = isFAWE;
         }
 
         @Override
-        @SuppressWarnings("deprecation")
-        public Stream<String> getSuggestions(String input) {
-            Set<String> namespacesInUse = manager.namespacesInUse();
+        public Stream<String> getSuggestions(String input, ParserContext context) {
+            Set<String> namespacesInUse = BukkitBlockManager.instance().namespacesInUse();
 
             if (input.isEmpty() || input.equals(":")) {
                 return namespacesInUse.stream().map(namespace -> namespace + ":");
@@ -75,15 +91,15 @@ public class WorldEditBlockRegister {
 
         @Override
         public BaseBlock parseFromInput(String input, ParserContext context) {
-            if (isFAWE) {
+            if (this.isFAWE) {
                 int index = input.indexOf("[");
-                if (input.charAt(index+1) == ']') return null;
+                if (input.charAt(index + 1) == ']') return null;
             }
 
             int colonIndex = input.indexOf(':');
             if (colonIndex == -1) return null;
 
-            Set<String> namespacesInUse = manager.namespacesInUse();
+            Set<String> namespacesInUse = BukkitBlockManager.instance().namespacesInUse();
             String namespace = input.substring(0, colonIndex);
             if (!namespacesInUse.contains(namespace)) return null;
 

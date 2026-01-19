@@ -2,8 +2,8 @@ package net.momirealms.craftengine.core.plugin.locale;
 
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
-import net.momirealms.craftengine.core.block.parser.BlockStateParser;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,37 +12,31 @@ import java.util.function.Function;
 
 public class LangData {
     private static final Map<String, Function<String, List<String>>> LANG_KEY_PROCESSORS = new HashMap<>();
-    public Map<String, String> translations = new HashMap<>();
+    public Map<String, String> translations = new LinkedHashMap<>();
 
     static {
         LANG_KEY_PROCESSORS.put("block_name", (id) -> {
-            if (id.contains("[") && id.contains("]")) {
-                ImmutableBlockState parsed = BlockStateParser.deserialize(id);
-                if (parsed == null) return List.of(id);
-                return List.of("block." + stateToRealBlockId(parsed));
-            } else {
-                Key blockId = Key.of(id);
-                Optional<CustomBlock> blockOptional = CraftEngine.instance().blockManager().blockById(blockId);
-                if (blockOptional.isPresent()) {
-                    List<ImmutableBlockState> states = blockOptional.get().variantProvider().states();
-                    if (states.size() == 1) {
-                        return List.of("block." + stateToRealBlockId(states.getFirst()));
-                    } else {
-                        ArrayList<String> processed = new ArrayList<>();
-                        for (ImmutableBlockState state : states) {
-                            processed.add("block." + stateToRealBlockId(state));
-                        }
-                        return processed;
-                    }
+            Key blockId = Key.of(id);
+            Optional<CustomBlock> blockOptional = CraftEngine.instance().blockManager().blockById(blockId);
+            if (blockOptional.isPresent() && Config.generateModAssets()) {
+                List<String> keys = new ArrayList<>();
+                List<ImmutableBlockState> states = blockOptional.get().variantProvider().states();
+                if (states.size() == 1) {
+                    keys.add("block." + stateToRealBlockId(states.getFirst()));
                 } else {
-                    return List.of(id);
+                    for (ImmutableBlockState state : states) {
+                        keys.add("block." + stateToRealBlockId(state));
+                    }
                 }
+                keys.add("block." + id.replace(":", "."));
+                return keys;
             }
+            return List.of("block." + id.replace(":", "."));
         });
     }
 
     public void processTranslations() {
-        Map<String, String> temp = new HashMap<>(Math.max(10, this.translations.size()));
+        Map<String, String> temp = new LinkedHashMap<>(Math.max(10, this.translations.size()));
         for (Map.Entry<String, String> entry : this.translations.entrySet()) {
             String key = entry.getKey();
             String[] split = key.split(":", 2);

@@ -12,13 +12,15 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
+import net.momirealms.craftengine.core.plugin.context.Condition;
+import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LegacyChatFormatter;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.world.Glowing;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -26,9 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement>, Glowing {
-    public static final Factory FACTORY = new Factory();
+public final class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<ArmorStandFurnitureElement> {
+    public static final FurnitureElementConfigFactory<ArmorStandFurnitureElement> FACTORY = new Factory();
     public final Function<Player, List<Object>> metadata;
     public final Key itemId;
     public final float scale;
@@ -36,19 +39,25 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
     public final Vector3f position;
     public final boolean small;
     public final LegacyChatFormatter glowColor;
+    public final Predicate<PlayerContext> predicate;
+    public final boolean hasCondition;
 
-    public ArmorStandFurnitureElementConfig(Key itemId,
+    private ArmorStandFurnitureElementConfig(Key itemId,
                                             float scale,
                                             Vector3f position,
                                             boolean applyDyedColor,
                                             boolean small,
-                                            LegacyChatFormatter glowColor) {
+                                            LegacyChatFormatter glowColor,
+                                            Predicate<PlayerContext> predicate,
+                                            boolean hasCondition) {
         this.position = position;
         this.applyDyedColor = applyDyedColor;
         this.small = small;
         this.scale = scale;
         this.itemId = itemId;
         this.glowColor = glowColor;
+        this.predicate = predicate;
+        this.hasCondition = hasCondition;
         this.metadata = (player) -> {
             List<Object> dataValues = new ArrayList<>(2);
             if (glowColor != null) {
@@ -59,7 +68,6 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
             if (small) {
                 ArmorStandData.ArmorStandFlags.addEntityData((byte) 0x01, dataValues);
             }
-
             return dataValues;
         };
     }
@@ -79,48 +87,25 @@ public class ArmorStandFurnitureElementConfig implements FurnitureElementConfig<
         return Optional.ofNullable(wrappedItem).orElseGet(() -> BukkitItemManager.instance().createWrappedItem(ItemKeys.BARRIER, null));
     }
 
-    @Nullable
-    @Override
-    public LegacyChatFormatter glowColor() {
-        return this.glowColor;
-    }
-
-    public float scale() {
-        return scale;
-    }
-
-    public boolean small() {
-        return small;
-    }
-
-    public Vector3f position() {
-        return this.position;
-    }
-
-    public boolean applyDyedColor() {
-        return this.applyDyedColor;
-    }
-
-    public Key itemId() {
-        return this.itemId;
-    }
-
     @Override
     public ArmorStandFurnitureElement create(@NotNull Furniture furniture) {
         return new ArmorStandFurnitureElement(furniture, this);
     }
 
-    public static class Factory implements FurnitureElementConfigFactory<ArmorStandFurnitureElement> {
+    private static class Factory implements FurnitureElementConfigFactory<ArmorStandFurnitureElement> {
 
         @Override
         public ArmorStandFurnitureElementConfig create(Map<String, Object> arguments) {
+            List<Condition<PlayerContext>> conditions = ResourceConfigUtils.parseConfigAsList(arguments.get("conditions"), CommonConditions::fromMap);
             return new ArmorStandFurnitureElementConfig(
                     Key.of(ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("item"), "warning.config.furniture.element.armor_stand.missing_item")),
                     ResourceConfigUtils.getAsFloat(arguments.getOrDefault("scale", 1f), "scale"),
                     ResourceConfigUtils.getAsVector3f(arguments.getOrDefault("position", 0f), "position"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("apply-dyed-color", true), "apply-dyed-color"),
                     ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("small", false), "small"),
-                    ResourceConfigUtils.getAsEnum(arguments.get("glow-color"), LegacyChatFormatter.class, null)
+                    ResourceConfigUtils.getAsEnum(arguments.get("glow-color"), LegacyChatFormatter.class, null),
+                    MiscUtils.allOf(conditions),
+                    !conditions.isEmpty()
             );
         }
     }

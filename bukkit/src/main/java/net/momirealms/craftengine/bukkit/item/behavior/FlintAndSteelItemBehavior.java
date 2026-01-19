@@ -12,14 +12,14 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.RandomUtils;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -28,10 +28,12 @@ import org.bukkit.inventory.ItemStack;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class FlintAndSteelItemBehavior extends ItemBehavior {
+public final class FlintAndSteelItemBehavior extends ItemBehavior {
     public static final FlintAndSteelItemBehavior INSTANCE = new FlintAndSteelItemBehavior();
-    public static final Factory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<FlintAndSteelItemBehavior> FACTORY = new Factory();
     private static final Key FLINT_SOUND = Key.of("item.flintandsteel.use");
+
+    private FlintAndSteelItemBehavior() {}
 
     @SuppressWarnings("unchecked")
     @Override
@@ -159,9 +161,9 @@ public class FlintAndSteelItemBehavior extends ItemBehavior {
         return InteractionResult.PASS;
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<FlintAndSteelItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments) {
+        public FlintAndSteelItemBehavior create(Pack pack, Path path, String node, Key id, Map<String, Object> arguments) {
             return INSTANCE;
         }
     }

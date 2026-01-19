@@ -7,26 +7,21 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.RandomUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.random.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class TableBonusCondition<CTX extends Context> implements Condition<CTX> {
+public final class TableBonusCondition<CTX extends Context> implements Condition<CTX> {
     private final Key enchantmentType;
     private final List<Float> values;
 
     public TableBonusCondition(Key enchantmentType, List<Float> values) {
         this.enchantmentType = enchantmentType;
         this.values = values;
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.TABLE_BONUS;
     }
 
     @Override
@@ -37,10 +32,14 @@ public class TableBonusCondition<CTX extends Context> implements Condition<CTX> 
         return RandomUtils.generateRandomFloat(0, 1) < f;
     }
 
-    public static class FactoryImpl<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX, TableBonusCondition<CTX>> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, TableBonusCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public TableBonusCondition<CTX> create(Map<String, Object> arguments) {
             Object enchantmentObj = arguments.get("enchantment");
             if (enchantmentObj == null) {
                 throw new LocalizedResourceConfigException("warning.config.condition.table_bonus.missing_enchantment");

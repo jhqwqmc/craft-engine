@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
+public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     private final CustomFurnitureHitboxConfig config;
     private final Collider collider;
     private final Object spawnPacket;
@@ -28,7 +28,7 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     private final FurnitureHitboxPart part;
     private final int entityId;
 
-    public CustomFurnitureHitbox(Furniture furniture, CustomFurnitureHitboxConfig config) {
+    CustomFurnitureHitbox(Furniture furniture, CustomFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();
@@ -38,7 +38,7 @@ public class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
         int entityId = CoreReflections.instance$Entity$ENTITY_COUNTER.incrementAndGet();
         List<Object> packets = new ArrayList<>(3);
         packets.add(FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                entityId, UUID.randomUUID(), position.x, position.y, position.z, 0, position.yRot,
+                entityId, UUID.randomUUID(), pos.x, pos.y, pos.z, 0, position.yRot,
                 config.entityType(), 0, CoreReflections.instance$Vec3$Zero, 0
         ));
         packets.add(FastNMS.INSTANCE.constructor$ClientboundSetEntityDataPacket(entityId, config.cachedValues()));

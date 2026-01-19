@@ -13,18 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class EnchantmentCondition<CTX extends Context> implements Condition<CTX> {
+public final class EnchantmentCondition<CTX extends Context> implements Condition<CTX> {
     private final Key id;
     private final Function<Integer, Boolean> expression;
 
     public EnchantmentCondition(Key id, Function<Integer, Boolean> expression) {
         this.expression = expression;
         this.id = id;
-    }
-
-    @Override
-    public Key type() {
-        return CommonConditions.ENCHANTMENT;
     }
 
     @Override
@@ -36,10 +31,14 @@ public class EnchantmentCondition<CTX extends Context> implements Condition<CTX>
         return this.expression.apply(level);
     }
 
-    public static class Factory<CTX extends Context> implements ConditionFactory<CTX> {
+    public static <CTX extends Context> ConditionFactory<CTX, EnchantmentCondition<CTX>> factory() {
+        return new Factory<>();
+    }
+
+    private static class Factory<CTX extends Context> implements ConditionFactory<CTX, EnchantmentCondition<CTX>> {
 
         @Override
-        public Condition<CTX> create(Map<String, Object> arguments) {
+        public EnchantmentCondition<CTX> create(Map<String, Object> arguments) {
             String predicate = ResourceConfigUtils.requireNonEmptyStringOrThrow(arguments.get("predicate"), "warning.config.condition.enchantment.missing_predicate");
             String[] split = predicate.split("(<=|>=|<|>|==|=)", 2);
             int level;

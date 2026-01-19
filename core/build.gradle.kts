@@ -1,17 +1,29 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("com.gradleup.shadow") version "9.3.0"
     id("maven-publish")
+}
+
+val adventureLibraries: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+configurations {
+    compileOnly.get().extendsFrom(adventureLibraries)
 }
 
 repositories {
     maven("https://jitpack.io/")
     maven("https://libraries.minecraft.net/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.gtemc.net/releases/")
 }
 
 dependencies {
     // JOML
-    compileOnly("org.joml:joml:1.10.8")
+    compileOnly("org.joml:joml:${rootProject.properties["joml_version"]}")
     // YAML
     compileOnly(files("${rootProject.rootDir}/libs/boosted-yaml-${rootProject.properties["boosted_yaml_version"]}.jar"))
     compileOnly("org.yaml:snakeyaml:${rootProject.properties["snake_yaml_version"]}")
@@ -21,18 +33,17 @@ dependencies {
     implementation("net.momirealms:sparrow-nbt-codec:${rootProject.properties["sparrow_nbt_version"]}")
     implementation("net.momirealms:sparrow-nbt-legacy-codec:${rootProject.properties["sparrow_nbt_version"]}")
     // S3
-    implementation("net.momirealms:craft-engine-s3:0.9")
+    implementation("net.momirealms:craft-engine-s3:0.14")
     // Util
     compileOnly("net.momirealms:sparrow-util:${rootProject.properties["sparrow_util_version"]}")
     // Adventure
-    compileOnly("net.kyori:adventure-api:${rootProject.properties["adventure_bundle_version"]}")
-    compileOnly("net.kyori:adventure-text-minimessage:${rootProject.properties["adventure_bundle_version"]}")
-    compileOnly("net.kyori:adventure-text-serializer-gson:${rootProject.properties["adventure_bundle_version"]}") {
+    adventureLibraries("net.kyori:adventure-api:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-minimessage:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-gson:${rootProject.properties["adventure_bundle_version"]}") {
         exclude("com.google.code.gson", "gson")
     }
-    compileOnly("net.kyori:adventure-text-serializer-legacy:${rootProject.properties["adventure_bundle_version"]}")
-
-    compileOnly("net.kyori:adventure-text-serializer-json-legacy-impl:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-legacy:${rootProject.properties["adventure_bundle_version"]}")
+    adventureLibraries("net.kyori:adventure-text-serializer-json-legacy-impl:${rootProject.properties["adventure_bundle_version"]}")
     // Command
     compileOnly("org.incendo:cloud-core:${rootProject.properties["cloud_core_version"]}")
     compileOnly("org.incendo:cloud-minecraft-extras:${rootProject.properties["cloud_minecraft_extras_version"]}")
@@ -52,7 +63,7 @@ dependencies {
     compileOnly("com.github.ben-manes.caffeine:caffeine:${rootProject.properties["caffeine_version"]}")
     // Compression
     compileOnly("com.github.luben:zstd-jni:${rootProject.properties["zstd_version"]}")
-    compileOnly("org.lz4:lz4-java:${rootProject.properties["lz4_version"]}")
+    compileOnly("at.yawk.lz4:lz4-java:${rootProject.properties["lz4_version"]}")
     // Commons IO
     compileOnly("commons-io:commons-io:${rootProject.properties["commons_io_version"]}")
     // Data Fixer Upper
@@ -88,6 +99,14 @@ tasks.withType<JavaCompile> {
     dependsOn(tasks.clean)
 }
 
+tasks.register("adventureBundle", ShadowJar::class) {
+    group = "build"
+    archiveBaseName.set("adventure-bundle")
+    archiveClassifier.set("")
+    configurations = listOf(adventureLibraries)
+    relocate("net.kyori", "net.momirealms.craftengine.libraries")
+}
+
 tasks {
     shadowJar {
         archiveClassifier = ""
@@ -95,7 +114,6 @@ tasks {
         relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("dev.dejvokep", "net.momirealms.craftengine.libraries")
         relocate("org.yaml.snakeyaml", "net.momirealms.craftengine.libraries.snakeyaml")
-        relocate("net.kyori", "net.momirealms.craftengine.libraries")
         relocate("org.ahocorasick", "net.momirealms.craftengine.libraries.ahocorasick")
         relocate("net.momirealms.sparrow.nbt", "net.momirealms.craftengine.libraries.nbt")
         relocate("net.jpountz", "net.momirealms.craftengine.libraries.jpountz") // lz4
@@ -110,6 +128,8 @@ tasks {
         relocate("io.netty.handler.codec.spdy", "net.momirealms.craftengine.libraries.netty.handler.codec.spdy")
         relocate("io.netty.handler.codec.http2", "net.momirealms.craftengine.libraries.netty.handler.codec.http2")
         relocate("io.github.bucket4j", "net.momirealms.craftengine.libraries.bucket4j") // bucket4j
+        relocate("cn.gtemc.itembridge", "net.momirealms.craftengine.libraries.itembridge")
+        relocate("cn.gtemc.levelerbridge", "net.momirealms.craftengine.libraries.levelerbridge")
     }
 }
 
@@ -133,7 +153,7 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("core") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-core"
             version = rootProject.properties["project_version"].toString()
@@ -151,7 +171,7 @@ publishing {
                 }
             }
         }
-        create<MavenPublication>("mavenJavaSnapshot") {
+        create<MavenPublication>("coreSnapshot") {
             groupId = "net.momirealms"
             artifactId = "craft-engine-core"
             version = "${rootProject.properties["project_version"]}-SNAPSHOT"
@@ -169,17 +189,37 @@ publishing {
                 }
             }
         }
+        create<MavenPublication>("adventure") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-adventure"
+            version = rootProject.properties["project_version"].toString()
+            artifact(tasks.named("adventureBundle"))
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+            }
+        }
+        create<MavenPublication>("adventureSnapshot") {
+            groupId = "net.momirealms"
+            artifactId = "craft-engine-adventure"
+            version = "${rootProject.properties["project_version"]}-SNAPSHOT"
+            artifact(tasks.named("adventureBundle"))
+            pom {
+                name = "CraftEngine API"
+                url = "https://github.com/Xiao-MoMi/craft-engine"
+            }
+        }
     }
 }
 
 tasks.register("publishRelease") {
     group = "publishing"
     description = "Publishes to the release repository"
-    dependsOn("publishMavenJavaPublicationToReleasesRepository")
+    dependsOn("publishCorePublicationToReleasesRepository", "publishAdventurePublicationToReleasesRepository")
 }
 
 tasks.register("publishSnapshot") {
     group = "publishing"
     description = "Publishes to the snapshot repository"
-    dependsOn("publishMavenJavaSnapshotPublicationToSnapshotRepository")
+    dependsOn("publishCoreSnapshotPublicationToSnapshotRepository", "publishAdventureSnapshotPublicationToSnapshotRepository")
 }

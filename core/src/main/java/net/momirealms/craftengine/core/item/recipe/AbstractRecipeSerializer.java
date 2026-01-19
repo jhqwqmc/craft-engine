@@ -1,19 +1,16 @@
 package net.momirealms.craftengine.core.item.recipe;
 
 import net.momirealms.craftengine.core.item.*;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_20;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_20_5;
-import net.momirealms.craftengine.core.item.recipe.reader.VanillaRecipeReader1_21_2;
+import net.momirealms.craftengine.core.item.recipe.reader.*;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessors;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.context.CommonConditions;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
 import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.condition.AllOfCondition;
-import net.momirealms.craftengine.core.plugin.context.event.EventConditions;
-import net.momirealms.craftengine.core.plugin.context.event.EventFunctions;
 import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.*;
@@ -24,6 +21,8 @@ import java.util.*;
 
 public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implements RecipeSerializer<T, R> {
     protected static final VanillaRecipeReader VANILLA_RECIPE_HELPER =
+            VersionHelper.isOrAbove26_1() ?
+            new VanillaRecipeReader26_1() :
             VersionHelper.isOrAbove1_21_2() ?
             new VanillaRecipeReader1_21_2() :
             VersionHelper.isOrAbove1_20_5() ?
@@ -34,14 +33,14 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
     protected Function<Context>[] functions(Map<String, Object> arguments) {
         Object functions = ResourceConfigUtils.get(arguments, "functions", "function");
         if (functions == null) return null;
-        List<Function<Context>> functionList = ResourceConfigUtils.parseConfigAsList(functions, EventFunctions::fromMap);
+        List<Function<Context>> functionList = ResourceConfigUtils.parseConfigAsList(functions, CommonFunctions::fromMap);
         return functionList.toArray(new Function[0]);
     }
 
     protected Condition<Context> conditions(Map<String, Object> arguments) {
         Object conditions = ResourceConfigUtils.get(arguments, "conditions", "condition");
         if (conditions == null) return null;
-        List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(conditions, EventConditions::fromMap);
+        List<Condition<Context>> conditionList = ResourceConfigUtils.parseConfigAsList(conditions, CommonConditions::fromMap);
         if (conditionList.isEmpty()) return null;
         if (conditionList.size() == 1) return conditionList.getFirst();
         return new AllOfCondition<>(conditionList);
@@ -98,7 +97,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         if (resultItem.isEmpty()) {
             throw new LocalizedResourceConfigException("warning.config.recipe.invalid_result", id);
         }
-        List<PostProcessor<T>> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
+        List<PostProcessor> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
         return new CustomRecipeResult<>(
                 resultItem,
                 count,
@@ -119,7 +118,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         if (resultItem.isEmpty()) {
             throw new LocalizedResourceConfigException("warning.config.recipe.invalid_result", id);
         }
-        List<PostProcessor<T>> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
+        List<PostProcessor> processors = ResourceConfigUtils.parseConfigAsList(resultMap.get("post-processors"), PostProcessors::fromMap);
         return new CustomRecipeResult<>(
                 resultItem,
                 count,

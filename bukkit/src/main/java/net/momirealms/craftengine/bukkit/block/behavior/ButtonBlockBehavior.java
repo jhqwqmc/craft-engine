@@ -1,6 +1,8 @@
 package net.momirealms.craftengine.bukkit.block.behavior;
 
+import net.momirealms.antigrieflib.Flag;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
+import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MEntitySelectors;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MGameEvents;
@@ -8,7 +10,6 @@ import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.DirectionUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
-import net.momirealms.craftengine.core.block.BlockBehavior;
 import net.momirealms.craftengine.core.block.CustomBlock;
 import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.UpdateOption;
@@ -16,12 +17,13 @@ import net.momirealms.craftengine.core.block.behavior.BlockBehaviorFactory;
 import net.momirealms.craftengine.core.block.properties.BooleanProperty;
 import net.momirealms.craftengine.core.block.properties.Property;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.sound.SoundData;
-import net.momirealms.craftengine.core.util.Direction;
-import net.momirealms.craftengine.core.util.HorizontalDirection;
-import net.momirealms.craftengine.core.util.ResourceConfigUtils;
-import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
+import org.bukkit.Location;
+import org.bukkit.World;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -29,7 +31,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ButtonBlockBehavior extends BukkitBlockBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final BlockBehaviorFactory<ButtonBlockBehavior> FACTORY = new Factory();
     private final BooleanProperty poweredProperty;
     private final int ticksToStayPressed;
     private final boolean canButtonBeActivatedByArrows;
@@ -52,10 +54,19 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
 
     @Override
     public InteractionResult useWithoutItem(UseOnContext context, ImmutableBlockState state) {
+        Player player = context.getPlayer();
+        BlockPos pos = context.getClickedPos();
+        net.momirealms.craftengine.core.world.World world = context.getLevel();
+        if (player != null) {
+            Location location = new Location((World) world.platformWorld(), pos.x, pos.y, pos.z);
+            if (!BukkitCraftEngine.instance().antiGriefProvider().test((org.bukkit.entity.Player) player.platformPlayer(), Flag.USE_BUTTON, location)) {
+                return InteractionResult.SUCCESS_AND_CANCEL;
+            }
+        }
         if (!state.get(this.poweredProperty)) {
             press(BlockStateUtils.getBlockOwner(state.customBlockState().literalObject()),
-                    state, context.getLevel().serverWorld(), LocationUtils.toBlockPos(context.getClickedPos()),
-                    context.getPlayer() != null ? context.getPlayer().serverPlayer() : null);
+                    state, world.serverWorld(), LocationUtils.toBlockPos(pos),
+                    player != null ? player.serverPlayer() : null);
             return InteractionResult.SUCCESS_AND_CANCEL;
         }
         return InteractionResult.PASS;
@@ -148,7 +159,7 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
             updateNeighbours(thisBlock, blockState, level, pos);
             playSound(level, pos, on);
             Object gameEvent = VersionHelper.isOrAbove1_20_5()
-                    ? FastNMS.INSTANCE.method$Holder$direct(on ? MGameEvents.BLOCK_ACTIVATE : MGameEvents.BLOCK_DEACTIVATE)
+                    ? on ? MGameEvents.BLOCK_ACTIVATE$holder : MGameEvents.BLOCK_DEACTIVATE$holder
                     : on ? MGameEvents.BLOCK_ACTIVATE : MGameEvents.BLOCK_DEACTIVATE;
             FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, arrow, gameEvent, pos);
         }
@@ -190,21 +201,22 @@ public class ButtonBlockBehavior extends BukkitBlockBehavior {
 
     private void press(Object thisBlock, ImmutableBlockState state, Object level, Object pos, @Nullable Object player) {
         FastNMS.INSTANCE.method$LevelWriter$setBlock(level, pos, state.with(this.poweredProperty, true).customBlockState().literalObject(), UpdateOption.UPDATE_ALL.flags());
+        this.updateNeighbours(thisBlock, state, level, pos);
         FastNMS.INSTANCE.method$ScheduledTickAccess$scheduleBlockTick(level, pos, thisBlock, this.ticksToStayPressed);
         playSound(level, pos, true);
-        Object gameEvent = VersionHelper.isOrAbove1_20_5() ? FastNMS.INSTANCE.method$Holder$direct(MGameEvents.BLOCK_ACTIVATE) : MGameEvents.BLOCK_ACTIVATE;
+        Object gameEvent = VersionHelper.isOrAbove1_20_5() ? MGameEvents.BLOCK_ACTIVATE$holder : MGameEvents.BLOCK_ACTIVATE;
         FastNMS.INSTANCE.method$LevelAccessor$gameEvent(level, player, gameEvent, pos);
     }
 
-    public static class Factory implements BlockBehaviorFactory {
+    private static class Factory implements BlockBehaviorFactory<ButtonBlockBehavior> {
 
-        @SuppressWarnings({"unchecked", "DuplicatedCode"})
+        @SuppressWarnings("DuplicatedCode")
         @Override
-        public BlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+        public ButtonBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             BooleanProperty powered = (BooleanProperty) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("powered"), "warning.config.block.behavior.button.missing_powered");
             int ticksToStayPressed = ResourceConfigUtils.getAsInt(arguments.getOrDefault("ticks-to-stay-pressed", 30), "ticks-to-stay-pressed");
             boolean canButtonBeActivatedByArrows = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("can-be-activated-by-arrows", true), "can-be-activated-by-arrows");
-            Map<String, Object> sounds = (Map<String, Object>) arguments.get("sounds");
+            Map<String, Object> sounds = MiscUtils.castToMap(arguments.get("sounds"), true);
             SoundData buttonClickOnSound = null;
             SoundData buttonClickOffSound = null;
             if (sounds != null) {

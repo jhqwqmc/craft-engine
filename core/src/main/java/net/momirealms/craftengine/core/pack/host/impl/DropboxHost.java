@@ -2,14 +2,14 @@ package net.momirealms.craftengine.core.pack.host.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHostFactory;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHosts;
+import net.momirealms.craftengine.core.pack.host.*;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedException;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
-import net.momirealms.craftengine.core.util.*;
+import net.momirealms.craftengine.core.util.GsonHelper;
+import net.momirealms.craftengine.core.util.HashUtils;
+import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +26,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class DropboxHost implements ResourcePackHost {
-    public static final Factory FACTORY = new Factory();
+public final class DropboxHost implements ResourcePackHost {
+    public static final ResourcePackHostFactory<DropboxHost> FACTORY = new Factory();
     private final String appKey;
     private final String appSecret;
     private final String uploadPath;
@@ -92,7 +92,7 @@ public class DropboxHost implements ResourcePackHost {
     }
 
     @Override
-    public Key type() {
+    public ResourcePackHostType<DropboxHost> type() {
         return ResourcePackHosts.DROPBOX;
     }
 
@@ -257,10 +257,10 @@ public class DropboxHost implements ResourcePackHost {
         }
     }
 
-    public static class Factory implements ResourcePackHostFactory {
+    private static class Factory implements ResourcePackHostFactory<DropboxHost> {
 
         @Override
-        public ResourcePackHost create(Map<String, Object> arguments) {
+        public DropboxHost create(Map<String, Object> arguments) {
             boolean useEnv = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("use-environment-variables", false), "use-environment-variables");
             String appKey = useEnv ? System.getenv("CE_DROPBOX_APP_KEY") : Optional.ofNullable(arguments.get("app-key")).map(String::valueOf).orElse(null);
             if (appKey == null || appKey.isEmpty()) {

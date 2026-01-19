@@ -9,6 +9,7 @@ import net.momirealms.craftengine.bukkit.plugin.network.payload.protocol.VisualB
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.plugin.network.ModPacket;
+import net.momirealms.craftengine.core.plugin.network.ModPacketType;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.network.PayloadChannelKeys;
 import net.momirealms.craftengine.core.plugin.network.codec.NetworkCodec;
@@ -17,18 +18,21 @@ import net.momirealms.craftengine.core.registry.WritableRegistry;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 import net.momirealms.craftengine.core.util.ResourceKey;
 
-public class PayloadHelper {
-    public static final byte[] JADE_RESPONSE = new byte[]{0, 0, 0, 0};
+public final class PayloadHelper {
+    public static final ModPacketType<ClientCustomBlockPacket> CLIENT_CUSTOM_BLOCK = register(ClientCustomBlockPacket.TYPE, ClientCustomBlockPacket.CODEC);
+    public static final ModPacketType<CancelBlockUpdatePacket> CANCEL_BLOCK_UPDATE = register(CancelBlockUpdatePacket.TYPE, CancelBlockUpdatePacket.CODEC);
+    public static final ModPacketType<ClientBlockStateSizePacket> CLIENT_BLOCK_STATE_SIZE = register(ClientBlockStateSizePacket.TYPE, ClientBlockStateSizePacket.CODEC);
+    public static final ModPacketType<VisualBlockStatePacket> VISUAL_BLOCK_STATE = register(VisualBlockStatePacket.TYPE, VisualBlockStatePacket.CODEC);
 
-    public static void registerDataTypes() {
-        registerDataType(ClientCustomBlockPacket.TYPE, ClientCustomBlockPacket.CODEC);
-        registerDataType(CancelBlockUpdatePacket.TYPE, CancelBlockUpdatePacket.CODEC);
-        registerDataType(ClientBlockStateSizePacket.TYPE, ClientBlockStateSizePacket.CODEC);
-        registerDataType(VisualBlockStatePacket.TYPE, VisualBlockStatePacket.CODEC);
+    private PayloadHelper() {}
+
+    public static void init() {
     }
 
-    public static <T extends ModPacket> void registerDataType(ResourceKey<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>> key, NetworkCodec<FriendlyByteBuf, T> codec) {
+    public static <T extends ModPacket> ModPacketType<T> register(ResourceKey<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>> key, NetworkCodec<FriendlyByteBuf, T> codec) {
+        ModPacketType<T> type = new ModPacketType<>(key.location(), codec);
         ((WritableRegistry<NetworkCodec<FriendlyByteBuf, ? extends ModPacket>>) BuiltInRegistries.MOD_PACKET).register(key, codec);
+        return type;
     }
 
     public static void sendData(NetWorkUser user, ModPacket data) {

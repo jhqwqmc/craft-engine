@@ -1,8 +1,7 @@
 items:
   default:chessboard_block:
-    material: nether_brick
     data:
-      item-name: <!i><l10n:item.chessboard_block>
+      item-name: <!i><lang:item.default.chessboard_block>
     model: minecraft:block/custom/chessboard_block
     behavior:
       type: block_item
@@ -17,6 +16,7 @@ items:
           push-reaction: push_only
           instrument: basedrum
           map-color: 36
+          tags: ["minecraft:mineable/pickaxe"]
           sounds:
             break: minecraft:block.stone.break
             fall: minecraft:block.stone.fall

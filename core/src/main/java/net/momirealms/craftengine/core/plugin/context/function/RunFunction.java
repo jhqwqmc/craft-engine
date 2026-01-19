@@ -6,7 +6,6 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProvider;
 import net.momirealms.craftengine.core.plugin.context.number.NumberProviders;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
-import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -53,21 +52,20 @@ public class RunFunction<CTX extends Context> extends AbstractConditionalFunctio
         }
     }
 
-    @Override
-    public Key type() {
-        return CommonFunctions.RUN;
+    public static <CTX extends Context> FunctionFactory<CTX, RunFunction<CTX>> factory(java.util.function.Function<Map<String, Object>, Function<CTX>> f1, java.util.function.Function<Map<String, Object>, Condition<CTX>> f2) {
+        return new Factory<>(f1, f2);
     }
 
-    public static class FactoryImpl<CTX extends Context> extends AbstractFactory<CTX> {
+    private static class Factory<CTX extends Context> extends AbstractFactory<CTX, RunFunction<CTX>> {
         private final java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory;
 
-        public FactoryImpl(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
+        public Factory(java.util.function.Function<Map<String, Object>, Function<CTX>> functionFactory, java.util.function.Function<Map<String, Object>, Condition<CTX>> conditionFactory) {
             super(conditionFactory);
             this.functionFactory = functionFactory;
         }
 
         @Override
-        public Function<CTX> create(Map<String, Object> arguments) {
+        public RunFunction<CTX> create(Map<String, Object> arguments) {
             NumberProvider delay = NumberProviders.fromObject(arguments.getOrDefault("delay", 0));
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> functions = (List<Map<String, Object>>) ResourceConfigUtils.requireNonNullOrThrow(arguments.get("functions"), "warning.config.function.run.missing_functions");

@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.world;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
@@ -8,10 +9,10 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MFluids;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
 import net.momirealms.craftengine.core.block.*;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.ExistingBlock;
 import net.momirealms.craftengine.core.world.World;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -90,7 +91,7 @@ public class BukkitExistingBlock implements ExistingBlock {
 
     @Override
     public World world() {
-        return new BukkitWorld(this.block.getWorld());
+        return BukkitAdaptors.adapt(this.block.getWorld());
     }
 
     @Override

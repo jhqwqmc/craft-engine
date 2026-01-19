@@ -18,22 +18,21 @@ import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.behavior.BlockBoundItemBehavior;
-import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.pack.PendingConfigSection;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ContextHolder;
+import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
-import net.momirealms.craftengine.core.plugin.context.event.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 import org.bukkit.Bukkit;
 import org.bukkit.GameEvent;
 import org.bukkit.Location;
@@ -54,7 +53,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BlockItemBehavior extends BlockBoundItemBehavior {
-    public static final Factory FACTORY = new Factory();
+    public static final ItemBehaviorFactory<BlockItemBehavior> FACTORY = new Factory();
     private final Key blockId;
 
     public BlockItemBehavior(Key blockId) {
@@ -242,9 +241,9 @@ public class BlockItemBehavior extends BlockBoundItemBehavior {
         }
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<BlockItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public BlockItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for block_item behavior"));

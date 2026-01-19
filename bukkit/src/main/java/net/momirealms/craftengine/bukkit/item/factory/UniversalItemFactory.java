@@ -6,10 +6,11 @@ import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBuiltInRegistries;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.attribute.AttributeModifier;
+import net.momirealms.craftengine.core.item.ItemType;
 import net.momirealms.craftengine.core.item.data.Enchantment;
 import net.momirealms.craftengine.core.item.data.FireworkExplosion;
 import net.momirealms.craftengine.core.item.data.Trim;
-import net.momirealms.craftengine.core.item.modifier.IdModifier;
+import net.momirealms.craftengine.core.item.processor.IdProcessor;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.Key;
@@ -68,15 +69,20 @@ public class UniversalItemFactory extends BukkitItemFactory<LegacyItemWrapper> {
     }
 
     @Override
+    protected ItemType type(LegacyItemWrapper item) {
+        return item.itemType();
+    }
+
+    @Override
     protected Optional<Key> customId(LegacyItemWrapper item) {
-        Object id = item.getJavaTag(IdModifier.CRAFT_ENGINE_ID);
+        Object id = item.getJavaTag(IdProcessor.CRAFT_ENGINE_ID);
         if (id == null) return Optional.empty();
         return Optional.of(Key.of(id.toString()));
     }
 
     @Override
     protected void customId(LegacyItemWrapper item, Key id) {
-        item.setTag(id.toString(), IdModifier.CRAFT_ENGINE_ID);
+        item.setTag(id.toString(), IdProcessor.CRAFT_ENGINE_ID);
     }
 
     @Override
@@ -124,7 +130,10 @@ public class UniversalItemFactory extends BukkitItemFactory<LegacyItemWrapper> {
         if (skullData == null) {
             item.remove("SkullOwner");
         } else {
-            item.setTag(UUID.nameUUIDFromBytes(SkullUtils.identifierFromBase64(skullData).getBytes(StandardCharsets.UTF_8)), "SkullOwner", "Id");
+            UUID id = UUID.nameUUIDFromBytes(SkullUtils.identifierFromBase64(skullData).getBytes(StandardCharsets.UTF_8));
+            long most = id.getMostSignificantBits();
+            long least = id.getLeastSignificantBits();
+            item.setTag(List.of((int) (most >> 32), (int) most, (int) (least >> 32), (int) least), "SkullOwner", "Id");
             item.setTag(
                     List.of(Map.of("Value", skullData)),
                     "SkullOwner", "Properties", "textures"

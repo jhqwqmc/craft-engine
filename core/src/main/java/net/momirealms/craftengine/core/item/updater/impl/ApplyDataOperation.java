@@ -2,48 +2,43 @@ package net.momirealms.craftengine.core.item.updater.impl;
 
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
-import net.momirealms.craftengine.core.item.modifier.ItemDataModifier;
+import net.momirealms.craftengine.core.item.processor.ItemProcessor;
+import net.momirealms.craftengine.core.item.processor.ItemProcessors;
 import net.momirealms.craftengine.core.item.updater.ItemUpdater;
-import net.momirealms.craftengine.core.item.updater.ItemUpdaterType;
-import net.momirealms.craftengine.core.registry.BuiltInRegistries;
+import net.momirealms.craftengine.core.item.updater.ItemUpdaterFactory;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public class ApplyDataOperation<I> implements ItemUpdater<I> {
-    public static final Type<?> TYPE = new Type<>();
-    private final List<ItemDataModifier<I>> modifiers;
+public final class ApplyDataOperation implements ItemUpdater {
+    public static final ItemUpdaterFactory<ApplyDataOperation> FACTORY = new Factory();
+    private final List<ItemProcessor> modifiers;
 
-    public ApplyDataOperation(List<ItemDataModifier<I>> modifiers) {
+    public ApplyDataOperation(List<ItemProcessor> modifiers) {
         this.modifiers = modifiers;
     }
 
     @Override
-    public Item<I> update(Item<I> item, ItemBuildContext context) {
+    public <I> Item<I> update(Item<I> item, ItemBuildContext context) {
         if (this.modifiers != null) {
-            for (ItemDataModifier<I> modifier : this.modifiers) {
+            for (ItemProcessor modifier : this.modifiers) {
                 modifier.apply(item, context);
             }
         }
         return item;
     }
 
-    public static class Type<I> implements ItemUpdaterType<I> {
+    private static class Factory implements ItemUpdaterFactory<ApplyDataOperation> {
 
-        @SuppressWarnings("unchecked")
         @Override
-        public ItemUpdater<I> create(Key item, Map<String, Object> args) {
-            List<ItemDataModifier<I>> modifiers = new ArrayList<>();
+        public ApplyDataOperation create(Key item, Map<String, Object> args) {
+            List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                Optional.ofNullable(BuiltInRegistries.ITEM_DATA_MODIFIER_FACTORY.getValue(Key.withDefaultNamespace(entry.getKey(), Key.DEFAULT_NAMESPACE)))
-                        .ifPresent(factory -> modifiers.add((ItemDataModifier<I>) factory.create(entry.getValue())));
-            }
-            return new ApplyDataOperation<>(modifiers);
+            ItemProcessors.applyDataModifiers(data, modifiers::add);
+            return new ApplyDataOperation(modifiers);
         }
     }
 }

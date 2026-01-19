@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 
 import java.util.Map;
 
-public interface ConditionFactory<CTX extends Context> {
+public interface ConditionFactory<CTX extends Context, T extends Condition<CTX>> {
 
-    Condition<CTX> create(Map<String, Object> args);
+    T create(Map<String, Object> args);
 }

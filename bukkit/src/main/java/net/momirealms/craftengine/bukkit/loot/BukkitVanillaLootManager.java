@@ -6,7 +6,6 @@ import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MBlocks;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
-import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.loot.AbstractVanillaLootManager;
 import net.momirealms.craftengine.core.loot.LootTable;
@@ -66,7 +65,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
                 event.setDroppedExp(0);
             }
             Location location = entity.getLocation();
-            net.momirealms.craftengine.core.world.World world = new BukkitWorld(entity.getWorld());
+            net.momirealms.craftengine.core.world.World world = BukkitAdaptors.adapt(entity.getWorld());
             WorldPosition position = new WorldPosition(world, location.getX(), location.getY(), location.getZ());
             ContextHolder.Builder builder = ContextHolder.builder()
                     .withParameter(DirectContextParameters.POSITION, position);
@@ -74,7 +73,7 @@ public class BukkitVanillaLootManager extends AbstractVanillaLootManager impleme
             if (VersionHelper.isOrAbove1_20_5()) {
                 if (event.getDamageSource().getCausingEntity() instanceof Player player) {
                     optionalPlayer = BukkitAdaptors.adapt(player);
-                    builder.withParameter(DirectContextParameters.PLAYER, optionalPlayer);
+                    builder.withOptionalParameter(DirectContextParameters.PLAYER, optionalPlayer);
                 }
             }
             ContextHolder contextHolder = builder.build();

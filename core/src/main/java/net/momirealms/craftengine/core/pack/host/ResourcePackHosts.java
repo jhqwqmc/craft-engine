@@ -10,32 +10,24 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 import java.util.Map;
 
-public class ResourcePackHosts {
-    public static final Key NONE = Key.of("craftengine:none");
-    public static final Key SELF = Key.of("craftengine:self");
-    public static final Key EXTERNAL = Key.of("craftengine:external");
-    public static final Key LOBFILE = Key.of("craftengine:lobfile");
-    public static final Key S3 = Key.of("craftengine:s3");
-    public static final Key ALIST = Key.of("craftengine:alist");
-    public static final Key DROPBOX = Key.of("craftengine:dropbox");
-    public static final Key ONEDRIVE = Key.of("craftengine:onedrive");
-    public static final Key GITLAB = Key.of("craftengine:gitlab");
+public final class ResourcePackHosts {
+    public static final ResourcePackHostType<NoneHost> NONE = register(Key.ce("none"), NoneHost.FACTORY);
+    public static final ResourcePackHostType<SelfHost> SELF = register(Key.ce("self"), SelfHost.FACTORY);
+    public static final ResourcePackHostType<ExternalHost> EXTERNAL = register(Key.ce("external"), ExternalHost.FACTORY);
+    public static final ResourcePackHostType<LobFileHost> LOBFILE = register(Key.ce("lobfile"), LobFileHost.FACTORY);
+    public static final ResourcePackHostType<S3Host> S3 = register(Key.ce("s3"), S3HostFactory.INSTANCE);
+    public static final ResourcePackHostType<AlistHost> ALIST = register(Key.ce("alist"), AlistHost.FACTORY);
+    public static final ResourcePackHostType<DropboxHost> DROPBOX = register(Key.ce("dropbox"), DropboxHost.FACTORY);
+    public static final ResourcePackHostType<OneDriveHost> ONEDRIVE = register(Key.ce("onedrive"), OneDriveHost.FACTORY);
+    public static final ResourcePackHostType<GitLabHost> GITLAB = register(Key.ce("gitlab"), GitLabHost.FACTORY);
 
-    static {
-        register(NONE, NoneHost.FACTORY);
-        register(SELF, SelfHost.FACTORY);
-        register(EXTERNAL, ExternalHost.FACTORY);
-        register(LOBFILE, LobFileHost.FACTORY);
-        register(S3, S3HostFactory.INSTANCE);
-        register(ALIST, AlistHost.FACTORY);
-        register(DROPBOX, DropboxHost.FACTORY);
-        register(ONEDRIVE, OneDriveHost.FACTORY);
-        register(GITLAB, GitLabHost.FACTORY);
-    }
+    private ResourcePackHosts() {}
 
-    public static void register(Key key, ResourcePackHostFactory factory) {
-        ((WritableRegistry<ResourcePackHostFactory>) BuiltInRegistries.RESOURCE_PACK_HOST_FACTORY)
-                .register(ResourceKey.create(Registries.RESOURCE_PACK_HOST_FACTORY.location(), key), factory);
+    public static <T extends ResourcePackHost> ResourcePackHostType<T> register(Key key, ResourcePackHostFactory<T> factory) {
+        ResourcePackHostType<T> type = new ResourcePackHostType<>(key, factory);
+        ((WritableRegistry<ResourcePackHostType<? extends ResourcePackHost>>) BuiltInRegistries.RESOURCE_PACK_HOST_TYPE)
+                .register(ResourceKey.create(Registries.RESOURCE_PACK_HOST_TYPE.location(), key), type);
+        return type;
     }
 
     public static ResourcePackHost fromMap(Map<String, Object> map) {
@@ -44,10 +36,10 @@ public class ResourcePackHosts {
             throw new LocalizedException("warning.config.host.missing_type");
         }
         Key key = Key.withDefaultNamespace(type, Key.DEFAULT_NAMESPACE);
-        ResourcePackHostFactory factory = BuiltInRegistries.RESOURCE_PACK_HOST_FACTORY.getValue(key);
-        if (factory == null) {
+        ResourcePackHostType<? extends ResourcePackHost> hostType = BuiltInRegistries.RESOURCE_PACK_HOST_TYPE.getValue(key);
+        if (hostType == null) {
             throw new LocalizedException("warning.config.host.invalid_type", type);
         }
-        return factory.create(map);
+        return hostType.factory().create(map);
     }
 }

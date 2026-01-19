@@ -10,6 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class FileUtils {
@@ -67,9 +68,21 @@ public class FileUtils {
         }
     }
 
+    public static List<Path> collectOverlays(Path resourcePackFolder, Predicate<String> directoryPredicate) throws IOException {
+        List<Path> folders = new ObjectArrayList<>();
+        try (Stream<Path> paths = Files.list(resourcePackFolder)) {
+            folders.addAll(paths
+                    .filter(Files::isDirectory)
+                    .filter(path -> directoryPredicate.test(path.getFileName().toString()))
+                    .filter(path -> !path.getFileName().toString().equals("assets"))
+                    .filter(path -> Files.exists(path.resolve("assets")))
+                    .toList());
+        }
+        return folders;
+    }
+
     public static List<Path> collectOverlays(Path resourcePackFolder) throws IOException {
         List<Path> folders = new ObjectArrayList<>();
-        folders.add(resourcePackFolder);
         try (Stream<Path> paths = Files.list(resourcePackFolder)) {
             folders.addAll(paths
                     .filter(Files::isDirectory)

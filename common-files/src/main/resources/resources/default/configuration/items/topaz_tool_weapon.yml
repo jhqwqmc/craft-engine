@@ -5,7 +5,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_rod>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_rod>
       tooltip-style: minecraft:topaz
     textures:
       - minecraft:item/custom/topaz_rod
@@ -16,7 +16,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_bow>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_bow>
       tooltip-style: minecraft:topaz
     textures:
       - minecraft:item/custom/topaz_bow
@@ -29,7 +29,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_crossbow>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_crossbow>
       tooltip-style: minecraft:topaz
     textures:
       - minecraft:item/custom/topaz_crossbow
@@ -44,7 +44,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_pickaxe>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_pickaxe>
       tooltip-style: minecraft:topaz
       max-damage: 64
     texture: minecraft:item/custom/topaz_pickaxe
@@ -54,7 +54,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_axe>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_axe>
       tooltip-style: minecraft:topaz
       max-damage: 64
     texture: minecraft:item/custom/topaz_axe
@@ -64,7 +64,7 @@ items:
       tags:
         - default:topaz_tools
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_hoe>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_hoe>
       tooltip-style: minecraft:topaz
       max-damage: 64
     texture: minecraft:item/custom/topaz_hoe
@@ -73,7 +73,7 @@ items:
     settings:
       tags: ["default:topaz_tools"]
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_shovel>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_shovel>
       tooltip-style: minecraft:topaz
       max-damage: 64
     texture: minecraft:item/custom/topaz_shovel
@@ -82,7 +82,7 @@ items:
     settings:
       tags: ["default:topaz_tools"]
     data:
-      item-name: <!i><#FF8C00><l10n:item.topaz_sword>
+      item-name: <!i><#FF8C00><lang:item.default.topaz_sword>
       tooltip-style: minecraft:topaz
       max-damage: 64
     texture: minecraft:item/custom/topaz_sword
@@ -99,7 +99,7 @@ items:
         tags:
           - default:topaz_tools
       data:
-        item-name: <!i><#FF8C00><l10n:item.topaz_trident>
+        item-name: <!i><#FF8C00><lang:item.default.topaz_trident>
         tooltip-style: minecraft:topaz
         max-damage: 300
       model:
@@ -140,7 +140,7 @@ items:
         $$1.20.1~1.21.1: bow
         $$1.21.2~1.21.3: honey_bottle
       data:
-        item-name: <!i><#FF8C00><l10n:item.topaz_trident>
+        item-name: <!i><#FF8C00><lang:item.default.topaz_trident>
         components:
           minecraft:max_damage: 300
       $$>=1.21.2:

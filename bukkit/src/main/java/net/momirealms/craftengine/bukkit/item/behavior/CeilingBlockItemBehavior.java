@@ -1,22 +1,21 @@
 package net.momirealms.craftengine.bukkit.item.behavior;
 
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
-import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorFactory;
-import net.momirealms.craftengine.core.item.context.BlockPlaceContext;
-import net.momirealms.craftengine.core.item.context.UseOnContext;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
+import net.momirealms.craftengine.core.world.context.UseOnContext;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-public class CeilingBlockItemBehavior extends BlockItemBehavior {
-    public static final Factory FACTORY = new Factory();
+public final class CeilingBlockItemBehavior extends BlockItemBehavior {
+    public static final ItemBehaviorFactory<CeilingBlockItemBehavior> FACTORY = new Factory();
 
-    public CeilingBlockItemBehavior(Key ceilingBlockId) {
+    private CeilingBlockItemBehavior(Key ceilingBlockId) {
         super(ceilingBlockId);
     }
 
@@ -33,9 +32,9 @@ public class CeilingBlockItemBehavior extends BlockItemBehavior {
         return super.place(context);
     }
 
-    public static class Factory implements ItemBehaviorFactory {
+    private static class Factory implements ItemBehaviorFactory<CeilingBlockItemBehavior> {
         @Override
-        public ItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
+        public CeilingBlockItemBehavior create(Pack pack, Path path, String node, Key key, Map<String, Object> arguments) {
             Object id = arguments.get("block");
             if (id == null) {
                 throw new LocalizedResourceConfigException("warning.config.item.behavior.ceiling_block.missing_block", new IllegalArgumentException("Missing required parameter 'block' for ceiling_block_item behavior"));

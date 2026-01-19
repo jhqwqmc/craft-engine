@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.block;
 
+import net.momirealms.craftengine.core.block.behavior.BlockBehavior;
 import net.momirealms.craftengine.core.util.ObjectHolder;
 
 /**
