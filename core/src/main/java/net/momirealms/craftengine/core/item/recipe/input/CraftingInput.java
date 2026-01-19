@@ -31,7 +31,7 @@ public final class CraftingInput<T> implements RecipeInput, Iterable<UniqueIdIte
     }
 
     public RecipeFinder finder() {
-        return finder;
+        return this.finder;
     }
 
     public static <T> CraftingInput<T> of(int width, int height, List<UniqueIdItem<T>> stacks) {

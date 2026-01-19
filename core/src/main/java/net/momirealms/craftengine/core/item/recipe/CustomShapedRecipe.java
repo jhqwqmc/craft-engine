@@ -31,17 +31,12 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
                               Pattern<T> pattern,
                               Function<Context>[] craftingFunctions,
                               Condition<Context> craftingCondition,
-                              boolean alwaysRebuildOutput) {
+                              boolean alwaysRebuildOutput,
+                              boolean takeAdditionalIngredients) {
         super(id, showNotification, result, visualResult, group, category, craftingFunctions, craftingCondition, alwaysRebuildOutput);
         this.pattern = pattern;
         this.parsedPattern = pattern.parse();
-        boolean has = false;
-        for (Optional<Ingredient<T>> ingredient : this.parsedPattern.ingredients()) {
-            if (ingredient.isPresent() && ingredient.get().count() > 1) {
-                has = true;
-            }
-        }
-        this.takeAdditionalIngredients = has;
+        this.takeAdditionalIngredients = takeAdditionalIngredients;
     }
 
     public ParsedPattern<T> parsedPattern() {
@@ -217,13 +212,18 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
             }
             Object ingredientObj = getIngredientOrThrow(arguments);
             Map<Character, Ingredient<A>> ingredients = new HashMap<>();
+            boolean hasAdditionalIngredients = false;
             for (Map.Entry<String, Object> entry : ResourceConfigUtils.getAsMap(ingredientObj, "ingredient").entrySet()) {
                 String key = entry.getKey();
                 if (key.length() != 1) {
                     throw new LocalizedResourceConfigException("warning.config.recipe.shaped.invalid_symbol", key);
                 }
                 char ch = key.charAt(0);
-                ingredients.put(ch, parseIngredient(entry.getValue()));
+                Ingredient<A> in = parseIngredient(entry.getValue());
+                ingredients.put(ch, in);
+                if (in.count() > 1) {
+                    hasAdditionalIngredients = true;
+                }
             }
             return new CustomShapedRecipe(id,
                     showNotification(arguments),
@@ -233,7 +233,8 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
                     new Pattern<>(pattern.toArray(new String[0]), ingredients),
                     functions(arguments),
                     conditions(arguments),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("always-rebuild-result", true), "always-rebuild-result")
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("always-rebuild-result", true), "always-rebuild-result"),
+                    hasAdditionalIngredients
             );
         }
 
@@ -249,6 +250,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
                     new Pattern<>(VANILLA_RECIPE_HELPER.craftingShapedPattern(json), ingredients),
                     null,
                     null,
+                    false,
                     false
             );
         }

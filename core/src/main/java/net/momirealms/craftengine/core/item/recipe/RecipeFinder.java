@@ -21,4 +21,8 @@ public class RecipeFinder {
     private boolean canCraft(List<? extends StackedContents.IngredientInfo<UniqueKey>> rawIngredients) {
         return this.stackedContents.tryPick(rawIngredients);
     }
+
+    public <T> void takeAdditionalIngredients(CustomShapelessRecipe<T> recipe, int left) {
+
+    }
 }
