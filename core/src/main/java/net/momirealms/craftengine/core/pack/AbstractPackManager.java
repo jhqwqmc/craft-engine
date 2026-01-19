@@ -991,6 +991,31 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
+    private Predicate<String> parseExcludePredicate(Set<String> exclude) {
+        List<String> excludeFolders = new ArrayList<>();
+        exclude.removeIf(it -> {
+            if (it.endsWith("/")) {
+                excludeFolders.add(it);
+                return true;
+            }
+            return false;
+        });
+        Predicate<String> folderPredicate;
+        if (excludeFolders.isEmpty()) {
+            folderPredicate = (s) -> false;
+        } else {
+            folderPredicate = (s) -> {
+                for (String folder : excludeFolders) {
+                    if (s.startsWith(folder)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+        }
+        return folderPredicate;
+    }
+
     @SuppressWarnings("DuplicatedCode")
     private void optimizeResourcePack(Path path) {
         // 收集全部overlay
@@ -1007,27 +1032,32 @@ public abstract class AbstractPackManager implements PackManager {
         List<Path> modelJsonToOptimize = new ArrayList<>();
         Set<String> excludeTexture = new HashSet<>(Config.optimizeTextureExclude());
         Set<String> excludeJson = new HashSet<>(Config.optimizeJsonExclude());
-        Set<String> excludeTexturePath = new HashSet<>(Config.optimizeTextureExcludePath());
-        Set<String> excludeJsonPath = new HashSet<>(Config.optimizeJsonExcludePath());
         excludeTexture.addAll(this.parser.excludeTexture());
         excludeJson.addAll(this.parser.excludeJson());
-        Predicate<Path> texturePathPredicate = p -> {
+        Predicate<String> textureFolderPredicate = parseExcludePredicate(excludeTexture);
+        Predicate<String> jsonFolderPredicate = parseExcludePredicate(excludeJson);
+
+        Predicate<Path> textureExcluder = p -> {
             Path relativize = path.relativize(p);
-            boolean unFilteredFile = !excludeTexture.contains(CharacterUtils.replaceBackslashWithSlash(relativize.toString()));
-            boolean unFilteredPath = !excludeTexturePath.contains(CharacterUtils.replaceBackslashWithSlash(String.valueOf(relativize.getParent())));
-            return unFilteredFile && unFilteredPath;
+            String relativizePath = CharacterUtils.replaceBackslashWithSlash(relativize.toString());
+            if (excludeTexture.contains(relativizePath)) {
+                return true;
+            }
+            return textureFolderPredicate.test(relativizePath);
         };
-        Predicate<Path> jsonPathPredicate = p -> {
+        Predicate<Path> jsonExcluder = p -> {
             Path relativize = path.relativize(p);
-            boolean unFilteredFile = !excludeJson.contains(CharacterUtils.replaceBackslashWithSlash(relativize.toString()));
-            boolean unFilteredPath = !excludeJsonPath.contains(CharacterUtils.replaceBackslashWithSlash(String.valueOf(relativize.getParent())));
-            return unFilteredFile && unFilteredPath;
+            String relativizePath = CharacterUtils.replaceBackslashWithSlash(relativize.toString());
+            if (excludeJson.contains(relativizePath)) {
+                return true;
+            }
+            return jsonFolderPredicate.test(relativizePath);
         };
 
         if (Config.optimizeJson()) {
             Path metaPath = path.resolve("pack.mcmeta");
             if (Files.exists(metaPath)) {
-                if (jsonPathPredicate.test(metaPath)) {
+                if (jsonExcluder.test(metaPath)) {
                     commonJsonToOptimize.add(metaPath);
                 }
             }
@@ -1036,7 +1066,7 @@ public abstract class AbstractPackManager implements PackManager {
         if (Config.optimizeTexture()) {
             Path packPngPath = path.resolve("pack.png");
             if (Files.exists(packPngPath)) {
-                if (texturePathPredicate.test(packPngPath)) {
+                if (textureExcluder.test(packPngPath)) {
                     imagesToOptimize.add(packPngPath);
                 }
             }
@@ -1069,7 +1099,7 @@ public abstract class AbstractPackManager implements PackManager {
                                     @Override
                                     public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                         if (!FileUtils.isJsonFile(file)) return FileVisitResult.CONTINUE;
-                                        if (!jsonPathPredicate.test(file)) return FileVisitResult.CONTINUE;
+                                        if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                         commonJsonToOptimize.add(file);
                                         return FileVisitResult.CONTINUE;
                                     }
@@ -1088,7 +1118,7 @@ public abstract class AbstractPackManager implements PackManager {
                                 @Override
                                 public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                     if (!FileUtils.isJsonFile(file)) return FileVisitResult.CONTINUE;
-                                    if (!jsonPathPredicate.test(file)) return FileVisitResult.CONTINUE;
+                                    if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                     modelJsonToOptimize.add(file);
                                     return FileVisitResult.CONTINUE;
                                 }
@@ -1108,11 +1138,11 @@ public abstract class AbstractPackManager implements PackManager {
                                 @Override
                                 public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                     if (FileUtils.isPngFile(file)) {
-                                        if (Config.optimizeTexture() && texturePathPredicate.test(file)) {
+                                        if (Config.optimizeTexture() && !textureExcluder.test(file)) {
                                             imagesToOptimize.add(file);
                                         }
                                     } else if (FileUtils.isMcMetaFile(file) && Config.optimizeJson()) {
-                                        if (!jsonPathPredicate.test(file)) return FileVisitResult.CONTINUE;
+                                        if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                         commonJsonToOptimize.add(file);
                                     }
                                     return FileVisitResult.CONTINUE;
@@ -3580,7 +3610,7 @@ public abstract class AbstractPackManager implements PackManager {
             List<String> textures = MiscUtils.getAsStringList(section.get("texture"));
             if (!textures.isEmpty()) {
                 for (String texture : textures) {
-                    if (texture.endsWith(".png")) {
+                    if (texture.endsWith(".png") || texture.endsWith("/")) {
                         this.excludeTexture.add(texture);
                     } else {
                         this.excludeTexture.add(texture + ".png");
@@ -3590,7 +3620,7 @@ public abstract class AbstractPackManager implements PackManager {
             List<String> jsons = MiscUtils.getAsStringList(section.get("json"));
             if (!jsons.isEmpty()) {
                 for (String json : jsons) {
-                    if (json.endsWith(".json") || json.endsWith(".mcmeta")) {
+                    if (json.endsWith(".json") || json.endsWith(".mcmeta") || json.endsWith("/")) {
                         this.excludeJson.add(json);
                     } else {
                         this.excludeJson.add(json + ".json");
