@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,6 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<>();
     private final List<Ingredient<T>> ingredients;
     private final PlacementInfo<T> placementInfo;
-    private final boolean takeAdditionalIngredients;
 
     public CustomShapelessRecipe(Key id,
                                  boolean showNotification,
@@ -32,12 +30,10 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                                  List<Ingredient<T>> ingredients,
                                  Function<Context>[] craftingFunctions,
                                  Condition<Context> craftingCondition,
-                                 boolean alwaysRebuildOutput,
-                                 boolean takeAdditionalIngredients) {
+                                 boolean alwaysRebuildOutput) {
         super(id, showNotification, result, visualResult, group, category, craftingFunctions, craftingCondition, alwaysRebuildOutput);
         this.ingredients = ingredients;
         this.placementInfo = PlacementInfo.create(ingredients);
-        this.takeAdditionalIngredients = takeAdditionalIngredients;
     }
 
     public PlacementInfo<T> placementInfo() {
@@ -65,23 +61,6 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
         return input.finder().canCraft(this);
     }
 
-    public boolean takeAdditionalIngredients() {
-        return this.takeAdditionalIngredients;
-    }
-
-    public void takeAdditionalIngredients(CraftingInput<T> input, int left) {
-        if (input.ingredientCount() != this.ingredients.size()) {
-            return;
-        }
-        if (input.size() == 1 && this.ingredients.size() == 1) {
-            UniqueIdItem<T> item = input.getItem(0);
-            Ingredient<T> first = this.ingredients.getFirst();
-            item.item().shrink(first.count() - left);
-            return;
-        }
-        input.finder().takeAdditionalIngredients(this, left);
-    }
-
     @Override
     public @NotNull Key serializerType() {
         return RecipeSerializers.SHAPELESS;
@@ -93,33 +72,19 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
         @Override
         public CustomShapelessRecipe<A> readMap(Key id, Map<String, Object> arguments) {
             List<Ingredient<A>> ingredients = new ArrayList<>();
-            boolean hasAdditionalInput = false;
             Object ingredientsObject = getIngredientOrThrow(arguments);
             if (ingredientsObject instanceof Map<?,?> map) {
                 for (Map.Entry<String, Object> entry : (MiscUtils.castToMap(map, false)).entrySet()) {
                     if (entry.getValue() == null) continue;
-                    Ingredient<A> in = parseIngredient(entry.getValue());
-                    ingredients.add(in);
-                    if (in.count() > 1) {
-                        hasAdditionalInput = true;
-                    }
+                    ingredients.add(parseIngredient(entry.getValue()));
                 }
             } else if (ingredientsObject instanceof List<?> list) {
                 for (Object obj : list) {
-                    Ingredient<A> in = parseIngredient(obj);
-                    ingredients.add(in);
-                    if (in.count() > 1) {
-                        hasAdditionalInput = true;
-                    }
+                    ingredients.add(parseIngredient(obj));
                 }
             } else {
-                Ingredient<A> ingredient = parseIngredient(ingredientsObject);
-                ingredients.add(ingredient);
-                if (ingredient.count() > 1) {
-                    hasAdditionalInput = true;
-                }
+                ingredients.add(parseIngredient(ingredientsObject));
             }
-            ingredients.sort(Comparator.comparingInt(Ingredient::count));
             return new CustomShapelessRecipe(id,
                     showNotification(arguments),
                     parseResult(arguments),
@@ -128,8 +93,7 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                     ingredients,
                     functions(arguments),
                     conditions(arguments),
-                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("always-rebuild-result", true), "always-rebuild-result"),
-                    hasAdditionalInput
+                    ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("always-rebuild-result", true), "always-rebuild-result")
             );
         }
 
@@ -143,7 +107,6 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                     VANILLA_RECIPE_HELPER.shapelessIngredients(json.getAsJsonArray("ingredients")).stream().map(this::toIngredient).toList(),
                     null,
                     null,
-                    false,
                     false
             );
         }
