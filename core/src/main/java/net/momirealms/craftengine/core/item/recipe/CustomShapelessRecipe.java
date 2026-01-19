@@ -79,7 +79,26 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
             item.item().shrink(first.count() - left);
             return;
         }
-        input.finder().takeAdditionalIngredients(this, left);
+        List<UniqueIdItem<T>> inputItems = new ArrayList<>(input.items);
+        // 数量多的排前面
+        inputItems.sort((o1, o2) -> Integer.compare(o2.item().count(), o1.item().count()));
+        boolean[] taken = new boolean[inputItems.size()];
+        outer:
+        for (Ingredient<T> ingredient : this.ingredients) {
+            for (int j = 0; j < taken.length; j++) {
+                if (!taken[j]) {
+                    UniqueIdItem<T> inputItem = inputItems.get(j);
+                    if (ingredient.test(inputItem)) {
+                        int toShrink = ingredient.count() - left;
+                        if (toShrink > 0) {
+                            inputItem.item().shrink(toShrink);
+                        }
+                        taken[j] = true;
+                        continue outer;
+                    }
+                }
+            }
+        }
     }
 
     @Override

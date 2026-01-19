@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.util.UniqueKey;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContents.IngredientInfo<UniqueKey> {
+public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContents.IngredientInfo<UniqueIdItem<T>> {
     private final List<IngredientElement> elements;
     // 自定义物品与原版物品混合的列表
     private final List<UniqueKey> items;
@@ -80,8 +80,11 @@ public class Ingredient<T> implements Predicate<UniqueIdItem<T>>, StackedContent
     }
 
     @Override
-    public boolean acceptsItem(UniqueKey entry) {
-        return this.items.contains(entry);
+    public boolean acceptsItem(UniqueIdItem<T> entry) {
+        if (!this.items.contains(entry.id())) {
+            return false;
+        }
+        return this.count <= 1 || entry.item().count() >= this.count;
     }
 }
 

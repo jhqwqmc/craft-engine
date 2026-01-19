@@ -57,7 +57,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
 
     protected Ingredient<T> parseIngredient(Object rawIngredient) {
         if (rawIngredient instanceof Map<?,?> map) {
-            List<String> ingredients = MiscUtils.getAsStringList(map.get("items"));
+            List<String> ingredients = MiscUtils.getAsStringList(ResourceConfigUtils.get(MiscUtils.castToMap(rawIngredient, false), "items", "item"));
             int count = ResourceConfigUtils.getAsInt(map.get("count"), "count");
             return toIngredient(ingredients, Math.max(count, 1));
         } else {

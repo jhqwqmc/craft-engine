@@ -1236,8 +1236,9 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
                     char currentChar = (char) (start + x + y * 3);
                     if (i < ingredients.size()) {
                         List<Item<?>> ingredientItems = new ArrayList<>();
-                        for (UniqueKey in : ingredients.get(i).items()) {
-                            ingredientItems.add(this.plugin.itemManager().createWrappedItem(in.key(), player));
+                        net.momirealms.craftengine.core.item.recipe.Ingredient<Object> ingredient = ingredients.get(i);
+                        for (UniqueKey in : ingredient.items()) {
+                            ingredientItems.add(this.plugin.itemManager().createWrappedItem(in.key(), player).count(ingredient.count()));
                         }
                         layout.addIngredient(currentChar, GuiElement.recipeIngredient(ingredientItems, (e, c) -> {
                             c.cancel();
