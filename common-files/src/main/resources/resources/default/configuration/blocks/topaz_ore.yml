@@ -110,7 +110,7 @@ recipes:
       count: 1
 placed-features:
   default:topaz_ore:
-    environment:
+    dimension:
       - minecraft:overworld
     feature:
       type: minecraft:ore

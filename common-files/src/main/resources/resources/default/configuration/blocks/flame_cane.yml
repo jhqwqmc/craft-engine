@@ -101,7 +101,7 @@ recipes:
       count: 2
 placed-features:
   default:flame_cane:
-    environment:
+    dimension:
       - minecraft:the_nether
     feature:
       type: 'minecraft:random_patch'

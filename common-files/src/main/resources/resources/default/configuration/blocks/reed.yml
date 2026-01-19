@@ -38,7 +38,7 @@ placed-features:
   default:reed:
     biome:
       - minecraft:river
-    environment:
+    dimension:
       - minecraft:overworld
     feature:
       type: 'minecraft:random_patch'
