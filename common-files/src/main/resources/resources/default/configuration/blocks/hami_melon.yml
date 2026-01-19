@@ -211,7 +211,7 @@ recipes:
       count: 1
 placed-features:
   default:hami_melon:
-    dimension:
+    dimension-type:
       - minecraft:overworld
     feature:
       type: 'minecraft:random_patch'

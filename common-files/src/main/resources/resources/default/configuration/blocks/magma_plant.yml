@@ -151,7 +151,7 @@ blocks:
           - type: update_interaction_tick
 placed-features:
   default:reed:
-    dimension:
+    dimension-type:
       - minecraft:the_nether
     feature:
       type: 'minecraft:random_patch'

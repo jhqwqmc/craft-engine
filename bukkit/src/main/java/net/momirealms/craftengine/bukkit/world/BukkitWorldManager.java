@@ -105,9 +105,13 @@ public class BukkitWorldManager implements WorldManager, Listener {
         World world = FastNMS.INSTANCE.method$Level$getCraftWorld(serverLevel);
         String name = world.getName();
         Key dimension = KeyUtils.resourceLocationToKey(FastNMS.INSTANCE.field$ResourceKey$location(FastNMS.INSTANCE.method$Level$dimension(serverLevel)));
+        Object holder = FastNMS.INSTANCE.method$Level$dimensionTypeRegistration(serverLevel);
+        Key dimensionType = CoreReflections.clazz$Holder$Reference.isInstance(holder)
+                ? KeyUtils.resourceLocationToKey(FastNMS.INSTANCE.method$Holder$Reference$identifier(holder))
+                : null;
         List<ConditionalFeature> features = new ArrayList<>();
         for (ConditionalFeature feature : this.placedFeatures) {
-            if (feature.isAllowedWorld(name) && feature.isAllowedEnvironment(dimension)) {
+            if (feature.isAllowedWorld(name) && feature.isAllowedEnvironment(dimension) && feature.isAllowedDimensionType(dimensionType)) {
                 features.add(feature);
             }
         }
@@ -630,6 +634,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             Predicate<Key> biomeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "biome", "biomes"), Key::of);
             Predicate<String> worldFilter = parseFilter(ResourceConfigUtils.get(processedSection, "world", "worlds"), Function.identity());
             Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "dimension", "dimensions", "environment", "environments"), Key::of);
+            Predicate<Key> dimensionTypeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "dimension-type"), Key::of);
 
             Object rawFeature = processedSection.get("feature");
             Object configuredFeature = null;
@@ -677,7 +682,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
             }
             try {
                 Object placedFeature = CoreReflections.constructor$PlacedFeature.newInstance(configuredFeature, placements);
-                this.tempFeatures.add(new ConditionalFeature(this.id++, placedFeature, biomeFilter, worldFilter, environmentFilter));
+                this.tempFeatures.add(new ConditionalFeature(this.id++, placedFeature, biomeFilter, worldFilter, environmentFilter, dimensionTypeFilter));
             } catch (ReflectiveOperationException e) {
                 BukkitWorldManager.this.plugin.logger().warn("Failed to create placed feature '" + id + "': " + e, e);
             }

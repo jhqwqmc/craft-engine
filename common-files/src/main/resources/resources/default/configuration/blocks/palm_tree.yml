@@ -787,7 +787,7 @@ placed-features:
   default:palm_tree:
     biome:
       - minecraft:beach
-    dimension:
+    dimension-type:
       - minecraft:overworld
     feature: default:palm_tree
     placement:
