@@ -92,10 +92,10 @@ recipes:
   default:magma_block:
     type: shapeless
     ingredients:
-      A1: minecraft:cobblestone
-      A2: minecraft:cobblestone
-      B1: default:flame_cane
-      B2: default:flame_cane
+      - minecraft:cobblestone
+      - minecraft:cobblestone
+      - default:flame_cane
+      - default:flame_cane
     result:
       id: minecraft:magma_block
       count: 2

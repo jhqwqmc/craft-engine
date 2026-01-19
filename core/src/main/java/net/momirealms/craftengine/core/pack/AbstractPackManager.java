@@ -2116,6 +2116,7 @@ public abstract class AbstractPackManager implements PackManager {
                             pattern.addProperty("path", "^" + texture.value() + "$");
                             source.add("pattern", pattern);
                             sources.add(source);
+                            itemAtlas.addDeleted(texture);
                         }
                     }
 
