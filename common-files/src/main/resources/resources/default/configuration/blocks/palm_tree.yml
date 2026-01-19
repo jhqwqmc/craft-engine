@@ -644,6 +644,8 @@ recipes:
       wood_type: default:stripped_palm
   default:palm_trapdoor:
     type: shaped
+    category: redstone
+    group: wooden_trapdoor
     pattern:
       - AAA
       - AAA
@@ -654,6 +656,8 @@ recipes:
       count: 2
   default:palm_door:
     type: shaped
+    category: redstone
+    group: wooden_door
     pattern:
       - AA
       - AA
@@ -665,6 +669,8 @@ recipes:
       count: 3
   default:palm_fence_gate:
     type: shaped
+    category: redstone
+    group: wooden_fence_gate
     pattern:
       - ABA
       - ABA
@@ -676,6 +682,8 @@ recipes:
       count: 1
   default:palm_slab:
     type: shaped
+    category: building
+    group: wooden_slab
     pattern:
       - AAA
     ingredients:
@@ -685,6 +693,8 @@ recipes:
       count: 6
   default:palm_pressure_plate:
     type: shaped
+    category: redstone
+    group: wooden_pressure_plate
     pattern:
       - AA
     ingredients:
@@ -695,6 +705,8 @@ recipes:
   $$>=1.20.3#palm_stairs:
     default:palm_stairs:
       type: shaped
+      category: building
+      group: wooden_stairs
       pattern:
         - "A  "
         - "AA "
@@ -706,6 +718,8 @@ recipes:
         count: 4
   default:palm_button:
     type: shapeless
+    category: redstone
+    group: wooden_button
     ingredients:
       - default:palm_planks
     result:
@@ -713,6 +727,8 @@ recipes:
       count: 1
   default:palm_fence:
     type: shaped
+    category: misc
+    group: wooden_fence
     pattern:
       - ABA
       - ABA
