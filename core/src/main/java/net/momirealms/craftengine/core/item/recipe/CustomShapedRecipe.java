@@ -186,8 +186,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
                     throw new LocalizedResourceConfigException("warning.config.recipe.shaped.invalid_symbol", key);
                 }
                 char ch = key.charAt(0);
-                List<String> items = MiscUtils.getAsStringList(entry.getValue());
-                ingredients.put(ch, toIngredient(items));
+                ingredients.put(ch, parseIngredient(entry.getValue()));
             }
             return new CustomShapedRecipe(id,
                     showNotification(arguments),

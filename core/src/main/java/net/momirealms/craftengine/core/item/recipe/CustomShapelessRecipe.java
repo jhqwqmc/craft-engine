@@ -76,19 +76,14 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
             if (ingredientsObject instanceof Map<?,?> map) {
                 for (Map.Entry<String, Object> entry : (MiscUtils.castToMap(map, false)).entrySet()) {
                     if (entry.getValue() == null) continue;
-                    ingredients.add(toIngredient(MiscUtils.getAsStringList(entry.getValue())));
+                    ingredients.add(parseIngredient(entry.getValue()));
                 }
             } else if (ingredientsObject instanceof List<?> list) {
                 for (Object obj : list) {
-                    if (obj instanceof List<?> inner) {
-                        ingredients.add(toIngredient(MiscUtils.getAsStringList(inner)));
-                    } else {
-                        String item = obj.toString();
-                        ingredients.add(toIngredient(item));
-                    }
+                    ingredients.add(parseIngredient(obj));
                 }
             } else {
-                ingredients.add(toIngredient(ingredientsObject.toString()));
+                ingredients.add(parseIngredient(ingredientsObject));
             }
             return new CustomShapelessRecipe(id,
                     showNotification(arguments),

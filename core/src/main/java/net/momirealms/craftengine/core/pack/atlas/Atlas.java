@@ -151,8 +151,8 @@ public final class Atlas {
         this.defined.add(key);
     }
 
-    public boolean addDeleted(Key key) {
-        return this.deleted.contains(key);
+    public void addDeleted(Key key) {
+        this.deleted.add(key);
     }
 
     // 获取贴图源文件路径，有些类型可能查不到
@@ -160,11 +160,11 @@ public final class Atlas {
         // 被筛选掉了
         if (this.filtered.test(texture)) return null;
         // 被修复过
-        if (!this.deleted.isEmpty() && this.deleted.contains(texture)) return null;
-        // 被unstitch或者调色盘定义
-        if (!this.defined.isEmpty() && this.defined.contains(texture)) return null;
+        if (this.deleted.contains(texture)) return null;
         // single直接包含
         if (this.single.contains(texture)) return texture;
+        // 被unstitch或者调色盘定义
+        if (this.defined.contains(texture)) return null;
         String path = texture.value();
         // 路径匹配
         for (Map.Entry<String, String> entry : this.directory.entrySet()) {
