@@ -220,6 +220,7 @@ public class BukkitServerPlayer extends Player {
         this.selectedLocale = TranslationManager.parseLocale(locale);
         this.trackedChunks = ConcurrentLong2ReferenceChainedHashTable.createWithCapacity(512, 0.5f);
         this.entityTypeView = new ConcurrentHashMap<>(256);
+        this.eyeLocation = getEyeLocation();
         try {
             this.cooldownData = CooldownData.fromBytes(bytes);
         } catch (IOException e) {
@@ -741,12 +742,12 @@ public class BukkitServerPlayer extends Player {
 
     public boolean canInteractWithBlock(BlockPos pos, double distance) {
         double d = this.getCachedInteractionRange() + distance;
-        return (new AABB(pos)).distanceToSqr(this.getEyePos()) < d * d;
+        return (new AABB(pos)).distanceToSqr(LocationUtils.toVec3d(this.eyeLocation)) < d * d;
     }
 
     public boolean canInteractPoint(Vec3d pos, double distance) {
         double d = this.getCachedInteractionRange() + distance;
-        return Vec3d.distanceToSqr(this.getEyePos(), pos) < d * d;
+        return Vec3d.distanceToSqr(LocationUtils.toVec3d(this.eyeLocation), pos) < d * d;
     }
 
     @Override
