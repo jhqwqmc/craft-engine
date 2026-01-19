@@ -1037,7 +1037,7 @@ public abstract class AbstractPackManager implements PackManager {
         Predicate<String> textureFolderPredicate = parseExcludePredicate(excludeTexture);
         Predicate<String> jsonFolderPredicate = parseExcludePredicate(excludeJson);
 
-        Predicate<Path> textureExluder = p -> {
+        Predicate<Path> textureExcluder = p -> {
             Path relativize = path.relativize(p);
             String relativizePath = CharacterUtils.replaceBackslashWithSlash(relativize.toString());
             if (excludeTexture.contains(relativizePath)) {
@@ -1045,7 +1045,7 @@ public abstract class AbstractPackManager implements PackManager {
             }
             return textureFolderPredicate.test(relativizePath);
         };
-        Predicate<Path> jsonExluder = p -> {
+        Predicate<Path> jsonExcluder = p -> {
             Path relativize = path.relativize(p);
             String relativizePath = CharacterUtils.replaceBackslashWithSlash(relativize.toString());
             if (excludeJson.contains(relativizePath)) {
@@ -1057,7 +1057,7 @@ public abstract class AbstractPackManager implements PackManager {
         if (Config.optimizeJson()) {
             Path metaPath = path.resolve("pack.mcmeta");
             if (Files.exists(metaPath)) {
-                if (jsonExluder.test(metaPath)) {
+                if (jsonExcluder.test(metaPath)) {
                     commonJsonToOptimize.add(metaPath);
                 }
             }
@@ -1066,7 +1066,7 @@ public abstract class AbstractPackManager implements PackManager {
         if (Config.optimizeTexture()) {
             Path packPngPath = path.resolve("pack.png");
             if (Files.exists(packPngPath)) {
-                if (textureExluder.test(packPngPath)) {
+                if (textureExcluder.test(packPngPath)) {
                     imagesToOptimize.add(packPngPath);
                 }
             }
@@ -1099,7 +1099,7 @@ public abstract class AbstractPackManager implements PackManager {
                                     @Override
                                     public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                         if (!FileUtils.isJsonFile(file)) return FileVisitResult.CONTINUE;
-                                        if (jsonExluder.test(file)) return FileVisitResult.CONTINUE;
+                                        if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                         commonJsonToOptimize.add(file);
                                         return FileVisitResult.CONTINUE;
                                     }
@@ -1118,7 +1118,7 @@ public abstract class AbstractPackManager implements PackManager {
                                 @Override
                                 public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                     if (!FileUtils.isJsonFile(file)) return FileVisitResult.CONTINUE;
-                                    if (jsonExluder.test(file)) return FileVisitResult.CONTINUE;
+                                    if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                     modelJsonToOptimize.add(file);
                                     return FileVisitResult.CONTINUE;
                                 }
@@ -1138,11 +1138,11 @@ public abstract class AbstractPackManager implements PackManager {
                                 @Override
                                 public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs)  {
                                     if (FileUtils.isPngFile(file)) {
-                                        if (Config.optimizeTexture() && !textureExluder.test(file)) {
+                                        if (Config.optimizeTexture() && !textureExcluder.test(file)) {
                                             imagesToOptimize.add(file);
                                         }
                                     } else if (FileUtils.isMcMetaFile(file) && Config.optimizeJson()) {
-                                        if (jsonExluder.test(file)) return FileVisitResult.CONTINUE;
+                                        if (jsonExcluder.test(file)) return FileVisitResult.CONTINUE;
                                         commonJsonToOptimize.add(file);
                                     }
                                     return FileVisitResult.CONTINUE;
