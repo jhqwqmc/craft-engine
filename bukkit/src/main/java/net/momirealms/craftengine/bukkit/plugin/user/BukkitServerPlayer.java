@@ -1569,12 +1569,12 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public int clearOrCountMatchingInventoryItems(Key itemId, int count) {
-        Predicate<Object> predicate = nmsStack -> this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)).id().equals(itemId);
+    public int clearOrCountMatchingInventoryItems(Predicate<Item<?>> predicate, int count) {
+        Predicate<Object> nmsPredicate = nmsStack -> predicate.test(this.plugin.itemManager().wrap(ItemStackUtils.asCraftMirror(nmsStack)));
         Object inventory = FastNMS.INSTANCE.method$Player$getInventory(serverPlayer());
         Object inventoryMenu = FastNMS.INSTANCE.field$Player$inventoryMenu(serverPlayer());
         Object craftSlots = FastNMS.INSTANCE.method$InventoryMenu$getCraftSlots(inventoryMenu);
-        return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, predicate, count, craftSlots);
+        return FastNMS.INSTANCE.method$Inventory$clearOrCountMatchingItems(inventory, nmsPredicate, count, craftSlots);
     }
 
     @Override

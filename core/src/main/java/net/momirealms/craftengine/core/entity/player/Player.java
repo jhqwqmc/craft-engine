@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public abstract class Player extends AbstractEntity implements NetWorkUser {
     private static final Key TYPE = Key.of("minecraft:player");
@@ -236,7 +237,11 @@ public abstract class Player extends AbstractEntity implements NetWorkUser {
 
     public abstract void clearTrackedBlockEntities();
 
-    public abstract int clearOrCountMatchingInventoryItems(Key itemId, int count);
+    public abstract int clearOrCountMatchingInventoryItems(Predicate<Item<?>> predicate, int count);
+
+    public int clearOrCountMatchingInventoryItems(Key itemId, int count) {
+        return this.clearOrCountMatchingInventoryItems(item -> itemId.equals(item.id()), count);
+    }
 
     public abstract GameEdition gameEdition();
 
