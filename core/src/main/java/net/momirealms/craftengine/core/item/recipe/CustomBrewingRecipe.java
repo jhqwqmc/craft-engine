@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CustomBrewingRecipe<T> extends AbstractedFixedResultRecipe<T> {
+public class CustomBrewingRecipe<T> extends AbstractFixedResultRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<>();
     private final Ingredient<T> container;
     private final Ingredient<T> ingredient;
@@ -43,6 +43,14 @@ public class CustomBrewingRecipe<T> extends AbstractedFixedResultRecipe<T> {
         ingredients.add(this.container);
         ingredients.add(this.ingredient);
         return ingredients;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void takeInput(@NotNull RecipeInput input, int ignore) {
+        BrewingInput<T> brewingInput = (BrewingInput<T>) input;
+        takeIngredient(this.container, brewingInput.container().item(), ignore);
+        takeIngredient(this.ingredient, brewingInput.ingredient().item(), ignore);
     }
 
     @Override

@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.util.ResourceConfigUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<>();
     private final List<Ingredient<T>> ingredients;
     private final PlacementInfo<T> placementInfo;
-    private final boolean takeAdditionalIngredients;
+    private final boolean ingredientCountSupport;
 
     public CustomShapelessRecipe(Key id,
                                  boolean showNotification,
@@ -33,11 +32,11 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                                  Function<Context>[] craftingFunctions,
                                  Condition<Context> craftingCondition,
                                  boolean alwaysRebuildOutput,
-                                 boolean takeAdditionalIngredients) {
+                                 boolean ingredientCountSupport) {
         super(id, showNotification, result, visualResult, group, category, craftingFunctions, craftingCondition, alwaysRebuildOutput);
         this.ingredients = ingredients;
         this.placementInfo = PlacementInfo.create(ingredients);
-        this.takeAdditionalIngredients = takeAdditionalIngredients;
+        this.ingredientCountSupport = ingredientCountSupport;
     }
 
     public PlacementInfo<T> placementInfo() {
@@ -65,18 +64,17 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
         return input.finder().canCraft(this);
     }
 
-    public boolean takeAdditionalIngredients() {
-        return this.takeAdditionalIngredients;
-    }
-
-    public void takeAdditionalIngredients(CraftingInput<T> input, int left) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public void takeInput(@NotNull RecipeInput in, int ignore) {
+        CraftingInput<T> input = (CraftingInput<T>) in;
         if (input.ingredientCount() != this.ingredients.size()) {
             return;
         }
         if (input.size() == 1 && this.ingredients.size() == 1) {
             UniqueIdItem<T> item = input.getItem(0);
             Ingredient<T> first = this.ingredients.getFirst();
-            item.item().shrink(first.count() - left);
+            item.item().shrink(first.count() - ignore);
             return;
         }
         List<UniqueIdItem<T>> inputItems = new ArrayList<>(input.items);
@@ -89,7 +87,7 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                 if (!taken[j]) {
                     UniqueIdItem<T> inputItem = inputItems.get(j);
                     if (ingredient.test(inputItem)) {
-                        int toShrink = ingredient.count() - left;
+                        int toShrink = ingredient.count() - ignore;
                         if (toShrink > 0) {
                             inputItem.item().shrink(toShrink);
                         }
@@ -99,6 +97,10 @@ public class CustomShapelessRecipe<T> extends CustomCraftingTableRecipe<T> {
                 }
             }
         }
+    }
+
+    public boolean ingredientCountSupport() {
+        return this.ingredientCountSupport;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<CustomShapedRecipe<?>>();
     private final ParsedPattern<T> parsedPattern;
     private final Pattern<T> pattern;
-    private final boolean takeAdditionalIngredients;
+    private final boolean ingredientCountSupport;
 
     public CustomShapedRecipe(Key id,
                               boolean showNotification,
@@ -32,11 +32,11 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
                               Function<Context>[] craftingFunctions,
                               Condition<Context> craftingCondition,
                               boolean alwaysRebuildOutput,
-                              boolean takeAdditionalIngredients) {
+                              boolean ingredientCountSupport) {
         super(id, showNotification, result, visualResult, group, category, craftingFunctions, craftingCondition, alwaysRebuildOutput);
         this.pattern = pattern;
         this.parsedPattern = pattern.parse();
-        this.takeAdditionalIngredients = takeAdditionalIngredients;
+        this.ingredientCountSupport = ingredientCountSupport;
     }
 
     public ParsedPattern<T> parsedPattern() {
@@ -49,12 +49,14 @@ public class CustomShapedRecipe<T> extends CustomCraftingTableRecipe<T> {
         return this.parsedPattern.matches((CraftingInput<T>) input);
     }
 
-    public boolean takeAdditionalIngredients() {
-        return this.takeAdditionalIngredients;
+    @SuppressWarnings("unchecked")
+    @Override
+    public void takeInput(@NotNull RecipeInput input, int ignore) {
+        this.parsedPattern.matchesAndTake((CraftingInput<T>) input, ignore);
     }
 
-    public void takeAdditionalIngredients(CraftingInput<T> input, int left) {
-        this.parsedPattern.matchesAndTake(input, left);
+    public boolean ingredientCountSupport() {
+        return this.ingredientCountSupport;
     }
 
     @Override

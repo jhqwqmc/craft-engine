@@ -11,6 +11,12 @@ public interface Recipe<T> {
 
     boolean matches(RecipeInput input);
 
+    void takeInput(@NotNull final RecipeInput input, int ignore);
+
+    default void takeInput(@NotNull final RecipeInput input) {
+        this.takeInput(input, 0);
+    }
+
     T assemble(RecipeInput input, ItemBuildContext context);
 
     List<Ingredient<T>> ingredientsInUse();

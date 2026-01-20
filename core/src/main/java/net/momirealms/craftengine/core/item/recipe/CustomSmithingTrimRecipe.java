@@ -72,6 +72,15 @@ public class CustomSmithingTrimRecipe<T> extends AbstractRecipe<T>
 
     @SuppressWarnings("unchecked")
     @Override
+    public void takeInput(@NotNull RecipeInput input, int ignore) {
+        SmithingInput<T> smithingInput = (SmithingInput<T>) input;
+        super.takeIngredient(this.base, smithingInput.base().item(), ignore);
+        super.takeIngredient(this.template, smithingInput.template().item(), ignore);
+        super.takeIngredient(this.addition, smithingInput.addition().item(), ignore);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public T assemble(RecipeInput input, ItemBuildContext context) {
         SmithingInput<T> smithingInput = (SmithingInput<T>) input;
         Item<T> processed = (Item<T>) CraftEngine.instance().itemManager().applyTrim((Item<Object>) smithingInput.base().item(), (Item<Object>) smithingInput.addition().item(), (Item<Object>) smithingInput.template().item(), this.pattern);

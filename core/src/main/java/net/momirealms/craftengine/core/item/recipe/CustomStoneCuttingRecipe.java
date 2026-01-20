@@ -44,6 +44,13 @@ public class CustomStoneCuttingRecipe<T> extends AbstractGroupedRecipe<T> {
         return this.ingredient;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void takeInput(@NotNull RecipeInput in, int ignore) {
+        SingleItemInput<T> input = (SingleItemInput<T>) in;
+        takeIngredient(this.ingredient, input.input().item(), ignore);
+    }
+
     public static class Serializer<A> extends AbstractRecipeSerializer<A, CustomStoneCuttingRecipe<A>> {
 
         @SuppressWarnings({"DuplicatedCode"})

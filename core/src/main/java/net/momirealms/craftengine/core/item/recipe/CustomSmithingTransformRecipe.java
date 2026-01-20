@@ -26,7 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecipe<T>
+public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<T>
         implements ConditionalRecipe<T>, VisualResultRecipe<T>, FunctionalRecipe<T> {
     public static final Serializer<?> SERIALIZER = new Serializer<>();
     private final Ingredient<T> base;
@@ -91,6 +91,15 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
     @Override
     public boolean hasCondition() {
         return this.condition != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void takeInput(@NotNull RecipeInput input, int ignore) {
+        SmithingInput<T> smithingInput = (SmithingInput<T>) input;
+        super.takeIngredient(this.base, smithingInput.base().item(), ignore);
+        if (this.template != null) super.takeIngredient(this.template, smithingInput.template().item(), ignore);
+        if (this.addition != null) super.takeIngredient(this.addition, smithingInput.addition().item(), ignore);
     }
 
     @SuppressWarnings("unchecked")
@@ -206,7 +215,8 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                     ItemDataProcessors.fromMapList(processors),
                     mergeComponents,
                     mergeEnchantments,
-                    functions(arguments), conditions(arguments)
+                    functions(arguments),
+                    conditions(arguments)
             );
         }
 
@@ -223,7 +233,8 @@ public class CustomSmithingTransformRecipe<T> extends AbstractedFixedResultRecip
                     null,
                     true,
                     false,
-                    null, null
+                    null,
+                    null
             );
         }
     }

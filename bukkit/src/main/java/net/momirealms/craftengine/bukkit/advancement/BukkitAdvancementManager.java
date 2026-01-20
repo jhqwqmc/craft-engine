@@ -35,7 +35,7 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
     }
 
     public void unload() {
-        advancements.clear();
+        this.advancements.clear();
     }
 
     @Override
@@ -122,12 +122,12 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
 
         @Override
         public int count() {
-            return 0;
+            return BukkitAdvancementManager.this.advancements.size();
         }
 
         @Override
         public void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) {
-            if (advancements.containsKey(id)) {
+            if (BukkitAdvancementManager.this.advancements.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.advancement.duplicate", path, id);
             }
         }
