@@ -82,6 +82,12 @@ resource-pack:
       resolution:
         type: merge_atlas
     - term:
+        type: parent_path_suffix
+        suffix: "minecraft/lang"
+      resolution:
+        type: merge_json
+        deeply: false
+    - term:
         type: any_of
         terms:
           - type: exact
