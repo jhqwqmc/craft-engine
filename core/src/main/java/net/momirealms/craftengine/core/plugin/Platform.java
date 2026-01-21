@@ -16,5 +16,7 @@ public interface Platform {
 
     World getWorld(String name);
 
+    boolean isStopping();
+
     ParticleType getParticleType(Key name);
 }

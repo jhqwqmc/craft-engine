@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
 import net.momirealms.craftengine.core.block.entity.tick.*;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.plugin.logger.Debugger;
@@ -420,7 +421,9 @@ public class CEChunk {
     public void deactivateAllBlockEntities() {
         if (!this.activated) return;
         this.blockEntities.values().forEach(e -> e.setValid(false));
-        this.constantBlockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
+        if (!CraftEngine.instance().platform().isStopping()) {
+            this.constantBlockEntityRenderers.values().forEach(ConstantBlockEntityRenderer::deactivate);
+        }
         this.dynamicBlockEntityRenderers.clear();
         this.tickingSyncBlockEntitiesByPos.values().forEach((ticker) -> ticker.setTicker(DummyTickingBlockEntity.INSTANCE));
         this.tickingSyncBlockEntitiesByPos.clear();
