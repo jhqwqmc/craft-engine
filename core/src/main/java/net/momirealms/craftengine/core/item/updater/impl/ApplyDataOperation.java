@@ -37,7 +37,7 @@ public final class ApplyDataOperation implements ItemUpdater {
         public ApplyDataOperation create(Key item, Map<String, Object> args) {
             List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            ItemProcessors.applyDataModifiers(data, modifiers::add);
+            ItemProcessors.collectProcessors(data, modifiers::add);
             return new ApplyDataOperation(modifiers);
         }
     }

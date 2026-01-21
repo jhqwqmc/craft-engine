@@ -32,7 +32,7 @@ public class ApplyItemDataPostProcessor implements PostProcessor {
         public ApplyItemDataPostProcessor create(Map<String, Object> args) {
             List<ItemProcessor> modifiers = new ArrayList<>();
             Map<String, Object> data = ResourceConfigUtils.getAsMap(args.get("data"), "data");
-            ItemProcessors.applyDataModifiers(data, modifiers::add);
+            ItemProcessors.collectProcessors(data, modifiers::add);
             return new ApplyItemDataPostProcessor(modifiers.toArray(new ItemProcessor[0]));
         }
     }

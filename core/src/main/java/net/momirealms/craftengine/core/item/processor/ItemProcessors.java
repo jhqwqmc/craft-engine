@@ -72,7 +72,7 @@ public final class ItemProcessors {
         return register(key, condition ? factory : null);
     }
 
-    public static <I> void applyDataModifiers(Map<String, Object> dataSection, Consumer<ItemProcessor> callback) {
+    public static void collectProcessors(Map<String, Object> dataSection, Consumer<ItemProcessor> callback) {
         ExceptionCollector<LocalizedResourceConfigException> errorCollector = new ExceptionCollector<>();
         if (dataSection != null) {
             for (Map.Entry<String, Object> dataEntry : dataSection.entrySet()) {

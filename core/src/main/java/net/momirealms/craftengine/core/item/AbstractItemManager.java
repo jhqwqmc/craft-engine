@@ -589,7 +589,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
 
                 // 应用物品数据
                 try {
-                    ItemProcessors.applyDataModifiers(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
+                    ItemProcessors.collectProcessors(MiscUtils.castToMap(section.get("data"), true), itemBuilder::dataModifier);
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);
                 }
@@ -597,7 +597,7 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 // 应用客户端侧数据
                 try {
                     if (VersionHelper.PREMIUM) {
-                        ItemProcessors.applyDataModifiers(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
+                        ItemProcessors.collectProcessors(MiscUtils.castToMap(section.get("client-bound-data"), true), itemBuilder::clientBoundDataModifier);
                     }
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);

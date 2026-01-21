@@ -44,6 +44,11 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
     }
 
     @Override
+    public void runDelayedSyncTasks() {
+
+    }
+
+    @Override
     public void sendToast(Player player, Item<?> icon, Component message, AdvancementType type) {
         try {
             Object displayInfo = CoreReflections.constructor$DisplayInfo.newInstance(
