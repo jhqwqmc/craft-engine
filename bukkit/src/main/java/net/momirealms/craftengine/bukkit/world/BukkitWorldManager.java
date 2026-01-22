@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class BukkitWorldManager implements WorldManager, Listener {
+public final class BukkitWorldManager implements WorldManager, Listener {
     private static BukkitWorldManager instance;
     private final BukkitCraftEngine plugin;
     private final ConcurrentUUID2ReferenceChainedHashTable<CEWorld> worlds;
@@ -728,7 +728,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
     /**
      * 递归地将Map中所有键的短横线(-)替换为下划线(_)
      */
-    protected Map<String, Object> replaceDashToUnderscore(Map<String, Object> map) {
+    private Map<String, Object> replaceDashToUnderscore(Map<String, Object> map) {
         if (map == null) {
             return null;
         }
@@ -768,7 +768,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
     }
 
     @SuppressWarnings("unchecked")
-    protected Object processValue(Object value) {
+    private Object processValue(Object value) {
         if (value == null) return null;
         if (value instanceof Map) {
             Map<String, Object> nestedMap = (Map<String, Object>) value;

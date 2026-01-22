@@ -2,11 +2,14 @@ package net.momirealms.craftengine.bukkit.advancement;
 
 import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
+import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.NetworkReflections;
 import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
+import net.momirealms.craftengine.bukkit.util.LegacyDFUUtils;
 import net.momirealms.craftengine.core.advancement.AbstractAdvancementManager;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -16,6 +19,7 @@ import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
 import net.momirealms.craftengine.core.plugin.locale.LocalizedResourceConfigException;
+import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -26,7 +30,7 @@ import java.util.*;
 public final class BukkitAdvancementManager extends AbstractAdvancementManager {
     private final BukkitCraftEngine plugin;
     private final AdvancementParser advancementParser;
-    private final Map<Key, JsonElement> advancements = new HashMap<>();
+    private final Map<Key, Object> advancements = new HashMap<>();
 
     public BukkitAdvancementManager(BukkitCraftEngine plugin) {
         super(plugin);
@@ -45,7 +49,48 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
 
     @Override
     public void runDelayedSyncTasks() {
-
+        if (this.advancements.isEmpty()) {
+            return;
+        }
+        Map<Object, Object> advancements = new HashMap<>();
+        for (Map.Entry<Key, Object> entry : this.advancements.entrySet()) {
+            Object identifier = KeyUtils.toResourceLocation(entry.getKey());
+            try {
+                Object advancementHolder = CoreReflections.constructor$AdvancementHolder.newInstance(identifier, entry.getValue());
+                advancements.put(identifier, advancementHolder);
+            } catch (ReflectiveOperationException e) {
+                this.plugin.logger().warn("Failed to create advancement holder", e);
+            }
+        }
+        try {
+            Object serverAdvancementManager = CoreReflections.method$MinecraftServer$getAdvancements.invoke(FastNMS.INSTANCE.method$MinecraftServer$getServer());
+            // 进度管理器里新的map
+            Map<Object, Object> mapBuilder = new HashMap<>();
+            @SuppressWarnings("unchecked")
+            Map<Object, Object> serverAdvancementManager$advancements = (Map<Object, Object>) CoreReflections.field$ServerAdvancementManager$advancements.get(serverAdvancementManager);
+            mapBuilder.putAll(serverAdvancementManager$advancements);
+            mapBuilder.putAll(advancements);
+            CoreReflections.field$ServerAdvancementManager$advancements.set(serverAdvancementManager, mapBuilder);
+            Object advancementTree = CoreReflections.method$ServerAdvancementManager$tree.invoke(serverAdvancementManager);
+            CoreReflections.method$AdvancementTree$addAll.invoke(advancementTree, advancements.values());
+            HashSet<Object> processedRoots = new HashSet<>();
+            for (Map.Entry<Object, Object> entry : advancements.entrySet()) {
+                Object node = CoreReflections.method$AdvancementTree$get.invoke(advancementTree, entry.getKey());
+                if (node != null) {
+                    Object root = CoreReflections.method$AdvancementNode$root.invoke(node);
+                    if (processedRoots.add(root)) {
+                        Object advancementHolder = CoreReflections.method$AdvancementNode$holder.invoke(root);
+                        Object advancement = CoreReflections.field$AdvancementHolder$value.get(advancementHolder);
+                        Optional<?> optionalDisplay = (Optional<?>) CoreReflections.field$Advancement$display.get(advancement);
+                        if (optionalDisplay.isPresent()) {
+                            CoreReflections.method$TreeNodePosition$run.invoke(null, root);
+                        }
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            this.plugin.logger().warn("Failed to register advancements", e);
+        }
     }
 
     @Override
@@ -135,6 +180,23 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
             if (BukkitAdvancementManager.this.advancements.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.advancement.duplicate", path, id);
             }
+            JsonElement json = GsonHelper.get().toJsonTree(section);
+            Object advancement = null;
+            if (VersionHelper.isOrAbove1_20_5()) {
+                advancement = CoreReflections.instance$Advancement$CODEC.parse(MRegistryOps.JSON, json)
+                        .resultOrPartial(error -> {
+                            throw new LocalizedResourceConfigException("warning.config.advancement.invalid_advancement", json.toString(), error);
+                        })
+                        .orElse(null);
+            } else {
+                advancement = LegacyDFUUtils.parse(CoreReflections.instance$Advancement$CODEC, MRegistryOps.JSON, json, (error) -> {
+                    throw new LocalizedResourceConfigException("warning.config.advancement.invalid_advancement", json.toString(), error);
+                });
+            }
+            if (advancement == null) {
+                return;
+            }
+            BukkitAdvancementManager.this.advancements.put(id, advancement);
         }
     }
 }
