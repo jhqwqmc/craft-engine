@@ -4490,7 +4490,7 @@ public final class CoreReflections {
 
     public static final Field field$Advancement$CODEC = requireNonNull(
             ReflectionUtils.getDeclaredField(
-                    clazz$Advancement, Codec.class, 0
+                    clazz$Advancement, Codec.class, 1
             )
     );
 

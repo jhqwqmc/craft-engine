@@ -2,6 +2,7 @@ package net.momirealms.craftengine.bukkit.advancement;
 
 import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.bukkit.item.DataComponentTypes;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.CoreReflections;
@@ -13,7 +14,9 @@ import net.momirealms.craftengine.bukkit.util.LegacyDFUUtils;
 import net.momirealms.craftengine.core.advancement.AbstractAdvancementManager;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
@@ -23,6 +26,7 @@ import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import org.bukkit.inventory.ItemStack;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -180,8 +184,9 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
             if (BukkitAdvancementManager.this.advancements.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.advancement.duplicate", path, id);
             }
-            JsonElement json = GsonHelper.get().toJsonTree(section);
-            Object advancement = null;
+            Map<String, Object> processed = processAdvancement(section);
+            JsonElement json = GsonHelper.get().toJsonTree(processed);
+            Object advancement;
             if (VersionHelper.isOrAbove1_20_5()) {
                 advancement = CoreReflections.instance$Advancement$CODEC.parse(MRegistryOps.JSON, json)
                         .resultOrPartial(error -> {
@@ -198,5 +203,55 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
             }
             BukkitAdvancementManager.this.advancements.put(id, advancement);
         }
+    }
+
+    @SuppressWarnings({"DuplicatedCode"})
+    private Map<String, Object> processAdvancement(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String originalKey = entry.getKey();
+            Object value = entry.getValue();
+            String newKey = originalKey.replace("-", "_");
+            Object processedValue = processValue(value);
+            result.put(newKey, processedValue);
+        }
+        Object rawName = result.get("items");
+        if (rawName instanceof String itemId) {
+            Optional<CustomItem<ItemStack>> optionalCustomItem = this.plugin.itemManager().getCustomItem(Key.of(itemId));
+            if (optionalCustomItem.isPresent()) {
+                CustomItem<ItemStack> customItem = optionalCustomItem.get();
+                result.put("items", customItem.material().asString());
+                Item<ItemStack> item = customItem.buildItem(ItemBuildContext.empty());
+                if (VersionHelper.isOrAbove1_20_5()) {
+                    Object customData = item.getJavaComponent(DataComponentTypes.CUSTOM_DATA);
+                    result.put("predicates", Map.of("minecraft:custom_data", customData));
+                } else {
+                    Object javaTag = item.getJavaTag();
+                    result.put("nbt", GsonHelper.get().toJson(javaTag));
+                }
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings({"unchecked", "DuplicatedCode"})
+    private Object processValue(Object value) {
+        if (value == null) return null;
+        if (value instanceof Map) {
+            Map<String, Object> nestedMap = (Map<String, Object>) value;
+            return processAdvancement(nestedMap);
+        }
+        if (value instanceof List) {
+            List<Object> originalList = (List<Object>) value;
+            List<Object> processedList = new ArrayList<>();
+            for (Object item : originalList) {
+                processedList.add(processValue(item));
+            }
+            return processedList;
+        }
+        return value;
     }
 }

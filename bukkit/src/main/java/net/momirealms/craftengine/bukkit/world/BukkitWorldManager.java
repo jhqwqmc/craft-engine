@@ -577,7 +577,7 @@ public final class BukkitWorldManager implements WorldManager, Listener {
 
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
-            Map<String, Object> processedSection = replaceDashToUnderscore(section);
+            Map<String, Object> processedSection = processPlacedFeature(section);
             Object feature;
             if (VersionHelper.isOrAbove1_20_5()) {
                 feature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection))
@@ -630,7 +630,7 @@ public final class BukkitWorldManager implements WorldManager, Listener {
 
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
-            Map<String, Object> processedSection = replaceDashToUnderscore(section);
+            Map<String, Object> processedSection = processPlacedFeature(section);
             Predicate<Key> biomeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "biome", "biomes"), Key::of);
             Predicate<String> worldFilter = parseFilter(ResourceConfigUtils.get(processedSection, "world", "worlds"), Function.identity());
             Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "dimension", "dimensions"), Key::of);
@@ -725,10 +725,8 @@ public final class BukkitWorldManager implements WorldManager, Listener {
         }
     }
 
-    /**
-     * 递归地将Map中所有键的短横线(-)替换为下划线(_)
-     */
-    private Map<String, Object> replaceDashToUnderscore(Map<String, Object> map) {
+    @SuppressWarnings({"DuplicatedCode"})
+    private Map<String, Object> processPlacedFeature(Map<String, Object> map) {
         if (map == null) {
             return null;
         }
@@ -767,12 +765,12 @@ public final class BukkitWorldManager implements WorldManager, Listener {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "DuplicatedCode"})
     private Object processValue(Object value) {
         if (value == null) return null;
         if (value instanceof Map) {
             Map<String, Object> nestedMap = (Map<String, Object>) value;
-            return replaceDashToUnderscore(nestedMap);
+            return processPlacedFeature(nestedMap);
         }
         if (value instanceof List) {
             List<Object> originalList = (List<Object>) value;

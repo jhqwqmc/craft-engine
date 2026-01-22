@@ -21,6 +21,7 @@ import net.momirealms.craftengine.core.plugin.command.sender.SenderFactory;
 import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager;
 import net.momirealms.craftengine.core.plugin.compatibility.PluginTaskRegistry;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
 import net.momirealms.craftengine.core.plugin.context.GlobalVariableManager;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
@@ -48,6 +49,7 @@ import net.momirealms.craftengine.core.world.score.TeamManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -61,6 +63,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class CraftEngine implements Plugin {
     private static CraftEngine instance;
@@ -178,7 +181,7 @@ public abstract class CraftEngine implements Plugin {
         this.networkManager.reload();
     }
 
-    private void runDelayTasks(boolean reloadRecipe) {
+    private void runDelayTasks(boolean reloadRecipe, boolean reloadAdvancement) {
         List<CompletableFuture<Void>> delayedLoadTasks = new ArrayList<>();
         // 指令补全，重置外部配方原料
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemManager.delayedLoad(), this.scheduler.async()));
@@ -199,10 +202,13 @@ public abstract class CraftEngine implements Plugin {
             // 转换数据包配方
             delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.recipeManager.delayedLoad(), this.scheduler.async()));
         }
+        if (reloadAdvancement) {
+            delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.advancementManager.delayedLoad(), this.scheduler.async()));
+        }
         CompletableFutures.allOf(delayedLoadTasks).join();
     }
 
-    public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe) {
+    public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe, boolean reloadAdvancement) {
         CompletableFuture<ReloadResult> future = new CompletableFuture<>();
         asyncExecutor.execute(() -> {
             long asyncTime = -1;
@@ -226,13 +232,14 @@ public abstract class CraftEngine implements Plugin {
                     // 加载全部配置资源
                     this.packManager.loadPacks();
                     this.packManager.updateCachedConfigFiles();
-                    this.packManager.loadResources(reloadRecipe ? (p) -> true : (p) -> p.loadingSequence() != LoadingSequence.RECIPE);
+                    Predicate<ConfigParser> predicate = getConfigParserPredicate(reloadRecipe, reloadAdvancement);
+                    this.packManager.loadResources(predicate);
                     this.packManager.clearResourceConfigs();
                 } catch (Exception e) {
                     this.logger().warn("Failed to load resources folder", e);
                 }
                 // 执行延迟任务
-                this.runDelayTasks(reloadRecipe);
+                this.runDelayTasks(reloadRecipe, reloadAdvancement);
                 // 重新发送tags，需要等待tags更新完成
                 this.networkManager.delayedLoad();
                 long time2 = System.currentTimeMillis();
@@ -248,6 +255,10 @@ public abstract class CraftEngine implements Plugin {
                         if (reloadRecipe) {
                             this.recipeManager.runDelayedSyncTasks();
                         }
+                        // 同步修改进度
+                        if (reloadAdvancement) {
+                            this.advancementManager.runDelayedSyncTasks();
+                        }
                         long time4 = System.currentTimeMillis();
                         long syncTime = time4 - time3;
                         this.reloadEventDispatcher.accept(this);
@@ -259,6 +270,20 @@ public abstract class CraftEngine implements Plugin {
             }
         });
         return future;
+    }
+
+    private static @NotNull Predicate<ConfigParser> getConfigParserPredicate(boolean reloadRecipe, boolean reloadAdvancement) {
+        Predicate<ConfigParser> predicate;
+        if (reloadRecipe && reloadAdvancement) {
+            predicate = (p) -> true;
+        } else if (reloadRecipe) {
+            predicate = (p) -> p.loadingSequence() != LoadingSequence.ADVANCEMENT;
+        } else if (reloadAdvancement) {
+            predicate = (p) -> p.loadingSequence() != LoadingSequence.RECIPE;
+        } else {
+            predicate = (p) -> p.loadingSequence() != LoadingSequence.RECIPE && p.loadingSequence() != LoadingSequence.ADVANCEMENT;
+        }
+        return predicate;
     }
 
     protected void onPluginEnable() {
@@ -301,9 +326,9 @@ public abstract class CraftEngine implements Plugin {
             // 加载packs
             this.packManager.loadPacks();
             this.packManager.updateCachedConfigFiles();
-            // 不要加载配方
+            // 不要加载配方和进度
             this.packManager.loadResources((p) -> p.loadingSequence() != LoadingSequence.RECIPE);
-            this.runDelayTasks(false);
+            this.runDelayTasks(false, false);
         }
 
         // 延迟任务
@@ -331,7 +356,7 @@ public abstract class CraftEngine implements Plugin {
                 this.recipeManager.runDelayedSyncTasks();
             } else {
                 try {
-                    this.reloadPlugin(Runnable::run, Runnable::run, true);
+                    this.reloadPlugin(Runnable::run, Runnable::run, true, true);
                     this.worldManager.delayedInit();
                 } catch (Exception e) {
                     this.logger.severe("Failed to reload plugin on delayed enable stage", e);

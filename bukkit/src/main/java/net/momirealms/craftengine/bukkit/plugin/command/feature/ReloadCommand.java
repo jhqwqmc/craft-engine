@@ -36,7 +36,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                     }
                     if (argument == ReloadArgument.CONFIG) {
                         try {
-                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), false).thenAccept(reloadResult -> {
+                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), false, false).thenAccept(reloadResult -> {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
                                         Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
                                         Component.text(reloadResult.asyncTime()),
@@ -49,7 +49,20 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                         }
                     } else if (argument == ReloadArgument.RECIPE) {
                         try {
-                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), true).thenAccept(reloadResult -> {
+                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), true, false).thenAccept(reloadResult -> {
+                                handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
+                                        Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
+                                        Component.text(reloadResult.asyncTime()),
+                                        Component.text(reloadResult.syncTime())
+                                );
+                            });
+                        } catch (Throwable e) {
+                            handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
+                            plugin().logger().warn("Failed to reload config", e);
+                        }
+                    } else if (argument == ReloadArgument.ADVANCEMENT) {
+                        try {
+                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), false, true).thenAccept(reloadResult -> {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
                                         Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
                                         Component.text(reloadResult.asyncTime()),
@@ -76,7 +89,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                     } else if (argument == ReloadArgument.ALL) {
                         RELOAD_PACK_FLAG = true;
                         try {
-                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), !VersionHelper.isFolia()).thenAcceptAsync(reloadResult -> {
+                            plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().sync().run(r), !VersionHelper.isFolia(), true).thenAcceptAsync(reloadResult -> {
                                 try {
                                     long time1 = System.currentTimeMillis();
                                     plugin().packManager().generateResourcePack();
@@ -111,6 +124,7 @@ public class ReloadCommand extends BukkitCommandFeature<CommandSender> {
     public enum ReloadArgument {
         CONFIG,
         RECIPE,
+        ADVANCEMENT,
         PACK,
         ALL
     }
