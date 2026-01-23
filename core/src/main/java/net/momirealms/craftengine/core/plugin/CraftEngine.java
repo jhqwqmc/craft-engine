@@ -181,7 +181,7 @@ public abstract class CraftEngine implements Plugin {
         this.networkManager.reload();
     }
 
-    private void runDelayTasks(boolean reloadRecipe, boolean reloadAdvancement) {
+    private void runDelayTasks(boolean reloadRecipe) {
         List<CompletableFuture<Void>> delayedLoadTasks = new ArrayList<>();
         // 指令补全，重置外部配方原料
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.itemManager.delayedLoad(), this.scheduler.async()));
@@ -197,18 +197,17 @@ public abstract class CraftEngine implements Plugin {
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.fontManager.delayedLoad(), this.scheduler.async()));
         // 指令补全
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.soundManager.delayedLoad(), this.scheduler.async()));
+        // 进度
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.advancementManager.delayedLoad(), this.scheduler.async()));
         // 如果重载配方
         if (reloadRecipe) {
             // 转换数据包配方
             delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.recipeManager.delayedLoad(), this.scheduler.async()));
         }
-        if (reloadAdvancement) {
-            delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.advancementManager.delayedLoad(), this.scheduler.async()));
-        }
         CompletableFutures.allOf(delayedLoadTasks).join();
     }
 
-    public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe, boolean reloadAdvancement) {
+    public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe) {
         CompletableFuture<ReloadResult> future = new CompletableFuture<>();
         asyncExecutor.execute(() -> {
             long asyncTime = -1;
@@ -232,14 +231,14 @@ public abstract class CraftEngine implements Plugin {
                     // 加载全部配置资源
                     this.packManager.loadPacks();
                     this.packManager.updateCachedConfigFiles();
-                    Predicate<ConfigParser> predicate = getConfigParserPredicate(reloadRecipe, reloadAdvancement);
+                    Predicate<ConfigParser> predicate = getConfigParserPredicate(reloadRecipe);
                     this.packManager.loadResources(predicate);
                     this.packManager.clearResourceConfigs();
                 } catch (Exception e) {
                     this.logger().warn("Failed to load resources folder", e);
                 }
                 // 执行延迟任务
-                this.runDelayTasks(reloadRecipe, reloadAdvancement);
+                this.runDelayTasks(reloadRecipe);
                 // 重新发送tags，需要等待tags更新完成
                 this.networkManager.delayedLoad();
                 long time2 = System.currentTimeMillis();
@@ -256,9 +255,7 @@ public abstract class CraftEngine implements Plugin {
                             this.recipeManager.runDelayedSyncTasks();
                         }
                         // 同步修改进度
-                        if (reloadAdvancement) {
-                            this.advancementManager.runDelayedSyncTasks();
-                        }
+                        this.advancementManager.runDelayedSyncTasks();
                         long time4 = System.currentTimeMillis();
                         long syncTime = time4 - time3;
                         this.reloadEventDispatcher.accept(this);
@@ -272,16 +269,12 @@ public abstract class CraftEngine implements Plugin {
         return future;
     }
 
-    private static @NotNull Predicate<ConfigParser> getConfigParserPredicate(boolean reloadRecipe, boolean reloadAdvancement) {
+    private static @NotNull Predicate<ConfigParser> getConfigParserPredicate(boolean reloadRecipe) {
         Predicate<ConfigParser> predicate;
-        if (reloadRecipe && reloadAdvancement) {
+        if (reloadRecipe) {
             predicate = (p) -> true;
-        } else if (reloadRecipe) {
-            predicate = (p) -> p.loadingSequence() != LoadingSequence.ADVANCEMENT;
-        } else if (reloadAdvancement) {
-            predicate = (p) -> p.loadingSequence() != LoadingSequence.RECIPE;
         } else {
-            predicate = (p) -> p.loadingSequence() != LoadingSequence.RECIPE && p.loadingSequence() != LoadingSequence.ADVANCEMENT;
+            predicate = (p) -> p.loadingSequence() != LoadingSequence.RECIPE;
         }
         return predicate;
     }
@@ -328,7 +321,7 @@ public abstract class CraftEngine implements Plugin {
             this.packManager.updateCachedConfigFiles();
             // 不要加载配方和进度
             this.packManager.loadResources((p) -> p.loadingSequence() != LoadingSequence.RECIPE);
-            this.runDelayTasks(false, false);
+            this.runDelayTasks(false);
         }
 
         // 延迟任务
@@ -356,7 +349,7 @@ public abstract class CraftEngine implements Plugin {
                 this.recipeManager.runDelayedSyncTasks();
             } else {
                 try {
-                    this.reloadPlugin(Runnable::run, Runnable::run, true, true);
+                    this.reloadPlugin(Runnable::run, Runnable::run, true);
                     this.worldManager.delayedInit();
                 } catch (Exception e) {
                     this.logger.severe("Failed to reload plugin on delayed enable stage", e);
