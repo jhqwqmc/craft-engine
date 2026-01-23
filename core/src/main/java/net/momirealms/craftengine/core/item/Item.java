@@ -222,6 +222,8 @@ public interface Item<I> {
 
     void shrink(int amount);
 
+    void grow(int amount);
+
     void hurtAndBreak(int amount, @Nullable Player player, @Nullable EquipmentSlot slot);
 
     default Item<I> transmuteCopy(Key another) {
