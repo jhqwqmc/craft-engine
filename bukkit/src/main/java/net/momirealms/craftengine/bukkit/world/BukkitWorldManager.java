@@ -762,6 +762,15 @@ public final class BukkitWorldManager implements WorldManager, Listener {
                 result.put("Name", BlockStateUtils.getBlockOwnerIdFromState(blockState.customBlockState().literalObject()).asString());
             }
         }
+        Object rawBlocks = result.get("blocks");
+        if (rawBlocks instanceof String blockName && blockName.charAt(0) != '#') {
+            Optional<CustomBlock> customBlock = this.plugin.blockManager().blockById(Key.of(blockName));
+            if (customBlock.isPresent()) {
+                CustomBlock block = customBlock.get();
+                ImmutableBlockState blockState = block.defaultState();
+                result.put("blocks", BlockStateUtils.getBlockOwnerIdFromState(blockState.customBlockState().literalObject()).asString());
+            }
+        }
         return result;
     }
 
