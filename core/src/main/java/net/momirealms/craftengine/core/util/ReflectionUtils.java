@@ -141,6 +141,22 @@ public class ReflectionUtils {
     }
 
     @Nullable
+    public static Field getStaticField(final Class<?> clazz, final Class<?> type, final int index) {
+        int i = 0;
+        for (final Field field : clazz.getFields()) {
+            if (field.getType() == type) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    if (index == i) {
+                        return setAccessible(field);
+                    }
+                    i++;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     public static Field getDeclaredField(final Class<?> clazz, final Class<?> type, int index) {
         int i = 0;
         for (final Field field : clazz.getDeclaredFields()) {

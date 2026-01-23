@@ -4488,22 +4488,21 @@ public final class CoreReflections {
             )
     );
 
-    public static final Field field$Advancement$CODEC = requireNonNull(
-            ReflectionUtils.getDeclaredField(
-                    clazz$Advancement, Codec.class, 1
-            )
-    );
-
-    @SuppressWarnings("unchecked")
-    public static Codec<Object> getAdvancement$CODEC() {
-        try {
-            return (Codec<Object>) field$Advancement$CODEC.get(null);
-        } catch (ReflectiveOperationException e) {
-            throw new ReflectionInitException("Failed to initialize Advancement$CODEC", e);
-        }
-    }
-
-    public static final Codec<Object> instance$Advancement$CODEC = getAdvancement$CODEC();
+//    public static final Field field$Advancement$CODEC = MiscUtils.requireNonNullIf(
+//            ReflectionUtils.getStaticField(clazz$Advancement, Codec.class, 0),
+//            VersionHelper.isOrAbove1_20_3()
+//    );
+//
+//    @SuppressWarnings("unchecked")
+//    public static Codec<Object> getAdvancement$CODEC() {
+//        try {
+//            return field$Advancement$CODEC == null ? null : (Codec<Object>) field$Advancement$CODEC.get(null);
+//        } catch (ReflectiveOperationException e) {
+//            throw new ReflectionInitException("Failed to initialize Advancement$CODEC", e);
+//        }
+//    }
+//
+//    public static final Codec<Object> instance$Advancement$CODEC = getAdvancement$CODEC();
 
     public static final Constructor<?> constructor$Advancement = requireNonNull(
             VersionHelper.isOrAbove1_20_2() ?
@@ -4528,6 +4527,31 @@ public final class CoreReflections {
                     "advancements.AdvancementHolder"
             ), VersionHelper.isOrAbove1_20_2()
     );
+//
+//    public static final Class<?> clazz$ServerAdvancementManager = requireNonNull(
+//            BukkitReflectionUtils.findReobfOrMojmapClass(
+//                    "server.AdvancementDataWorld",
+//                    "server.ServerAdvancementManager"
+//            )
+//    );
+//
+//    // 1.20.1特有
+//    public static final Class<?> clazz$AdvancementList = MiscUtils.requireNonNullIf(
+//            BukkitReflectionUtils.findReobfOrMojmapClass(
+//                    "advancements.Advancements",
+//                    "advancements.AdvancementList"
+//            ), !VersionHelper.isOrAbove1_20_2()
+//    );
+//
+//    // 1.20.1特有
+//    public static final Field field$AdvancementList$advancements = MiscUtils.requireNonNullIf(
+//            ReflectionUtils.getDeclaredField(clazz$AdvancementList, Map.class, 0),
+//            !VersionHelper.isOrAbove1_20_2()
+//    );
+//
+//    public static final Field field$ServerAdvancementManager$advancements = requireNonNull(
+//            ReflectionUtils.getDeclaredField(clazz$ServerAdvancementManager, VersionHelper.isOrAbove1_20_2() ? Map.class : clazz$AdvancementList, 0)
+//    );
 
     public static final Constructor<?> constructor$AdvancementHolder = Optional.ofNullable(clazz$AdvancementHolder)
             .map(it -> ReflectionUtils.getConstructor(it, clazz$ResourceLocation, clazz$Advancement))
@@ -4540,70 +4564,59 @@ public final class CoreReflections {
             )
     );
 
-    public static final Class<?> clazz$ServerAdvancementManager = requireNonNull(
-            BukkitReflectionUtils.findReobfOrMojmapClass(
-                    "server.AdvancementDataWorld",
-                    "server.ServerAdvancementManager"
-            )
-    );
-
-    public static final Method method$MinecraftServer$getAdvancements = requireNonNull(
-            ReflectionUtils.getMethod(clazz$MinecraftServer, clazz$ServerAdvancementManager, 0)
-    );
-
-    public static final Field field$ServerAdvancementManager$advancements = requireNonNull(
-            ReflectionUtils.getDeclaredField(clazz$ServerAdvancementManager, Map.class, 0)
-    );
-
-    public static final Class<?> clazz$AdvancementTree = requireNonNull(
-            ReflectionUtils.getClazz(
-                    BukkitReflectionUtils.assembleMCClass("advancements.AdvancementTree")
-            )
-    );
-
-    public static final Class<?> clazz$AdvancementNode = requireNonNull(
-            ReflectionUtils.getClazz(
-                    BukkitReflectionUtils.assembleMCClass("advancements.AdvancementNode")
-            )
-    );
-
-    public static final Class<?> clazz$TreeNodePosition = requireNonNull(
-            ReflectionUtils.getClazz(
-                    BukkitReflectionUtils.assembleMCClass("advancements.TreeNodePosition")
-            )
-    );
-
-    public static final Method method$TreeNodePosition$run = requireNonNull(
-            ReflectionUtils.getStaticMethod(clazz$TreeNodePosition, void.class, clazz$AdvancementNode)
-    );
-
-    public static final Method method$ServerAdvancementManager$tree = requireNonNull(
-            ReflectionUtils.getMethod(clazz$ServerAdvancementManager, clazz$AdvancementTree, 0)
-    );
-
-    public static final Method method$AdvancementTree$addAll = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AdvancementTree, void.class, Collection.class)
-    );
-
-    public static final Method method$AdvancementTree$remove = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AdvancementTree, void.class, Set.class)
-    );
-
-    public static final Method method$AdvancementTree$get = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AdvancementTree, clazz$AdvancementNode, clazz$ResourceLocation)
-    );
-
-    public static final Method method$AdvancementNode$root = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AdvancementNode, clazz$AdvancementNode)
-    );
-
-    public static final Method method$AdvancementNode$holder = requireNonNull(
-            ReflectionUtils.getMethod(clazz$AdvancementNode, clazz$AdvancementHolder)
-    );
-
-    public static final Field field$AdvancementHolder$value = requireNonNull(
-            ReflectionUtils.getDeclaredField(clazz$AdvancementHolder, clazz$Advancement, 0)
-    );
+//    public static final Method method$MinecraftServer$getAdvancements = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$MinecraftServer, clazz$ServerAdvancementManager, 0)
+//    );
+//
+//    public static final Class<?> clazz$AdvancementTree = requireNonNull(
+//            ReflectionUtils.getClazz(
+//                    BukkitReflectionUtils.assembleMCClass("advancements.AdvancementTree")
+//            )
+//    );
+//
+//    // 1.20.2+
+//    public static final Class<?> clazz$AdvancementNode = MiscUtils.requireNonNullIf(
+//            ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("advancements.AdvancementNode")),
+//            VersionHelper.isOrAbove1_20_2()
+//    );
+//
+//    public static final Class<?> clazz$TreeNodePosition = requireNonNull(
+//            ReflectionUtils.getClazz(
+//                    BukkitReflectionUtils.assembleMCClass("advancements.TreeNodePosition")
+//            )
+//    );
+//
+//    public static final Method method$TreeNodePosition$run = requireNonNull(
+//            ReflectionUtils.getStaticMethod(clazz$TreeNodePosition, void.class, clazz$AdvancementNode)
+//    );
+//
+//    public static final Method method$ServerAdvancementManager$tree = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$ServerAdvancementManager, clazz$AdvancementTree, 0)
+//    );
+//
+//    public static final Method method$AdvancementTree$addAll = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AdvancementTree, void.class, Collection.class)
+//    );
+//
+//    public static final Method method$AdvancementTree$remove = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AdvancementTree, void.class, Set.class)
+//    );
+//
+//    public static final Method method$AdvancementTree$get = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AdvancementTree, clazz$AdvancementNode, clazz$ResourceLocation)
+//    );
+//
+//    public static final Method method$AdvancementNode$root = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AdvancementNode, clazz$AdvancementNode)
+//    );
+//
+//    public static final Method method$AdvancementNode$holder = requireNonNull(
+//            ReflectionUtils.getMethod(clazz$AdvancementNode, clazz$AdvancementHolder)
+//    );
+//
+//    public static final Field field$AdvancementHolder$value = requireNonNull(
+//            ReflectionUtils.getDeclaredField(clazz$AdvancementHolder, clazz$Advancement, 0)
+//    );
 
     public static final Class<?> clazz$GameEvent = requireNonNull(
             ReflectionUtils.getClazz(
