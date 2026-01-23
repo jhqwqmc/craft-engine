@@ -6,6 +6,7 @@ import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.entity.culling.Cullable;
+import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.context.CooldownData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
@@ -14,7 +15,6 @@ import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.*;
-import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

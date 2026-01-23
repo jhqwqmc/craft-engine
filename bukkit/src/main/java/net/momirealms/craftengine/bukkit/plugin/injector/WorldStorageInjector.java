@@ -64,6 +64,8 @@ public final class WorldStorageInjector {
                 .intercept(MethodDelegation.toField("target"))
                 .method(ElementMatchers.is(CoreReflections.method$PalettedContainer$getAndSet))
                 .intercept(MethodDelegation.to(GetAndSetInterceptor.INSTANCE))
+                .method(ElementMatchers.is(CoreReflections.method$PalettedContainer$getAndSetUnchecked))
+                .intercept(MethodDelegation.to(GetAndSetUncheckedInterceptor.INSTANCE))
                 .method(ElementMatchers.named("target"))
                 .intercept(FieldAccessor.ofField("target"))
                 .method(ElementMatchers.named("setTarget"))
@@ -211,6 +213,25 @@ public final class WorldStorageInjector {
             int z = (int) args[2];
             Object newState = args[3];
             Object previousState = FastNMS.INSTANCE.method$PalettedContainer$getAndSet(targetStates, x, y, z, newState);
+            if (holder.isActive()) {
+                compareAndUpdateBlockState(x, y, z, newState, previousState, holder);
+            }
+            return previousState;
+        }
+    }
+
+    public static class GetAndSetUncheckedInterceptor {
+        public static final GetAndSetInterceptor INSTANCE = new GetAndSetInterceptor();
+
+        @RuntimeType
+        public Object intercept(@This Object thisObj, @AllArguments Object[] args) {
+            InjectedHolder.Palette holder = (InjectedHolder.Palette) thisObj;
+            Object targetStates = holder.target();
+            int x = (int) args[0];
+            int y = (int) args[1];
+            int z = (int) args[2];
+            Object newState = args[3];
+            Object previousState = FastNMS.INSTANCE.method$PalettedContainer$getAndSetUnchecked(targetStates, x, y, z, newState);
             if (holder.isActive()) {
                 compareAndUpdateBlockState(x, y, z, newState, previousState, holder);
             }

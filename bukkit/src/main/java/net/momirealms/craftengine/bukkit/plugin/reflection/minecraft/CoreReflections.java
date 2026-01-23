@@ -21,7 +21,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.*;
-import java.sql.Ref;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -2453,6 +2452,10 @@ public final class CoreReflections {
     
     public static final Method method$PalettedContainer$getAndSet = Objects.requireNonNull(
             ReflectionUtils.getMethod(clazz$PalettedContainer, Object.class, new String[] {"a", "getAndSet"}, int.class, int.class, int.class, Object.class)
+    );
+
+    public static final Method method$PalettedContainer$getAndSetUnchecked = Objects.requireNonNull(
+            ReflectionUtils.getMethod(clazz$PalettedContainer, Object.class, new String[] {"b", "getAndSetUnchecked"}, int.class, int.class, int.class, Object.class)
     );
 
     public static final Class<?> clazz$MenuType = requireNonNull(

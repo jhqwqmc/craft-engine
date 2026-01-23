@@ -60,8 +60,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
-@SuppressWarnings("unchecked")
-public class BukkitCraftEngine extends CraftEngine {
+public final class BukkitCraftEngine extends CraftEngine {
     private static final String COMPATIBILITY_CLASS = "net.momirealms.craftengine.bukkit.compatibility.BukkitCompatibilityManager";
     private static BukkitCraftEngine instance;
     private SchedulerTask tickTask;
@@ -71,13 +70,13 @@ public class BukkitCraftEngine extends CraftEngine {
     private JavaPlugin javaPlugin;
     private final Path dataFolderPath;
 
-    protected BukkitCraftEngine(JavaPlugin plugin) {
+    BukkitCraftEngine(JavaPlugin plugin) {
         this(new JavaPluginLogger(plugin.getLogger()), plugin.getDataFolder().toPath().toAbsolutePath(),
                 new ReflectionClassPathAppender(plugin.getClass().getClassLoader()), new ReflectionClassPathAppender(plugin.getClass().getClassLoader()));
         this.setJavaPlugin(plugin);
     }
 
-    protected BukkitCraftEngine(PluginLogger logger, Path dataFolderPath, ClassPathAppender sharedClassPathAppender, ClassPathAppender privateClassPathAppender) {
+    BukkitCraftEngine(PluginLogger logger, Path dataFolderPath, ClassPathAppender sharedClassPathAppender, ClassPathAppender privateClassPathAppender) {
         super((p) -> {
             CraftEngineReloadEvent event = new CraftEngineReloadEvent((BukkitCraftEngine) p);
             EventUtils.fireAndForget(event);
@@ -99,7 +98,7 @@ public class BukkitCraftEngine extends CraftEngine {
         }
     }
 
-    protected void setJavaPlugin(JavaPlugin javaPlugin) {
+    void setJavaPlugin(JavaPlugin javaPlugin) {
         this.javaPlugin = javaPlugin;
     }
 
@@ -323,11 +322,13 @@ public class BukkitCraftEngine extends CraftEngine {
         return VersionHelper.MINECRAFT_VERSION.version();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SchedulerAdapter<World> scheduler() {
         return (SchedulerAdapter<World>) scheduler;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ItemManager<ItemStack> itemManager() {
         return (ItemManager<ItemStack>) itemManager;
@@ -348,11 +349,7 @@ public class BukkitCraftEngine extends CraftEngine {
         return (BukkitFurnitureManager) furnitureManager;
     }
 
-    @Override
-    public CompatibilityManager compatibilityManager() {
-        return compatibilityManager;
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public SenderFactory<CraftEngine, CommandSender> senderFactory() {
         return (SenderFactory<CraftEngine, CommandSender>) senderFactory;

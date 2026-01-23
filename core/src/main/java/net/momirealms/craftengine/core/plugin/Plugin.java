@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.plugin;
 
 import net.momirealms.craftengine.core.advancement.AdvancementManager;
 import net.momirealms.craftengine.core.block.BlockManager;
+import net.momirealms.craftengine.core.entity.culling.EntityCullingManager;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureManager;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileManager;
 import net.momirealms.craftengine.core.entity.seat.SeatManager;
@@ -17,7 +18,6 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
 import net.momirealms.craftengine.core.plugin.context.GlobalVariableManager;
 import net.momirealms.craftengine.core.plugin.dependency.DependencyManager;
-import net.momirealms.craftengine.core.entity.culling.EntityCullingManager;
 import net.momirealms.craftengine.core.plugin.gui.GuiManager;
 import net.momirealms.craftengine.core.plugin.gui.category.ItemBrowserManager;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
