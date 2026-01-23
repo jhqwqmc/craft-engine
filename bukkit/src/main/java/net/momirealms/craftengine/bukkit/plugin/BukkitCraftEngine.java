@@ -60,6 +60,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("unchecked")
 public final class BukkitCraftEngine extends CraftEngine {
     private static final String COMPATIBILITY_CLASS = "net.momirealms.craftengine.bukkit.compatibility.BukkitCompatibilityManager";
     private static BukkitCraftEngine instance;
@@ -322,13 +323,11 @@ public final class BukkitCraftEngine extends CraftEngine {
         return VersionHelper.MINECRAFT_VERSION.version();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SchedulerAdapter<World> scheduler() {
         return (SchedulerAdapter<World>) scheduler;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ItemManager<ItemStack> itemManager() {
         return (ItemManager<ItemStack>) itemManager;
@@ -349,7 +348,6 @@ public final class BukkitCraftEngine extends CraftEngine {
         return (BukkitFurnitureManager) furnitureManager;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SenderFactory<CraftEngine, CommandSender> senderFactory() {
         return (SenderFactory<CraftEngine, CommandSender>) senderFactory;
