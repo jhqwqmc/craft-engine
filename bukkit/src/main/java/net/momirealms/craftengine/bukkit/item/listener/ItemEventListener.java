@@ -586,6 +586,10 @@ public class ItemEventListener implements Listener {
         org.bukkit.entity.Item itemDrop = event.getItem();
         ItemStack itemStack = itemDrop.getItemStack();
         Item<ItemStack> wrapped = this.itemManager.wrap(itemStack);
+        // 低版本拙劣的inventory change替代品
+        if (!VersionHelper.isOrAbove1_20_3()) {
+            this.itemManager.unlockRecipeOnInventoryChanged(player, wrapped);
+        }
         Optional<CustomItem<ItemStack>> optionalCustomItem = wrapped.getCustomItem();
         if (optionalCustomItem.isEmpty()) return;
         BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
@@ -610,18 +614,23 @@ public class ItemEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     public void onInventoryClickItem(InventoryClickEvent event) {
-        if (!Config.triggerUpdateClick()) return;
         if (!(event.getWhoClicked() instanceof Player player)) return;
         Inventory clickedInventory = event.getClickedInventory();
         // 点击自己物品栏里的物品
         if (clickedInventory == null || clickedInventory != player.getInventory()) return;
         ItemStack currentItem = event.getCurrentItem();
         Item<ItemStack> wrapped = this.itemManager.wrap(currentItem);
-        ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(BukkitAdaptors.adapt(player)));
-        if (!result.updated() || !result.replaced()) {
-           return;
+        // 低版本拙劣的inventory change替代品
+        if (!VersionHelper.isOrAbove1_20_3()) {
+            this.itemManager.unlockRecipeOnInventoryChanged(player, wrapped);
         }
-        event.setCurrentItem((ItemStack) result.finalItem().getItem());
+        if (Config.triggerUpdateClick()) {
+            ItemUpdateResult result = this.itemManager.updateItem(wrapped, () -> ItemBuildContext.of(BukkitAdaptors.adapt(player)));
+            if (!result.updated() || !result.replaced()) {
+                return;
+            }
+            event.setCurrentItem((ItemStack) result.finalItem().getItem());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)

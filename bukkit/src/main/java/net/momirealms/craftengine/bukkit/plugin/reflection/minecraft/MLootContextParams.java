@@ -9,6 +9,8 @@ import java.lang.reflect.Type;
 import static java.util.Objects.requireNonNull;
 
 public final class MLootContextParams {
+    private MLootContextParams() {}
+
     public static final Object THIS_ENTITY;
     public static final Object ORIGIN;
     public static final Object TOOL;

@@ -31,6 +31,7 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 public final class CoreReflections {
+    private CoreReflections() {}
 
     public static final Class<?> clazz$RandomSource = requireNonNull(
             ReflectionUtils.getClazz(BukkitReflectionUtils.assembleMCClass("util.RandomSource"))
@@ -4617,15 +4618,15 @@ public final class CoreReflections {
 //    public static final Field field$AdvancementHolder$value = requireNonNull(
 //            ReflectionUtils.getDeclaredField(clazz$AdvancementHolder, clazz$Advancement, 0)
 //    );
+//
+//    public static final Field field$Advancement$display = requireNonNull(
+//            ReflectionUtils.getDeclaredField(clazz$Advancement, Optional.class, 1)
+//    );
 
     public static final Class<?> clazz$GameEvent = requireNonNull(
             ReflectionUtils.getClazz(
                     BukkitReflectionUtils.assembleMCClass("world.level.gameevent.GameEvent")
             )
-    );
-
-    public static final Field field$Advancement$display = requireNonNull(
-            ReflectionUtils.getDeclaredField(clazz$Advancement, Optional.class, 1)
     );
 
     public static final Class<?> clazz$HolderSet = requireNonNull(

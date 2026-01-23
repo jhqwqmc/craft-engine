@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
 import static java.util.Objects.requireNonNull;
 
 public final class MRegistries {
+    private MRegistries() {}
+
     public static final Object BLOCK;
     public static final Object ITEM;
     public static final Object ATTRIBUTE;

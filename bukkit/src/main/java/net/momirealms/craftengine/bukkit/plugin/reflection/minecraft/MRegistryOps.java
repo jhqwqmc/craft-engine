@@ -19,6 +19,8 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("unchecked")
 public final class MRegistryOps {
+    private MRegistryOps() {}
+
     public static final DynamicOps<Object> NBT;
     public static final DynamicOps<Tag> SPARROW_NBT;
     public static final DynamicOps<Object> JAVA;

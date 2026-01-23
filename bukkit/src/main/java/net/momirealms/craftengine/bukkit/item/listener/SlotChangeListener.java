@@ -1,23 +1,13 @@
 package net.momirealms.craftengine.bukkit.item.listener;
 
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
-import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
-import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
-import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
-import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.item.recipe.IngredientUnlockable;
-import net.momirealms.craftengine.core.util.Key;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class SlotChangeListener implements Listener {
@@ -38,24 +28,6 @@ public class SlotChangeListener implements Listener {
                 event.setShouldTriggerAdvancements(false);
             }
         }
-        Key itemId = wrap.id();
-        Player player = event.getPlayer();
-        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
-        if (serverPlayer == null) return;
-        serverPlayer.addObtainedItem(itemId);
-        List<IngredientUnlockable> recipes = BukkitRecipeManager.instance().ingredientUnlockablesByChangedItem(itemId);
-        if (recipes.isEmpty()) return;
-        List<NamespacedKey> recipesToUnlock = new ArrayList<>(4);
-        for (IngredientUnlockable recipe : recipes) {
-            NamespacedKey recipeBukkitId = KeyUtils.toNamespacedKey(recipe.id());
-            if (!player.hasDiscoveredRecipe(recipeBukkitId)) {
-                if (recipe.canUnlock(serverPlayer, serverPlayer.obtainedItems())) {
-                    recipesToUnlock.add(recipeBukkitId);
-                }
-            }
-        }
-        if (!recipesToUnlock.isEmpty()) {
-            player.discoverRecipes(recipesToUnlock);
-        }
+        this.itemManager.unlockRecipeOnInventoryChanged(event.getPlayer(), wrap);
     }
 }
