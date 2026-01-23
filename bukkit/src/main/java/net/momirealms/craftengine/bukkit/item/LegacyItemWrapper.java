@@ -170,6 +170,11 @@ public class LegacyItemWrapper implements ItemWrapper<ItemStack> {
     }
 
     @Override
+    public void grow(int amount) {
+        this.count(count() + amount);
+    }
+
+    @Override
     public void hurtAndBreak(int amount, @Nullable Player player, @Nullable EquipmentSlot slot) {
         if (player == null) {
             if (this.hurt(amount)) {
