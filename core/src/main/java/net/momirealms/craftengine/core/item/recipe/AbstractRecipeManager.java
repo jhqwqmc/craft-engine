@@ -20,6 +20,7 @@ public abstract class AbstractRecipeManager<T> implements RecipeManager<T> {
     protected final Map<Key, Recipe<T>> byId = new LinkedHashMap<>();
     protected final Map<Key, List<Recipe<T>>> byResult = new HashMap<>();
     protected final Map<Key, List<Recipe<T>>> byIngredient = new HashMap<>();
+    protected final Map<Key, List<IngredientUnlockable>> ingredientUnlockable = new HashMap<>();
     protected final Set<Key> dataPackRecipes = new HashSet<>();
     protected final RecipeParser recipeParser;
 
@@ -39,6 +40,7 @@ public abstract class AbstractRecipeManager<T> implements RecipeManager<T> {
         this.byId.clear();
         this.byResult.clear();
         this.byIngredient.clear();
+        this.ingredientUnlockable.clear();
     }
 
     protected void markAsDataPackRecipe(Key key) {
@@ -100,22 +102,44 @@ public abstract class AbstractRecipeManager<T> implements RecipeManager<T> {
         return recipeByInput(type, input);
     }
 
-    protected boolean registerInternalRecipe(Key id, Recipe<T> recipe) {
+    public List<IngredientUnlockable> ingredientUnlockablesByChangedItem(Key item) {
+        return this.ingredientUnlockable.getOrDefault(item, List.of());
+    }
+
+    protected boolean registerInternalRecipe(Key id, Recipe<T> recipe, boolean unlockOnIngredientObtained) {
         if (this.byId.containsKey(id)) return false;
         this.byType.computeIfAbsent(recipe.type(), k -> new ArrayList<>()).add(recipe);
         this.byId.put(id, recipe);
         if (recipe instanceof AbstractFixedResultRecipe<?> fixedResult) {
             this.byResult.computeIfAbsent(fixedResult.result().item().id(), k -> new ArrayList<>()).add(recipe);
         }
+        List<Ingredient<T>> ingredients = recipe.ingredientsInUse();
         if (recipe.canBeSearchedByIngredients()) {
             HashSet<Key> usedKeys = new HashSet<>();
-            for (Ingredient<T> ingredient : recipe.ingredientsInUse()) {
+            for (Ingredient<T> ingredient : ingredients) {
                 for (UniqueKey holder : ingredient.items()) {
                     Key key = holder.key();
                     if (usedKeys.add(key)) {
                         this.byIngredient.computeIfAbsent(key, k -> new ArrayList<>()).add(recipe);
                     }
                 }
+            }
+        }
+        if (unlockOnIngredientObtained) {
+            List<IngredientUnlockable.Requirement> requirements =  new ArrayList<>(4);
+            HashSet<UniqueKey> usedKeys = new HashSet<>();
+            for (Ingredient<T> ingredient : ingredients) {
+                List<UniqueKey> items = ingredient.items();
+                if (items.size() > 1) {
+                    requirements.add(new IngredientUnlockable.Multiple(items.toArray(new UniqueKey[0])));
+                } else if (!items.isEmpty()) {
+                    requirements.add(new IngredientUnlockable.Single(items.getFirst()));
+                }
+                usedKeys.addAll(items);
+            }
+            IngredientUnlockable unlockable = new IngredientUnlockable(recipe, requirements.toArray(new IngredientUnlockable.Requirement[0]));
+            for (UniqueKey usedKey : usedKeys) {
+                this.ingredientUnlockable.computeIfAbsent(usedKey.key(), l -> new ArrayList<>()).add(unlockable);
             }
         }
         return true;
@@ -145,9 +169,10 @@ public abstract class AbstractRecipeManager<T> implements RecipeManager<T> {
             if (AbstractRecipeManager.this.byId.containsKey(id)) {
                 throw new LocalizedResourceConfigException("warning.config.recipe.duplicate");
             }
+            boolean unlockOnIngredientObtained = (boolean) section.getOrDefault("unlock-on-ingredient-obtained", Config.unlockOnIngredientObtained());
             Recipe<T> recipe = RecipeSerializers.fromMap(id, section);
             try {
-                registerInternalRecipe(id, recipe);
+                registerInternalRecipe(id, recipe, unlockOnIngredientObtained);
             } catch (LocalizedResourceConfigException e) {
                 throw e;
             } catch (Exception e) {

@@ -95,6 +95,9 @@ public class LegacyItemWrapper implements ItemWrapper<ItemStack> {
         Object compoundTag = FastNMS.INSTANCE.method$ItemStack$getTag(this.nmsStack);
         if (compoundTag == null) return null;
         Object currentTag = compoundTag;
+        if (path == null || path.length == 0) {
+            return currentTag;
+        }
         for (int i = 0; i < path.length; i++) {
             Object pathSegment = path[i];
             if (pathSegment == null) return null;

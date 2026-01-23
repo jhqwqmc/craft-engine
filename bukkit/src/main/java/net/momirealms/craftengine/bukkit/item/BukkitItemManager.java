@@ -4,20 +4,25 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
 import net.momirealms.craftengine.bukkit.item.behavior.AxeItemBehavior;
 import net.momirealms.craftengine.bukkit.item.behavior.FlintAndSteelItemBehavior;
 import net.momirealms.craftengine.bukkit.item.factory.BukkitItemFactory;
 import net.momirealms.craftengine.bukkit.item.listener.ArmorEventListener;
 import net.momirealms.craftengine.bukkit.item.listener.DebugStickListener;
 import net.momirealms.craftengine.bukkit.item.listener.ItemEventListener;
+import net.momirealms.craftengine.bukkit.item.listener.SlotChangeListener;
+import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.*;
+import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.item.recipe.DatapackRecipeResult;
+import net.momirealms.craftengine.core.item.recipe.IngredientUnlockable;
 import net.momirealms.craftengine.core.item.recipe.UniqueIdItem;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
 import net.momirealms.craftengine.core.plugin.compatibility.ItemSource;
@@ -28,6 +33,7 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.UniqueKey;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.incendo.cloud.suggestion.Suggestion;
@@ -53,6 +59,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
     private final ItemEventListener itemEventListener;
     private final DebugStickListener debugStickListener;
     private final ArmorEventListener armorEventListener;
+    private final SlotChangeListener slotChangeListener;
     private final NetworkItemHandler<ItemStack> networkItemHandler;
     private final Object bedrockItemHolder;
     private final Item<ItemStack> emptyItem;
@@ -69,6 +76,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
         this.itemEventListener = new ItemEventListener(plugin, this);
         this.debugStickListener = new DebugStickListener(plugin);
         this.armorEventListener = new ArmorEventListener();
+        this.slotChangeListener = VersionHelper.isOrAbove1_20_3() ? new SlotChangeListener(this) : null;
         this.networkItemHandler = VersionHelper.isOrAbove1_20_5() ? new ModernNetworkItemHandler() : new LegacyNetworkItemHandler();
         this.registerAllVanillaItems();
         this.bedrockItemHolder = FastNMS.INSTANCE.method$Registry$getHolderByResourceKey(MBuiltInRegistries.ITEM, FastNMS.INSTANCE.method$ResourceKey$create(MRegistries.ITEM, KeyUtils.toResourceLocation(Key.of("minecraft:bedrock")))).get();
@@ -105,6 +113,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
         Bukkit.getPluginManager().registerEvents(this.itemEventListener, this.plugin.javaPlugin());
         Bukkit.getPluginManager().registerEvents(this.debugStickListener, this.plugin.javaPlugin());
         Bukkit.getPluginManager().registerEvents(this.armorEventListener, this.plugin.javaPlugin());
+        if (this.slotChangeListener != null) Bukkit.getPluginManager().registerEvents(this.slotChangeListener, this.plugin.javaPlugin());
     }
 
     @Override
@@ -185,6 +194,7 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
         HandlerList.unregisterAll(this.itemEventListener);
         HandlerList.unregisterAll(this.debugStickListener);
         HandlerList.unregisterAll(this.armorEventListener);
+        if (this.slotChangeListener != null) HandlerList.unregisterAll(this.slotChangeListener);
         this.persistLastRegisteredPatterns();
     }
 
@@ -442,6 +452,27 @@ public class BukkitItemManager extends AbstractItemManager<ItemStack> {
 
     @Nullable // 1.21.5+
     public Function<Object, Integer> decoratedHashOpsGenerator() {
-        return decoratedHashOpsGenerator;
+        return this.decoratedHashOpsGenerator;
+    }
+
+    public void unlockRecipeOnInventoryChanged(org.bukkit.entity.Player player, Item<ItemStack> item) {
+        Key itemId = item.id();
+        BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(player);
+        if (serverPlayer == null) return;
+        serverPlayer.addObtainedItem(itemId);
+        List<IngredientUnlockable> recipes = BukkitRecipeManager.instance().ingredientUnlockablesByChangedItem(itemId);
+        if (recipes.isEmpty()) return;
+        List<NamespacedKey> recipesToUnlock = new ArrayList<>(4);
+        for (IngredientUnlockable recipe : recipes) {
+            NamespacedKey recipeBukkitId = KeyUtils.toNamespacedKey(recipe.id());
+            if (!player.hasDiscoveredRecipe(recipeBukkitId)) {
+                if (recipe.canUnlock(serverPlayer, serverPlayer.obtainedItems())) {
+                    recipesToUnlock.add(recipeBukkitId);
+                }
+            }
+        }
+        if (!recipesToUnlock.isEmpty()) {
+            player.discoverRecipes(recipesToUnlock);
+        }
     }
 }

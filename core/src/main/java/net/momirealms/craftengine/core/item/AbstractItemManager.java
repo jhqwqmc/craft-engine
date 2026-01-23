@@ -621,7 +621,13 @@ public abstract class AbstractItemManager<I> extends AbstractModelGenerator impl
                 try {
                     settings = Optional.ofNullable(ResourceConfigUtils.get(section, "settings"))
                             .map(map -> ItemSettings.fromMap(MiscUtils.castToMap(map, true)))
-                            .map(it -> isVanillaItem ? it.disableVanillaBehavior(false) : it)
+                            .map(it -> {
+                                if (isVanillaItem) {
+                                    it.disableVanillaBehavior(false);
+                                    it.triggerAdvancement(true);
+                                }
+                                return it;
+                            })
                             .orElse(ItemSettings.of().disableVanillaBehavior(!isVanillaItem));
                 } catch (LocalizedResourceConfigException e) {
                     collector.add(e);

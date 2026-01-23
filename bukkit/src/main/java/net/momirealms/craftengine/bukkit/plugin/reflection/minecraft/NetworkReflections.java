@@ -18,7 +18,6 @@ import java.util.*;
 import static java.util.Objects.requireNonNull;
 
 public final class NetworkReflections {
-
     private NetworkReflections() {}
 
     public static final Class<?> clazz$Connection = requireNonNull(

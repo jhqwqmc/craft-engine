@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class BukkitWorldManager implements WorldManager, Listener {
+public final class BukkitWorldManager implements WorldManager, Listener {
     private static BukkitWorldManager instance;
     private final BukkitCraftEngine plugin;
     private final ConcurrentUUID2ReferenceChainedHashTable<CEWorld> worlds;
@@ -577,7 +577,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
-            Map<String, Object> processedSection = replaceDashToUnderscore(section);
+            Map<String, Object> processedSection = processPlacedFeature(section);
             Object feature;
             if (VersionHelper.isOrAbove1_20_5()) {
                 feature = CoreReflections.instance$ConfiguredFeature$CODEC.parse(MRegistryOps.JSON, GsonHelper.get().toJsonTree(processedSection))
@@ -630,7 +630,7 @@ public class BukkitWorldManager implements WorldManager, Listener {
 
         @Override
         protected void parseSection(Pack pack, Path path, String node, Key id, Map<String, Object> section) throws LocalizedException {
-            Map<String, Object> processedSection = replaceDashToUnderscore(section);
+            Map<String, Object> processedSection = processPlacedFeature(section);
             Predicate<Key> biomeFilter = parseFilter(ResourceConfigUtils.get(processedSection, "biome", "biomes"), Key::of);
             Predicate<String> worldFilter = parseFilter(ResourceConfigUtils.get(processedSection, "world", "worlds"), Function.identity());
             Predicate<Key> environmentFilter = parseFilter(ResourceConfigUtils.get(processedSection, "dimension", "dimensions"), Key::of);
@@ -725,10 +725,8 @@ public class BukkitWorldManager implements WorldManager, Listener {
         }
     }
 
-    /**
-     * 递归地将Map中所有键的短横线(-)替换为下划线(_)
-     */
-    protected Map<String, Object> replaceDashToUnderscore(Map<String, Object> map) {
+    @SuppressWarnings({"DuplicatedCode"})
+    private Map<String, Object> processPlacedFeature(Map<String, Object> map) {
         if (map == null) {
             return null;
         }
@@ -764,15 +762,24 @@ public class BukkitWorldManager implements WorldManager, Listener {
                 result.put("Name", BlockStateUtils.getBlockOwnerIdFromState(blockState.customBlockState().literalObject()).asString());
             }
         }
+        Object rawBlocks = result.get("blocks");
+        if (rawBlocks instanceof String blockName && blockName.charAt(0) != '#') {
+            Optional<CustomBlock> customBlock = this.plugin.blockManager().blockById(Key.of(blockName));
+            if (customBlock.isPresent()) {
+                CustomBlock block = customBlock.get();
+                ImmutableBlockState blockState = block.defaultState();
+                result.put("blocks", BlockStateUtils.getBlockOwnerIdFromState(blockState.customBlockState().literalObject()).asString());
+            }
+        }
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Object processValue(Object value) {
+    @SuppressWarnings({"unchecked", "DuplicatedCode"})
+    private Object processValue(Object value) {
         if (value == null) return null;
         if (value instanceof Map) {
             Map<String, Object> nestedMap = (Map<String, Object>) value;
-            return replaceDashToUnderscore(nestedMap);
+            return processPlacedFeature(nestedMap);
         }
         if (value instanceof List) {
             List<Object> originalList = (List<Object>) value;

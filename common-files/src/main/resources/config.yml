@@ -438,6 +438,9 @@ recipe:
     list: []
   # You can use items from other plugins by adding the supported them here
   ingredient-sources: []
+  # Whether to automatically unlock the corresponding recipe when the player obtains its required ingredients.
+  # This option can be set individually for each recipe to override the global setting.
+  unlock-on-ingredient-obtained: true
 
 gui:
   browser:
