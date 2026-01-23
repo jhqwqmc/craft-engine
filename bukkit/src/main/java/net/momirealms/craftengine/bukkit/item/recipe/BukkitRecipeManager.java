@@ -305,7 +305,7 @@ public class BukkitRecipeManager extends AbstractRecipeManager<ItemStack> {
             try {
                 Recipe<ItemStack> recipe = serializer.readJson(id, jsonObject);
                 markAsDataPackRecipe(id);
-                registerInternalRecipe(id, recipe);
+                registerInternalRecipe(id, recipe, false);
             } catch (Exception e) {
                 this.plugin.logger().warn("Failed to load data pack recipe " + id + ". Json: " + jsonObject, e);
             }

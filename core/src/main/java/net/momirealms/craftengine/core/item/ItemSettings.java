@@ -55,6 +55,7 @@ public final class ItemSettings {
     @Nullable
     LegacyChatFormatter glowColor = null;
     Map<CustomItemSettingType<?>, Object> customData = new IdentityHashMap<>(4);
+    boolean triggerAdvancement = false;
 
     private ItemSettings() {}
 
@@ -135,6 +136,7 @@ public final class ItemSettings {
         newSettings.destroyOnDeathChance = settings.destroyOnDeathChance;
         newSettings.glowColor = settings.glowColor;
         newSettings.dropDisplay = settings.dropDisplay;
+        newSettings.triggerAdvancement = settings.triggerAdvancement;
         newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
@@ -251,6 +253,10 @@ public final class ItemSettings {
 
     public List<DamageSource> invulnerable() {
         return this.invulnerable;
+    }
+
+    public boolean triggerAdvancement() {
+        return triggerAdvancement;
     }
 
     public float compostProbability() {
@@ -395,6 +401,11 @@ public final class ItemSettings {
         return this;
     }
 
+    public ItemSettings triggerAdvancement(boolean triggerAdvancement) {
+        this.triggerAdvancement = triggerAdvancement;
+        return this;
+    }
+
     @FunctionalInterface
     public interface Modifier {
 
@@ -520,6 +531,10 @@ public final class ItemSettings {
             registerFactory("can-place", (value -> {
                 boolean bool = ResourceConfigUtils.getAsBoolean(value, "can-place");
                 return settings -> settings.disableVanillaBehavior(!bool);
+            }));
+            registerFactory("trigger-advancement", (value -> {
+                boolean bool = ResourceConfigUtils.getAsBoolean(value, "trigger-advancement");
+                return settings -> settings.triggerAdvancement(bool);
             }));
             registerFactory("disable-vanilla-behavior", (value -> {
                 boolean bool = ResourceConfigUtils.getAsBoolean(value, "disable-vanilla-behavior");

@@ -162,6 +162,7 @@ public class Config {
 
     protected boolean recipe$enable;
     protected boolean recipe$disable_vanilla_recipes$all;
+    protected boolean recipe$unlock_on_ingredient_obtained;
     protected Set<Key> recipe$disable_vanilla_recipes$list;
     protected List<String> recipe$ingredient_sources;
 
@@ -557,6 +558,7 @@ public class Config {
         recipe$disable_vanilla_recipes$all = config.getBoolean("recipe.disable-vanilla-recipes.all", false);
         recipe$disable_vanilla_recipes$list = config.getStringList("recipe.disable-vanilla-recipes.list").stream().map(Key::of).collect(Collectors.toSet());
         recipe$ingredient_sources = config.getStringList("recipe.ingredient-sources");
+        recipe$unlock_on_ingredient_obtained = config.getBoolean("recipe.unlock-on-ingredient-obtained", true);
 
         // image
         image$illegal_characters_filter$anvil = config.getBoolean("image.illegal-characters-filter.anvil", true);
@@ -1184,6 +1186,10 @@ public class Config {
 
     public static List<String> recipeIngredientSources() {
         return instance.recipe$ingredient_sources;
+    }
+
+    public static boolean unlockOnIngredientObtained() {
+        return instance.recipe$unlock_on_ingredient_obtained;
     }
 
     public static boolean triggerUpdateAttack() {

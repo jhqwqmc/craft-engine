@@ -53,9 +53,6 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
 
     @Override
     public void runDelayedSyncTasks() {
-        if (this.advancements.isEmpty()) {
-            return;
-        }
         Map<Object, Object> advancements = new HashMap<>();
         for (Map.Entry<Key, Object> entry : this.advancements.entrySet()) {
             Object identifier = KeyUtils.toResourceLocation(entry.getKey());

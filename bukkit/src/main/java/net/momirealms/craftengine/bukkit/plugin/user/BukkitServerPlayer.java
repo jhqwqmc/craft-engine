@@ -187,6 +187,7 @@ public class BukkitServerPlayer extends Player {
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .concurrencyLevel(4)
             .build();
+    private final Set<UniqueKey> obtainedItems = new HashSet<>();
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
         this.channel = channel;
@@ -226,6 +227,12 @@ public class BukkitServerPlayer extends Player {
         } catch (IOException e) {
             this.cooldownData = new CooldownData();
             this.plugin.logger().warn("Failed to parse cooldown data", e);
+        }
+        PlayerInventory inventory = player.getInventory();
+        for (ItemStack item : inventory.getContents()) {
+            if (!ItemStackUtils.isEmpty(item)) {
+                this.obtainedItems.add(UniqueKey.create(BukkitItemManager.instance().wrap(item).id()));
+            }
         }
     }
 
@@ -1666,5 +1673,13 @@ public class BukkitServerPlayer extends Player {
 
     public FurnitureHitData furnitureHitData() {
         return furnitureHitData;
+    }
+
+    public boolean addObtainedItem(Key item) {
+        return this.obtainedItems.add(UniqueKey.create(item));
+    }
+
+    public Set<UniqueKey> obtainedItems() {
+        return this.obtainedItems;
     }
 }
