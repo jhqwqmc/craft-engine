@@ -381,11 +381,13 @@ public final class NetworkReflections {
             ReflectionUtils.getStaticMethod(clazz$ClientboundPlayerInfoUpdatePacket$Action, clazz$ClientboundPlayerInfoUpdatePacket$Action.arrayType())
     );
 
+    public static final Object instance$ClientboundPlayerInfoUpdatePacket$Action$ADD_PLAYER;
     public static final Object instance$ClientboundPlayerInfoUpdatePacket$Action$UPDATE_DISPLAY_NAME;
 
     static {
         try {
             Object[] values = (Object[]) method$ClientboundPlayerInfoUpdatePacket$Action$values.invoke(null);
+            instance$ClientboundPlayerInfoUpdatePacket$Action$ADD_PLAYER = values[0];
             instance$ClientboundPlayerInfoUpdatePacket$Action$UPDATE_DISPLAY_NAME = values[5];
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
@@ -1830,5 +1832,14 @@ public final class NetworkReflections {
 
     public static final Constructor<?> constructor$ClientboundLoginDisconnectPacket = requireNonNull(
             ReflectionUtils.getDeclaredConstructor(clazz$ClientboundLoginDisconnectPacket, CoreReflections.clazz$Component)
+    );
+
+    // 1.20(.1)
+    public static final Constructor<?> constructor$ClientboundAddPlayerPacket = Optional.ofNullable(clazz$ClientboundAddPlayerPacket)
+            .map(it -> ReflectionUtils.getConstructor(it, CoreReflections.clazz$FriendlyByteBuf))
+            .orElse(null);
+
+    public static final Constructor<?> constructor$ClientboundRotateHeadPacket = requireNonNull(
+            ReflectionUtils.getConstructor(clazz$ClientboundRotateHeadPacket, CoreReflections.clazz$FriendlyByteBuf)
     );
 }
