@@ -1836,10 +1836,10 @@ public final class NetworkReflections {
 
     // 1.20(.1)
     public static final Constructor<?> constructor$ClientboundAddPlayerPacket = Optional.ofNullable(clazz$ClientboundAddPlayerPacket)
-            .map(it -> ReflectionUtils.getConstructor(it, CoreReflections.clazz$FriendlyByteBuf))
+            .map(it -> ReflectionUtils.getDeclaredConstructor(it, CoreReflections.clazz$FriendlyByteBuf))
             .orElse(null);
 
     public static final Constructor<?> constructor$ClientboundRotateHeadPacket = requireNonNull(
-            ReflectionUtils.getConstructor(clazz$ClientboundRotateHeadPacket, CoreReflections.clazz$FriendlyByteBuf)
+            ReflectionUtils.getDeclaredConstructor(clazz$ClientboundRotateHeadPacket, CoreReflections.clazz$FriendlyByteBuf)
     );
 }
