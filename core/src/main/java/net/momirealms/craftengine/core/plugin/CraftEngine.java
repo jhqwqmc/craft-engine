@@ -14,7 +14,7 @@ import net.momirealms.craftengine.core.item.recipe.RecipeManager;
 import net.momirealms.craftengine.core.item.recipe.network.legacy.LegacyRecipeTypes;
 import net.momirealms.craftengine.core.item.recipe.network.modern.display.RecipeDisplayTypes;
 import net.momirealms.craftengine.core.item.recipe.network.modern.display.slot.SlotDisplayTypes;
-import net.momirealms.craftengine.core.loot.VanillaLootManager;
+import net.momirealms.craftengine.core.loot.LootManager;
 import net.momirealms.craftengine.core.pack.LoadingSequence;
 import net.momirealms.craftengine.core.pack.PackManager;
 import net.momirealms.craftengine.core.plugin.classpath.ClassPathAppender;
@@ -89,7 +89,7 @@ public abstract class CraftEngine implements Plugin {
     protected ItemBrowserManager itemBrowserManager;
     protected GuiManager guiManager;
     protected SoundManager soundManager;
-    protected VanillaLootManager vanillaLootManager;
+    protected LootManager lootManager;
     protected AdvancementManager advancementManager;
     protected CompatibilityManager compatibilityManager;
     protected GlobalVariableManager globalVariableManager;
@@ -172,7 +172,7 @@ public abstract class CraftEngine implements Plugin {
         this.itemBrowserManager.reload();
         this.blockManager.reload();
         this.worldManager.reload();
-        this.vanillaLootManager.reload();
+        this.lootManager.reload();
         this.guiManager.reload();
         this.packManager.reload();
         this.advancementManager.reload();
@@ -199,6 +199,8 @@ public abstract class CraftEngine implements Plugin {
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.soundManager.delayedLoad(), this.scheduler.async()));
         // 进度
         delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.advancementManager.delayedLoad(), this.scheduler.async()));
+        // 战利品
+        delayedLoadTasks.add(CompletableFuture.runAsync(() -> this.lootManager.delayedLoad(), this.scheduler.async()));
         // 如果重载配方
         if (reloadRecipe) {
             // 转换数据包配方
@@ -299,7 +301,7 @@ public abstract class CraftEngine implements Plugin {
         // 注册聊天监听器
         this.fontManager.delayedInit();
         // 注册实体死亡监听器
-        this.vanillaLootManager.delayedInit();
+        this.lootManager.delayedInit();
         // 注册脱离坐骑监听器
         this.seatManager.delayedInit();
         // 加载实体剔除线程
@@ -460,7 +462,7 @@ public abstract class CraftEngine implements Plugin {
         if (this.itemBrowserManager != null) this.itemBrowserManager.disable();
         if (this.guiManager != null) this.guiManager.disable();
         if (this.soundManager != null) this.soundManager.disable();
-        if (this.vanillaLootManager != null) this.vanillaLootManager.disable();
+        if (this.lootManager != null) this.lootManager.disable();
         if (this.seatManager != null) this.seatManager.disable();
         if (this.translationManager != null) this.translationManager.disable();
         if (this.globalVariableManager != null) this.globalVariableManager.disable();
@@ -495,7 +497,7 @@ public abstract class CraftEngine implements Plugin {
         // register sound parser
         this.packManager.registerConfigSectionParsers(this.soundManager.parsers());
         // register vanilla loot parser
-        this.packManager.registerConfigSectionParser(this.vanillaLootManager.parser());
+        this.packManager.registerConfigSectionParser(this.lootManager.parser());
         // register advancement parser
         this.packManager.registerConfigSectionParser(this.advancementManager.parser());
         // register skip-optimization parser
@@ -662,8 +664,8 @@ public abstract class CraftEngine implements Plugin {
     }
 
     @Override
-    public VanillaLootManager vanillaLootManager() {
-        return vanillaLootManager;
+    public LootManager vanillaLootManager() {
+        return lootManager;
     }
 
     @Override

@@ -15,7 +15,7 @@ import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BukkitItemBehaviors;
 import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
-import net.momirealms.craftengine.bukkit.loot.BukkitVanillaLootManager;
+import net.momirealms.craftengine.bukkit.loot.BukkitLootManager;
 import net.momirealms.craftengine.bukkit.pack.BukkitPackManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandManager;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitSenderFactory;
@@ -182,7 +182,7 @@ public final class BukkitCraftEngine extends CraftEngine {
         // 初始化声音管理器
         super.soundManager = new BukkitSoundManager(this);
         // 初始化战利品管理器
-        super.vanillaLootManager = new BukkitVanillaLootManager(this);
+        super.lootManager = new BukkitLootManager(this);
         // 初始化字体管理器
         super.fontManager = new BukkitFontManager(this);
         // 初始化进度管理器

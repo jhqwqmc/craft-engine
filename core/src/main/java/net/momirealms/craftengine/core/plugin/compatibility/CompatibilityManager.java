@@ -45,4 +45,8 @@ public interface CompatibilityManager {
     LevelerProvider getLevelerProvider(String id);
 
     void registerLevelerProvider(LevelerProvider provider);
+
+    EntityProvider getEntityProvider(String id);
+
+    void registerEntityProvider(EntityProvider provider);
 }

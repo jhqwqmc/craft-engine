@@ -9,7 +9,7 @@ import net.momirealms.craftengine.core.entity.seat.SeatManager;
 import net.momirealms.craftengine.core.font.FontManager;
 import net.momirealms.craftengine.core.item.ItemManager;
 import net.momirealms.craftengine.core.item.recipe.RecipeManager;
-import net.momirealms.craftengine.core.loot.VanillaLootManager;
+import net.momirealms.craftengine.core.loot.LootManager;
 import net.momirealms.craftengine.core.pack.PackManager;
 import net.momirealms.craftengine.core.plugin.classpath.ClassPathAppender;
 import net.momirealms.craftengine.core.plugin.command.sender.SenderFactory;
@@ -92,7 +92,7 @@ public interface Plugin {
 
     SoundManager soundManager();
 
-    VanillaLootManager vanillaLootManager();
+    LootManager vanillaLootManager();
 
     CompatibilityManager compatibilityManager();
 

@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class AbstractVanillaLootManager implements VanillaLootManager {
+public abstract class AbstractLootManager implements LootManager {
     protected final Map<Integer, VanillaLoot> blockLoots = new HashMap<>();
     // TODO 实现一个基于entity data的生物战利品系统
     protected final Map<Key, VanillaLoot> entityLoots = new HashMap<>();
 
-    public AbstractVanillaLootManager() {
+    public AbstractLootManager() {
     }
 
     @Override

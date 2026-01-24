@@ -166,6 +166,8 @@ public class Config {
     protected Set<Key> recipe$disable_vanilla_recipes$list;
     protected List<String> recipe$ingredient_sources;
 
+    protected List<String> loot$entity_sources;
+
     protected boolean image$illegal_characters_filter$command;
     protected boolean image$illegal_characters_filter$chat;
     protected boolean image$illegal_characters_filter$anvil;
@@ -559,6 +561,9 @@ public class Config {
         recipe$disable_vanilla_recipes$list = config.getStringList("recipe.disable-vanilla-recipes.list").stream().map(Key::of).collect(Collectors.toSet());
         recipe$ingredient_sources = config.getStringList("recipe.ingredient-sources");
         recipe$unlock_on_ingredient_obtained = config.getBoolean("recipe.unlock-on-ingredient-obtained", true);
+
+        // loot
+        loot$entity_sources = config.getStringList("recipe.entity-sources");
 
         // image
         image$illegal_characters_filter$anvil = config.getBoolean("image.illegal-characters-filter.anvil", true);
@@ -1186,6 +1191,10 @@ public class Config {
 
     public static List<String> recipeIngredientSources() {
         return instance.recipe$ingredient_sources;
+    }
+
+    public static List<String> lootEntitySources() {
+        return instance.loot$entity_sources;
     }
 
     public static boolean unlockOnIngredientObtained() {

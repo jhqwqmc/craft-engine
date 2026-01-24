@@ -49,4 +49,22 @@ public final class StringUtils {
         }
         return new String(decodedBytes, StandardCharsets.UTF_8);
     }
+
+    public static String normalizeString(String str) {
+        if (str == null) {
+            return null;
+        }
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == ':') {
+                chars[i] = '_';
+            } else {
+                if (c >= 'A' && c <= 'Z') {
+                    chars[i] = (char) (c + 32);
+                }
+            }
+        }
+        return new String(chars);
+    }
 }
