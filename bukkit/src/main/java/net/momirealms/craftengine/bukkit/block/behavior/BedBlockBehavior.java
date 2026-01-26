@@ -284,7 +284,7 @@ public class BedBlockBehavior extends BukkitBlockBehavior implements EntityBlock
         @Override
         public BedBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
             if (!VersionHelper.isOrAbove1_20_2()) {
-                throw new IllegalStateException("BedBlockBehavior requires at least 1.20.2");
+                throw new UnsupportedOperationException("bed_block requires at least 1.20.2");
             }
             Property<HorizontalDirection> facingProperty = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.bed.missing_facing");
             Property<BedPart> partProperty = (Property<BedPart>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("part"), "warning.config.block.behavior.bed.missing_part");
