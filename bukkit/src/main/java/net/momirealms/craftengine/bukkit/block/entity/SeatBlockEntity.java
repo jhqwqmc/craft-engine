@@ -29,7 +29,7 @@ public class SeatBlockEntity extends BlockEntity implements SeatOwner {
     }
 
     @Override
-    public void saveCustomData(CompoundTag data) {
+    public void saveEntityData(CompoundTag data) {
         data.putString("type", "seat_block_entity");
     }
 
