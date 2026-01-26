@@ -69,4 +69,5 @@ public final class DirectContextParameters {
     public static final ContextKey<Integer> COUNT = ContextKey.direct("count");
     public static final ContextKey<Integer> HIT_TIMES = ContextKey.direct("hit_times");
     public static final ContextKey<GameEdition> GAME_EDITION = ContextKey.direct("game_edition");
+    public static final ContextKey<Double> MOB_LEVEL = ContextKey.direct("mob_level");
 }

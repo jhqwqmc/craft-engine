@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class MythicSkillHelper {
+    private MythicSkillHelper() {}
 
     public static void execute(String skill, float power, Player player) {
         org.bukkit.entity.Player casterPlayer = (org.bukkit.entity.Player) player.platformPlayer();

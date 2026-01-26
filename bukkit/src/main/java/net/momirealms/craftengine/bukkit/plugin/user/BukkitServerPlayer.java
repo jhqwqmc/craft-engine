@@ -802,7 +802,7 @@ public class BukkitServerPlayer extends Player {
         } else {
             BlockPos previousPos = this.destroyPos;
             if (previousPos != null && !pos.equals(previousPos)) {
-                this.broadcastDestroyProgress(this.platformPlayer(), previousPos, -1);
+                this.broadcastDestroyProgress(previousPos, -1);
             }
             this.destroyPos = pos;
             this.destroyedState = state;
@@ -913,7 +913,7 @@ public class BukkitServerPlayer extends Player {
         BlockPos pos = this.destroyPos;
         if (pos != null && this.isDestroyingCustomBlock) {
             // 只纠正自定义方块的破坏进度
-            this.broadcastDestroyProgress(platformPlayer(), pos, -1);
+            this.broadcastDestroyProgress(pos, -1);
         }
     }
 
@@ -1008,7 +1008,7 @@ public class BukkitServerPlayer extends Player {
                     if (packetStage != this.lastSentState) {
                         this.lastSentState = packetStage;
                         // broadcast changes
-                        broadcastDestroyProgress(platformPlayer(), hitPos, packetStage);
+                        broadcastDestroyProgress(hitPos, packetStage);
                     }
 
                     // can break now
@@ -1062,23 +1062,17 @@ public class BukkitServerPlayer extends Player {
         platformPlayer().breakBlock(new Location(platformPlayer().getWorld(), x, y, z).getBlock());
     }
 
-    private void broadcastDestroyProgress(org.bukkit.entity.Player player, BlockPos hitPos, int stage) {
+    @SuppressWarnings("deprecation")
+    private void broadcastDestroyProgress(BlockPos hitPos, int stage) {
         Object packet = FastNMS.INSTANCE.constructor$ClientboundBlockDestructionPacket(Integer.MAX_VALUE - entityId(), LocationUtils.toBlockPos(hitPos), stage);
-        for (org.bukkit.entity.Player other : player.getWorld().getPlayers()) {
-            Location otherLocation = other.getLocation();
-            double d0 = (double) hitPos.x() - otherLocation.getX();
-            double d1 = (double) hitPos.y() - otherLocation.getY();
-            double d2 = (double) hitPos.z() - otherLocation.getZ();
-            if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D) {
-                FastNMS.INSTANCE.method$Connection$send(
-                        FastNMS.INSTANCE.field$ServerGamePacketListenerImpl$connection(
-                                FastNMS.INSTANCE.field$Player$connection(
-                                        FastNMS.INSTANCE.method$CraftPlayer$getHandle(player)
-                                )
-                        ),
-                        packet,
-                        null
-                );
+        for (org.bukkit.entity.Player other : platformPlayer().getTrackedPlayers()) {
+            double d0 = (double) hitPos.x() - other.getX();
+            double d1 = (double) hitPos.y() - other.getY();
+            double d2 = (double) hitPos.z() - other.getZ();
+            if (d0 * d0 + d1 * d1 + d2 * d2 < 32 * 32) {
+                BukkitServerPlayer serverPlayer = BukkitAdaptors.adapt(other);
+                if (serverPlayer == null) continue;
+                serverPlayer.sendPacket(packet, false);
             }
         }
     }

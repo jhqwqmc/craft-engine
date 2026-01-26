@@ -105,7 +105,7 @@ public abstract class BukkitItemFactory<W extends ItemWrapper<ItemStack>> extend
            for (ItemSource<ItemStack> source : this.recipeIngredientSources) {
                String id = source.id(item.getItem());
                if (id != null) {
-                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.toLowerCase(id)));
+                   return UniqueKey.create(Key.of(source.plugin(), StringUtils.normalizeString(id)));
                }
            }
         }

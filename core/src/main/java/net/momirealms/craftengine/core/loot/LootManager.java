@@ -6,7 +6,7 @@ import net.momirealms.craftengine.core.util.Key;
 
 import java.util.Optional;
 
-public interface VanillaLootManager extends Manageable {
+public interface LootManager extends Manageable {
 
     ConfigParser parser();
 
