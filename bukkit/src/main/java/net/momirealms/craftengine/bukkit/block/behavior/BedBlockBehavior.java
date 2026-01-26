@@ -26,6 +26,7 @@ import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.util.HorizontalDirection;
 import net.momirealms.craftengine.core.util.ResourceConfigUtils;
+import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.*;
 import net.momirealms.craftengine.core.world.context.BlockPlaceContext;
 import net.momirealms.craftengine.core.world.context.UseOnContext;
@@ -282,6 +283,9 @@ public class BedBlockBehavior extends BukkitBlockBehavior implements EntityBlock
         @SuppressWarnings("unchecked")
         @Override
         public BedBlockBehavior create(CustomBlock block, Map<String, Object> arguments) {
+            if (!VersionHelper.isOrAbove1_20_2()) {
+                throw new IllegalStateException("BedBlockBehavior requires at least 1.20.2");
+            }
             Property<HorizontalDirection> facingProperty = (Property<HorizontalDirection>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("facing"), "warning.config.block.behavior.bed.missing_facing");
             Property<BedPart> partProperty = (Property<BedPart>) ResourceConfigUtils.requireNonNullOrThrow(block.getProperty("part"), "warning.config.block.behavior.bed.missing_part");
             SeatConfig seatConfig;

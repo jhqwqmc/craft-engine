@@ -112,7 +112,7 @@ public sealed abstract class BedBlockEntity extends BlockEntity permits BedBlock
         }
 
         @Override
-        public void saveCustomData(CompoundTag data) {
+        public void saveEntityData(CompoundTag data) {
             data.putString("type", "bed_block_entity");
         }
 

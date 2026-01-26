@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.block.entity.renderer;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.bukkit.block.behavior.BedBlockBehavior;
 import net.momirealms.craftengine.bukkit.block.entity.BedBlockEntity;
@@ -17,7 +16,6 @@ import net.momirealms.craftengine.core.block.ImmutableBlockState;
 import net.momirealms.craftengine.core.block.entity.render.DynamicBlockEntityRenderer;
 import net.momirealms.craftengine.core.entity.player.InteractionHand;
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.util.*;
 import net.momirealms.craftengine.core.world.BlockPos;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class DynamicPlayerRenderer implements DynamicBlockEntityRenderer {
     private static final EnumSet<?> ADD_PLAYER_ACTION = createAction();
@@ -57,13 +54,6 @@ public class DynamicPlayerRenderer implements DynamicBlockEntityRenderer {
     private @Nullable Object cachedHideOccupierPacket;
     private @Nullable Object cachedSetEntityDataPacket;
     private @Nullable Object cachedSetEquipmentPacket;
-    // 1.20.1及以下版本用的补丁包
-    private @Nullable Object cachedSouthPatchPacket;
-    private @Nullable Object cachedNorthPatchPacket;
-    private @Nullable Object cachedEastPatch1Packet;
-    private @Nullable Object cachedEastPatch2Packet;
-    private @Nullable Object cachedPatchPacket;
-    private boolean hasPatchPacket;
 
     public DynamicPlayerRenderer(BedBlockEntity blockEntity, BlockPos pos, Vector3f sleepOffset) {
         this.blockEntity = blockEntity;
@@ -91,19 +81,6 @@ public class DynamicPlayerRenderer implements DynamicBlockEntityRenderer {
         });
         this.cachedDespawnPacket = FastNMS.INSTANCE.constructor$ClientboundRemoveEntitiesPacket(IntList.of(entityId));
         this.cachedPlayerInfoRemovePacket = FastNMS.INSTANCE.constructor$ClientboundPlayerInfoRemovePacket(List.of(this.uuid));
-        // 1.20.1及以下版本用的补丁包
-        if (!VersionHelper.isOrAbove1_20_2()) {
-            try {
-                this.cachedSouthPatchPacket = NetworkReflections.constructor$ClientboundMoveEntityPacket$PosRot.newInstance(this.entityId, (short) 0, (short) 0, (short) 0, MiscUtils.packDegrees(140), (byte) 0, true);
-                this.cachedNorthPatchPacket = NetworkReflections.constructor$ClientboundMoveEntityPacket$PosRot.newInstance(this.entityId, (short) 0, (short) 0, (short) 0, MiscUtils.packDegrees(-140), (byte) 0, true);
-                this.cachedEastPatch1Packet = NetworkReflections.constructor$ClientboundMoveEntityPacket$PosRot.newInstance(this.entityId, (short) 0, (short) 0, (short) 0, MiscUtils.packDegrees(230), (byte) 0, true);
-                this.cachedEastPatch2Packet = NetworkReflections.constructor$ClientboundMoveEntityPacket$PosRot.newInstance(this.entityId, (short) 0, (short) 0, (short) 0, MiscUtils.packDegrees(-230), (byte) 0, true);
-                this.cachedPatchPacket = NetworkReflections.constructor$ClientboundMoveEntityPacket$PosRot.newInstance(this.entityId, (short) 0, (short) 0, (short) 0, MiscUtils.packDegrees(this.yRot), (byte) 0, true);
-                this.hasPatchPacket = true;
-            } catch (ReflectiveOperationException e) {
-                CraftEngine.instance().logger().warn("Failed to create ClientboundMoveEntityPacket", e);
-            }
-        }
     }
 
     @Override
@@ -132,18 +109,6 @@ public class DynamicPlayerRenderer implements DynamicBlockEntityRenderer {
         }
         player.sendPacket(this.cachedPlayerInfoUpdatePacket, false);
         player.sendPacket(this.cachedSpawnPacket, false);
-        // 1.20.1及以下版本发的补丁包
-        if (this.hasPatchPacket && this.yRot != 0) {
-            if (this.yRot == 90) {
-                player.sendPacket(this.cachedSouthPatchPacket, false);
-            } else if (this.yRot == 180) {
-                player.sendPacket(this.cachedEastPatch1Packet, false);
-                CraftEngine.instance().scheduler().asyncLater(() -> player.sendPacket(this.cachedEastPatch2Packet, false), 50 * 5, TimeUnit.MILLISECONDS);
-            } else if (this.yRot == 270) {
-                player.sendPacket(this.cachedNorthPatchPacket, false);
-            }
-            CraftEngine.instance().scheduler().asyncLater(() -> player.sendPacket(this.cachedPatchPacket, false), 50 * 10, TimeUnit.MILLISECONDS);
-        }
         this.updateNoAdd(player);
     }
 
@@ -199,34 +164,10 @@ public class DynamicPlayerRenderer implements DynamicBlockEntityRenderer {
                 CoreReflections.instance$GameType$SURVIVAL, null, false, 0, null
         );
         this.cachedPlayerInfoUpdatePacket = FastNMS.INSTANCE.constructor$ClientboundPlayerInfoUpdatePacket(ADD_PLAYER_ACTION, List.of(entry));
-        if (VersionHelper.isOrAbove1_20_2()) {
-            this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
-                    this.entityId, this.uuid, pos.x + this.offset.x, y + this.offset.y, pos.z + this.offset.z,
-                    0, this.yRot, MEntityTypes.PLAYER, 0, CoreReflections.instance$Vec3$Zero, this.yRot
-            );
-        } else { // 1.20.1及以下版本用的解决方案
-            try {
-                byte yRot = MiscUtils.packDegrees(this.yRot);
-                FriendlyByteBuf addBuf = new FriendlyByteBuf(Unpooled.buffer());
-                addBuf.writeVarInt(this.entityId);
-                addBuf.writeUUID(this.uuid);
-                addBuf.writeDouble(pos.x + this.offset.x);
-                addBuf.writeDouble(y + this.offset.y);
-                addBuf.writeDouble(pos.z + this.offset.z);
-                addBuf.writeByte(0);
-                addBuf.writeByte(0);
-                FriendlyByteBuf rotateBuf = new FriendlyByteBuf(Unpooled.buffer());
-                rotateBuf.writeVarInt(this.entityId);
-                rotateBuf.writeByte(yRot);
-                this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundBundlePacket(List.of(
-                        NetworkReflections.constructor$ClientboundAddPlayerPacket.newInstance(FastNMS.INSTANCE.constructor$FriendlyByteBuf(addBuf)),
-                        NetworkReflections.constructor$ClientboundRotateHeadPacket.newInstance(FastNMS.INSTANCE.constructor$FriendlyByteBuf(rotateBuf))
-                ));
-            } catch (ReflectiveOperationException e) {
-                CraftEngine.instance().logger().warn("Failed to create cachedSpawnPacket", e);
-                return;
-            }
-        }
+        this.cachedSpawnPacket = FastNMS.INSTANCE.constructor$ClientboundAddEntityPacket(
+                this.entityId, this.uuid, pos.x + this.offset.x, y + this.offset.y, pos.z + this.offset.z,
+                0, this.yRot, MEntityTypes.PLAYER, 0, CoreReflections.instance$Vec3$Zero, this.yRot
+        );
         @SuppressWarnings({"rawtypes", "unchecked"})
         List<Object> metadata = new ArrayList<>(FastNMS.INSTANCE.method$SynchedEntityData$getNonDefaultValues(player.entityData()));
         this.cachedSetOccupierDataPacket = null;
