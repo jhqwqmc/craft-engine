@@ -4045,7 +4045,7 @@ public class BukkitNetworkManager extends AbstractNetworkManager implements List
                         return;
 
                     int hitTimes = furniture.config.settings().hitTimes();
-                    if (hitTimes > 1) {
+                    if (hitTimes > 1 && !serverPlayer.isCreativeMode()) {
                         FurnitureHitData furnitureHitData = serverPlayer.furnitureHitData();
                         int previousTimes = furnitureHitData.times(furniture.entityId());
                         int alreadyHit = furnitureHitData.hit(furniture.entityId());
