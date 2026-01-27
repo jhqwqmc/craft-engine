@@ -32,9 +32,9 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class DebugCleanCacheCommand extends BukkitCommandFeature<CommandSender> {
+public class CleanCacheCommand extends BukkitCommandFeature<CommandSender> {
 
-    public DebugCleanCacheCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
+    public CleanCacheCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
         super(commandManager, plugin);
     }
 
@@ -70,7 +70,7 @@ public class DebugCleanCacheCommand extends BukkitCommandFeature<CommandSender> 
 
     @Override
     public String getFeatureID() {
-        return "debug_clean_cache";
+        return "clean_cache";
     }
 
     private void handleVisualBlockState(CommandContext<CommandSender> context) {
