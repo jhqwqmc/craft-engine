@@ -38,6 +38,7 @@ public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<
     private final Condition<Context> condition;
     private final Function<Context>[] smithingFunctions;
     private final CustomRecipeResult<T> visualResult;
+    private final boolean ingredientCountSupport;
 
     public CustomSmithingTransformRecipe(Key id,
                                          boolean showNotification,
@@ -50,7 +51,8 @@ public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<
                                          boolean mergeComponents,
                                          boolean mergeEnchantments,
                                          Function<Context>[] smithingFunctions,
-                                         Condition<Context> condition
+                                         Condition<Context> condition,
+                                         boolean ingredientCountSupport
     ) {
         super(id, showNotification, result);
         this.base = base;
@@ -62,14 +64,19 @@ public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<
         this.condition = condition;
         this.smithingFunctions = smithingFunctions;
         this.visualResult = visualResult;
+        this.ingredientCountSupport = ingredientCountSupport;
+    }
+
+    public boolean ingredientCountSupport() {
+        return this.ingredientCountSupport;
     }
 
     public boolean mergeComponents() {
-        return mergeComponents;
+        return this.mergeComponents;
     }
 
     public boolean mergeEnchantments() {
-        return mergeEnchantments;
+        return this.mergeEnchantments;
     }
 
     @Override
@@ -198,25 +205,37 @@ public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<
 
         @Override
         public CustomSmithingTransformRecipe<A> readMap(Key id, Map<String, Object> arguments) {
-            List<String> base = MiscUtils.getAsStringList(arguments.get("base"));
-            List<String> template = MiscUtils.getAsStringList(arguments.get("template-type"));
-            List<String> addition = MiscUtils.getAsStringList(arguments.get("addition"));
             boolean mergeComponents = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-components", true), "merge-components");
             boolean mergeEnchantments = ResourceConfigUtils.getAsBoolean(arguments.getOrDefault("merge-enchantments", false), "merge-enchantments");
+
+            Ingredient<A> templateIngredient = parseIngredient(ResourceConfigUtils.get(arguments, "template-type", "template_type"));
+            Ingredient<A> baseIngredient = ResourceConfigUtils.requireNonNullOrThrow(parseIngredient(arguments.get("base")), "warning.config.recipe.smithing_transform.missing_base");
+            Ingredient<A> additionIngredient = parseIngredient(arguments.get("addition"));
+            boolean countSupport = false;
+            if (/* !countSupport && */ templateIngredient != null && templateIngredient.count() > 1) {
+                countSupport = true;
+            }
+            if (!countSupport && additionIngredient != null && additionIngredient.count() > 1) {
+                countSupport = true;
+            }
+            if (!countSupport && /* baseIngredient != null && */ baseIngredient.count() > 1) {
+                countSupport = true;
+            }
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> processors = (List<Map<String, Object>>) arguments.getOrDefault("post-processors", List.of());
             return new CustomSmithingTransformRecipe<>(id,
                     showNotification(arguments),
-                    toIngredient(template),
-                    ResourceConfigUtils.requireNonNullOrThrow(toIngredient(base), "warning.config.recipe.smithing_transform.missing_base"),
-                    toIngredient(addition),
+                    templateIngredient,
+                    baseIngredient,
+                    additionIngredient,
                     parseResult(arguments),
                     parseVisualResult(arguments),
                     ItemDataProcessors.fromMapList(processors),
                     mergeComponents,
                     mergeEnchantments,
                     functions(arguments),
-                    conditions(arguments)
+                    conditions(arguments),
+                    countSupport
             );
         }
 
@@ -234,7 +253,8 @@ public class CustomSmithingTransformRecipe<T> extends AbstractFixedResultRecipe<
                     true,
                     false,
                     null,
-                    null
+                    null,
+                    false
             );
         }
     }

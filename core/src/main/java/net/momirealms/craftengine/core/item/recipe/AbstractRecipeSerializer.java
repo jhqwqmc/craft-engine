@@ -143,22 +143,22 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
         return new CustomRecipeResult<>(CloneableConstantItem.of(result), recipeResult.count(), null);
     }
 
-    @NotNull
+    @Nullable
     protected Ingredient<T> toIngredient(String item, int count) {
         return toIngredient(List.of(item), count);
     }
 
-    @NotNull
+    @Nullable
     protected Ingredient<T> toIngredient(String item) {
         return toIngredient(List.of(item), 1);
     }
 
-    @NotNull
+    @Nullable
     protected Ingredient<T> toIngredient(List<String> items) {
         return toIngredient(items, 1);
     }
 
-    @NotNull
+    @Nullable
     protected Ingredient<T> toIngredient(List<String> items, int count) {
         Set<UniqueKey> itemIds = new HashSet<>();
         Set<UniqueKey> minecraftItemIds = new HashSet<>();
@@ -217,7 +217,7 @@ public abstract class AbstractRecipeSerializer<T, R extends Recipe<T>> implement
             minecraftItemIds.add(vanillaItem);
         }
         if (itemIds.isEmpty()) {
-            throw new IllegalArgumentException("ingredients must contain at least one item");
+            return null;
         }
         return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem, count);
     }

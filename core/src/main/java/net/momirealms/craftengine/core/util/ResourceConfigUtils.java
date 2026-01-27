@@ -196,8 +196,8 @@ public final class ResourceConfigUtils {
         }
     }
 
-    public static boolean getAsBoolean(Object o, String option) {
-        switch (o) {
+    public static boolean getAsBoolean(Object obj, String option) {
+        switch (obj) {
             case null -> {
                 return false;
             }
@@ -206,17 +206,19 @@ public final class ResourceConfigUtils {
             }
             case Number n -> {
                 if (n.byteValue() == 0) return false;
-                if (n.byteValue() == 1) return true;
+                if (n.byteValue() > 0) return true;
                 throw new LocalizedResourceConfigException("warning.config.type.boolean", String.valueOf(n), option);
             }
             case String s -> {
                 if (s.equalsIgnoreCase("true")) return true;
                 if (s.equalsIgnoreCase("false")) return false;
+                if (s.equalsIgnoreCase("yes")) return true;
+                if (s.equalsIgnoreCase("no")) return false;
+                if (s.equalsIgnoreCase("on")) return true;
+                if (s.equalsIgnoreCase("off")) return false;
                 throw new LocalizedResourceConfigException("warning.config.type.boolean", s, option);
             }
-            default -> {
-                throw new LocalizedResourceConfigException("warning.config.type.boolean", o.toString(), option);
-            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.boolean", obj.toString(), option);
         }
     }
 
