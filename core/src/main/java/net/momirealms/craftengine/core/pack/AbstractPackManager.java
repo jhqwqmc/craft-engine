@@ -872,13 +872,13 @@ public abstract class AbstractPackManager implements PackManager {
                 try {
                     ZipUtils.compress(generatedPackPath, newPath);
                 } catch (IOException e) {
-                    this.plugin.logger().severe("Error zipping unprotected resource pack", e);
+                    this.plugin.logger().severe("Error creating unprotected resource pack", e);
                 }
             }
             try {
                 this.zipGenerator.accept(generatedPackPath, finalPath);
             } catch (Exception e) {
-                this.plugin.logger().severe("Error zipping resource pack", e);
+                this.plugin.logger().severe("Error creating resource pack", e);
             }
             long time5 = System.currentTimeMillis();
             this.plugin.logger().info(TranslationManager.instance().translateLog("info.resource_pack.create.finish", String.valueOf(time5 - time4)));
