@@ -1766,7 +1766,9 @@ public abstract class AbstractPackManager implements PackManager {
         // 收集全部方块状态的模型贴图
         label: for (Map.Entry<Key, Collection<String>> entry : modelToBlockStates.asMap().entrySet()) {
             Key modelPath = entry.getKey();
-            if (modelsCache.containsKey(modelPath)) continue;
+            if (blockModels.containsKey(modelPath)) {
+                continue;
+            }
             String modelStringPath = "assets/" + modelPath.namespace() + "/models/" + modelPath.value() + ".json";
             for (Path rootPath : rootPaths) {
                 Path modelJsonPath = rootPath.resolve(modelStringPath);
@@ -1825,7 +1827,9 @@ public abstract class AbstractPackManager implements PackManager {
         // 收集全部物品定义的模型贴图
         label: for (Map.Entry<Key, Collection<Key>> entry : modelToItemDefinitions.asMap().entrySet()) {
             Key modelPath = entry.getKey();
-            if (modelsCache.containsKey(modelPath)) continue;
+            if (itemModels.containsKey(modelPath)) {
+                continue;
+            }
             String modelStringPath = "assets/" + modelPath.namespace() + "/models/" + modelPath.value() + ".json";
             for (Path rootPath : rootPaths) {
                 Path modelJsonPath = rootPath.resolve(modelStringPath);
@@ -2278,6 +2282,10 @@ public abstract class AbstractPackManager implements PackManager {
 
     @SuppressWarnings("all")
     public TexturedModel getTexturedModel(Key currentRL, @Nullable Key parentRL, Map<String, Key> textures, Path[] rootPaths, Map<Key, TexturedModel> cached) {
+        TexturedModel cachedModel = cached.get(currentRL);
+        if (cachedModel != null) {
+            return cachedModel;
+        }
         TexturedModel texturedModel = new TexturedModel(currentRL, textures);
         // 放这里防止parent互相引用造成死循环
         cached.put(currentRL, texturedModel);
@@ -3038,12 +3046,14 @@ public abstract class AbstractPackManager implements PackManager {
                     .resolve(key.namespace())
                     .resolve("blockstates")
                     .resolve(key.value() + ".json");
+
             JsonObject stateJson;
+            JsonObject previousVariants = null;
             if (Files.exists(overridedBlockPath)) {
                 try {
                     stateJson = GsonHelper.readJsonFile(overridedBlockPath).getAsJsonObject();
-                    if (!stateJson.has("variants")) {
-                        stateJson = new JsonObject();
+                    if (stateJson.has("variants")) {
+                        previousVariants = stateJson.get("variants").getAsJsonObject();
                     }
                 } catch (IOException e) {
                     stateJson = new JsonObject();
@@ -3051,16 +3061,21 @@ public abstract class AbstractPackManager implements PackManager {
             } else {
                 stateJson = new JsonObject();
             }
-            JsonObject variants;
-            if (!stateJson.has("variants")) {
-                variants = new JsonObject();
-                stateJson.add("variants", variants);
-            } else {
-                variants = stateJson.get("variants").getAsJsonObject();
-            }
+
+            JsonObject newVariants = new JsonObject();
             for (Map.Entry<String, JsonElement> resourcePathEntry : entry.getValue().entrySet()) {
-                variants.add(resourcePathEntry.getKey(), resourcePathEntry.getValue());
+                newVariants.add(resourcePathEntry.getKey(), resourcePathEntry.getValue());
             }
+            if (previousVariants != null) {
+                for (Map.Entry<String, JsonElement> variantEntry : previousVariants.entrySet()) {
+                    String variantName = variantEntry.getKey();
+                    if (!newVariants.has(variantName)) {
+                        newVariants.add(variantName, variantEntry.getValue());
+                    }
+                }
+            }
+
+            stateJson.add("variants", newVariants);
             try {
                 Files.createDirectories(overridedBlockPath.getParent());
             } catch (IOException e) {
