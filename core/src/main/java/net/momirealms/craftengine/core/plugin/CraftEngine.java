@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.plugin;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.advancement.AdvancementManager;
+import net.momirealms.craftengine.core.block.AbstractBlockManager;
 import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.entity.culling.EntityCullingManager;
 import net.momirealms.craftengine.core.entity.culling.EntityCullingManagerImpl;
@@ -371,6 +372,14 @@ public abstract class CraftEngine implements Plugin {
             if (Config.checkUpdate()) {
                 this.scheduler.executeAsync(this::checkUpdates);
             }
+
+            // 用于兼容那些注册群系比较晚的插件，点名批评某R开头的季节插件
+            int biomeCount = this.platform.biomeCount();
+            this.scheduler.sync().runDelayed(() -> {
+                if (biomeCount != this.platform.biomeCount()) {
+                    ((AbstractBlockManager) this.blockManager).registerBlockStatePacketListener();
+                }
+            });
         });
     }
 

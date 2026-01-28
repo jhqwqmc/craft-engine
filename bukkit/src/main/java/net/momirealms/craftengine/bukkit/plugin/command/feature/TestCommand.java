@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.plugin.command.feature;
 
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
+import net.momirealms.craftengine.bukkit.util.RegistryUtils;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import org.bukkit.command.CommandSender;

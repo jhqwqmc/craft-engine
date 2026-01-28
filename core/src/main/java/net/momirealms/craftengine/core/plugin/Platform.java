@@ -19,4 +19,6 @@ public interface Platform {
     boolean isStopping();
 
     ParticleType getParticleType(Key name);
+
+    int biomeCount();
 }
