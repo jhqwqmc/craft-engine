@@ -1065,6 +1065,7 @@ public class BukkitServerPlayer extends Player {
     @SuppressWarnings("deprecation")
     private void broadcastDestroyProgress(BlockPos hitPos, int stage) {
         Object packet = FastNMS.INSTANCE.constructor$ClientboundBlockDestructionPacket(Integer.MAX_VALUE - entityId(), LocationUtils.toBlockPos(hitPos), stage);
+        sendPacket(packet, false);
         for (org.bukkit.entity.Player other : platformPlayer().getTrackedPlayers()) {
             double d0 = (double) hitPos.x() - other.getX();
             double d1 = (double) hitPos.y() - other.getY();

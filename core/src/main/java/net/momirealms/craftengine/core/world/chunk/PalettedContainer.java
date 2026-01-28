@@ -103,7 +103,11 @@ public class PalettedContainer<T> implements PaletteResizeListener<T>, ReadableC
 
     private Data<T> getCompatibleData(@Nullable Data<T> previousData, int bits) {
         DataProvider<T> dataProvider = this.paletteProvider.createDataProvider(this.idList, bits);
-        return previousData != null && dataProvider.equals(previousData.configuration()) ? previousData : dataProvider.createData(this.idList, this, this.paletteProvider.getContainerSize());
+        if (previousData != null && dataProvider.equals(previousData.configuration())) {
+            return previousData;
+        } else {
+            return dataProvider.createData(this.idList, this, this.paletteProvider.getContainerSize());
+        }
     }
 
     private Data<T> getCompatibleData(@Nullable Data<T> previousData, IndexedIterable<T> idList, int bits) {

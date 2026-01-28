@@ -136,6 +136,13 @@ unset_locale:
   usage:
     - /ce feature locale unset
 
+clean_cache:
+  enable: true
+  permission: ce.command.clean_cache
+  usage:
+    - /craftengine clean-cache
+    - /ce clean-cache
+
 set_display_entity_view_distance_scale:
   enable: true
   permission: ce.command.admin.set_display_entity_view_distance_scale
@@ -265,13 +272,6 @@ debug_save_default_resources:
   usage:
     - /craftengine debug save-default-resources
     - /ce debug save-default-resources
-
-debug_clean_cache:
-  enable: true
-  permission: ce.command.debug.clean_cache
-  usage:
-    - /craftengine debug clean-cache
-    - /ce debug clean-cache
 
 debug_custom_model_data:
   enable: true

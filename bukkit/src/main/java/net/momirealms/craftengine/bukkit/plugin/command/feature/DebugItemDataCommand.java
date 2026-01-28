@@ -1,11 +1,14 @@
 package net.momirealms.craftengine.bukkit.plugin.command.feature;
 
+import net.momirealms.craftengine.bukkit.api.BukkitAdaptors;
+import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.FastNMS;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
 import net.momirealms.craftengine.bukkit.plugin.reflection.minecraft.MRegistryOps;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
+import net.momirealms.craftengine.core.plugin.command.FlagKeys;
 import net.momirealms.craftengine.core.util.AdventureHelper;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,10 +27,15 @@ public class DebugItemDataCommand extends BukkitCommandFeature<CommandSender> {
     public Command.Builder<? extends CommandSender> assembleCommand(org.incendo.cloud.CommandManager<CommandSender> manager, Command.Builder<CommandSender> builder) {
         return builder
                 .senderType(Player.class)
+                .flag(FlagKeys.CLIENT_SIDE_FLAG)
                 .handler(context -> {
-                    ItemStack itemInHand = context.sender().getInventory().getItemInMainHand();
+                    ItemStack itemInHand = context.sender().getInventory().getItemInMainHand().clone();
                     if (ItemStackUtils.isEmpty(itemInHand)) {
                         return;
+                    }
+                    boolean toClientSide = context.flags().hasFlag(FlagKeys.CLIENT_SIDE_FLAG);
+                    if (toClientSide) {
+                        itemInHand = BukkitItemManager.instance().s2c(itemInHand, BukkitAdaptors.adapt(context.sender())).orElse(itemInHand);
                     }
                     Map<String, Object> readableMap = toMap(itemInHand);
                     List<String> readableList = mapToList(readableMap);

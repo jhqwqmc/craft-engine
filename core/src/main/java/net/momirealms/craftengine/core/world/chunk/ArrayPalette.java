@@ -43,7 +43,7 @@ public class ArrayPalette<T> implements Palette<T> {
     @Override
     public void readPacket(FriendlyByteBuf buf) {
         this.size = buf.readVarInt();
-        for(int i = 0; i < this.size; ++i) {
+        for (int i = 0; i < this.size; ++i) {
             this.array[i] = this.idList.getOrThrow(buf.readVarInt());
         }
     }

@@ -58,8 +58,7 @@ public final class MergePackMcMetaResolution implements Resolution {
             for (JsonObject overlay : overlays) {
                 JsonPrimitive directory = overlay.getAsJsonPrimitive("directory");
                 if (directory != null) {
-                    // 名字相同的大概率内部版本也一致，不进一步处理了
-                    overlayMap.put(directory.getAsString(), overlay);
+                    overlayMap.merge(directory.getAsString(), overlay, MergePackMcMetaResolution::combineOverlays);
                 }
             }
             if (!overlayMap.isEmpty()) {
@@ -145,6 +144,30 @@ public final class MergePackMcMetaResolution implements Resolution {
                 overlayCollector.accept(entryJson);
             }
         }
+    }
+
+    private static JsonObject combineOverlays(JsonObject overlay1, JsonObject overlay2) {
+        Pair<PackVersion, PackVersion> v1 = getOverlayVersions(overlay1);
+        Pair<PackVersion, PackVersion> v2 = getOverlayVersions(overlay2);
+        PackVersion min = PackVersion.getLower(v1.left(), v2.left());
+        PackVersion max = PackVersion.getHigher(v1.right(), v2.right());
+        JsonObject merged = new JsonObject();
+        merged.add("directory", overlay1.getAsJsonPrimitive("directory"));
+        // 旧版格式支持
+        JsonArray supportedFormats = new JsonArray();
+        supportedFormats.add(min.major());
+        supportedFormats.add(max.major());
+        merged.add("formats", supportedFormats);
+        // 新版格式支持
+        JsonArray minFormat = new JsonArray();
+        minFormat.add(min.major());
+        minFormat.add(min.minor());
+        merged.add("min_format", minFormat);
+        JsonArray maxFormat = new JsonArray();
+        maxFormat.add(max.major());
+        maxFormat.add(max.minor());
+        merged.add("max_format", maxFormat);
+        return merged;
     }
 
     private static void collectOverlays(JsonObject overlayJson, Consumer<JsonObject> overlayCollector) {

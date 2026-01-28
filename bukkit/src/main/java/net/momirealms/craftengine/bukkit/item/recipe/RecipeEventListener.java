@@ -890,8 +890,9 @@ public class RecipeEventListener implements Listener {
             if (optionalRecipe.isEmpty() || !(optionalRecipe.get() instanceof CustomSmithingTransformRecipe<ItemStack> ceRecipe)) {
                 return;
             }
+
             // 没有视觉结果和函数你凑什么热闹
-            if (!ceRecipe.hasFunctions() && !ceRecipe.hasVisualResult()) {
+            if (!ceRecipe.hasFunctions() && !ceRecipe.hasVisualResult() && !ceRecipe.ingredientCountSupport()) {
                 return;
             }
 
@@ -916,7 +917,15 @@ public class RecipeEventListener implements Listener {
                 }
             }
 
-            if (event.isShiftClick()) {
+            ClickType click = event.getClick();
+
+            // todo 未来再说吧
+            if (click == ClickType.CONTROL_DROP) {
+                event.setResult(Event.Result.DENY);
+                return;
+            }
+
+            if (click.isShiftClick()) {
                 // 由插件自己处理多次合成
                 event.setResult(Event.Result.DENY);
 
@@ -933,6 +942,11 @@ public class RecipeEventListener implements Listener {
                     // 发现取了个寂寞，根本没地方放，给他复原成视觉结果
                     inventory.setResult(visualResultOrReal);
                     return;
+                }
+                // 能取走啦
+                // 扣除额外原料
+                if (ceRecipe.ingredientCountSupport()) {
+                    ceRecipe.takeInput(getSmithingInput(inventory), 1);
                 }
                 // 有函数的情况下，执行函数
                 if (ceRecipe.hasFunctions()) {
@@ -961,6 +975,10 @@ public class RecipeEventListener implements Listener {
                         inventory.setResult(visualResultOrReal);
                         break;
                     }
+                    // 扣除额外原料
+                    if (ceRecipe.ingredientCountSupport()) {
+                        ceRecipe.takeInput(getSmithingInput(inventory), 1);
+                    }
                     // 有函数的情况下，执行函数
                     if (ceRecipe.hasFunctions()) {
                         PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer);
@@ -970,13 +988,12 @@ public class RecipeEventListener implements Listener {
                     }
                 }
             } else {
-                ClickType click = event.getClick();
                 if (click == ClickType.MIDDLE) {
                     if (ItemStackUtils.isEmpty(event.getCursor())) {
                         return;
                     }
                 }
-                if (click == ClickType.DROP || click == ClickType.CONTROL_DROP) {
+                if (click == ClickType.DROP) {
                     if (!ItemStackUtils.isEmpty(event.getCursor())) {
                         return;
                     }
@@ -1001,6 +1018,10 @@ public class RecipeEventListener implements Listener {
                     for (Function<Context> function : ceRecipe.functions()) {
                         function.run(context);
                     }
+                }
+                // 扣除额外原料
+                if (ceRecipe.ingredientCountSupport()) {
+                    ceRecipe.takeInput(getSmithingInput(inventory), 1);
                 }
             }
         }

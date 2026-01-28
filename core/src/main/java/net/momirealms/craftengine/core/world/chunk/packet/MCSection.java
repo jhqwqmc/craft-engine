@@ -39,10 +39,10 @@ public final class MCSection {
     }
 
     public PalettedContainer<Integer> blockStateContainer() {
-        return serverBlockStateContainer;
+        return this.serverBlockStateContainer;
     }
 
     public PalettedContainer<Integer> biomeContainer() {
-        return biomeContainer;
+        return this.biomeContainer;
     }
 }

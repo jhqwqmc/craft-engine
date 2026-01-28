@@ -699,7 +699,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item<?>> templates = new ArrayList<>();
         Optional.ofNullable(recipe.template()).ifPresent(it -> {
             for (UniqueKey in : it.items()) {
-                templates.add(this.plugin.itemManager().createWrappedItem(in.key(), player));
+                templates.add(this.plugin.itemManager().createWrappedItem(in.key(), player).count(it.count()));
             }
         });
         layout.addIngredient('A', templates.isEmpty() ? GuiElement.EMPTY : GuiElement.recipeIngredient(templates, (e, c) -> {
@@ -732,7 +732,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item<?>> bases = new ArrayList<>();
         Optional.ofNullable(recipe.base()).ifPresent(it -> {
             for (UniqueKey in : it.items()) {
-                bases.add(this.plugin.itemManager().createWrappedItem(in.key(), player));
+                bases.add(this.plugin.itemManager().createWrappedItem(in.key(), player).count(it.count()));
             }
         });
         layout.addIngredient('B', bases.isEmpty() ? GuiElement.EMPTY : GuiElement.recipeIngredient(bases, (e, c) -> {
@@ -765,7 +765,7 @@ public class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item<?>> additions = new ArrayList<>();
         Optional.ofNullable(recipe.addition()).ifPresent(it -> {
             for (UniqueKey in : it.items()) {
-                additions.add(this.plugin.itemManager().createWrappedItem(in.key(), player));
+                additions.add(this.plugin.itemManager().createWrappedItem(in.key(), player).count(it.count()));
             }
         });
         layout.addIngredient('C', additions.isEmpty() ? GuiElement.EMPTY : GuiElement.recipeIngredient(additions, (e, c) -> {

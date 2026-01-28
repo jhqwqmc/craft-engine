@@ -17,8 +17,225 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ResourceConfigUtils {
-
     private ResourceConfigUtils() {}
+
+    /**
+     * Try multiple keys in order and return the first non-null value found.
+     * If no non-null value is found, returns null.
+     *
+     * @param <K> Type of keys
+     * @param <V> Type of values
+     * @param arguments The map to search in
+     * @param keys Keys to try in order
+     * @return The first non-null value found, or null if none
+     */
+    @SafeVarargs
+    public static <K, V> V get(Map<K, V> arguments, K... keys) {
+        for (K key : keys) {
+            V value = arguments.get(key);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Try multiple keys in order and return the first non-null value found.
+     * If no non-null value is found, returns the specified default value.
+     *
+     * @param <K> Type of keys
+     * @param <V> Type of values
+     * @param arguments The map to search in
+     * @param def Default value to return if no non-null value is found
+     * @param keys Keys to try in order
+     * @return The first non-null value found, or the default value if none
+     */
+    @SafeVarargs
+    public static <K, V> V getOrDefault(Map<K, V> arguments, V def, K... keys) {
+        for (K key : keys) {
+            V value = arguments.get(key);
+            if (value != null) {
+                return value;
+            }
+        }
+        return def;
+    }
+
+    /**
+     * Safely converts an object to a boolean value with configurable fallback behavior.
+     * Handles null, Boolean, Number, and String types. Throws an exception for invalid values.
+     *
+     * @param obj The object to convert to boolean
+     * @param option Configuration option name (for error messages)
+     * @return Boolean value representation of the object
+     * @throws LocalizedResourceConfigException If the object cannot be converted to a valid boolean value
+     */
+    public static boolean getAsBoolean(Object obj, String option) {
+        switch (obj) {
+            case null -> {
+                return false;
+            }
+            case Boolean b -> {
+                return b;
+            }
+            case Number n -> {
+                if (n.byteValue() == 0) return false;
+                if (n.byteValue() > 0) return true;
+                throw new LocalizedResourceConfigException("warning.config.type.boolean", String.valueOf(n), option);
+            }
+            case String s -> {
+                if (s.equalsIgnoreCase("true")) return true;
+                if (s.equalsIgnoreCase("false")) return false;
+                if (s.equalsIgnoreCase("yes")) return true;
+                if (s.equalsIgnoreCase("no")) return false;
+                if (s.equalsIgnoreCase("on")) return true;
+                if (s.equalsIgnoreCase("off")) return false;
+                throw new LocalizedResourceConfigException("warning.config.type.boolean", s, option);
+            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.boolean", obj.toString(), option);
+        }
+    }
+
+    /**
+     * Safely converts an object to an integer value.
+     * Supports null, Integer, Number, String (with underscore removal), and Boolean types.
+     *
+     * @param obj The object to convert to integer
+     * @param option Configuration option name (for error messages)
+     * @return Integer value representation of the object
+     * @throws LocalizedResourceConfigException If the object cannot be converted to a valid integer
+     */
+    public static int getAsInt(Object obj, String option) {
+        switch (obj) {
+            case null -> {
+                return 0;
+            }
+            case Integer i -> {
+                return i;
+            }
+            case Number number -> {
+                return number.intValue();
+            }
+            case String s -> {
+                try {
+                    return Integer.parseInt(s.replace("_", ""));
+                } catch (NumberFormatException e) {
+                    throw new LocalizedResourceConfigException("warning.config.type.int", e, s, option);
+                }
+            }
+            case Boolean b -> {
+                return b ? 1 : 0;
+            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.int", obj.toString(), option);
+        }
+    }
+
+    /**
+     * Safely converts an object to a long value.
+     * Supports null, Long, Number, and String (with underscore removal) types.
+     *
+     * @param obj The object to convert to long
+     * @param option Configuration option name (for error messages)
+     * @return Long value representation of the object
+     * @throws LocalizedResourceConfigException If the object cannot be converted to a valid long
+     */
+    public static long getAsLong(Object obj, String option) {
+        switch (obj) {
+            case null -> {
+                return 0;
+            }
+            case Long l -> {
+                return l;
+            }
+            case Number number -> {
+                return number.longValue();
+            }
+            case String s -> {
+                try {
+                    return Long.parseLong(s.replace("_", ""));
+                } catch (NumberFormatException e) {
+                    throw new LocalizedResourceConfigException("warning.config.type.long", e, s, option);
+                }
+            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.long", obj.toString(), option);
+        }
+    }
+
+    /**
+     * Safely converts an object to a float value.
+     * Supports null, Float, String, and Number types.
+     *
+     * @param obj The object to convert to float
+     * @param option Configuration option name (for error messages)
+     * @return Float value representation of the object
+     * @throws LocalizedResourceConfigException If the object cannot be converted to a valid float
+     */
+    public static float getAsFloat(Object obj, String option) {
+        switch (obj) {
+            case null -> {
+                return 0.0f;
+            }
+            case Float f -> {
+                return f;
+            }
+            case String s -> {
+                try {
+                    return Float.parseFloat(s);
+                } catch (NumberFormatException e) {
+                    throw new LocalizedResourceConfigException("warning.config.type.float", e, s, option);
+                }
+            }
+            case Number number -> {
+                return number.floatValue();
+            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.float", obj.toString(), option);
+        }
+    }
+
+    /**
+     * Safely converts an object to a double value.
+     * Supports null, Double, Number, and String types.
+     *
+     * @param obj The object to convert to double
+     * @param option Configuration option name (for error messages)
+     * @return Double value representation of the object
+     * @throws LocalizedResourceConfigException If the object cannot be converted to a valid double
+     */
+    public static double getAsDouble(Object obj, String option) {
+        switch (obj) {
+            case null -> {
+                return 0.0;
+            }
+            case Double d -> {
+                return d;
+            }
+            case Number n -> {
+                return n.doubleValue();
+            }
+            case String s -> {
+                try {
+                    return Double.parseDouble(s);
+                } catch (NumberFormatException e) {
+                    throw new LocalizedResourceConfigException("warning.config.type.double", e, s, option);
+                }
+            }
+            default -> throw new LocalizedResourceConfigException("warning.config.type.double", obj.toString(), option);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public static <T, O> T getOrDefault(@Nullable O raw, Function<O, T> function, T defaultValue) {
         return raw != null ? function.apply(raw) : defaultValue;
@@ -112,137 +329,6 @@ public final class ResourceConfigUtils {
         }
     }
 
-    @SafeVarargs
-    public static <K, V> V get(Map<K, V> arguments, K... keys) {
-        for (K key : keys) {
-            V value = arguments.get(key);
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    public static int getAsInt(Object o, String option) {
-        switch (o) {
-            case null -> {
-                return 0;
-            }
-            case Integer i -> {
-                return i;
-            }
-            case Number number -> {
-                return number.intValue();
-            }
-            case String s -> {
-                try {
-                    return Integer.parseInt(s.replace("_", ""));
-                } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.type.int", e, s, option);
-                }
-            }
-            case Boolean b -> {
-                return b ? 1 : 0;
-            }
-            default -> throw new LocalizedResourceConfigException("warning.config.type.int", o.toString(), option);
-        }
-    }
-
-    public static double getAsDouble(Object o, String option) {
-        switch (o) {
-            case null -> {
-                return 0.0;
-            }
-            case Double d -> {
-                return d;
-            }
-            case Number n -> {
-                return n.doubleValue();
-            }
-            case String s -> {
-                try {
-                    return Double.parseDouble(s);
-                } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.type.double", e, s, option);
-                }
-            }
-            default -> {
-                throw new LocalizedResourceConfigException("warning.config.type.double", o.toString(), option);
-            }
-        }
-    }
-
-    public static float getAsFloat(Object o, String option) {
-        switch (o) {
-            case null -> {
-                return 0.0f;
-            }
-            case Float f -> {
-                return f;
-            }
-            case String s -> {
-                try {
-                    return Float.parseFloat(s);
-                } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.type.float", e, s, option);
-                }
-            }
-            case Number number -> {
-                return number.floatValue();
-            }
-            default -> {
-                throw new LocalizedResourceConfigException("warning.config.type.float", o.toString(), option);
-            }
-        }
-    }
-
-    public static boolean getAsBoolean(Object o, String option) {
-        switch (o) {
-            case null -> {
-                return false;
-            }
-            case Boolean b -> {
-                return b;
-            }
-            case Number n -> {
-                if (n.byteValue() == 0) return false;
-                if (n.byteValue() == 1) return true;
-                throw new LocalizedResourceConfigException("warning.config.type.boolean", String.valueOf(n), option);
-            }
-            case String s -> {
-                if (s.equalsIgnoreCase("true")) return true;
-                if (s.equalsIgnoreCase("false")) return false;
-                throw new LocalizedResourceConfigException("warning.config.type.boolean", s, option);
-            }
-            default -> {
-                throw new LocalizedResourceConfigException("warning.config.type.boolean", o.toString(), option);
-            }
-        }
-    }
-
-    public static long getAsLong(Object o, String option) {
-        switch (o) {
-            case null -> {
-                return 0;
-            }
-            case Long l -> {
-                return l;
-            }
-            case Number number -> {
-                return number.longValue();
-            }
-            case String s -> {
-                try {
-                    return Long.parseLong(s.replace("_", ""));
-                } catch (NumberFormatException e) {
-                    throw new LocalizedResourceConfigException("warning.config.type.long", e, s, option);
-                }
-            }
-            default -> {
-                throw new LocalizedResourceConfigException("warning.config.type.long", o.toString(), option);
-            }
-        }
-    }
 
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getAsMap(Object obj, String option) {

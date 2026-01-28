@@ -237,6 +237,8 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
         return Optional.ofNullable(this.appearanceToRealState.get(appearanceStateId)).orElse(List.of());
     }
 
+    public abstract void registerBlockStatePacketListener();
+
     public abstract BlockBehavior createBlockBehavior(CustomBlock customBlock, List<Map<String, Object>> behaviorConfig);
 
     public boolean isViewBlockingBlock(int stateId) {
