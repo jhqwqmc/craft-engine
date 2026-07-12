@@ -22,6 +22,7 @@ public final class TemplateArguments {
     public static final TemplateArgumentType<ConditionTemplateArgument> CONDITION = register(Key.ce("condition"), ConditionTemplateArgument.FACTORY);
     public static final TemplateArgumentType<ToUpperCaseTemplateArgument> TO_UPPER_CASE = register(Key.ce("to_upper_case"), ToUpperCaseTemplateArgument.FACTORY);
     public static final TemplateArgumentType<ToLowerCaseTemplateArgument> TO_LOWER_CASE = register(Key.ce("to_lower_case"), ToLowerCaseTemplateArgument.FACTORY);
+    public static final TemplateArgumentType<CapitalizeTemplateArgument> CAPITALIZE = register(Key.ce("capitalize"), CapitalizeTemplateArgument.FACTORY);
     public static final TemplateArgumentType<ObjectTemplateArgument> OBJECT = register(Key.ce("object"), ObjectTemplateArgument.FACTORY);
     public static final TemplateArgumentType<WhenTemplateArgument> WHEN = register(Key.ce("when"), WhenTemplateArgument.FACTORY);
 

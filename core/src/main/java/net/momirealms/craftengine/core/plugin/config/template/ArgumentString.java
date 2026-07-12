@@ -3,10 +3,12 @@ package net.momirealms.craftengine.core.plugin.config.template;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
 import net.momirealms.craftengine.core.plugin.config.KnownResourceException;
 import net.momirealms.craftengine.core.plugin.config.template.argument.TemplateArgument;
+import net.momirealms.craftengine.core.util.StringUtils;
 import net.momirealms.craftengine.core.util.TagParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public interface ArgumentString {
@@ -57,16 +59,19 @@ public interface ArgumentString {
         private final String rawText;
         private final Object defaultValue;
         private final boolean hasDefaultValue;
+        private final boolean capitalize;
+        private final boolean toUpperCase;
 
         public Placeholder(String node, String placeholderContent) {
             this.rawText = "${" + placeholderContent + "}";
             int separatorIndex = placeholderContent.indexOf(":-");
+            String placeholderPart;
             if (separatorIndex == -1) {
-                this.placeholder = placeholderContent;
+                placeholderPart = placeholderContent;
                 this.defaultValue = null;
                 this.hasDefaultValue = false;
             } else {
-                this.placeholder = placeholderContent.substring(0, separatorIndex);
+                placeholderPart = placeholderContent.substring(0, separatorIndex);
                 String defaultValueString = placeholderContent.substring(separatorIndex + 2);
                 try {
                     Object parsed = TagParser.parseObjectFully(defaultValueString);
@@ -80,6 +85,21 @@ public interface ArgumentString {
                     throw new KnownResourceException("resource.argument.parser.snbt", node, defaultValueString, e.getMessage());
                 }
             }
+            if (placeholderPart.endsWith("^")) {
+                if (placeholderPart.endsWith("^^")) {
+                    this.capitalize = false;
+                    this.toUpperCase = true;
+                    this.placeholder = placeholderPart.substring(0, placeholderPart.length() - 2);
+                } else {
+                    this.capitalize = true;
+                    this.toUpperCase = false;
+                    this.placeholder = placeholderPart.substring(0, placeholderPart.length() - 1);
+                }
+            } else {
+                this.capitalize = false;
+                this.toUpperCase = false;
+                this.placeholder = placeholderPart;
+            }
         }
 
         public static Placeholder placeholder(String node, String placeholder) {
@@ -88,17 +108,25 @@ public interface ArgumentString {
 
         @Override
         public Object get(String node, Map<String, TemplateArgument> arguments) {
+            Object value;
             TemplateArgument replacement = arguments.get(this.placeholder);
             if (replacement != null) {
-                return replacement.get(node, arguments);
-            }
-            if (this.hasDefaultValue) {
+                value = replacement.get(node, arguments);
+            } else if (this.hasDefaultValue) {
                 if (this.defaultValue == null) {
                     return null;
                 }
-                return ((TemplateManagerImpl) TemplateManager.INSTANCE).processUnknownValue(node, this.defaultValue, arguments);
+                value = ((TemplateManagerImpl) TemplateManager.INSTANCE).processUnknownValue(node, this.defaultValue, arguments);
+            } else {
+                throw new KnownResourceException("resource.template.missing_argument", node, this.rawText);
             }
-            throw new KnownResourceException("resource.template.missing_argument", node, this.rawText);
+            if (this.capitalize && value != null) {
+                return StringUtils.capitalize(String.valueOf(value), Locale.getDefault());
+            }
+            if (this.toUpperCase && value != null) {
+                return String.valueOf(value).toUpperCase(Locale.getDefault());
+            }
+            return value;
         }
 
         @Override

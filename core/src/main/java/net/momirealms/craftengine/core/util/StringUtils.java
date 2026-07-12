@@ -1,9 +1,31 @@
 package net.momirealms.craftengine.core.util;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public final class StringUtils {
     private StringUtils() {}
+
+    public static String capitalize(String str, Locale locale) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        String[] words = str.split("[_ ]", -1);
+        StringBuilder builder = new StringBuilder(str.length());
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                builder.append(' ');
+            }
+            String word = words[i];
+            if (!word.isEmpty()) {
+                builder.append(String.valueOf(word.charAt(0)).toUpperCase(locale));
+                if (word.length() > 1) {
+                    builder.append(word.substring(1));
+                }
+            }
+        }
+        return builder.toString();
+    }
 
     public static String[] splitByDot(String s) {
         if (s == null || s.isEmpty()) {
