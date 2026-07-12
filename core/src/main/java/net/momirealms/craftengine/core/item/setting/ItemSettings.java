@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.item.setting;
 
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
+import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.processor.EquippableProcessor;
 import net.momirealms.craftengine.core.item.processor.FoodProcessor;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
@@ -57,12 +58,15 @@ public final class ItemSettings {
     public List<ItemProcessor> processors() {
         ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
+            boolean clientBoundData = this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel());
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
-                data.setAssetId(null);
+                if (clientBoundData && this.equipment.equipment() instanceof ComponentBasedEquipment) {
+                    data.setAssetId(null);
+                }
                 processors.add(new EquippableProcessor(data));
             }
-            if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
+            if (!clientBoundData) {
                 processors.addAll(this.equipment.equipment().modifiers());
             }
         }
