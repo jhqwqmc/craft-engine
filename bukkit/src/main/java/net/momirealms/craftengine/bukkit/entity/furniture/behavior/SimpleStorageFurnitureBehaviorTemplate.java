@@ -16,6 +16,8 @@ import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehavi
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureBehaviorTemplate;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureController;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
+import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigs;
 import net.momirealms.craftengine.core.entity.player.InteractionResult;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -37,9 +39,11 @@ import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Consumer;
 
 public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehaviorTemplate {
     public static final FurnitureBehaviorFactory<SimpleStorageFurnitureBehaviorTemplate> FACTORY = new Factory();
@@ -51,19 +55,23 @@ public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehav
     public final SoundData closeSound;
     @Nullable
     public final String customDataKey;
+    @NotNull
+    public final Map<String, VariantRule> variantRules;
 
     private SimpleStorageFurnitureBehaviorTemplate(FurnitureDefinition furniture,
                                                    String containerTitle,
                                                    int rows,
                                                    @Nullable SoundData openSound,
                                                    @Nullable SoundData closeSound,
-                                                   @Nullable String customDataKey) {
+                                                   @Nullable String customDataKey,
+                                                   @NotNull Map<String, VariantRule> variantRules) {
         super(furniture);
         this.containerTitle = containerTitle;
         this.rows = rows;
         this.openSound = openSound;
         this.closeSound = closeSound;
         this.customDataKey = customDataKey;
+        this.variantRules = variantRules;
     }
 
     @Override
@@ -72,7 +80,7 @@ public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehav
     }
 
     private static class Factory implements FurnitureBehaviorFactory<SimpleStorageFurnitureBehaviorTemplate> {
-        private static final String[] DATA_KEY = new String[] {"data_key", "data-key"};
+        private static final String[] DATA_KEY = new String[]{"data_key", "data-key"};
 
         @SuppressWarnings("DuplicatedCode")
         @Override
@@ -84,15 +92,32 @@ public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehav
                 openSound = soundSection.getValue("open", v -> SoundData.fromConfig(v, SoundData.SoundValue.FIXED_0_5, SoundData.SoundValue.RANGED_0_9_1));
                 closeSound = soundSection.getValue("close", v -> SoundData.fromConfig(v, SoundData.SoundValue.FIXED_0_5, SoundData.SoundValue.RANGED_0_9_1));
             }
+            ConfigSection variantsSection = section.getSection("variants");
+            Map<String, VariantRule> variantRule;
+            if (variantsSection == null) {
+                variantRule = Map.of();
+            } else {
+                variantRule = new HashMap<>();
+                for (String variantName : variantsSection.keySet()) {
+                    ConfigSection variantSection = variantsSection.getSection(variantName);
+                    List<? extends FurnitureHitBoxConfig<? extends FurnitureHitBox>> hitboxes =
+                            variantSection.getList("hitboxes", v -> FurnitureHitBoxConfigs.fromConfig(v.getAsSection()));
+                    variantRule.put(variantName, new VariantRule(hitboxes));
+                }
+            }
             return new SimpleStorageFurnitureBehaviorTemplate(
                     furniture,
                     section.getString("title", "<lang:container.chest>"),
                     section.getInt("rows", 1),
                     openSound,
                     closeSound,
-                    section.getString(DATA_KEY)
+                    section.getString(DATA_KEY),
+                    variantRule
             );
         }
+    }
+
+    public record VariantRule(List<? extends FurnitureHitBoxConfig<? extends FurnitureHitBox>> hitBoxConfigs) {
     }
 
     public static final class SimpleStorageFurnitureController extends FurnitureController {
@@ -100,6 +125,8 @@ public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehav
         public final Furniture furniture;
         private final SimpleStorageFurnitureBehaviorTemplate template;
         private final Inventory inventory;
+        @Nullable
+        private Set<FurnitureHitBox> trackedHitboxes;
 
         private SimpleStorageFurnitureController(Furniture furniture, SimpleStorageFurnitureBehaviorTemplate template) {
             super(furniture);
@@ -116,7 +143,25 @@ public final class SimpleStorageFurnitureBehaviorTemplate extends FurnitureBehav
         }
 
         @Override
+        public void gatherHitboxes(Consumer<FurnitureHitBox> consumer) {
+            this.trackedHitboxes = null;
+            VariantRule variantRule = this.template.variantRules.get(furniture.getCurrentVariant().name());
+            if (variantRule != null && !variantRule.hitBoxConfigs.isEmpty()) {
+                this.trackedHitboxes = new HashSet<>();
+                for (FurnitureHitBoxConfig<? extends FurnitureHitBox> hitBoxConfig : variantRule.hitBoxConfigs) {
+                    FurnitureHitBox furnitureHitBox = hitBoxConfig.create(this.furniture);
+                    this.trackedHitboxes.add(furnitureHitBox);
+                    consumer.accept(furnitureHitBox);
+                }
+            }
+        }
+
+        @Override
         public InteractionResult useOnFurniture(FurnitureHitBox hitBox, InteractEntityContext context) {
+            boolean hasSpecialHitBoxes = (this.trackedHitboxes != null);
+            if (hasSpecialHitBoxes && !this.trackedHitboxes.contains(hitBox)) {
+                return InteractionResult.PASS;
+            }
             BlockPos blockPos = context.getClickedPos();
             World bukkitWorld = (World) context.getLevel().platformWorld();
             Location location = new Location(bukkitWorld, blockPos.x(), blockPos.y(), blockPos.z());
