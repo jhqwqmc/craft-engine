@@ -6,7 +6,7 @@ items:
       equipment_part: helmet
       equipment_slot: head
       equipment_material: topaz
-    overrides:
+    merges:
       data:
         item_name: <!i><#FF8C00><lang:item.${__NAMESPACE__}.${equipment_material}_${equipment_part}>
         tooltip_style: minecraft:topaz
@@ -17,7 +17,7 @@ items:
       equipment_part: chestplate
       equipment_slot: chest
       equipment_material: topaz
-    overrides:
+    merges:
       data:
         item_name: <!i><#FF8C00><lang:item.${__NAMESPACE__}.${equipment_material}_${equipment_part}>
         tooltip_style: minecraft:topaz
@@ -28,7 +28,7 @@ items:
       equipment_part: leggings
       equipment_slot: legs
       equipment_material: topaz
-    overrides:
+    merges:
       data:
         item_name: <!i><#FF8C00><lang:item.${__NAMESPACE__}.${equipment_material}_${equipment_part}>
         tooltip_style: minecraft:topaz
@@ -39,7 +39,7 @@ items:
       equipment_part: boots
       equipment_slot: feet
       equipment_material: topaz
-    overrides:
+    merges:
       data:
         item_name: <!i><#FF8C00><lang:item.${__NAMESPACE__}.${equipment_material}_${equipment_part}>
         tooltip_style: minecraft:topaz

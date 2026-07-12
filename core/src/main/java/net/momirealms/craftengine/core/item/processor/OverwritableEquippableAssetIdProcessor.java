@@ -28,7 +28,7 @@ public final class OverwritableEquippableAssetIdProcessor implements SimpleNetwo
     @Override
     public Item apply(Item item, ItemBuildContext context) {
         Optional<EquipmentData> optionalData = item.equippable();
-        optionalData.ifPresent(data ->
+        optionalData.ifPresentOrElse(data ->
                 {
                     Key previousAssetId = data.assetId();
                     boolean canSet = false;
@@ -66,6 +66,18 @@ public final class OverwritableEquippableAssetIdProcessor implements SimpleNetwo
                                 data.shearingSound()
                         ));
                     }
+                }, () -> {
+                    Optional<Object> optional = item.type().getJavaComponent(DataComponentKeys.EQUIPPABLE);
+                    if (optional.isEmpty()) {
+                        return;
+                    }
+                    Map<String, Object> equippableData = MiscUtils.castToMap(optional.get());
+                    Key defaultAssetId = equippableData.containsKey("asset_id") ? Key.of((String) equippableData.get("asset_id")) : null;
+                    if (Objects.equals(defaultAssetId, this.assetId)) {
+                        return;
+                    }
+                    equippableData.put("asset_id", this.assetId.asString());
+                    item.setJavaComponent(DataComponentKeys.EQUIPPABLE, equippableData);
                 }
         );
         return item;

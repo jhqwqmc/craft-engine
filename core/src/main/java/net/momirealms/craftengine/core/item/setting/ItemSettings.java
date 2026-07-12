@@ -61,9 +61,7 @@ public final class ItemSettings {
             boolean clientBoundData = this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel());
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
-                if (clientBoundData && this.equipment.equipment() instanceof ComponentBasedEquipment) {
-                    data.setAssetId(null);
-                }
+                data.setAssetId(null);
                 processors.add(new EquippableProcessor(data));
             }
             if (!clientBoundData) {
