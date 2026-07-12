@@ -4,7 +4,6 @@ items:
       - default:armor/topaz
     arguments:
       equipment_part: helmet
-      equipment_slot: head
       equipment_material: topaz
     merges:
       data:
@@ -15,7 +14,6 @@ items:
       - default:armor/topaz
     arguments:
       equipment_part: chestplate
-      equipment_slot: chest
       equipment_material: topaz
     merges:
       data:
@@ -26,7 +24,6 @@ items:
       - default:armor/topaz
     arguments:
       equipment_part: leggings
-      equipment_slot: legs
       equipment_material: topaz
     merges:
       data:
@@ -37,7 +34,6 @@ items:
       - default:armor/topaz
     arguments:
       equipment_part: boots
-      equipment_slot: feet
       equipment_material: topaz
     merges:
       data:
@@ -110,8 +106,6 @@ templates:
         - minecraft:trimmable_armor
       equipment:
         asset_id: ${__NAMESPACE__}:${equipment_material}
-        $$>=1.21.2:
-          slot: ${equipment_slot}
     model:
       template: default:model/armor_trim
       arguments:
