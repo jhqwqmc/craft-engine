@@ -630,7 +630,7 @@ public abstract class AbstractBlockManager extends AbstractModelGenerator implem
                                 appearanceName,
                                 AbstractBlockManager.this.visualBlockStateAllocator.assignFixedBlockState(
                                         appearanceName.isEmpty() ? id.asString() : id.asString() + ":" + appearanceName,
-                                        stateValue.getAsBlockState()
+                                        stateValue.getAsVanillaBlockState()
                                 )
                         );
                     }

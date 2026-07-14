@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityEl
 import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
@@ -188,7 +189,7 @@ public final class BlockDisplayBlockEntityElementConfig implements BlockEntityEl
             ConfigSection brightness = section.getSection("brightness");
             List<Condition<PlayerContext>> conditions = section.getSectionList("conditions", CommonConditions::fromConfig);
             return new BlockDisplayBlockEntityElementConfig(
-                    section.getNonNullValue("block", ConfigConstants.ARGUMENT_BLOCK_STATE, ConfigValue::getAsBlockState),
+                    section.getNonNullValue("block", ConfigConstants.ARGUMENT_BLOCK_STATE, v -> CraftEngine.instance().blockManager().createBlockState(v.getAsString())),
                     section.getVector3f("scale", ConfigConstants.NORMAL_SCALE),
                     section.getVector3f("position", ConfigConstants.ZERO_VECTOR3),
                     section.getVector3f("translation", ConfigConstants.ZERO_VECTOR3),

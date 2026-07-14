@@ -39,7 +39,7 @@ public final class ConfigValue {
         registerSerializer(List.class, ConfigValue::getAsList);
         registerSerializer(Map.class, ConfigValue::getAsMap);
         registerSerializer(UUID.class, ConfigValue::getAsUUID);
-        registerSerializer(BlockStateWrapper.class, ConfigValue::getAsBlockState);
+        registerSerializer(BlockStateWrapper.class, ConfigValue::getAsVanillaBlockState);
         registerSerializer(Key.class, ConfigValue::getAsKey);
         registerSerializer(NumberProvider.class, ConfigValue::getAsNumber);
         registerSerializer(Tag.class, ConfigValue::getAsSNBT);
@@ -683,7 +683,7 @@ public final class ConfigValue {
     // minecraft:note_block[xxx=xxx]
     // note_block[xxx=xxx]
     // minecraft:barrier
-    public BlockStateWrapper getAsBlockState() {
+    public BlockStateWrapper getAsVanillaBlockState() {
         String stringFormat = getAsString();
         String[] split = stringFormat.split(":");
         if (split.length >= 4) {
