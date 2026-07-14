@@ -429,8 +429,10 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
             registerNMSPacketConsumer(NMSContainerSetContentListener.INSTANCE, ClientboundContainerSetContentPacketProxy.CLASS);
             registerNMSPacketConsumer(NMSContainerSetSlotListener.INSTANCE, ClientboundContainerSetSlotPacketProxy.CLASS);
             registerNMSPacketConsumer(NMSSetPlayerInventoryListener.INSTANCE, ClientboundSetPlayerInventoryPacketProxy.CLASS);
-            registerNMSPacketConsumer(NMSSetCursorItemListener.INSTANCE, ClientboundSetCursorItemPacketProxy.CLASS);
             registerNMSPacketConsumer(NMSSetEquipmentListener.INSTANCE, ClientboundSetEquipmentPacketProxy.CLASS);
+            if (VersionHelper.isOrAbove1_21_2) {
+                registerNMSPacketConsumer(NMSSetCursorItemListener.INSTANCE, ClientboundSetCursorItemPacketProxy.CLASS);
+            }
         } else {
             registerByteBufferPacketListener(ContainerSetContentListener.INSTANCE, PACKET_IDS.clientboundContainerSetContentPacket(), "ClientboundContainerSetContentPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);
             registerByteBufferPacketListener(ContainerSetSlotListener.INSTANCE, PACKET_IDS.clientboundContainerSetSlotPacket(), "ClientboundContainerSetSlotPacket", ConnectionState.PLAY, PacketFlow.CLIENTBOUND);

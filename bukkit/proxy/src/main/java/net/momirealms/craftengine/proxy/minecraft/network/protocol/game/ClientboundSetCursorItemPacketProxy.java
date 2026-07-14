@@ -8,7 +8,7 @@ import net.momirealms.sparrow.reflection.proxy.annotation.FieldGetter;
 import net.momirealms.sparrow.reflection.proxy.annotation.ReflectionProxy;
 import net.momirealms.sparrow.reflection.proxy.annotation.Type;
 
-@ReflectionProxy(name = "net.minecraft.network.protocol.game.ClientboundSetCursorItemPacket")
+@ReflectionProxy(name = "net.minecraft.network.protocol.game.ClientboundSetCursorItemPacket", activeIf = "min_version=1.21.2")
 public interface ClientboundSetCursorItemPacketProxy {
     ClientboundSetCursorItemPacketProxy INSTANCE = ASMProxyFactory.create(ClientboundSetCursorItemPacketProxy.class);
     Class<?> CLASS = SparrowClass.find("net.minecraft.network.protocol.game.ClientboundSetCursorItemPacket");
