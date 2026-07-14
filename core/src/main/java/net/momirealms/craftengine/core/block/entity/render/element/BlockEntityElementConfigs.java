@@ -36,6 +36,8 @@ public abstract class BlockEntityElementConfigs {
                 return "text_display";
             } else if (section.containsKey("item")) {
                 return "item_display";
+            } else if (section.containsKey("block")) {
+                return "block_display";
             } else {
                 // 到这里必定抛出异常
                 return section.getNonNullString("type");
