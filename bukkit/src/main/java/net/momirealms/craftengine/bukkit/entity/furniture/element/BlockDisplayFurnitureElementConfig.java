@@ -1,11 +1,11 @@
-package net.momirealms.craftengine.bukkit.block.entity.renderer.constant;
+package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
-import com.google.common.base.Objects;
 import net.momirealms.craftengine.bukkit.entity.data.DisplayData;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfig;
-import net.momirealms.craftengine.core.block.entity.render.element.BlockEntityElementConfigFactory;
 import net.momirealms.craftengine.core.entity.display.Billboard;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
@@ -17,20 +17,22 @@ import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.Color;
 import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.world.BlockPos;
-import net.momirealms.craftengine.core.world.chunk.CEChunk;
+import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.WorldPosition;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public final class BlockDisplayBlockEntityElementConfig implements BlockEntityElementConfig<BlockDisplayBlockEntityElement> {
-    public static final BlockEntityElementConfigFactory<BlockDisplayBlockEntityElement> FACTORY = new Factory();
-    public final Function<Player, List<Object>> lazyMetadataPacket;
+public final class BlockDisplayFurnitureElementConfig implements FurnitureElementConfig<BlockDisplayFurnitureElement> {
+    public static final FurnitureElementConfigFactory<BlockDisplayFurnitureElement> FACTORY = new Factory();
+    public final Function<Player, List<Object>> metadata;
     public final LazyReference<BlockStateWrapper> blockState;
     public final Vector3f scale;
     public final Vector3f position;
@@ -48,22 +50,22 @@ public final class BlockDisplayBlockEntityElementConfig implements BlockEntityEl
     public final Predicate<PlayerContext> predicate;
     public final boolean hasCondition;
 
-    public BlockDisplayBlockEntityElementConfig(LazyReference<BlockStateWrapper> blockState,
-                                                Vector3f scale,
-                                                Vector3f position,
-                                                Vector3f translation,
-                                                float xRot,
-                                                float yRot,
-                                                Quaternionf rotation,
-                                                Billboard billboard,
-                                                float shadowRadius,
-                                                float shadowStrength,
-                                                @Nullable Color glowColor,
-                                                int blockLight,
-                                                int skyLight,
-                                                float viewRange,
-                                                Predicate<PlayerContext> predicate,
-                                                boolean hasCondition) {
+    private BlockDisplayFurnitureElementConfig(LazyReference<BlockStateWrapper> blockState,
+                                               Vector3f scale,
+                                               Vector3f position,
+                                               Vector3f translation,
+                                               float xRot,
+                                               float yRot,
+                                               Quaternionf rotation,
+                                               Billboard billboard,
+                                               float shadowRadius,
+                                               float shadowStrength,
+                                               @Nullable Color glowColor,
+                                               int blockLight,
+                                               int skyLight,
+                                               float viewRange,
+                                               Predicate<PlayerContext> predicate,
+                                               boolean hasCondition) {
         this.blockState = blockState;
         this.scale = scale;
         this.position = position;
@@ -80,7 +82,7 @@ public final class BlockDisplayBlockEntityElementConfig implements BlockEntityEl
         this.viewRange = viewRange;
         this.hasCondition = hasCondition;
         this.predicate = predicate;
-        this.lazyMetadataPacket = player -> {
+        this.metadata = player -> {
             List<Object> dataValues = new ArrayList<>();
             if (glowColor != null) {
                 DisplayData.BlockDisplayData.SharedFlags.addEntityData((byte) 0x40, dataValues);
@@ -107,92 +109,52 @@ public final class BlockDisplayBlockEntityElementConfig implements BlockEntityEl
     }
 
     @Override
-    public BlockDisplayBlockEntityElement create(CEChunk chunk, BlockPos pos) {
-        return new BlockDisplayBlockEntityElement(this, pos);
+    public BlockDisplayFurnitureElement create(@NotNull Furniture furniture) {
+        return new BlockDisplayFurnitureElement(furniture, this, getPos(furniture));
     }
 
     @Override
-    public BlockDisplayBlockEntityElement create(CEChunk chunk, BlockPos pos, BlockDisplayBlockEntityElement previous) {
-        return new BlockDisplayBlockEntityElement(this, pos, previous.entityId,
-                previous.config.yRot != this.yRot ||
-                        previous.config.xRot != this.xRot ||
-                        !previous.config.position.equals(this.position)
-        );
+    public BlockDisplayFurnitureElement create(@NotNull Furniture furniture, @NonNull BlockDisplayFurnitureElement previous) {
+        WorldPosition pos = getPos(furniture);
+        return new BlockDisplayFurnitureElement(furniture, this, pos, previous.entityId, !pos.equals(previous.position));
     }
 
     @Override
-    public BlockDisplayBlockEntityElement createExact(CEChunk chunk, BlockPos pos, BlockDisplayBlockEntityElement previous) {
-        if (!previous.config.isSamePosition(this)) {
+    public BlockDisplayFurnitureElement createExact(@NotNull Furniture furniture, @NonNull BlockDisplayFurnitureElement previous) {
+        WorldPosition pos = getPos(furniture);
+        if (!pos.equals(previous.position)) {
             return null;
         }
-        return new BlockDisplayBlockEntityElement(this, pos, previous.entityId, false);
+        return new BlockDisplayFurnitureElement(furniture, this, pos, previous.entityId, false);
     }
 
     @Override
-    public Class<BlockDisplayBlockEntityElement> elementClass() {
-        return BlockDisplayBlockEntityElement.class;
+    public Class<BlockDisplayFurnitureElement> elementClass() {
+        return BlockDisplayFurnitureElement.class;
     }
 
-    public Vector3f scale() {
-        return this.scale;
+    public WorldPosition getPos(Furniture furniture) {
+        WorldPosition furniturePos = furniture.position();
+        Vec3d position = Furniture.getRelativePosition(furniturePos, this.position);
+        return new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot + xRot, furniturePos.yRot + yRot);
     }
 
-    public Vector3f translation() {
-        return this.translation;
-    }
-
-    public Vector3f position() {
-        return this.position;
-    }
-
-    public float yRot() {
-        return this.yRot;
-    }
-
-    public float xRot() {
-        return this.xRot;
-    }
-
-    public Billboard billboard() {
-        return this.billboard;
-    }
-
-    public Quaternionf rotation() {
-        return this.rotation;
-    }
-
-    public LazyReference<BlockStateWrapper> blockState() {
-        return this.blockState;
-    }
-
-    public List<Object> metadataValues(Player player) {
-        return this.lazyMetadataPacket.apply(player);
-    }
-
-    public boolean isSamePosition(BlockDisplayBlockEntityElementConfig that) {
-        return Float.compare(xRot, that.xRot) == 0 &&
-                Float.compare(yRot, that.yRot) == 0 &&
-                Objects.equal(position, that.position) &&
-                Objects.equal(translation, that.translation) &&
-                Objects.equal(rotation, that.rotation);
-    }
-
-    private static class Factory implements BlockEntityElementConfigFactory<BlockDisplayBlockEntityElement> {
-        private static final String[] SHADOW_RADIUS = new String[]{"shadow_radius", "shadow-radius"};
-        private static final String[] SHADOW_STRENGTH = new String[]{"shadow_strength", "shadow-strength"};
-        private static final String[] GLOW_COLOR = new String[]{"glow_color", "glow-color"};
-        private static final String[] BLOCK_LIGHT = new String[]{"block_light", "block-light"};
-        private static final String[] SKY_LIGHT = new String[]{"sky_light", "sky-light"};
-        private static final String[] VIEW_RANGE = new String[]{"view_range", "view-range"};
+    private static class Factory implements FurnitureElementConfigFactory<BlockDisplayFurnitureElement> {
+        private static final String[] SHADOW_RADIUS = new String[] {"shadow_radius", "shadow-radius"};
+        private static final String[] SHADOW_STRENGTH = new String[] {"shadow_strength", "shadow-strength"};
+        private static final String[] GLOW_COLOR = new String[] {"glow_color", "glow-color"};
+        private static final String[] BLOCK_LIGHT = new String[] {"block_light", "block-light"};
+        private static final String[] SKY_LIGHT = new String[] {"sky_light", "sky-light"};
+        private static final String[] VIEW_RANGE = new String[] {"view_range", "view-range"};
 
         @Override
-        public BlockDisplayBlockEntityElementConfig create(ConfigSection section) {
+        public BlockDisplayFurnitureElementConfig create(ConfigSection section) {
             ConfigSection brightness = section.getSection("brightness");
             List<Condition<PlayerContext>> conditions = section.getSectionList("conditions", CommonConditions::fromConfig);
-            return new BlockDisplayBlockEntityElementConfig(
+            return new BlockDisplayFurnitureElementConfig(
                     section.getNonNullValue("block", ConfigConstants.ARGUMENT_BLOCK_STATE, v -> {
-                        String blockState = v.getAsString();
-                        return LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(blockState));
+                        String state = v.getAsString();
+                        return LazyReference.lazyReference(() -> CraftEngine.instance().blockManager().createBlockState(state));
                     }),
                     section.getVector3f("scale", ConfigConstants.NORMAL_SCALE),
                     section.getVector3f("position", ConfigConstants.ZERO_VECTOR3),
