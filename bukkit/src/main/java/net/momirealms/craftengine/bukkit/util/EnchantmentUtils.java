@@ -1,8 +1,13 @@
 package net.momirealms.craftengine.bukkit.util;
 
+import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.item.component.value.Enchantment;
+import net.momirealms.craftengine.core.util.AdventureHelper;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.proxy.bukkit.craftbukkit.enchantments.CraftEnchantmentProxy;
 import net.momirealms.craftengine.proxy.minecraft.core.HolderProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.item.enchantment.EnchantmentProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.item.enchantment.ItemEnchantmentsProxy;
 
 import java.util.ArrayList;
@@ -37,5 +42,15 @@ public final class EnchantmentUtils {
             map.put(name, level);
         }
         return map;
+    }
+
+    public static Component getFullName(org.bukkit.enchantments.Enchantment enchantment, int level) {
+        Object nmsComponent;
+        if (VersionHelper.isOrAbove1_21) {
+            nmsComponent = EnchantmentProxy.INSTANCE.getFullname(CraftEnchantmentProxy.INSTANCE.getHandle(enchantment), level);
+        } else {
+            nmsComponent = EnchantmentProxy.INSTANCE.getFullname$legacy(CraftEnchantmentProxy.INSTANCE.getHandle(enchantment), level);
+        }
+        return AdventureHelper.jsonToComponent(ComponentUtils.minecraftToJson(nmsComponent));
     }
 }
