@@ -22,6 +22,8 @@ import net.momirealms.craftengine.core.entity.furniture.setting.FurnitureSetting
 import net.momirealms.craftengine.core.entity.furniture.setting.FurnitureSettingsModifierType;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorType;
+import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicateType;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.EquipmentType;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
@@ -137,4 +139,5 @@ public final class Registries {
     public static final ResourceKey<Registry<DialogAction.Type<? extends DialogAction>>> DIALOG_ACTION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("dialog_action_type"));
     public static final ResourceKey<Registry<DialogInputControl.Type<? extends DialogInputControl>>> DIALOG_INPUT_CONTROL_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("dialog_input_control_type"));
     public static final ResourceKey<Registry<ClickEvent.Type<? extends ClickEvent>>> CLICK_EVENT_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("click_event_type"));
+    public static final ResourceKey<Registry<DataComponentPredicateType<? extends DataComponentPredicate>>> DATA_COMPONENT_PREDICATE_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("data_component_predicate_type"));
 }

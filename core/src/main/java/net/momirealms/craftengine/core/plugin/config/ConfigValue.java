@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin.config;
 
 import com.ezylang.evalex.Expression;
+import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.block.AbstractBlockManager;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
@@ -675,6 +676,24 @@ public final class ConfigValue {
         } catch (Exception e) {
             throw new KnownResourceException(ConfigConstants.PARSE_SNBT_FAILED, this.path, snbt, e.getMessage());
         }
+    }
+
+    public Tag getAsTag() {
+        if (this.is(String.class)) {
+            String stringValue = this.getAsString();
+            if (stringValue.startsWith("(json) ")) {
+                JsonElement element = GsonHelper.get().fromJson(stringValue.substring("(json) ".length()), JsonElement.class);
+                return CraftEngine.instance().platform().jsonToSparrowNBT(element);
+            } else if (stringValue.startsWith("(snbt) ")) {
+                String snbt = stringValue.substring("(snbt) ".length());
+                try {
+                    return TagParser.parseTagFully(snbt);
+                } catch (Exception e) {
+                    throw new KnownResourceException(ConfigConstants.PARSE_SNBT_FAILED, this.path(), snbt, e.getMessage());
+                }
+            }
+        }
+        return CraftEngine.instance().platform().javaToSparrowNBT(this.value());
     }
 
     // 五种合理情况

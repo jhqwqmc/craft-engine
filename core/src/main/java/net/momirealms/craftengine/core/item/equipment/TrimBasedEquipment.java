@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.util.VersionHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Vector;
 
 public final class TrimBasedEquipment extends AbstractEquipment {
     public static final EquipmentFactory<TrimBasedEquipment> FACTORY = new Factory();

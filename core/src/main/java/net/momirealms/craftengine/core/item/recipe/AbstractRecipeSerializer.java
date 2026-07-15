@@ -1,6 +1,9 @@
 package net.momirealms.craftengine.core.item.recipe;
 
 import net.momirealms.craftengine.core.item.*;
+import net.momirealms.craftengine.core.item.component.predicate.AllOfDataComponentPredicate;
+import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicates;
 import net.momirealms.craftengine.core.item.recipe.reader.*;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;
@@ -74,10 +77,15 @@ public abstract class AbstractRecipeSerializer<R extends Recipe> implements Reci
 
         // 如果是 map 就说明用了count，或是未来的predicate
         ConfigValue itemsValue;
+        DataComponentPredicate predicate = null;
         if (value.is(Map.class)) {
             ConfigSection section = value.getAsSection();
             count = section.getInt("count", 1);
             itemsValue = section.getNonNullValue(ITEMS, ConfigConstants.ARGUMENT_LIST);
+            List<DataComponentPredicate> predicates = section.getSectionList("predicate", DataComponentPredicates::fromConfig);
+            if (!predicates.isEmpty()) {
+                predicate = predicates.size() == 1 ? predicates.getFirst() : new AllOfDataComponentPredicate(predicates);
+            }
         } else {
             itemsValue = value;
         }
@@ -128,7 +136,7 @@ public abstract class AbstractRecipeSerializer<R extends Recipe> implements Reci
             }
             minecraftItemIds.add(vanillaItem);
         }
-        return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem, count);
+        return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem, count, predicate);
     }
 
     // 解析原版数据包的物品为ingredient
@@ -203,6 +211,6 @@ public abstract class AbstractRecipeSerializer<R extends Recipe> implements Reci
         if (itemIds.isEmpty()) {
             return null;
         }
-        return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem, 1);
+        return Ingredient.of(elements, itemIds, minecraftItemIds, hasCustomItem);
     }
 }

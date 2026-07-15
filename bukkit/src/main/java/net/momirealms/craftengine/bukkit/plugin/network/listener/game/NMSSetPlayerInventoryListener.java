@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
 import net.momirealms.craftengine.core.plugin.network.listener.NMSPacketListener;
-import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundContainerSetSlotPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundSetPlayerInventoryPacketProxy;
 
 public final class NMSSetPlayerInventoryListener implements NMSPacketListener {

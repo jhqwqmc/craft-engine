@@ -71,7 +71,8 @@ public final class BukkitRecipeManager extends AbstractRecipeManager {
         for (UniqueKey holder : ingredient.items()) {
             Optional<? extends BuildableItem> buildableItem = BukkitItemManager.instance().getBuildableItem(holder.key());
             if (buildableItem.isPresent()) {
-                itemStacks.add(buildableItem.get().buildItem(ItemBuildContext.empty(), ingredient.count()).minecraftItem());
+                Item item = buildableItem.get().buildItem(ItemBuildContext.empty(), ingredient.count());
+                itemStacks.add(ingredient.applyPredicateLooks(item).minecraftItem());
             } else {
                 Item barrier = Item.byId(ItemKeys.BARRIER);
                 assert barrier != null;

@@ -281,6 +281,8 @@ resource.item.custom_model_data_conflict: CustomModelData '<arg:0>' has been occ
 resource.item.missing_model_id: Missing 'custom_model_data' or 'item_model' for custom model to function
 resource.item.occupied_vanilla_item_model: Item model '<arg:0>' has been occupied by a vanilla item
 resource.item.invalid_material: Invalid material type '<arg:0>'
+resource.item.unknown_data_component_type: Unknown data component type '<arg:0>'
+resource.item.data_component_predicate.unknown_type: Unknown data component predicate type '<arg:0>'
 resource.model.generation.conflict: Failed to generate model for '<arg:0>' as two or more configurations attempt to generate different json models with the same path
 resource.recipe.transform_processor.unknown_type: Unknown smithing transform post processor type '<arg:0>'
 resource.recipe.ingredient.invalid_tag: Item tag '<arg:0>' doesn't contain any item

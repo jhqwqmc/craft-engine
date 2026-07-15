@@ -2,13 +2,11 @@ package net.momirealms.craftengine.bukkit.util;
 
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
-import net.momirealms.craftengine.core.world.ChunkPos;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.CraftChunkProxy;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.CraftWorldProxy;
 import net.momirealms.craftengine.proxy.minecraft.core.registries.RegistriesProxy;
 import net.momirealms.craftengine.proxy.minecraft.resources.ResourceKeyProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.MinecraftServerProxy;
-import net.momirealms.craftengine.proxy.minecraft.server.level.ChunkHolderProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerChunkCacheProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerLevelProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.level.LevelAccessorProxy;
@@ -20,8 +18,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public final class LevelUtils {
     private LevelUtils() {}

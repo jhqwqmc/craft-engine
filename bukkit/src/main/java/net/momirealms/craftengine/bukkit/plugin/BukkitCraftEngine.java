@@ -17,6 +17,7 @@ import net.momirealms.craftengine.bukkit.entity.seat.BukkitSeatManager;
 import net.momirealms.craftengine.bukkit.font.BukkitFontManager;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.item.behavior.BukkitItemBehaviors;
+import net.momirealms.craftengine.bukkit.item.predicate.BukkitDataComponentPredicates;
 import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
 import net.momirealms.craftengine.bukkit.loot.BukkitLootManager;
 import net.momirealms.craftengine.bukkit.pack.BukkitPackManager;
@@ -167,6 +168,7 @@ public final class BukkitCraftEngine extends CraftEngine {
         BukkitFurnitureHitboxTypes.init();
         BukkitBlockEntityElementConfigs.init();
         BukkitFurnitureElementConfigs.init();
+        BukkitDataComponentPredicates.init();
         CommonConditions.register(Key.ce("test_flag"), TestFlagCondition.factory());
         // 初始化 onload 阶段的兼容性
         super.compatibilityManager().onLoad();

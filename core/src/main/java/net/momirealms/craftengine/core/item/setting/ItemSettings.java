@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.item.setting;
 
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
-import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.processor.EquippableProcessor;
 import net.momirealms.craftengine.core.item.processor.FoodProcessor;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
