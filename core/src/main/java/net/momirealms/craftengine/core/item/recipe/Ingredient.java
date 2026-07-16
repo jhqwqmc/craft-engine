@@ -23,7 +23,12 @@ public final class Ingredient implements Predicate<UniqueIdItem>, StackedContent
     @Nullable
     public final DataComponentPredicate predicate;
 
-    private Ingredient(List<IngredientElement> elements, List<UniqueKey> items, List<UniqueKey> vanillaItems, boolean hasCustomItem, int count, DataComponentPredicate predicate) {
+    private Ingredient(List<IngredientElement> elements,
+                       List<UniqueKey> items,
+                       List<UniqueKey> vanillaItems,
+                       boolean hasCustomItem,
+                       int count,
+                       @Nullable DataComponentPredicate predicate) {
         this.elements = List.copyOf(elements);
         this.items = List.copyOf(items);
         this.vanillaItems = List.copyOf(vanillaItems);
@@ -110,6 +115,9 @@ public final class Ingredient implements Predicate<UniqueIdItem>, StackedContent
     @Override
     public boolean acceptsItem(UniqueIdItem entry) {
         if (!this.items.contains(entry.id())) {
+            return false;
+        }
+        if (this.predicate != null && !this.predicate.test(entry.item())) {
             return false;
         }
         return this.count <= 1 || entry.item().count() >= this.count;

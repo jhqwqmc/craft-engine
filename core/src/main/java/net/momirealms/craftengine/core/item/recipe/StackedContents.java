@@ -41,11 +41,6 @@ public final class StackedContents<T> {
         boolean acceptsItem(T entry);
     }
 
-    @FunctionalInterface
-    public interface Output<T> {
-        void accept(T item);
-    }
-
     List<T> getUniqueAvailableIngredientItems(List<? extends IngredientInfo<T>> ingredients) {
         List<T> list = new ArrayList<>();
         for (Reference2IntMap.Entry<T> entry : amounts.reference2IntEntrySet()) {
