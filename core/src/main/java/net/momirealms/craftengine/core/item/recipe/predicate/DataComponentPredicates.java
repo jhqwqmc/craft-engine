@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.item.component.predicate;
+package net.momirealms.craftengine.core.item.recipe.predicate;
 
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.config.KnownResourceException;

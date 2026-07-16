@@ -1,9 +1,9 @@
 package net.momirealms.craftengine.core.item.recipe;
 
 import net.momirealms.craftengine.core.item.*;
-import net.momirealms.craftengine.core.item.component.predicate.AllOfDataComponentPredicate;
-import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicate;
-import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicates;
+import net.momirealms.craftengine.core.item.recipe.predicate.AllOfDataComponentPredicate;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicates;
 import net.momirealms.craftengine.core.item.recipe.reader.*;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.result.PostProcessor;

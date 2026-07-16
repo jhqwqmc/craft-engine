@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.item.recipe;
 
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicate;
 import net.momirealms.craftengine.core.util.UniqueKey;
 import org.jetbrains.annotations.Nullable;
 

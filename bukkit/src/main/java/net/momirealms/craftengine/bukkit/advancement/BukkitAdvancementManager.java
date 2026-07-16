@@ -9,6 +9,13 @@ import net.momirealms.craftengine.core.advancement.AbstractAdvancementManager;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.pack.Pack;
+import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.config.ConfigParser;
+import net.momirealms.craftengine.core.plugin.config.ConfigSection;
+import net.momirealms.craftengine.core.plugin.config.IdSectionConfigParser;
+import net.momirealms.craftengine.core.plugin.config.lifecycle.LoadingStage;
+import net.momirealms.craftengine.core.plugin.config.lifecycle.LoadingStages;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -17,15 +24,35 @@ import net.momirealms.craftengine.proxy.minecraft.advancements.triggers.Criterio
 import net.momirealms.craftengine.proxy.minecraft.advancements.triggers.ImpossibleTriggerProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.chat.ComponentProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacketProxy;
+import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class BukkitAdvancementManager extends AbstractAdvancementManager {
     private final BukkitCraftEngine plugin;
+    private final AdvancementParser advancementParser;
+    private final Map<Key, Object> advancements = new ConcurrentHashMap<>();
 
     public BukkitAdvancementManager(BukkitCraftEngine plugin) {
         super(plugin);
         this.plugin = plugin;
+        this.advancementParser = new AdvancementParser();
+    }
+
+    @Override
+    public void unload() {
+        this.advancements.clear();
+    }
+
+    @Override
+    public ConfigParser parser() {
+        return this.advancementParser;
+    }
+
+    @Override
+    public void runDelayedSyncTasks() {
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +109,7 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
         if (VersionHelper.isOrAbove1_20_2) {
             Object advancementRequirements = VersionHelper.isOrAbove1_20_3 ?
                     AdvancementRequirementsProxy.INSTANCE.newInstance(List.of(List.of("impossible"))) :
-                    AdvancementRequirementsProxy.INSTANCE.newInstance(new String[][] {{"impossible"}});
+                    AdvancementRequirementsProxy.INSTANCE.newInstance(new String[][]{{"impossible"}});
             advancement = AdvancementProxy.INSTANCE.newInstance(
                     Optional.empty(),
                     (Optional<Object>) displayInfo,
@@ -100,10 +127,10 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
                     displayInfo,
                     AdvancementRewardsProxy.EMPTY,
                     criteria,
-                    new String[][] {{"impossible"}},
+                    new String[][]{{"impossible"}},
                     false
             );
-            AdvancementProgressProxy.INSTANCE.update(advancementProgress, criteria, new String[][] {{"impossible"}});
+            AdvancementProgressProxy.INSTANCE.update(advancementProgress, criteria, new String[][]{{"impossible"}});
         }
         AdvancementProgressProxy.INSTANCE.grantProgress(advancementProgress, "impossible");
         Map<Object, Object> advancementsToGrant = new HashMap<>();
@@ -115,5 +142,38 @@ public final class BukkitAdvancementManager extends AbstractAdvancementManager {
                 ClientboundUpdateAdvancementsPacketProxy.INSTANCE.newInstance(false, new ArrayList<>(), MiscUtils.init(new HashSet<>(), s -> s.add(identifier)), new HashMap<>(), true) :
                 ClientboundUpdateAdvancementsPacketProxy.INSTANCE.newInstance(false, new ArrayList<>(), MiscUtils.init(new HashSet<>(), s -> s.add(identifier)), new HashMap<>());
         player.sendPackets(List.of(grantPacket, removePacket), false);
+    }
+
+    private final class AdvancementParser extends IdSectionConfigParser {
+        private static final String[] CONFIG_SECTION_NAME = new String[]{"advancements", "advancement"};
+
+        @Override
+        public String[] sectionId() {
+            return CONFIG_SECTION_NAME;
+        }
+
+        @Override
+        public LoadingStage loadingStage() {
+            return LoadingStages.ADVANCEMENT;
+        }
+
+        @Override
+        public List<LoadingStage> dependencies() {
+            return List.of(LoadingStages.ITEM, LoadingStages.BLOCK);
+        }
+
+        @Override
+        public int count() {
+            return BukkitAdvancementManager.this.advancements.size();
+        }
+
+        @Override
+        public boolean async() {
+            return Config.multiThreadedConfigLoad();
+        }
+
+        @Override
+        protected void parseSection(@NotNull Pack pack, @NotNull Path path, @NotNull Key id, @NotNull ConfigSection section) {
+        }
     }
 }

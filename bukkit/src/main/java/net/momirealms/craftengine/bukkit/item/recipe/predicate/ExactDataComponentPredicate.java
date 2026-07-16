@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.bukkit.item.predicate;
+package net.momirealms.craftengine.bukkit.item.recipe.predicate;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -6,8 +6,8 @@ import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.bukkit.util.RegistryOps;
 import net.momirealms.craftengine.bukkit.util.RegistryUtils;
 import net.momirealms.craftengine.core.item.Item;
-import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicate;
-import net.momirealms.craftengine.core.item.component.predicate.DataComponentPredicateFactory;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicateFactory;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
