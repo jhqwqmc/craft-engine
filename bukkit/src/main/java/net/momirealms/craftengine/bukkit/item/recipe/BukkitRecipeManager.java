@@ -55,6 +55,7 @@ public final class BukkitRecipeManager extends AbstractRecipeManager {
         it.put(RecipeSerializers.SHAPED, recipe -> FastNMS.INSTANCE.createShapedRecipe((CustomShapedRecipe) recipe));
         it.put(RecipeSerializers.SHAPED_TRANSFORM, recipe -> FastNMS.INSTANCE.createShapedRecipe((CustomShapedTransformRecipe) recipe));
         it.put(RecipeSerializers.SHAPELESS, recipe -> FastNMS.INSTANCE.createShapelessRecipe((CustomShapelessRecipe) recipe));
+        it.put(RecipeSerializers.SHAPELESS_TRANSFORM, recipe -> FastNMS.INSTANCE.createShapelessRecipe((CustomShapelessRecipe) recipe));
         it.put(RecipeSerializers.SMELTING, recipe -> FastNMS.INSTANCE.createSmeltingRecipe((CustomSmeltingRecipe) recipe));
         it.put(RecipeSerializers.BLASTING, recipe -> FastNMS.INSTANCE.createBlastingRecipe((CustomBlastingRecipe) recipe));
         it.put(RecipeSerializers.SMOKING, recipe -> FastNMS.INSTANCE.createSmokingRecipe((CustomSmokingRecipe) recipe));

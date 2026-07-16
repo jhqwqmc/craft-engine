@@ -300,6 +300,8 @@ resource.recipe.shaped.invalid_pattern: Invalid pattern '<arg:0>'
 resource.recipe.shaped.invalid_symbol: Invalid symbol '<arg:0>'
 resource.recipe.shaped_transform.ambigious_source: "Found 2 or more materials marked as source in shaped transform recipe: '<arg:0>', '<arg:1>'"
 resource.recipe.shaped_transform.source_not_found: "Unable to find a material marked as source in recipe"
+resource.recipe.shapeless_transform.ambigious_source: "Found 2 or more materials marked as source in shapeless transform recipe: '<arg:0>'"
+resource.recipe.shapeless_transform.source_not_found: "Unable to find a material marked as source in recipe"
 resource.recipe.post_processor.unknown_type: Unknown recipe post processor type '<arg:0>'
 resource.recipe.unknown_type: Unknown recipe type '<arg:0>'
 resource.vanilla_loot.block.invalid_target: Invalid block target '<arg:0>'

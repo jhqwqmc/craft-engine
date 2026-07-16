@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 public class DataComponentPredicates {
     public static final DataComponentPredicateType<AllOfDataComponentPredicate> ALL_OF = register(Key.ce("all_of"), AllOfDataComponentPredicate.FACTORY);
+    public static final DataComponentPredicateType<EnchantmentDataComponentPredicate> ENCHANTMENT = register(Key.ce("enchantment"), EnchantmentDataComponentPredicate.FACTORY);
 
     protected DataComponentPredicates() {}
 
