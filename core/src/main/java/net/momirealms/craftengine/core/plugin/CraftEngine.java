@@ -434,7 +434,7 @@ public abstract class CraftEngine implements Plugin {
         String link;
         if (VersionHelper.PREMIUM) {
             if (downloadFromPolymart) {
-                link = "https://polymart.org/product/7624/";
+                link = "https://voxel.shop/product/7624/";
             } else if (downloadFromBBB) {
                 link = "https://builtbybit.com/resources/82674/";
             } else {
