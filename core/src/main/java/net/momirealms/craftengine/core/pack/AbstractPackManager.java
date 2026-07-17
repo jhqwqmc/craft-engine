@@ -2921,10 +2921,18 @@ public abstract class AbstractPackManager implements PackManager {
             } else {
                 json = new JsonObject();
             }
-            for (Map.Entry<String, String> pair : entry.getValue().translations.entrySet()) {
-                json.addProperty(pair.getKey(), pair.getValue());
+            Map<String, String> sorted = new TreeMap<>();
+            for (Map.Entry<String, JsonElement> existing : json.entrySet()) {
+                if (existing.getValue().isJsonPrimitive()) {
+                    sorted.put(existing.getKey(), existing.getValue().getAsString());
+                }
             }
-            writeJsonSafely(json, langPath);
+            sorted.putAll(entry.getValue().translations);
+            JsonObject sortedJson = new JsonObject();
+            for (Map.Entry<String, String> pair : sorted.entrySet()) {
+                sortedJson.addProperty(pair.getKey(), pair.getValue());
+            }
+            writeJsonSafely(sortedJson, langPath);
         }
     }
 
@@ -2946,10 +2954,18 @@ public abstract class AbstractPackManager implements PackManager {
             } else {
                 soundJson = new JsonObject();
             }
-            for (SoundEvent soundEvent : entry.getValue()) {
-                soundJson.add(soundEvent.id().value(), soundEvent.get());
+            Map<String, JsonElement> sorted = new TreeMap<>();
+            for (Map.Entry<String, JsonElement> existing : soundJson.entrySet()) {
+                sorted.put(existing.getKey(), existing.getValue());
             }
-            writeJsonSafely(soundJson, soundPath);
+            for (SoundEvent soundEvent : entry.getValue()) {
+                sorted.put(soundEvent.id().value(), soundEvent.get());
+            }
+            JsonObject sortedJson = new JsonObject();
+            for (Map.Entry<String, JsonElement> pair : sorted.entrySet()) {
+                sortedJson.add(pair.getKey(), pair.getValue());
+            }
+            writeJsonSafely(sortedJson, soundPath);
         }
     }
 
@@ -3017,7 +3033,15 @@ public abstract class AbstractPackManager implements PackManager {
             }
         }
 
-        writeJsonSafely(soundJson, soundPath);
+        Map<String, JsonElement> sorted = new TreeMap<>();
+        for (Map.Entry<String, JsonElement> existing : soundJson.entrySet()) {
+            sorted.put(existing.getKey(), existing.getValue());
+        }
+        JsonObject sortedJson = new JsonObject();
+        for (Map.Entry<String, JsonElement> pair : sorted.entrySet()) {
+            sortedJson.add(pair.getKey(), pair.getValue());
+        }
+        writeJsonSafely(sortedJson, soundPath);
     }
 
     // 生成 json 模型文件
@@ -3069,13 +3093,12 @@ public abstract class AbstractPackManager implements PackManager {
                 JsonObject newVariants = new JsonObject();
                 if (previousVariants != null) {
                     for (Map.Entry<String, JsonElement> variantEntry : previousVariants.entrySet()) {
-                        String variantName = variantEntry.getKey();
-                        if (!newVariants.has(variantName)) {
-                            newVariants.add(variantName, variantEntry.getValue());
-                        }
+                        newVariants.add(variantEntry.getKey(), variantEntry.getValue());
                     }
                 }
-                for (Map.Entry<String, JsonElement> resourcePathEntry : entry.getValue().entrySet()) {
+                // 新增变体排序后追加在末尾；与旧变体同 key 的仅替换值，保持原位
+                Map<String, JsonElement> sortedNewVariants = new TreeMap<>(entry.getValue());
+                for (Map.Entry<String, JsonElement> resourcePathEntry : sortedNewVariants.entrySet()) {
                     newVariants.add(resourcePathEntry.getKey(), resourcePathEntry.getValue());
                 }
                 stateJson.add("variants", newVariants);
@@ -3389,10 +3412,13 @@ public abstract class AbstractPackManager implements PackManager {
                 fontJson.add("providers", providers);
             }
 
+            Map<String, JsonObject> sortedProviders = new TreeMap<>();
             for (BitmapImage image : font.bitmapImages()) {
-                providers.add(image.get());
+                sortedProviders.put(image.file(), image.get());
             }
-
+            for (JsonObject provider : sortedProviders.values()) {
+                providers.add(provider);
+            }
             try {
                 Files.writeString(fontPath, CharacterUtils.replaceDoubleBackslashU(fontJson.toString()));
             } catch (IOException e) {
