@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.pack.model.definition.select.ChargeTypeSe
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.Map2;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public final class CrossbowItemModelReader implements SimplifiedItemModelReader 
         boolean autoModel = models == null;
         return new SelectItemModel(
                 ChargeTypeSelectProperty.INSTANCE,
-                Map.of(
+                Map2.of(
                         Either.left(new JsonPrimitive("arrow")), new BaseItemModel(
                                 autoModel ? Key.of(id.namespace(), "item/" + id.value() + "_arrow") : models.get(4),
                                 List.of(),
@@ -55,7 +56,7 @@ public final class CrossbowItemModelReader implements SimplifiedItemModelReader 
                         new RangeDispatchItemModel(
                                 CrossBowPullingRangeDispatchProperty.INSTANCE,
                                 1f,
-                                Map.of(
+                                Map2.of(
                                         0.58f, new BaseItemModel(
                                                 autoModel ? Key.of(id.namespace(), "item/" + id.value() + "_pulling_1") : models.get(2),
                                                 List.of(),
@@ -99,7 +100,7 @@ public final class CrossbowItemModelReader implements SimplifiedItemModelReader 
         List<Key> models = modelValue.getAsFixedSizeList(6, ConfigValue::getAsAssetPath);
         return new SelectItemModel(
                 ChargeTypeSelectProperty.INSTANCE,
-                Map.of(
+                Map2.of(
                         Either.left(new JsonPrimitive("arrow")), new BaseItemModel(models.get(4)),
                         Either.left(new JsonPrimitive("rocket")), new BaseItemModel(models.get(5))
                 ),
@@ -108,7 +109,7 @@ public final class CrossbowItemModelReader implements SimplifiedItemModelReader 
                         new RangeDispatchItemModel(
                                 CrossBowPullingRangeDispatchProperty.INSTANCE,
                                 1f,
-                                Map.of(
+                                Map2.of(
                                         0.58f, new BaseItemModel(models.get(2)),
                                         1.0f, new BaseItemModel(models.get(3))
                                 ),
