@@ -3412,12 +3412,10 @@ public abstract class AbstractPackManager implements PackManager {
                 fontJson.add("providers", providers);
             }
 
-            Map<String, JsonObject> sortedProviders = new TreeMap<>();
-            for (BitmapImage image : font.bitmapImages()) {
-                sortedProviders.put(image.file(), image.get());
-            }
-            for (JsonObject provider : sortedProviders.values()) {
-                providers.add(provider);
+            List<BitmapImage> sortedImages = new ArrayList<>(font.bitmapImages());
+            sortedImages.sort(Comparator.comparing((BitmapImage image) -> image.id().namespace).thenComparing(image -> image.id().value));
+            for (BitmapImage image : sortedImages) {
+                providers.add(image.get());
             }
             try {
                 Files.writeString(fontPath, CharacterUtils.replaceDoubleBackslashU(fontJson.toString()));
