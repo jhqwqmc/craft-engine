@@ -26,6 +26,7 @@ public final class ZipUtils {
                     if (!dir.equals(in)) {
                         String relativePath = in.relativize(dir).toString().replace("\\", "/") + "/";
                         ZipEntry entry = new ZipEntry(relativePath);
+                        entry.setTime(0L);
                         zos.putNextEntry(entry);
                         zos.closeEntry();
                     }
@@ -36,6 +37,7 @@ public final class ZipUtils {
                 public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
                     String relativePath = in.relativize(file).toString().replace("\\", "/");
                     ZipEntry entry = new ZipEntry(relativePath);
+                    entry.setTime(0L);
                     zos.putNextEntry(entry);
                     Files.copy(file, zos);
                     zos.closeEntry();
