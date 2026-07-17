@@ -15,11 +15,13 @@ import java.util.Optional;
 
 public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
     public static boolean RELOAD_PACK_FLAG = false;
+    public static boolean RELOAD_HOST_FLAG = false;
 
     public ReloadCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
         super(commandManager, plugin);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public Command.Builder<? extends CommandSender> assembleCommand(org.incendo.cloud.CommandManager<CommandSender> manager, Command.Builder<CommandSender> builder) {
         return builder
@@ -61,6 +63,23 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_FAILURE);
                             }
                         });
+                    } else if (argument == ReloadArgument.HOST) {
+                        RELOAD_HOST_FLAG = true;
+                        plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), false).thenAccept(reloadResult -> {
+                            if (reloadResult.success()) {
+                                handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
+                                        Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
+                                        Component.text(reloadResult.asyncTime()),
+                                        Component.text(reloadResult.syncTime())
+                                );
+                                if (reloadResult.issues() != 0 && context.sender() instanceof Player) {
+                                    handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_ISSUES, Component.text(reloadResult.issues()));
+                                }
+                            } else {
+                                handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
+                            }
+                            RELOAD_HOST_FLAG = false;
+                        });
                     } else if (argument == ReloadArgument.ALL) {
                         RELOAD_PACK_FLAG = true;
                         plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), true).thenAcceptAsync(reloadResult -> {
@@ -101,6 +120,7 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
         CONFIG,
         RECIPE,
         PACK,
+        HOST,
         ALL
     }
 }
