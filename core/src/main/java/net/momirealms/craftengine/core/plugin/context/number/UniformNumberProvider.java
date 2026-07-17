@@ -9,17 +9,17 @@ public record UniformNumberProvider(NumberProvider min, NumberProvider max) impl
 
     @Override
     public int getInt(RandomSource random) {
-        return RandomUtils.generateRandomInt(this.min.getInt(random), this.max.getInt(random) + 1);
+        return RandomUtils.generateRandomInt(this.min.getInt(random), this.max.getInt(random) + 1, random);
     }
 
     @Override
     public double getDouble(RandomSource random) {
-        return RandomUtils.generateRandomDouble(this.min.getDouble(random), this.max.getDouble(random));
+        return RandomUtils.generateRandomDouble(this.min.getDouble(random), this.max.getDouble(random), random);
     }
 
     @Override
     public float getFloat(RandomSource random) {
-        return RandomUtils.generateRandomFloat(this.min.getFloat(random), this.max.getFloat(random));
+        return RandomUtils.generateRandomFloat(this.min.getFloat(random), this.max.getFloat(random), random);
     }
 
     private static class Factory implements NumberProviderFactory<UniformNumberProvider> {

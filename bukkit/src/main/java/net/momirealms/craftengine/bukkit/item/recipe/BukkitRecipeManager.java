@@ -55,6 +55,7 @@ public final class BukkitRecipeManager extends AbstractRecipeManager {
         it.put(RecipeSerializers.SHAPED, recipe -> FastNMS.INSTANCE.createShapedRecipe((CustomShapedRecipe) recipe));
         it.put(RecipeSerializers.SHAPED_TRANSFORM, recipe -> FastNMS.INSTANCE.createShapedRecipe((CustomShapedTransformRecipe) recipe));
         it.put(RecipeSerializers.SHAPELESS, recipe -> FastNMS.INSTANCE.createShapelessRecipe((CustomShapelessRecipe) recipe));
+        it.put(RecipeSerializers.SHAPELESS_TRANSFORM, recipe -> FastNMS.INSTANCE.createShapelessRecipe((CustomShapelessRecipe) recipe));
         it.put(RecipeSerializers.SMELTING, recipe -> FastNMS.INSTANCE.createSmeltingRecipe((CustomSmeltingRecipe) recipe));
         it.put(RecipeSerializers.BLASTING, recipe -> FastNMS.INSTANCE.createBlastingRecipe((CustomBlastingRecipe) recipe));
         it.put(RecipeSerializers.SMOKING, recipe -> FastNMS.INSTANCE.createSmokingRecipe((CustomSmokingRecipe) recipe));
@@ -71,7 +72,8 @@ public final class BukkitRecipeManager extends AbstractRecipeManager {
         for (UniqueKey holder : ingredient.items()) {
             Optional<? extends BuildableItem> buildableItem = BukkitItemManager.instance().getBuildableItem(holder.key());
             if (buildableItem.isPresent()) {
-                itemStacks.add(buildableItem.get().buildItem(ItemBuildContext.empty(), ingredient.count()).minecraftItem());
+                Item item = buildableItem.get().buildItem(ItemBuildContext.empty(), ingredient.count());
+                itemStacks.add(ingredient.applyPredicateLooks(item).minecraftItem());
             } else {
                 Item barrier = Item.byId(ItemKeys.BARRIER);
                 assert barrier != null;

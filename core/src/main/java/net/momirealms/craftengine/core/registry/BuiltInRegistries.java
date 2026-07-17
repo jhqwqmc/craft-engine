@@ -22,6 +22,8 @@ import net.momirealms.craftengine.core.entity.furniture.setting.FurnitureSetting
 import net.momirealms.craftengine.core.entity.furniture.setting.FurnitureSettingsModifierType;
 import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.behavior.ItemBehaviorType;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicate;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicateType;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.EquipmentType;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
@@ -134,6 +136,7 @@ public final class BuiltInRegistries {
     public static final Registry<DialogAction.Type<? extends DialogAction>> DIALOG_ACTION_TYPE = createConstantBoundRegistry(Registries.DIALOG_ACTION_TYPE, 8);
     public static final Registry<DialogInputControl.Type<? extends DialogInputControl>> DIALOG_INPUT_CONTROL_TYPE = createConstantBoundRegistry(Registries.DIALOG_INPUT_CONTROL_TYPE, 8);
     public static final Registry<ClickEvent.Type<? extends ClickEvent>> CLICK_EVENT_TYPE = createConstantBoundRegistry(Registries.CLICK_EVENT_TYPE, 16);
+    public static final Registry<DataComponentPredicateType<? extends DataComponentPredicate>> DATA_COMPONENT_PREDICATE_TYPE = createConstantBoundRegistry(Registries.DATA_COMPONENT_PREDICATE_TYPE, 16);
 
     // todo 修改
     public static final Registry<PlayerSelectorType<? extends Context>> PLAYER_SELECTOR_TYPE = createConstantBoundRegistry(Registries.PLAYER_SELECTOR_TYPE, 16);

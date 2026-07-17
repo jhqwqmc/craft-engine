@@ -20,6 +20,7 @@ public final class LoadingStages {
     public static final LoadingStage LOOT_TABLE = new LoadingStage("loot tables");
     public static final LoadingStage VANILLA_LOOT = new LoadingStage("vanilla loots");
     public static final LoadingStage EMOJI = new LoadingStage("emojis");
+    public static final LoadingStage ADVANCEMENT = new LoadingStage("advancements");
     public static final LoadingStage LANG = new LoadingStage("lang");
     public static final LoadingStage SKIP_OPTIMIZATION = new LoadingStage("skip optimization");
     public static final LoadingStage CONFIGURED_FEATURE = new LoadingStage("configured features");

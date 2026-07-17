@@ -26,24 +26,30 @@ public final class ModelGeneration implements Supplier<JsonObject> {
     @Nullable
     private final GuiLight guiLight;
     @Nullable
+    private final Boolean ambientOcclusion;
+    @Nullable
     private JsonObject cachedModel;
 
     public ModelGeneration(@NotNull Key parentModelPath,
                            @Nullable Map<String, String> texturesOverride,
                            @Nullable Map<DisplayPosition, DisplayMeta> displays,
-                           @Nullable GuiLight guiLight) {
+                           @Nullable GuiLight guiLight,
+                           @Nullable Boolean ambientOcclusion) {
         this.parentModelPath = parentModelPath;
         this.texturesOverride = texturesOverride;
         this.displays = displays;
         this.guiLight = guiLight;
+        this.ambientOcclusion = ambientOcclusion;
     }
 
     private static final String[] GUI_LIGHT = new String[]{"gui_light", "gui-light"};
+    private static final String[] AMBIENT_OCCLUSION = new String[]{"ambientocclusion", "ambient-occlusion", "ambient_occlusion"};
 
     public static ModelGeneration of(ConfigSection section) {
         return builder()
                 .parentModelPath(section.getNonNullIdentifier("parent"))
                 .guiLight(section.getEnum(GUI_LIGHT, GuiLight.class))
+                .ambientOcclusion(section.getValue(AMBIENT_OCCLUSION, v -> v.getAsBoolean()))
                 .displays(section.getValue("display", v -> {
                     Map<DisplayPosition, DisplayMeta> displays = new EnumMap<>(DisplayPosition.class);
                     ConfigSection displaySection = v.getAsSection();
@@ -95,6 +101,11 @@ public final class ModelGeneration implements Supplier<JsonObject> {
         return this.guiLight;
     }
 
+    @Nullable
+    public Boolean ambientOcclusion() {
+        return this.ambientOcclusion;
+    }
+
     @Override
     public JsonObject get() {
         if (this.cachedModel == null) {
@@ -131,6 +142,9 @@ public final class ModelGeneration implements Supplier<JsonObject> {
         if (this.guiLight != null) {
             model.addProperty("gui_light", this.guiLight.name().toLowerCase(Locale.ROOT));
         }
+        if (this.ambientOcclusion != null) {
+            model.addProperty("ambientocclusion", this.ambientOcclusion);
+        }
         return model;
     }
 
@@ -140,7 +154,8 @@ public final class ModelGeneration implements Supplier<JsonObject> {
         if (o == null || getClass() != o.getClass()) return false;
         ModelGeneration that = (ModelGeneration) o;
         return parentModelPath.equals(that.parentModelPath) && Objects.equals(texturesOverride, that.texturesOverride)
-                && Objects.equals(displays, that.displays) && Objects.equals(guiLight, that.guiLight);
+                && Objects.equals(displays, that.displays) && Objects.equals(guiLight, that.guiLight)
+                && Objects.equals(ambientOcclusion, that.ambientOcclusion);
     }
 
     @Override
@@ -148,6 +163,9 @@ public final class ModelGeneration implements Supplier<JsonObject> {
         int i = this.parentModelPath.hashCode();
         if (this.texturesOverride != null) {
             i += 31 * this.texturesOverride.hashCode();
+        }
+        if (this.ambientOcclusion != null) {
+            i += 31 * this.ambientOcclusion.hashCode();
         }
         return i;
     }
@@ -164,6 +182,8 @@ public final class ModelGeneration implements Supplier<JsonObject> {
         private Map<DisplayPosition, DisplayMeta> displays;
         @Nullable
         private GuiLight guiLight;
+        @Nullable
+        private Boolean ambientOcclusion;
 
         public Builder() {
         }
@@ -188,8 +208,13 @@ public final class ModelGeneration implements Supplier<JsonObject> {
             return this;
         }
 
+        public Builder ambientOcclusion(Boolean ambientOcclusion) {
+            this.ambientOcclusion = ambientOcclusion;
+            return this;
+        }
+
         public ModelGeneration build() {
-            return new ModelGeneration(this.parentModelPath, this.texturesOverride, this.displays, this.guiLight);
+            return new ModelGeneration(this.parentModelPath, this.texturesOverride, this.displays, this.guiLight, this.ambientOcclusion);
         }
     }
 }

@@ -458,13 +458,13 @@ public final class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item> ingredients = new ArrayList<>();
         net.momirealms.craftengine.core.item.recipe.Ingredient ingredient = recipe.ingredient();
         for (UniqueKey in : ingredient.items()) {
-            ingredients.add(Item.byId(in.key(), player));
+            ingredients.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(ingredient.count));
         }
 
         List<Item> containers = new ArrayList<>();
         net.momirealms.craftengine.core.item.recipe.Ingredient container = recipe.container();
         for (UniqueKey in : container.items()) {
-            containers.add(Item.byId(in.key(), player));
+            containers.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(container.count));
         }
 
         GuiLayout layout = new GuiLayout(
@@ -824,7 +824,7 @@ public final class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item> ingredients = new ArrayList<>();
         net.momirealms.craftengine.core.item.recipe.Ingredient ingredient = recipe.ingredient();
         for (UniqueKey in : ingredient.items()) {
-            ingredients.add(Item.byId(in.key(), player));
+            ingredients.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(ingredient.count()));
         }
         GuiLayout layout = new GuiLayout(
                 "         ",
@@ -957,7 +957,7 @@ public final class ItemBrowserManagerImpl implements ItemBrowserManager {
         List<Item> ingredients = new ArrayList<>();
         net.momirealms.craftengine.core.item.recipe.Ingredient ingredient = recipe.ingredient();
         for (UniqueKey in : ingredient.items()) {
-            ingredients.add(Item.byId(in.key(), player));
+            ingredients.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(ingredient.count));
         }
         GuiLayout layout = new GuiLayout(
                 "         ",
@@ -1202,7 +1202,7 @@ public final class ItemBrowserManagerImpl implements ItemBrowserManager {
                         } else {
                             List<Item> ingredients = new ArrayList<>();
                             for (UniqueKey in : ingredient.items()) {
-                                ingredients.add(Item.byId(in.key(), player).count(ingredient.count()));
+                                ingredients.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(ingredient.count()));
                             }
                             layout.addIngredient(currentChar, GuiElement.recipeIngredient(ingredients, (e, c) -> {
                                 c.cancel();
@@ -1246,7 +1246,7 @@ public final class ItemBrowserManagerImpl implements ItemBrowserManager {
                         List<Item> ingredientItems = new ArrayList<>();
                         net.momirealms.craftengine.core.item.recipe.Ingredient ingredient = ingredients.get(i);
                         for (UniqueKey in : ingredient.items()) {
-                            ingredientItems.add(Item.byId(in.key(), player).count(ingredient.count()));
+                            ingredientItems.add(ingredient.applyPredicateLooks(Item.byId(in.key(), player)).count(ingredient.count()));
                         }
                         layout.addIngredient(currentChar, GuiElement.recipeIngredient(ingredientItems, (e, c) -> {
                             c.cancel();

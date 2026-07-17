@@ -2,11 +2,11 @@ package net.momirealms.craftengine.core.item.recipe;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -18,9 +18,9 @@ public final class StackedContents<T> {
     }
 
     void take(T input, int count) {
-        int i = this.amounts.addTo(input, -count);
-        if (i < count) {
-            throw new IllegalStateException("Took " + count + " items, but only had " + i);
+        int previous = this.amounts.addTo(input, -count);
+        if (previous < count) {
+            throw new IllegalStateException("Took " + count + " items, but only had " + previous);
         }
     }
 
@@ -41,14 +41,9 @@ public final class StackedContents<T> {
         boolean acceptsItem(T entry);
     }
 
-    @FunctionalInterface
-    public interface Output<T> {
-        void accept(T item);
-    }
-
     List<T> getUniqueAvailableIngredientItems(List<? extends IngredientInfo<T>> ingredients) {
         List<T> list = new ArrayList<>();
-        for (Reference2IntMap.Entry<T> entry : amounts.reference2IntEntrySet()) {
+        for (var entry : amounts.reference2IntEntrySet()) {
             if (entry.getIntValue() > 0 && anyIngredientMatches(ingredients, entry.getKey())) {
                 list.add(entry.getKey());
             }
@@ -70,7 +65,12 @@ public final class StackedContents<T> {
         private final int ingredientCount;
         private final List<T> items;
         private final int itemCount;
-        private final BitSet data;
+        private final BitSet connections;
+        private final BitSet assigned;
+        private final boolean[] visitedIngredients;
+        private final boolean[] visitedItems;
+        private final boolean[] satisfied;
+
         private final IntList path = new IntArrayList();
 
         public Matcher(List<? extends IngredientInfo<T>> ingredients) {
@@ -78,16 +78,24 @@ public final class StackedContents<T> {
             this.ingredientCount = ingredients.size();
             this.items = getUniqueAvailableIngredientItems(ingredients);
             this.itemCount = this.items.size();
-            this.data = new BitSet(this.visitedIngredientCount() + this.visitedItemCount() + this.satisfiedCount() + this.connectionCount() + this.residualCount());
-            this.setInitialConnections();
+
+            int connectionCount = this.ingredientCount * this.itemCount;
+            this.connections = new BitSet(connectionCount);
+            this.assigned = new BitSet(connectionCount);
+
+            this.visitedIngredients = new boolean[this.ingredientCount];
+            this.visitedItems = new boolean[this.itemCount];
+            this.satisfied = new boolean[this.ingredientCount];
+
+            this.buildConnections();
         }
 
-        private void setInitialConnections() {
-            for (int i = 0; i < this.ingredientCount; i++) {
-                IngredientInfo<T> ingredientInfo = this.ingredients.get(i);
-                for (int j = 0; j < this.itemCount; j++) {
-                    if (ingredientInfo.acceptsItem(this.items.get(j))) {
-                        this.setConnection(j, i);
+        private void buildConnections() {
+            for (int ingredientIndex = 0; ingredientIndex < this.ingredientCount; ingredientIndex++) {
+                IngredientInfo<T> ingredientInfo = this.ingredients.get(ingredientIndex);
+                for (int itemIndex = 0; itemIndex < this.itemCount; itemIndex++) {
+                    if (ingredientInfo.acceptsItem(this.items.get(itemIndex))) {
+                        this.setConnection(itemIndex, ingredientIndex);
                     }
                 }
             }
@@ -157,7 +165,7 @@ public final class StackedContents<T> {
                 if (assignmentPath == null) {
                     boolean allIngredientsTried = assignedIngredientsCount == this.ingredientCount;
                     this.clearAllVisited();
-                    this.clearSatisfied();
+                    Arrays.fill(this.satisfied, false);
 
                     for (int ingredientIndex = 0; ingredientIndex < this.ingredientCount; ingredientIndex++) {
                         for (int itemIndex = 0; itemIndex < this.itemCount; itemIndex++) {
@@ -169,7 +177,7 @@ public final class StackedContents<T> {
                         }
                     }
 
-                    assert this.data.get(this.residualOffset(), this.residualOffset() + this.residualCount()).isEmpty();
+                    assert this.assigned.nextSetBit(0) == -1;
                     return allIngredientsTried;
                 }
 
@@ -198,133 +206,63 @@ public final class StackedContents<T> {
             return (index & 1) == 0;
         }
 
-        private int visitedIngredientOffset() {
-            return 0;
-        }
-
-        private int visitedIngredientCount() {
-            return this.ingredientCount;
-        }
-
-        private int visitedItemOffset() {
-            return this.visitedIngredientOffset() + this.visitedIngredientCount();
-        }
-
-        private int visitedItemCount() {
-            return this.itemCount;
-        }
-
-        private int satisfiedOffset() {
-            return this.visitedItemOffset() + this.visitedItemCount();
-        }
-
-        private int satisfiedCount() {
-            return this.ingredientCount;
-        }
-
-        private int connectionOffset() {
-            return this.satisfiedOffset() + this.satisfiedCount();
-        }
-
-        private int connectionCount() {
-            return this.ingredientCount * this.itemCount;
-        }
-
-        private int residualOffset() {
-            return this.connectionOffset() + this.connectionCount();
-        }
-
-        private int residualCount() {
-            return this.ingredientCount * this.itemCount;
-        }
-
-        private boolean isSatisfied(int itemId) {
-            return this.data.get(this.getSatisfiedIndex(itemId));
-        }
-
-        private void setSatisfied(int itemId) {
-            this.data.set(this.getSatisfiedIndex(itemId));
-        }
-
-        private int getSatisfiedIndex(int itemId) {
-            assert itemId >= 0 && itemId < this.ingredientCount;
-
-            return this.satisfiedOffset() + itemId;
-        }
-
-        private void clearSatisfied() {
-            this.clearRange(this.satisfiedOffset(), this.satisfiedCount());
-        }
-
         private void setConnection(int itemIndex, int ingredientIndex) {
-            this.data.set(this.getConnectionIndex(itemIndex, ingredientIndex));
+            this.connections.set(this.getConnectionIndex(itemIndex, ingredientIndex));
         }
 
         private boolean hasConnection(int itemIndex, int ingredientIndex) {
-            return this.data.get(this.getConnectionIndex(itemIndex, ingredientIndex));
+            return this.connections.get(this.getConnectionIndex(itemIndex, ingredientIndex));
         }
 
         private int getConnectionIndex(int itemIndex, int ingredientIndex) {
             assert itemIndex >= 0 && itemIndex < this.itemCount;
             assert ingredientIndex >= 0 && ingredientIndex < this.ingredientCount;
-            return this.connectionOffset() + itemIndex * this.ingredientCount + ingredientIndex;
+            return itemIndex * this.ingredientCount + ingredientIndex;
         }
 
         private boolean isAssigned(int itemIndex, int ingredientIndex) {
-            return this.data.get(this.getResidualIndex(itemIndex, ingredientIndex));
+            return this.assigned.get(this.getConnectionIndex(itemIndex, ingredientIndex));
         }
 
         private void assign(int itemIndex, int ingredientIndex) {
-            int i = this.getResidualIndex(itemIndex, ingredientIndex);
-            assert !this.data.get(i);
-            this.data.set(i);
+            int i = this.getConnectionIndex(itemIndex, ingredientIndex);
+            assert !this.assigned.get(i);
+            this.assigned.set(i);
         }
 
         private void unassign(int itemIndex, int ingredientIndex) {
-            int i = this.getResidualIndex(itemIndex, ingredientIndex);
-            assert this.data.get(i);
-            this.data.clear(i);
+            int i = this.getConnectionIndex(itemIndex, ingredientIndex);
+            assert this.assigned.get(i);
+            this.assigned.clear(i);
         }
 
-        private int getResidualIndex(int itemIndex, int ingredientIndex) {
-            assert itemIndex >= 0 && itemIndex < this.itemCount;
-            assert ingredientIndex >= 0 && ingredientIndex < this.ingredientCount;
-            return this.residualOffset() + itemIndex * this.ingredientCount + ingredientIndex;
+        private boolean isSatisfied(int ingredientIndex) {
+            return this.satisfied[ingredientIndex];
+        }
+
+        private void setSatisfied(int ingredientIndex) {
+            this.satisfied[ingredientIndex] = true;
         }
 
         private void visitIngredient(int index) {
-            this.data.set(this.getVisitedIngredientIndex(index));
+            this.visitedIngredients[index] = true;
         }
 
         private boolean hasVisitedIngredient(int index) {
-            return this.data.get(this.getVisitedIngredientIndex(index));
-        }
-
-        private int getVisitedIngredientIndex(int index) {
-            assert index >= 0 && index < this.ingredientCount;
-            return this.visitedIngredientOffset() + index;
+            return this.visitedIngredients[index];
         }
 
         private void visitItem(int index) {
-            this.data.set(this.getVisitedItemIndex(index));
+            this.visitedItems[index] = true;
         }
 
         private boolean hasVisitedItem(int index) {
-            return this.data.get(this.getVisitedItemIndex(index));
-        }
-
-        private int getVisitedItemIndex(int index) {
-            assert index >= 0 && index < this.itemCount;
-            return this.visitedItemOffset() + index;
+            return this.visitedItems[index];
         }
 
         private void clearAllVisited() {
-            this.clearRange(this.visitedIngredientOffset(), this.visitedIngredientCount());
-            this.clearRange(this.visitedItemOffset(), this.visitedItemCount());
-        }
-
-        private void clearRange(int start, int offset) {
-            this.data.clear(start, start + offset);
+            Arrays.fill(this.visitedIngredients, false);
+            Arrays.fill(this.visitedItems, false);
         }
     }
 }

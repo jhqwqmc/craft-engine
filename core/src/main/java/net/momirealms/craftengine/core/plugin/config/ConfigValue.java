@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin.config;
 
 import com.ezylang.evalex.Expression;
+import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.block.AbstractBlockManager;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
@@ -39,7 +40,7 @@ public final class ConfigValue {
         registerSerializer(List.class, ConfigValue::getAsList);
         registerSerializer(Map.class, ConfigValue::getAsMap);
         registerSerializer(UUID.class, ConfigValue::getAsUUID);
-        registerSerializer(BlockStateWrapper.class, ConfigValue::getAsBlockState);
+        registerSerializer(BlockStateWrapper.class, ConfigValue::getAsVanillaBlockState);
         registerSerializer(Key.class, ConfigValue::getAsKey);
         registerSerializer(NumberProvider.class, ConfigValue::getAsNumber);
         registerSerializer(Tag.class, ConfigValue::getAsSNBT);
@@ -677,13 +678,31 @@ public final class ConfigValue {
         }
     }
 
+    public Tag getAsTag() {
+        if (this.is(String.class)) {
+            String stringValue = this.getAsString();
+            if (stringValue.startsWith("(json) ")) {
+                JsonElement element = GsonHelper.get().fromJson(stringValue.substring("(json) ".length()), JsonElement.class);
+                return CraftEngine.instance().platform().jsonToSparrowNBT(element);
+            } else if (stringValue.startsWith("(snbt) ")) {
+                String snbt = stringValue.substring("(snbt) ".length());
+                try {
+                    return TagParser.parseTagFully(snbt);
+                } catch (Exception e) {
+                    throw new KnownResourceException(ConfigConstants.PARSE_SNBT_FAILED, this.path(), snbt, e.getMessage());
+                }
+            }
+        }
+        return CraftEngine.instance().platform().javaToSparrowNBT(this.value());
+    }
+
     // 五种合理情况
     // minecraft:note_block:10
     // note_block:10
     // minecraft:note_block[xxx=xxx]
     // note_block[xxx=xxx]
     // minecraft:barrier
-    public BlockStateWrapper getAsBlockState() {
+    public BlockStateWrapper getAsVanillaBlockState() {
         String stringFormat = getAsString();
         String[] split = stringFormat.split(":");
         if (split.length >= 4) {

@@ -41,6 +41,14 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_SEND_RESOURCE_PACK_SUCCESS_MULTIPLE = Component.translatable().key("command.send_resource_pack.success.multiple");
     TranslatableComponent.Builder COMMAND_TOTEM_SUCCESS_SINGLE = Component.translatable().key("command.totem_animation.success.single");
     TranslatableComponent.Builder COMMAND_TOTEM_SUCCESS_MULTIPLE = Component.translatable().key("command.totem_animation.success.multiple");
+    TranslatableComponent.Builder COMMAND_ENCHANT_SUCCESS_SINGLE = Component.translatable().key("command.enchant.success.single");
+    TranslatableComponent.Builder COMMAND_ENCHANT_SUCCESS_MULTIPLE = Component.translatable().key("command.enchant.success.multiple");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_NOT_EXIST = Component.translatable().key("command.enchant.failure.not_exist");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_LEVEL = Component.translatable().key("command.enchant.failure.level");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_INCOMPATIBLE = Component.translatable().key("command.enchant.failure.incompatible");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_ITEMLESS = Component.translatable().key("command.enchant.failure.itemless");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_ENTITY = Component.translatable().key("command.enchant.failure.entity");
+    TranslatableComponent.Builder COMMAND_ENCHANT_FAILURE_NO_TARGET = Component.translatable().key("command.enchant.failure.no_target");
     TranslatableComponent.Builder COMMAND_TOAST_FAILURE_ITEM_NOT_EXIST = Component.translatable().key("command.toast.failure.item_not_exist");
     TranslatableComponent.Builder COMMAND_TOAST_SUCCESS_SINGLE = Component.translatable().key("command.toast.success.single");
     TranslatableComponent.Builder COMMAND_TOAST_SUCCESS_MULTIPLE = Component.translatable().key("command.toast.success.multiple");

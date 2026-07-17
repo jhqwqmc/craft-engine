@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public final class CustomShapelessRecipe extends CustomCraftingTableRecipe {
+public class CustomShapelessRecipe extends CustomCraftingTableRecipe {
     public static final Serializer SERIALIZER = new Serializer();
     private final List<Ingredient> ingredients;
     private final PlacementInfo placementInfo;

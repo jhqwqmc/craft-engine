@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.pack.model.definition.rangedisptach.UseDu
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.Map2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public final class BowItemModelReader implements SimplifiedItemModelReader {
                 new RangeDispatchItemModel(
                         new UseDurationRangeDispatchProperty(false),
                         0.05f,
-                        Map.of(
+                        Map2.of(
                                 0.65f, new BaseItemModel(
                                         autoModel ? Key.of(id.namespace(), "item/" + id.value() + "_pulling_1") : models.get(1),
                                         List.of(),
@@ -80,7 +81,7 @@ public final class BowItemModelReader implements SimplifiedItemModelReader {
                 new RangeDispatchItemModel(
                         new UseDurationRangeDispatchProperty(false),
                         0.05f,
-                        Map.of(
+                        Map2.of(
                                 0.65f, new BaseItemModel(models.get(2)),
                                 0.9f, new BaseItemModel(models.get(3))
                         ),

@@ -65,6 +65,7 @@ public final class BukkitCommandManager extends AbstractCommandManager<CommandSe
                 new DebugIsChunkPersistentLoadedCommand(this, plugin),
                 new DebugOptimizeFurnitureStructureCommand(this, plugin),
                 new TotemAnimationCommand(this, plugin),
+                new EnchantCommand(this, plugin),
                 new ToastCommand(this, plugin),
                 new EnableResourceCommand(this, plugin),
                 new DisableResourceCommand(this, plugin),

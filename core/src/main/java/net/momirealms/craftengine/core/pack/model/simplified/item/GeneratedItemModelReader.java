@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.pack.model.definition.tint.Tint;
 import net.momirealms.craftengine.core.pack.model.generation.ModelGeneration;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
 import net.momirealms.craftengine.core.util.Key;
+import net.momirealms.craftengine.core.util.Map2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ public final class GeneratedItemModelReader implements SimplifiedItemModelReader
         Map<String, String> texturesProperty;
         switch (textures.size()) {
             case 1 -> texturesProperty = Map.of("layer0", textures.getFirst().asMinimalString());
-            case 2 -> texturesProperty = Map.of(
+            case 2 -> texturesProperty = Map2.of(
                     "layer0", textures.get(0).asMinimalString(),
                     "layer1", textures.get(1).asMinimalString()
             );

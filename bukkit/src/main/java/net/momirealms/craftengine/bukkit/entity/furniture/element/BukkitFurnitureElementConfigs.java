@@ -7,6 +7,7 @@ import net.momirealms.craftengine.core.util.Key;
 public final class BukkitFurnitureElementConfigs extends FurnitureElementConfigs {
     public static final FurnitureElementConfigType<ItemDisplayFurnitureElement> ITEM_DISPLAY = register(Key.ce("item_display"), ItemDisplayFurnitureElementConfig.FACTORY);
     public static final FurnitureElementConfigType<TextDisplayFurnitureElement> TEXT_DISPLAY = register(Key.ce("text_display"), TextDisplayFurnitureElementConfig.FACTORY);
+    public static final FurnitureElementConfigType<BlockDisplayFurnitureElement> BLOCK_DISPLAY = register(Key.ce("block_display"), BlockDisplayFurnitureElementConfig.FACTORY);
     public static final FurnitureElementConfigType<ItemFurnitureElement> ITEM = register(Key.ce("item"), ItemFurnitureElementConfig.FACTORY);
     public static final FurnitureElementConfigType<ArmorStandFurnitureElement> ARMOR_STAND = register(Key.ce("armor_stand"), ArmorStandFurnitureElementConfig.FACTORY);
 

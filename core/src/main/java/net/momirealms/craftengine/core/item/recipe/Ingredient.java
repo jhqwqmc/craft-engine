@@ -1,53 +1,56 @@
 package net.momirealms.craftengine.core.item.recipe;
 
+import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.item.recipe.predicate.DataComponentPredicate;
 import net.momirealms.craftengine.core.util.UniqueKey;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
 
 public final class Ingredient implements Predicate<UniqueIdItem>, StackedContents.IngredientInfo<UniqueIdItem> {
-    private final List<IngredientElement> elements;
+    public final List<IngredientElement> elements;
     // 自定义物品与原版物品混合的列表
-    private final List<UniqueKey> items;
+    public final List<UniqueKey> items;
     // 自定义物品原版材质与原版物品混合的列表
-    private final List<UniqueKey> vanillaItems;
+    public final List<UniqueKey> vanillaItems;
     // ingredient里是否含有自定义物品
-    private final boolean hasCustomItem;
-    private final int count;
+    public final boolean hasCustomItem;
+    public final int count;
+    @Nullable
+    public final DataComponentPredicate predicate;
 
-    private Ingredient(List<IngredientElement> elements, List<UniqueKey> items, List<UniqueKey> vanillaItems, boolean hasCustomItem, int count) {
+    private Ingredient(List<IngredientElement> elements,
+                       List<UniqueKey> items,
+                       List<UniqueKey> vanillaItems,
+                       boolean hasCustomItem,
+                       int count,
+                       @Nullable DataComponentPredicate predicate) {
         this.elements = List.copyOf(elements);
         this.items = List.copyOf(items);
         this.vanillaItems = List.copyOf(vanillaItems);
         this.hasCustomItem = hasCustomItem;
         this.count = count;
+        this.predicate = predicate;
     }
 
     public int count() {
-        return count;
+        return this.count;
     }
 
-    public static boolean isInstance(Optional<Ingredient> optionalIngredient, UniqueIdItem stack) {
-        return optionalIngredient.map((ingredient) -> ingredient.test(stack))
-                .orElseGet(stack::isEmpty);
+    @Nullable
+    public DataComponentPredicate predicate() {
+        return this.predicate;
     }
 
-    public static Ingredient of(List<IngredientElement> elements, Set<UniqueKey> items, Set<UniqueKey> minecraftItems, boolean hasCustomItem, int count) {
-        return new Ingredient(elements, new ArrayList<>(items), new ArrayList<>(minecraftItems), hasCustomItem, count);
-    }
-
-    @Override
-    public boolean test(UniqueIdItem uniqueIdItem) {
-        for (UniqueKey item : this.items()) {
-            if (uniqueIdItem.is(item)) {
-                if (this.count == 1) {
-                    return true;
-                } else {
-                    return uniqueIdItem.item().count() >= this.count;
-                }
-            }
+    public Item applyPredicateLooks(Item item) {
+        if (this.predicate != null) {
+            this.predicate.apply(item);
         }
-        return false;
+        return item;
     }
 
     public List<IngredientElement> elements() {
@@ -66,6 +69,36 @@ public final class Ingredient implements Predicate<UniqueIdItem>, StackedContent
         return vanillaItems;
     }
 
+    public static boolean isInstance(Optional<Ingredient> optionalIngredient, UniqueIdItem stack) {
+        return optionalIngredient.map((ingredient) -> ingredient.test(stack))
+                .orElseGet(stack::isEmpty);
+    }
+
+    public static Ingredient of(List<IngredientElement> elements, Set<UniqueKey> items, Set<UniqueKey> minecraftItems, boolean hasCustomItem, int count, DataComponentPredicate predicate) {
+        return new Ingredient(elements, List.copyOf(items), List.copyOf(minecraftItems), hasCustomItem, count, predicate);
+    }
+
+    public static Ingredient of(List<IngredientElement> elements, Set<UniqueKey> items, Set<UniqueKey> minecraftItems, boolean hasCustomItem) {
+        return new Ingredient(elements, List.copyOf(items), List.copyOf(minecraftItems), hasCustomItem, 1, null);
+    }
+
+    @Override
+    public boolean test(UniqueIdItem uniqueIdItem) {
+        for (UniqueKey item : this.items()) {
+            if (uniqueIdItem.is(item)) {
+                if (this.predicate != null && !this.predicate.test(uniqueIdItem.item())) {
+                    return false;
+                }
+                if (this.count == 1) {
+                    return true;
+                } else {
+                    return uniqueIdItem.item().count() >= this.count;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ");
@@ -82,6 +115,9 @@ public final class Ingredient implements Predicate<UniqueIdItem>, StackedContent
     @Override
     public boolean acceptsItem(UniqueIdItem entry) {
         if (!this.items.contains(entry.id())) {
+            return false;
+        }
+        if (this.predicate != null && !this.predicate.test(entry.item())) {
             return false;
         }
         return this.count <= 1 || entry.item().count() >= this.count;

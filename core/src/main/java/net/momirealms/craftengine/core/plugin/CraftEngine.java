@@ -392,6 +392,8 @@ public abstract class CraftEngine implements Plugin {
                 this.paintingManager.runDelayedSyncTasks();
                 // 同步注册配方
                 this.recipeManager.runDelayedSyncTasks();
+                // 同步注册进度
+                this.advancementManager.runDelayedSyncTasks();
                 this.compatibilityManager.runDelayedSyncTasks();
             } else {
                 try {
@@ -564,6 +566,8 @@ public abstract class CraftEngine implements Plugin {
         this.packManager.registerConfigSectionParsers(this.worldManager.parsers());
         // register painting parser
         this.packManager.registerConfigSectionParser(this.paintingManager.parser());
+        // register advancement parser
+        this.packManager.registerConfigSectionParser(this.advancementManager.parser());
     }
 
     public void applyDependencies() {

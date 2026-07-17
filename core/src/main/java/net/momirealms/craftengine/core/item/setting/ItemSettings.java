@@ -57,12 +57,13 @@ public final class ItemSettings {
     public List<ItemProcessor> processors() {
         ArrayList<ItemProcessor> processors = new ArrayList<>();
         if (this.equipment != null) {
+            boolean clientBoundData = this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel());
             EquipmentData data = this.equipment.equipmentData();
             if (data != null) {
                 data.setAssetId(null);
                 processors.add(new EquippableProcessor(data));
             }
-            if (!this.equipment.clientBoundModel().asBoolean(Config.globalClientboundModel())) {
+            if (!clientBoundData) {
                 processors.addAll(this.equipment.equipment().modifiers());
             }
         }

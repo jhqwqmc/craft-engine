@@ -63,6 +63,14 @@ command.search_usage.no_item: <red>Please hold an item before running this comma
 command.totem_animation.failure.not_totem: <red>Item '<arg:0>' is not minecraft:totem_of_undying</red>
 command.totem_animation.success.single: <white>Played totem animation <arg:0> to <arg:1></white>
 command.totem_animation.success.multiple: <white>Played totem animation <arg:0> to <arg:1> players</white>
+command.enchant.success.single: <white>Applied <arg:0> to <arg:1></white>
+command.enchant.success.multiple: <white>Applied <arg:0> to <arg:1> entities</white>
+command.enchant.failure.not_exist: <red>Unknown enchantment '<arg:0>'</red>
+command.enchant.failure.level: <red>Level <arg:0> exceeds the maximum level of <arg:1></red>
+command.enchant.failure.incompatible: <red>The enchantment cannot be applied to <arg:0></red>
+command.enchant.failure.itemless: <red><arg:0> is not holding an item in the selected slot</red>
+command.enchant.failure.entity: <red><arg:0> is not a living entity</red>
+command.enchant.failure.no_target: <red>No enchantments could be applied</red>
 command.toast.failure.item_not_exist: <red>Item '<arg:0>' does not exist</red>
 command.toast.success.single: <white>Sent toast <arg:0> to <arg:1></white>
 command.toast.success.multiple: <white>Sent toast <arg:0> to <arg:1> players</white>
@@ -281,6 +289,8 @@ resource.item.custom_model_data_conflict: CustomModelData '<arg:0>' has been occ
 resource.item.missing_model_id: Missing 'custom_model_data' or 'item_model' for custom model to function
 resource.item.occupied_vanilla_item_model: Item model '<arg:0>' has been occupied by a vanilla item
 resource.item.invalid_material: Invalid material type '<arg:0>'
+resource.item.unknown_data_component_type: Unknown data component type '<arg:0>'
+resource.item.data_component_predicate.unknown_type: Unknown data component predicate type '<arg:0>'
 resource.model.generation.conflict: Failed to generate model for '<arg:0>' as two or more configurations attempt to generate different json models with the same path
 resource.recipe.transform_processor.unknown_type: Unknown smithing transform post processor type '<arg:0>'
 resource.recipe.ingredient.invalid_tag: Item tag '<arg:0>' doesn't contain any item
@@ -290,6 +300,8 @@ resource.recipe.shaped.invalid_pattern: Invalid pattern '<arg:0>'
 resource.recipe.shaped.invalid_symbol: Invalid symbol '<arg:0>'
 resource.recipe.shaped_transform.ambigious_source: "Found 2 or more materials marked as source in shaped transform recipe: '<arg:0>', '<arg:1>'"
 resource.recipe.shaped_transform.source_not_found: "Unable to find a material marked as source in recipe"
+resource.recipe.shapeless_transform.ambigious_source: "Found 2 or more materials marked as source in shapeless transform recipe: '<arg:0>'"
+resource.recipe.shapeless_transform.source_not_found: "Unable to find a material marked as source in recipe"
 resource.recipe.post_processor.unknown_type: Unknown recipe post processor type '<arg:0>'
 resource.recipe.unknown_type: Unknown recipe type '<arg:0>'
 resource.vanilla_loot.block.invalid_target: Invalid block target '<arg:0>'

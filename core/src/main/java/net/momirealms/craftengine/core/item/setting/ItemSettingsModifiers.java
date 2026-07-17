@@ -125,6 +125,7 @@ public final class ItemSettingsModifiers {
                 // 基于盔甲纹饰
                 ConfigSection copiedSection = section.copy();
                 copiedSection.put("asset_id", Config.sacrificedVanillaArmorType());
+                copiedSection.put("asset-id", Config.sacrificedVanillaArmorType());
                 EquipmentData data = EquipmentData.fromConfig(copiedSection);
                 return settings -> settings.equipment(new ItemEquipment(clientBoundModel, data, optionalEquipment.get()));
             }

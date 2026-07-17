@@ -7,7 +7,6 @@ import net.momirealms.sparrow.reflection.proxy.annotation.ConstructorInvoker;
 import net.momirealms.sparrow.reflection.proxy.annotation.FieldGetter;
 import net.momirealms.sparrow.reflection.proxy.annotation.ReflectionProxy;
 import net.momirealms.sparrow.reflection.proxy.annotation.Type;
-import org.checkerframework.checker.units.qual.C;
 
 @ReflectionProxy(name = "net.minecraft.network.protocol.game.ClientboundSetPlayerInventoryPacket", optional = true)
 public interface ClientboundSetPlayerInventoryPacketProxy {

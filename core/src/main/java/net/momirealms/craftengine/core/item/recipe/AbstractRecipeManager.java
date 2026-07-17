@@ -260,15 +260,13 @@ public abstract class AbstractRecipeManager implements RecipeManager {
                                         List.of(IngredientElement.item(itemId)),
                                         Set.of(UniqueKey.create(itemId)),
                                         Set.of(UniqueKey.create(itemDefinition.material())),
-                                        !itemDefinition.isVanillaItem(),
-                                        1
+                                        !itemDefinition.isVanillaItem()
                                 ),
                                 Ingredient.of(
                                         List.of(IngredientElement.tag(DYES)),
                                         itemIds,
                                         minecraftItemIds,
-                                        hasCustomItem,
-                                        1
+                                        hasCustomItem
                                 ),
                                 null, null, false, false
                         ), Config.unlockOnIngredientObtained(), false);

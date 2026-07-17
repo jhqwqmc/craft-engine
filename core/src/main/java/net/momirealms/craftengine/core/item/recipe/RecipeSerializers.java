@@ -13,6 +13,7 @@ public final class RecipeSerializers {
     public static final Key SHAPED = Key.of("minecraft:shaped");
     public static final Key SHAPED_TRANSFORM = Key.of("minecraft:shaped_transform");
     public static final Key SHAPELESS = Key.of("minecraft:shapeless");
+    public static final Key SHAPELESS_TRANSFORM = Key.of("minecraft:shapeless_transform");
     public static final Key DYE = Key.of("minecraft:dye");
     public static final Key SMELTING = Key.of("minecraft:smelting");
     public static final Key BLASTING = Key.of("minecraft:blasting");
@@ -28,6 +29,7 @@ public final class RecipeSerializers {
         register(SHAPED_TRANSFORM, CustomShapedTransformRecipe.SERIALIZER);
         register(Key.of("crafting_shaped"), CustomShapedRecipe.SERIALIZER);
         register(SHAPELESS, CustomShapelessRecipe.SERIALIZER);
+        register(SHAPELESS_TRANSFORM, CustomShapelessTransformRecipe.SERIALIZER);
         register(Key.of("crafting_shapeless"), CustomShapelessRecipe.SERIALIZER);
         if (VersionHelper.isOrAbove26_1) {
             register(DYE, CustomDyeRecipe.SERIALIZER);

@@ -2,7 +2,6 @@ package net.momirealms.craftengine.bukkit.plugin.network.listener.game;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
