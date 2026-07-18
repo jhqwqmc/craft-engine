@@ -689,6 +689,11 @@ public abstract class CraftEngine implements Plugin {
     }
 
     @Override
+    public AttributeManager attributeManager() {
+        return this.attributeManager;
+    }
+
+    @Override
     public TranslationManager translationManager() {
         return this.translationManager;
     }

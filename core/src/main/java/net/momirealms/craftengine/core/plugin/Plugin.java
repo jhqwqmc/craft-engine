@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.plugin;
 
 import net.momirealms.craftengine.core.advancement.AdvancementManager;
+import net.momirealms.craftengine.core.attribute.AttributeManager;
 import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.entity.culling.EntityCullingManager;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureManager;
@@ -77,6 +78,8 @@ public interface Plugin {
     AdvancementManager advancementManager();
 
     Config config();
+
+    AttributeManager attributeManager();
 
     TranslationManager translationManager();
 

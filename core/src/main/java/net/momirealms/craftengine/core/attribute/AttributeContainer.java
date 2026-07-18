@@ -2,6 +2,8 @@ package net.momirealms.craftengine.core.attribute;
 
 import com.google.common.collect.ImmutableMap;
 import net.momirealms.craftengine.core.entity.Entity;
+import net.momirealms.craftengine.core.entity.player.Player;
+import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.util.Key;
 
 import java.util.HashMap;
@@ -20,7 +22,13 @@ public final class AttributeContainer implements AttributeGetter {
     }
 
     public AttributeInstance getOrCreateInstance(Attribute attribute) {
-        return this.instances.computeIfAbsent(attribute.id(), k -> new AttributeInstance(attribute));
+        return this.instances.computeIfAbsent(attribute.id(), k -> {
+            if (this.entity instanceof Player player) {
+                return new AttributeInstance(attribute, PlayerOptionalContext.of(player));
+            } else {
+                return new AttributeInstance(attribute, PlayerOptionalContext.of(null));
+            }
+        });
     }
 
     @Override
