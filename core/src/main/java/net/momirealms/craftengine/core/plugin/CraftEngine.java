@@ -2,6 +2,7 @@ package net.momirealms.craftengine.core.plugin;
 
 import com.google.gson.JsonObject;
 import net.momirealms.craftengine.core.advancement.AdvancementManager;
+import net.momirealms.craftengine.core.attribute.AttributeManager;
 import net.momirealms.craftengine.core.block.AbstractBlockManager;
 import net.momirealms.craftengine.core.block.BlockManager;
 import net.momirealms.craftengine.core.block.setting.BlockSettingsModifiers;
@@ -105,6 +106,7 @@ public abstract class CraftEngine implements Plugin {
     protected TeamManager teamManager;
     protected PaintingManager paintingManager;
     protected ProxyMessageManager proxyMessageManager;
+    protected AttributeManager attributeManager;
 
     private final PluginTaskRegistry preEnableTaskRegistry = new PluginTaskRegistry();
     private final PluginTaskRegistry postEnableTaskRegistry = new PluginTaskRegistry();
@@ -568,6 +570,8 @@ public abstract class CraftEngine implements Plugin {
         this.packManager.registerConfigSectionParser(this.paintingManager.parser());
         // register advancement parser
         this.packManager.registerConfigSectionParser(this.advancementManager.parser());
+        // register attribute parser
+        this.packManager.registerConfigSectionParsers(this.attributeManager.parsers());
     }
 
     public void applyDependencies() {

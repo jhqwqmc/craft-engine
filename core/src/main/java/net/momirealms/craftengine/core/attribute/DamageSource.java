@@ -1,6 +1,5 @@
 package net.momirealms.craftengine.core.attribute;
 
-import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
@@ -11,16 +10,11 @@ public interface DamageSource {
 
     boolean isCritical();
 
-    default boolean isDirect() {
-        return causingEntity() == directEntity();
-    }
+    boolean isDirect();
 
     @Nullable
     Entity causingEntity();
 
     @Nullable
     Entity directEntity();
-
-    @Nullable
-    BlockStateWrapper blockSnapshot();
 }

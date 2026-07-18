@@ -2,7 +2,12 @@ package net.momirealms.craftengine.bukkit.util;
 
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
+import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
+import net.momirealms.craftengine.bukkit.entity.BukkitItemEntity;
+import net.momirealms.craftengine.bukkit.entity.BukkitLivingEntity;
+import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
 import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
@@ -19,11 +24,13 @@ import net.momirealms.craftengine.proxy.minecraft.network.syncher.SynchedEntityD
 import net.momirealms.craftengine.proxy.minecraft.server.level.ChunkMapProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerChunkCacheProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerLevelProxy;
+import net.momirealms.craftengine.proxy.minecraft.server.level.ServerPlayerProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.network.ServerPlayerConnectionProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.LivingEntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.PoseProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.PositionMoveRotationProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.item.ItemEntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.player.PlayerProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.vehicle.DismountHelperProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.level.BlockGetterProxy;
@@ -37,6 +44,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -44,6 +52,12 @@ import java.util.function.Function;
 
 public final class EntityUtils {
     public static final AtomicInteger ENTITY_COUNTER = VersionHelper.isOrAbove26_2 ? ServerLevelProxy.INSTANCE.getEntityCounter() : EntityProxy.INSTANCE.getEntityCounter();
+    public static final Map<Class<?>, Function<Object, net.momirealms.craftengine.core.entity.Entity>> ENTITY_ADAPTORS = MiscUtils.init(new Object2ObjectOpenHashMap<>(), m -> {
+        m.put(ServerPlayerProxy.CLASS, e -> BukkitNetworkManager.instance().getOnlineUser(EntityProxy.INSTANCE.getUUID(e)));
+        m.put(PlayerProxy.CLASS, e -> BukkitNetworkManager.instance().getOnlineUser(EntityProxy.INSTANCE.getUUID(e)));
+        m.put(LivingEntityProxy.CLASS, BukkitLivingEntity::new);
+        m.put(ItemEntityProxy.CLASS, BukkitItemEntity::new);
+    });
 
     private EntityUtils() {}
 
@@ -219,5 +233,17 @@ public final class EntityUtils {
             }
         }
         return players.build();
+    }
+
+    public static BukkitEntity adaptNMS(Object handle) {
+        Class<?> clazz = handle.getClass();
+        while (clazz != null) {
+            Function<Object, net.momirealms.craftengine.core.entity.Entity> adaptor = ENTITY_ADAPTORS.get(clazz);
+            if (adaptor != null) {
+                return (BukkitEntity) adaptor.apply(handle);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return new BukkitEntity(handle);
     }
 }

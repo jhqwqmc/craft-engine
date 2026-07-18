@@ -22,7 +22,7 @@ public interface LivingEntity extends Entity {
 
     double luck();
 
-    void damage(double amount, Key damageType, @Nullable Object causeEntity);
+    void damage(double amount, Key damageType, @Nullable Entity causeEntity);
 
     void addPotionEffect(Key potionEffectType, int duration, int amplifier, boolean ambient, boolean particles, boolean showIcon);
 

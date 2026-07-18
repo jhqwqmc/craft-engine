@@ -26,4 +26,7 @@ public final class LoadingStages {
     public static final LoadingStage CONFIGURED_FEATURE = new LoadingStage("configured features");
     public static final LoadingStage PLACED_FEATURE = new LoadingStage("placed features");
     public static final LoadingStage PAINTING = new LoadingStage("painting");
+    public static final LoadingStage ATTRIBUTE = new LoadingStage("attributes");
+    public static final LoadingStage ATTRIBUTE_RULES = new LoadingStage("attribute rules");
+    public static final LoadingStage ATTRIBUTE_OPERATION = new LoadingStage("attribute operations");
 }

@@ -1,8 +1,7 @@
 package net.momirealms.craftengine.core.attribute;
 
+import com.ezylang.evalex.Expression;
 import net.momirealms.craftengine.core.util.Key;
-
-import java.beans.Expression;
 
 public final class VanillaAttributeSync {
     private final Key target;
@@ -13,7 +12,7 @@ public final class VanillaAttributeSync {
         this.expression = expression;
     }
 
-    public Key vanillaAttributeId() {
+    public Key target() {
         return this.target;
     }
 

@@ -1,20 +1,42 @@
 package net.momirealms.craftengine.core.attribute;
 
+import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.Nullable;
 
-public interface Attribute {
+public final class Attribute {
+    public final Key id;
+    public final double defaultValue;
+    public final ValueConstraint constraint;
+    @Nullable
+    public final VanillaAttributeSync sync;
 
-    Key id();
-
-    double defaultValue();
-
-    default double limit(double value) {
-        return this.constraint().limit(value);
+    public Attribute(Key id, double defaultValue, ValueConstraint constraint, @Nullable VanillaAttributeSync sync) {
+        this.id = id;
+        this.defaultValue = defaultValue;
+        this.constraint = constraint;
+        this.sync = sync;
     }
 
-    ValueConstraint constraint();
+    public Key id() {
+        return this.id;
+    }
+
+    public double limit(double value) {
+        return this.constraint.limit(value);
+    }
+
+    public double defaultValue(Entity entity) {
+        // TODO per entity default value
+        return this.defaultValue;
+    }
+
+    public ValueConstraint constraint() {
+        return this.constraint;
+    }
 
     @Nullable
-    VanillaAttributeSync sync();
+    public VanillaAttributeSync sync() {
+        return this.sync;
+    }
 }

@@ -13,4 +13,10 @@ public interface DamageSourceProxy {
 
     @FieldGetter(name = "directEntity")
     Object getDirectEntity(Object target);
+
+    @FieldGetter(name = "critical")
+    boolean isCritical(Object target);
+
+    @FieldGetter(name = "type")
+    Object getType(Object target);
 }

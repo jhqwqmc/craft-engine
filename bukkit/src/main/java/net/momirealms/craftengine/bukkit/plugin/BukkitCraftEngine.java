@@ -5,6 +5,7 @@ import net.momirealms.antigrieflib.AntiGriefCompatibility;
 import net.momirealms.antigrieflib.AntiGriefLib;
 import net.momirealms.craftengine.bukkit.advancement.BukkitAdvancementManager;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
+import net.momirealms.craftengine.bukkit.attribute.BukkitAttributeManager;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.behavior.BukkitBlockBehaviors;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.constant.BukkitBlockEntityElementConfigs;
@@ -200,6 +201,8 @@ public final class BukkitCraftEngine extends CraftEngine {
         super.furnitureManager = new BukkitFurnitureManager(this);
         // 初始化画管理器
         super.paintingManager = new BukkitPaintingManager(this);
+        // 初始化属性管理器
+        super.attributeManager = new BukkitAttributeManager(this);
         // 注册默认的parser
         this.registerDefaultParsers();
         // 完成加载
