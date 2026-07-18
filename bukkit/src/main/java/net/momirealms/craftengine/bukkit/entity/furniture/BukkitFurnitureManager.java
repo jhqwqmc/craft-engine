@@ -18,6 +18,7 @@ import net.momirealms.craftengine.core.entity.furniture.tick.FurnitureTicker;
 import net.momirealms.craftengine.core.entity.furniture.tick.TickingFurnitureImpl;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -153,11 +154,15 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
     public void disable() {
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
-                if (entity instanceof ItemDisplay itemDisplay) {
-                    handleMetaEntityUnload(itemDisplay, true);
-                } else if (BukkitFurnitureManager.COLLISION_ENTITY_CLASS.isInstance(entity)) {
-                    handleCollisionEntityUnload(entity);
-                    entity.remove();
+                try {
+                    if (entity instanceof ItemDisplay itemDisplay) {
+                        handleMetaEntityUnload(itemDisplay, true);
+                    } else if (BukkitFurnitureManager.COLLISION_ENTITY_CLASS.isInstance(entity)) {
+                        handleCollisionEntityUnload(entity);
+                        entity.remove();
+                    }
+                } catch (Throwable t) {
+                    Debugger.FURNITURE.warn(() -> "Failed to unload entity " + entity, t);
                 }
             }
         }
