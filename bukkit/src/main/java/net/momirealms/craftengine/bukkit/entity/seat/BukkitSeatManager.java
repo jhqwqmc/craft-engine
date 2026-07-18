@@ -6,6 +6,7 @@ import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.KeyUtils;
 import net.momirealms.craftengine.core.entity.seat.SeatManager;
+import net.momirealms.craftengine.core.plugin.logger.Debugger;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.sparrow.nbt.CompoundTag;
 import net.momirealms.sparrow.nbt.NBT;
@@ -70,7 +71,11 @@ public final class BukkitSeatManager implements SeatManager, Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             Entity vehicle = player.getVehicle();
             if (vehicle != null) {
-                tryLeavingSeat(player, vehicle);
+                try {
+                    tryLeavingSeat(player, vehicle);
+                } catch (Throwable t) {
+                    Debugger.COMMON.warn(() -> "Failed to leave seat for player " + player.getName(), t);
+                }
             }
         }
     }
