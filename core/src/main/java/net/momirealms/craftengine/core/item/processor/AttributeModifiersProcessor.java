@@ -1,8 +1,8 @@
 package net.momirealms.craftengine.core.item.processor;
 
-import net.momirealms.craftengine.core.attribute.AttributeModifier;
-import net.momirealms.craftengine.core.attribute.Attributes;
-import net.momirealms.craftengine.core.attribute.Attributes1_21;
+import net.momirealms.craftengine.core.attribute.vanilla.AttributeModifier;
+import net.momirealms.craftengine.core.attribute.vanilla.Attributes;
+import net.momirealms.craftengine.core.attribute.vanilla.Attributes1_21;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemBuildContext;
 import net.momirealms.craftengine.core.item.component.DataComponentKeys;

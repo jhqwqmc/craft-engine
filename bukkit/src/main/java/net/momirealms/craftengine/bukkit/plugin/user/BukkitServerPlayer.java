@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.display.BukkitDestroyStageDisplayRecorder;
+import net.momirealms.craftengine.bukkit.entity.BukkitLivingEntity;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
@@ -33,7 +34,6 @@ import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.entity.culling.EntityCulling;
-import net.momirealms.craftengine.core.entity.data.EntityData;
 import net.momirealms.craftengine.core.entity.furniture.FurnitureVariant;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureLightData;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
@@ -63,12 +63,10 @@ import net.momirealms.craftengine.core.world.chunk.client.ClientChunk;
 import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.CraftWorldProxy;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
-import net.momirealms.craftengine.proxy.minecraft.core.registries.BuiltInRegistriesProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.ConnectionProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.common.ClientboundResourcePackPopPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.*;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.login.ClientboundLoginDisconnectPacketProxy;
-import net.momirealms.craftengine.proxy.minecraft.network.syncher.SynchedEntityDataProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.MinecraftServerProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerLevelProxy;
 import net.momirealms.craftengine.proxy.minecraft.server.level.ServerPlayerGameModeProxy;
@@ -81,7 +79,6 @@ import net.momirealms.craftengine.proxy.minecraft.server.network.config.ServerRe
 import net.momirealms.craftengine.proxy.minecraft.sounds.SoundEventProxy;
 import net.momirealms.craftengine.proxy.minecraft.util.thread.BlockableEventLoopProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.InteractionHandProxy;
-import net.momirealms.craftengine.proxy.minecraft.world.effect.MobEffectInstanceProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.effect.MobEffectsProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.LivingEntityProxy;
@@ -98,16 +95,10 @@ import net.momirealms.craftengine.proxy.minecraft.world.level.block.state.BlockB
 import net.momirealms.craftengine.proxy.minecraft.world.level.chunk.ChunkSourceProxy;
 import net.momirealms.craftengine.proxy.paper.chunk.system.entity.RegionizedPlayerChunkLoaderProxy;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -128,7 +119,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-public class BukkitServerPlayer extends Player {
+public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     public static final Key SELECTED_LOCALE_KEY = Key.ce("locale");
     public static final Key ENTITY_CULLING_DISTANCE_SCALE = Key.ce("entity_culling_distance_scale");
     public static final Key DISPLAY_ENTITY_VIEW_DISTANCE_SCALE = Key.ce("display_entity_view_distance_scale");
@@ -140,6 +131,8 @@ public class BukkitServerPlayer extends Player {
 
     // connection state
     private final Channel channel;
+    private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
+    private final EntityCulling culling;
     private ChannelHandler connection;
     private InetAddress address;
     private String name;
@@ -151,7 +144,6 @@ public class BukkitServerPlayer extends Player {
     private ConnectionState decoderState = ConnectionState.HANDSHAKING; // inbound(decode|c2s)
     private ConnectionState encoderState = ConnectionState.HANDSHAKING; // outbound(encode|s2c)
     private boolean shouldProcessFinishConfiguration = true;
-    private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
     // some references
     private Reference<org.bukkit.entity.Player> playerRef;
     private Reference<Object> serverPlayerRef;
@@ -207,7 +199,6 @@ public class BukkitServerPlayer extends Player {
     // 跟踪到的方块实体渲染器
     private Map<BlockPos, CullableHolder> trackedBlockEntityRenderers;
     private Map<Integer, CullableHolder> trackedEntities;
-    private final EntityCulling culling;
     private Vec3d firstPersonCameraVec3;
     private Vec3d thirdPersonCameraVec3;
     // 是否启用实体剔除
@@ -246,6 +237,7 @@ public class BukkitServerPlayer extends Player {
     private boolean isSimulatingInteraction;
 
     public BukkitServerPlayer(BukkitCraftEngine plugin, @Nullable Channel channel) {
+        super((WeakReference<Object>) null);
         this.channel = channel;
         this.plugin = plugin;
         if (channel != null) {
@@ -295,8 +287,8 @@ public class BukkitServerPlayer extends Player {
     private void initPlayStageFields() {
         this.trackedBlockEntityRenderers = new ConcurrentHashMap<>(64);
         this.trackedEntities = new ConcurrentHashMap<>(64);
-        this.trackedChunks = ConcurrentChainedLong2ReferenceHashTable.createWithCapacity(512, 0.5f);
-        this.entityTypeView = new ConcurrentHashMap<>(256);
+        this.trackedChunks = ConcurrentChainedLong2ReferenceHashTable.createWithCapacity(128, 0.5f);
+        this.entityTypeView = new ConcurrentHashMap<>(128);
         this.obtainedItems = new HashSet<>(32);
         this.furnitureHitData = new FurnitureHitData();
         this.furnitureLightData = new FurnitureLightData();
@@ -330,26 +322,6 @@ public class BukkitServerPlayer extends Player {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean isSneaking() {
-        return platformPlayer().isSneaking();
-    }
-
-    @Override
-    public boolean isSwimming() {
-        return platformPlayer().isSwimming();
-    }
-
-    @Override
-    public boolean isClimbing() {
-        return platformPlayer().isClimbing();
-    }
-
-    @Override
-    public boolean isGliding() {
-        return platformPlayer().isGliding();
     }
 
     @Override
@@ -684,7 +656,6 @@ public class BukkitServerPlayer extends Player {
         }
     }
 
-    @Override
     public void tick() {
         // 还没上线或是已经离线
         Object serverPlayer = serverPlayer();
@@ -851,7 +822,8 @@ public class BukkitServerPlayer extends Player {
         InventoryHolder topHolder = top.getHolder();
         if (topHolder instanceof CraftEngineGUIHolder holder) {
             holder.gui().onTimer();
-        } if (topHolder instanceof WorldlyContainerHolder itemStorage) {
+        }
+        if (topHolder instanceof WorldlyContainerHolder itemStorage) {
             WorldPosition pos = itemStorage.pos();
             if (!canInteractPoint(pos.toVec3d(), 4d)) {
                 closeInventory();
@@ -1331,27 +1303,6 @@ public class BukkitServerPlayer extends Player {
         return DirectionUtils.toDirection(platformPlayer().getFacing());
     }
 
-    @NotNull
-    @Override
-    public BukkitItem getItemInHand(InteractionHand hand) {
-        PlayerInventory inventory = platformPlayer().getInventory();
-        return BukkitItemManager.instance().wrap(hand == InteractionHand.MAIN_HAND ? inventory.getItemInMainHand() : inventory.getItemInOffHand());
-    }
-
-    @NotNull
-    @Override
-    public BukkitItem getItemBySlot(int slot) {
-        PlayerInventory inventory = platformPlayer().getInventory();
-        return BukkitItemManager.instance().wrap(inventory.getItem(slot));
-    }
-
-    @Override
-    public void setItemInHand(InteractionHand hand, Item item) {
-        PlayerInventory inventory = platformPlayer().getInventory();
-        EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
-        inventory.setItem(slot, ((BukkitItem) item).getBukkitItem());
-    }
-
     @Override
     public World world() {
         return BukkitAdaptor.adapt(platformPlayer().getWorld());
@@ -1374,14 +1325,14 @@ public class BukkitServerPlayer extends Player {
 
     @Override
     public Object serverPlayer() {
-        if (serverPlayerRef == null) return null;
-        return serverPlayerRef.get();
+        if (this.serverPlayerRef == null) return null;
+        return this.serverPlayerRef.get();
     }
 
     @Override
     public org.bukkit.entity.Player platformPlayer() {
-        if (playerRef == null) return null;
-        return playerRef.get();
+        if (this.playerRef == null) return null;
+        return this.playerRef.get();
     }
 
     @Override
@@ -1412,7 +1363,7 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public Object serverEntity() {
+    public Object minecraftEntity() {
         return serverPlayer();
     }
 
@@ -1548,34 +1499,6 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public double luck() {
-        if (VersionHelper.isOrAbove1_21_3) {
-            return Optional.ofNullable(platformPlayer().getAttribute(Attribute.LUCK)).map(AttributeInstance::getValue).orElse(1d);
-        } else {
-            return LegacyAttributeUtils.getLuck(platformPlayer());
-        }
-    }
-
-    @Override
-    public double health() {
-        return platformPlayer().getHealth();
-    }
-
-    @Override
-    public void setHealth(double amount) {
-        platformPlayer().setHealth(amount);
-    }
-
-    @Override
-    public double maxHealth() {
-        if (VersionHelper.isOrAbove1_21) {
-            return Objects.requireNonNull(platformPlayer().getAttribute(Attribute.MAX_HEALTH)).getValue();
-        } else {
-            return LegacyAttributeUtils.getMaxHealth(platformPlayer());
-        }
-    }
-
-    @Override
     public int foodLevel() {
         return platformPlayer().getFoodLevel();
     }
@@ -1593,42 +1516,6 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void setSaturation(float saturation) {
         this.platformPlayer().setSaturation(saturation);
-    }
-
-    @Override
-    public void addPotionEffect(Key potionEffectType, int duration, int amplifier, boolean ambient, boolean particles, boolean showIcon) {
-        if (VersionHelper.isOrAbove1_20_5) {
-            Object holder = RegistryUtils.getHolderById(BuiltInRegistriesProxy.MOB_EFFECT, KeyUtils.toIdentifier(potionEffectType));
-            if (holder != null) {
-                Object mobEffect = MobEffectInstanceProxy.INSTANCE.newInstance(holder, duration, amplifier, ambient, particles, showIcon);
-                LivingEntityProxy.INSTANCE.addEffect(serverPlayer(), mobEffect);
-            }
-        } else {
-            Object mobEffect = RegistryUtils.getRegistryValue(BuiltInRegistriesProxy.MOB_EFFECT, KeyUtils.toIdentifier(potionEffectType));
-            if (mobEffect != null) {
-                LivingEntityProxy.INSTANCE.addEffect(serverPlayer(), MobEffectInstanceProxy.INSTANCE.newInstance$legacy(mobEffect, duration, amplifier, ambient, particles, showIcon));
-            }
-        }
-    }
-
-    @Override
-    public void removePotionEffect(Key potionEffectType) {
-        if (VersionHelper.isOrAbove1_20_5) {
-            Object holder = RegistryUtils.getHolderById(BuiltInRegistriesProxy.MOB_EFFECT, KeyUtils.toIdentifier(potionEffectType));
-            if (holder != null) {
-                LivingEntityProxy.INSTANCE.removeEffect(serverPlayer(), holder);
-            }
-        } else {
-            Object mobEffect = RegistryUtils.getRegistryValue(BuiltInRegistriesProxy.MOB_EFFECT, KeyUtils.toIdentifier(potionEffectType));
-            if (mobEffect != null) {
-                LivingEntityProxy.INSTANCE.removeEffect$legacy(serverPlayer(), mobEffect);
-            }
-        }
-    }
-
-    @Override
-    public void clearPotionEffects() {
-        LivingEntityProxy.INSTANCE.removeAllEffects(serverPlayer());
     }
 
     @Override
@@ -1662,43 +1549,6 @@ public class BukkitServerPlayer extends Player {
     @Override
     public void clearTrackedChunks() {
         this.trackedChunks.clear();
-    }
-
-    @Override
-    public void teleport(WorldPosition worldPosition) {
-        Location location = new Location((org.bukkit.World) worldPosition.world().platformWorld(), worldPosition.x(), worldPosition.y(), worldPosition.z(), worldPosition.yRot(), worldPosition.xRot());
-        if (VersionHelper.hasFoliaPatch) {
-            this.platformPlayer().teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        } else {
-            this.platformPlayer().teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        }
-    }
-
-    @Override
-    public void damage(double amount, Key damageType, @Nullable Object causeEntity) {
-        @SuppressWarnings("deprecation")
-        DamageType type = Registry.DAMAGE_TYPE.get(KeyUtils.toNamespacedKey(damageType));
-        DamageSource source = DamageSource.builder(type != null ? type : DamageType.GENERIC)
-                .withCausingEntity(causeEntity instanceof Entity entity ? entity : this.platformPlayer())
-                .withDirectEntity(this.platformPlayer())
-                .withDamageLocation(this.platformPlayer().getLocation())
-                .build();
-        this.platformPlayer().damage(amount, source);
-    }
-
-    @Override
-    public Object entityData() {
-        return EntityProxy.INSTANCE.getEntityData(serverEntity());
-    }
-
-    @Override
-    public <T> T getEntityData(EntityData<T> data) {
-        return SynchedEntityDataProxy.INSTANCE.get(entityData(), data.entityDataAccessor());
-    }
-
-    @Override
-    public <T> void setEntityData(EntityData<T> data, T value, boolean force) {
-        SynchedEntityDataProxy.INSTANCE.set(entityData(), data.entityDataAccessor(), value, force);
     }
 
     @Override
@@ -1891,11 +1741,6 @@ public class BukkitServerPlayer extends Player {
     }
 
     @Override
-    public WorldPosition eyePosition() {
-        return LocationUtils.toWorldPosition(this.getEyeLocation());
-    }
-
-    @Override
     public Cache<Object, Boolean> receivedMapData() {
         return this.receivedMapData;
     }
@@ -1910,31 +1755,10 @@ public class BukkitServerPlayer extends Player {
         Particle particle = Registry.PARTICLE_TYPE.get(KeyUtils.toNamespacedKey(particleId));
         if (particle != null) {
             if (VersionHelper.hasPaperPatch) {
-                platformPlayer().getWorld().spawnParticle(particle, List.of(platformPlayer()), null, x, y, z, 1, 0, 0,0, 0, null, false);
+                platformPlayer().getWorld().spawnParticle(particle, List.of(platformPlayer()), null, x, y, z, 1, 0, 0, 0, 0, null, false);
             } else {
                 platformPlayer().spawnParticle(particle, x, y, z, 1, 0, 0, 0, 0);
             }
-        }
-    }
-
-    public Location getEyeLocation() {
-        Object serverPlayer = serverPlayer();
-        Object vehicle = EntityProxy.INSTANCE.getVehicle(serverPlayer);
-        if (vehicle != null) {
-            Vec3d mountPos = EntityUtils.getPassengerRidingPosition(vehicle, serverPlayer);
-            return new Location(platformPlayer().getWorld(), mountPos.x, mountPos.y + EntityProxy.INSTANCE.getEyeHeight(serverPlayer), mountPos.z);
-        }
-        return platformPlayer().getEyeLocation();
-    }
-
-    public Vec3d getEyePos() {
-        Object serverPlayer = serverPlayer();
-        Object vehicle = EntityProxy.INSTANCE.getVehicle(serverPlayer);
-        if (vehicle != null) {
-            Vec3d mountPos = EntityUtils.getPassengerRidingPosition(vehicle, serverPlayer);
-            return new Vec3d(mountPos.x, mountPos.y + EntityProxy.INSTANCE.getEyeHeight(serverPlayer), mountPos.z);
-        } else {
-            return new Vec3d(EntityProxy.INSTANCE.getXo(serverPlayer), EntityProxy.INSTANCE.getEyeY(serverPlayer), EntityProxy.INSTANCE.getZo(serverPlayer));
         }
     }
 
@@ -2032,8 +1856,10 @@ public class BukkitServerPlayer extends Player {
         return 0;
     }
 
+    @NotNull
     @Override
-    public Set<Player> getTrackedBy() {
-        return EntityUtils.getTrackedBy(this.platformPlayer(), BukkitAdaptor::adapt);
+    public BukkitItem getItemBySlot(int slot) {
+        PlayerInventory inventory = platformPlayer().getInventory();
+        return BukkitItemManager.instance().wrap(inventory.getItem(slot));
     }
 }

@@ -6,7 +6,7 @@ import org.bukkit.entity.Item;
 
 public class BukkitItemEntity extends BukkitEntity implements ItemEntity {
 
-    public BukkitItemEntity(Item entity) {
+    public BukkitItemEntity(Object entity) {
         super(entity);
     }
 

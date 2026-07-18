@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.advancement.AdvancementType;
 import net.momirealms.craftengine.core.block.entity.render.ConstantBlockEntityRenderer;
-import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.LivingEntity;
 import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureLightData;
@@ -15,292 +15,251 @@ import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.GameEdition;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.world.*;
+import net.momirealms.craftengine.core.world.BlockPos;
+import net.momirealms.craftengine.core.world.Position;
+import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class Player extends AbstractEntity implements NetWorkUser {
-    private static final Key TYPE = Key.of("minecraft:player");
+public interface Player extends NetWorkUser, LivingEntity {
+    Key TYPE = Key.of("minecraft:player");
 
-    public abstract boolean isSecondaryUseActive();
-
-    @NotNull
-    public abstract Item getItemInHand(InteractionHand hand);
+    boolean isSecondaryUseActive();
 
     @NotNull
-    public abstract Item getItemBySlot(int slot);
-
-    public abstract void setItemInHand(InteractionHand hand, Item item);
+    Item getItemBySlot(int slot);
 
     @Override
-    public abstract Object platformPlayer();
+    Object platformPlayer();
 
     @Override
-    public abstract Object serverPlayer();
+    Object serverPlayer();
 
-    public abstract void setClientSideWorld(World world);
+    void setClientSideWorld(World world);
 
-    public abstract void entityCullingTick();
+    void entityCullingTick();
 
-    public abstract float getDestroyProgress(Object blockState, BlockPos pos);
+    float getDestroyProgress(Object blockState, BlockPos pos);
 
-    public abstract void setClientSideCanBreakBlock(boolean canBreak);
+    void setClientSideCanBreakBlock(boolean canBreak);
 
-    public abstract void finishMiningBlock();
+    void finishMiningBlock();
 
-    public abstract void preventMiningBlock();
+    void preventMiningBlock();
 
-    public abstract void stopMiningBlock();
+    void stopMiningBlock();
 
-    public abstract void abortMiningBlock();
+    void abortMiningBlock();
 
-    public abstract boolean clientSideCanBreak();
+    boolean clientSideCanBreak();
 
-    public abstract void breakBlock(int x, int y, int z);
+    void breakBlock(int x, int y, int z);
 
-    public abstract double getCachedInteractionRange();
+    double getCachedInteractionRange();
 
-    public abstract void onSwingHand();
+    void onSwingHand();
 
-    public abstract boolean isMiningBlock();
+    boolean isMiningBlock();
 
-    public abstract boolean shouldSyncAttribute();
+    boolean shouldSyncAttribute();
 
-    public abstract boolean isSneaking();
+    boolean isFlying();
 
-    public abstract boolean isSwimming();
+    GameMode gameMode();
 
-    public abstract boolean isClimbing();
+    void setGameMode(GameMode gameMode);
 
-    public abstract boolean isGliding();
+    boolean canBreak(BlockPos pos, Object state);
 
-    public abstract boolean isFlying();
+    boolean canPlace(BlockPos pos, Object state);
 
-    public abstract GameMode gameMode();
+    void sendToast(Component text, Item icon, AdvancementType type);
 
-    public abstract void setGameMode(GameMode gameMode);
+    void sendActionBar(Component text);
 
-    public abstract boolean canBreak(BlockPos pos, Object state);
+    void sendMessage(Component text, boolean overlay);
 
-    public abstract boolean canPlace(BlockPos pos, Object state);
+    void sendTitle(Component title, Component subtitle, int fadeIn, int stay, int fadeOut);
 
-    public abstract void sendToast(Component text, Item icon, AdvancementType type);
+    void setIsSimulatingInteraction(boolean isSimulating);
 
-    public abstract void sendActionBar(Component text);
+    boolean isSimulatingInteraction();
 
-    public abstract void sendMessage(Component text, boolean overlay);
+    boolean updateLastSuccessfulInteractionTick(int tick);
 
-    public abstract void sendTitle(Component title, Component subtitle, int fadeIn, int stay, int fadeOut);
+    int lastSuccessfulInteractionTick();
 
-    public abstract void setIsSimulatingInteraction(boolean isSimulating);
+    void updateLastInteractEntityTick(@NotNull InteractionHand hand);
 
-    public abstract boolean isSimulatingInteraction();
+    boolean lastInteractEntityCheck(@NotNull InteractionHand hand);
 
-    public abstract boolean updateLastSuccessfulInteractionTick(int tick);
+    int gameTicks();
 
-    public abstract int lastSuccessfulInteractionTick();
+    boolean hasInteractionInThisTick();
 
-    public abstract void updateLastInteractEntityTick(@NotNull InteractionHand hand);
+    void swingHand(InteractionHand hand);
 
-    public abstract boolean lastInteractEntityCheck(@NotNull InteractionHand hand);
+    boolean hasPermission(String permission);
 
-    public abstract int gameTicks();
+    boolean canInstabuild();
 
-    public abstract boolean hasInteractionInThisTick();
-
-    public abstract void swingHand(InteractionHand hand);
-
-    public abstract boolean hasPermission(String permission);
-
-    public abstract boolean canInstabuild();
-
-    public abstract String name();
-
-    public void playSound(Key sound) {
+    default void playSound(Key sound) {
         playSound(sound, 1f, 1f);
     }
 
-    public void playSound(Key sound, float volume, float pitch) {
+    default void playSound(Key sound, float volume, float pitch) {
         playSound(sound, SoundSource.MASTER, volume, pitch);
     }
 
-    public abstract void playSound(Key sound, SoundSource source, float volume, float pitch);
+    void playSound(Key sound, SoundSource source, float volume, float pitch);
 
-    public abstract void playSound(Position pos, Key sound, SoundSource source, float volume, float pitch);
+    void playSound(Position pos, Key sound, SoundSource source, float volume, float pitch);
 
-    public void playSound(BlockPos pos, Key sound, SoundSource source, float volume, float pitch) {
+    default void playSound(BlockPos pos, Key sound, SoundSource source, float volume, float pitch) {
         this.playSound(Vec3d.atCenterOf(pos), sound, source, volume, pitch);
     }
 
-    public void playSound(BlockPos pos, SoundData data, SoundSource source) {
+    default void playSound(BlockPos pos, SoundData data, SoundSource source) {
         this.playSound(pos, data.id(), source, data.volume().get(), data.pitch().get());
     }
 
-    public void playSound(Position pos, SoundData data, SoundSource source) {
+    default void playSound(Position pos, SoundData data, SoundSource source) {
         this.playSound(pos, data.id(), source, data.volume().get(), data.pitch().get());
     }
 
-    public abstract void giveItem(Item item, boolean spawnFakeEntity);
+    void giveItem(Item item, boolean spawnFakeEntity);
 
-    public void giveItem(Item item) {
+    default void giveItem(Item item) {
         giveItem(item, true);
     }
 
-    public abstract void closeInventory();
+    void closeInventory();
 
-    public abstract void clearEntityView();
+    void clearEntityView();
 
-    public abstract void unloadCurrentResourcePack();
+    void unloadCurrentResourcePack();
 
-    public abstract void performCommand(String command, boolean asOp);
+    void performCommand(String command, boolean asOp);
 
-    public abstract void performCommandAsEvent(String command);
-
-    public abstract double luck();
+    void performCommandAsEvent(String command);
 
     @Override
-    public Key type() {
+    default Key type() {
         return TYPE;
     }
 
-    public boolean isCreativeMode() {
+    default boolean isCreativeMode() {
         return gameMode() == GameMode.CREATIVE;
     }
 
-    public boolean isSpectatorMode() {
+    default boolean isSpectatorMode() {
         return gameMode() == GameMode.SPECTATOR;
     }
 
-    public boolean isSurvivalMode() {
+    default boolean isSurvivalMode() {
         return gameMode() == GameMode.SURVIVAL;
     }
 
-    public boolean isAdventureMode() {
+    default boolean isAdventureMode() {
         return gameMode() == GameMode.ADVENTURE;
     }
 
-    public abstract double health();
+    int foodLevel();
 
-    public abstract void setHealth(double amount);
+    void setFoodLevel(int foodLevel);
 
-    public abstract double maxHealth();
+    float saturation();
 
-    public void heal(double amount) {
-        double targetHealth = Math.min(this.health() + amount, this.maxHealth());
-        targetHealth = Math.max(targetHealth, health());
-        this.setHealth(targetHealth);
-    }
+    void setSaturation(float saturation);
 
-    public abstract int foodLevel();
+    CooldownData cooldown();
 
-    public abstract void setFoodLevel(int foodLevel);
+    Locale locale();
 
-    public abstract float saturation();
+    void setClientLocale(Locale clientLocale);
 
-    public abstract void setSaturation(float saturation);
+    Locale selectedLocale();
 
-    public abstract void addPotionEffect(Key potionEffectType, int duration, int amplifier, boolean ambient, boolean particles, boolean showIcon);
+    void setSelectedLocale(@Nullable Locale locale);
 
-    public abstract void removePotionEffect(Key potionEffectType);
+    void setEntityCullingDistanceScale(double value);
 
-    public abstract void clearPotionEffects();
+    void setDisplayEntityViewDistanceScale(double value);
 
-    public abstract CooldownData cooldown();
+    double displayEntityViewDistance();
 
-    public abstract void teleport(WorldPosition worldPosition);
+    void setEnableEntityCulling(boolean enable);
 
-    public abstract void damage(double amount, Key damageType, @Nullable Object causeEntity);
+    boolean enableEntityCulling();
 
-    public abstract Locale locale();
+    boolean enableFurnitureDebug();
 
-    public abstract void setClientLocale(Locale clientLocale);
+    void setEnableFurnitureDebug(boolean enableFurnitureDebug);
 
-    public abstract Locale selectedLocale();
+    void giveExperiencePoints(int xpPoints);
 
-    public abstract void setSelectedLocale(@Nullable Locale locale);
+    void giveExperienceLevels(int levels);
 
-    public abstract void setEntityCullingDistanceScale(double value);
+    int getXpNeededForNextLevel();
 
-    public abstract void setDisplayEntityViewDistanceScale(double value);
+    void setExperiencePoints(int experiencePoints);
 
-    public abstract double displayEntityViewDistance();
+    void setExperienceLevels(int level);
 
-    public abstract void setEnableEntityCulling(boolean enable);
+    void sendTotemAnimation(Item totem, @Nullable SoundData sound, boolean silent);
 
-    public abstract boolean enableEntityCulling();
+    void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
 
-    public abstract boolean enableFurnitureDebug();
+    void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
 
-    public abstract void setEnableFurnitureDebug(boolean enableFurnitureDebug);
+    CullableHolder getTrackedBlockEntity(BlockPos blockPos);
 
-    public abstract void giveExperiencePoints(int xpPoints);
+    void removeTrackedBlockEntities(Collection<BlockPos> renders);
 
-    public abstract void giveExperienceLevels(int levels);
+    CullableHolder getTrackedEntity(int entityId);
 
-    public abstract int getXpNeededForNextLevel();
+    void addTrackedEntity(int entityId, Cullable cullable);
 
-    public abstract void setExperiencePoints(int experiencePoints);
+    void removeTrackedBlockEntities(BlockPos pos);
 
-    public abstract void setExperienceLevels(int level);
+    void clearTrackedBlockEntities();
 
-    public abstract void sendTotemAnimation(Item totem, @Nullable SoundData sound, boolean silent);
+    int clearOrCountMatchingInventoryItems(Predicate<Item> predicate, int count);
 
-    public abstract void addTrackedBlockEntities(Map<BlockPos, ConstantBlockEntityRenderer> renders);
-
-    public abstract void addTrackedBlockEntity(BlockPos blockPos, ConstantBlockEntityRenderer renderer);
-
-    public abstract CullableHolder getTrackedBlockEntity(BlockPos blockPos);
-
-    public abstract void removeTrackedBlockEntities(Collection<BlockPos> renders);
-
-    public abstract CullableHolder getTrackedEntity(int entityId);
-
-    public abstract void addTrackedEntity(int entityId, Cullable cullable);
-
-    public abstract void removeTrackedBlockEntities(BlockPos pos);
-
-    public abstract void clearTrackedBlockEntities();
-
-    public abstract int clearOrCountMatchingInventoryItems(Predicate<Item> predicate, int count);
-
-    public int clearOrCountMatchingInventoryItems(Key itemId, int count) {
+    default int clearOrCountMatchingInventoryItems(Key itemId, int count) {
         return this.clearOrCountMatchingInventoryItems(item -> itemId.equals(item.id()), count);
     }
 
-    public abstract GameEdition gameEdition();
+    GameEdition gameEdition();
 
     @Override
-    public void remove() {
+    default void remove() {
     }
 
-    public abstract FurnitureLightData furnitureLightData();
+    FurnitureLightData furnitureLightData();
 
-    public abstract void playParticle(Key particleId, double x, double y, double z);
+    void playParticle(Key particleId, double x, double y, double z);
 
-    public abstract void removeTrackedEntity(int entityId);
+    void removeTrackedEntity(int entityId);
 
-    public abstract void clearTrackedEntities();
+    void clearTrackedEntities();
 
-    public abstract WorldPosition eyePosition();
+    Cache<Object, Boolean> receivedMapData();
 
-    public abstract Cache<Object, Boolean> receivedMapData();
-
-    public abstract boolean canInteractPoint(Vec3d vec3d, double range);
+    boolean canInteractPoint(Vec3d vec3d, double range);
 
     @Override
-    public boolean isValid() {
+    default boolean isValid() {
         return this.isOnline();
     }
 
-    public abstract void setItemCooldown(Key id, int ticks);
+    void setItemCooldown(Key id, int ticks);
 
-    public abstract int getItemCooldown(Key id);
-
-    public abstract Set<Player> getTrackedBy();
+    int getItemCooldown(Key id);
 }

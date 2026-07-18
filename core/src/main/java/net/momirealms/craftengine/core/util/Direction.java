@@ -1,6 +1,6 @@
 package net.momirealms.craftengine.core.util;
 
-import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.world.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,7 +83,7 @@ public enum Direction {
         return angle;
     }
 
-    public static Direction[] orderedByNearest(AbstractEntity entity) {
+    public static Direction[] orderedByNearest(Entity entity) {
         float f = entity.xRot() * ((float) Math.PI / 180F);
         float f1 = -entity.yRot() * ((float) Math.PI / 180F);
         float sin = MiscUtils.sin(f);

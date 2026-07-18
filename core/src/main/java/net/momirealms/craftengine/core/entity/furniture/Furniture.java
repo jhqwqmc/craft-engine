@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.momirealms.craftengine.core.entity.AbstractEntity;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.entity.culling.CullableHolder;
@@ -332,7 +331,7 @@ public abstract class Furniture implements Cullable {
             Optional.ofNullable(externalModel.get()).ifPresent(model -> {
                 this.hasExternalModel = true;
                 try {
-                    model.bindModel((AbstractEntity) this.metaDataEntity);
+                    model.bindModel(this.metaDataEntity);
                 } catch (Throwable e) {
                     CraftEngine.instance().logger().warn("Failed to load external model for furniture " + id(), e);
                 }

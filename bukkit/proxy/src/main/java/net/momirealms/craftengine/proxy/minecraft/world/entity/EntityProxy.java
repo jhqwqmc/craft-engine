@@ -176,4 +176,7 @@ public interface EntityProxy {
 
     @MethodInvoker(name = "setPose")
     void setPose(Object target, @Type(clazz = PoseProxy.class) Object pose);
+
+    @MethodInvoker(name = "getEyePosition")
+    Object getEyePosition(Object target);
 }

@@ -7,12 +7,7 @@ import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.util.Key;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class EnchantmentDataComponentPredicate implements DataComponentPredicate {
     public static final DataComponentPredicateFactory<EnchantmentDataComponentPredicate> FACTORY = new Factory();

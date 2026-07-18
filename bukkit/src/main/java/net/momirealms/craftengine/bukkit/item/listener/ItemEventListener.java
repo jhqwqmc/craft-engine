@@ -4,7 +4,6 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackGenerateEvent;
 import net.momirealms.craftengine.bukkit.api.event.CustomBlockInteractEvent;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
-import net.momirealms.craftengine.bukkit.entity.BukkitItemEntity;
 import net.momirealms.craftengine.bukkit.entity.projectile.ProjectileItems;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.item.BukkitItemDefinition;
@@ -720,7 +719,7 @@ public final class ItemEventListener implements Listener {
         }
         Cancellable dummy = Cancellable.dummy();
         itemDefinition.execute(PlayerOptionalContext.of(serverPlayer, ContextHolder.builder()
-                .withParameter(DirectContextParameters.ENTITY, new BukkitItemEntity(itemDrop))
+                .withParameter(DirectContextParameters.ENTITY, BukkitAdaptor.adapt(itemDrop))
                 .withParameter(DirectContextParameters.POSITION, LocationUtils.toWorldPosition(itemDrop.getLocation()))
                 .withParameter(DirectContextParameters.EVENT, dummy)
         ), EventTrigger.PICK_UP);

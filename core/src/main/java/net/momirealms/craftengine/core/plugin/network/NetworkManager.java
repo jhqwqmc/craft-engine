@@ -25,7 +25,8 @@ public interface NetworkManager extends Manageable {
 
     Channel getChannel(Player player);
 
-    @Nullable NetWorkUser getOnlineUser(UUID uuid);
+    @Nullable
+    Player getOnlineUser(UUID uuid);
 
     int remapBlockState(int stateId, boolean enableMod);
 

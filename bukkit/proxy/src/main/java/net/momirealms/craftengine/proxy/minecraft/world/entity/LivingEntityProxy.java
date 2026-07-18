@@ -5,6 +5,7 @@ import net.momirealms.craftengine.proxy.minecraft.world.InteractionHandProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.effect.MobEffectInstanceProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.effect.MobEffectProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.AttributeProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.item.ItemStackProxy;
 import net.momirealms.sparrow.reflection.clazz.SparrowClass;
 import net.momirealms.sparrow.reflection.proxy.ASMProxyFactory;
 import net.momirealms.sparrow.reflection.proxy.annotation.FieldGetter;
@@ -67,4 +68,10 @@ public interface LivingEntityProxy extends EntityProxy {
 
     @MethodInvoker(name = "removeAllEffects")
     boolean removeAllEffects(Object target);
+
+    @MethodInvoker(name = "getItemBySlot")
+    Object getItemBySlot(Object target, @Type(clazz = EquipmentSlotProxy.class) Object slot);
+
+    @MethodInvoker(name = "setItemSlot")
+    void setItemSlot(Object target, @Type(clazz = EquipmentSlotProxy.class) Object slot, @Type(clazz = ItemStackProxy.class) Object item);
 }

@@ -122,7 +122,7 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
     private final TriConsumer<Channel, Object, Runnable> immediatePacketConsumer;
     private final TriConsumer<Channel, List<Object>, Runnable> immediatePacketsConsumer;
     private final Map<ChannelPipeline, BukkitServerPlayer> users = new ConcurrentHashMap<>();
-    private final Map<UUID, BukkitServerPlayer> onlineUsers = new ConcurrentHashMap<>();
+    private final ConcurrentChainedUUID2ReferenceHashTable<BukkitServerPlayer> onlineUsers = ConcurrentChainedUUID2ReferenceHashTable.createWithCapacity(30);
     private final HashSet<Channel> injectedChannels = new HashSet<>();
     private final boolean hasAntiPopup;
     private BukkitServerPlayer[] onlineUserArray = new BukkitServerPlayer[0];
@@ -598,7 +598,7 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
 
     @Override
     @Nullable
-    public NetWorkUser getOnlineUser(UUID uuid) {
+    public BukkitServerPlayer getOnlineUser(UUID uuid) {
         return this.onlineUsers.get(uuid);
     }
 

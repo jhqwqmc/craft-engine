@@ -1,6 +1,9 @@
 package net.momirealms.craftengine.bukkit.api;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
+import net.momirealms.craftengine.bukkit.entity.BukkitItemEntity;
+import net.momirealms.craftengine.bukkit.entity.BukkitLivingEntity;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
@@ -8,7 +11,14 @@ import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.world.BukkitExistingBlock;
 import net.momirealms.craftengine.bukkit.world.BukkitWorld;
 import net.momirealms.craftengine.bukkit.world.BukkitWorldManager;
+import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.CEWorld;
+import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
+import net.momirealms.craftengine.proxy.minecraft.server.level.ServerPlayerProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.LivingEntityProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.item.ItemEntityProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.player.PlayerProxy;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -17,7 +27,17 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+import java.util.function.Function;
+
 public final class BukkitAdaptor {
+    private static final Map<Class<?>, Function<Object, net.momirealms.craftengine.core.entity.Entity>> ENTITY_ADAPTORS = MiscUtils.init(new Object2ObjectOpenHashMap<>(), m -> {
+        m.put(ServerPlayerProxy.CLASS, e -> BukkitNetworkManager.instance().getOnlineUser(EntityProxy.INSTANCE.getUUID(e)));
+        m.put(PlayerProxy.CLASS, e -> BukkitNetworkManager.instance().getOnlineUser(EntityProxy.INSTANCE.getUUID(e)));
+        m.put(LivingEntityProxy.CLASS, BukkitLivingEntity::new);
+        m.put(ItemEntityProxy.CLASS, BukkitItemEntity::new);
+    });
+
     private BukkitAdaptor() {}
 
     /**
@@ -29,7 +49,7 @@ public final class BukkitAdaptor {
      */
     @Nullable
     public static BukkitServerPlayer adapt(@NotNull final Player player) {
-        return (BukkitServerPlayer) BukkitNetworkManager.instance().getOnlineUser(player.getUniqueId());
+        return BukkitNetworkManager.instance().getOnlineUser(player.getUniqueId());
     }
 
     /**
@@ -55,7 +75,16 @@ public final class BukkitAdaptor {
      */
     @NotNull
     public static BukkitEntity adapt(@NotNull final Entity entity) {
-        return new BukkitEntity(entity);
+        Object handle = CraftEntityProxy.INSTANCE.getEntity(entity);
+        Class<?> clazz = handle.getClass();
+        while (clazz != null) {
+            Function<Object, net.momirealms.craftengine.core.entity.Entity> adaptor = ENTITY_ADAPTORS.get(clazz);
+            if (adaptor != null) {
+                return (BukkitEntity) adaptor.apply(handle);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return new BukkitEntity(handle);
     }
 
     /**

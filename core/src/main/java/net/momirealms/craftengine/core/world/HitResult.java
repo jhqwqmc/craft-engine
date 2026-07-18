@@ -1,6 +1,6 @@
 package net.momirealms.craftengine.core.world;
 
-import net.momirealms.craftengine.core.entity.AbstractEntity;
+import net.momirealms.craftengine.core.entity.Entity;
 
 public abstract class HitResult {
     protected final Vec3d location;
@@ -9,7 +9,7 @@ public abstract class HitResult {
         this.location = pos;
     }
 
-    public double distanceTo(AbstractEntity entity) {
+    public double distanceTo(Entity entity) {
         double d = this.location.x() - entity.x();
         double e = this.location.y() - entity.y();
         double f = this.location.z() - entity.z();

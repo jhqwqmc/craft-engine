@@ -1,11 +1,13 @@
 package net.momirealms.craftengine.core.entity;
 
 import net.momirealms.craftengine.core.entity.data.EntityData;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.Direction;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface Entity {
@@ -19,9 +21,9 @@ public interface Entity {
 
     double z();
 
-    WorldPosition position();
-
-    void tick();
+    default WorldPosition position() {
+        return new WorldPosition(world(), x(), y(), z(), xRot(), yRot());
+    }
 
     float xRot();
 
@@ -35,7 +37,7 @@ public interface Entity {
 
     Object platformEntity();
 
-    Object serverEntity();
+    Object minecraftEntity();
 
     String name();
 
@@ -52,4 +54,10 @@ public interface Entity {
     <T> void setEntityData(EntityData<T> data, T value, boolean force);
 
     void remove();
+
+    Set<Player> getTrackedBy();
+
+    WorldPosition eyePosition();
+
+    void teleport(WorldPosition worldPosition);
 }

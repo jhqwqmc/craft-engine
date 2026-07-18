@@ -1,4 +1,4 @@
-package net.momirealms.craftengine.core.attribute;
+package net.momirealms.craftengine.core.attribute.vanilla;
 
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.core.util.Key;
