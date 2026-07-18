@@ -63,7 +63,7 @@ public final class BukkitPackManager extends AbstractPackManager implements List
 
     @Override
     public void load() {
-        if (ReloadCommand.RELOAD_PACK_FLAG || this.plugin.isInitializing()) {
+        if (ReloadCommand.RELOAD_PACK_FLAG || ReloadCommand.RELOAD_HOST_FLAG || this.plugin.isInitializing()) {
             super.load();
         }
     }

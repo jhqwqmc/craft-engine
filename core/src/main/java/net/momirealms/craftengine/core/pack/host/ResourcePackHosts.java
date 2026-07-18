@@ -20,6 +20,7 @@ public final class ResourcePackHosts {
     public static final ResourcePackHostType<DropboxHost> DROPBOX = register(Key.ce("dropbox"), DropboxHost.FACTORY);
     public static final ResourcePackHostType<OneDriveHost> ONEDRIVE = register(Key.ce("onedrive"), OneDriveHost.FACTORY);
     public static final ResourcePackHostType<GitLabHost> GITLAB = register(Key.ce("gitlab"), GitLabHost.FACTORY);
+    public static final ResourcePackHostType<SelfForwardHost> SELF_FORWARD = register(Key.ce("self_forward"), SelfForwardHost.FACTORY);
 
     private ResourcePackHosts() {}
 

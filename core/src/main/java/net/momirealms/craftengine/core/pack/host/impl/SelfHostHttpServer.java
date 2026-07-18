@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.pack.host.impl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
+import com.google.gson.JsonObject;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.netty.bootstrap.ServerBootstrap;
@@ -23,6 +24,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
+import net.momirealms.craftengine.core.util.UUIDUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -76,6 +78,7 @@ public final class SelfHostHttpServer {
     private boolean useServerPort = false;
     private boolean autoIp = false;
     private boolean enabled = false;
+    private String forwardSecret;
 
     private long globalUploadRateLimit = 0;
     private long minDownloadSpeed = 50_000;
@@ -115,7 +118,8 @@ public final class SelfHostHttpServer {
                                  long minDownloadSpeed,
                                  boolean strictValidation,
                                  boolean useServerPort,
-                                 boolean autoIp) {
+                                 boolean autoIp,
+                                 String forwardSecret) {
         this.ip = ip;
         this.autoIp = autoIp;
         this.url = url;
@@ -125,6 +129,7 @@ public final class SelfHostHttpServer {
         this.useToken = token;
         this.strictValidation = strictValidation;
         this.useServerPort = useServerPort;
+        this.forwardSecret = forwardSecret;
         if (this.globalUploadRateLimit != globalUploadRateLimit || this.minDownloadSpeed != minDownloadSpeed) {
             this.globalUploadRateLimit = globalUploadRateLimit;
             this.minDownloadSpeed = minDownloadSpeed;
@@ -250,6 +255,8 @@ public final class SelfHostHttpServer {
                     handleDownload(ctx, request, queryDecoder);
                 } else if ("/metrics".equals(path)) {
                     handleMetrics(ctx);
+                } else if (SelfHostHttpServer.this.forwardSecret != null && "/forward".equals(path)) {
+                    handleForward(ctx, request);
                 } else {
                     sendError(ctx, HttpResponseStatus.NOT_FOUND, "Not Found");
                 }
@@ -344,6 +351,43 @@ public final class SelfHostHttpServer {
                     .set(HttpHeaderNames.CONTENT_TYPE, "text/plain")
                     .set(HttpHeaderNames.CONTENT_LENGTH, metrics.length());
 
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        }
+
+        private void handleForward(ChannelHandlerContext ctx, FullHttpRequest request) {
+            String secret = request.headers().get("secret");
+            if (secret == null || !secret.equals(SelfHostHttpServer.this.forwardSecret)) {
+                sendError(ctx, HttpResponseStatus.UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            if (SelfHostHttpServer.this.resourcePackBytes == null) {
+                sendError(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, "No resource pack available");
+                return;
+            }
+            String uuid = request.headers().get("uuid");
+            if (uuid == null || !UUIDUtils.validateUUID(uuid)) {
+                sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Incorrect UUID");
+                return;
+            }
+            JsonObject jsonObject = new JsonObject();
+            if (SelfHostHttpServer.this.useToken) {
+                String token = UUID.randomUUID().toString();
+                SelfHostHttpServer.this.oneTimePackUrls.put(token, SelfHostHttpServer.this.strictValidation ? uuid.replace("-", "") : "");
+                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
+            } else {
+                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download");
+            }
+            jsonObject.addProperty("uuid", SelfHostHttpServer.this.packUUID.toString());
+            jsonObject.addProperty("hash", SelfHostHttpServer.this.packHash);
+            String json = jsonObject.toString();
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer(json, CharsetUtil.UTF_8)
+            );
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_TYPE, "application/json")
+                    .set(HttpHeaderNames.CONTENT_LENGTH, json.length());
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 

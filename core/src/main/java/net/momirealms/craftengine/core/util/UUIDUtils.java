@@ -20,4 +20,13 @@ public final class UUIDUtils {
     private static int[] leastMostToIntArray(long uuidMost, long uuidLeast) {
         return new int[]{(int) (uuidMost >> 32), (int) uuidMost, (int) (uuidLeast >> 32), (int) uuidLeast};
     }
+
+    public static boolean validateUUID(String uuid) {
+        try {
+            UUID.fromString(uuid);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }

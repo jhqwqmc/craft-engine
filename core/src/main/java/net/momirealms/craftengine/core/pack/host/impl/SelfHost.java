@@ -72,6 +72,7 @@ public final class SelfHost implements ResourcePackHost {
         private static final String[] QPS_PER_IP = new String[]{"qps_per_ip", "qps-per-ip"};
         private static final String[] MAX_BANDWIDTH_PER_SECOND = new String[]{"max_bandwidth_per_second", "max-bandwidth-per-second"};
         private static final String[] MIN_DOWNLOAD_SPEED_PER_PLAYER = new String[]{"min_download_speed_per_player", "min-download-speed-per-player"};
+        private static final String[] FORWARD_SECRET = new String[]{"forward_secret", "forward-secret"};
 
         @Override
         public SelfHost create(ConfigSection section) {
@@ -132,12 +133,14 @@ public final class SelfHost implements ResourcePackHost {
                 minDownloadSpeed = section.getLong(MIN_DOWNLOAD_SPEED_PER_PLAYER, 50_000);
             }
 
+            String forwardSecret = section.getString(FORWARD_SECRET);
+
             // 更新单例
             selfHostHttpServer.updateProperties(
                     ip, port, url, denyNonMinecraftRequest,
                     protocol, limit, oneTimeToken,
                     maxBandwidthUsage, minDownloadSpeed, strictValidation,
-                    useServerPort, autoIp
+                    useServerPort, autoIp, forwardSecret
             );
             return INSTANCE;
         }
