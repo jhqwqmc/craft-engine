@@ -131,7 +131,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
 
     // connection state
     private final Channel channel;
-    private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UUID> resourcePackUUID = Collections.synchronizedSet(new HashSet<>(4));
     private final EntityCulling culling;
     private ChannelHandler connection;
     private InetAddress address;

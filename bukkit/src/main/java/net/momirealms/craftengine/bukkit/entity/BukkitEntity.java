@@ -28,20 +28,20 @@ import java.util.Set;
 import java.util.UUID;
 
 public class BukkitEntity implements net.momirealms.craftengine.core.entity.Entity {
-    protected final WeakReference<Object> entity;
+    protected final WeakReference<Object> entityRef;
 
     public BukkitEntity(Object entity) {
         if (EntityProxy.CLASS.isInstance(entity)) {
-            this.entity = new WeakReference<>(entity);
+            this.entityRef = new WeakReference<>(entity);
         } else if (entity instanceof Entity bukkitEntity) {
-            this.entity = new WeakReference<>(CraftEntityProxy.INSTANCE.getEntity(bukkitEntity));
+            this.entityRef = new WeakReference<>(CraftEntityProxy.INSTANCE.getEntity(bukkitEntity));
         } else {
             throw new IllegalArgumentException(entity.getClass() + " is not a valid Entity");
         }
     }
 
     protected BukkitEntity(WeakReference<Object> entity) {
-        this.entity = entity;
+        this.entityRef = entity;
     }
 
     @Override
@@ -91,12 +91,12 @@ public class BukkitEntity implements net.momirealms.craftengine.core.entity.Enti
 
     @Override
     public org.bukkit.entity.Entity platformEntity() {
-        return EntityProxy.INSTANCE.getBukkitEntity(this.entity.get());
+        return EntityProxy.INSTANCE.getBukkitEntity(this.entityRef.get());
     }
 
     @Override
     public Object minecraftEntity() {
-        return this.entity.get();
+        return this.entityRef.get();
     }
 
     @Override
@@ -181,6 +181,6 @@ public class BukkitEntity implements net.momirealms.craftengine.core.entity.Enti
             Vec3d mountPos = EntityUtils.getPassengerRidingPosition(vehicle, entity);
             return new Location(platformEntity().getWorld(), mountPos.x, mountPos.y + EntityProxy.INSTANCE.getEyeHeight(entity), mountPos.z, EntityProxy.INSTANCE.getYRot(entity), EntityProxy.INSTANCE.getXRot(entity));
         }
-        return new Location(platformEntity().getWorld(), EntityProxy.INSTANCE.getXo(this.entity), EntityProxy.INSTANCE.getEyeY(this.entity), EntityProxy.INSTANCE.getZo(this.entity), EntityProxy.INSTANCE.getYRot(entity), EntityProxy.INSTANCE.getXRot(entity));
+        return new Location(platformEntity().getWorld(), EntityProxy.INSTANCE.getXo(entity), EntityProxy.INSTANCE.getEyeY(entity), EntityProxy.INSTANCE.getZo(entity), EntityProxy.INSTANCE.getYRot(entity), EntityProxy.INSTANCE.getXRot(entity));
     }
 }
