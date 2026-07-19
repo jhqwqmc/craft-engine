@@ -175,12 +175,12 @@ public class BukkitEntity implements net.momirealms.craftengine.core.entity.Enti
     }
 
     public Location getEyeLocation() {
-        Object serverPlayer = minecraftEntity();
-        Object vehicle = EntityProxy.INSTANCE.getVehicle(serverPlayer);
+        Object entity = minecraftEntity();
+        Object vehicle = EntityProxy.INSTANCE.getVehicle(entity);
         if (vehicle != null) {
-            Vec3d mountPos = EntityUtils.getPassengerRidingPosition(vehicle, serverPlayer);
-            return new Location(platformEntity().getWorld(), mountPos.x, mountPos.y + EntityProxy.INSTANCE.getEyeHeight(serverPlayer), mountPos.z);
+            Vec3d mountPos = EntityUtils.getPassengerRidingPosition(vehicle, entity);
+            return new Location(platformEntity().getWorld(), mountPos.x, mountPos.y + EntityProxy.INSTANCE.getEyeHeight(entity), mountPos.z, EntityProxy.INSTANCE.getYRot(entity), EntityProxy.INSTANCE.getXRot(entity));
         }
-        return new Location(platformEntity().getWorld(), EntityProxy.INSTANCE.getXo(entity), EntityProxy.INSTANCE.getEyeY(entity), EntityProxy.INSTANCE.getZo(entity));
+        return new Location(platformEntity().getWorld(), EntityProxy.INSTANCE.getXo(this.entity), EntityProxy.INSTANCE.getEyeY(this.entity), EntityProxy.INSTANCE.getZo(this.entity), EntityProxy.INSTANCE.getYRot(entity), EntityProxy.INSTANCE.getXRot(entity));
     }
 }

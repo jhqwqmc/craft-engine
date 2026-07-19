@@ -46,6 +46,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,7 +58,9 @@ public final class EntityUtils {
         m.put(PlayerProxy.CLASS, e -> BukkitNetworkManager.instance().getOnlineUser(EntityProxy.INSTANCE.getUUID(e)));
         m.put(LivingEntityProxy.CLASS, BukkitLivingEntity::new);
         m.put(ItemEntityProxy.CLASS, BukkitItemEntity::new);
+        m.put(EntityProxy.CLASS, BukkitEntity::new);
     });
+    private static final Map<Class<?>, Function<Object, net.momirealms.craftengine.core.entity.Entity>> CACHED_ADAPTORS = new ConcurrentHashMap<>();
 
     private EntityUtils() {}
 
@@ -237,13 +240,15 @@ public final class EntityUtils {
 
     public static BukkitEntity adaptNMS(Object handle) {
         Class<?> clazz = handle.getClass();
-        while (clazz != null) {
-            Function<Object, net.momirealms.craftengine.core.entity.Entity> adaptor = ENTITY_ADAPTORS.get(clazz);
-            if (adaptor != null) {
-                return (BukkitEntity) adaptor.apply(handle);
+        return (BukkitEntity) CACHED_ADAPTORS.computeIfAbsent(clazz, k -> {
+            while (k != null) {
+                Function<Object, net.momirealms.craftengine.core.entity.Entity> adaptor = ENTITY_ADAPTORS.get(k);
+                if (adaptor != null) {
+                    return adaptor;
+                }
+                k = k.getSuperclass();
             }
-            clazz = clazz.getSuperclass();
-        }
-        return new BukkitEntity(handle);
+            throw new IllegalStateException("Could not find entity adaptor for " + clazz);
+        }).apply(handle);
     }
 }
