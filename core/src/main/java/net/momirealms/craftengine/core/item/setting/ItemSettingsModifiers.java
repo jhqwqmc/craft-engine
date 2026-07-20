@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.item.setting;
 
 import net.momirealms.craftengine.core.attribute.EquipmentSetComponent;
+import net.momirealms.craftengine.core.attribute.SlotAttributeModifierConfig;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileMeta;
 import net.momirealms.craftengine.core.item.AbstractItemManager;
 import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
@@ -206,6 +207,10 @@ public final class ItemSettingsModifiers {
     public static final ItemSettingsModifierType<ItemSettingsModifier> EQUIPMENT_SET_PART = register(Key.ce("equipment_set_part"), (value -> {
         EquipmentSetPart equipmentSetPart = new EquipmentSetPart(value.getAsList(v -> EquipmentSetComponent.fromConfig(v.getAsSection())));
         return settings -> settings.equipmentSetPart(equipmentSetPart);
+    }));
+    public static final ItemSettingsModifierType<ItemSettingsModifier> ATTRIBUTE_MODIFIERS = register(Key.ce("attribute_modifiers"), (value -> {
+        AttributeModifiers attributeModifiers = new AttributeModifiers(value.getAsList(v -> SlotAttributeModifierConfig.fromConfig(v.getAsSection())));
+        return settings -> settings.attributeModifiers(attributeModifiers);
     }));
 
     private ItemSettingsModifiers() {

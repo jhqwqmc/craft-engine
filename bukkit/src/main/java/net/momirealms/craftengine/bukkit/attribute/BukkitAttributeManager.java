@@ -22,7 +22,7 @@ public final class BukkitAttributeManager extends AbstractAttributeManager {
         super(plugin);
         this.plugin = plugin;
         this.attributeEventListener = new AttributeEventListener(this);
-        this.paperAttributeEventListener = VersionHelper.hasPaperPatch ? new PaperAttributeEventListener() : null;
+        this.paperAttributeEventListener = VersionHelper.hasPaperPatch ? new PaperAttributeEventListener(this) : null;
     }
 
     @Override

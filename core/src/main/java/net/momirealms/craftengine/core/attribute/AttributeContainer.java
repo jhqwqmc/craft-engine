@@ -6,25 +6,35 @@ import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.util.Key;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public final class AttributeContainer implements AttributeGetter {
+    private final AttributeManager manager;
     private final Entity entity;
     private final Map<Key, AttributeInstance> instances = new HashMap<>();
+    private final EntityEquipments equipments;
     private final Context context;
 
-    public AttributeContainer(Entity entity) {
+    public AttributeContainer(AttributeManager manager, Entity entity) {
+        this.manager = manager;
         this.entity = entity;
         this.context = entity instanceof Player player ? PlayerOptionalContext.of(player) : PlayerOptionalContext.emptyImmutable();
-
-
+        this.equipments = new EntityEquipments(this);
     }
 
     public Entity entity() {
         return this.entity;
+    }
+
+    public EntityEquipments equipments() {
+        return this.equipments;
+    }
+
+    public AttributeInstance getOrCreateInstance(Key attribute) {
+        Attribute attr = this.manager.getAttribute(attribute).orElseThrow(() -> new IllegalStateException("Attribute " + attribute + " not found"));
+        return getOrCreateInstance(attr);
     }
 
     public AttributeInstance getOrCreateInstance(Attribute attribute) {

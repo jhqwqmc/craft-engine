@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.util;
 
+import net.momirealms.craftengine.core.attribute.EquipmentSetSlot;
 import net.momirealms.craftengine.core.entity.EquipmentSlot;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.EquipmentSlotProxy;
 
@@ -23,5 +24,18 @@ public final class EquipmentSlotUtils {
         Enum<?> directionEnum = (Enum<?>) equipmentSlot;
         int index = directionEnum.ordinal();
         return EquipmentSlot.values()[index];
+    }
+
+    public static EquipmentSetSlot toEquipmentSetSlot(org.bukkit.inventory.EquipmentSlot equipmentSlot) {
+        return switch (equipmentSlot) {
+            case HAND -> EquipmentSetSlot.MAINHAND;
+            case OFF_HAND -> EquipmentSetSlot.OFFHAND;
+            case FEET -> EquipmentSetSlot.FEET;
+            case LEGS -> EquipmentSetSlot.LEGS;
+            case CHEST -> EquipmentSetSlot.CHEST;
+            case HEAD -> EquipmentSetSlot.HEAD;
+            case BODY -> EquipmentSetSlot.BODY;
+            case SADDLE -> EquipmentSetSlot.SADDLE;
+        };
     }
 }

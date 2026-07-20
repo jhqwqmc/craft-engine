@@ -5,9 +5,9 @@ import net.momirealms.craftengine.core.util.Key;
 public final class AttributeOperations {
     private AttributeOperations() {}
 
-    public static final Key ADD_VALUE_ID = Key.ce("add_value");
-    public static final Key ADD_MULTIPLIED_BASE_ID = Key.ce("add_multiplied_base");
-    public static final Key ADD_MULTIPLIED_TOTAL_ID = Key.ce("add_multiplied_total");
+    public static final Key ADD_VALUE_ID = Key.minecraft("add_value");
+    public static final Key ADD_MULTIPLIED_BASE_ID = Key.minecraft("add_multiplied_base");
+    public static final Key ADD_MULTIPLIED_TOTAL_ID = Key.minecraft("add_multiplied_total");
 
     public static final AttributeOperation ADD_VALUE = AttributeOperation.of(ADD_VALUE_ID, 0,
             (base, current, amount) -> current + amount);

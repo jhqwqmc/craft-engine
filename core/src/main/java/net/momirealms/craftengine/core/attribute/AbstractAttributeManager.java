@@ -5,6 +5,7 @@ import com.ezylang.evalex.parser.ParseException;
 import net.momirealms.craftengine.core.attribute.formula.CauseToFormula;
 import net.momirealms.craftengine.core.attribute.formula.VictimToFormula;
 import net.momirealms.craftengine.core.entity.Entity;
+import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.pack.Pack;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.*;
@@ -43,6 +44,12 @@ public abstract class AbstractAttributeManager implements AttributeManager {
         this.apiOperations.put(AttributeOperations.ADD_MULTIPLIED_TOTAL_ID, AttributeOperations.ADD_MULTIPLIED_TOTAL);
     }
 
+    @Override
+    public void unload() {
+        this.configAttributes.clear();
+        this.configOperations.clear();
+    }
+
     protected void rebuildSortedOperations() {
         Map<Key, AttributeOperation> merged = new LinkedHashMap<>(this.apiOperations);
         merged.putAll(this.configOperations);
@@ -71,8 +78,8 @@ public abstract class AbstractAttributeManager implements AttributeManager {
     }
 
     public AttributeGetter getOrCreateContainer(Entity entity) {
-        if (Config.applyAttributeToAll()) {
-            return this.containers.computeIfAbsent(entity.uuid(), k -> new AttributeContainer(entity));
+        if (Config.applyAttributeToAll() || entity instanceof Player) {
+            return this.containers.computeIfAbsent(entity.uuid(), k -> new AttributeContainer(this, entity));
         }
         return this.containers.get(entity.uuid());
     }
@@ -89,6 +96,7 @@ public abstract class AbstractAttributeManager implements AttributeManager {
 
     @Override
     public DamageFormula findFormula(DamageEvent event) {
+        if (this.causeToFormula == null) return null;
         return this.causeToFormula.getFormula(event);
     }
 
@@ -154,6 +162,11 @@ public abstract class AbstractAttributeManager implements AttributeManager {
         @Override
         public LoadingStage loadingStage() {
             return LoadingStages.ATTRIBUTE_RULES;
+        }
+
+        @Override
+        public List<LoadingStage> dependencies() {
+            return List.of(LoadingStages.ATTRIBUTE);
         }
 
         private DamageFormula compile(String path, String formula) {

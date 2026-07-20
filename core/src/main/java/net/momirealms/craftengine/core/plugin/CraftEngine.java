@@ -345,6 +345,8 @@ public abstract class CraftEngine implements Plugin {
         this.lootManager.delayedInit();
         // 注册脱离坐骑监听器
         this.seatManager.delayedInit();
+        // 注册属性监听器
+        this.attributeManager.delayedInit();
         // 注册玩家相关监听器
         this.proxyMessageManager.delayedInit();
         // 加载实体剔除线程
@@ -511,6 +513,7 @@ public abstract class CraftEngine implements Plugin {
         this.isStopping = true;
         if (this.networkManager != null) this.networkManager.disable();
         if (this.fontManager != null) this.fontManager.disable();
+        if (this.attributeManager != null) this.attributeManager.disable();
         if (this.advancementManager != null) this.advancementManager.disable();
         if (this.packManager != null) this.packManager.disable();
         if (this.itemManager != null) this.itemManager.disable();
