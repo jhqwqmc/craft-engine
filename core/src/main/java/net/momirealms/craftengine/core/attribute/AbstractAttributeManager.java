@@ -58,7 +58,7 @@ public abstract class AbstractAttributeManager implements AttributeManager {
 
     @Override
     public double getAttributeValue(Entity entity, Attribute attribute) {
-        AttributeGetter attributeGetter = this.containers.get(entity.uuid());
+        AttributeGetter attributeGetter = getOrCreateContainer(entity);
         if (attributeGetter == null) {
             return attribute.defaultValue(entity);
         }
@@ -68,6 +68,13 @@ public abstract class AbstractAttributeManager implements AttributeManager {
     @Override
     public void removeContainer(UUID uuid) {
         this.containers.remove(uuid);
+    }
+
+    public AttributeGetter getOrCreateContainer(Entity entity) {
+        if (Config.applyAttributeToAll()) {
+            return this.containers.computeIfAbsent(entity.uuid(), k -> new AttributeContainer(entity));
+        }
+        return this.containers.get(entity.uuid());
     }
 
     @Override
@@ -93,6 +100,10 @@ public abstract class AbstractAttributeManager implements AttributeManager {
         }
         double newDamage = formula.getValue(event);
         if (event.damage() != newDamage) {
+            if (newDamage < 0) {
+                event.setDamage(0);
+                return;
+            }
             event.setDamage(newDamage);
         }
     }

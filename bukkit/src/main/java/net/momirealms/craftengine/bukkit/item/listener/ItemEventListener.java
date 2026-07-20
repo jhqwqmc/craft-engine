@@ -27,6 +27,7 @@ import net.momirealms.craftengine.core.item.behavior.ItemBehavior;
 import net.momirealms.craftengine.core.item.component.DataComponentKeys;
 import net.momirealms.craftengine.core.item.enchantment.EnchantmentKeys;
 import net.momirealms.craftengine.core.item.setting.ItemSettings;
+import net.momirealms.craftengine.core.item.setting.value.DragRepairItem;
 import net.momirealms.craftengine.core.item.setting.value.FoodData;
 import net.momirealms.craftengine.core.item.updater.ItemUpdateResult;
 import net.momirealms.craftengine.core.plugin.config.Config;
@@ -35,6 +36,7 @@ import net.momirealms.craftengine.core.plugin.context.EventTrigger;
 import net.momirealms.craftengine.core.plugin.context.PlayerOptionalContext;
 import net.momirealms.craftengine.core.plugin.context.parameter.DirectContextParameters;
 import net.momirealms.craftengine.core.plugin.network.mod.protocol.ClientboundCreativeModeTabItemsPacket;
+import net.momirealms.craftengine.core.sound.SoundData;
 import net.momirealms.craftengine.core.sound.SoundSet;
 import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.*;
@@ -675,6 +677,72 @@ public final class ItemEventListener implements Listener {
             }
             serverPlayer.sendPackets(packets, false);
         }, null, serverPlayer.platformPlayer());
+    }
+
+    /*
+    左键修复到耐久最大值或用尽材料，右键只消耗单个材料。
+    目标已修满或无法修复时不拦截事件，保持原版交换行为。
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onDragRepairItem(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (event.getClickedInventory() != player.getInventory()) return;
+        org.bukkit.event.inventory.ClickType clickType = event.getClick();
+        if (clickType != org.bukkit.event.inventory.ClickType.LEFT && clickType != org.bukkit.event.inventory.ClickType.RIGHT) return;
+        ItemStack cursor = event.getCursor();
+        ItemStack current = event.getCurrentItem();
+        if (ItemStackUtils.isEmpty(cursor) || ItemStackUtils.isEmpty(current)) return;
+        Item wrappedMaterial = this.itemManager.wrap(cursor);
+        Optional<ItemDefinition> optionalMaterial = wrappedMaterial.getDefinition();
+        if (optionalMaterial.isEmpty()) return;
+        List<DragRepairItem> dragRepairItems = optionalMaterial.get().settings().dragRepairItems();
+        if (dragRepairItems.isEmpty()) return;
+        Item wrappedTarget = this.itemManager.wrap(current);
+        int maxDamage = wrappedTarget.maxDamage();
+        int damage = wrappedTarget.damage().orElse(0);
+        // 目标无耐久或已修满
+        if (maxDamage <= 0 || damage <= 0) return;
+        Optional<ItemDefinition> optionalTarget = wrappedTarget.getDefinition();
+        Key targetId = wrappedTarget.id();
+        DragRepairItem repairItem = null;
+        for (DragRepairItem item : dragRepairItems) {
+            for (String target : item.targets()) {
+                if (target.charAt(0) == '#') {
+                    Key tag = Key.of(target.substring(1));
+                    if (optionalTarget.isPresent() && optionalTarget.get().is(tag)) {
+                        repairItem = item;
+                        break;
+                    }
+                    if (wrappedTarget.hasVanillaTag(tag)) {
+                        repairItem = item;
+                        break;
+                    }
+                } else if (target.equals(targetId.toString())) {
+                    repairItem = item;
+                    break;
+                }
+            }
+            if (repairItem != null) break;
+        }
+        // 找不到匹配的修复目标
+        if (repairItem == null) return;
+        int durabilityPerItem = (int) (repairItem.amount() + repairItem.percent() * maxDamage);
+        if (durabilityPerItem <= 0) return;
+        int consumeAmount = clickType == org.bukkit.event.inventory.ClickType.LEFT
+                ? Math.min((damage + durabilityPerItem - 1) / durabilityPerItem, wrappedMaterial.count())
+                : 1;
+        event.setCancelled(true);
+        wrappedTarget.damage(Math.max(damage - consumeAmount * durabilityPerItem, 0));
+        event.setCurrentItem(ItemStackUtils.getBukkitStack(wrappedTarget.minecraftItem()));
+        wrappedMaterial.shrink(consumeAmount);
+        player.setItemOnCursor(wrappedMaterial.count() <= 0 ? null : ItemStackUtils.getBukkitStack(wrappedMaterial.minecraftItem()));
+        SoundData sound = repairItem.sound();
+        if (sound != null) {
+            BukkitServerPlayer serverPlayer = BukkitAdaptor.adapt(player);
+            if (serverPlayer != null) {
+                serverPlayer.playSound(sound.id(), SoundSource.PLAYER, sound.volume().get(), sound.pitch().get());
+            }
+        }
     }
 
     /*

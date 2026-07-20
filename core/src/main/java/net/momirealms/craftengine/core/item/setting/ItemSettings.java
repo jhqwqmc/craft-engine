@@ -21,11 +21,11 @@ public final class ItemSettings {
     Set<Key> tags = Set.of();
     Repairable repairable = Repairable.UNDEFINED;
     List<AnvilRepairItem> anvilRepairItems = List.of();
+    List<DragRepairItem> dragRepairItems = List.of();
     boolean renameable = true;
     boolean disableVanillaBehavior = true;
     ProjectileMeta projectileMeta;
     Tristate dyeable = Tristate.UNDEFINED;
-    Helmet helmet = null;
     FoodData foodData = null;
     Key consumeReplacement = null;
     CraftRemainder craftRemainder = null;
@@ -50,6 +50,7 @@ public final class ItemSettings {
     Map<CustomItemSettingType<?>, Object> customData = new IdentityHashMap<>(4);
     boolean triggerAdvancement = false;
     Set<Key> allowedProjectiles = Set.of();
+    EquipmentSetPart equipmentSetPart;
 
     private ItemSettings() {}
 
@@ -125,11 +126,11 @@ public final class ItemSettings {
         newSettings.equipment = settings.equipment;
         newSettings.repairable = settings.repairable;
         newSettings.anvilRepairItems = settings.anvilRepairItems;
+        newSettings.dragRepairItems = settings.dragRepairItems;
         newSettings.renameable = settings.renameable;
         newSettings.disableVanillaBehavior = settings.disableVanillaBehavior;
         newSettings.projectileMeta = settings.projectileMeta;
         newSettings.dyeable = settings.dyeable;
-        newSettings.helmet = settings.helmet;
         newSettings.foodData = settings.foodData;
         newSettings.consumeReplacement = settings.consumeReplacement;
         newSettings.craftRemainder = settings.craftRemainder;
@@ -146,6 +147,7 @@ public final class ItemSettings {
         newSettings.glowColor = settings.glowColor;
         newSettings.dropDisplay = settings.dropDisplay;
         newSettings.triggerAdvancement = settings.triggerAdvancement;
+        newSettings.equipmentSetPart = settings.equipmentSetPart;
         newSettings.customData = new IdentityHashMap<>(settings.customData);
         return newSettings;
     }
@@ -221,6 +223,10 @@ public final class ItemSettings {
         return this.anvilRepairItems;
     }
 
+    public List<DragRepairItem> dragRepairItems() {
+        return this.dragRepairItems;
+    }
+
     public boolean respectRepairableComponent() {
         return this.respectRepairableComponent;
     }
@@ -242,11 +248,6 @@ public final class ItemSettings {
     @Nullable
     public CraftRemainder craftRemainder() {
         return this.craftRemainder;
-    }
-
-    @Nullable
-    public Helmet helmet() {
-        return this.helmet;
     }
 
     @Nullable
@@ -303,6 +304,11 @@ public final class ItemSettings {
         return this.allowedProjectiles;
     }
 
+    @Nullable
+    public EquipmentSetPart equipmentSetPart() {
+        return this.equipmentSetPart;
+    }
+
     public ItemSettings fireworkColor(Color color) {
         this.fireworkColor = color;
         return this;
@@ -320,6 +326,11 @@ public final class ItemSettings {
 
     public ItemSettings repairItems(List<AnvilRepairItem> items) {
         this.anvilRepairItems = items;
+        return this;
+    }
+
+    public ItemSettings dragRepairItems(List<DragRepairItem> items) {
+        this.dragRepairItems = items;
         return this;
     }
 
@@ -393,11 +404,6 @@ public final class ItemSettings {
         return this;
     }
 
-    public ItemSettings helmet(Helmet helmet) {
-        this.helmet = helmet;
-        return this;
-    }
-
     public ItemSettings respectRepairableComponent(boolean respectRepairableComponent) {
         this.respectRepairableComponent = respectRepairableComponent;
         return this;
@@ -435,6 +441,11 @@ public final class ItemSettings {
 
     public ItemSettings allowedProjectiles(Set<Key> allowedProjectiles) {
         this.allowedProjectiles = allowedProjectiles;
+        return this;
+    }
+
+    public ItemSettings equipmentSetPart(EquipmentSetPart equipmentSetPart) {
+        this.equipmentSetPart = equipmentSetPart;
         return this;
     }
 }

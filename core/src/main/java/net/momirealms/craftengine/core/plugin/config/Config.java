@@ -172,6 +172,9 @@ public final class Config {
     private boolean chunk_system$generation$carver;
     private boolean chunk_system$generation$feature;
 
+    private boolean attribute$enable;
+    private boolean attribute$apply_to_all_entities;
+
     private boolean furniture$hide_base_entity;
     private ColliderType furniture$collision_entity_type;
     private boolean furniture$light_system;
@@ -559,6 +562,10 @@ public final class Config {
         this.chunk_system$generation$noise = config.getBoolean("chunk-system.generation.noise", true);
         this.chunk_system$generation$structure = config.getBoolean("chunk-system.generation.structure", true);
         this.chunk_system$generation$surface = config.getBoolean("chunk-system.generation.surface", true);
+
+        // attribute
+        this.attribute$enable = config.getBoolean("attribute.enable", true);
+        this.attribute$apply_to_all_entities = config.getBoolean("attribute.apply-to-all-entities", false);
 
         // furniture
         this.furniture$hide_base_entity = config.getBoolean("furniture.hide-base-entity", true);
@@ -1599,6 +1606,14 @@ public final class Config {
 
     public static boolean generationSurface() {
         return instance.chunk_system$generation$surface;
+    }
+
+    public static boolean enableAttributeSystem() {
+        return instance.attribute$enable;
+    }
+
+    public static boolean applyAttributeToAll() {
+        return instance.attribute$apply_to_all_entities;
     }
 
     public YamlDocument loadYamlConfig(String filePath, GeneralSettings generalSettings, LoaderSettings loaderSettings, DumperSettings dumperSettings, UpdaterSettings updaterSettings) {

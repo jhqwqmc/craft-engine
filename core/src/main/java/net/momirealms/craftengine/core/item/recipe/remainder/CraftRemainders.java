@@ -38,6 +38,7 @@ public final class CraftRemainders {
     }
 
     public static CraftRemainder fromConfig(ConfigValue value) {
+        if (value == null) return EmptyCraftRemainder.INSTANCE;
         if (value.is(Map.class)) {
             return CraftRemainders.fromConfig(value.getAsSection());
         } else if (value.is(List.class)) {

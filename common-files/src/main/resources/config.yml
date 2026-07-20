@@ -559,6 +559,12 @@ recipe:
   # Inject furnace block entities to support custom condition. This option requires a restart to apply.
   inject-block-entities: true
 
+attribute:
+  # Master switch for attribute system
+  enable: true
+  # By default, custom attribute settings only apply to players. Turn on this option to apply them to all entities
+  apply-to-all-entities: false
+
 gui:
   browser:
     sounds:
