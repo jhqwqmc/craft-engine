@@ -5,6 +5,7 @@ import net.momirealms.antigrieflib.AntiGriefCompatibility;
 import net.momirealms.antigrieflib.AntiGriefLib;
 import net.momirealms.craftengine.bukkit.advancement.BukkitAdvancementManager;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
+import net.momirealms.craftengine.bukkit.api.event.ServerPreShutdownEvent;
 import net.momirealms.craftengine.bukkit.attribute.BukkitAttributeManager;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.block.behavior.BukkitBlockBehaviors;
@@ -78,6 +79,7 @@ public final class BukkitCraftEngine extends CraftEngine {
     private AntiGriefLib antiGrief;
     private JavaPlugin javaPlugin;
     private final Path dataFolderPath;
+    private ServerEventListener serverEventListener;
 
     BukkitCraftEngine(JavaPlugin plugin) {
         this(new JavaPluginLogger(plugin.getLogger()), plugin.getDataFolder().toPath().toAbsolutePath(),
@@ -257,13 +259,18 @@ public final class BukkitCraftEngine extends CraftEngine {
             this.logger.error("Failed to enable compatibility manager", t);
         }
         super.onPluginEnable();
+        if (VersionHelper.hasPaperPatch) {
+            this.serverEventListener = new ServerEventListener(this);
+            Bukkit.getPluginManager().registerEvents(this.serverEventListener, javaPlugin());
+        }
     }
 
     @Override
     public void onPluginDisable() {
+        if (super.isDisabled) return;
         super.onPluginDisable();
         if (this.tickTask != null) this.tickTask.cancel();
-        if (VersionHelper.hasPaperPatch && !ServerUtils.isStopping()) {
+        if (VersionHelper.hasPaperPatch && ServerUtils.isRunning()) {
             logger().error(" ");
             logger().error(" ");
             logger().error(" ");

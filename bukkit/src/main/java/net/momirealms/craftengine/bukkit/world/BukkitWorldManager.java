@@ -170,6 +170,7 @@ public final class BukkitWorldManager implements WorldManager, Listener {
 
     @Override
     public void disable() {
+        if (this.disabled) return;
         this.disabled = true;
         HandlerList.unregisterAll(this);
         if (this.storageAdaptor instanceof Listener listener) {

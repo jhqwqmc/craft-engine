@@ -8,4 +8,8 @@ public final class ServerUtils {
     public static boolean isStopping() {
         return MinecraftServerProxy.INSTANCE.hasStopped(MinecraftServerProxy.INSTANCE.getServer());
     }
+
+    public static boolean isRunning() {
+        return MinecraftServerProxy.INSTANCE.isRunning(MinecraftServerProxy.INSTANCE.getServer());
+    }
 }

@@ -112,10 +112,10 @@ public abstract class CraftEngine implements Plugin {
     private final PluginTaskRegistry postEnableTaskRegistry = new PluginTaskRegistry();
 
     private final Consumer<CraftEngine> reloadEventDispatcher;
-    private boolean isReloading;
-    private boolean isInitializing;
-    private boolean isStopping;
-    private boolean isDisabled;
+    protected boolean isReloading;
+    protected boolean isInitializing;
+    protected boolean isStopping;
+    protected boolean isDisabled;
 
     private String buildByBit = "%%__BUILTBYBIT__%%";
     private String polymart = "%%__POLYMART__%%";
@@ -510,6 +510,7 @@ public abstract class CraftEngine implements Plugin {
     }
 
     protected void onPluginDisable() {
+        if (this.isDisabled) return;
         this.isStopping = true;
         if (this.networkManager != null) this.networkManager.disable();
         if (this.fontManager != null) this.fontManager.disable();
