@@ -22,6 +22,11 @@ public final class AttributeContainer implements AttributeGetter {
         this.entity = entity;
         this.context = entity instanceof Player player ? PlayerOptionalContext.of(player) : PlayerOptionalContext.emptyImmutable();
         this.equipments = new EntityEquipments(this);
+        for (Attribute attribute : manager.getAttributes()) {
+            if (attribute.predicate.test(entity)) {
+                this.getOrCreateInstance(attribute);
+            }
+        }
     }
 
     public Entity entity() {

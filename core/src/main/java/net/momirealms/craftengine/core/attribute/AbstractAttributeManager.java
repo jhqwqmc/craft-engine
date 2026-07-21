@@ -64,6 +64,11 @@ public abstract class AbstractAttributeManager implements AttributeManager {
     }
 
     @Override
+    public Collection<Attribute> getAttributes() {
+        return this.mergedAttributes.values();
+    }
+
+    @Override
     public double getAttributeValue(Entity entity, Attribute attribute) {
         AttributeGetter attributeGetter = getOrCreateContainer(entity);
         if (attributeGetter == null) {
@@ -244,7 +249,7 @@ public abstract class AbstractAttributeManager implements AttributeManager {
                         new Expression(section.getString("value", "value"))
                 );
             }
-            Attribute attribute = new Attribute(id, defaultValue, constraint, sync);
+            Attribute attribute = new Attribute(id, defaultValue, constraint, (e) -> true, sync);
             AbstractAttributeManager.this.configAttributes.put(id, attribute);
         }
     }

@@ -5,14 +5,18 @@ import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.util.EquipmentSlotUtils;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.core.attribute.AttributeContainer;
+import net.momirealms.craftengine.core.attribute.AttributeContainerSnapshot;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRemoveEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -56,5 +60,16 @@ public final class AttributeEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuit(PlayerQuitEvent event) {
         this.manager.removeContainer(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onShootProjectile(ProjectileLaunchEvent event) {
+        Projectile projectile = event.getEntity();
+        if (projectile.getShooter() instanceof LivingEntity livingEntity) {
+            AttributeContainer container = (AttributeContainer) this.manager.getOrCreateContainer(BukkitAdaptor.adapt(livingEntity));
+            if (container == null) {
+                return;
+            }
+        }
     }
 }
