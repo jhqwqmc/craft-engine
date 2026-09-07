@@ -7,10 +7,75 @@ update-checker: true
 # Forces a specific locale (e.g., zh_cn)
 forced-locale: ''
 
+# Data storage, used by features such as resource pack preferences. Restart to change the backend.
+# Only the selected database's dependencies are downloaded.
+storage:
+  # json, sqlite, h2, mysql, mariadb, postgresql, mongodb
+  type: sqlite
+  # Required JDBC URL. Relative paths start at the server working directory.
+  # SQLite needs no credentials and uses one connection.
+  url: 'jdbc:sqlite:./plugins/CraftEngine/data.db'
+
 resource-pack:
-  # This option determines the location of the generated resource pack
-  # You can use either an absolute path or a relative path here
-  path: "./generated/resource_pack.zip"
+  # Run a workflow explicitly with /ce workflow <name>, or set its trigger below.
+  # /ce reload pack fires reload_pack. /ce reload all fires it after reloading configuration.
+  # Matching workflows run in config order; an error stops the remaining workflows.
+  # Omit trigger to run a workflow only by name.
+  # Steps run in order and stop on failure. Paths are relative to plugins/CraftEngine.
+  # upload requires a pack ID and a file path; the current main ZIP is written before uploading it.
+  # validate and optimize must run before obfuscate, which writes the protected ZIP.
+  workflows:
+    # Fast local builds: generate, validate, and upload.
+    development:
+      trigger: reload_pack
+      steps:
+        - type: generate
+          path: "./generated/resource_pack.zip"
+        - type: validate
+        - type: upload
+          pack: development
+          path: "./generated/resource_pack.zip"
+    # Release builds: requires the resource pack obfuscation module.
+    production:
+      steps:
+        - type: generate
+          path: "./generated/resource_pack_production.zip"
+        - type: validate
+        - type: optimize
+        - type: obfuscate
+        - type: upload
+          pack: production
+          path: "./generated/resource_pack_production.zip"
+
+  # Selected packs are sent in list order. Player overrides take precedence over default.
+  # Players need ce.resourcepack.<id> to change their own preference by command.
+  # Upload cache files default to <type>_<id>.json, separating both types and pack IDs.
+  packs:
+    - id: development
+      default: true
+      type: self
+      # Uploaded files are copied to <storage_directory>/resource_pack.zip.
+      # Relative directories are resolved from plugins/CraftEngine.
+      # Defaults to ./cache/hosted/<id> when omitted.
+      storage_directory: "./cache/hosted/development"
+    - id: production
+      default: false
+      type: self
+      storage_directory: "./cache/hosted/production"
+
+  # Shared HTTP server settings are read once for all self packs: /download/<pack-id>.
+  # self_forward hosts select the remote host ID with their 'pack' option.
+  self-host:
+    ip: "auto"
+    port: "auto"
+    protocol: "http"
+    deny_non_minecraft_request: true
+    one_time_token: true
+    strict_validation: false
+    rate_limiting:
+      max_bandwidth_per_second: 5_000_000
+      min_download_speed_per_player: 50_000
+      qps_per_ip: 5/60
 
   # The minimum client version supported by CraftEngine is 1.16. If you need to provide support for lower client versions, please modify the resource pack yourself.
   # Allowed values:
@@ -170,28 +235,8 @@ resource-pack:
     # Whether a verified player UUID is required to download the resource pack
     strict-player-uuid-validation: true
 
-    # Upload the resource pack automatically on generation
-    # When disabled, you must manually trigger uploads using the /ce upload command
-    auto-upload: true
     # Resend the resource pack to players upon successful upload
     resend-on-upload: true
-    # The file to upload
-    file-to-upload: "./generated/resource_pack.zip"
-
-    # If you're using BungeeCord or Velocity, consider using a proxy-side plugin to handle resource pack delivery.
-    # Read this page for more host types and argument explanations: https://xiao-momi.github.io/craft-engine-wiki/getting_start/set_up_host
-    hosting:
-      - type: "self"
-        ip: "auto"
-        port: "auto"
-        protocol: "http"
-        deny_non_minecraft_request: true
-        one_time_token: true
-        strict_validation: false
-        rate_limiting:
-          max_bandwidth_per_second: 5_000_000
-          min_download_speed_per_player: 50_000
-          qps_per_ip: 5/60
 
     # HTTP proxy settings for routing resource pack download requests. For most users, this option is unnecessary.
     proxy:

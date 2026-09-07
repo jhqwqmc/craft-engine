@@ -6,6 +6,7 @@ import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface ResourcePackHost {
@@ -13,6 +14,10 @@ public interface ResourcePackHost {
     CompletableFuture<List<ResourcePackDownloadData>> requestResourcePackDownloadLink(NetWorkUser user);
 
     CompletableFuture<Void> upload(Path resourcePackPath);
+
+    default CompletableFuture<ResourcePackResponseAction> response(NetWorkUser user, UUID packId, ResourcePackResponseAction action) {
+        return response(user, action);
+    }
 
     default CompletableFuture<ResourcePackResponseAction> response(NetWorkUser user, ResourcePackResponseAction action) {
         defaultResponseCheck(user, action);

@@ -1,3 +1,11 @@
+storage.unknown_type: Unknown storage type '<arg:0>'
+storage.invalid_path: 'Invalid storage path'
+command.workflow.started: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Running resource pack workflow <color:#FFD700><arg:0></color>…</white>'
+command.pack_preference.no_permission: '<red>You do not have permission to manage preferences for resource pack <arg:0>.</red>'
+command.pack_preference.failure: '<red>Could not update resource pack <arg:0>. Check the console.</red>'
+command.pack_preference.usage: '<red>Usage: /ce pack enable|disable|reset &lt;pack&gt; [online-player|UUID]</red>'
+command.workflow.success: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Resource pack workflow <color:#FFD700><arg:0></color> completed</white> <gray>(<hover:show_text:"<gray>Async Process"><color:#FFD700><arg:1></color> ms</hover>)</gray>'
+command.workflow.failure: '<red>Failed to run resource pack workflow <arg:0>. Please check console logs</red>'
 exception.invalid_syntax: '<red>Invalid syntax. Correct syntax: <white><arg:0></white></red>'
 exception.invalid_argument: '<red>Invalid argument. Reason: <white><arg:0></white></red>'
 exception.invalid_sender: <red><arg:0> is not allowed to execute that command. Must be of type <arg:1></red>
@@ -88,8 +96,6 @@ command.resource.save_default.failure: <red>An unknown error occurred while savi
 command.resource.search.parser.not_found: <red>Cannot found config type '<arg:0>'</red>
 command.resource.search.resource.not_found: <red>Cannot found any resource with id '<arg:0>'</red>
 command.resource.search.success: <white>The path of '<arg:0>' is <arg:1></white>
-command.upload.failure.not_supported: <red>Current hosting method '<arg:0>' doesn't support uploading resource packs.</red>
-command.upload.on_progress: <white>Started uploading progress. Check the console for more information.</white>
 command.send_resource_pack.success.single: <white>Sent resource pack to <arg:0>.</white>
 command.send_resource_pack.success.multiple: <white>Send resource packs to <arg:0> players</white>
 command.locale.set.failure: '<red>Invalid locale format: <arg:0></red>'

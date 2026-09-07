@@ -86,7 +86,6 @@ public final class Config {
     private List<String> resource_pack$merge_external_folders;
     private List<String> resource_pack$merge_external_zips;
     private Set<String> resource_pack$exclude_file_extensions;
-    private Path resource_pack$path;
     private String resource_pack$description;
     private boolean resource_pack$map_plugin_compatibility$enable;
     private Path resource_pack$map_plugin_compatibility$path;
@@ -155,9 +154,7 @@ public final class Config {
     private boolean resource_pack$delivery$kick_if_failed_to_apply;
     private boolean resource_pack$delivery$send_on_join;
     private boolean resource_pack$delivery$resend_on_upload;
-    private boolean resource_pack$delivery$auto_upload;
     private boolean resource_pack$delivery$strict_player_uuid_validation;
-    private Path resource_pack$delivery$file_to_upload;
     private boolean resource_pack$delivery$proxy$enable;
     private int resource_pack$delivery$proxy$port;
     private String resource_pack$delivery$proxy$host;
@@ -363,7 +360,10 @@ public final class Config {
                     loadedConfig,
                     this.yaml.load(defaultInputStream),
                     List.of(
-                            YamlUtils.route("resource-pack.delivery.hosting"),
+                            YamlUtils.route("storage"),
+                            YamlUtils.route("resource-pack.packs"),
+                            YamlUtils.route("resource-pack.self-host"),
+                            YamlUtils.route("resource-pack.workflows"),
                             YamlUtils.route("chunk-system.process-invalid-blocks.convert"),
                             YamlUtils.route("chunk-system.process-invalid-furniture.convert"),
                             YamlUtils.route("item.custom-model-data-starting-value.overrides"),
@@ -431,7 +431,6 @@ public final class Config {
         this.debug$print_stack_trace = config.getBoolean("debug.print-stack-trace", false);
 
         // resource pack
-        this.resource_pack$path = resolvePath(config.getString("resource-pack.path", "./generated/resource_pack.zip"));
         this.resource_pack$description = config.getString("resource-pack.description", "<gray>CraftEngine ResourcePack</gray>");
         this.resource_pack$override_uniform_font = config.getBoolean("resource-pack.override-uniform-font", false);
         this.resource_pack$generate_mod_assets = config.getBoolean("resource-pack.generate-mod-assets", false);
@@ -450,9 +449,7 @@ public final class Config {
         this.resource_pack$delivery$resend_on_upload = config.getBoolean("resource-pack.delivery.resend-on-upload", true);
         this.resource_pack$delivery$kick_if_declined = config.getBoolean("resource-pack.delivery.kick-if-declined", true);
         this.resource_pack$delivery$kick_if_failed_to_apply = config.getBoolean("resource-pack.delivery.kick-if-failed-to-apply", true);
-        this.resource_pack$delivery$auto_upload = config.getBoolean("resource-pack.delivery.auto-upload", true);
         this.resource_pack$delivery$strict_player_uuid_validation = config.getBoolean("resource-pack.delivery.strict-player-uuid-validation", true);
-        this.resource_pack$delivery$file_to_upload = resolvePath(config.getString("resource-pack.delivery.file-to-upload", "./generated/resource_pack.zip"));
         this.resource_pack$delivery$proxy$enable = config.getBoolean("resource-pack.delivery.proxy.enable", false);
         this.resource_pack$delivery$proxy$port = config.getInt("resource-pack.delivery.proxy.port", 7890);
         this.resource_pack$delivery$proxy$host = config.getString("resource-pack.delivery.proxy.host", "localhost");
@@ -1101,16 +1098,8 @@ public final class Config {
         return instance.resource_pack$delivery$resend_on_upload;
     }
 
-    public static boolean autoUpload() {
-        return instance.resource_pack$delivery$auto_upload;
-    }
-
     public static boolean strictPlayerUuidValidation() {
         return instance.resource_pack$delivery$strict_player_uuid_validation;
-    }
-
-    public static Path fileToUpload() {
-        return instance.resource_pack$delivery$file_to_upload;
     }
 
     public static List<ConditionalResolution> resolutions() {
@@ -1597,10 +1586,6 @@ public final class Config {
         return instance.item$default_material;
     }
 
-    public static Path resourcePackPath() {
-        return instance.resource_pack$path;
-    }
-
     public void setObf(boolean enable) {
         this.resource_pack$protection$obfuscation$enable = enable;
     }
@@ -1795,7 +1780,6 @@ public final class Config {
 
     private List<DamageIndicator> parseDamageIndicatorSchemes(YamlDocument config) {
         List<Map<?, ?>> list = YamlUtils.reader(config).getMapList("damage-indicator.schemes");
-        if (list == null) return List.of();
         List<DamageIndicator> schemes = new ArrayList<>(list.size());
         int index = 0;
         for (Map<?, ?> element : list) {

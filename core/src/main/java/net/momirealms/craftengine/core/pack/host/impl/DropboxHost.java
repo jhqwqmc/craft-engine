@@ -255,14 +255,14 @@ public final class DropboxHost implements ResourcePackHost {
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
         @Override
-        public DropboxHost create(ConfigSection section) {
+        public DropboxHost create(String id, ConfigSection section) {
             boolean useEnv = section.getBoolean(USE_ENVIRONMENT_VARIABLES);
             String appKey = useEnv ? getNonNullEnvironmentVariable(section, "CE_DROPBOX_APP_KEY") : section.getNonEmptyString(APP_KEY);
             String appSecret = useEnv ? getNonNullEnvironmentVariable(section, "CE_DROPBOX_APP_SECRET") : section.getNonEmptyString(APP_SECRET);
             String refreshToken = useEnv ? getNonNullEnvironmentVariable(section, "CE_DROPBOX_REFRESH_TOKEN") : section.getNonEmptyString(REFRESH_TOKEN);
             String uploadPath = section.getNonNullString(UPLOAD_PATH);
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
-                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "dropbox.json"));
+                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "dropbox_" + id + ".json"));
             return new DropboxHost(appKey, appSecret, refreshToken, uploadPath, cacheFilePath);
         }
     }

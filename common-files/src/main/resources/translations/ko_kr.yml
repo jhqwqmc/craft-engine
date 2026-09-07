@@ -74,8 +74,6 @@ command.resource.create.success: '<white>리소스 <arg:0>가 생성되었습니
 command.resource.create.failure.unknown: '<red>리소스 <arg:0> 생성 실패, 오류: <arg:1></red>'
 command.resource.create.failure.invalid_namespace: '<red>리소스 <arg:0> 생성 실패, 네임스페이스 <arg:1>이(가) 유효하지 않습니다.</red>'
 command.resource.create.failure.exists: '<red>리소스 <arg:0>가 이미 존재합니다.</red>'
-command.upload.failure.not_supported: '<red>현재 호스팅 방식 ''<arg:0>''은 리소스 팩 업로드를 지원하지 않습니다.</red>'
-command.upload.on_progress: '<white>업로드를 시작했습니다. 자세한 내용은 콘솔을 확인하세요.</white>'
 command.send_resource_pack.success.single: '<white><arg:0>에게 리소스 팩을 전송했습니다.</white>'
 command.send_resource_pack.success.multiple: '<white><arg:0>명에게 리소스 팩을 전송했습니다.</white>'
 command.locale.set.failure: '<red>잘못된 로케일 형식: <arg:0></red>'

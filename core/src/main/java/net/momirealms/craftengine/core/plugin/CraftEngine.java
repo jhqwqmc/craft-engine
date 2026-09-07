@@ -28,6 +28,8 @@ import net.momirealms.craftengine.core.plugin.command.sender.SenderFactory;
 import net.momirealms.craftengine.core.plugin.compatibility.CompatibilityManager;
 import net.momirealms.craftengine.core.plugin.compatibility.PluginTaskRegistry;
 import net.momirealms.craftengine.core.plugin.config.Config;
+import net.momirealms.craftengine.core.plugin.config.ConfigSection;
+import net.momirealms.craftengine.core.plugin.config.KnownResourceException;
 import net.momirealms.craftengine.core.plugin.config.lifecycle.LoadingStages;
 import net.momirealms.craftengine.core.plugin.config.template.TemplateManager;
 import net.momirealms.craftengine.core.plugin.context.GlobalVariableManager;
@@ -51,6 +53,8 @@ import net.momirealms.craftengine.core.plugin.proxy.ProxyMessageManager;
 import net.momirealms.craftengine.core.plugin.scheduler.SchedulerAdapter;
 import net.momirealms.craftengine.core.plugin.script.ScriptManager;
 import net.momirealms.craftengine.core.plugin.script.ScriptManagerImpl;
+import net.momirealms.craftengine.core.plugin.storage.StorageTypes;
+import net.momirealms.craftengine.core.plugin.storage.StorageManager;
 import net.momirealms.craftengine.core.plugin.text.component.NBTDataComponentConverter;
 import net.momirealms.craftengine.core.plugin.text.minimessage.ExpressionTag;
 import net.momirealms.craftengine.core.plugin.text.minimessage.RandomTag;
@@ -59,6 +63,7 @@ import net.momirealms.craftengine.core.util.CompletableFutures;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.Timestamp;
 import net.momirealms.craftengine.core.util.VersionHelper;
+import net.momirealms.craftengine.core.util.YamlUtils;
 import net.momirealms.craftengine.core.world.WorldManager;
 import net.momirealms.craftengine.core.world.score.TeamManager;
 import net.momirealms.craftengine.core.world.score.TeamManagerImpl;
@@ -75,6 +80,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -86,6 +92,7 @@ public abstract class CraftEngine implements Plugin {
     protected ClassPathAppender sharedClassPathAppender;
     protected ClassPathAppender privateClassPathAppender;
     protected DependencyManager dependencyManager;
+    protected StorageManager storageManager;
     protected SchedulerAdapter scheduler;
     protected NetworkManager networkManager;
     protected FontManager fontManager;
@@ -186,6 +193,17 @@ public abstract class CraftEngine implements Plugin {
             Migrator.migrateWorldData(this);
         } catch (Exception e) {
             this.logger.warn("Failed to migrate worlds", e);
+        }
+
+        // 初始化存储服务
+        Object value = YamlUtils.reader(this.config.settings()).getValue("storage");
+        ConfigSection settings = ConfigSection.of("storage", value == null ? Map.of() : value);
+        try {
+            this.storageManager = new StorageManager(this.scheduler.async(), StorageTypes.fromConfig(settings));
+        } catch (KnownResourceException e) {
+            throw new IllegalStateException(TranslationManager.instance().plainTranslation("resource.errors_detail", "1", e.node(), e.getLocalizedMessage()), e);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to initialize storage", e);
         }
     }
 
@@ -599,6 +617,7 @@ public abstract class CraftEngine implements Plugin {
         if (this.scriptManager != null) this.scriptManager.disable();
         if (this.scheduler != null) this.scheduler.shutdownScheduler();
         if (this.scheduler != null) this.scheduler.shutdownExecutor();
+        if (this.storageManager != null) this.storageManager.close();
         if (this.commandManager != null) this.commandManager.unregisterFeatures();
         if (this.senderFactory != null) this.senderFactory.close();
         if (this.dependencyManager != null) this.dependencyManager.close();
@@ -732,6 +751,11 @@ public abstract class CraftEngine implements Plugin {
     @Override
     public DependencyManager dependencyManager() {
         return this.dependencyManager;
+    }
+
+    @Override
+    public StorageManager storageManager() {
+        return this.storageManager;
     }
 
     @Override

@@ -4,6 +4,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 
 public interface MessageConstants {
+    TranslatableComponent.Builder COMMAND_PACK_PREFERENCE_NO_PERMISSION = Component.translatable().key("command.pack_preference.no_permission");
+    TranslatableComponent.Builder COMMAND_PACK_PREFERENCE_FAILURE = Component.translatable().key("command.pack_preference.failure");
+    TranslatableComponent.Builder COMMAND_WORKFLOW_STARTED = Component.translatable().key("command.workflow.started");
+    TranslatableComponent.Builder COMMAND_WORKFLOW_SUCCESS = Component.translatable().key("command.workflow.success");
+    TranslatableComponent.Builder COMMAND_WORKFLOW_FAILURE = Component.translatable().key("command.workflow.failure");
     TranslatableComponent.Builder COMMAND_RELOAD_TOO_FAST = Component.translatable().key("command.reload.too_fast");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_SUCCESS = Component.translatable().key("command.reload.config.success");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_ISSUES = Component.translatable().key("command.reload.config.issues");
@@ -38,8 +43,6 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_RESOURCE_SEARCH_PARSER_NOT_FOUND = Component.translatable().key("command.resource.search.parser.not_found");
     TranslatableComponent.Builder COMMAND_RESOURCE_SEARCH_RESOURCE_NOT_FOUND = Component.translatable().key("command.resource.search.resource.not_found");
     TranslatableComponent.Builder COMMAND_RESOURCE_SEARCH_SUCCESS = Component.translatable().key("command.resource.search.success");
-    TranslatableComponent.Builder COMMAND_UPLOAD_FAILURE_NOT_SUPPORTED = Component.translatable().key("command.upload.failure.not_supported");
-    TranslatableComponent.Builder COMMAND_UPLOAD_ON_PROGRESS = Component.translatable().key("command.upload.on_progress");
     TranslatableComponent.Builder COMMAND_SEND_RESOURCE_PACK_SUCCESS_SINGLE = Component.translatable().key("command.send_resource_pack.success.single");
     TranslatableComponent.Builder COMMAND_SEND_RESOURCE_PACK_SUCCESS_MULTIPLE = Component.translatable().key("command.send_resource_pack.success.multiple");
     TranslatableComponent.Builder COMMAND_TOTEM_SUCCESS_SINGLE = Component.translatable().key("command.totem_animation.success.single");

@@ -31,13 +31,13 @@ public final class ResourcePackHosts {
         return type;
     }
 
-    public static ResourcePackHost fromConfig(ConfigSection section) {
+    public static ResourcePackHost fromConfig(String id, ConfigSection section) {
         String type = section.getNonEmptyString("type");
         Key key = Key.ce(type);
         ResourcePackHostType<? extends ResourcePackHost> hostType = BuiltInRegistries.RESOURCE_PACK_HOST_TYPE.getValue(key);
         if (hostType == null) {
             throw new KnownResourceException("host.unknown_type", section.assemblePath("type"), key.asString());
         }
-        return hostType.factory().create(section);
+        return hostType.factory().create(id, section);
     }
 }

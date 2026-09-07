@@ -1,4 +1,9 @@
+storage.unknown_type: 未知的存储类型“<arg:0>”
+storage.invalid_path: '存储路径无效'
 exception.invalid_syntax: <red>语法错误。正确语法：<white><arg:0></white></red>
+command.pack_preference.no_permission: '<red>你没有管理资源包 <arg:0> 偏好的权限。</red>'
+command.pack_preference.failure: '<red>资源包 <arg:0> 操作失败，请查看控制台。</red>'
+command.pack_preference.usage: '<red>用法：/ce pack enable|disable|reset &lt;资源包&gt; [在线玩家名|UUID]</red>'
 exception.invalid_argument: <red>参数无效。原因：<white><arg:0></white></red>
 exception.invalid_sender: <red><arg:0>不允许执行此命令。执行者必须是<arg:1></red>
 exception.unexpected: <red>执行此命令时发生内部错误</red>
@@ -80,8 +85,6 @@ command.resource.save_default.failure: <red>保存默认资产的时候发生了
 command.resource.search.parser.not_found: <red>没有类型为“<arg:0>”的资源</red>
 command.resource.search.resource.not_found: <red>没有ID为“<arg:0>”的资源</red>
 command.resource.search.success: <white>ID为“<arg:0>”的资源定义文件路径为：<arg:1></white>
-command.upload.failure.not_supported: <red>当前的托管方式“<arg:0>”不支持上传资源包</red>
-command.upload.on_progress: <white>已开始上传，请检查控制台以获取更多信息</white>
 command.send_resource_pack.success.single: <white>已将资源包发送给<arg:0></white>
 command.send_resource_pack.success.multiple: <white>已将资源包发送给<arg:0>名玩家</white>
 command.locale.set.failure: <red>无效的区域设置格式：<arg:0></red>
@@ -326,3 +329,6 @@ resource.recipe.shaped_transform.ambigious_source: 在有序合成转化配方�
 resource.recipe.shaped_transform.source_not_found: 无法在配方中找到标记为source的原料
 resource.recipe.post_processor.unknown_type: 未知的配方结果后处理器类型“<arg:0>”
 resource.recipe.unknown_type: 未知的配方类型“<arg:0>”
+command.workflow.started: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>正在执行资源包工作流 <color:#FFD700><arg:0></color>…</white>'
+command.workflow.success: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>资源包工作流 <color:#FFD700><arg:0></color> 执行完成</white><gray>（<hover:show_text:"<gray>异步处理"><color:#FFD700><arg:1></color>毫秒</hover>）</gray>'
+command.workflow.failure: '<red>无法执行资源包工作流 <arg:0>。请检查控制台日志</red>'

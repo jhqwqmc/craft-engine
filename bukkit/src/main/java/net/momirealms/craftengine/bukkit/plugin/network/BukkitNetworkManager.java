@@ -829,7 +829,7 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
     private void handleC2SByteBufPacket(NetWorkUser user, ByteBufPacketEvent event) {
         int packetID = event.packetID();
         ByteBufferPacketListenerHolder[] listener = c2sPacketListeners[user.decoderState().ordinal()];
-        if (packetID >= listener.length) {
+        if (packetID >= listener.length || packetID < 0) {
             Debugger.PACKET.debug(() -> "Failed to convert the packet " + packetID + " for player " + user.name() +
                     ". Packet Flow: C->S, Decoder State: " + user.decoderState() + ", " +
                     "Server version: " + VersionHelper.MINECRAFT_VERSION.version() + ", Bytes: " + event.getBuffer());

@@ -24,18 +24,20 @@ public final class NMSResourcePackListener implements NMSPacketListener {
 
     @Override
     public void onPacketReceive(NetWorkUser user, NMSPacketEvent event, Object packet) {
+        UUID packId = null;
         if (VersionHelper.isOrAbove1_20_3) {
             UUID uuid = ServerboundResourcePackPacketProxy.INSTANCE.getId(packet);
             if (!user.isResourcePackLoading(uuid)) {
                 // 不是CraftEngine发送的资源包,不管
                 return;
             }
+            packId = uuid;
         }
 
         ResourcePackResponseAction action = ResourcePackResponseAction.byOrdinal(ServerboundResourcePackPacketProxy.INSTANCE.getAction(packet).ordinal());
 
         ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
-        host.response(user, action).whenComplete((returnAction, t) -> {
+        host.response(user, packId, action).whenComplete((returnAction, t) -> {
             if (t != null) {
                 CraftEngine.instance().logger().warn(TranslationManager.instance().plainTranslation("host.handle_response_failed", user.name()), t);
                 return;

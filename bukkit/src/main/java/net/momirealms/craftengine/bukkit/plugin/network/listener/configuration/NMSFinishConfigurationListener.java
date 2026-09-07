@@ -3,7 +3,6 @@ package net.momirealms.craftengine.bukkit.plugin.network.listener.configuration;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.util.ResourcePackUtils;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
@@ -70,8 +69,7 @@ public final class NMSFinishConfigurationListener implements NMSPacketListener {
         }
 
         // 请求资源包
-        ResourcePackHost host = CraftEngine.instance().packManager().resourcePackHost();
-        host.requestResourcePackDownloadLink(user).whenComplete((dataList, t) -> {
+        CraftEngine.instance().packManager().prepareResourcePacks(user).whenComplete((dataList, t) -> {
             Queue<Object> tasks = ServerConfigurationPacketListenerImplProxy.INSTANCE.getConfigurationTasks(packetListener);
             if (t != null) {
                 CraftEngine.instance().logger().warn(TranslationManager.instance().plainTranslation("host.get_url_failed", user.name()), t);

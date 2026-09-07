@@ -74,8 +74,6 @@ command.resource.create.success: <white>已建立名為 '<arg:0>' 的空資源</
 command.resource.create.failure.unknown: <red>無法建立名為 '<arg:0>' 的資源，錯誤訊息：<arg:1></red>
 command.resource.create.failure.invalid_namespace: <red>無法建立名為 '<arg:0>' 的資源，命名空間 '<arg:1>' 中包含無效字元</red>
 command.resource.create.failure.exists: <red>名為 '<arg:0>' 的資源已經存在</red>
-command.upload.failure.not_supported: <red>當前的託管方式 '<arg:0>' 不支援上傳資源包</red>
-command.upload.on_progress: <white>已開始上傳，請檢查控制台以獲取更多資訊</white>
 command.send_resource_pack.success.single: <white>已將資源包傳送給 <arg:0></white>
 command.send_resource_pack.success.multiple: <white>已將資源包傳送給 <arg:0> 個玩家</white>
 command.locale.set.failure: <red>無效的區域設定格式：<arg:0></red>

@@ -231,11 +231,11 @@ public final class LobFileHost implements ResourcePackHost {
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
         @Override
-        public LobFileHost create(ConfigSection section) {
+        public LobFileHost create(String id, ConfigSection section) {
             boolean useEnv = section.getBoolean(USE_ENVIRONMENT_VARIABLES);
             String apiKey = useEnv ? getNonNullEnvironmentVariable(section, "CE_LOBFILE_API_KEY") : section.getNonEmptyString(API_KEY);
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
-                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "lobfile.json"));
+                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "lobfile_" + id + ".json"));
             return new LobFileHost(apiKey, cacheFilePath);
         }
     }

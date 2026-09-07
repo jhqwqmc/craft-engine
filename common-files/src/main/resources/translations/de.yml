@@ -77,8 +77,6 @@ command.resource.create.failure.invalid_namespace: <red>Fehler beim Erstellen de
 command.resource.create.failure.exists: <red>Ressource <arg:0> existiert bereits.</red>
 command.resource.save_default.success: <white>Standard-Assets aus '<arg:0>' erfolgreich gespeichert</white>
 command.resource.save_default.failure: <red>Ein unbekannter Fehler ist beim Speichern der Standard-Assets aufgetreten. Bitte prüfe die Konsole</red>
-command.upload.failure.not_supported: <red>Die aktuelle Hosting-Methode '<arg:0>' unterstützt das Hochladen von Resource Packs nicht.</red>
-command.upload.on_progress: <white>Upload gestartet. Prüfe die Konsole für weitere Informationen.</white>
 command.send_resource_pack.success.single: <white>Resource Pack an <arg:0> gesendet.</white>
 command.send_resource_pack.success.multiple: <white>Resource Packs an <arg:0> Spieler gesendet</white>
 command.locale.set.failure: '<red>Ungültiges Locale-Format: <arg:0></red>'

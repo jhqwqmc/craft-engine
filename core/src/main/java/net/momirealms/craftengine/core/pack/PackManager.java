@@ -2,12 +2,19 @@ package net.momirealms.craftengine.core.pack;
 
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
+import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public interface PackManager extends Manageable {
@@ -43,13 +50,27 @@ public interface PackManager extends Manageable {
 
     void clearResourceConfigs();
 
-    void generateResourcePack() throws Exception;
+    void generateResourcePack(Path outputPath) throws Exception;
 
-    Path resourcePackPath();
+    Collection<String> workflowNames();
+
+    void runWorkflow(String name) throws Exception;
+
+    void triggerWorkflows(String event) throws Exception;
 
     ResourcePackHost resourcePackHost();
 
-    void uploadResourcePack();
+    Map<String, ResourcePackHost> resourcePackHosts();
+
+    @Nullable Map<String, Boolean> packPreferences(NetWorkUser user);
+
+    CompletableFuture<List<ResourcePackDownloadData>> prepareResourcePacks(NetWorkUser user);
+
+    CompletableFuture<Void> setPackPreference(UUID player, String pack, Boolean enabled);
+
+    CompletableFuture<Void> sendPackToUsers(String pack);
+
+    CompletableFuture<Void> sendResourcePackAsync(Player player);
 
     void sendResourcePack(Player player);
 }

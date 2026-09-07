@@ -161,14 +161,14 @@ public final class GitLabHost implements ResourcePackHost {
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
         @Override
-        public GitLabHost create(ConfigSection section) {
+        public GitLabHost create(String id, ConfigSection section) {
             boolean useEnv = section.getBoolean(USE_ENVIRONMENT_VARIABLES);
             String gitlabUrl = section.getNonEmptyString(GITLAB_URL);
             String accessToken = useEnv ? getNonNullEnvironmentVariable(section, "CE_GITLAB_ACCESS_TOKEN") : section.getNonEmptyString(ACCESS_TOKEN);
             String projectId = section.getNonEmptyString(PROJECT_ID);
             projectId = URLEncoder.encode(projectId, StandardCharsets.UTF_8).replace("/", "%2F");
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
-                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "gitlab.json"));
+                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "gitlab_" + id + ".json"));
             return new GitLabHost(gitlabUrl, accessToken, projectId, cacheFilePath);
         }
     }

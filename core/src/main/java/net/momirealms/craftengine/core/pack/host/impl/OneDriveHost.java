@@ -253,14 +253,14 @@ public final class OneDriveHost implements ResourcePackHost {
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
         @Override
-        public OneDriveHost create(ConfigSection section) {
+        public OneDriveHost create(String id, ConfigSection section) {
             boolean useEnv = section.getBoolean(USE_ENVIRONMENT_VARIABLES);
             String clientId = useEnv ? getNonNullEnvironmentVariable(section, "CE_ONEDRIVE_CLIENT_ID") : section.getNonEmptyString(CLIENT_ID);
             String clientSecret = useEnv ? getNonNullEnvironmentVariable(section, "CE_ONEDRIVE_CLIENT_SECRET") : section.getNonEmptyString(CLIENT_SECRET);
             String refreshToken = useEnv ? getNonNullEnvironmentVariable(section, "CE_ONEDRIVE_REFRESH_TOKEN") : section.getNonEmptyString(REFRESH_TOKEN);
             String uploadPath = section.getString(UPLOAD_PATH, "resource_pack.zip");
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
-                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "onedrive.json"));
+                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), "onedrive_" + id + ".json"));
             return new OneDriveHost(clientId, clientSecret, refreshToken, uploadPath, cacheFilePath);
         }
     }

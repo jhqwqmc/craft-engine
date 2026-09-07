@@ -88,8 +88,6 @@ command.resource.save_default.failure: <red>Ocurrió un error desconocido al gua
 command.resource.search.parser.not_found: <red>No se encontró el tipo de configuración '<arg:0>'</red>
 command.resource.search.resource.not_found: <red>No se encontró ningún recurso con el id '<arg:0>'</red>
 command.resource.search.success: <white>La ruta de '<arg:0>' es <arg:1></white>
-command.upload.failure.not_supported: <red>El método de alojamiento actual '<arg:0>' no admite la carga de paquetes de recursos.</red>
-command.upload.on_progress: <white>Proceso de carga iniciado. Consulta la consola para más información.</white>
 command.send_resource_pack.success.single: <white>Se envió el paquete de recursos a <arg:0>.</white>
 command.send_resource_pack.success.multiple: <white>Se enviaron paquetes de recursos a <arg:0> jugadores</white>
 command.locale.set.failure: '<red>Formato de idioma no válido: <arg:0></red>'

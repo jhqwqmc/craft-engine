@@ -19,10 +19,12 @@ public final class SelfForwardHost implements ResourcePackHost {
     public static final ResourcePackHostFactory<SelfForwardHost> FACTORY = new Factory();
     private final String server;
     private final String secret;
+    private final String packId;
 
-    private SelfForwardHost(String server, String secret) {
+    private SelfForwardHost(String server, String secret, String packId) {
         this.server = server;
         this.secret = secret;
+        this.packId = packId;
     }
 
     @Override
@@ -31,7 +33,7 @@ public final class SelfForwardHost implements ResourcePackHost {
         CraftEngine.instance().scheduler().executeAsync(() -> {
             try {
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(this.server + "/forward"))
+                        .uri(URI.create(this.server + "/forward/" + this.packId))
                         .header("secret", this.secret)
                         .header("uuid", user.uuid().toString())
                         .build();
@@ -70,10 +72,10 @@ public final class SelfForwardHost implements ResourcePackHost {
     private static class Factory implements ResourcePackHostFactory<SelfForwardHost> {
 
         @Override
-        public SelfForwardHost create(ConfigSection section) {
+        public SelfForwardHost create(String id, ConfigSection section) {
             String server = section.getNonEmptyString("server");
             String secret = section.getNonEmptyString("secret");
-            return new SelfForwardHost(server, secret);
+            return new SelfForwardHost(server, secret, section.getNonEmptyString("pack"));
         }
     }
 }

@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.core.registry;
 
+import net.momirealms.craftengine.core.plugin.storage.Storage;
+import net.momirealms.craftengine.core.plugin.storage.StorageType;
 import net.momirealms.craftengine.core.attribute.base.BaseValueSource;
 import net.momirealms.craftengine.core.attribute.base.BaseValueSourceType;
 import net.momirealms.craftengine.core.attribute.damage.DamageIndicator;
@@ -136,6 +138,7 @@ public final class Registries {
     public static final ResourceKey<Registry<ResolutionType<? extends Resolution>>> RESOLUTION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("resolution_type"));
     public static final ResourceKey<Registry<ItemTransformDataProcessor.Type<? extends ItemTransformDataProcessor>>> TRANSFORM_PROCESSOR_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("transform_processor_type"));
     public static final ResourceKey<Registry<ResourcePackHostType<? extends ResourcePackHost>>> RESOURCE_PACK_HOST_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("resource_pack_host_type"));
+    public static final ResourceKey<Registry<StorageType<? extends Storage>>> STORAGE_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("storage_type"));
     public static final ResourceKey<Registry<CommonFunctionType<? extends Function<Context>>>> COMMON_FUNCTION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("common_function_type"));
     public static final ResourceKey<Registry<CommonConditionType<? extends Condition<Context>>>> COMMON_CONDITION_TYPE = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("common_condition_type"));
     public static final ResourceKey<Registry<EventTrigger>> EVENT_TRIGGER = ResourceKey.create(ROOT_REGISTRY, Key.withCraftEngineNamespace("event_trigger"));

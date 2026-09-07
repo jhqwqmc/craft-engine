@@ -13,12 +13,19 @@ reload:
     - /craftengine reload
     - /ce reload
 
-upload:
+pack_preference:
   enable: true
-  permission: ce.command.admin.upload
+  permission: ''
   usage:
-    - /craftengine upload
-    - /ce upload
+    - /craftengine pack
+    - /ce pack
+
+pack_workflow:
+  enable: true
+  permission: ce.command.admin.pack_workflow
+  usage:
+  - /craftengine workflow
+  - /ce workflow
 
 send_resource_pack:
   enable: true
@@ -354,6 +361,13 @@ debug_clear_cooldown:
   usage:
     - /craftengine debug clear-cooldown
     - /ce debug clear-cooldown
+
+debug_pack_states:
+  enable: true
+  permission: ce.command.debug.pack_states
+  usage:
+    - /craftengine debug pack-states
+    - /ce debug pack-states
 
 debug_expression:
   enable: true

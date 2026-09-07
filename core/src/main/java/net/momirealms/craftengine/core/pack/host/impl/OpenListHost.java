@@ -9,6 +9,7 @@ import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.util.GsonHelper;
 import net.momirealms.craftengine.core.util.HashUtils;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -284,9 +285,9 @@ public final class OpenListHost implements ResourcePackHost {
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
         @Override
-        public OpenListHost create(ConfigSection section) {
+        public OpenListHost create(String id, ConfigSection section) {
             boolean useEnv = section.getBoolean(USE_ENVIRONMENT_VARIABLES);
-            boolean isAlist = "alist".equals(section.get("type")); // 简单的判断是否为 alist 以便兼容旧版本环境变量及缓存读取
+            boolean isAlist = Key.ce(section.getNonEmptyString("type")).equals(ResourcePackHosts.ALIST.id());
             String apiUrl = section.getNonEmptyString(API_URL);
             String userName = useEnv ? getNonNullEnvironmentVariable(section, isAlist ? "CE_ALIST_USERNAME" : "CE_OPENLIST_USERNAME") : section.getNonEmptyString("username");
             String password = useEnv ? getNonNullEnvironmentVariable(section, isAlist ? "CE_ALIST_PASSWORD" : "CE_OPENLIST_PASSWORD") : section.getNonEmptyString("password");
@@ -296,7 +297,7 @@ public final class OpenListHost implements ResourcePackHost {
             String uploadPath = section.getNonEmptyString(UPLOAD_PATH);
             boolean disableUpload = section.getBoolean(DISABLE_UPLOAD);
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
-                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), isAlist ? "alist.json" : "openlist.json"));
+                    .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), (isAlist ? "alist_" : "openlist_") + id + ".json"));
             return new OpenListHost(apiUrl, userName, password, filePassword, otpCode, jwtTokenExpiration, uploadPath, disableUpload, isAlist, cacheFilePath);
         }
     }
