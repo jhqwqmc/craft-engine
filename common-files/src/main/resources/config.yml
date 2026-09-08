@@ -48,7 +48,8 @@ resource-pack:
         - type: optimize
         - type: zip
           path: "./generated/resource_pack_production.zip"
-          # Enable only with the resource pack protection module installed.
+          # Apply the configured protection features; this does not force obfuscation.enable on.
+          # Premium builds require the protection module when true. Ignored in free builds.
           protection: true
         - type: upload
           pack: production
@@ -165,6 +166,7 @@ resource-pack:
 
   # [Premium Exclusive]
   # Protect your resource pack from being cracked by others
+  # These settings apply only to workflow ZIP steps with protection: true.
   protection:
     # Prevent thieves from extracting your resource pack. These options will crash their software.
     # Some of these options may impact your resource pack size.

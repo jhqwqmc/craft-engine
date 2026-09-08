@@ -146,7 +146,7 @@ public abstract class AbstractPackManager implements PackManager {
     public final JsonObject vanillaItemAtlas;
     private Map<Path, CachedConfigFile> cachedConfigFiles = Collections.emptyMap();
     private Map<Path, CachedAssetFile> cachedAssetFiles = Collections.emptyMap();
-    protected BiConsumer<Path, Path> zipGenerator;
+    protected ZipGenerator zipGenerator;
     protected volatile ResourcePackHost resourcePackHost = NoneHost.INSTANCE;
     private volatile Map<String, ResourcePackHost> resourcePackHosts = Map.of();
     private volatile Map<String, Boolean> defaultPacks = Map.of();
@@ -158,13 +158,7 @@ public abstract class AbstractPackManager implements PackManager {
 
     public AbstractPackManager(CraftEngine plugin) {
         this.plugin = plugin;
-        this.zipGenerator = (p1, p2) -> {
-            try {
-                ZipUtils.compress(p1, p2);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to compress resource pack.", e);
-            }
-        };
+        this.zipGenerator = request -> ZipUtils.compress(request.source(), request.output());
         Path resourcesFolder = this.plugin.dataFolderPath().resolve("resources");
         try {
             if (Files.notExists(resourcesFolder)) {
@@ -864,21 +858,17 @@ public abstract class AbstractPackManager implements PackManager {
         return this.plugin.dataFolderPath().resolve(path).toAbsolutePath().normalize();
     }
 
-    private void writePack(GeneratedPack pack, Path output, BiConsumer<Path, Path> writer) throws IOException {
+    private void writePack(GeneratedPack pack, Path output, ZipGenerator writer, boolean protection) throws IOException {
         Files.createDirectories(output.toAbsolutePath().getParent());
         // Upload only a complete result, keeping a previous successful file intact if writing fails.
         Path temporary = Files.createTempFile(output.toAbsolutePath().getParent(), ".pack-", ".zip");
         try {
-            writer.accept(pack.path(), temporary);
+            writer.generate(new PackZipRequest(pack.path(), temporary, protection));
             if (Files.size(temporary) == 0) throw new IOException("No resource pack was written: " + output);
             Files.move(temporary, output, StandardCopyOption.REPLACE_EXISTING);
         } finally {
             Files.deleteIfExists(temporary);
         }
-    }
-
-    private void writePlainPack(GeneratedPack pack, Path output) throws IOException {
-        writePack(pack, output, this.zipGenerator);
     }
 
     private ConfigSection workflowConfig() {
@@ -903,7 +893,7 @@ public abstract class AbstractPackManager implements PackManager {
         PackWorkflowSequence sequence = PackWorkflowSequence.fromConfig(name, value);
         PackWorkflowValidation validation = new PackWorkflowValidation(this.plugin.dataFolderPath(), this.resourcePackHosts);
         sequence.validate(validation);
-        try (WorkflowRun run = new WorkflowRun(validation.usesProtection())) {
+        try (WorkflowRun run = new WorkflowRun(this.zipGenerator, validation.usesProtection())) {
             sequence.execute(run);
             if (run.uploaded && Config.sendPackOnUpload()) {
                 for (Player player : this.plugin.networkManager().onlineUsers()) sendResourcePack(player);
@@ -914,9 +904,11 @@ public abstract class AbstractPackManager implements PackManager {
     private final class WorkflowRun implements PackWorkflowContext, AutoCloseable {
         private GeneratedPack pack;
         private boolean uploaded;
+        private final ZipGenerator generator;
         private final boolean protection;
 
-        private WorkflowRun(boolean protection) {
+        private WorkflowRun(ZipGenerator generator, boolean protection) {
+            this.generator = generator;
             this.protection = protection;
         }
 
@@ -954,7 +946,7 @@ public abstract class AbstractPackManager implements PackManager {
         @Override
         public void zip(String path, boolean protection) throws IOException {
             Path output = resolveWorkflowPath(path);
-            writePlainPack(this.pack, output);
+            writePack(this.pack, output, this.generator, this.protection);
             dispatchGenerationEvent(this.pack.path(), output);
         }
 
