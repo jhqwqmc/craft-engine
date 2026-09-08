@@ -23,6 +23,10 @@ public final class PackWorkflowCommand extends BukkitCommandFeature<CommandSende
         return builder.required("name", StringParser.stringParser(), (context, input) -> CompletableFuture.completedFuture(plugin().packManager().workflowNames().stream().map(Suggestion::suggestion).toList()))
                 .handler(context -> {
                     String name = context.get("name");
+                    if (!plugin().packManager().workflowNames().contains(name)) {
+                        handleFeedback(context, MessageConstants.COMMAND_WORKFLOW_UNKNOWN, Component.text(name));
+                        return;
+                    }
                     handleFeedback(context, MessageConstants.COMMAND_WORKFLOW_STARTED, Component.text(name));
                     plugin().scheduler().executeAsync(() -> {
                         Timestamp timestamp = new Timestamp();

@@ -147,7 +147,6 @@ public final class Config {
     private boolean resource_pack$delivery$kick_if_declined;
     private boolean resource_pack$delivery$kick_if_failed_to_apply;
     private boolean resource_pack$delivery$send_on_join;
-    private boolean resource_pack$delivery$resend_on_upload;
     private boolean resource_pack$delivery$strict_player_uuid_validation;
     private boolean resource_pack$delivery$proxy$enable;
     private int resource_pack$delivery$proxy$port;
@@ -438,7 +437,6 @@ public final class Config {
         this.resource_pack$merge_external_zips = config.getStringList("resource-pack.merge-external-zip-files");
         this.resource_pack$exclude_file_extensions = new HashSet<>(config.getStringList("resource-pack.exclude-file-extensions"));
         this.resource_pack$delivery$send_on_join = config.getBoolean("resource-pack.delivery.send-on-join", true);
-        this.resource_pack$delivery$resend_on_upload = config.getBoolean("resource-pack.delivery.resend-on-upload", true);
         this.resource_pack$delivery$kick_if_declined = config.getBoolean("resource-pack.delivery.kick-if-declined", true);
         this.resource_pack$delivery$kick_if_failed_to_apply = config.getBoolean("resource-pack.delivery.kick-if-failed-to-apply", true);
         this.resource_pack$delivery$strict_player_uuid_validation = config.getBoolean("resource-pack.delivery.strict-player-uuid-validation", true);
@@ -1080,10 +1078,6 @@ public final class Config {
 
     public static boolean sendPackOnJoin() {
         return instance.resource_pack$delivery$send_on_join;
-    }
-
-    public static boolean sendPackOnUpload() {
-        return instance.resource_pack$delivery$resend_on_upload;
     }
 
     public static boolean strictPlayerUuidValidation() {

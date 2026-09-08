@@ -24,7 +24,7 @@ import net.momirealms.craftengine.core.item.*;
 import net.momirealms.craftengine.core.item.component.DataComponentKeys;
 import net.momirealms.craftengine.core.item.network.NetworkItemHandler;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
-import net.momirealms.craftengine.core.item.processor.ObfuscatedItemModelProcessor;
+import net.momirealms.craftengine.core.item.network.ItemModelMappings;
 import net.momirealms.craftengine.core.item.recipe.DatapackRecipeResult;
 import net.momirealms.craftengine.core.item.recipe.IngredientUnlockable;
 import net.momirealms.craftengine.core.pack.AbstractPackManager;
@@ -369,7 +369,7 @@ public final class BukkitItemManager extends AbstractItemManager {
         try {
             Files.createDirectories(itemModelObfPath.getParent());
             JsonObject json = new JsonObject();
-            for (Map.Entry<Key, Key> entry : ObfuscatedItemModelProcessor.getMappings().entrySet()) {
+            for (Map.Entry<Key, Key> entry : ItemModelMappings.getMappings().entrySet()) {
                 json.addProperty(entry.getKey().toString(), entry.getValue().toString());
             }
             GsonHelper.writeJsonFile(json, itemModelObfPath);
@@ -392,7 +392,7 @@ public final class BukkitItemManager extends AbstractItemManager {
                         mappings.put(Key.of(entry.getKey()), Key.of(primitive.getAsString()));
                     }
                 }
-                ObfuscatedItemModelProcessor.setMappings(mappings);
+                ItemModelMappings.setMappings(mappings);
             } catch (IOException e) {
                 this.plugin.logger().warn("Failed to load item model obfuscation mappings.", e);
             }

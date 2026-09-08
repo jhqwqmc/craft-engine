@@ -14,7 +14,6 @@ import net.momirealms.craftengine.core.item.equipment.ComponentBasedEquipment;
 import net.momirealms.craftengine.core.item.equipment.Equipment;
 import net.momirealms.craftengine.core.item.equipment.EquipmentLayerType;
 import net.momirealms.craftengine.core.item.equipment.TrimBasedEquipment;
-import net.momirealms.craftengine.core.item.processor.ObfuscatedItemModelProcessor;
 import net.momirealms.craftengine.core.pack.atlas.*;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ConditionalResolution;
@@ -753,10 +752,6 @@ public abstract class AbstractPackManager implements PackManager {
     private GeneratedPack generatePackAssets(PackGenerationOptions options) throws IOException {
         this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.generation_started"));
         Timestamp timestamp = new Timestamp();
-        if (!options.mapCompatibility() && !Config.obfuscateItemModelUseCache()) {
-            ObfuscatedItemModelProcessor.resetMappings();
-        }
-
         // Create cache data
         PackCacheData cacheData = new PackCacheData(this.plugin);
         this.dispatchCacheEvent(cacheData);
@@ -895,15 +890,11 @@ public abstract class AbstractPackManager implements PackManager {
         sequence.validate(validation);
         try (WorkflowRun run = new WorkflowRun(this.zipGenerator, validation.usesProtection())) {
             sequence.execute(run);
-            if (run.uploaded && Config.sendPackOnUpload()) {
-                for (Player player : this.plugin.networkManager().onlineUsers()) sendResourcePack(player);
-            }
         }
     }
 
     private final class WorkflowRun implements PackWorkflowContext, AutoCloseable {
         private GeneratedPack pack;
-        private boolean uploaded;
         private final ZipGenerator generator;
         private final boolean protection;
 
@@ -955,7 +946,6 @@ public abstract class AbstractPackManager implements PackManager {
             Path source = resolveWorkflowPath(path);
             if (!Files.isRegularFile(source)) throw new IOException("Resource pack does not exist: " + source);
             resourcePackHosts.get(pack).upload(source).join();
-            this.uploaded = true;
         }
 
         @Override

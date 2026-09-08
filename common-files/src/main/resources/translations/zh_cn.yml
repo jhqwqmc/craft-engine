@@ -333,3 +333,4 @@ resource.recipe.unknown_type: 未知的配方类型“<arg:0>”
 command.workflow.started: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>正在执行资源包工作流 <color:#FFD700><arg:0></color>…</white>'
 command.workflow.success: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>资源包工作流 <color:#FFD700><arg:0></color> 执行完成</white><gray>（<hover:show_text:"<gray>异步处理"><color:#FFD700><arg:1></color>毫秒</hover>）</gray>'
 command.workflow.failure: '<red>无法执行资源包工作流 <arg:0>。请检查控制台日志</red>'
+command.workflow.unknown: '<red>未知的资源包工作流：<arg:0></red>'

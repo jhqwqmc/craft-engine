@@ -18,16 +18,9 @@ storage:
 
 resource-pack:
   # Run a workflow explicitly with /ce workflow <name>, or set its trigger below.
-  # /ce reload pack fires reload_pack. /ce reload all fires it after reloading configuration.
-  # Matching workflows run in config order; an error stops the remaining workflows.
-  # Omit trigger to run a workflow only by name.
-  # Steps run in order and stop on failure. Paths are relative to plugins/CraftEngine.
-  # generate creates assets in memory. description overrides the global resource pack description when set.
-  # map_compatibility (or map-compatibility) generates map-plugin assets instead of vanilla block overrides.
-  # zip requires an output path. upload sends an existing file using its pack ID and file path.
-  # validate and optimize must run before zip. ZIP packaging works in all editions.
   workflows:
-    # Fast local builds: generate, validate, zip, and upload.
+    # Sending is controlled by explicit send_pack steps, filtered by players' enabled packs.
+    # Fast local builds: generate, validate, zip, upload, and send.
     development:
       trigger: reload_pack
       steps:
@@ -39,6 +32,8 @@ resource-pack:
         - type: upload
           pack: development
           path: "./generated/resource_pack.zip"
+        - type: send_pack
+          pack: development
     # Release builds: optimize before ZIP packaging.
     production:
       steps:
@@ -48,12 +43,13 @@ resource-pack:
         - type: optimize
         - type: zip
           path: "./generated/resource_pack_production.zip"
-          # Apply the configured protection features; this does not force obfuscation.enable on.
-          # Premium builds require the protection module when true. Ignored in free builds.
+          # Premium Exclusive
           protection: true
         - type: upload
           pack: production
           path: "./generated/resource_pack_production.zip"
+        - type: send_pack
+          pack: production
     # Generate a separate map-compatible resource pack with /ce workflow bluemap.
     bluemap:
       steps:
@@ -192,8 +188,8 @@ resource-pack:
     obfuscation:
       enable: false
       seed: 0 # 0 = random seed
-      # Whether to obfuscate the item model component
-      # This only takes effect when you enable the client-bound-model.
+      # Obfuscate all item model definitions in the resource pack, except bypass-item-models.
+      # Item model components are mapped when sent to clients; server-side values stay unchanged.
       item-model:
         enable: false
         # Prioritize using cached obfuscation results when generating the resource pack,
@@ -242,9 +238,6 @@ resource-pack:
 
     # Whether a verified player UUID is required to download the resource pack
     strict-player-uuid-validation: true
-
-    # Resend the resource pack to players upon successful upload
-    resend-on-upload: true
 
     # HTTP proxy settings for routing resource pack download requests. For most users, this option is unnecessary.
     proxy:

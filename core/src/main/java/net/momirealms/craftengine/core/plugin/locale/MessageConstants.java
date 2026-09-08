@@ -7,6 +7,7 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_PACK_PREFERENCE_NO_PERMISSION = Component.translatable().key("command.pack_preference.no_permission");
     TranslatableComponent.Builder COMMAND_PACK_PREFERENCE_FAILURE = Component.translatable().key("command.pack_preference.failure");
     TranslatableComponent.Builder COMMAND_WORKFLOW_STARTED = Component.translatable().key("command.workflow.started");
+    TranslatableComponent.Builder COMMAND_WORKFLOW_UNKNOWN = Component.translatable().key("command.workflow.unknown");
     TranslatableComponent.Builder COMMAND_WORKFLOW_SUCCESS = Component.translatable().key("command.workflow.success");
     TranslatableComponent.Builder COMMAND_WORKFLOW_FAILURE = Component.translatable().key("command.workflow.failure");
     TranslatableComponent.Builder COMMAND_RELOAD_TOO_FAST = Component.translatable().key("command.reload.too_fast");

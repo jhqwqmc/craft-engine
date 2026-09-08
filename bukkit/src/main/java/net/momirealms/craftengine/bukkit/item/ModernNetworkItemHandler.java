@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.item.component.DataComponentIds;
 import net.momirealms.craftengine.core.item.component.DataComponentKeys;
 import net.momirealms.craftengine.core.item.network.NetworkItemBuildContext;
 import net.momirealms.craftengine.core.item.network.NetworkItemHandler;
+import net.momirealms.craftengine.core.item.network.ItemModelMappings;
 import net.momirealms.craftengine.core.item.network.encrypt.ItemCrypto;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -19,6 +20,7 @@ import net.momirealms.craftengine.core.plugin.context.Context;
 import net.momirealms.craftengine.core.plugin.context.NetworkTextReplaceContext;
 import net.momirealms.craftengine.core.plugin.text.component.ComponentProvider;
 import net.momirealms.craftengine.core.util.AdventureHelper;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.proxy.minecraft.core.component.DataComponentMapProxy;
 import net.momirealms.craftengine.proxy.minecraft.core.component.PatchedDataComponentMapProxy;
@@ -299,6 +301,9 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler {
             modifier.apply(context);
         }
         wrapped = context.item();
+        if (VersionHelper.isOrAbove1_21_2 && Config.obfuscateItemModel()) {
+            processItemModel(wrapped, () -> tag);
+        }
         // 如果tag不空，则需要返回
         if (!tag.isEmpty()) {
             CompoundTag customData = Optional.ofNullable(wrapped.getComponentAsSparrowTag(DataComponentTypes.CUSTOM_DATA))
@@ -313,6 +318,24 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler {
             forceReturn = true;
         }
         return forceReturn ? Optional.of(wrapped) : Optional.empty();
+    }
+
+    static boolean processItemModel(Item item, Supplier<CompoundTag> tagSupplier) {
+        Optional<String> itemModel = item.itemModel();
+        if (itemModel.isEmpty()) return false;
+        Key original = Key.of(itemModel.get());
+        Key mapped = ItemModelMappings.getMappings().get(original);
+        if (mapped == null || mapped.equals(original)) return false;
+
+        CompoundTag tag = tagSupplier.get();
+        // A processor may already have saved the server-side value before changing this component.
+        if (!tag.containsKey(DataComponentIds.ITEM_MODEL)) {
+            tag.put(DataComponentIds.ITEM_MODEL, item.hasNonDefaultComponent(DataComponentKeys.ITEM_MODEL)
+                    ? NetworkItemHandler.pack(Operation.ADD, new StringTag(itemModel.get()))
+                    : NetworkItemHandler.pack(Operation.RESET));
+        }
+        item.itemModel(mapped.asString());
+        return true;
     }
 
     static boolean rebase(Object itemStack, @Nullable Object originalPrototype) {
@@ -483,21 +506,27 @@ public final class ModernNetworkItemHandler implements NetworkItemHandler {
         }
 
         public Optional<Item> process(Context context) {
-            if (VersionHelper.isOrAbove1_21_5) {
-                if (processModernLore(this.item, this::getOrCreateTag, context))
+            if (Config.interceptItem()) {
+                if (VersionHelper.isOrAbove1_21_5) {
+                    if (processModernLore(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                    if (processModernCustomName(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                    if (processModernItemName(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                } else {
+                    if (processLegacyLore(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                    if (processLegacyCustomName(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                    if (processLegacyItemName(this.item, this::getOrCreateTag, context))
+                        this.globalChanged = true;
+                }
+                if (VersionHelper.isOrAbove1_21_2 && Config.obfuscateItemModel() && processItemModel(this.item, this::getOrCreateTag)) {
                     this.globalChanged = true;
-                if (processModernCustomName(this.item, this::getOrCreateTag, context))
-                    this.globalChanged = true;
-                if (processModernItemName(this.item, this::getOrCreateTag, context))
-                    this.globalChanged = true;
-            } else {
-                if (processLegacyLore(this.item, this::getOrCreateTag, context))
-                    this.globalChanged = true;
-                if (processLegacyCustomName(this.item, this::getOrCreateTag, context))
-                    this.globalChanged = true;
-                if (processLegacyItemName(this.item, this::getOrCreateTag, context))
-                    this.globalChanged = true;
+                }
             }
+
             if (this.globalChanged) {
                 CompoundTag customData = Optional.ofNullable(this.item.getComponentAsSparrowTag(DataComponentTypes.CUSTOM_DATA))
                         .map(CompoundTag.class::cast)

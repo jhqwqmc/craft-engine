@@ -7,6 +7,7 @@ command.pack_preference.failure: '<red>Could not update resource pack <arg:0>. C
 command.pack_preference.usage: '<red>Usage: /ce pack enable|disable|reset &lt;pack&gt; [online-player|UUID]</red>'
 command.workflow.success: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Resource pack workflow <color:#FFD700><arg:0></color> completed</white> <gray>(<hover:show_text:"<gray>Async Process"><color:#FFD700><arg:1></color> ms</hover>)</gray>'
 command.workflow.failure: '<red>Failed to run resource pack workflow <arg:0>. Please check console logs</red>'
+command.workflow.unknown: '<red>Unknown resource pack workflow: <arg:0></red>'
 exception.invalid_syntax: '<red>Invalid syntax. Correct syntax: <white><arg:0></white></red>'
 exception.invalid_argument: '<red>Invalid argument. Reason: <white><arg:0></white></red>'
 exception.invalid_sender: <red><arg:0> is not allowed to execute that command. Must be of type <arg:1></red>
