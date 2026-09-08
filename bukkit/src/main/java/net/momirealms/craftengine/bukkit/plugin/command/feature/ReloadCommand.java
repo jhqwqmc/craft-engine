@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
 import net.momirealms.craftengine.core.pack.workflow.PackWorkflowSequence;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
+import net.momirealms.craftengine.core.plugin.ResourceOperationCoordinator;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import net.momirealms.craftengine.core.plugin.locale.MessageConstants;
 import net.momirealms.craftengine.core.util.Timestamp;
@@ -15,9 +16,6 @@ import org.incendo.cloud.parser.standard.EnumParser;
 import java.util.Optional;
 
 public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
-    public static boolean RELOAD_PACK_FLAG = false;
-    public static boolean RELOAD_HOST_FLAG = false;
-
     public ReloadCommand(CraftEngineCommandManager<CommandSender> commandManager, CraftEngine plugin) {
         super(commandManager, plugin);
     }
@@ -29,8 +27,8 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                 .flag(manager.flagBuilder("silent").withAliases("s"))
                 .optional("content", EnumParser.enumParser(ReloadArgument.class))
                 .handler(context -> {
-                    if (plugin().isReloading()) {
-                        handleFeedback(context, MessageConstants.COMMAND_RELOAD_TOO_FAST);
+                    if (plugin().resourceOperations().isBusy()) {
+                        handleFeedback(context, MessageConstants.COMMAND_RESOURCE_BUSY);
                         return;
                     }
                     Optional<ReloadArgument> optional = context.optional("content");
@@ -59,14 +57,15 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                 Timestamp timestamp = new Timestamp();
                                 plugin().packManager().triggerWorkflows(PackWorkflowSequence.RELOAD_PACK);
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_SUCCESS, Component.text(timestamp.deltaMillis()));
+                            } catch (ResourceOperationCoordinator.BusyException e) {
+                                handleFeedback(context, MessageConstants.COMMAND_RESOURCE_BUSY);
                             } catch (Throwable e) {
                                 plugin().logger().warn("Failed to run reload_pack workflows", e);
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_FAILURE);
                             }
                         });
                     } else if (argument == ReloadArgument.HOST) {
-                        RELOAD_HOST_FLAG = true;
-                        plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), false, true).thenAccept(reloadResult -> {
+                        plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), false, true, false, true).thenAccept(reloadResult -> {
                             if (reloadResult.success()) {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
                                         Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
@@ -79,11 +78,9 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                             } else {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
                             }
-                            RELOAD_HOST_FLAG = false;
                         });
                     } else if (argument == ReloadArgument.ALL) {
-                        RELOAD_PACK_FLAG = true;
-                        plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), true, true).thenAcceptAsync(reloadResult -> {
+                        plugin().reloadPlugin(plugin().scheduler().async(), r -> plugin().scheduler().platform().run(r), true, true, true, false).thenAcceptAsync(reloadResult -> {
                             if (reloadResult.success()) {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_SUCCESS,
                                         Component.text(reloadResult.asyncTime() + reloadResult.syncTime()),
@@ -97,15 +94,14 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                     Timestamp timestamp = new Timestamp();
                                     plugin().packManager().triggerWorkflows(PackWorkflowSequence.RELOAD_PACK);
                                     handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_SUCCESS, Component.text(timestamp.deltaMillis()));
+                                } catch (ResourceOperationCoordinator.BusyException e) {
+                                    handleFeedback(context, MessageConstants.COMMAND_RESOURCE_BUSY);
                                 } catch (Throwable e) {
                                     plugin().logger().warn("Failed to run reload_pack workflows", e);
                                     handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_FAILURE);
-                                } finally {
-                                    RELOAD_PACK_FLAG = false;
                                 }
                             } else {
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_CONFIG_FAILURE);
-                                RELOAD_PACK_FLAG = false;
                             }
                         }, plugin().scheduler().async());
                     }

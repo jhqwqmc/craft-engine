@@ -33,6 +33,7 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_WORKFLOW_UNKNOWN = Component.translatable().key("command.workflow.unknown");
     TranslatableComponent.Builder COMMAND_WORKFLOW_SUCCESS = Component.translatable().key("command.workflow.success");
     TranslatableComponent.Builder COMMAND_WORKFLOW_FAILURE = Component.translatable().key("command.workflow.failure");
+    TranslatableComponent.Builder COMMAND_RESOURCE_BUSY = Component.translatable().key("command.resource.busy");
     TranslatableComponent.Builder COMMAND_RELOAD_TOO_FAST = Component.translatable().key("command.reload.too_fast");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_SUCCESS = Component.translatable().key("command.reload.config.success");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_ISSUES = Component.translatable().key("command.reload.config.issues");

@@ -13,7 +13,6 @@ import net.momirealms.craftengine.bukkit.item.factory.BukkitItemFactory;
 import net.momirealms.craftengine.bukkit.item.listener.*;
 import net.momirealms.craftengine.bukkit.item.recipe.BukkitRecipeManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.bukkit.plugin.command.feature.ReloadCommand;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.ItemStackUtils;
 import net.momirealms.craftengine.bukkit.util.ItemComponentUtils;
@@ -121,7 +120,7 @@ public final class BukkitItemManager extends AbstractItemManager {
     public void delayedLoad() {
         super.delayedLoad();
         this.resetItemProviders();
-        if (!ReloadCommand.RELOAD_PACK_FLAG || !Config.obfuscateItemModel()) {
+        if (!this.plugin.isReloadingPack() || !Config.obfuscateItemModel()) {
             for (Player player : this.plugin.networkManager().onlineUsers()) {
                 if (!player.hasClientMod()) continue;
                 player.sendCustomPackets(ClientboundCreativeModeTabItemsPacket.create(player));

@@ -6,7 +6,6 @@ import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackGenerateEven
 import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackPrepareEvent;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.bukkit.plugin.command.feature.ReloadCommand;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.util.ResourcePackUtils;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -70,7 +69,7 @@ public final class BukkitPackManager extends AbstractPackManager implements List
     @Override
     protected void loadHosts() {
         // 仅托管配置需要显式重载；工作流由父类 load 在每次普通重载时重新解析。
-        if (ReloadCommand.RELOAD_PACK_FLAG || ReloadCommand.RELOAD_HOST_FLAG || this.plugin.isEnabling()) {
+        if (this.plugin.isReloadingPack() || this.plugin.isReloadingHost() || this.plugin.isEnabling()) {
             super.loadHosts();
         }
     }

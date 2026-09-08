@@ -32,12 +32,12 @@ public final class SelfForwardHost implements ResourcePackHost {
         CompletableFuture<List<ResourcePackDownloadData>> future = new CompletableFuture<>();
         CraftEngine.instance().scheduler().executeAsync(() -> {
             try {
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create(this.server + "/forward/" + this.packId))
                         .header("secret", this.secret)
                         .header("uuid", user.uuid().toString())
                         .build();
-                HttpResponse<String> response = HttpClientManager.get().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = HttpClientManager.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() != 200) {
                     future.completeExceptionally(new RuntimeException("Failed to request resource pack download link | Body: " + response.body()));
                     return;

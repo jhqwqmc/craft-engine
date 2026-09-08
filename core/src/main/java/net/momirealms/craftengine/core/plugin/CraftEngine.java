@@ -126,7 +126,10 @@ public abstract class CraftEngine implements Plugin {
     private final PluginTaskRegistry preEnableTaskRegistry = new PluginTaskRegistry();
     private final PluginTaskRegistry postEnableTaskRegistry = new PluginTaskRegistry();
 
-    protected boolean isReloading;
+    private final ResourceOperationCoordinator resourceOperations = new ResourceOperationCoordinator();
+    protected volatile boolean isReloading;
+    private volatile boolean reloadingPack;
+    private volatile boolean reloadingHost;
     protected boolean isEnabling;
     protected boolean isFullyLoaded;
     protected boolean isStopping;
@@ -288,95 +291,135 @@ public abstract class CraftEngine implements Plugin {
     }
 
     public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe, boolean callEvent) {
-        CompletableFuture<ReloadResult> future = new CompletableFuture<>();
-        asyncExecutor.execute(() -> {
-            long asyncTime = -1;
-            int issues = 0;
-            try {
-                if (this.isReloading) {
-                    future.complete(ReloadResult.failure());
-                    return;
-                }
-                this.isReloading = true;
-                Timestamp timestamp = new Timestamp();
-                // 重载config
-                this.config.load();
-                // 重载翻译
-                this.translationManager.reload();
-                // 重载其他管理器
-                this.reloadManagers();
-                if (reloadRecipe) {
-                    this.recipeManager.reload();
-                }
-                // 卸载旧脚本（触发 //@Disable、退订事件），在新配置加载前完成
-                if (this.scriptManager != null) this.scriptManager.unload();
-                try {
-                    // 加载全部配置资源
-                    this.packManager.loadPacks();
-                    this.packManager.updateCachedConfigFiles();
-                    if (reloadRecipe) {
-                        issues = this.packManager.loadResources(p -> true);
-                    } else {
-                        issues = this.packManager.loadResources(p -> p.loadingStage() != LoadingStages.RECIPE);
-                    }
-                    this.packManager.clearResourceConfigs();
-                } catch (Throwable e) {
-                    this.logger().warn("Failed to load resources folder", e);
-                    future.complete(ReloadResult.failure());
-                    return;
-                }
-                try {
-                    // pack 列表就绪后再加载脚本（pack 内 script 目录依赖 pack 扫描结果）
-                    if (this.scriptManager != null) this.scriptManager.load();
-                } catch (Throwable e) {
-                    this.logger().warn("Failed to load scripts", e);
-                    future.complete(ReloadResult.failure());
-                    return;
-                }
+        return reloadPlugin(asyncExecutor, syncExecutor, reloadRecipe, callEvent, false, false);
+    }
 
-                // 执行延迟任务
-                this.runDelayTasks(reloadRecipe);
-                // 重新发送tags，需要等待tags更新完成
-                this.networkManager.delayedLoad();
-                asyncTime = timestamp.deltaMillis();
-            } catch (Throwable e) {
-                this.logger().warn("Failed to reload", e);
-                future.complete(ReloadResult.failure());
-            } finally {
-                long finalAsyncTime = asyncTime;
-                int finalIssues = issues;
-                syncExecutor.execute(() -> {
-                    try {
-                        Timestamp timestamp = new Timestamp();
-                        // 注册唱片机音乐
-                        this.soundManager.runDelayedSyncTasks();
-                        // 注册画
-                        this.paintingManager.runDelayedSyncTasks();
-                        // 同步注册配方
-                        if (reloadRecipe) {
-                            this.recipeManager.runDelayedSyncTasks();
-                        }
-                        // 同步修改进度
-                        this.advancementManager.runDelayedSyncTasks();
-                        // 注册所需的监听器
-                        this.lootManager.runDelayedSyncTasks();
-                        this.attributeManager.runDelayedSyncTasks();
-                        this.itemManager.runDelayedSyncTasks();
-                        this.entityManager.runDelayedSyncTasks();
-                        this.compatibilityManager.runDelayedSyncTasks();
-                        if (callEvent) this.callReloadEvent();
-                        long syncTime = timestamp.deltaMillis();
-                        future.complete(ReloadResult.success(finalAsyncTime, syncTime, finalIssues));
-                    } catch (Throwable e) {
-                        this.logger().warn("Failed to run sync tasks", e);
-                        future.complete(ReloadResult.failure());
-                    } finally {
-                        this.isReloading = false;
-                    }
-                });
+    public ResourceOperationCoordinator resourceOperations() {
+        return this.resourceOperations;
+    }
+
+    public boolean isReloadingPack() {
+        return this.reloadingPack;
+    }
+
+    public boolean isReloadingHost() {
+        return this.reloadingHost;
+    }
+
+    public CompletableFuture<ReloadResult> reloadPlugin(Executor asyncExecutor, Executor syncExecutor, boolean reloadRecipe, boolean callEvent, boolean reloadPack, boolean reloadHost) {
+        ResourceOperationCoordinator.Lease operation;
+        try {
+            operation = this.resourceOperations.acquire();
+        } catch (ResourceOperationCoordinator.BusyException e) {
+            return CompletableFuture.completedFuture(ReloadResult.failure());
+        }
+        this.isReloading = true;
+        this.reloadingPack = reloadPack;
+        this.reloadingHost = reloadHost;
+        CompletableFuture<ReloadResult> future = new CompletableFuture<>();
+        // Release before completing the returned future: reload-all starts its workflow in a continuation.
+        CompletableFuture<ReloadResult> result = new CompletableFuture<>();
+        future.whenComplete((value, error) -> {
+            this.isReloading = false;
+            this.reloadingPack = false;
+            this.reloadingHost = false;
+            operation.close();
+            if (error != null) {
+                this.logger().warn("Failed to reload", error);
+                result.complete(ReloadResult.failure());
+            } else {
+                result.complete(value);
             }
         });
-        return future;
+        try {
+            asyncExecutor.execute(() -> {
+                long asyncTime = -1;
+                int issues = 0;
+                try {
+                    Timestamp timestamp = new Timestamp();
+                    // 重载config
+                    this.config.load();
+                    // 重载翻译
+                    this.translationManager.reload();
+                    // 重载其他管理器
+                    this.reloadManagers();
+                    if (reloadRecipe) {
+                        this.recipeManager.reload();
+                    }
+                    // 卸载旧脚本（触发 //@Disable、退订事件），在新配置加载前完成
+                    if (this.scriptManager != null) this.scriptManager.unload();
+                    try {
+                        // 加载全部配置资源
+                        this.packManager.loadPacks();
+                        this.packManager.updateCachedConfigFiles();
+                        if (reloadRecipe) {
+                            issues = this.packManager.loadResources(p -> true);
+                        } else {
+                            issues = this.packManager.loadResources(p -> p.loadingStage() != LoadingStages.RECIPE);
+                        }
+                        this.packManager.clearResourceConfigs();
+                    } catch (Throwable e) {
+                        this.logger().warn("Failed to load resources folder", e);
+                        future.complete(ReloadResult.failure());
+                        return;
+                    }
+                    try {
+                        // pack 列表就绪后再加载脚本（pack 内 script 目录依赖 pack 扫描结果）
+                        if (this.scriptManager != null) this.scriptManager.load();
+                    } catch (Throwable e) {
+                        this.logger().warn("Failed to load scripts", e);
+                        future.complete(ReloadResult.failure());
+                        return;
+                    }
+
+                    // 执行延迟任务
+                    this.runDelayTasks(reloadRecipe);
+                    // 重新发送tags，需要等待tags更新完成
+                    this.networkManager.delayedLoad();
+                    asyncTime = timestamp.deltaMillis();
+                } catch (Throwable e) {
+                    this.logger().warn("Failed to reload", e);
+                    future.complete(ReloadResult.failure());
+                    return;
+                }
+                try {
+                    long finalAsyncTime = asyncTime;
+                    int finalIssues = issues;
+                    syncExecutor.execute(() -> {
+                        try {
+                            Timestamp timestamp = new Timestamp();
+                            // 注册唱片机音乐
+                            this.soundManager.runDelayedSyncTasks();
+                            // 注册画
+                            this.paintingManager.runDelayedSyncTasks();
+                            // 同步注册配方
+                            if (reloadRecipe) {
+                                this.recipeManager.runDelayedSyncTasks();
+                            }
+                            // 同步修改进度
+                            this.advancementManager.runDelayedSyncTasks();
+                            // 注册所需的监听器
+                            this.lootManager.runDelayedSyncTasks();
+                            this.attributeManager.runDelayedSyncTasks();
+                            this.itemManager.runDelayedSyncTasks();
+                            this.entityManager.runDelayedSyncTasks();
+                            this.compatibilityManager.runDelayedSyncTasks();
+                            if (callEvent) this.callReloadEvent();
+                            long syncTime = timestamp.deltaMillis();
+                            future.complete(ReloadResult.success(finalAsyncTime, syncTime, finalIssues));
+                        } catch (Throwable e) {
+                            this.logger().warn("Failed to run sync tasks", e);
+                            future.complete(ReloadResult.failure());
+                        }
+                    });
+                } catch (Throwable e) {
+                    future.completeExceptionally(e);
+                }
+            });
+        } catch (Throwable e) {
+            future.completeExceptionally(e);
+        }
+        return result;
     }
 
     protected void onPluginEnable() {

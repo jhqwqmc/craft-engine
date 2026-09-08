@@ -284,7 +284,8 @@ public final class Dependencies {
 
     public static final Dependency NETTY_HTTP2 = Dependency.of("netty-codec-http2", "io{}netty", "netty-codec-http2")
             .relocations(
-                    Relocation.of("netty{}handler{}codec{}http2", "io{}netty{}handler{}codec{}http2")
+                    Relocation.of("netty{}handler{}codec{}http2", "io{}netty{}handler{}codec{}http2"),
+                    Relocation.of("netty{}handler{}codec{}http", "io{}netty{}handler{}codec{}http")
             )
             .build();
 
@@ -300,6 +301,7 @@ public final class Dependencies {
 
     private static final List<Relocation> AWS_RELOCATIONS = List.of(
             Relocation.of("awssdk", "software{}amazon{}awssdk"),
+            Relocation.of("eventstream", "software{}amazon{}eventstream"),
             Relocation.of("reactivestreams", "org{}reactivestreams"),
             Relocation.of("netty{}handler{}codec{}http2", "io{}netty{}handler{}codec{}http2"),
             Relocation.of("netty{}handler{}codec{}http", "io{}netty{}handler{}codec{}http"),

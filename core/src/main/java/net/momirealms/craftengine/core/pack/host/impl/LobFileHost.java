@@ -75,14 +75,14 @@ public final class LobFileHost implements ResourcePackHost {
 
                 String boundary = "LobFileBoundary" + System.currentTimeMillis();
 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create("https://lobfile.com/api/v3/upload.php"))
                         .header("X-API-Key", this.apiKey)
                         .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                         .POST(buildMultipartBody(resourcePackPath, sha256Hash, boundary))
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(response -> handleUploadResponse(response, sha1Hash, future))
                         .exceptionally(ex -> {
                             future.completeExceptionally(ex);
@@ -127,13 +127,13 @@ public final class LobFileHost implements ResourcePackHost {
     }
 
     public CompletableFuture<AccountInfo> fetchAccountInfo() {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest request = HttpClientManager.requestBuilder()
                 .uri(URI.create("https://lobfile.com/api/v3/rest/get-account-info"))
                 .header("X-API-Key", this.apiKey)
                 .GET()
                 .build();
 
-        return HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        return HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     if (response.statusCode() == 200) {
                         AccountInfo info = GsonHelper.get().fromJson(response.body(), AccountInfo.class);

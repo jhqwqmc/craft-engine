@@ -954,18 +954,26 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public synchronized void triggerWorkflows(String event) throws Exception {
-        for (PackWorkflowSequence workflow : this.workflows.values()) {
-            if (workflow.triggers().contains(event)) {
-                runWorkflow(workflow.name());
+    public void triggerWorkflows(String event) throws Exception {
+        try (var operation = this.plugin.resourceOperations().acquire()) {
+            for (PackWorkflowSequence workflow : this.workflows.values()) {
+                if (workflow.triggers().contains(event)) {
+                    executeWorkflow(workflow);
+                }
             }
         }
     }
 
     @Override
-    public synchronized void runWorkflow(String name) throws Exception {
-        PackWorkflowSequence sequence = this.workflows.get(name);
-        if (sequence == null) throw new IllegalArgumentException("Unknown resource pack workflow: " + name);
+    public void runWorkflow(String name) throws Exception {
+        try (var operation = this.plugin.resourceOperations().acquire()) {
+            PackWorkflowSequence sequence = this.workflows.get(name);
+            if (sequence == null) throw new IllegalArgumentException("Unknown resource pack workflow: " + name);
+            executeWorkflow(sequence);
+        }
+    }
+
+    private void executeWorkflow(PackWorkflowSequence sequence) throws Exception {
         try (WorkflowRun run = new WorkflowRun(this.zipGenerator, sequence.protection())) {
             sequence.execute(run);
         }

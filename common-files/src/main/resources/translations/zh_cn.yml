@@ -338,6 +338,7 @@ command.workflow.started: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><
 command.workflow.success: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>资源包工作流 <color:#FFD700><arg:0></color> 执行完成</white><gray>（<hover:show_text:"<gray>异步处理"><color:#FFD700><arg:1></color>毫秒</hover>）</gray>'
 command.workflow.failure: '<red>无法执行资源包工作流 <arg:0>。请检查控制台日志</red>'
 command.workflow.unknown: '<red>未知的资源包工作流：<arg:0></red>'
+command.resource.busy: '<red>重载或资源包工作流正在执行，请等待完成后再试。</red>'
 command.enchant.success.single: '<white>已将<arg:0>应用于<arg:1></white>'
 command.enchant.success.multiple: '<white>已将<arg:0>应用于<arg:1>个实体</white>'
 command.enchant.failure.not_exist: '<red>未知的魔咒''<arg:0>''</red>'

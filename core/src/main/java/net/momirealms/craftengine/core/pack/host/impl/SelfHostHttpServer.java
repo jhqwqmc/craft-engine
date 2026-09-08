@@ -225,10 +225,10 @@ public final class SelfHostHttpServer {
     }
 
     private static String fetchIp(URI uri) {
-        HttpRequest request = HttpRequest.newBuilder(uri).GET().build();
+        HttpRequest request = HttpClientManager.requestBuilder().uri(uri).timeout(java.time.Duration.ofSeconds(10)).GET().build();
         java.net.http.HttpResponse<String> response;
         try {
-            response = HttpClientManager.get().send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            response = HttpClientManager.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri, e);
             return LOCALHOST;
@@ -341,10 +341,7 @@ public final class SelfHostHttpServer {
         );
         CraftEngine.instance().networkManager().setServerPortHost(pipeline -> {
             pipeline.addLast("trafficShaping", SelfHostHttpServer.this.trafficShapingHandler);
-            pipeline.addLast(new HttpServerCodec());
-            pipeline.addLast(new ChunkedWriteHandler());
-            pipeline.addLast(new HttpObjectAggregator(1048576));
-            pipeline.addLast(new RequestHandler());
+            initializeHttpPipeline(pipeline);
         });
         this.enabled = true;
     }
@@ -371,10 +368,7 @@ public final class SelfHostHttpServer {
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("trafficShaping", SelfHostHttpServer.this.trafficShapingHandler);
-                        pipeline.addLast(new HttpServerCodec());
-                        pipeline.addLast(new ChunkedWriteHandler());
-                        pipeline.addLast(new HttpObjectAggregator(1048576));
-                        pipeline.addLast(new RequestHandler());
+                        initializeHttpPipeline(pipeline);
                     }
                 });
         try {
@@ -385,6 +379,13 @@ public final class SelfHostHttpServer {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while starting self-host HTTP server", e);
         }
+    }
+
+    void initializeHttpPipeline(ChannelPipeline pipeline) {
+        pipeline.addLast(new HttpServerCodec());
+        pipeline.addLast(new ChunkedWriteHandler());
+        pipeline.addLast(new HttpObjectAggregator(1048576));
+        pipeline.addLast(new RequestHandler());
     }
 
     @ChannelHandler.Sharable

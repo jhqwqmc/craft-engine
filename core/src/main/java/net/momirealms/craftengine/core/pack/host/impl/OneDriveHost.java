@@ -80,13 +80,13 @@ public final class OneDriveHost implements ResourcePackHost {
                     return;
                 }
 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create("https://graph.microsoft.com/v1.0/drive/items/" + this.cachedFileId))
                         .header("Authorization", "Bearer " + token)
                         .GET()
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(response -> handleDownloadLinkResponse(response, future))
                         .exceptionally(ex -> {
                             future.completeExceptionally(ex);
@@ -134,14 +134,14 @@ public final class OneDriveHost implements ResourcePackHost {
 
                 String localSha1 = HashUtils.sha1(resourcePackPath);
 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create("https://graph.microsoft.com/v1.0/drive/root:/" + this.uploadPath + ":/content"))
                         .header("Authorization", "Bearer " + token)
                         .header("Content-Type", "application/octet-stream")
                         .PUT(HttpRequest.BodyPublishers.ofFile(resourcePackPath))
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(response -> {
                             if (response.statusCode() == 200 || response.statusCode() == 201) {
                                 JsonObject json = GsonHelper.parseJsonToJsonObject(response.body());
@@ -184,13 +184,13 @@ public final class OneDriveHost implements ResourcePackHost {
                     "&grant_type=refresh_token" +
                     "&scope=Files.ReadWrite.All+offline_access";
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = HttpClientManager.requestBuilder()
                     .uri(URI.create("https://login.microsoftonline.com/common/oauth2/v2.0/token"))
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .POST(HttpRequest.BodyPublishers.ofString(formData))
                     .build();
 
-            HttpResponse<String> response = HttpClientManager.get().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = HttpClientManager.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 CraftEngine.instance().logger().warn("OneDrive Token Refresh Failed: " + response.body());

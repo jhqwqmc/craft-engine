@@ -14,13 +14,13 @@ import net.momirealms.craftengine.core.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 public final class OpenListHost implements ResourcePackHost {
     public static final ResourcePackHostFactory<OpenListHost> FACTORY = new Factory();
@@ -80,14 +81,14 @@ public final class OpenListHost implements ResourcePackHost {
                     return;
                 }
 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create(this.apiUrl + "/api/fs/get"))
                         .header("Authorization", token)
                         .header("Content-Type", "application/json")
                         .POST(getRequestResourcePackDownloadLinkPost())
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(response -> handleResourcePackDownloadLinkResponse(response, future))
                         .exceptionally(ex -> {
                             future.completeExceptionally(ex);
@@ -144,7 +145,7 @@ public final class OpenListHost implements ResourcePackHost {
         CompletableFuture<Void> future = new CompletableFuture<>();
         CraftEngine.instance().scheduler().executeAsync(() -> {
             try {
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create(this.apiUrl + "/api/fs/put"))
                         .header("Authorization", getOrRefreshJwtToken())
                         .header("File-Path", URLEncoder.encode(this.uploadPath, StandardCharsets.UTF_8).replace("/", "%2F"))
@@ -154,7 +155,7 @@ public final class OpenListHost implements ResourcePackHost {
                         .PUT(HttpRequest.BodyPublishers.ofFile(resourcePackPath))
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(resp -> {
                             if (resp.statusCode() == 200) {
                                 this.cachedSha1 = HashUtils.sha1(resourcePackPath);
@@ -175,18 +176,31 @@ public final class OpenListHost implements ResourcePackHost {
     }
 
     private String fetchRemoteSha1(String url) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-        HttpResponse<InputStream> response = HttpClientManager.get().send(request, HttpResponse.BodyHandlers.ofInputStream());
+        HttpRequest request = HttpClientManager.requestBuilder().uri(URI.create(url)).GET().build();
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        // Keep hashing inside the HTTP response future so the deadline also covers the body.
+        return HttpClientManager.send(request, info -> HttpResponse.BodySubscribers.fromSubscriber(
+                new Flow.Subscriber<List<ByteBuffer>>() {
+                    private Flow.Subscription subscription;
 
-        try (InputStream is = response.body()) {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                md.update(buffer, 0, len);
-            }
-            return HexFormat.of().formatHex(md.digest());
-        }
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                        this.subscription = subscription;
+                        subscription.request(1);
+                    }
+
+                    @Override
+                    public void onNext(List<ByteBuffer> buffers) {
+                        buffers.forEach(digest::update);
+                        this.subscription.request(1);
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {}
+
+                    @Override
+                    public void onComplete() {}
+                }, ignored -> HexFormat.of().formatHex(digest.digest()))).body();
     }
 
     private boolean isResponseSuccess(JsonObject json) {
@@ -209,13 +223,13 @@ public final class OpenListHost implements ResourcePackHost {
             return this.jwtToken.left();
         }
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest request = HttpClientManager.requestBuilder()
                 .uri(URI.create(this.apiUrl + "/api/auth/login"))
                 .header("Content-Type", "application/json")
                 .POST(getLoginPost())
                 .build();
 
-        HttpResponse<String> response = HttpClientManager.get().send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = HttpClientManager.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
             throw new IllegalStateException("Authentication failed (HTTP " + response.statusCode() + "): " + response.body());

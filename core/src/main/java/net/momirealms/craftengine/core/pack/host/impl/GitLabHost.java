@@ -70,14 +70,14 @@ public final class GitLabHost implements ResourcePackHost {
                 String localSha1 = HashUtils.sha1(resourcePackPath);
                 String boundary = "CraftEngineBoundary" + System.currentTimeMillis();
 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest request = HttpClientManager.requestBuilder()
                         .uri(URI.create(this.gitlabUrl + "/api/v4/projects/" + this.projectId + "/uploads"))
                         .header("PRIVATE-TOKEN", this.accessToken)
                         .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                         .POST(buildMultipartBodyPublisher(resourcePackPath, boundary))
                         .build();
 
-                HttpClientManager.get().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                HttpClientManager.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenAccept(response -> handleUploadResponse(response, localSha1, future))
                         .exceptionally(ex -> {
                             future.completeExceptionally(ex);

@@ -6,6 +6,8 @@ import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class S3HostFactory implements ResourcePackHostFactory<S3Host> {
     public static final ResourcePackHostFactory<S3Host> INSTANCE = new S3HostFactory();
@@ -49,6 +51,16 @@ public final class S3HostFactory implements ResourcePackHostFactory<S3Host> {
                         Dependencies.AMAZON_AWSSDK_THIRD_PARTY_JACKSON_CORE
                 )
         );
-        return S3Host.FACTORY.create(id, section);
+        // The SDK's socket timeout alone does not bound retries or the whole upload.
+        ConfigSection settings = section.copy();
+        var timeout = settings.getValue("timeout");
+        if (timeout == null) {
+            settings.put("timeout", Map.of("api_call", 300));
+        } else if (timeout.is(Map.class)) {
+            Map<String, Object> timeouts = new LinkedHashMap<>(timeout.getAsSection().values());
+            if (!timeouts.containsKey("api_call") && !timeouts.containsKey("api-call")) timeouts.put("api_call", 300);
+            settings.put("timeout", timeouts);
+        }
+        return S3Host.FACTORY.create(id, settings);
     }
 }
