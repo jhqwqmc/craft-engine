@@ -40,10 +40,12 @@ public final class FileStorage implements Storage {
     }
 
     @Override
-    public synchronized void setPackPreference(UUID player, String pack, Boolean enabled) throws IOException {
+    public synchronized void setPackPreferences(UUID player, Map<String, Boolean> updates) throws IOException {
         Map<String, Boolean> states = new HashMap<>(loadPackPreferences(player));
-        if (enabled == null) states.remove(pack);
-        else states.put(pack, enabled);
+        updates.forEach((pack, enabled) -> {
+            if (enabled == null) states.remove(pack);
+            else states.put(pack, enabled);
+        });
         JsonObject json = new JsonObject();
         states.forEach(json::addProperty);
         Path temporary = Files.createTempFile(this.packPreferencesDirectory, player + "-", ".tmp");

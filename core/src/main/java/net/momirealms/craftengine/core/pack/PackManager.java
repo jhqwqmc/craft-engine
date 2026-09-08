@@ -6,6 +6,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
+import net.momirealms.craftengine.core.util.Tristate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +64,13 @@ public interface PackManager extends Manageable {
 
     CompletableFuture<List<ResourcePackDownloadData>> prepareResourcePacks(NetWorkUser user);
 
-    CompletableFuture<Void> setPackPreference(UUID player, String pack, Boolean enabled);
+    CompletableFuture<Boolean> setPackPreference(UUID player, String pack, @NotNull Tristate enabled);
+
+    CompletableFuture<Boolean> setPackPreferences(UUID player, Map<String, @NotNull Tristate> updates);
+
+    Map<String, PackPreset> packPresets();
+
+    CompletableFuture<Boolean> applyPackPreset(UUID player, String preset);
 
     CompletableFuture<Void> sendPackToUsers(String pack);
 

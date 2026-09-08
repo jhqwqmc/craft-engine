@@ -150,6 +150,7 @@ public abstract class AbstractPackManager implements PackManager {
     private volatile Map<String, ResourcePackHost> resourcePackHosts = Map.of();
     private volatile Map<String, Boolean> defaultPacks = Map.of();
     private volatile Map<String, PackWorkflowSequence> workflows = Map.of();
+    private volatile Map<String, PackPreset> packPresets = Map.of();
     private final Map<NetWorkUser, Set<String>> activePacks = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<NetWorkUser, Map<String, Boolean>> packPreferences = Collections.synchronizedMap(new WeakHashMap<>());
     private final SkipOptimizationParser skipOptimizationParser = new SkipOptimizationParser();
@@ -296,6 +297,7 @@ public abstract class AbstractPackManager implements PackManager {
     public synchronized void load() {
         this.loadHosts();
         this.loadWorkflows();
+        this.loadPackPresets();
     }
 
     @Override
@@ -343,19 +345,60 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     @Override
-    public CompletableFuture<Void> setPackPreference(UUID player, String pack, Boolean enabled) {
+    public CompletableFuture<Boolean> setPackPreference(UUID player, String pack, @NotNull Tristate enabled) {
+        return setPackPreferences(player, Collections.singletonMap(pack, enabled));
+    }
+
+    @Override
+    public Map<String, PackPreset> packPresets() {
+        return this.packPresets;
+    }
+
+    @Override
+    public CompletableFuture<Boolean> applyPackPreset(UUID player, String name) {
+        Map<String, PackPreset> presets = this.packPresets;
+        PackPreset preset = presets.get(name);
+        if (preset == null) throw new IllegalArgumentException("Unknown resource pack preset: " + name);
+        Set<String> managedPacks = new HashSet<>(this.resourcePackHosts.keySet());
+        presets.values().forEach(value -> managedPacks.addAll(value.packs()));
+        return setPackPreferences(player, preset.preferences(managedPacks));
+    }
+
+    @Override
+    public CompletableFuture<Boolean> setPackPreferences(UUID player, Map<String, Tristate> updates) {
+        if (updates.isEmpty()) return CompletableFuture.completedFuture(false);
+        // 在提交异步任务前生成存储快照；UNDEFINED 在存储层通过移除覆盖来恢复默认值。
+        Map<String, Boolean> snapshot = new HashMap<>(updates.size());
+        updates.forEach((pack, state) -> snapshot.put(pack, switch (state) {
+            case TRUE -> true;
+            case FALSE -> false;
+            case UNDEFINED -> null;
+        }));
+        Map<String, Boolean> defaults = this.defaultPacks;
         return this.plugin.storageManager().submit(storage -> {
-            storage.setPackPreference(player, pack, enabled);
-            return Map.copyOf(storage.loadPackPreferences(player));
-        }).thenCompose(states -> {
+            Map<String, Boolean> previous = storage.loadPackPreferences(player);
+            // 比较保存的三态偏好，而非最终是否启用；默认启用与显式启用仍是不同偏好。
+            boolean preferencesChanged = snapshot.entrySet().stream()
+                    .anyMatch(entry -> !Objects.equals(previous.get(entry.getKey()), entry.getValue()));
+            if (!preferencesChanged) return new PackPreferenceUpdate(Map.copyOf(previous), false, false);
+            // 整批持久化后再更新缓存、重发，不能逐个调用单包接口导致多次加载。
+            storage.setPackPreferences(player, snapshot);
+            Map<String, Boolean> states = Map.copyOf(storage.loadPackPreferences(player));
+            boolean changed = defaults.entrySet().stream().anyMatch(entry ->
+                    !Objects.equals(previous.getOrDefault(entry.getKey(), entry.getValue()),
+                            states.getOrDefault(entry.getKey(), entry.getValue())));
+            return new PackPreferenceUpdate(states, true, changed);
+        }).thenCompose(result -> {
             Player online = this.plugin.networkManager().getOnlineUser(player);
-            if (online == null) return CompletableFuture.completedFuture(null);
-            this.packPreferences.put(online, states);
-            // 未配置的包只保存偏好并更新在线缓存，供以后添加该包时使用，无需重发当前资源包。
-            if (!this.resourcePackHosts.containsKey(pack)) return CompletableFuture.completedFuture(null);
-            return sendResourcePackAsync(online);
+            if (online == null) return CompletableFuture.completedFuture(result.preferencesChanged());
+            this.packPreferences.put(online, result.states());
+            // 本服实际选择未变化（包括只修改未托管的包）时，仅保存数据。
+            if (!result.selectionChanged()) return CompletableFuture.completedFuture(result.preferencesChanged());
+            return sendResourcePackAsync(online).thenApply(ignored -> result.preferencesChanged());
         });
     }
+
+    private record PackPreferenceUpdate(Map<String, Boolean> states, boolean preferencesChanged, boolean selectionChanged) {}
 
     @Override
     public CompletableFuture<Void> sendPackToUsers(String pack) {
@@ -817,9 +860,11 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void validateGeneratedPack(GeneratedPack pack, boolean obfuscation) {
+        Timestamp timestamp = new Timestamp();
         this.validateResourcePack(pack.path(), pack.overlays(), obfuscation);
         this.validatePackMetadata(pack.metadata(), pack.overlays(), pack.options().description());
         this.writeJsonSafely(pack.metadata(), pack.path().resolve("pack.mcmeta"));
+        this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.validation_finished", String.valueOf(timestamp.deltaMillis())));
     }
 
     private Path resolveWorkflowPath(String path) {
@@ -827,6 +872,9 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void writePack(GeneratedPack pack, Path output, ZipGenerator writer, boolean protection) throws IOException {
+        this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.compression_started"));
+        // 包含混淆、ZIP 写入和最终文件替换的耗时，仅在成功后输出完成提示。
+        Timestamp timestamp = new Timestamp();
         Files.createDirectories(output.toAbsolutePath().getParent());
         // Upload only a complete result, keeping a previous successful file intact if writing fails.
         Path temporary = Files.createTempFile(output.toAbsolutePath().getParent(), ".pack-", ".zip");
@@ -837,21 +885,22 @@ public abstract class AbstractPackManager implements PackManager {
         } finally {
             Files.deleteIfExists(temporary);
         }
+        this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.compression_finished", String.valueOf(timestamp.deltaMillis())));
     }
 
     protected void loadHosts() {
         Object hostingObj = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.packs");
-        ConfigValue configValue = ConfigValue.of("resource-pack.packs", hostingObj == null ? List.of() : hostingObj);
         try {
+            ConfigSection packs = ConfigSection.of("resource-pack.packs", hostingObj == null ? Map.of() : hostingObj);
             Map<String, ResourcePackHost> hosts = new LinkedHashMap<>();
             Map<String, Boolean> defaults = new LinkedHashMap<>();
             Map<String, Path> selfHostedPacks = new LinkedHashMap<>();
-            for (ConfigValue value : configValue.getAsValueList()) {
-                ConfigSection section = value.getAsSection();
-                String id = section.getNonEmptyString("id");
-                if (!id.matches("[A-Za-z0-9_-]{1,64}") || hosts.containsKey(id)) {
-                    throw new IllegalArgumentException("Invalid or duplicate resource pack host id: " + id);
+            // 与工作流一样使用配置键作为 ID，并保留配置顺序作为资源包发送顺序。
+            for (String id : packs.keySet()) {
+                if (!id.matches("[A-Za-z0-9_-]{1,64}")) {
+                    throw new IllegalArgumentException("Invalid resource pack host id: " + id);
                 }
+                ConfigSection section = packs.getNonNullSection(id);
                 hosts.put(id, ResourcePackHosts.fromConfig(id, section));
                 defaults.put(id, section.getBoolean("default", true));
                 if (hosts.get(id) instanceof SelfHost selfHost) {
@@ -873,6 +922,26 @@ public abstract class AbstractPackManager implements PackManager {
         } catch (Throwable e) {
             this.plugin.logger().warn("Failed to load resource pack hosts", e);
         }
+    }
+
+    private void loadPackPresets() {
+        Map<String, PackPreset> presets = new LinkedHashMap<>();
+        try {
+            Object value = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.presets");
+            ConfigSection section = ConfigSection.of("resource-pack.presets", value == null ? Map.of() : value);
+            for (String name : section.keySet()) {
+                try {
+                    presets.put(name, PackPreset.fromConfig(name, Objects.requireNonNull(section.getValue(name))));
+                } catch (KnownResourceException e) {
+                    this.plugin.logger().warn(TranslationManager.instance().plainTranslation("config.errors_detected", e.getLocalizedMessage()));
+                } catch (Exception e) {
+                    this.plugin.logger().warn("Failed to load resource pack preset: " + name, e);
+                }
+            }
+        } catch (KnownResourceException e) {
+            this.plugin.logger().warn(TranslationManager.instance().plainTranslation("config.errors_detected", e.getLocalizedMessage()));
+        }
+        this.packPresets = Collections.unmodifiableMap(presets);
     }
 
     private void loadWorkflows() {
@@ -967,7 +1036,11 @@ public abstract class AbstractPackManager implements PackManager {
         public void upload(String pack, String path) throws IOException {
             Path source = resolveWorkflowPath(path);
             if (!Files.isRegularFile(source)) throw new IOException("Resource pack does not exist: " + source);
+            plugin.logger().info(TranslationManager.instance().plainTranslation("host.upload_started"));
+            Timestamp timestamp = new Timestamp();
+            // 托管上传是异步操作，等待完成后再统计耗时，失败时不输出成功提示。
             resourcePackHosts.get(pack).upload(source).join();
+            plugin.logger().info(TranslationManager.instance().plainTranslation("host.upload_finished", String.valueOf(timestamp.deltaMillis())));
         }
 
         @Override
@@ -1108,6 +1181,7 @@ public abstract class AbstractPackManager implements PackManager {
 
     @SuppressWarnings("DuplicatedCode")
     private void optimizeResourcePack(Path path) {
+        Timestamp timestamp = new Timestamp();
         // 收集全部overlay
         Path[] rootPaths;
         try {
@@ -1362,6 +1436,7 @@ public abstract class AbstractPackManager implements PackManager {
             double compressionRatio = ((double) optimizedSize / originalSize) * 100;
             this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.optimization_result", formatSize(originalSize), formatSize(optimizedSize), String.format("%.2f", compressionRatio)));
         }
+        this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.optimization_finished", String.valueOf(timestamp.deltaMillis())));
     }
 
     private static final int BAR_LENGTH = 30;

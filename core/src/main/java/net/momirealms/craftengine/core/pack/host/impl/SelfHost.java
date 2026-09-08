@@ -17,9 +17,9 @@ public final class SelfHost implements ResourcePackHost {
     private final String id;
     private final Path storagePath;
 
-    SelfHost(String id, Path storageDirectory) {
+    SelfHost(String id, Path storagePath) {
         this.id = id;
-        this.storagePath = storageDirectory.resolve("resource_pack.zip").toAbsolutePath().normalize();
+        this.storagePath = storagePath.toAbsolutePath().normalize();
     }
 
     public Path storagePath() {
@@ -76,8 +76,8 @@ public final class SelfHost implements ResourcePackHost {
     private static class Factory implements ResourcePackHostFactory<SelfHost> {
         @Override
         public SelfHost create(String id, ConfigSection section) {
-            String directory = section.getValue("storage_directory", ConfigValue::getAsNonEmptyString, "./cache/hosted/" + id);
-            Path path = CraftEngine.instance().dataFolderPath().resolve(directory).toAbsolutePath().normalize();
+            String file = section.getValue("storage_path", ConfigValue::getAsNonEmptyString, "./cache/hosted/" + id + "/resource_pack.zip");
+            Path path = CraftEngine.instance().dataFolderPath().resolve(file);
             return new SelfHost(id, path);
         }
     }

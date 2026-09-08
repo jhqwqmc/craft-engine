@@ -61,21 +61,25 @@ resource-pack:
           path: "./generated/resource_pack_bluemap.zip"
           protection: false
 
-  # Selected packs are sent in list order. Player overrides take precedence over default.
-  # Players need ce.resourcepack.<id> to change their own preference by command.
-  # Upload cache files default to <type>_<id>.json, separating both types and pack IDs.
+  # Keys are pack IDs. Selected packs are sent in configuration order.
+  # Player overrides take precedence over default.
   packs:
-    - id: development
+    development:
       default: true
       type: self
-      # Uploaded files are copied to <storage_directory>/resource_pack.zip.
-      # Relative directories are resolved from plugins/CraftEngine.
-      # Defaults to ./cache/hosted/<id> when omitted.
-      storage_directory: "./cache/hosted/development"
-    - id: production
+      # Destination ZIP file for uploads. Relative paths start at plugins/CraftEngine.
+      # Defaults to ./cache/hosted/<id>/resource_pack.zip when omitted.
+      storage_path: "./cache/hosted/development/resource_pack.zip"
+    production:
       default: false
       type: self
-      storage_directory: "./cache/hosted/production"
+      storage_path: "./cache/hosted/production/resource_pack.zip"
+
+  # Players apply with /pack preset <name>. Reload presets with /ce reload.
+  # Players need ce.resourcepack.preset.<name>
+  presets:
+    development: [development]
+    production: [production]
 
   # Shared HTTP server settings are read once for all self packs: /download/<pack-id>.
   # self_forward hosts select the remote host ID with their 'pack' option.
@@ -767,6 +771,9 @@ chunk-system:
   # Settings for injection
   injection:
     # Requires server restart to take effect
+    # If one of the options is incompatible with your server, switch to another option.
+    # The typical symptom of this issue is the loss of block physics.
+    # This behavior is entirely dependent on how the server implementation in use modifies the default chunk logic
     # - section: Injects the LevelChunkSection
     # - palette: Injects the PalettedContainer
     target: section

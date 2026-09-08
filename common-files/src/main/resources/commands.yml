@@ -13,13 +13,6 @@ reload:
     - /craftengine reload
     - /ce reload
 
-pack_preference:
-  enable: true
-  permission: ''
-  usage:
-    - /craftengine pack
-    - /ce pack
-
 pack_workflow:
   enable: true
   permission: ce.command.admin.pack_workflow
@@ -67,6 +60,32 @@ item_browser_admin:
   usage:
     - /craftengine item browser
     - /ce item browser
+
+pack_preference_admin:
+  enable: true
+  permission: ce.command.admin.pack_preference
+  usage:
+    - /craftengine feature pack-preference
+    - /ce feature pack-preference
+
+pack_preset_admin:
+  enable: true
+  permission: ce.command.admin.pack_preset
+  usage:
+    - /craftengine feature pack-preset
+    - /ce feature pack-preset
+
+pack_preference_player:
+  enable: true
+  permission: ce.command.player.pack_preference
+  usage:
+    - /pack
+
+pack_preset_player:
+  enable: true
+  permission: ce.command.player.pack_preset
+  usage:
+    - /pack preset
 
 search_usage_player:
   enable: true

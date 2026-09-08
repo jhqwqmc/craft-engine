@@ -355,6 +355,7 @@ public final class Config {
                     List.of(
                             YamlUtils.route("storage"),
                             YamlUtils.route("resource-pack.packs"),
+                            YamlUtils.route("resource-pack.presets"),
                             YamlUtils.route("resource-pack.self-host"),
                             YamlUtils.route("resource-pack.workflows"),
                             YamlUtils.route("chunk-system.process-invalid-blocks.convert"),

@@ -486,14 +486,19 @@ public final class RecipeEventListener implements Listener {
                 return;
             }
 
-            Item wrappedResult = BukkitItemManager.instance().wrap(event.getResult());
             if (!firstItemDefinition.settings().canEnchant()) {
-                Object previousEnchantment = wrappedFirst.getExactComponent(DataComponentTypes.ENCHANTMENTS);
-                if (previousEnchantment != null) {
-                    wrappedResult.setExactComponent(DataComponentTypes.ENCHANTMENTS, previousEnchantment);
+                Item wrappedResult = BukkitItemManager.instance().wrap(event.getResult());
+                if (VersionHelper.COMPONENT_RELEASE) {
+                    Object previousEnchantment = wrappedFirst.getExactComponent(DataComponentTypes.ENCHANTMENTS);
+                    if (previousEnchantment != null) {
+                        wrappedResult.setExactComponent(DataComponentTypes.ENCHANTMENTS, previousEnchantment);
+                    } else {
+                        wrappedResult.resetComponent(DataComponentTypes.ENCHANTMENTS);
+                    }
                 } else {
-                    wrappedResult.resetComponent(DataComponentTypes.ENCHANTMENTS);
+                    wrappedResult.setEnchantments(wrappedFirst.enchantments().orElseGet(List::of));
                 }
+                event.setResult(ItemStackUtils.getBukkitStack(wrappedResult));
             }
         }
     }
@@ -510,7 +515,6 @@ public final class RecipeEventListener implements Listener {
     处理item settings中repair item属性。如果修补材料不是自定义物品，则不会参与后续逻辑。
     这会忽略preprocess里event.setResult(null);
      */
-    @SuppressWarnings("UnstableApiUsage")
     private void processRepairable(PrepareAnvilEvent event) {
         AnvilInventory inventory = event.getInventory();
         ItemStack first = inventory.getItem(0);

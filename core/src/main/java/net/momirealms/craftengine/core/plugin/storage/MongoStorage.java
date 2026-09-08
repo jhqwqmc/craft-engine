@@ -75,13 +75,12 @@ public final class MongoStorage implements Storage {
     }
 
     @Override
-    public void setPackPreference(UUID player, String pack, Boolean enabled) {
-        String field = "preferences." + pack;
-        if (enabled == null) {
-            this.packPreferences.updateOne(eq("_id", player), Updates.unset(field));
-        } else {
-            this.packPreferences.updateOne(eq("_id", player), Updates.set(field, enabled), new UpdateOptions().upsert(true));
-        }
+    public void setPackPreferences(UUID player, Map<String, Boolean> updates) {
+        if (updates.isEmpty()) return;
+        this.packPreferences.updateOne(eq("_id", player), Updates.combine(updates.entrySet().stream().map(entry -> {
+            String field = "preferences." + entry.getKey();
+            return entry.getValue() == null ? Updates.unset(field) : Updates.set(field, entry.getValue());
+        }).toList()), new UpdateOptions().upsert(true));
     }
 
     @Override

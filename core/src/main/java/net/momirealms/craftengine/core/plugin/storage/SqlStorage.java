@@ -68,13 +68,15 @@ public final class SqlStorage implements Storage {
     }
 
     @Override
-    public void setPackPreference(UUID player, String pack, Boolean enabled) {
+    public void setPackPreferences(UUID player, Map<String, Boolean> updates) {
         this.jdbi.useTransaction(handle -> {
             handle.createUpdate(this.insertPackPreferences).bind("player", player.toString()).execute();
             String stored = handle.createQuery(this.selectPackPreferencesForUpdate).bind("player", player.toString()).mapTo(String.class).one();
             JsonObject preferences = JsonParser.parseString(stored).getAsJsonObject();
-            if (enabled == null) preferences.remove(pack);
-            else preferences.addProperty(pack, enabled);
+            updates.forEach((pack, enabled) -> {
+                if (enabled == null) preferences.remove(pack);
+                else preferences.addProperty(pack, enabled);
+            });
             handle.createUpdate("UPDATE ce_pack_preferences SET preferences = :preferences WHERE player_id = :player")
                     .bind("player", player.toString()).bind("preferences", preferences.toString()).execute();
         });
