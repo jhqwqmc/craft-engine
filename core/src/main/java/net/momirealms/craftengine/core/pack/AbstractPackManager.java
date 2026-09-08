@@ -351,6 +351,8 @@ public abstract class AbstractPackManager implements PackManager {
             Player online = this.plugin.networkManager().getOnlineUser(player);
             if (online == null) return CompletableFuture.completedFuture(null);
             this.packPreferences.put(online, states);
+            // 未配置的包只保存偏好并更新在线缓存，供以后添加该包时使用，无需重发当前资源包。
+            if (!this.resourcePackHosts.containsKey(pack)) return CompletableFuture.completedFuture(null);
             return sendResourcePackAsync(online);
         });
     }

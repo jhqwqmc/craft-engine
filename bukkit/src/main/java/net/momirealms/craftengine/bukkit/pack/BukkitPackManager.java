@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 public final class BukkitPackManager extends AbstractPackManager implements Listener {
     private final BukkitCraftEngine plugin;
-    private final Map<Player, CompletableFuture<Void>> pendingSends = new WeakHashMap<>();
 
     public BukkitPackManager(BukkitCraftEngine plugin) {
         super(plugin);
@@ -96,12 +95,7 @@ public final class BukkitPackManager extends AbstractPackManager implements List
 
     @Override
     public CompletableFuture<Void> sendResourcePackAsync(Player player) {
-        synchronized (this.pendingSends) {
-            CompletableFuture<Void> previous = this.pendingSends.getOrDefault(player, CompletableFuture.completedFuture(null));
-            CompletableFuture<Void> next = previous.handle((ignored, error) -> null).thenCompose(ignored -> sendPreparedResourcePacks(player));
-            this.pendingSends.put(player, next);
-            return next;
-        }
+        return sendPreparedResourcePacks(player);
     }
 
     private CompletableFuture<Void> sendPreparedResourcePacks(Player player) {
