@@ -325,18 +325,18 @@ public final class BukkitItemManager extends AbstractItemManager {
             }
         }
         ItemComponentUtils.replaceContents(prototype, components);
-//        if (detached && !VersionHelper.isOrAbove1_21_2) {
-//            // These versions intern prototypes. Rebind cached recipe results to the
-//            // item's private prototype, preserving explicitly configured components.
-//            Object registries = RegistryUtils.getRegistryAccess();
-//            Object recipeManager = BukkitRecipeManager.minecraftRecipeManager();
-//            for (Object holder : RecipeManagerProxy.INSTANCE.getByName(recipeManager).values()) {
-//                Object recipe = RecipeHolderProxy.INSTANCE.getValue(holder);
-//                Object result = RecipeProxy.INSTANCE.getResultItem(recipe, registries);
-//                if (ItemStackProxy.INSTANCE.getItem(result) != item) continue;
-//                ItemComponentUtils.rebasePrototype(result, prototype);
-//            }
-//        }
+        if (detached && !VersionHelper.isOrAbove1_21_2) {
+            // These versions intern prototypes. Rebind cached recipe results to the
+            // item's private prototype, preserving explicitly configured components.
+            Object registries = RegistryUtils.getRegistryAccess();
+            Object recipeManager = BukkitRecipeManager.minecraftRecipeManager();
+            for (Object holder : RecipeManagerProxy.INSTANCE.getByName(recipeManager).values()) {
+                Object recipe = RecipeHolderProxy.INSTANCE.getValue(holder);
+                Object result = RecipeProxy.INSTANCE.getResultItem(recipe, registries);
+                if (ItemStackProxy.INSTANCE.getItem(result) != item) continue;
+                ItemComponentUtils.rebasePrototype(result, prototype);
+            }
+        }
     }
 
     @Nullable
