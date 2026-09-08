@@ -839,7 +839,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private void loadHosts() {
+    protected void loadHosts() {
         Object hostingObj = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.packs");
         ConfigValue configValue = ConfigValue.of("resource-pack.packs", hostingObj == null ? List.of() : hostingObj);
         try {

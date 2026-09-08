@@ -68,9 +68,10 @@ public final class BukkitPackManager extends AbstractPackManager implements List
     }
 
     @Override
-    public void load() {
+    protected void loadHosts() {
+        // 仅托管配置需要显式重载；工作流由父类 load 在每次普通重载时重新解析。
         if (ReloadCommand.RELOAD_PACK_FLAG || ReloadCommand.RELOAD_HOST_FLAG || this.plugin.isEnabling()) {
-            super.load();
+            super.loadHosts();
         }
     }
 
