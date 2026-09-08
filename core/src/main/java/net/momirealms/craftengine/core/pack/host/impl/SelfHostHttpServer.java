@@ -19,49 +19,44 @@ import io.netty.handler.stream.ChunkedStream;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.traffic.GlobalChannelTrafficShapingHandler;
 import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import net.momirealms.craftengine.core.pack.host.HttpClientManager;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.config.ConfigValue;
 import net.momirealms.craftengine.core.plugin.config.KnownResourceException;
-import net.momirealms.craftengine.core.pack.host.HttpClientManager;
-import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
+import net.momirealms.craftengine.core.util.Pair;
 import net.momirealms.craftengine.core.util.UUIDUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.*;
 import java.net.http.HttpRequest;
-import java.net.InetAddress;
-import java.net.Inet6Address;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class SelfHostHttpServer {
+    private static final int REQUEST_TIMEOUT_SECONDS = 20;
+    private static final int MAX_CONNECTIONS = 1024;
+    private static final URI CLOUDFLARE = URI.create("https://www.cloudflare.com/cdn-cgi/trace");
+    private static final URI CLOUDFLARE_CN = URI.create("https://www.cloudflare-cn.com/cdn-cgi/trace");
+    private static final String LOCALHOST = "localhost";
     private static SelfHostHttpServer instance;
+    private static String IP_CACHE = null;
+    private final Semaphore connectionSlots = new Semaphore(MAX_CONNECTIONS);
     private final Cache<String, DownloadToken> oneTimePackUrls = Caffeine.newBuilder()
             .maximumSize(1024)
             .scheduler(Scheduler.systemScheduler())
@@ -72,16 +67,15 @@ public final class SelfHostHttpServer {
             .scheduler(Scheduler.systemScheduler())
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build();
-
     private final AtomicLong totalRequests = new AtomicLong();
     private final AtomicLong blockedRequests = new AtomicLong();
-
+    private final ChannelGroup activeDownloadChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private final ChannelGroup connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private volatile Bandwidth limitPerIp = Bandwidth.builder()
             .capacity(1)
             .refillGreedy(1, Duration.ofSeconds(1))
             .initialTokens(1)
             .build();
-
     private volatile String ip = "localhost";
     private volatile int port = -1;
     private volatile String protocol = "http";
@@ -93,19 +87,11 @@ public final class SelfHostHttpServer {
     private volatile boolean autoIp = false;
     private volatile boolean enabled = false;
     private volatile String forwardSecret;
-
     private volatile long globalUploadRateLimit = 0;
     private volatile long minDownloadSpeed = 50_000;
     private volatile GlobalChannelTrafficShapingHandler trafficShapingHandler;
     private ScheduledExecutorService virtualTrafficExecutor;
-    private final ChannelGroup activeDownloadChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private final ChannelGroup connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
     private volatile Map<String, HostedPack> packs = new ConcurrentHashMap<>();
-
-    private record HostedPack(byte[] bytes, String hash, UUID uuid) {}
-    private record DownloadToken(String packId, String playerId) {}
-
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Channel serverChannel;
@@ -121,6 +107,55 @@ public final class SelfHostHttpServer {
             instance = new SelfHostHttpServer();
         }
         return instance;
+    }
+
+    private static String getIp() {
+        if (IP_CACHE == null || LOCALHOST.equals(IP_CACHE)) {
+            boolean inChina = Locale.getDefault() == Locale.SIMPLIFIED_CHINESE;
+            IP_CACHE = fetchIp(inChina ? CLOUDFLARE_CN : CLOUDFLARE);
+            if (LOCALHOST.equals(IP_CACHE)) {
+                IP_CACHE = fetchIp(inChina ? CLOUDFLARE : CLOUDFLARE_CN);
+            }
+        }
+        return IP_CACHE;
+    }
+
+    private static String fetchIp(URI uri) {
+        HttpRequest request = HttpClientManager.requestBuilder().uri(uri).timeout(java.time.Duration.ofSeconds(10)).GET().build();
+        java.net.http.HttpResponse<String> response;
+        try {
+            response = HttpClientManager.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri, e);
+            return LOCALHOST;
+        }
+        Properties props = new Properties();
+        try {
+            props.load(new StringReader(response.body()));
+        } catch (IOException e) {
+            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri + " Body: " + response.body(), e);
+            return LOCALHOST;
+        }
+        if (!props.containsKey("ip")) {
+            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri + " Body: " + response.body());
+            return LOCALHOST;
+        }
+        try {
+            Pair<String, String> ip = verifyIp(props.getProperty("ip"));
+            return ip.left();
+        } catch (UnknownHostException e) {
+            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Invalid IP address. Uri: " + uri + " Body: " + response.body());
+            return LOCALHOST;
+        }
+    }
+
+    private static Pair<String, String> verifyIp(String ip) throws UnknownHostException {
+        InetAddress address = InetAddress.getByName(ip);
+        String verifiedIp = address.getHostAddress();
+        if (address instanceof Inet6Address) {
+            return Pair.of("[" + verifiedIp + "]", verifiedIp);
+        }
+        return Pair.of(verifiedIp, verifiedIp);
     }
 
     public synchronized void load(ConfigSection section, Map<String, Path> packPaths) {
@@ -150,7 +185,7 @@ public final class SelfHostHttpServer {
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
                 url = "http://" + url;
             }
-            if (!url.endsWith("/")) url  += "/";
+            if (!url.endsWith("/")) url += "/";
         }
 
         // 其他参数
@@ -208,73 +243,19 @@ public final class SelfHostHttpServer {
         });
     }
 
-    private static final URI CLOUDFLARE = URI.create("https://www.cloudflare.com/cdn-cgi/trace");
-    private static final URI CLOUDFLARE_CN = URI.create("https://www.cloudflare-cn.com/cdn-cgi/trace");
-    private static final String LOCALHOST = "localhost";
-    private static String IP_CACHE = null;
-
-    private static String getIp() {
-        if (IP_CACHE == null || LOCALHOST.equals(IP_CACHE)) {
-            boolean inChina = Locale.getDefault() == Locale.SIMPLIFIED_CHINESE;
-            IP_CACHE = fetchIp(inChina ? CLOUDFLARE_CN : CLOUDFLARE);
-            if (LOCALHOST.equals(IP_CACHE)) {
-                IP_CACHE = fetchIp(inChina ? CLOUDFLARE : CLOUDFLARE_CN);
-            }
-        }
-        return IP_CACHE;
-    }
-
-    private static String fetchIp(URI uri) {
-        HttpRequest request = HttpClientManager.requestBuilder().uri(uri).timeout(java.time.Duration.ofSeconds(10)).GET().build();
-        java.net.http.HttpResponse<String> response;
-        try {
-            response = HttpClientManager.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri, e);
-            return LOCALHOST;
-        }
-        Properties props = new Properties();
-        try {
-            props.load(new StringReader(response.body()));
-        } catch (IOException e) {
-            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri + " Body: " + response.body(), e);
-            return LOCALHOST;
-        }
-        if (!props.containsKey("ip")) {
-            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Uri: " + uri + " Body: " + response.body());
-            return LOCALHOST;
-        }
-        try {
-            Pair<String, String> ip = verifyIp(props.getProperty("ip"));
-            return ip.left();
-        } catch (UnknownHostException e) {
-            CraftEngine.instance().logger().warn("Failed to automatically obtain an IP address. Invalid IP address. Uri: " + uri + " Body: " + response.body());
-            return LOCALHOST;
-        }
-    }
-
-    private static Pair<String, String> verifyIp(String ip) throws UnknownHostException {
-        InetAddress address = InetAddress.getByName(ip);
-        String verifiedIp = address.getHostAddress();
-        if (address instanceof Inet6Address) {
-            return Pair.of("[" + verifiedIp + "]", verifiedIp);
-        }
-        return Pair.of(verifiedIp, verifiedIp);
-    }
-
     private void updateProperties(String ip,
-                                 int port,
-                                 String url,
-                                 boolean denyNonMinecraft,
-                                 String protocol,
-                                 Bandwidth limitPerIp,
-                                 boolean token,
-                                 long globalUploadRateLimit,
-                                 long minDownloadSpeed,
-                                 boolean strictValidation,
-                                 boolean useServerPort,
-                                 boolean autoIp,
-                                 String forwardSecret) {
+                                  int port,
+                                  String url,
+                                  boolean denyNonMinecraft,
+                                  String protocol,
+                                  Bandwidth limitPerIp,
+                                  boolean token,
+                                  long globalUploadRateLimit,
+                                  long minDownloadSpeed,
+                                  boolean strictValidation,
+                                  boolean useServerPort,
+                                  boolean autoIp,
+                                  String forwardSecret) {
         boolean reuseServer = this.enabled && this.useServerPort == useServerPort && this.port == port;
         if (!reuseServer) disable();
         this.ip = ip;
@@ -292,7 +273,7 @@ public final class SelfHostHttpServer {
         this.useToken = token;
         this.strictValidation = strictValidation;
         this.useServerPort = useServerPort;
-        this.forwardSecret = forwardSecret;
+        this.forwardSecret = forwardSecret == null || forwardSecret.isBlank() ? null : forwardSecret;
         if (this.globalUploadRateLimit != globalUploadRateLimit || this.minDownloadSpeed != minDownloadSpeed) {
             this.globalUploadRateLimit = globalUploadRateLimit;
             this.minDownloadSpeed = minDownloadSpeed;
@@ -339,10 +320,7 @@ public final class SelfHostHttpServer {
                 100, // checkInterval (ms)
                 10_000 // maxTime (ms)
         );
-        CraftEngine.instance().networkManager().setServerPortHost(pipeline -> {
-            pipeline.addLast("trafficShaping", SelfHostHttpServer.this.trafficShapingHandler);
-            initializeHttpPipeline(pipeline);
-        });
+        CraftEngine.instance().networkManager().setServerPortHost(this::initializeHttpPipeline);
         this.enabled = true;
     }
 
@@ -366,9 +344,7 @@ public final class SelfHostHttpServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("trafficShaping", SelfHostHttpServer.this.trafficShapingHandler);
-                        initializeHttpPipeline(pipeline);
+                        initializeHttpPipeline(ch.pipeline());
                     }
                 });
         try {
@@ -382,220 +358,13 @@ public final class SelfHostHttpServer {
     }
 
     void initializeHttpPipeline(ChannelPipeline pipeline) {
+        pipeline.addLast(new ConnectionHandler());
+        if (this.trafficShapingHandler != null) {
+            pipeline.addLast("trafficShaping", this.trafficShapingHandler);
+        }
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new ChunkedWriteHandler());
-        pipeline.addLast(new HttpObjectAggregator(1048576));
         pipeline.addLast(new RequestHandler());
-    }
-
-    @ChannelHandler.Sharable
-    private class RequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) {
-            SelfHostHttpServer.this.connections.add(ctx.channel());
-        }
-
-        @Override
-        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            super.channelInactive(ctx);
-            // 有人走了，其他人的速度上限提高
-            if (SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
-                SelfHostHttpServer.this.activeDownloadChannels.remove(ctx.channel());
-                rebalanceBandwidth();
-            }
-        }
-
-        @Override
-        protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-            SelfHostHttpServer.this.totalRequests.incrementAndGet();
-
-            try {
-                String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress())
-                        .getAddress().getHostAddress();
-
-                if (!checkIpRateLimit(clientIp)) {
-                    sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Forbidden");
-                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                    return;
-                }
-
-                QueryStringDecoder queryDecoder = new QueryStringDecoder(request.uri());
-                String path = queryDecoder.path();
-
-                if (path.startsWith("/download/")) {
-                    handleDownload(ctx, request, queryDecoder, path.substring("/download/".length()));
-                } else if ("/metrics".equals(path)) {
-                    handleMetrics(ctx);
-                } else if (SelfHostHttpServer.this.forwardSecret != null && path.startsWith("/forward/")) {
-                    handleForward(ctx, request, path.substring("/forward/".length()));
-                } else {
-                    sendError(ctx, HttpResponseStatus.NOT_FOUND, "Not Found");
-                }
-            } catch (Exception e) {
-                CraftEngine.instance().logger().warn("Request handling failed", e);
-                sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Internal Error");
-            }
-        }
-
-        private void handleDownload(ChannelHandlerContext ctx, FullHttpRequest request, QueryStringDecoder queryDecoder, String packId) {
-            // 使用一次性token
-            if (SelfHostHttpServer.this.useToken) {
-                String token = queryDecoder.parameters().getOrDefault("token", Collections.emptyList()).stream().findFirst().orElse(null);
-                String clientUUID = SelfHostHttpServer.this.strictValidation ? request.headers().get("X-Minecraft-UUID") : null;
-                if (!validateToken(token, clientUUID, packId)) {
-                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
-                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                    return;
-                }
-            }
-
-            // 不是Minecraft客户端
-            if (SelfHostHttpServer.this.denyNonMinecraft) {
-                String userAgent = request.headers().get(HttpHeaderNames.USER_AGENT);
-                boolean nonMinecraftClient = userAgent == null || !userAgent.startsWith("Minecraft Java/");
-                if (SelfHostHttpServer.this.strictValidation && !nonMinecraftClient) {
-                    String clientVersion = request.headers().get("X-Minecraft-Version");
-                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring("Minecraft Java/".length()));
-                }
-                if (nonMinecraftClient) {
-                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
-                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                    return;
-                }
-            }
-
-            // 没有资源包
-            HostedPack pack = SelfHostHttpServer.this.packs.get(packId);
-            if (pack == null) {
-                sendError(ctx, HttpResponseStatus.NOT_FOUND, "Pack Not Found");
-                SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                return;
-            }
-
-            // 新人来了，所有人的速度上限降低
-            if (!SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
-                SelfHostHttpServer.this.activeDownloadChannels.add(ctx.channel());
-                rebalanceBandwidth();
-            }
-
-            // 告诉客户端资源包大小
-            long fileLength = pack.bytes().length;
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            HttpUtil.setContentLength(response, fileLength);
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/zip");
-            boolean keepAlive = HttpUtil.isKeepAlive(request);
-            if (keepAlive) {
-                response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-            }
-            ctx.write(response);
-
-            // 发送分段资源包
-            ChunkedStream chunkedStream = new ChunkedStream(new ByteArrayInputStream(pack.bytes()), 8192);
-            HttpChunkedInput httpChunkedInput = new HttpChunkedInput(chunkedStream);
-            ChannelFuture sendFileFuture = ctx.writeAndFlush(httpChunkedInput);
-            if (!keepAlive) {
-                sendFileFuture.addListener(ChannelFutureListener.CLOSE);
-            }
-
-            // 监听下载完成（成功或失败），以便在下载结束后（如果不关闭连接）也能移除计数
-            // 注意：如果是 Keep-Alive，连接不会断，但下载结束了。
-            // 为了精确控制，可以在这里监听 operationComplete
-            sendFileFuture.addListener((ChannelFutureListener) future -> {
-                if (SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
-                    SelfHostHttpServer.this.activeDownloadChannels.remove(ctx.channel());
-                    rebalanceBandwidth();
-                }
-            });
-        }
-
-        private void handleMetrics(ChannelHandlerContext ctx) {
-            String metrics = "# TYPE total_requests counter\n"
-                    + "total_requests " + SelfHostHttpServer.this.totalRequests.get() + "\n"
-                    + "# TYPE blocked_requests counter\n"
-                    + "blocked_requests " + SelfHostHttpServer.this.blockedRequests.get();
-
-            FullHttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK,
-                    Unpooled.copiedBuffer(metrics, CharsetUtil.UTF_8)
-            );
-            response.headers()
-                    .set(HttpHeaderNames.CONTENT_TYPE, "text/plain")
-                    .set(HttpHeaderNames.CONTENT_LENGTH, metrics.length());
-
-            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-        }
-
-        private void handleForward(ChannelHandlerContext ctx, FullHttpRequest request, String packId) {
-            String secret = request.headers().get("secret");
-            if (secret == null || !secret.equals(SelfHostHttpServer.this.forwardSecret)) {
-                sendError(ctx, HttpResponseStatus.UNAUTHORIZED, "Unauthorized");
-                return;
-            }
-            HostedPack pack = SelfHostHttpServer.this.packs.get(packId);
-            if (pack == null) {
-                sendError(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, "No resource pack available");
-                return;
-            }
-            String uuid = request.headers().get("uuid");
-            if (uuid == null || !UUIDUtils.validateUUID(uuid)) {
-                sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Incorrect UUID");
-                return;
-            }
-            JsonObject jsonObject = new JsonObject();
-            if (SelfHostHttpServer.this.useToken) {
-                String token = UUID.randomUUID().toString();
-                SelfHostHttpServer.this.oneTimePackUrls.put(token, new DownloadToken(packId, SelfHostHttpServer.this.strictValidation ? uuid.replace("-", "") : ""));
-                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
-            } else {
-                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId);
-            }
-            jsonObject.addProperty("uuid", pack.uuid().toString());
-            jsonObject.addProperty("hash", pack.hash());
-            String json = jsonObject.toString();
-            FullHttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK,
-                    Unpooled.copiedBuffer(json, CharsetUtil.UTF_8)
-            );
-            response.headers()
-                    .set(HttpHeaderNames.CONTENT_TYPE, "application/json")
-                    .set(HttpHeaderNames.CONTENT_LENGTH, json.length());
-            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-        }
-
-        private boolean checkIpRateLimit(String clientIp) {
-            if (SelfHostHttpServer.this.limitPerIp == null) return true;
-            Bucket rateLimiter = SelfHostHttpServer.this.ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(SelfHostHttpServer.this.limitPerIp).build());
-            assert rateLimiter != null;
-            return rateLimiter.tryConsume(1);
-        }
-
-        private boolean validateToken(String token, String clientUUID, String packId) {
-            if (token == null || token.length() != 36) return false;
-            DownloadToken valid = SelfHostHttpServer.this.oneTimePackUrls.getIfPresent(token);
-            boolean isValid = valid != null && valid.packId().equals(packId)
-                    && (!SelfHostHttpServer.this.strictValidation || Objects.equals(valid.playerId(), clientUUID));
-            if (isValid) {
-                return SelfHostHttpServer.this.oneTimePackUrls.asMap().remove(token, valid);
-            }
-            return false;
-        }
-
-        private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String message) {
-            FullHttpResponse response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    status,
-                    Unpooled.copiedBuffer(message, CharsetUtil.UTF_8)
-            );
-            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-        }
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            ctx.close();
-        }
     }
 
     private synchronized void rebalanceBandwidth() {
@@ -702,6 +471,289 @@ public final class SelfHostHttpServer {
             return new HostedPack(bytes, hash, UUID.nameUUIDFromBytes(hash.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-1 algorithm not available", e);
+        }
+    }
+
+    private record HostedPack(byte[] bytes, String hash, UUID uuid) {
+    }
+
+    private record DownloadToken(String packId, String playerId) {
+    }
+
+    private class ConnectionHandler extends ChannelInboundHandlerAdapter {
+        private ScheduledFuture<?> requestTimeout;
+        private boolean acquired;
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) {
+            this.acquired = SelfHostHttpServer.this.connectionSlots.tryAcquire();
+            if (!this.acquired) {
+                ctx.close();
+                return;
+            }
+            SelfHostHttpServer.this.connections.add(ctx.channel());
+            // An absolute deadline also catches clients that keep sending individual bytes.
+            this.requestTimeout = ctx.executor().schedule(() -> {
+                ctx.close();
+            }, REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
+
+        private void receivedRequest(ChannelHandlerContext ctx) {
+            cancelTimeout();
+            // Serve one request per connection. Do not buffer pipelined requests during a download.
+            ctx.channel().config().setAutoRead(false);
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
+            if (!this.acquired || !ctx.channel().isActive()) {
+                ReferenceCountUtil.release(message);
+                return;
+            }
+            super.channelRead(ctx, message);
+        }
+
+        private void cancelTimeout() {
+            if (this.requestTimeout != null) {
+                this.requestTimeout.cancel(false);
+                this.requestTimeout = null;
+            }
+        }
+
+        private void release() {
+            cancelTimeout();
+            if (this.acquired) {
+                this.acquired = false;
+                SelfHostHttpServer.this.connectionSlots.release();
+            }
+        }
+
+        @Override
+        public void handlerRemoved(ChannelHandlerContext ctx) {
+            release();
+        }
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            release();
+            super.channelInactive(ctx);
+        }
+    }
+
+    private class RequestHandler extends SimpleChannelInboundHandler<HttpObject> {
+        private boolean receivedRequest;
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            ctx.close();
+        }
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            super.channelInactive(ctx);
+            // 有人走了，其他人的速度上限提高
+            if (SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
+                SelfHostHttpServer.this.activeDownloadChannels.remove(ctx.channel());
+                rebalanceBandwidth();
+            }
+        }
+
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, HttpObject message) {
+            if (this.receivedRequest || !(message instanceof io.netty.handler.codec.http.HttpRequest request)) return;
+            this.receivedRequest = true;
+            ctx.pipeline().get(ConnectionHandler.class).receivedRequest(ctx);
+            SelfHostHttpServer.this.totalRequests.incrementAndGet();
+
+            try {
+                if (!request.decoderResult().isSuccess()) {
+                    sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Bad Request");
+                    return;
+                }
+                if (!HttpMethod.GET.equals(request.method())) {
+                    sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED, "Method Not Allowed");
+                    return;
+                }
+                // These endpoints never consume a body. Reject its headers before buffering any data.
+                if (request.headers().contains(HttpHeaderNames.TRANSFER_ENCODING)
+                        || HttpUtil.getContentLength(request, 0) != 0) {
+                    sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Request body not supported");
+                    return;
+                }
+                String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress())
+                        .getAddress().getHostAddress();
+
+                if (!checkIpRateLimit(clientIp)) {
+                    sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Forbidden");
+                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
+                    return;
+                }
+
+                QueryStringDecoder queryDecoder = new QueryStringDecoder(request.uri());
+                String path = queryDecoder.path();
+                String forwardSecret = SelfHostHttpServer.this.forwardSecret;
+
+                if (path.startsWith("/download/")) {
+                    handleDownload(ctx, request, queryDecoder, path.substring("/download/".length()));
+                } else if ("/metrics".equals(path)) {
+                    handleMetrics(ctx);
+                } else if (forwardSecret != null && !forwardSecret.isBlank() && path.startsWith("/forward/")) {
+                    handleForward(ctx, request, path.substring("/forward/".length()));
+                } else {
+                    sendError(ctx, HttpResponseStatus.NOT_FOUND, "Not Found");
+                }
+            } catch (Exception e) {
+                CraftEngine.instance().logger().warn("Request handling failed", e);
+                sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Internal Error");
+            }
+        }
+
+        private void handleDownload(ChannelHandlerContext ctx, io.netty.handler.codec.http.HttpRequest request, QueryStringDecoder queryDecoder, String packId) {
+            // 使用一次性token
+            if (SelfHostHttpServer.this.useToken) {
+                String token = queryDecoder.parameters().getOrDefault("token", Collections.emptyList()).stream().findFirst().orElse(null);
+                String clientUUID = SelfHostHttpServer.this.strictValidation ? request.headers().get("X-Minecraft-UUID") : null;
+                if (!validateToken(token, clientUUID, packId)) {
+                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
+                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
+                    return;
+                }
+            }
+
+            // 不是Minecraft客户端
+            if (SelfHostHttpServer.this.denyNonMinecraft) {
+                String userAgent = request.headers().get(HttpHeaderNames.USER_AGENT);
+                boolean nonMinecraftClient = userAgent == null || !userAgent.startsWith("Minecraft Java/");
+                if (SelfHostHttpServer.this.strictValidation && !nonMinecraftClient) {
+                    String clientVersion = request.headers().get("X-Minecraft-Version");
+                    nonMinecraftClient = !Objects.equals(clientVersion, userAgent.substring("Minecraft Java/".length()));
+                }
+                if (nonMinecraftClient) {
+                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
+                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
+                    return;
+                }
+            }
+
+            // 没有资源包
+            HostedPack pack = SelfHostHttpServer.this.packs.get(packId);
+            if (pack == null) {
+                sendError(ctx, HttpResponseStatus.NOT_FOUND, "Pack Not Found");
+                SelfHostHttpServer.this.blockedRequests.incrementAndGet();
+                return;
+            }
+
+            // 新人来了，所有人的速度上限降低
+            if (!SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
+                SelfHostHttpServer.this.activeDownloadChannels.add(ctx.channel());
+                rebalanceBandwidth();
+            }
+
+            // 告诉客户端资源包大小
+            long fileLength = pack.bytes().length;
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            HttpUtil.setContentLength(response, fileLength);
+            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/zip");
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+            ctx.write(response);
+
+            // 发送分段资源包
+            ChunkedStream chunkedStream = new ChunkedStream(new ByteArrayInputStream(pack.bytes()), 8192);
+            HttpChunkedInput httpChunkedInput = new HttpChunkedInput(chunkedStream);
+            ChannelFuture sendFileFuture = ctx.writeAndFlush(httpChunkedInput);
+            sendFileFuture.addListener(ChannelFutureListener.CLOSE);
+
+            // 下载结束后移除计数
+            sendFileFuture.addListener((ChannelFutureListener) future -> {
+                if (SelfHostHttpServer.this.activeDownloadChannels.contains(ctx.channel())) {
+                    SelfHostHttpServer.this.activeDownloadChannels.remove(ctx.channel());
+                    rebalanceBandwidth();
+                }
+            });
+        }
+
+        private void handleMetrics(ChannelHandlerContext ctx) {
+            String metrics = "# TYPE total_requests counter\n"
+                    + "total_requests " + SelfHostHttpServer.this.totalRequests.get() + "\n"
+                    + "# TYPE blocked_requests counter\n"
+                    + "blocked_requests " + SelfHostHttpServer.this.blockedRequests.get();
+
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer(metrics, CharsetUtil.UTF_8)
+            );
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_TYPE, "text/plain")
+                    .set(HttpHeaderNames.CONTENT_LENGTH, metrics.length());
+
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        }
+
+        private void handleForward(ChannelHandlerContext ctx, io.netty.handler.codec.http.HttpRequest request, String packId) {
+            String secret = request.headers().get("secret");
+            String expectedSecret = SelfHostHttpServer.this.forwardSecret;
+            if (expectedSecret == null || expectedSecret.isBlank() || !expectedSecret.equals(secret)) {
+                sendError(ctx, HttpResponseStatus.UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            HostedPack pack = SelfHostHttpServer.this.packs.get(packId);
+            if (pack == null) {
+                sendError(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, "No resource pack available");
+                return;
+            }
+            String uuid = request.headers().get("uuid");
+            if (uuid == null || !UUIDUtils.validateUUID(uuid)) {
+                sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Incorrect UUID");
+                return;
+            }
+            JsonObject jsonObject = new JsonObject();
+            if (SelfHostHttpServer.this.useToken) {
+                String token = UUID.randomUUID().toString();
+                SelfHostHttpServer.this.oneTimePackUrls.put(token, new DownloadToken(packId, SelfHostHttpServer.this.strictValidation ? uuid.replace("-", "") : ""));
+                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
+            } else {
+                jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId);
+            }
+            jsonObject.addProperty("uuid", pack.uuid().toString());
+            jsonObject.addProperty("hash", pack.hash());
+            String json = jsonObject.toString();
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer(json, CharsetUtil.UTF_8)
+            );
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_TYPE, "application/json")
+                    .set(HttpHeaderNames.CONTENT_LENGTH, json.length());
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        }
+
+        private boolean checkIpRateLimit(String clientIp) {
+            if (SelfHostHttpServer.this.limitPerIp == null) return true;
+            Bucket rateLimiter = SelfHostHttpServer.this.ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(SelfHostHttpServer.this.limitPerIp).build());
+            assert rateLimiter != null;
+            return rateLimiter.tryConsume(1);
+        }
+
+        private boolean validateToken(String token, String clientUUID, String packId) {
+            if (token == null || token.length() != 36) return false;
+            DownloadToken valid = SelfHostHttpServer.this.oneTimePackUrls.getIfPresent(token);
+            boolean isValid = valid != null && valid.packId().equals(packId)
+                    && (!SelfHostHttpServer.this.strictValidation || Objects.equals(valid.playerId(), clientUUID));
+            if (isValid) {
+                return SelfHostHttpServer.this.oneTimePackUrls.asMap().remove(token, valid);
+            }
+            return false;
+        }
+
+        private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status, String message) {
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1,
+                    status,
+                    Unpooled.copiedBuffer(message, CharsetUtil.UTF_8)
+            );
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
     }
 }
