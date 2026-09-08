@@ -39,6 +39,7 @@ open class RelocationExtension {
             relocate("org.jdbi", "$libs.jdbi")
             relocate("org.flywaydb", "$libs.flywaydb")
             relocate("com.fasterxml.jackson", "$libs.jackson")
+            relocate("tools.jackson", "$libs.jackson3")
             relocate("com.mongodb", "$libs.mongodb")
             relocate("org.bson", "$libs.bson")
             mergeServiceFiles()

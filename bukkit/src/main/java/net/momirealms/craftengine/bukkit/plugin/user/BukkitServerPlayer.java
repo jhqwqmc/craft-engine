@@ -798,12 +798,12 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
                 }
             }
 
-            float rotX = EntityProxy.INSTANCE.getXRot(serverPlayer);
-            float rotY = EntityProxy.INSTANCE.getYRot(serverPlayer);
-            float y = -MiscUtils.sin(MiscUtils.toRadians(rotY));
-            float xz = MiscUtils.cos(MiscUtils.toRadians(rotY));
-            float x = -xz * MiscUtils.sin(MiscUtils.toRadians(rotX));
-            float z = xz * MiscUtils.cos(MiscUtils.toRadians(rotX));
+            float pitch = MiscUtils.toRadians(EntityProxy.INSTANCE.getXRot(serverPlayer));
+            float yaw = MiscUtils.toRadians(EntityProxy.INSTANCE.getYRot(serverPlayer));
+            float y = -MiscUtils.sin(pitch);
+            float xz = MiscUtils.cos(pitch);
+            float x = -xz * MiscUtils.sin(yaw);
+            float z = xz * MiscUtils.cos(yaw);
             this.thirdPersonCameraVec3 = this.eyeLocation.subtract(x * distance, y * distance, z * distance);
         }
     }

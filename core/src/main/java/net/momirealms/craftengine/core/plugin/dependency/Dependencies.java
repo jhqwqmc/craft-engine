@@ -458,24 +458,23 @@ public final class Dependencies {
             .build();
 
     public static final Dependency JACKSON_ANNOTATIONS = Dependency.of("jackson-annotations", "com{}fasterxml{}jackson{}core", "jackson-annotations")
-            .versionKey("jackson")
             .relocations(
                     Relocation.of("jackson", "com{}fasterxml{}jackson")
             )
             .build();
 
-    public static final Dependency JACKSON_CORE = Dependency.of("jackson-core", "com{}fasterxml{}jackson{}core", "jackson-core")
+    public static final Dependency JACKSON_CORE = Dependency.of("jackson-core", "tools{}jackson{}core", "jackson-core")
             .versionKey("jackson")
             .relocations(
-                    Relocation.of("jackson", "com{}fasterxml{}jackson")
+                    Relocation.of("jackson3", "tools{}jackson")
             )
             .build();
 
-    public static final Dependency JACKSON_DATABIND = Dependency.of("jackson-databind", "com{}fasterxml{}jackson{}core", "jackson-databind")
+    public static final Dependency JACKSON_DATABIND = Dependency.of("jackson-databind", "tools{}jackson{}core", "jackson-databind")
             .versionKey("jackson")
             .relocations(
                     Relocation.of("jackson", "com{}fasterxml{}jackson"),
-                    Relocation.of("hikari", "com{}zaxxer{}hikari")
+                    Relocation.of("jackson3", "tools{}jackson")
             )
             .build();
 
@@ -501,21 +500,26 @@ public final class Dependencies {
             .versionKey("flyway")
             .relocations(
                     Relocation.of("flywaydb", "org{}flywaydb"),
-                    Relocation.of("jackson", "com{}fasterxml{}jackson")
+                    Relocation.of("jackson", "com{}fasterxml{}jackson"),
+                    Relocation.of("jackson3", "tools{}jackson")
             )
             .build();
 
     public static final Dependency FLYWAY_DATABASE_POSTGRESQL = Dependency.of("flyway-database-postgresql", "org{}flywaydb", "flyway-database-postgresql")
             .versionKey("flyway")
             .relocations(
-                    Relocation.of("flywaydb", "org{}flywaydb")
+                    Relocation.of("flywaydb", "org{}flywaydb"),
+                    Relocation.of("jackson", "com{}fasterxml{}jackson"),
+                    Relocation.of("jackson3", "tools{}jackson")
             )
             .build();
 
     public static final Dependency FLYWAY_MYSQL = Dependency.of("flyway-mysql", "org{}flywaydb", "flyway-mysql")
             .versionKey("flyway")
             .relocations(
-                    Relocation.of("flywaydb", "org{}flywaydb")
+                    Relocation.of("flywaydb", "org{}flywaydb"),
+                    Relocation.of("jackson", "com{}fasterxml{}jackson"),
+                    Relocation.of("jackson3", "tools{}jackson")
             )
             .build();
 

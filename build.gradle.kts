@@ -70,6 +70,7 @@ val embeddedVersionAliases = mapOf(
     "graaljs_version" to "graaljs",
     "nashorn_version" to "nashorn",
     "jackson_version" to "jackson",
+    "jackson_annotations_version" to "jackson-annotations",
     "protobuf_java_version" to "protobuf-java",
     "h2_version" to "h2",
     "mysql_connector_j_version" to "mysql-connector-j",

@@ -4,7 +4,7 @@ plugin-yml = "0.7.1"
 run-paper = "3.1.0"
 
 paper = "26.2.build.+"
-slf4j = "2.0.18"
+slf4j = "2.0.19"
 log4j = "2.26.1"
 gson = "2.14.0"
 asm = "9.10.1"
@@ -75,18 +75,19 @@ legacy-datafixerupper = "6.0.8"
 legacy-authlib = "6.0.58"
 flow-nbt = "2.0.2"
 
-jackson = "2.19.1"
-protobuf-java = "4.29.0"
-h2 = "2.3.232"
-mysql-connector-j = "9.3.0"
-hikari = "6.3.3"
-checker-qual = "3.49.3"
-flyway = "11.20.2"
-jdbi3-core = "3.49.6"
-mariadb-java-client = "3.5.3"
-mongodb = "5.6.1"
-postgresql = "42.7.7"
-sqlite-jdbc = "3.50.3.0"
+jackson = "3.2.2"
+jackson-annotations = "2.22"
+protobuf-java = "4.36.1"
+h2 = "2.5.250"
+mysql-connector-j = "26.7.0"
+hikari = "7.1.0"
+checker-qual = "4.2.3"
+flyway = "13.5.0"
+jdbi3-core = "3.54.0"
+mariadb-java-client = "3.5.10"
+mongodb = "5.11.0"
+postgresql = "42.7.13"
+sqlite-jdbc = "3.53.4.0"
 
 [libraries]
 shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
@@ -170,9 +171,9 @@ legacy-paper = { module = "io.papermc.paper:paper-api", version.ref = "legacy-pa
 legacy-datafixerupper = { module = "com.mojang:datafixerupper", version.ref = "legacy-datafixerupper" }
 legacy-authlib = { module = "com.mojang:authlib", version.ref = "legacy-authlib" }
 
-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-annotations" }
+jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf-java" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector-j" }
