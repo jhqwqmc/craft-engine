@@ -45,7 +45,9 @@ public final class PackWorkflowValidation {
     }
 
     public void upload(String pack) {
-        if (!requireHost(pack).canUpload()) throw new IllegalArgumentException("Host does not support uploads: " + pack);
+        if (!requireHost(pack).canUpload()) {
+            throw new IllegalArgumentException("Host does not support uploads: " + pack);
+        }
     }
 
     public boolean usesProtection() {

@@ -149,6 +149,7 @@ public abstract class AbstractPackManager implements PackManager {
     protected volatile ResourcePackHost resourcePackHost = NoneHost.INSTANCE;
     private volatile Map<String, ResourcePackHost> resourcePackHosts = Map.of();
     private volatile Map<String, Boolean> defaultPacks = Map.of();
+    private volatile Map<String, PackWorkflowSequence> workflows = Map.of();
     private final Map<NetWorkUser, Set<String>> activePacks = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<NetWorkUser, Map<String, Boolean>> packPreferences = Collections.synchronizedMap(new WeakHashMap<>());
     private final SkipOptimizationParser skipOptimizationParser = new SkipOptimizationParser();
@@ -293,39 +294,8 @@ public abstract class AbstractPackManager implements PackManager {
 
     @Override
     public synchronized void load() {
-        Object hostingObj = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.packs");
-        ConfigValue configValue = ConfigValue.of("resource-pack.packs", hostingObj == null ? List.of() : hostingObj);
-        try {
-            Map<String, ResourcePackHost> hosts = new LinkedHashMap<>();
-            Map<String, Boolean> defaults = new LinkedHashMap<>();
-            Map<String, Path> selfHostedPacks = new LinkedHashMap<>();
-            for (ConfigValue value : configValue.getAsValueList()) {
-                ConfigSection section = value.getAsSection();
-                String id = section.getNonEmptyString("id");
-                if (!id.matches("[A-Za-z0-9_-]{1,64}") || hosts.containsKey(id)) {
-                    throw new IllegalArgumentException("Invalid or duplicate resource pack host id: " + id);
-                }
-                hosts.put(id, ResourcePackHosts.fromConfig(id, section));
-                defaults.put(id, section.getBoolean("default", true));
-                if (hosts.get(id) instanceof SelfHost selfHost) {
-                    selfHostedPacks.put(id, selfHost.storagePath());
-                }
-            }
-            if (!selfHostedPacks.isEmpty()) {
-                Object serverConfig = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.self-host");
-                SelfHostHttpServer.instance().load(ConfigSection.of("resource-pack.self-host", serverConfig == null ? Map.of() : serverConfig), selfHostedPacks);
-            } else {
-                SelfHostHttpServer.instance().disable();
-                SelfHostHttpServer.instance().clearPacks();
-            }
-            this.resourcePackHosts = Collections.unmodifiableMap(hosts);
-            this.defaultPacks = Collections.unmodifiableMap(defaults);
-            this.resourcePackHost = hosts.isEmpty() ? NoneHost.INSTANCE : new ResourcePackHostGroup(hosts.values());
-        } catch (KnownResourceException e) {
-            this.plugin.logger().warn(TranslationManager.instance().plainTranslation("config.errors_detected", e.getLocalizedMessage()));
-        } catch (Throwable e) {
-            this.plugin.logger().warn("Failed to load resource pack hosts", e);
-        }
+        this.loadHosts();
+        this.loadWorkflows();
     }
 
     @Override
@@ -412,6 +382,7 @@ public abstract class AbstractPackManager implements PackManager {
     public void unload() {
         this.skipOptimizationParser.clearCache();
         this.loadedPacks.clear();
+        this.workflows = Map.of();
     }
 
     @Override
@@ -866,29 +837,78 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private ConfigSection workflowConfig() {
+    private void loadHosts() {
+        Object hostingObj = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.packs");
+        ConfigValue configValue = ConfigValue.of("resource-pack.packs", hostingObj == null ? List.of() : hostingObj);
+        try {
+            Map<String, ResourcePackHost> hosts = new LinkedHashMap<>();
+            Map<String, Boolean> defaults = new LinkedHashMap<>();
+            Map<String, Path> selfHostedPacks = new LinkedHashMap<>();
+            for (ConfigValue value : configValue.getAsValueList()) {
+                ConfigSection section = value.getAsSection();
+                String id = section.getNonEmptyString("id");
+                if (!id.matches("[A-Za-z0-9_-]{1,64}") || hosts.containsKey(id)) {
+                    throw new IllegalArgumentException("Invalid or duplicate resource pack host id: " + id);
+                }
+                hosts.put(id, ResourcePackHosts.fromConfig(id, section));
+                defaults.put(id, section.getBoolean("default", true));
+                if (hosts.get(id) instanceof SelfHost selfHost) {
+                    selfHostedPacks.put(id, selfHost.storagePath());
+                }
+            }
+            if (!selfHostedPacks.isEmpty()) {
+                Object serverConfig = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.self-host");
+                SelfHostHttpServer.instance().load(ConfigSection.of("resource-pack.self-host", serverConfig == null ? Map.of() : serverConfig), selfHostedPacks);
+            } else {
+                SelfHostHttpServer.instance().disable();
+                SelfHostHttpServer.instance().clearPacks();
+            }
+            this.resourcePackHosts = Collections.unmodifiableMap(hosts);
+            this.defaultPacks = Collections.unmodifiableMap(defaults);
+            this.resourcePackHost = hosts.isEmpty() ? NoneHost.INSTANCE : new ResourcePackHostGroup(hosts.values());
+        } catch (KnownResourceException e) {
+            this.plugin.logger().warn(TranslationManager.instance().plainTranslation("config.errors_detected", e.getLocalizedMessage()));
+        } catch (Throwable e) {
+            this.plugin.logger().warn("Failed to load resource pack hosts", e);
+        }
+    }
+
+    private void loadWorkflows() {
         Object value = YamlUtils.reader(Config.instance().settings()).getValue("resource-pack.workflows");
-        return ConfigSection.of("resource-pack.workflows", value == null ? Map.of() : value);
+        ConfigSection section = ConfigSection.of("resource-pack.workflows", value == null ? Map.of() : value);
+        Map<String, PackWorkflowSequence> workflows = new LinkedHashMap<>();
+        for (String name : section.keySet()) {
+            try {
+                PackWorkflowValidation validation = new PackWorkflowValidation(this.plugin.dataFolderPath(), this.resourcePackHosts);
+                workflows.put(name, PackWorkflowSequence.fromConfig(name, Objects.requireNonNull(section.getValue(name)), validation));
+            } catch (KnownResourceException e) {
+                this.plugin.logger().warn(TranslationManager.instance().plainTranslation("config.errors_detected", e.getLocalizedMessage()));
+            } catch (Exception e) {
+                this.plugin.logger().warn("Failed to load resource pack workflow: " + name, e);
+            }
+        }
+        this.workflows = Collections.unmodifiableMap(workflows);
     }
 
     @Override
     public Collection<String> workflowNames() {
-        return List.copyOf(workflowConfig().keySet());
+        return List.copyOf(this.workflows.keySet());
     }
 
     @Override
     public synchronized void triggerWorkflows(String event) throws Exception {
-        PackWorkflowSequence.trigger(workflowConfig(), event, this::runWorkflow);
+        for (PackWorkflowSequence workflow : this.workflows.values()) {
+            if (workflow.triggers().contains(event)) {
+                runWorkflow(workflow.name());
+            }
+        }
     }
 
     @Override
     public synchronized void runWorkflow(String name) throws Exception {
-        ConfigValue value = workflowConfig().getValue(name);
-        if (value == null) throw new IllegalArgumentException("Unknown resource pack workflow: " + name);
-        PackWorkflowSequence sequence = PackWorkflowSequence.fromConfig(name, value);
-        PackWorkflowValidation validation = new PackWorkflowValidation(this.plugin.dataFolderPath(), this.resourcePackHosts);
-        sequence.validate(validation);
-        try (WorkflowRun run = new WorkflowRun(this.zipGenerator, validation.usesProtection())) {
+        PackWorkflowSequence sequence = this.workflows.get(name);
+        if (sequence == null) throw new IllegalArgumentException("Unknown resource pack workflow: " + name);
+        try (WorkflowRun run = new WorkflowRun(this.zipGenerator, sequence.protection())) {
             sequence.execute(run);
         }
     }
