@@ -151,7 +151,7 @@ public abstract class AbstractPackManager implements PackManager {
     private volatile Map<String, Boolean> defaultPacks = Map.of();
     private volatile Map<String, PackWorkflowSequence> workflows = Map.of();
     private volatile Map<String, PackPreset> packPresets = Map.of();
-    private final Map<NetWorkUser, Set<String>> activePacks = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<NetWorkUser, Set<String>> selectedPacks = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<NetWorkUser, Map<String, Boolean>> packPreferences = Collections.synchronizedMap(new WeakHashMap<>());
     private final SkipOptimizationParser skipOptimizationParser = new SkipOptimizationParser();
     private final ConfigFactoryParser bundleParser = new ConfigFactoryParser();
@@ -333,14 +333,10 @@ public abstract class AbstractPackManager implements PackManager {
             // Plugins may change membership; configured order and known IDs remain authoritative.
             return hosts.keySet().stream().filter(selected::contains).toList();
         }, this.plugin.scheduler().async()).thenCompose(selected -> {
+            // Keep the selection even when a pack has not been generated or uploaded yet.
+            this.selectedPacks.put(user, Set.copyOf(selected));
             if (!(group instanceof ResourcePackHostGroup hostGroup)) return CompletableFuture.completedFuture(List.of());
-            return hostGroup.requestResourcePackDownloadLink(user, selected.stream().map(hosts::get).toList()).thenApply(data -> {
-                List<ResourcePackDownloadData> delivered = VersionHelper.isOrAbove1_20_3 ? data : data.stream().limit(1).toList();
-                Set<ResourcePackHost> sources = new HashSet<>();
-                delivered.forEach(pack -> sources.add(hostGroup.sourceOf(pack.uuid())));
-                this.activePacks.put(user, Set.copyOf(selected.stream().filter(id -> sources.contains(hosts.get(id))).toList()));
-                return data;
-            });
+            return hostGroup.requestResourcePackDownloadLink(user, selected.stream().map(hosts::get).toList());
         });
     }
 
@@ -405,14 +401,14 @@ public abstract class AbstractPackManager implements PackManager {
         if (!this.resourcePackHosts.containsKey(pack)) throw new IllegalArgumentException("Unknown resource pack: " + pack);
         List<CompletableFuture<Void>> sends = new ArrayList<>();
         for (Player player : this.plugin.networkManager().onlineUsers()) {
-            if (this.activePacks.getOrDefault(player, Set.of()).contains(pack)) sends.add(sendResourcePackAsync(player));
+            if (this.selectedPacks.getOrDefault(player, Set.of()).contains(pack)) sends.add(sendResourcePackAsync(player));
         }
         return CompletableFuture.allOf(sends.toArray(CompletableFuture[]::new));
     }
 
     @Override
     public void disable() {
-        this.activePacks.clear();
+        this.selectedPacks.clear();
         this.packPreferences.clear();
         SelfHostHttpServer.instance().disable();
         SelfHostHttpServer.instance().clearPacks();
