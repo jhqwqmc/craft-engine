@@ -38,14 +38,13 @@ public final class OpenListHost implements ResourcePackHost {
     private final String otpCode;
     private final Duration jwtTokenExpiration;
     private final String uploadPath;
-    private final boolean disableUpload;
     private final boolean isAlist;
     private final Path cacheFilePath;
     private Pair<String, Date> jwtToken;
     private String cachedSha1;
 
     private OpenListHost(String apiUrl, String userName, String password, String filePassword, String otpCode,
-                        Duration jwtTokenExpiration, String uploadPath, boolean disableUpload, boolean isAlist, Path cacheFilePath) {
+                        Duration jwtTokenExpiration, String uploadPath, boolean isAlist, Path cacheFilePath) {
         this.apiUrl = apiUrl;
         this.userName = userName;
         this.password = password;
@@ -53,7 +52,6 @@ public final class OpenListHost implements ResourcePackHost {
         this.otpCode = otpCode;
         this.jwtTokenExpiration = jwtTokenExpiration;
         this.uploadPath = uploadPath;
-        this.disableUpload = disableUpload;
         this.isAlist = isAlist;
         this.cacheFilePath = cacheFilePath;
 
@@ -143,12 +141,6 @@ public final class OpenListHost implements ResourcePackHost {
 
     @Override
     public CompletableFuture<Void> upload(Path resourcePackPath) {
-        if (this.disableUpload) {
-            this.cachedSha1 = "";
-            saveCacheToDisk();
-            return CompletableFuture.completedFuture(null);
-        }
-
         CompletableFuture<Void> future = new CompletableFuture<>();
         CraftEngine.instance().scheduler().executeAsync(() -> {
             try {
@@ -202,7 +194,8 @@ public final class OpenListHost implements ResourcePackHost {
     }
 
     private boolean shouldUpdateCache() {
-        return (this.cachedSha1 == null || this.cachedSha1.isEmpty()) && this.disableUpload;
+        // 未执行上传步骤时，也允许直接使用托管端已有的资源包。
+        return this.cachedSha1 == null || this.cachedSha1.isEmpty();
     }
 
     private void fail(CompletableFuture<?> future, String reason, String body) {
@@ -280,7 +273,6 @@ public final class OpenListHost implements ResourcePackHost {
         private static final String[] API_URL = ConfigKeys.of("api_url");
         private static final String[] JWT_TOKEN_EXPIRATION = ConfigKeys.of("jwt_token_expiration");
         private static final String[] UPLOAD_PATH = ConfigKeys.of("upload_path");
-        private static final String[] DISABLE_UPLOAD = ConfigKeys.of("disable_upload");
         private static final String[] OPT_CODE = ConfigKeys.of("otp_code");
         private static final String[] CACHE_FILE_NAME = ConfigKeys.of("cache_file_name");
 
@@ -295,10 +287,9 @@ public final class OpenListHost implements ResourcePackHost {
             String otpCode = section.getString(OPT_CODE, "");
             Duration jwtTokenExpiration = Duration.ofHours(section.getInt(JWT_TOKEN_EXPIRATION, 48));
             String uploadPath = section.getNonEmptyString(UPLOAD_PATH);
-            boolean disableUpload = section.getBoolean(DISABLE_UPLOAD);
             Path cacheFilePath = CraftEngine.instance().dataFolderPath().resolve("cache")
                     .resolve(section.getValue(CACHE_FILE_NAME, it -> it.getAsNonEmptyString().replace("/", "_"), (isAlist ? "alist_" : "openlist_") + id + ".json"));
-            return new OpenListHost(apiUrl, userName, password, filePassword, otpCode, jwtTokenExpiration, uploadPath, disableUpload, isAlist, cacheFilePath);
+            return new OpenListHost(apiUrl, userName, password, filePassword, otpCode, jwtTokenExpiration, uploadPath, isAlist, cacheFilePath);
         }
     }
 }

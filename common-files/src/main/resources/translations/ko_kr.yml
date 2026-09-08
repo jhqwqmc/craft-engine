@@ -358,3 +358,7 @@ resource_pack.validation_finished: "리소스 팩 검증 완료 (<arg:0>ms)"
 resource_pack.optimization_finished: "리소스 팩 최적화 완료 (<arg:0>ms)"
 resource_pack.compression_started: "리소스 팩 압축 중...(난독화 사용 시 진행이 느릴 수 있음)"
 resource_pack.compression_finished: "리소스 팩 압축 완료 (<arg:0>ms)"
+resource_pack.packsquash_started: '설정 <arg:0>(으)로 PackSquash 실행 중...'
+resource_pack.packsquash_finished: 'PackSquash 완료, 소요 시간: <arg:0>ms'
+resource_pack.zip_loaded: '리소스 팩 ZIP <arg:0> 로드 완료, 소요 시간: <arg:1>ms'
+resource_pack.export_finished: '리소스 팩을 <arg:0>(으)로 내보냈습니다. 소요 시간: <arg:1>ms'

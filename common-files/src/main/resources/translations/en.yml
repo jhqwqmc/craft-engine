@@ -357,3 +357,7 @@ resource_pack.validation_finished: Validated resource pack in <arg:0>ms
 resource_pack.optimization_finished: Optimized resource pack in <arg:0>ms
 resource_pack.compression_started: Compressing resource pack...(This progress might be slow if you have obfuscation enabled)
 resource_pack.compression_finished: Compressed resource pack in <arg:0>ms
+resource_pack.packsquash_started: 'Running PackSquash with configuration <arg:0>...'
+resource_pack.packsquash_finished: 'PackSquash completed in <arg:0>ms'
+resource_pack.zip_loaded: 'Loaded resource pack ZIP <arg:0> in <arg:1>ms'
+resource_pack.export_finished: 'Exported resource pack to <arg:0> in <arg:1>ms'

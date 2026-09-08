@@ -848,22 +848,13 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private record GeneratedPack(FileSystem fileSystem,
-                                 Path path,
-                                 JsonObject metadata,
-                                 Overlays overlays,
-                                 PackGenerationOptions options) implements AutoCloseable {
-        @Override
-        public void close() throws IOException {
-            this.fileSystem.close();
-        }
-    }
-
     private void validateGeneratedPack(GeneratedPack pack, boolean obfuscation) {
         Timestamp timestamp = new Timestamp();
         this.validateResourcePack(pack.path(), pack.overlays(), obfuscation);
-        this.validatePackMetadata(pack.metadata(), pack.overlays(), pack.options().description());
-        this.writeJsonSafely(pack.metadata(), pack.path().resolve("pack.mcmeta"));
+        if (pack.options() != null) {
+            this.validatePackMetadata(pack.metadata(), pack.overlays(), pack.options().description());
+            this.writeJsonSafely(pack.metadata(), pack.path().resolve("pack.mcmeta"));
+        }
         this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.validation_finished", String.valueOf(timestamp.deltaMillis())));
     }
 
@@ -1016,8 +1007,26 @@ public abstract class AbstractPackManager implements PackManager {
         }
 
         @Override
+        public void loadZip(String path) throws IOException {
+            Timestamp timestamp = new Timestamp();
+            GeneratedPack loaded = GeneratedPack.loadZip(resolveWorkflowPath(path));
+            // 成功读取新包后再替换，避免加载失败时丢失原有工作流资源。
+            GeneratedPack previous = this.pack;
+            this.pack = loaded;
+            if (previous != null) previous.close();
+            plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.zip_loaded", path, String.valueOf(timestamp.deltaMillis())));
+        }
+
+        @Override
         public void validatePack() {
             validateGeneratedPack(this.pack, this.protection);
+        }
+
+        @Override
+        public void export(String path) throws IOException {
+            Timestamp timestamp = new Timestamp();
+            this.pack.export(resolveWorkflowPath(path));
+            plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.export_finished", path, String.valueOf(timestamp.deltaMillis())));
         }
 
         @Override
@@ -1028,7 +1037,7 @@ public abstract class AbstractPackManager implements PackManager {
         @Override
         public void zip(String path, boolean protection) throws IOException {
             Path output = resolveWorkflowPath(path);
-            writePack(this.pack, output, this.generator, this.protection);
+            writePack(this.pack, output, this.generator, protection && VersionHelper.PREMIUM);
             dispatchGenerationEvent(this.pack.path(), output);
         }
 

@@ -357,3 +357,7 @@ resource_pack.validation_finished: Resource Pack in <arg:0>ms validiert
 resource_pack.optimization_finished: Resource Pack in <arg:0>ms optimiert
 resource_pack.compression_started: Komprimiere Resource Pack...(Dieser Vorgang kann länger dauern, falls Obfuscation aktiviert ist)
 resource_pack.compression_finished: Resource Pack in <arg:0>ms komprimiert
+resource_pack.packsquash_started: 'PackSquash wird mit Konfiguration <arg:0> ausgeführt...'
+resource_pack.packsquash_finished: 'PackSquash in <arg:0>ms abgeschlossen'
+resource_pack.zip_loaded: 'Ressourcenpaket-ZIP <arg:0> in <arg:1>ms geladen'
+resource_pack.export_finished: 'Ressourcenpaket in <arg:1>ms nach <arg:0> exportiert'

@@ -357,3 +357,7 @@ resource_pack.validation_finished: 資源包驗證完成，耗時 <arg:0> 毫秒
 resource_pack.optimization_finished: 資源包最佳化完成，耗時 <arg:0> 毫秒
 resource_pack.compression_started: 正在壓縮資源包...（如果啟用了混淆功能，此過程可能會比較慢）
 resource_pack.compression_finished: 資源包壓縮完成，耗時 <arg:0> 毫秒
+resource_pack.packsquash_started: '正在使用設定<arg:0>執行PackSquash...'
+resource_pack.packsquash_finished: 'PackSquash處理完成，耗時<arg:0>毫秒'
+resource_pack.zip_loaded: '已載入資源包ZIP <arg:0>，耗時<arg:1>毫秒'
+resource_pack.export_finished: '已匯出資源包至<arg:0>，耗時<arg:1>毫秒'

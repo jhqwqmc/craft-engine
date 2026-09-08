@@ -31,6 +31,22 @@ public final class PackWorkflowValidation {
         if (!this.generated || this.packed) throw new IllegalArgumentException("This workflow requires generated assets before ZIP packaging");
     }
 
+    public void loadZip(String path) {
+        resolvePath(path);
+        // 读取已有 ZIP 后重新进入可处理资源的阶段，允许继续校验、优化和打包。
+        this.generated = true;
+        this.packed = false;
+    }
+
+    public void export(String path) {
+        requireGeneratedPack();
+        Path output = resolvePath(path);
+        // 导出会重建目标目录，不能将插件数据目录或其父目录当作导出目录。
+        if (this.directory.toAbsolutePath().normalize().startsWith(output)) {
+            throw new IllegalArgumentException("Cannot export a resource pack over the plugin data directory: " + output);
+        }
+    }
+
     public void zip(String path, boolean protection) {
         requireGeneratedPack();
         this.packed = true;

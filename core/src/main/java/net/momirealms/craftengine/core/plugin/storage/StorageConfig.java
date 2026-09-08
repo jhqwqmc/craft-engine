@@ -4,21 +4,11 @@ import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.config.KnownResourceException;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
 public final class StorageConfig {
     private StorageConfig() {}
-
-    private static String mongoUrl(ConfigSection section) {
-        String host = nonBlank(section, "host", "localhost");
-        if (host.contains(":") && !host.startsWith("[")) host = "[" + host + "]";
-        int port = section.getValue("port", value -> value.getAsInt(1, 65535), 27017);
-        String database = nonBlank(section, "database", "craftengine");
-        return "mongodb://" + host + ":" + port + "/" + encode(database);
-    }
 
     private static Path localPath(ConfigSection section, String key, String defaultValue, Path dataDirectory) {
         try {
@@ -34,10 +24,6 @@ public final class StorageConfig {
             throw new KnownResourceException(ConfigConstants.PARSE_NONEMPTY_STRING_FAILED, section.assemblePath(key));
         }
         return value;
-    }
-
-    private static String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
     public record Json(Path directory) {
@@ -67,13 +53,7 @@ public final class StorageConfig {
 
     public record Mongo(String url, String username, String password) {
         public static Mongo fromConfig(ConfigSection section) {
-            String url = section.getString("url", "").trim();
-            if (url.isEmpty()) {
-                int poolSize = section.getValue("max_pool_size", value -> value.getAsInt(1), 10);
-                url = mongoUrl(section)
-                        + "?authSource=" + encode(nonBlank(section, "auth_source", "admin"))
-                        + "&maxPoolSize=" + poolSize;
-            }
+            String url = nonBlank(section, "url", "");
             return new Mongo(url, section.getString("username", ""), section.getString("password", ""));
         }
     }

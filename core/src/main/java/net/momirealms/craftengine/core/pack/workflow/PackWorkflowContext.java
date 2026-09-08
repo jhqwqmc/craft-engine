@@ -15,6 +15,10 @@ public interface PackWorkflowContext {
 
     void generate(PackGenerationOptions options) throws Exception;
 
+    void loadZip(String path) throws Exception;
+
+    void export(String path) throws Exception;
+
     void validatePack() throws Exception;
 
     void optimize() throws Exception;

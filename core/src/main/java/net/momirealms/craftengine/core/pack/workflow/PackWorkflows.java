@@ -11,6 +11,9 @@ import net.momirealms.craftengine.core.util.ResourceKey;
 
 public final class PackWorkflows {
     public static final PackWorkflowType<GeneratePackWorkflow> GENERATE = register(Key.ce("generate"), GeneratePackWorkflow.FACTORY);
+    public static final PackWorkflowType<LoadZipPackWorkflow> LOAD_ZIP = register(Key.ce("load_zip"), LoadZipPackWorkflow.FACTORY);
+    public static final PackWorkflowType<ExportPackWorkflow> EXPORT = register(Key.ce("export"), ExportPackWorkflow.FACTORY);
+    public static final PackWorkflowType<PackSquashWorkflow> PACKSQUASH = register(Key.ce("packsquash"), PackSquashWorkflow.FACTORY);
     public static final PackWorkflowType<ValidatePackWorkflow> VALIDATE = register(Key.ce("validate"), ValidatePackWorkflow.FACTORY);
     public static final PackWorkflowType<OptimizePackWorkflow> OPTIMIZE = register(Key.ce("optimize"), OptimizePackWorkflow.FACTORY);
     public static final PackWorkflowType<ZipPackWorkflow> ZIP = register(Key.ce("zip"), ZipPackWorkflow.FACTORY);
