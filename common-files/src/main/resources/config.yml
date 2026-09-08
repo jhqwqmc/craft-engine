@@ -22,30 +22,47 @@ resource-pack:
   # Matching workflows run in config order; an error stops the remaining workflows.
   # Omit trigger to run a workflow only by name.
   # Steps run in order and stop on failure. Paths are relative to plugins/CraftEngine.
-  # upload requires a pack ID and a file path; the current main ZIP is written before uploading it.
-  # validate and optimize must run before obfuscate, which writes the protected ZIP.
+  # generate creates assets in memory. description overrides the global resource pack description when set.
+  # map_compatibility (or map-compatibility) generates map-plugin assets instead of vanilla block overrides.
+  # zip requires an output path. upload sends an existing file using its pack ID and file path.
+  # validate and optimize must run before zip. ZIP packaging works in all editions.
   workflows:
-    # Fast local builds: generate, validate, and upload.
+    # Fast local builds: generate, validate, zip, and upload.
     development:
       trigger: reload_pack
       steps:
         - type: generate
-          path: "./generated/resource_pack.zip"
+          description: "<gray>CraftEngine Development ResourcePack</gray>"
         - type: validate
+        - type: zip
+          path: "./generated/resource_pack.zip"
         - type: upload
           pack: development
           path: "./generated/resource_pack.zip"
-    # Release builds: requires the resource pack obfuscation module.
+    # Release builds: optimize before ZIP packaging.
     production:
       steps:
         - type: generate
-          path: "./generated/resource_pack_production.zip"
+          description: "<gray>CraftEngine Production ResourcePack</gray>"
         - type: validate
         - type: optimize
-        - type: obfuscate
+        - type: zip
+          path: "./generated/resource_pack_production.zip"
+          # Enable only with the resource pack protection module installed.
+          protection: true
         - type: upload
           pack: production
           path: "./generated/resource_pack_production.zip"
+    # Generate a separate map-compatible resource pack with /ce workflow bluemap.
+    bluemap:
+      steps:
+        - type: generate
+          description: "<gray>CraftEngine BlueMap ResourcePack</gray>"
+          map_compatibility: true
+        - type: validate
+        - type: zip
+          path: "./generated/resource_pack_bluemap.zip"
+          protection: false
 
   # Selected packs are sent in list order. Player overrides take precedence over default.
   # Players need ce.resourcepack.<id> to change their own preference by command.
@@ -146,19 +163,9 @@ resource-pack:
       enable: true
       exclude: []
 
-  # Enabling this option generates a resource pack that is compatible with other map plugins, such as BlueMap.
-  map-plugin-compatibility:
-    enable: false
-    path: "./generated/resource_pack_map.zip"
-
   # [Premium Exclusive]
   # Protect your resource pack from being cracked by others
   protection:
-    # Create a copy without any protection applied. This copy is entirely created using the standard Java library
-    # and maintains good compatibility with other programs (such as bedrock resource pack converters).
-    unprotected-copy:
-      enable: false
-      path: "./generated/resource_pack_unprotected.zip"
     # Prevent thieves from extracting your resource pack. These options will crash their software.
     # Some of these options may impact your resource pack size.
     crash-tools:

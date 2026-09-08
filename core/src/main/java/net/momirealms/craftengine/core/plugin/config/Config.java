@@ -87,11 +87,7 @@ public final class Config {
     private List<String> resource_pack$merge_external_zips;
     private Set<String> resource_pack$exclude_file_extensions;
     private String resource_pack$description;
-    private boolean resource_pack$map_plugin_compatibility$enable;
-    private Path resource_pack$map_plugin_compatibility$path;
 
-    private boolean resource_pack$protection$unprotected_copy$enable;
-    private Path resource_pack$protection$unprotected_copy$path;
     private boolean resource_pack$protection$crash_tools$method_1;
     private boolean resource_pack$protection$crash_tools$method_2;
     private boolean resource_pack$protection$crash_tools$method_3;
@@ -440,8 +436,6 @@ public final class Config {
         if (this.resource_pack$supported_version$min.isAbove(this.resource_pack$supported_version$max)) {
             this.resource_pack$supported_version$min = this.resource_pack$supported_version$max;
         }
-        this.resource_pack$map_plugin_compatibility$enable = config.getBoolean("resource-pack.map-plugin-compatibility.enable", false);
-        this.resource_pack$map_plugin_compatibility$path = resolvePath(config.getString("resource-pack.map-plugin-compatibility.path", "./generated/resource_pack_map.zip"));
         this.resource_pack$merge_external_folders = config.getStringList("resource-pack.merge-external-folders");
         this.resource_pack$merge_external_zips = config.getStringList("resource-pack.merge-external-zip-files");
         this.resource_pack$exclude_file_extensions = new HashSet<>(config.getStringList("resource-pack.exclude-file-extensions"));
@@ -467,8 +461,6 @@ public final class Config {
         this.resource_pack$pack_squash$enable = config.getBoolean("resource-pack.pack-squash.enable", false);
         this.resource_pack$pack_squash$software_path = resolvePath(config.getString("resource-pack.pack-squash.software-path", "./packsquash/packsquash.exe"));
         this.resource_pack$pack_squash$config_path = resolvePath(config.getString("resource-pack.pack-squash.config-path", "./packsquash/config.toml"));
-        this.resource_pack$protection$unprotected_copy$enable = config.getBoolean("resource-pack.protection.unprotected-copy.enable", false);
-        this.resource_pack$protection$unprotected_copy$path = resolvePath(config.getString("resource-pack.protection.unprotected-copy.path", "./generated/unprotected_resource_pack.zip"));
         this.resource_pack$protection$crash_tools$method_1 = config.getBoolean("resource-pack.protection.crash-tools.method-1", false);
         this.resource_pack$protection$crash_tools$method_2 = config.getBoolean("resource-pack.protection.crash-tools.method-2", false);
         this.resource_pack$protection$crash_tools$method_3 = config.getBoolean("resource-pack.protection.crash-tools.method-3", false);
@@ -1672,22 +1664,6 @@ public final class Config {
 
     public static String bedrockEditionPlayerPrefix() {
         return instance.bedrock_edition_support$player_prefix;
-    }
-
-    public static boolean enableMapPluginCompatibility() {
-        return instance.resource_pack$map_plugin_compatibility$enable;
-    }
-
-    public static Path mapPluginCompatibilityPath() {
-        return instance.resource_pack$map_plugin_compatibility$path;
-    }
-
-    public static boolean createUnprotectedCopy() {
-        return instance.resource_pack$protection$unprotected_copy$enable;
-    }
-
-    public static Path unprotectedCopyPath() {
-        return instance.resource_pack$protection$unprotected_copy$path;
     }
 
     public static boolean enableProxy() {

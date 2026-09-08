@@ -19,6 +19,7 @@ import net.momirealms.craftengine.core.pack.atlas.*;
 import net.momirealms.craftengine.core.pack.conflict.PathContext;
 import net.momirealms.craftengine.core.pack.conflict.resolution.ConditionalResolution;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
+import net.momirealms.craftengine.core.pack.workflow.*;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.pack.host.ResourcePackHostGroup;
@@ -146,7 +147,6 @@ public abstract class AbstractPackManager implements PackManager {
     private Map<Path, CachedConfigFile> cachedConfigFiles = Collections.emptyMap();
     private Map<Path, CachedAssetFile> cachedAssetFiles = Collections.emptyMap();
     protected BiConsumer<Path, Path> zipGenerator;
-    protected BiConsumer<Path, Path> obfuscator;
     protected volatile ResourcePackHost resourcePackHost = NoneHost.INSTANCE;
     private volatile Map<String, ResourcePackHost> resourcePackHosts = Map.of();
     private volatile Map<String, Boolean> defaultPacks = Map.of();
@@ -756,10 +756,10 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private GeneratedPack generatePackAssets(boolean mapCompatibility) throws IOException {
+    private GeneratedPack generatePackAssets(PackGenerationOptions options) throws IOException {
         this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.generation_started"));
         Timestamp timestamp = new Timestamp();
-        if (!mapCompatibility && !Config.obfuscateItemModelUseCache()) {
+        if (!options.mapCompatibility() && !Config.obfuscateItemModelUseCache()) {
             ObfuscatedItemModelProcessor.resetMappings();
         }
 
@@ -805,15 +805,8 @@ public abstract class AbstractPackManager implements PackManager {
             this.generateParticle(generatedPackPath);
             this.generateAtlases(generatedPackPath);
 
-            // Keep the original vanilla blockstates for a later map-compatible copy.
-            Map<String, byte[]> originalBlockStates = new LinkedHashMap<>();
-            for (Key key : this.plugin.blockManager().blockOverrides().keySet()) {
-                String relative = "assets/" + key.namespace() + "/blockstates/" + key.value() + ".json";
-                Path original = generatedPackPath.resolve(relative);
-                originalBlockStates.put(relative, Files.exists(original) ? Files.readAllBytes(original) : null);
-            }
-            // 有地图兼容的情况下，先生成一半
-            if (mapCompatibility) {
+            // Maps use CraftEngine block IDs instead of sacrificed vanilla block states.
+            if (options.mapCompatibility()) {
                 this.generateBlockOverrides(generatedPackPath, false, true);
             } else {
                 this.generateBlockOverrides(generatedPackPath, true, Config.generateModAssets());
@@ -840,31 +833,30 @@ public abstract class AbstractPackManager implements PackManager {
                 this.removeAllShaders(generatedPackPath);
             }
 
-            this.validatePackMetadata(packMcMeta, overlays);
+            this.validatePackMetadata(packMcMeta, overlays, options.description());
             this.writeJsonSafely(packMcMeta, generatedPackPath.resolve("pack.mcmeta"));
             this.plugin.logger().info(TranslationManager.instance().plainTranslation("resource_pack.generation_finished", String.valueOf(timestamp.deltaMillis())));
-            return new GeneratedPack(fs, generatedPackPath, packMcMeta, overlays, originalBlockStates);
+            return new GeneratedPack(fs, generatedPackPath, packMcMeta, overlays, options);
         } catch (IOException | RuntimeException | Error e) {
             fs.close();
             throw e;
         }
     }
 
-    private record GeneratedPack(FileSystem fileSystem, Path path, JsonObject metadata, Overlays overlays,
-                                 Map<String, byte[]> originalBlockStates) implements AutoCloseable {
+    private record GeneratedPack(FileSystem fileSystem,
+                                 Path path,
+                                 JsonObject metadata,
+                                 Overlays overlays,
+                                 PackGenerationOptions options) implements AutoCloseable {
         @Override
         public void close() throws IOException {
             this.fileSystem.close();
         }
     }
 
-    private void validateGeneratedPack(GeneratedPack pack) {
-        validateGeneratedPack(pack, Config.enableObfuscation());
-    }
-
     private void validateGeneratedPack(GeneratedPack pack, boolean obfuscation) {
         this.validateResourcePack(pack.path(), pack.overlays(), obfuscation);
-        this.validatePackMetadata(pack.metadata(), pack.overlays());
+        this.validatePackMetadata(pack.metadata(), pack.overlays(), pack.options().description());
         this.writeJsonSafely(pack.metadata(), pack.path().resolve("pack.mcmeta"));
     }
 
@@ -886,52 +878,7 @@ public abstract class AbstractPackManager implements PackManager {
     }
 
     private void writePlainPack(GeneratedPack pack, Path output) throws IOException {
-        writePack(pack, output, (source, target) -> {
-            try {
-                ZipUtils.compress(source, target);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-    }
-
-    private void writeMapCompatibilityPack(GeneratedPack pack, Path output) throws IOException {
-        try (FileSystem fs = Jimfs.newFileSystem(Configuration.forCurrentPlatform())) {
-            Path copy = fs.getPath("resource_pack");
-            try (var paths = Files.walk(pack.path())) {
-                for (Path path : paths.toList()) {
-                    Path target = copy.resolve(pack.path().relativize(path).toString());
-                    if (Files.isDirectory(path)) Files.createDirectories(target);
-                    else Files.copy(path, target);
-                }
-            }
-            // Maps use CE's own block IDs instead of the vanilla states sacrificed by the main pack.
-            for (Map.Entry<String, byte[]> entry : pack.originalBlockStates().entrySet()) {
-                Path target = copy.resolve(entry.getKey());
-                if (entry.getValue() == null) Files.deleteIfExists(target);
-                else Files.write(target, entry.getValue());
-            }
-            generateBlockOverrides(copy, false, true);
-            writePlainPack(new GeneratedPack(fs, copy, pack.metadata(), pack.overlays(), pack.originalBlockStates()), output);
-        }
-    }
-
-    @Override
-    public synchronized void generateResourcePack(Path outputPath) throws IOException {
-        // The API caller chooses the output; named workflows use only their listed steps.
-        try (GeneratedPack pack = generatePackAssets(Config.enableMapPluginCompatibility())) {
-            if (Config.enableMapPluginCompatibility()) {
-                writePlainPack(pack, Config.mapPluginCompatibilityPath());
-                this.deleteMapCompatibilityAssets(pack.path());
-                this.generateBlockOverrides(pack.path(), true, false);
-                if (!Config.generateModAssets()) this.deleteModAssets(pack.path());
-            }
-            if (Config.validateResourcePack()) validateGeneratedPack(pack);
-            if (Config.optimizeResourcePack()) this.optimizeResourcePack(pack.path());
-            if (VersionHelper.PREMIUM && Config.createUnprotectedCopy()) writePlainPack(pack, Config.unprotectedCopyPath());
-            writePack(pack, outputPath, this.zipGenerator);
-            this.dispatchGenerationEvent(pack.path(), outputPath);
-        }
+        writePack(pack, output, this.zipGenerator);
     }
 
     private ConfigSection workflowConfig() {
@@ -946,97 +893,82 @@ public abstract class AbstractPackManager implements PackManager {
 
     @Override
     public synchronized void triggerWorkflows(String event) throws Exception {
-        PackWorkflow.trigger(workflowConfig(), event, this::runWorkflow);
+        PackWorkflowSequence.trigger(workflowConfig(), event, this::runWorkflow);
     }
 
     @Override
     public synchronized void runWorkflow(String name) throws Exception {
         ConfigValue value = workflowConfig().getValue(name);
         if (value == null) throw new IllegalArgumentException("Unknown resource pack workflow: " + name);
-        PackWorkflow workflow = PackWorkflow.fromConfig(name, value, this.resourcePackHosts.keySet());
-        Set<Path> mainOutputs = new HashSet<>();
-        mainOutputs.add(resolveWorkflowPath("generated/" + name + ".zip"));
-        for (PackWorkflow.Step step : workflow.steps()) {
-            if ((step.type() == PackWorkflow.Type.GENERATE || step.type() == PackWorkflow.Type.OBFUSCATE) && step.path() != null) {
-                mainOutputs.add(resolveWorkflowPath(step.path()));
-            }
-        }
-        for (PackWorkflow.Step step : workflow.steps()) {
-            if (step.type() == PackWorkflow.Type.MAP_COMPATIBILITY && mainOutputs.contains(resolveWorkflowPath(step.path()))) {
-                throw new IllegalArgumentException("Map compatibility output must differ from the main pack output");
-            }
-            if (step.type() == PackWorkflow.Type.OBFUSCATE && this.obfuscator == null) {
-                throw new IllegalStateException("The installed resource pack protection module does not support workflow obfuscation");
-            }
-            if (step.type() == PackWorkflow.Type.UPLOAD && !this.resourcePackHosts.get(step.host()).canUpload()) {
-                throw new IllegalArgumentException("Host does not support uploads: " + step.host());
-            }
-        }
-        try (WorkflowRun run = new WorkflowRun(name, workflow.steps().stream().anyMatch(step -> step.type() == PackWorkflow.Type.OBFUSCATE))) {
-            workflow.execute(step -> {
-                this.plugin.logger().info("Resource pack workflow " + name + ": " + step.type().name().toLowerCase(Locale.ROOT));
-                run.execute(step);
-            });
-            run.finish();
+        PackWorkflowSequence sequence = PackWorkflowSequence.fromConfig(name, value);
+        PackWorkflowValidation validation = new PackWorkflowValidation(this.plugin.dataFolderPath(), this.resourcePackHosts);
+        sequence.validate(validation);
+        try (WorkflowRun run = new WorkflowRun(validation.usesProtection())) {
+            sequence.execute(run);
             if (run.uploaded && Config.sendPackOnUpload()) {
                 for (Player player : this.plugin.networkManager().onlineUsers()) sendResourcePack(player);
             }
         }
     }
 
-    private final class WorkflowRun implements AutoCloseable {
+    private final class WorkflowRun implements PackWorkflowContext, AutoCloseable {
         private GeneratedPack pack;
-        private Path output;
-        private boolean written;
         private boolean uploaded;
-        private final boolean obfuscation;
+        private final boolean protection;
 
-        private WorkflowRun(String name, boolean obfuscation) {
-            this.output = resolveWorkflowPath("generated/" + name + ".zip");
-            this.obfuscation = obfuscation;
+        private WorkflowRun(boolean protection) {
+            this.protection = protection;
         }
 
-        private void execute(PackWorkflow.Step step) throws Exception {
-            switch (step.type()) {
-                case GENERATE -> {
-                    this.pack = generatePackAssets(false);
-                    if (step.path() != null) this.output = resolveWorkflowPath(step.path());
-                }
-                case VALIDATE -> {
-                    validateGeneratedPack(this.pack, this.obfuscation);
-                    this.written = false;
-                }
-                case OPTIMIZE -> {
-                    optimizeResourcePack(this.pack.path());
-                    this.written = false;
-                }
-                case MAP_COMPATIBILITY -> {
-                    Path mapOutput = resolveWorkflowPath(step.path());
-                    writeMapCompatibilityPack(this.pack, mapOutput);
-                }
-                case OBFUSCATE -> {
-                    if (step.path() != null) this.output = resolveWorkflowPath(step.path());
-                    writePack(this.pack, this.output, obfuscator);
-                    this.written = true;
-                    dispatchGenerationEvent(this.pack.path(), this.output);
-                }
-                case UPLOAD -> {
-                    Path source = resolveWorkflowPath(step.path());
-                    if (this.pack != null && source.equals(this.output)) finish();
-                    if (!Files.isRegularFile(source)) throw new IOException("Resource pack does not exist: " + source);
-                    resourcePackHosts.get(step.host()).upload(source).join();
-                    this.uploaded = true;
-                }
-                case SEND_PACK -> sendPackToUsers(step.host()).join();
-            }
+        @Override
+        public CraftEngine plugin() {
+            return plugin;
         }
 
-        private void finish() throws IOException {
-            if (this.pack != null && !this.written) {
-                writePlainPack(this.pack, this.output);
-                this.written = true;
-                dispatchGenerationEvent(this.pack.path(), this.output);
-            }
+        @Override
+        public Path resolvePath(String path) {
+            return resolveWorkflowPath(path);
+        }
+
+        @Override
+        public Path generatedPackPath() {
+            if (this.pack == null) throw new IllegalStateException("No resource pack has been generated");
+            return this.pack.path();
+        }
+
+        @Override
+        public void generate(PackGenerationOptions options) throws IOException {
+            this.pack = generatePackAssets(options);
+        }
+
+        @Override
+        public void validatePack() {
+            validateGeneratedPack(this.pack, this.protection);
+        }
+
+        @Override
+        public void optimize() {
+            optimizeResourcePack(this.pack.path());
+        }
+
+        @Override
+        public void zip(String path, boolean protection) throws IOException {
+            Path output = resolveWorkflowPath(path);
+            writePlainPack(this.pack, output);
+            dispatchGenerationEvent(this.pack.path(), output);
+        }
+
+        @Override
+        public void upload(String pack, String path) throws IOException {
+            Path source = resolveWorkflowPath(path);
+            if (!Files.isRegularFile(source)) throw new IOException("Resource pack does not exist: " + source);
+            resourcePackHosts.get(pack).upload(source).join();
+            this.uploaded = true;
+        }
+
+        @Override
+        public void sendPack(String pack) {
+            sendPackToUsers(pack).join();
         }
 
         @Override
@@ -1045,7 +977,7 @@ public abstract class AbstractPackManager implements PackManager {
         }
     }
 
-    private void validatePackMetadata(JsonObject rawMeta, Overlays packOverlays) {
+    private void validatePackMetadata(JsonObject rawMeta, Overlays packOverlays, String description) {
         // 获取设定的最大和最小值
         PackVersion minVersion = Config.packMinVersion().packFormat();
         PackVersion maxVersion = Config.packMaxVersion().packFormat();
@@ -1054,8 +986,8 @@ public abstract class AbstractPackManager implements PackManager {
         {
             JsonObject packJson = new JsonObject();
             rawMeta.add("pack", packJson);
-            JsonElement description = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(AdventureHelper.legacyToMiniMessage(Config.packDescription())));
-            packJson.add("description", description);
+            JsonElement descriptionJson = AdventureHelper.componentToJsonElement(AdventureHelper.miniMessage().deserialize(AdventureHelper.legacyToMiniMessage(description)));
+            packJson.add("description", descriptionJson);
             // 需要旧版本兼容性
             // https://minecraft.wiki/w/Java_Edition_25w31a
             if (minVersion.isBelow(PackVersion.PACK_FORMAT_CHANGE_VERSION)) {
@@ -3416,32 +3348,6 @@ public abstract class AbstractPackManager implements PackManager {
                 writeJsonSafely(blueMapBlockStates, generatedPackPath.resolve("assets").resolve(Key.CRAFTENGINE_NAMESPACE).resolve("blockColors.json"));
             }
         }
-    }
-
-    private void deleteMapCompatibilityAssets(Path generatedPackPath) {
-        Path assetPath = generatedPackPath.resolve("assets");
-        Path blueMapblockColorsFile = assetPath.resolve(Key.CRAFTENGINE_NAMESPACE).resolve("blockColors.json");
-        if (Files.exists(blueMapblockColorsFile)) {
-            try {
-                Files.delete(blueMapblockColorsFile);
-            } catch (IOException ignored) {
-            }
-        }
-    }
-
-    private void deleteModAssets(Path generatedPackPath) {
-        Path assetPath = generatedPackPath.resolve("assets");
-        Path blockStatePath = assetPath.resolve(Key.CRAFTENGINE_NAMESPACE).resolve("blockstates");
-        for (Map.Entry<Integer, JsonElement> entry : this.plugin.blockManager().modBlockStates().entrySet()) {
-            Path overridedBlockPath = blockStatePath.resolve("custom_" + entry.getKey() + ".json");
-            if (Files.exists(overridedBlockPath)) {
-                try {
-                    Files.delete(overridedBlockPath);
-                } catch (IOException ignored) {
-                }
-            }
-        }
-        FileUtils.deleteEmptyParentDirectories(blockStatePath, assetPath);
     }
 
     private void generateModernItemModels1_21_2(Path generatedPackPath) {

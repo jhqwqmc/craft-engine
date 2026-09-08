@@ -1,3 +1,4 @@
+workflow.unknown_type: Unknown resource pack workflow type '<arg:0>'
 storage.unknown_type: Unknown storage type '<arg:0>'
 storage.invalid_path: 'Invalid storage path'
 command.workflow.started: '<dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Running resource pack workflow <color:#FFD700><arg:0></color>…</white>'

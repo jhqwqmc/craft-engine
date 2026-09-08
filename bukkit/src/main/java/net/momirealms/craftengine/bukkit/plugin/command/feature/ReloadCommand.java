@@ -2,7 +2,7 @@ package net.momirealms.craftengine.bukkit.plugin.command.feature;
 
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.plugin.command.BukkitCommandFeature;
-import net.momirealms.craftengine.core.pack.PackWorkflow;
+import net.momirealms.craftengine.core.pack.workflow.PackWorkflowSequence;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.command.CraftEngineCommandManager;
 import net.momirealms.craftengine.core.plugin.locale.MessageConstants;
@@ -57,7 +57,7 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                         plugin().scheduler().executeAsync(() -> {
                             try {
                                 Timestamp timestamp = new Timestamp();
-                                plugin().packManager().triggerWorkflows(PackWorkflow.RELOAD_PACK);
+                                plugin().packManager().triggerWorkflows(PackWorkflowSequence.RELOAD_PACK);
                                 handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_SUCCESS, Component.text(timestamp.deltaMillis()));
                             } catch (Throwable e) {
                                 plugin().logger().warn("Failed to run reload_pack workflows", e);
@@ -95,7 +95,7 @@ public final class ReloadCommand extends BukkitCommandFeature<CommandSender> {
                                 }
                                 try {
                                     Timestamp timestamp = new Timestamp();
-                                    plugin().packManager().triggerWorkflows(PackWorkflow.RELOAD_PACK);
+                                    plugin().packManager().triggerWorkflows(PackWorkflowSequence.RELOAD_PACK);
                                     handleFeedback(context, MessageConstants.COMMAND_RELOAD_PACK_SUCCESS, Component.text(timestamp.deltaMillis()));
                                 } catch (Throwable e) {
                                     plugin().logger().warn("Failed to run reload_pack workflows", e);

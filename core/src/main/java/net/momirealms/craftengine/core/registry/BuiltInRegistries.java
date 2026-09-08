@@ -1,5 +1,7 @@
 package net.momirealms.craftengine.core.registry;
 
+import net.momirealms.craftengine.core.pack.workflow.PackWorkflow;
+import net.momirealms.craftengine.core.pack.workflow.PackWorkflowType;
 import net.momirealms.craftengine.core.plugin.storage.Storage;
 import net.momirealms.craftengine.core.plugin.storage.StorageType;
 import net.momirealms.craftengine.core.attribute.base.BaseValueSource;
@@ -137,6 +139,7 @@ public final class BuiltInRegistries {
     public static final Registry<ItemTransformDataProcessor.Type<? extends ItemTransformDataProcessor>> TRANSFORM_PROCESSOR_TYPE = createConstantBoundRegistry(Registries.TRANSFORM_PROCESSOR_TYPE, 16);
     public static final Registry<ResourcePackHostType<? extends ResourcePackHost>> RESOURCE_PACK_HOST_TYPE = createConstantBoundRegistry(Registries.RESOURCE_PACK_HOST_TYPE, 16);
     public static final Registry<StorageType<? extends Storage>> STORAGE_TYPE = createConstantBoundRegistry(Registries.STORAGE_TYPE, 8);
+    public static final Registry<PackWorkflowType<? extends PackWorkflow>> PACK_WORKFLOW_TYPE = createConstantBoundRegistry(Registries.PACK_WORKFLOW_TYPE, 8);
     public static final Registry<CommonFunctionType<? extends Function<Context>>> COMMON_FUNCTION_TYPE = createConstantBoundRegistry(Registries.COMMON_FUNCTION_TYPE, 128);
     public static final Registry<CommonConditionType<? extends Condition<Context>>> COMMON_CONDITION_TYPE = createConstantBoundRegistry(Registries.COMMON_CONDITION_TYPE, 128);
     public static final Registry<EventTrigger> EVENT_TRIGGER = createConstantBoundRegistry(Registries.EVENT_TRIGGER, 32);

@@ -9,7 +9,6 @@ import net.momirealms.craftengine.core.plugin.config.ConfigParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.List;
@@ -49,8 +48,6 @@ public interface PackManager extends Manageable {
     void updateCachedConfigFiles();
 
     void clearResourceConfigs();
-
-    void generateResourcePack(Path outputPath) throws Exception;
 
     Collection<String> workflowNames();
 

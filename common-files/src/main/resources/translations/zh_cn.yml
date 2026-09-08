@@ -1,3 +1,4 @@
+workflow.unknown_type: 未知的资源包工作流类型“<arg:0>”
 storage.unknown_type: 未知的存储类型“<arg:0>”
 storage.invalid_path: '存储路径无效'
 exception.invalid_syntax: <red>语法错误。正确语法：<white><arg:0></white></red>
