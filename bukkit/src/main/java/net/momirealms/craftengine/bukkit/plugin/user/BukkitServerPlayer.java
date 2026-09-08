@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
+import net.momirealms.craftengine.bukkit.pack.ResourcePackConfigurationTask;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.display.BukkitDestroyStageDisplayRecorder;
 import net.momirealms.craftengine.bukkit.entity.BukkitLivingEntity;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
@@ -1987,13 +1988,13 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
             Object packetListener = ConnectionProxy.INSTANCE.getPacketListener(connection);
             if (!ServerConfigurationPacketListenerImplProxy.CLASS.isInstance(packetListener)) return;
             Queue<Object> tasks = ServerConfigurationPacketListenerImplProxy.INSTANCE.getConfigurationTasks(packetListener);
+            // JoinWorldTask 必须排在资源包之后，否则客户端会先切换到游玩阶段。
             boolean removed = tasks.removeIf(JoinWorldTaskProxy.CLASS::isInstance);
             if (VersionHelper.isOrAbove1_20_3) {
-                for (ResourcePackDownloadData data : dataList) {
-                    tasks.add(ServerResourcePackConfigurationTaskProxy.INSTANCE.newInstance(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
-                    addResourcePackUUID(data.uuid());
-                }
+                // 一个批量任务连续发送整批资源包，全部加载成功后才允许推进配置队列。
+                tasks.add(ResourcePackConfigurationTask.create(this, dataList));
             } else {
+                // 1.20.2 不支持按 UUID 区分多个资源包，保留原版的单包配置任务。
                 ResourcePackDownloadData data = dataList.getFirst();
                 tasks.add(ServerResourcePackConfigurationTaskProxy.INSTANCE.newInstance(ResourcePackUtils.createServerResourcePackInfo(data.uuid(), data.url(), data.sha1())));
             }

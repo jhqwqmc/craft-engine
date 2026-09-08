@@ -48,12 +48,6 @@ public final class ResourcePackHostGroup implements ResourcePackHost {
     }
 
     @Override
-    public CompletableFuture<ResourcePackResponseAction> response(NetWorkUser user, UUID packId, ResourcePackResponseAction action) {
-        ResourcePackHost host = packId == null ? this.hosts.getFirst() : this.packHosts.get(packId);
-        return host == null ? ResourcePackHost.super.response(user, action) : host.response(user, packId, action);
-    }
-
-    @Override
     public boolean canUpload() {
         return this.hosts.stream().anyMatch(ResourcePackHost::canUpload);
     }
