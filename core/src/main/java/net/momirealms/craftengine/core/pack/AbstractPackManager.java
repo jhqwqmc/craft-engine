@@ -3867,7 +3867,6 @@ public abstract class AbstractPackManager implements PackManager {
 
         @Override
         protected void parseSection(Pack pack, Path path, ConfigSection section) {
-            if (!Config.optimizeResourcePack()) return;
             List<String> textures = section.getStringList("texture");
             if (!textures.isEmpty()) {
                 for (String texture : textures) {

@@ -98,7 +98,6 @@ public final class Config {
     private boolean resource_pack$protection$crash_tools$method_8;
     private boolean resource_pack$protection$crash_tools$method_9;
 
-    private boolean resource_pack$validation$enable;
     private boolean resource_pack$validation$fix_model_uv_out_of_bounds;
     private boolean resource_pack$validation$fix_atlas;
     private boolean resource_pack$validation$fix_missing_texture;
@@ -135,7 +134,6 @@ public final class Config {
     private List<String> resource_pack$protection$obfuscation$bypass_equipments;
     private List<String> resource_pack$protection$obfuscation$bypass_item_models;
 
-    private boolean resource_pack$optimization$enable;
     private boolean resource_pack$optimization$texture$enable;
     private Set<String> resource_pack$optimization$texture$exlude;
     private int resource_pack$optimization$texture$zopfli_iterations;
@@ -494,7 +492,6 @@ public final class Config {
         this.resource_pack$protection$obfuscation$bypass_sounds = config.getStringList("resource-pack.protection.obfuscation.bypass-sounds");
         this.resource_pack$protection$obfuscation$bypass_equipments = config.getStringList("resource-pack.protection.obfuscation.bypass-equipments");
         this.resource_pack$protection$obfuscation$bypass_item_models = config.getStringList("resource-pack.protection.obfuscation.bypass-item-models");
-        this.resource_pack$optimization$enable = config.getBoolean("resource-pack.optimization.enable", false);
         this.resource_pack$optimization$texture$enable = config.getBoolean("resource-pack.optimization.texture.enable", true);
         this.resource_pack$optimization$texture$zopfli_iterations = config.getInt("resource-pack.optimization.texture.zopfli-iterations", 0);
         this.resource_pack$optimization$texture$exlude = config.getStringList("resource-pack.optimization.texture.exclude").stream().map(p -> {
@@ -508,7 +505,6 @@ public final class Config {
             if (!p.endsWith(".json") && !p.endsWith(".mcmeta")) return p + ".json";
             return p;
         }).collect(Collectors.toSet());
-        this.resource_pack$validation$enable = config.getBoolean("resource-pack.validation.enable", true);
         this.resource_pack$validation$fix_model_uv_out_of_bounds = config.getBoolean("resource-pack.validation.fix-model-uv-out-of-bounds", false);
         this.resource_pack$validation$fix_atlas = config.getBoolean("resource-pack.validation.fix-atlas", true);
         this.resource_pack$validation$fix_missing_texture = config.getBoolean("resource-pack.validation.fix-missing-texture", true);
@@ -1465,10 +1461,6 @@ public final class Config {
         return instance.chunk_system$injection$target;
     }
 
-    public static boolean validateResourcePack() {
-        return instance.resource_pack$validation$enable;
-    }
-
     public static boolean fixModelUvOutOfBounds() {
         return instance.resource_pack$validation$fix_model_uv_out_of_bounds;
     }
@@ -1580,10 +1572,6 @@ public final class Config {
 
     public void setObf(boolean enable) {
         this.resource_pack$protection$obfuscation$enable = enable;
-    }
-
-    public static boolean optimizeResourcePack() {
-        return instance.resource_pack$optimization$enable;
     }
 
     public static boolean optimizeTexture() {

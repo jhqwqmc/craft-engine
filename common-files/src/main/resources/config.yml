@@ -128,9 +128,8 @@ resource-pack:
   exclude-core-shaders: false
 
   # Validate if there is any error in the resource pack, such as missing textures or models.
-  # If your resource pack is compliant with the standard, you can disable validation to improve the resource pack generation speed.
+  # Add a validate step to the workflow to run validation.
   validation:
-    enable: true
     # Fix textures that are not within the atlas. It is unreasonable to always rely on plugins to fix your mistakes.
     # You should strive to make your resource pack more standardized after gaining some experience with resource packs.
     fix-atlas: true
@@ -148,8 +147,8 @@ resource-pack:
     fix-model-uv-out-of-bounds: false
 
   # Optimize your resource pack by reducing its size without any quality loss.
+  # Add an optimize step to the workflow to run optimization.
   optimization:
-    enable: false
     # .png
     texture:
       enable: true
