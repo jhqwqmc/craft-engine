@@ -49,7 +49,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class SelfHostHttpServer {
-    private static final int REQUEST_TIMEOUT_SECONDS = 20;
+    private static final int REQUEST_TIMEOUT_SECONDS = 30;
     private static final int MAX_CONNECTIONS = 1024;
     private static final URI CLOUDFLARE = URI.create("https://www.cloudflare.com/cdn-cgi/trace");
     private static final URI CLOUDFLARE_CN = URI.create("https://www.cloudflare-cn.com/cdn-cgi/trace");
@@ -69,6 +69,10 @@ public final class SelfHostHttpServer {
             .build();
     private final AtomicLong totalRequests = new AtomicLong();
     private final AtomicLong blockedRequests = new AtomicLong();
+    private final AtomicLong totalConnections = new AtomicLong();
+    private final AtomicLong blockedConnections = new AtomicLong();
+    // Download callbacks must not wait for the monitor held during pack loading and server reloads.
+    private final Object bandwidthLock = new Object();
     private final ChannelGroup activeDownloadChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private final ChannelGroup connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private volatile Bandwidth limitPerIp = Bandwidth.builder()
@@ -234,12 +238,10 @@ public final class SelfHostHttpServer {
                 maxBandwidthUsage, minDownloadSpeed, strictValidation,
                 useServerPort, autoIp, forwardSecret
         );
-        Map<String, HostedPack> previousPacks = this.packs;
         this.packs = loadedPacks;
         this.oneTimePackUrls.asMap().values().removeIf(token -> {
-            HostedPack previous = previousPacks.get(token.packId());
             HostedPack current = loadedPacks.get(token.packId());
-            return previous == null || current == null || !previous.hash().equals(current.hash());
+            return current == null || !token.hash().equals(current.hash());
         });
     }
 
@@ -367,27 +369,31 @@ public final class SelfHostHttpServer {
         pipeline.addLast(new RequestHandler());
     }
 
-    private synchronized void rebalanceBandwidth() {
-        if (this.trafficShapingHandler == null) return;
-        if (this.globalUploadRateLimit == 0) {
-            this.trafficShapingHandler.setWriteChannelLimit(0);
-            return;
+    private void rebalanceBandwidth() {
+        synchronized (this.bandwidthLock) {
+            GlobalChannelTrafficShapingHandler handler = this.trafficShapingHandler;
+            if (handler == null) return;
+            long globalLimit = this.globalUploadRateLimit;
+            if (globalLimit == 0) {
+                handler.setWriteChannelLimit(0);
+                return;
+            }
+
+            int activeCount = this.activeDownloadChannels.size();
+            if (activeCount == 0) {
+                handler.setWriteChannelLimit(globalLimit);
+                return;
+            }
+
+            // 计算平均带宽：全局总量 / 当前人数
+            long fairRate = globalLimit / activeCount;
+
+            // 确保不低于最小保障速率（可选，防止除法导致过小）
+            fairRate = Math.max(fairRate, this.minDownloadSpeed);
+
+            // 更新 Handler 配置
+            handler.setWriteChannelLimit(fairRate);
         }
-
-        int activeCount = this.activeDownloadChannels.size();
-        if (activeCount == 0) {
-            this.trafficShapingHandler.setWriteChannelLimit(this.globalUploadRateLimit);
-            return;
-        }
-
-        // 计算平均带宽：全局总量 / 当前人数
-        long fairRate = this.globalUploadRateLimit / activeCount;
-
-        // 确保不低于最小保障速率（可选，防止除法导致过小）
-        fairRate = Math.max(fairRate, this.minDownloadSpeed);
-
-        // 更新 Handler 配置
-        this.trafficShapingHandler.setWriteChannelLimit(fairRate);
     }
 
     @Nullable
@@ -407,7 +413,7 @@ public final class SelfHostHttpServer {
         }
 
         String token = UUID.randomUUID().toString();
-        this.oneTimePackUrls.put(token, new DownloadToken(packId, this.strictValidation ? uuid.toString().replace("-", "") : ""));
+        this.oneTimePackUrls.put(token, new DownloadToken(packId, this.strictValidation ? uuid.toString().replace("-", "") : "", pack.hash()));
         return new ResourcePackDownloadData(
                 url(localhost) + "download/" + packId + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8),
                 pack.uuid(),
@@ -453,7 +459,9 @@ public final class SelfHostHttpServer {
     }
 
     public synchronized void readResourcePack(String packId, Path path) throws IOException {
-        this.packs.put(packId, readResourcePack(path));
+        HostedPack pack = readResourcePack(path);
+        this.packs.put(packId, pack);
+        this.oneTimePackUrls.asMap().values().removeIf(token -> token.packId().equals(packId) && !token.hash().equals(pack.hash()));
     }
 
     private HostedPack readResourcePack(Path path) throws IOException {
@@ -477,7 +485,7 @@ public final class SelfHostHttpServer {
     private record HostedPack(byte[] bytes, String hash, UUID uuid) {
     }
 
-    private record DownloadToken(String packId, String playerId) {
+    private record DownloadToken(String packId, String playerId, String hash) {
     }
 
     private class ConnectionHandler extends ChannelInboundHandlerAdapter {
@@ -486,16 +494,34 @@ public final class SelfHostHttpServer {
 
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) {
+            SelfHostHttpServer.this.totalConnections.incrementAndGet();
+            // Limit admission before incomplete requests can occupy the shared connection slots.
+            String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress();
+            if (!checkIpRateLimit(clientIp)) {
+                SelfHostHttpServer.this.blockedConnections.incrementAndGet();
+                ctx.close();
+                return;
+            }
             this.acquired = SelfHostHttpServer.this.connectionSlots.tryAcquire();
             if (!this.acquired) {
+                SelfHostHttpServer.this.blockedConnections.incrementAndGet();
                 ctx.close();
                 return;
             }
             SelfHostHttpServer.this.connections.add(ctx.channel());
             // An absolute deadline also catches clients that keep sending individual bytes.
             this.requestTimeout = ctx.executor().schedule(() -> {
+                SelfHostHttpServer.this.blockedConnections.incrementAndGet();
                 ctx.close();
             }, REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
+
+        private boolean checkIpRateLimit(String clientIp) {
+            Bandwidth limit = SelfHostHttpServer.this.limitPerIp;
+            if (limit == null) return true;
+            Bucket rateLimiter = SelfHostHttpServer.this.ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(limit).build());
+            assert rateLimiter != null;
+            return rateLimiter.tryConsume(1);
         }
 
         private void receivedRequest(ChannelHandlerContext ctx) {
@@ -580,15 +606,6 @@ public final class SelfHostHttpServer {
                     sendError(ctx, HttpResponseStatus.BAD_REQUEST, "Request body not supported");
                     return;
                 }
-                String clientIp = ((InetSocketAddress) ctx.channel().remoteAddress())
-                        .getAddress().getHostAddress();
-
-                if (!checkIpRateLimit(clientIp)) {
-                    sendError(ctx, HttpResponseStatus.TOO_MANY_REQUESTS, "Forbidden");
-                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                    return;
-                }
-
                 QueryStringDecoder queryDecoder = new QueryStringDecoder(request.uri());
                 String path = queryDecoder.path();
                 String forwardSecret = SelfHostHttpServer.this.forwardSecret;
@@ -609,17 +626,6 @@ public final class SelfHostHttpServer {
         }
 
         private void handleDownload(ChannelHandlerContext ctx, io.netty.handler.codec.http.HttpRequest request, QueryStringDecoder queryDecoder, String packId) {
-            // 使用一次性token
-            if (SelfHostHttpServer.this.useToken) {
-                String token = queryDecoder.parameters().getOrDefault("token", Collections.emptyList()).stream().findFirst().orElse(null);
-                String clientUUID = SelfHostHttpServer.this.strictValidation ? request.headers().get("X-Minecraft-UUID") : null;
-                if (!validateToken(token, clientUUID, packId)) {
-                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
-                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
-                    return;
-                }
-            }
-
             // 不是Minecraft客户端
             if (SelfHostHttpServer.this.denyNonMinecraft) {
                 String userAgent = request.headers().get(HttpHeaderNames.USER_AGENT);
@@ -641,6 +647,17 @@ public final class SelfHostHttpServer {
                 sendError(ctx, HttpResponseStatus.NOT_FOUND, "Pack Not Found");
                 SelfHostHttpServer.this.blockedRequests.incrementAndGet();
                 return;
+            }
+
+            // Consume the token only after all checks pass, against the exact version being sent.
+            if (SelfHostHttpServer.this.useToken) {
+                String token = queryDecoder.parameters().getOrDefault("token", Collections.emptyList()).stream().findFirst().orElse(null);
+                String clientUUID = SelfHostHttpServer.this.strictValidation ? request.headers().get("X-Minecraft-UUID") : null;
+                if (!validateToken(token, clientUUID, packId, pack)) {
+                    sendError(ctx, HttpResponseStatus.FORBIDDEN, "Forbidden");
+                    SelfHostHttpServer.this.blockedRequests.incrementAndGet();
+                    return;
+                }
             }
 
             // 新人来了，所有人的速度上限降低
@@ -676,7 +693,11 @@ public final class SelfHostHttpServer {
             String metrics = "# TYPE total_requests counter\n"
                     + "total_requests " + SelfHostHttpServer.this.totalRequests.get() + "\n"
                     + "# TYPE blocked_requests counter\n"
-                    + "blocked_requests " + SelfHostHttpServer.this.blockedRequests.get();
+                    + "blocked_requests " + SelfHostHttpServer.this.blockedRequests.get() + "\n"
+                    + "# TYPE total_connections counter\n"
+                    + "total_connections " + SelfHostHttpServer.this.totalConnections.get() + "\n"
+                    + "# TYPE blocked_connections counter\n"
+                    + "blocked_connections " + SelfHostHttpServer.this.blockedConnections.get();
 
             FullHttpResponse response = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1,
@@ -710,7 +731,7 @@ public final class SelfHostHttpServer {
             JsonObject jsonObject = new JsonObject();
             if (SelfHostHttpServer.this.useToken) {
                 String token = UUID.randomUUID().toString();
-                SelfHostHttpServer.this.oneTimePackUrls.put(token, new DownloadToken(packId, SelfHostHttpServer.this.strictValidation ? uuid.replace("-", "") : ""));
+                SelfHostHttpServer.this.oneTimePackUrls.put(token, new DownloadToken(packId, SelfHostHttpServer.this.strictValidation ? uuid.replace("-", "") : "", pack.hash()));
                 jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8));
             } else {
                 jsonObject.addProperty("url", SelfHostHttpServer.this.url(false) + "download/" + packId);
@@ -729,17 +750,10 @@ public final class SelfHostHttpServer {
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 
-        private boolean checkIpRateLimit(String clientIp) {
-            if (SelfHostHttpServer.this.limitPerIp == null) return true;
-            Bucket rateLimiter = SelfHostHttpServer.this.ipRateLimiters.get(clientIp, k -> Bucket.builder().addLimit(SelfHostHttpServer.this.limitPerIp).build());
-            assert rateLimiter != null;
-            return rateLimiter.tryConsume(1);
-        }
-
-        private boolean validateToken(String token, String clientUUID, String packId) {
+        private boolean validateToken(String token, String clientUUID, String packId, HostedPack pack) {
             if (token == null || token.length() != 36) return false;
             DownloadToken valid = SelfHostHttpServer.this.oneTimePackUrls.getIfPresent(token);
-            boolean isValid = valid != null && valid.packId().equals(packId)
+            boolean isValid = valid != null && valid.packId().equals(packId) && valid.hash().equals(pack.hash())
                     && (!SelfHostHttpServer.this.strictValidation || Objects.equals(valid.playerId(), clientUUID));
             if (isValid) {
                 return SelfHostHttpServer.this.oneTimePackUrls.asMap().remove(token, valid);

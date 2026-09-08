@@ -59,7 +59,7 @@ resource-pack:
     rate_limiting:
       max_bandwidth_per_second: 5_000_000
       min_download_speed_per_player: 50_000
-      qps_per_ip: 5/60
+      qps_per_ip: 10/60
 
   # The minimum client version supported by CraftEngine is 1.16. If you need to provide support for lower client versions, please modify the resource pack yourself.
   # Allowed values:

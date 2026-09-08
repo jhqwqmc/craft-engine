@@ -749,6 +749,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
     public boolean canInteract(Player player) {
         WorldPosition position = position();
+        if (!player.world().uuid().equals(position.world.uuid())) {
+            return false;
+        }
         if (!player.canInteractPoint(new Vec3d(position.x, position.y, position.z), 16d)) {
             return false;
         }
