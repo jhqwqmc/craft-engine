@@ -92,13 +92,7 @@ public final class AttackListener implements ByteBufferPacketListener {
             if (!BukkitCraftEngine.instance().antiGriefProvider().test(platformPlayer, Flag.BREAK, location))
                 return;
 
-            FurnitureHitboxPart part = null;
-            for (FurnitureHitboxPart p : hitBox.parts()) {
-                if (p.entityId() == entityId) {
-                    part = p;
-                    break;
-                }
-            }
+            FurnitureHitboxPart part = hitBox.findPart(entityId);
             if (part == null) {
                 return;
             }

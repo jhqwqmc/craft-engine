@@ -13,7 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public final class ModelEngineFurnitureElement extends AbstractConditionalFurnitureElement {
     public final Furniture furniture;
@@ -22,7 +22,7 @@ public final class ModelEngineFurnitureElement extends AbstractConditionalFurnit
     private Dummy<?> dummy;
 
     ModelEngineFurnitureElement(Furniture furniture, ModelEngineFurnitureElementConfig config) {
-        super(config.predicate, config.hasCondition);
+        super(config.predicate);
         this.furniture = furniture;
         this.config = config;
         WorldPosition furniturePos = furniture.position();
@@ -83,7 +83,7 @@ public final class ModelEngineFurnitureElement extends AbstractConditionalFurnit
     }
 
     @Override
-    public void gatherInteractableEntityId(Consumer<Integer> collector) {
+    public void gatherInteractableEntityId(IntConsumer collector) {
         if (this.dummy != null) {
             collector.accept(this.dummy.getEntityId());
         }

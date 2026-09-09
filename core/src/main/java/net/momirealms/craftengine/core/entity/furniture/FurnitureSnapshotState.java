@@ -35,14 +35,16 @@ public abstract class FurnitureSnapshotState {
     protected abstract void addCollidersToWorld(World world);
 
     public void refreshElements(Player player) {
-        for (FurnitureElement element : this.elements) {
+        for (int elementIndex = 0, elementCount = this.elements.size(); elementIndex < elementCount; elementIndex++) {
+            FurnitureElement element = this.elements.get(elementIndex);
             element.update(player);
         }
     }
 
     public void clearColliders() {
         if (this.colliders != null) {
-            for (Collider collider : this.colliders) {
+            for (int colliderIndex = 0, colliderCount = this.colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
+                Collider collider = this.colliders.get(colliderIndex);
                 collider.destroy();
             }
         }
@@ -50,7 +52,8 @@ public abstract class FurnitureSnapshotState {
 
     public void hideHitboxes(Player player) {
         if (this.hitboxes != null) {
-            for (FurnitureHitBox hitbox : this.hitboxes) {
+            for (int hitboxIndex = 0, hitboxCount = this.hitboxes.size(); hitboxIndex < hitboxCount; hitboxIndex++) {
+                FurnitureHitBox hitbox = this.hitboxes.get(hitboxIndex);
                 hitbox.hide(player);
             }
         }
@@ -58,7 +61,8 @@ public abstract class FurnitureSnapshotState {
 
     public void showHitboxes(Player player) {
         if (this.hitboxes != null) {
-            for (FurnitureHitBox hitbox : this.hitboxes) {
+            for (int hitboxIndex = 0, hitboxCount = this.hitboxes.size(); hitboxIndex < hitboxCount; hitboxIndex++) {
+                FurnitureHitBox hitbox = this.hitboxes.get(hitboxIndex);
                 hitbox.show(player);
             }
         }
@@ -69,12 +73,14 @@ public abstract class FurnitureSnapshotState {
     }
 
     public void show(Player player) {
-        for (FurnitureElement element : this.elements) {
+        for (int elementIndex = 0, elementCount = this.elements.size(); elementIndex < elementCount; elementIndex++) {
+            FurnitureElement element = this.elements.get(elementIndex);
             if (element != null) {
                 element.show(player);
             }
         }
-        for (FurnitureHitBox hitbox : this.hitboxes) {
+        for (int hitboxIndex = 0, hitboxCount = this.hitboxes.size(); hitboxIndex < hitboxCount; hitboxIndex++) {
+            FurnitureHitBox hitbox = this.hitboxes.get(hitboxIndex);
             if (hitbox != null) {
                 hitbox.show(player);
             }
@@ -82,12 +88,14 @@ public abstract class FurnitureSnapshotState {
     }
 
     public void hide(Player player) {
-        for (FurnitureElement element : this.elements) {
+        for (int elementIndex = 0, elementCount = this.elements.size(); elementIndex < elementCount; elementIndex++) {
+            FurnitureElement element = this.elements.get(elementIndex);
             if (element != null) {
                 element.hide(player);
             }
         }
-        for (FurnitureHitBox hitbox : this.hitboxes) {
+        for (int hitboxIndex = 0, hitboxCount = this.hitboxes.size(); hitboxIndex < hitboxCount; hitboxIndex++) {
+            FurnitureHitBox hitbox = this.hitboxes.get(hitboxIndex);
             if (hitbox != null) {
                 hitbox.hide(player);
             }
@@ -95,7 +103,8 @@ public abstract class FurnitureSnapshotState {
     }
 
     public void destroySeats() {
-        for (FurnitureHitBox hitbox : this.hitboxes) {
+        for (int hitboxIndex = 0, hitboxCount = this.hitboxes.size(); hitboxIndex < hitboxCount; hitboxIndex++) {
+            FurnitureHitBox hitbox = this.hitboxes.get(hitboxIndex);
             for (Seat<SeatOwner> seat : hitbox.seats()) {
                 seat.destroy();
             }

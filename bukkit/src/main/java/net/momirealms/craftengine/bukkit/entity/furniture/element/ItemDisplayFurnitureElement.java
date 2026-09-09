@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataResolver;
 import net.momirealms.craftengine.core.entity.furniture.data.ItemPatch;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -18,9 +19,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnitureElement {
+public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnitureElement implements TransformableFurnitureElement {
     public final ItemDisplayFurnitureElementConfig config;
     public final Furniture furniture;
     public final FurnitureDataResolver<ItemPatch> itemPatch;
@@ -36,7 +37,7 @@ public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnit
     }
 
     ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config, WorldPosition pos, int entityId, boolean positionChanged) {
-        super(config.predicate, config.hasCondition);
+        super(config.predicate);
         this.config = config;
         this.furniture = furniture;
         this.entityId = entityId;
@@ -79,11 +80,12 @@ public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnit
     }
 
     @Override
-    public void gatherInteractableEntityId(Consumer<Integer> collector) {
+    public void gatherInteractableEntityId(IntConsumer collector) {
     }
 
     @Override
-    public boolean supportsTransform() {
-        return true;
+    public @NotNull WorldPosition position() {
+        return this.position;
     }
+
 }

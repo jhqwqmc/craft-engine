@@ -5,7 +5,7 @@ import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.TextDisplayAlignment;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigKeys;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public final class TextDisplayFurnitureElementConfig implements FurnitureElementConfig<TextDisplayFurnitureElement> {
+public final class TextDisplayFurnitureElementConfig implements TransformableFurnitureElementConfig<TextDisplayFurnitureElement> {
     public static final FurnitureElementConfigFactory<TextDisplayFurnitureElement> FACTORY = new Factory();
     public final FurnitureMetadataProvider metadata;
     public final String text;
@@ -54,7 +54,6 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
     public final boolean useDefaultBackgroundColor;
     public final TextDisplayAlignment alignment;
     public final Predicate<PlayerContext> predicate;
-    public final boolean hasCondition;
 
     private TextDisplayFurnitureElementConfig(String text,
                                              Vector3f scale,
@@ -77,8 +76,7 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
                                              boolean isSeeThrough,
                                              boolean useDefaultBackgroundColor,
                                              TextDisplayAlignment alignment,
-                                             Predicate<PlayerContext> predicate,
-                                             boolean hasCondition) {
+                                             Predicate<PlayerContext> predicate) {
         this.text = text;
         this.scale = scale;
         this.position = position;
@@ -100,7 +98,6 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
         this.useDefaultBackgroundColor = useDefaultBackgroundColor;
         this.alignment = alignment;
         this.isSeeThrough = isSeeThrough;
-        this.hasCondition = hasCondition;
         this.predicate = predicate;
         this.metadata = (player, tintSource, force) -> {
             List<Object> dataValues = new ArrayList<>();
@@ -133,23 +130,14 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
     }
 
     @Override
-    public TextDisplayFurnitureElement create(@NotNull Furniture furniture) {
-        return new TextDisplayFurnitureElement(furniture, this, getPos(furniture));
+    public @NotNull TextDisplayFurnitureElement create(@NotNull Furniture furniture, @NotNull WorldPosition pos) {
+        return new TextDisplayFurnitureElement(furniture, this, pos);
     }
 
     @Override
-    public TextDisplayFurnitureElement create(@NotNull Furniture furniture, @NotNull TextDisplayFurnitureElement previous) {
-        WorldPosition pos = getPos(furniture);
-        return new TextDisplayFurnitureElement(furniture, this, pos, previous.entityId, !pos.equals(previous.position));
-    }
-
-    @Override
-    public TextDisplayFurnitureElement createExact(@NotNull Furniture furniture, @NotNull TextDisplayFurnitureElement previous) {
-        WorldPosition pos = getPos(furniture);
-        if (!pos.equals(previous.position)) {
-            return null;
-        }
-        return new TextDisplayFurnitureElement(furniture, this, pos, previous.entityId, false);
+    public @NotNull TextDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull TextDisplayFurnitureElement previous,
+                         @NotNull WorldPosition pos, boolean positionChanged) {
+        return new TextDisplayFurnitureElement(furniture, this, pos, previous.entityId, positionChanged);
     }
 
     @Override
@@ -157,7 +145,8 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
         return TextDisplayFurnitureElement.class;
     }
 
-    public WorldPosition getPos(Furniture furniture) {
+    @Override
+    public @NotNull WorldPosition getPos(@NotNull Furniture furniture) {
         WorldPosition furniturePos = furniture.position();
         Vec3d position = Furniture.getRelativePosition(furniturePos, this.position);
         return new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot + xRot, furniturePos.yRot + yRot);
@@ -203,8 +192,7 @@ public final class TextDisplayFurnitureElementConfig implements FurnitureElement
                     section.getBoolean(IS_SEE_THROUGH),
                     section.getBoolean(USE_DEFAULT_BACKGROUND_COLOR),
                     section.getEnum("alignment", TextDisplayAlignment.class, TextDisplayAlignment.CENTER),
-                    MiscUtils.allOf(conditions),
-                    !conditions.isEmpty()
+                    MiscUtils.allOf(conditions)
             );
         }
     }

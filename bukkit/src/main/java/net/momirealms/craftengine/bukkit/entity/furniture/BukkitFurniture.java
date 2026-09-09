@@ -45,6 +45,11 @@ public final class BukkitFurniture extends Furniture {
     private final WeakReference<ItemDisplay> metaEntity;
     private Location location;
 
+    @Override
+    protected Collider createCollider(ColliderConfig config) {
+        return new BukkitCollider(world(), position(), config);
+    }
+
     public BukkitFurniture(ItemDisplay metaEntity, FurnitureDefinition config, FurniturePersistentData data) {
         super(new BukkitEntity(metaEntity), data, config);
         this.metaEntity = new WeakReference<>(metaEntity);
@@ -70,13 +75,17 @@ public final class BukkitFurniture extends Furniture {
         if (!force) {
             List<AABB> aabbs = new ArrayList<>();
             WorldPosition position = position();
-            for (FurnitureHitBoxConfig<?> hitBoxConfig : variant.hitBoxConfigs()) {
+            List<? extends FurnitureHitBoxConfig<?>> hitboxConfigs = variant.hitBoxConfigs();
+            for (int configIndex = 0, configCount = hitboxConfigs.size(); configIndex < configCount; configIndex++) {
+                FurnitureHitBoxConfig<?> hitBoxConfig = hitboxConfigs.get(configIndex);
                 hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
             }
             if (!aabbs.isEmpty()) {
                 if (!CollisionUtils.test(position.world.minecraftWorld(), aabbs.stream().map(it -> AABBProxy.INSTANCE.newInstance(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
                         o -> {
-                            for (Collider collider : super.snapshot.colliders()) {
+                            List<Collider> colliders = super.snapshot.colliders();
+                            for (int colliderIndex = 0, colliderCount = colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
+                                Collider collider = colliders.get(colliderIndex);
                                 if (o == collider.handle()) {
                                     return false;
                                 }
@@ -94,7 +103,8 @@ public final class BukkitFurniture extends Furniture {
             BukkitFurnitureManager.instance().invalidateFurniture(this, false);
             super.destroySeats();
             super.clearColliders();
-            for (Player player : trackedBy) {
+            for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                Player player = trackedBy.get(playerIndex);
                 super.snapshot.hideHitboxes(player);
             }
         }
@@ -105,7 +115,8 @@ public final class BukkitFurniture extends Furniture {
         {
             BukkitFurnitureManager.instance().initFurniture(this);
             this.addCollidersToWorld();
-            for (Player player : trackedBy) {
+            for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                Player player = trackedBy.get(playerIndex);
                 super.snapshot.showHitboxes(player);
             }
         }
@@ -127,13 +138,17 @@ public final class BukkitFurniture extends Furniture {
             if (!force) {
                 // 检查新位置是否可用
                 List<AABB> aabbs = new ArrayList<>();
-                for (FurnitureHitBoxConfig<?> hitBoxConfig : currentVariant().hitBoxConfigs()) {
+                List<? extends FurnitureHitBoxConfig<?>> hitboxConfigs = currentVariant().hitBoxConfigs();
+                for (int configIndex = 0, configCount = hitboxConfigs.size(); configIndex < configCount; configIndex++) {
+                    FurnitureHitBoxConfig<?> hitBoxConfig = hitboxConfigs.get(configIndex);
                     hitBoxConfig.prepareBoundingBox(position, aabbs::add, false);
                 }
                 if (!aabbs.isEmpty()) {
                     if (!CollisionUtils.test(position.world.minecraftWorld(), aabbs.stream().map(it -> AABBProxy.INSTANCE.newInstance(it.minX, it.minY, it.minZ, it.maxX, it.maxY, it.maxZ)).toList(),
                             o -> {
-                                for (Collider collider : super.snapshot.colliders()) {
+                                List<Collider> colliders = super.snapshot.colliders();
+                                for (int colliderIndex = 0, colliderCount = colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
+                                    Collider collider = colliders.get(colliderIndex);
                                     if (o == collider.handle()) {
                                         return false;
                                     }
@@ -152,7 +167,8 @@ public final class BukkitFurniture extends Furniture {
                 BukkitFurnitureManager.instance().invalidateFurniture(this, false);
                 super.destroySeats();
                 super.clearColliders();
-                for (Player player : previousTrackedBy) {
+                for (int playerIndex = 0, playerCount = previousTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                    Player player = previousTrackedBy.get(playerIndex);
                     super.snapshot.hideHitboxes(player);
                 }
             }
@@ -167,7 +183,8 @@ public final class BukkitFurniture extends Furniture {
                             BukkitFurnitureManager.instance().initFurniture(this);
                             this.addCollidersToWorld();
                             List<Player> afterTrackedBy = trackedBy();
-                            for (Player player : afterTrackedBy) {
+                            for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                                Player player = afterTrackedBy.get(playerIndex);
                                 if (previousTrackedBy.contains(player)) {
                                     super.snapshot.showHitboxes(player);
                                 }
@@ -191,7 +208,8 @@ public final class BukkitFurniture extends Furniture {
                 BukkitFurnitureManager.instance().initFurniture(this);
                 this.addCollidersToWorld();
                 List<Player> afterTrackedBy = trackedBy();
-                for (Player player : afterTrackedBy) {
+                for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                    Player player = afterTrackedBy.get(playerIndex);
                     if (previousTrackedBy.contains(player)) {
                         super.snapshot.showHitboxes(player);
                     }
@@ -213,7 +231,9 @@ public final class BukkitFurniture extends Furniture {
         Location displayLocation = itemDisplay.getLocation();
         Object addPacket = ClientboundAddEntityPacketProxy.INSTANCE.newInstance(itemDisplay.getEntityId(), itemDisplay.getUniqueId(),
                 displayLocation.getX(), displayLocation.getY(), displayLocation.getZ(), displayLocation.getPitch(), displayLocation.getYaw(), EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0);
-        for (Player player : trackedBy()) {
+        List<Player> trackedBy = trackedBy();
+        for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+            Player player = trackedBy.get(playerIndex);
             player.sendPacket(removePacket, false);
             player.sendPacket(addPacket, false);
         }
@@ -237,7 +257,9 @@ public final class BukkitFurniture extends Furniture {
             this.controller.preRemove(player);
         } finally {
             Optional.ofNullable(this.metaEntity.get()).ifPresent(Entity::remove);
-            for (Collider entity : super.snapshot.colliders()) {
+            List<Collider> colliders = super.snapshot.colliders();
+            for (int colliderIndex = 0, colliderCount = colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
+                Collider entity = colliders.get(colliderIndex);
                 entity.destroy();
             }
             destroySeats();

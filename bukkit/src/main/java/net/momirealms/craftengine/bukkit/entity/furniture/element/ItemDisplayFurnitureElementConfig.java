@@ -5,7 +5,7 @@ import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.ItemDisplayContext;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.data.*;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-public final class ItemDisplayFurnitureElementConfig implements FurnitureElementConfig<ItemDisplayFurnitureElement> {
+public final class ItemDisplayFurnitureElementConfig implements TransformableFurnitureElementConfig<ItemDisplayFurnitureElement> {
     public static final FurnitureElementConfigFactory<ItemDisplayFurnitureElement> FACTORY = new Factory();
     public final FurnitureMetadataProvider metadata;
     public final Key itemId;
@@ -54,7 +54,6 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
     public final int skyLight;
     public final float viewRange;
     public final Predicate<PlayerContext> predicate;
-    public final boolean hasCondition;
 
     private ItemDisplayFurnitureElementConfig(Key itemId,
                                              Vector3f scale,
@@ -72,8 +71,7 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
                                              int blockLight,
                                              int skyLight,
                                              float viewRange,
-                                             Predicate<PlayerContext> predicate,
-                                             boolean hasCondition) {
+                                             Predicate<PlayerContext> predicate) {
         this.scale = scale;
         this.position = position;
         this.translation = translation;
@@ -91,7 +89,6 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
         this.skyLight = skyLight;
         this.viewRange = viewRange;
         this.predicate = predicate;
-        this.hasCondition = hasCondition;
         BiFunction<Player, FurnitureDataResolver<ItemPatch>, Item> itemFunction = (player, itemPatch) -> {
             Item wrappedItem = Item.byId(itemId, player);
             if (itemPatch != null && wrappedItem != null) {
@@ -130,23 +127,14 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
     }
 
     @Override
-    public ItemDisplayFurnitureElement create(@NotNull Furniture furniture) {
-        return new ItemDisplayFurnitureElement(furniture, this, getPos(furniture));
+    public @NotNull ItemDisplayFurnitureElement create(@NotNull Furniture furniture, @NotNull WorldPosition pos) {
+        return new ItemDisplayFurnitureElement(furniture, this, pos);
     }
 
     @Override
-    public ItemDisplayFurnitureElement create(@NotNull Furniture furniture, @NotNull ItemDisplayFurnitureElement previous) {
-        WorldPosition pos = getPos(furniture);
-        return new ItemDisplayFurnitureElement(furniture, this, pos, previous.entityId, !pos.equals(previous.position));
-    }
-
-    @Override
-    public ItemDisplayFurnitureElement createExact(@NotNull Furniture furniture, @NotNull ItemDisplayFurnitureElement previous) {
-        WorldPosition pos = getPos(furniture);
-        if (!pos.equals(previous.position)) {
-            return null;
-        }
-        return new ItemDisplayFurnitureElement(furniture, this, pos, previous.entityId, false);
+    public @NotNull ItemDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull ItemDisplayFurnitureElement previous,
+                         @NotNull WorldPosition pos, boolean positionChanged) {
+        return new ItemDisplayFurnitureElement(furniture, this, pos, previous.entityId, positionChanged);
     }
 
     @Override
@@ -154,7 +142,8 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
         return ItemDisplayFurnitureElement.class;
     }
 
-    public WorldPosition getPos(Furniture furniture) {
+    @Override
+    public @NotNull WorldPosition getPos(@NotNull Furniture furniture) {
         WorldPosition furniturePos = furniture.position();
         Vec3d position = Furniture.getRelativePosition(furniturePos, this.position);
         return new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot + xRot, furniturePos.yRot + yRot);
@@ -199,8 +188,7 @@ public final class ItemDisplayFurnitureElementConfig implements FurnitureElement
                     brightness != null ? brightness.getInt(BLOCK_LIGHT, -1) : -1,
                     brightness != null ? brightness.getInt(SKY_LIGHT, -1) : -1,
                     section.getFloat(VIEW_RANGE, 1f),
-                    MiscUtils.allOf(conditions),
-                    !conditions.isEmpty()
+                    MiscUtils.allOf(conditions)
             );
         }
     }

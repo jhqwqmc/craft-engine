@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.world.WorldPosition;
@@ -16,9 +17,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-public final class TextDisplayFurnitureElement extends AbstractConditionalFurnitureElement {
+public final class TextDisplayFurnitureElement extends AbstractConditionalFurnitureElement implements TransformableFurnitureElement {
     public final TextDisplayFurnitureElementConfig config;
     public final Furniture furniture;
     public final WorldPosition position;
@@ -33,7 +34,7 @@ public final class TextDisplayFurnitureElement extends AbstractConditionalFurnit
     }
 
     TextDisplayFurnitureElement(Furniture furniture, TextDisplayFurnitureElementConfig config, WorldPosition pos, int entityId, boolean positionChanged) {
-        super(config.predicate, config.hasCondition);
+        super(config.predicate);
         this.furniture = furniture;
         this.config = config;
         this.entityId = entityId;
@@ -75,11 +76,12 @@ public final class TextDisplayFurnitureElement extends AbstractConditionalFurnit
     }
 
     @Override
-    public void gatherInteractableEntityId(Consumer<Integer> collector) {
+    public void gatherInteractableEntityId(IntConsumer collector) {
     }
 
     @Override
-    public boolean supportsTransform() {
-        return true;
+    public @NotNull WorldPosition position() {
+        return this.position;
     }
+
 }

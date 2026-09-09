@@ -3,6 +3,7 @@ package net.momirealms.craftengine.core.entity.furniture;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.momirealms.craftengine.core.entity.Entity;
@@ -12,6 +13,9 @@ import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureController;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementMatcher;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
@@ -27,7 +31,6 @@ import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.plugin.context.parameter.FurnitureParameterProvider;
 import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.util.Key;
-import net.momirealms.craftengine.core.util.LazyReference;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
 import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.World;
@@ -42,16 +45,25 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.function.IntConsumer;
 
 public abstract class Furniture implements Cullable, ChainParameterSource {
     public final FurnitureDefinition config;
-    /** Accessor for persistent furniture data */
+    /**
+     * Accessor for persistent furniture data
+     */
     public final FurniturePersistentData persistentData;
-    /** The base entity that carries metadata for this furniture */
+    /**
+     * The base entity that carries metadata for this furniture
+     */
     public final Entity metaDataEntity;
-    /** Cached entity ID of the metadata entity */
+    /**
+     * Cached entity ID of the metadata entity
+     */
     public final int metaDataEntityId;
-    /** Furniture controller */
+    /**
+     * Furniture controller
+     */
     public final FurnitureController controller;
 
     protected CullingData cullingData;
@@ -59,17 +71,17 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     protected volatile FurnitureSnapshotState snapshot;
     protected FurnitureVariant currentVariant;
     protected Item sourceItem;
-    /** IDs of virtual entities that need to be sent to clients */
+    /**
+     * IDs of virtual entities that need to be sent to clients
+     */
     protected int[] interactableEntityIds;
-    /** IDs of entities specifically acting as physics colliders */
+    /**
+     * IDs of entities specifically acting as physics colliders
+     */
     protected int[] colliderEntityIds;
-    private boolean hasExternalModel;
     protected volatile boolean unsaved;
-
-    @Override
-    public <T> Optional<T> getParameter(ContextKey<T> key) {
-        return FurnitureParameterProvider.INSTANCE.getOptionalParameter(key, this);
-    }
+    private List<AABB> rayTraceBoxes;
+    private boolean hasExternalModel;
 
     protected Furniture(Entity metaDataEntity, FurniturePersistentData data, FurnitureDefinition config) {
         this.config = config;
@@ -79,6 +91,11 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         this.sourceItem = data.item().orElse(null);
         this.controller = FurnitureController.createController(this);
         this.setVariantInternal(config.getVariant(data));
+    }
+
+    @Override
+    public <T> Optional<T> getParameter(ContextKey<T> key) {
+        return FurnitureParameterProvider.INSTANCE.getOptionalParameter(key, this);
     }
 
     public WorldPosition position() {
@@ -210,7 +227,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      * Refreshes the visual elements for all tracking players.
      */
     public void refreshElements() {
-        for (Player player : trackedBy()) {
+        List<Player> trackedBy = trackedBy();
+        for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+            Player player = trackedBy.get(playerIndex);
             refreshElements(player);
         }
     }
@@ -224,6 +243,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
     /**
      * Moves the furniture to a new position.
+     *
      * @param position New world position.
      * @return A future containing the result of the move.
      */
@@ -233,8 +253,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
     /**
      * Moves the furniture to a new position.
+     *
      * @param position New world position.
-     * @param force Whether to force the move even if obstructed.
+     * @param force    Whether to force the move even if obstructed.
      * @return A future containing the result of the move.
      */
     public abstract CompletableFuture<Boolean> moveTo(WorldPosition position, boolean force);
@@ -243,7 +264,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      * Triggers a full refresh (elements & hitboxes) for all tracking players.
      */
     public void refresh() {
-        for (Player player : trackedBy()) {
+        List<Player> trackedBy = trackedBy();
+        for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+            Player player = trackedBy.get(playerIndex);
             refresh(player);
         }
     }
@@ -268,10 +291,10 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         FurnitureVariant previousVariant = this.currentVariant;
         this.currentVariant = variant;
         this.persistentData.setVariant(variant.name());
-        Int2ObjectMap<FurnitureHitBox> hitboxMap = new Int2ObjectOpenHashMap<>();
 
         // 所有可供交互的实体列表
-        IntList interactableEntityIds = new IntArrayList();
+        IntList interactableEntityIds = new IntArrayList(variant.elementConfigs().size() + variant.hitBoxConfigs().size());
+        IntConsumer interactableCollector = interactableEntityIds::add;
 
         // 获取全部家具显示元素，从行为和配置里获取
         List<FurnitureElementConfig<? extends FurnitureElement>> elementConfigs = variant.elementConfigs();
@@ -280,15 +303,17 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         // 如果先前存在变体快照
         if (this.snapshot != null) {
             elements = this.updateElements(elementConfigs);
-            for (FurnitureElement element : elements) {
-                element.gatherInteractableEntityId(interactableEntityIds::addLast);
+            for (int elementIndex = 0, elementCount = elements.size(); elementIndex < elementCount; elementIndex++) {
+                FurnitureElement element = elements.get(elementIndex);
+                element.gatherInteractableEntityId(interactableCollector);
             }
         } else {
             elements = new ArrayList<>(elementConfigs.size());
-            for (FurnitureElementConfig<?> elementConfig : elementConfigs) {
+            for (int configIndex = 0, configCount = elementConfigs.size(); configIndex < configCount; configIndex++) {
+                FurnitureElementConfig<?> elementConfig = elementConfigs.get(configIndex);
                 FurnitureElement element = elementConfig.create(this);
                 elements.add(element);
-                element.gatherInteractableEntityId(interactableEntityIds::addLast);
+                element.gatherInteractableEntityId(interactableCollector);
             }
         }
 
@@ -297,43 +322,75 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         int behaviorElementStart = elements.size();
         this.controller.gatherElements(element -> {
             elements.add(element);
-            element.gatherInteractableEntityId(interactableEntityIds::addLast);
+            element.gatherInteractableEntityId(interactableCollector);
         });
 
         // 初始化碰撞箱
         List<FurnitureHitBoxConfig<? extends FurnitureHitBox>> furnitureHitBoxConfigs = variant.hitBoxConfigs();
-        List<Collider> colliders = new ObjectArrayList<>(furnitureHitBoxConfigs.size());
+        ObjectArrayList<ColliderConfig> colliderConfigs = new ObjectArrayList<>(furnitureHitBoxConfigs.size());
         List<FurnitureHitBox> hitboxes = new ObjectArrayList<>(furnitureHitBoxConfigs.size());
 
         // 辅助map，用于排除重复的座椅
-        LazyReference<Map<Vector3f, Seat<SeatOwner>>> seatMap = LazyReference.untilNotNull(HashMap::new);
-        for (FurnitureHitBoxConfig<?> furnitureHitBoxConfig : furnitureHitBoxConfigs) {
+        Map<Vector3f, Seat<SeatOwner>> seatMap = null;
+        for (int configIndex = 0, configCount = furnitureHitBoxConfigs.size(); configIndex < configCount; configIndex++) {
+            FurnitureHitBoxConfig<?> furnitureHitBoxConfig = furnitureHitBoxConfigs.get(configIndex);
             FurnitureHitBox hitbox = furnitureHitBoxConfig.create(this);
             hitboxes.add(hitbox);
         }
         this.controller.gatherHitboxes(hitboxes::add);
 
-        for (FurnitureHitBox hitbox : hitboxes) {
-            for (FurnitureHitboxPart part : hitbox.parts()) {
+        int partCount = 0;
+        for (int i = 0; i < hitboxes.size(); i++) {
+            partCount += hitboxes.get(i).partCount();
+        }
+        Int2ObjectMap<FurnitureHitBox> hitboxMap = new Int2ObjectOpenHashMap<>(partCount);
+        ColliderMergePlan mergePlan = variant.colliderMergePlan();
+        int[] configuredColliders = mergePlan.hasMerges ? new int[furnitureHitBoxConfigs.size()] : IntArrays.EMPTY_ARRAY;
+        if (mergePlan.hasMerges) Arrays.fill(configuredColliders, -1);
+        for (int hitboxIndex = 0, size = hitboxes.size(); hitboxIndex < size; hitboxIndex++) {
+            FurnitureHitBox hitbox = hitboxes.get(hitboxIndex);
+            for (int i = 0, count = hitbox.partCount(); i < count; i++) {
+                FurnitureHitboxPart part = hitbox.part(i);
                 hitboxMap.put(part.entityId(), hitbox);
             }
             Seat<SeatOwner>[] seats = hitbox.seats();
             for (int index = 0; index < seats.length; index++) {
-                Map<Vector3f, Seat<SeatOwner>> tempMap = seatMap.get();
+                if (seatMap == null) seatMap = new HashMap<>(4);
                 Vector3f seatPos = seats[index].config().position();
-                if (tempMap.containsKey(seatPos)) {
-                    seats[index] = tempMap.get(seatPos);
-                } else {
-                    tempMap.put(seatPos, seats[index]);
-                }
+                Seat<SeatOwner> existing = seatMap.putIfAbsent(seatPos, seats[index]);
+                if (existing != null) seats[index] = existing;
             }
-            hitbox.collectInteractableEntityId(interactableEntityIds::addLast);
-            colliders.addAll(hitbox.colliders());
+            hitbox.collectInteractableEntityId(interactableCollector);
+            int colliderCount = hitbox.colliderConfigCount();
+            if (hitboxIndex < configuredColliders.length && colliderCount == 1) {
+                configuredColliders[hitboxIndex] = colliderConfigs.size();
+            }
+            for (int i = 0; i < colliderCount; i++) {
+                colliderConfigs.add(hitbox.colliderConfig(i));
+            }
+        }
+
+        // Keep the original shapes for ray tracing, including shapes that need no server entity.
+        if (colliderConfigs.isEmpty()) {
+            this.rayTraceBoxes = List.of();
+        } else {
+            List<AABB> boxes = new ArrayList<>(colliderConfigs.size());
+            for (int i = 0; i < colliderConfigs.size(); i++) {
+                boxes.add(colliderConfigs.get(i).bounds);
+            }
+            this.rayTraceBoxes = boxes;
+        }
+        mergePlan.optimize(colliderConfigs, configuredColliders);
+        List<Collider> colliders = new ObjectArrayList<>(colliderConfigs.size());
+        this.colliderEntityIds = new int[colliderConfigs.size()];
+        for (int i = 0; i < colliderConfigs.size(); i++) {
+            Collider collider = createCollider(colliderConfigs.get(i));
+            colliders.add(collider);
+            this.colliderEntityIds[i] = collider.entityId();
         }
 
         // 虚拟碰撞箱的实体id
         this.interactableEntityIds = interactableEntityIds.toIntArray();
-        this.colliderEntityIds = colliders.stream().mapToInt(Collider::entityId).toArray();
         this.cullingData = createCullingData(variant.cullingData());
         this.snapshot = createSnapshot(elements, hitboxes, hitboxMap, colliders, new IdentityHashMap<>(4));
 
@@ -360,7 +417,8 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                 List<Player> trackedBy = trackedBy();
                 if (!trackedBy.isEmpty()) {
                     boolean culling = Config.enableEntityCulling();
-                    for (Player player : trackedBy) {
+                    for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                        Player player = trackedBy.get(playerIndex);
                         if (culling) {
                             CullableHolder holder = player.getTrackedEntity(this.metaDataEntityId);
                             if (holder == null || !holder.isShown) continue;
@@ -377,8 +435,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private List<FurnitureElement> updateElements(List<FurnitureElementConfig<? extends FurnitureElement>> newElementConfigList) {
-        List<Player> trackedBy = trackedBy();
         List<FurnitureElement> newElements = new ArrayList<>(newElementConfigList.size());
+        if (this.snapshot.elements.isEmpty() && newElementConfigList.isEmpty()) return newElements;
+        List<Player> trackedBy = trackedBy();
         boolean hasTrackedBy = !trackedBy.isEmpty();
         boolean[] visibility = new boolean[trackedBy.size()];
         if (hasTrackedBy) {
@@ -402,97 +461,98 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         if (this.snapshot.elements.size() == 1 && newElementConfigList.size() == 1) {
             FurnitureElement previousElement = this.snapshot.elements.getFirst();
             FurnitureElementConfig<? extends FurnitureElement> config = newElementConfigList.getFirst();
-            if (previousElement.supportsTransform() && config.elementClass().isInstance(previousElement)) {
-                FurnitureElement element = ((FurnitureElementConfig) config).create(this, previousElement);
-                if (element != null) {
-                    if (hasTrackedBy) {
-                        for (int z = 0; z < trackedBy.size(); z++) {
-                            if (visibility[z]) {
-                                updateFurnitureElementVisibility(trackedBy.get(z), previousElement, element);
-                            }
-                        }
+            FurnitureElement element = null;
+            WorldPosition position = null;
+            if (config instanceof TransformableFurnitureElementConfig<?> transformConfig) {
+                position = transformConfig.getPos(this);
+                if (previousElement instanceof TransformableFurnitureElement transformable && transformConfig.elementClass().isInstance(previousElement)) {
+                    element = ((TransformableFurnitureElementConfig) transformConfig).transform(this, transformable,
+                            position, !position.equals(transformable.position()));
+                }
+            }
+            if (element != null) {
+                for (int z = 0; z < trackedBy.size(); z++) {
+                    if (visibility[z]) updateFurnitureElementVisibility(trackedBy.get(z), previousElement, element);
+                }
+            } else {
+                element = config instanceof TransformableFurnitureElementConfig<?> transformConfig ? transformConfig.create(this, position) : config.create(this);
+                for (int z = 0; z < trackedBy.size(); z++) {
+                    if (visibility[z]) {
+                        Player player = trackedBy.get(z);
+                        previousElement.hide(player);
+                        element.show(player);
                     }
+                }
+            }
+            newElements.add(element);
+        } else {
+            FurnitureElementMatcher matcher = new FurnitureElementMatcher(this.snapshot.elements);
+            FurnitureElementConfig<?>[] unmatched = null;
+            WorldPosition[] unmatchedPositions = null;
+            int unmatchedCount = 0;
+            int configCount = newElementConfigList.size();
+            for (int configIndex = 0; configIndex < configCount; configIndex++) {
+                FurnitureElementConfig<?> config = newElementConfigList.get(configIndex);
+                WorldPosition position = null;
+                TransformableFurnitureElement previousElement = null;
+                FurnitureElement element = null;
+                if (config instanceof TransformableFurnitureElementConfig<?> transformConfig) {
+                    position = transformConfig.getPos(this);
+                    previousElement = matcher.match(transformConfig.elementClass(), position, true);
+                    if (previousElement != null) {
+                        element = ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement, position, false);
+                    }
+                }
+                if (element == null) {
+                    if (unmatched == null) unmatched = new FurnitureElementConfig<?>[configCount];
+                    unmatched[unmatchedCount] = config;
+                    if (position != null) {
+                        if (unmatchedPositions == null) unmatchedPositions = new WorldPosition[configCount];
+                        unmatchedPositions[unmatchedCount] = position;
+                    }
+                    unmatchedCount++;
+                } else {
+                    newElements.add(element);
+                    for (int z = 0; z < trackedBy.size(); z++) {
+                        if (visibility[z]) updateFurnitureElementVisibility(trackedBy.get(z), previousElement, element);
+                    }
+                }
+            }
+            for (int i = 0; i < unmatchedCount; i++) {
+                assert unmatched != null;
+                FurnitureElementConfig<?> config = unmatched[i];
+                TransformableFurnitureElement previousElement = null;
+                FurnitureElement element;
+                if (config instanceof TransformableFurnitureElementConfig<?> transformConfig) {
+                    // The first pass stores a non-null position for every unmatched transformable config.
+                    assert unmatchedPositions != null;
+                    WorldPosition position = unmatchedPositions[i];
+                    assert position != null;
+                    previousElement = matcher.match(transformConfig.elementClass(), position, false);
+                    element = previousElement != null
+                            ? ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement,
+                            position, !position.equals(previousElement.position()))
+                            : transformConfig.create(this, position);
                 } else {
                     element = config.create(this);
-                    if (hasTrackedBy) {
-                        for (int z = 0; z < trackedBy.size(); z++) {
-                            if (visibility[z]) {
-                                Player player = trackedBy.get(z);
-                                previousElement.hide(player);
-                                element.show(player);
-                            }
-                        }
-                    }
                 }
                 newElements.add(element);
-            }
-        } else {
-            FurnitureElement[] previousElements = this.snapshot.elements.toArray(new FurnitureElement[0]);
-            FurnitureElementConfig<? extends FurnitureElement>[] newElementConfigs = newElementConfigList.toArray(new FurnitureElementConfig[0]);
-
-            outer: for (int i = 0; i < newElementConfigs.length; i++) {
-                FurnitureElementConfig<? extends FurnitureElement> config = newElementConfigs[i];
-
-                for (int j = 0; j < previousElements.length; j++) {
-                    FurnitureElement previousElement = previousElements[j];
-                    if (previousElement != null && previousElement.supportsTransform() && config.elementClass().isInstance(previousElement)) {
-                        FurnitureElement newElement = ((FurnitureElementConfig) config).createExact(this, previousElement);
-                        if (newElement != null) {
-                            previousElements[j] = null;
-                            newElementConfigs[i] = null;
-                            newElements.add(newElement);
-                            if (hasTrackedBy) {
-                                for (int z = 0; z < trackedBy.size(); z++) {
-                                    if (visibility[z]) {
-                                        updateFurnitureElementVisibility(trackedBy.get(z), previousElement, newElement);
-                                    }
-                                }
-                            }
-                            continue outer;
-                        }
+                for (int z = 0; z < trackedBy.size(); z++) {
+                    if (visibility[z]) {
+                        Player player = trackedBy.get(z);
+                        if (previousElement != null) updateFurnitureElementVisibility(player, previousElement, element);
+                        else element.show(player);
                     }
                 }
             }
-
-            outer: for (int i = 0; i < newElementConfigs.length; i++) {
-                FurnitureElementConfig<? extends FurnitureElement> config = newElementConfigs[i];
-                if (config != null) {
-                    for (int j = 0; j < previousElements.length; j++) {
-                        FurnitureElement previousElement = previousElements[j];
-                        if (previousElement != null && previousElement.supportsTransform() && config.elementClass().isInstance(previousElement)) {
-                            FurnitureElement newElement = ((FurnitureElementConfig) config).create(this, previousElement);
-                            if (newElement != null) {
-                                previousElements[j] = null;
-                                newElements.add(newElement);
-                                if (hasTrackedBy) {
-                                    for (int z = 0; z < trackedBy.size(); z++) {
-                                        if (visibility[z]) {
-                                            updateFurnitureElementVisibility(trackedBy.get(z), previousElement, newElement);
-                                        }
-                                    }
-                                }
-                                continue outer;
-                            }
-                        }
-                    }
-
-                    FurnitureElement newElement = config.create(this);
-                    newElements.add(newElement);
-                    if (hasTrackedBy) {
-                        for (int z = 0; z < trackedBy.size(); z++) {
-                            if (visibility[z]) {
-                                newElement.show(trackedBy.get(z));
-                            }
-                        }
-                    }
-                }
-            }
+            FurnitureElement[] previousElements = matcher.remaining;
 
             if (hasTrackedBy) {
                 for (int i = 0; i < previousElements.length; i++) {
                     FurnitureElement previousElement = previousElements[i];
                     if (previousElement != null) {
-                        for (Player player : trackedBy) {
+                        for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                            Player player = trackedBy.get(playerIndex);
                             previousElement.hide(player);
                         }
                     }
@@ -500,23 +560,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             }
         }
         return newElements;
-    }
-
-    private static void updateFurnitureElementVisibility(Player player, FurnitureElement before, FurnitureElement after) {
-        if (before.hasCondition() || after.hasCondition()) {
-            PlayerContext context = player.constantContext();
-            boolean previousCanSee = before.canSee(context);
-            boolean afterCanSee = after.canSee(context);
-            if (previousCanSee && afterCanSee) {
-                after.update(player);
-            } else if (previousCanSee) {
-                after.hide(player);
-            } else if (afterCanSee) {
-                after.show(player);
-            }
-        } else {
-            after.update(player);
-        }
     }
 
     protected abstract FurnitureSnapshotState createSnapshot(List<FurnitureElement> elements,
@@ -535,12 +578,14 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         WorldPosition position = position();
         if (aabb == null) {
             List<AABB> aabbs = new ArrayList<>();
-            for (FurnitureHitBoxConfig<?> hitBoxConfig : this.currentVariant.hitBoxConfigs()) {
+            List<? extends FurnitureHitBoxConfig<?>> hitboxConfigs = this.currentVariant.hitBoxConfigs();
+            for (int configIndex = 0, configCount = hitboxConfigs.size(); configIndex < configCount; configIndex++) {
+                FurnitureHitBoxConfig<?> hitBoxConfig = hitboxConfigs.get(configIndex);
                 hitBoxConfig.prepareBoundingBox(position, aabbs::add, true);
             }
             return new CullingData(getMaxAABB(this.position(), aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         } else {
-            Vector3f[] vertices = new Vector3f[] {
+            Vector3f[] vertices = new Vector3f[]{
                     // 底面两个对角点
                     new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ),
                     new Vector3f((float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ),
@@ -561,37 +606,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             return new CullingData(new AABB(minX, minY, minZ, maxX, maxY, maxZ),
                     parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         }
-    }
-
-    /**
-     * Calculates an enclosing AABB that contains all provided AABBs.
-     */
-    private static @NotNull AABB getMaxAABB(WorldPosition pos, List<AABB> aabbs) {
-        double minX = pos.x;
-        double minY = pos.y;
-        double minZ = pos.z;
-        double maxX = pos.x;
-        double maxY = pos.y;
-        double maxZ = pos.z;
-        for (int i = 0; i < aabbs.size(); i++) {
-            AABB aabb = aabbs.get(i);
-            if (i == 0) {
-                minX = aabb.minX;
-                minY = aabb.minY;
-                minZ = aabb.minZ;
-                maxX = aabb.maxX;
-                maxY = aabb.maxY;
-                maxZ = aabb.maxZ;
-            } else {
-                minX = Math.min(minX, aabb.minX);
-                minY = Math.min(minY, aabb.minY);
-                minZ = Math.min(minZ, aabb.minZ);
-                maxX = Math.max(maxX, aabb.maxX);
-                maxY = Math.max(maxY, aabb.maxY);
-                maxZ = Math.max(maxZ, aabb.maxZ);
-            }
-        }
-        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Nullable
@@ -646,7 +660,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         return this.metaDataEntity.isValid();
     }
 
-    /** Fully removes the furniture from the world and cleans up resources. */
+    /**
+     * Fully removes the furniture from the world and cleans up resources.
+     */
     public abstract void destroy(Player player);
 
     public void destroy() {
@@ -687,14 +703,14 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         return getRelativePosition(this.position(), position);
     }
 
-    /**
-     * Static utility to calculate relative coordinates based on rotation.
-     */
-    public static Vec3d getRelativePosition(WorldPosition location, Vector3f position) {
-        Quaternionf conjugated = QuaternionUtils.toQuaternionf(0f, (float) Math.toRadians(180 - location.yRot()), 0f).conjugate();
-        Vector3f offset = conjugated.transform(new Vector3f(position));
-        return new Vec3d(location.x + offset.x, location.y + offset.y, location.z - offset.z);
+    public List<AABB> rayTraceBoxes() {
+        return this.rayTraceBoxes;
     }
+
+    /**
+     * Called only after all hitboxes have supplied their data and optimization has finished.
+     */
+    protected abstract Collider createCollider(ColliderConfig config);
 
     /**
      * Gets the collection of physical colliders associated with this furniture.
@@ -757,5 +773,70 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             return false;
         }
         return true;
+    }
+
+    private static void updateFurnitureElementVisibility(Player player, FurnitureElement before, FurnitureElement after) {
+        PlayerContext context = player.constantContext();
+        boolean previousCanSee = before.canSee(context);
+        boolean afterCanSee = after.canSee(context);
+        if (previousCanSee && afterCanSee) {
+            after.update(player);
+        } else if (previousCanSee) {
+            after.hide(player);
+        } else if (afterCanSee) {
+            after.show(player);
+        }
+    }
+
+    /**
+     * Calculates an enclosing AABB that contains all provided AABBs.
+     */
+    private static @NotNull AABB getMaxAABB(WorldPosition pos, List<AABB> aabbs) {
+        double minX = pos.x;
+        double minY = pos.y;
+        double minZ = pos.z;
+        double maxX = pos.x;
+        double maxY = pos.y;
+        double maxZ = pos.z;
+        for (int i = 0; i < aabbs.size(); i++) {
+            AABB aabb = aabbs.get(i);
+            if (i == 0) {
+                minX = aabb.minX;
+                minY = aabb.minY;
+                minZ = aabb.minZ;
+                maxX = aabb.maxX;
+                maxY = aabb.maxY;
+                maxZ = aabb.maxZ;
+            } else {
+                minX = Math.min(minX, aabb.minX);
+                minY = Math.min(minY, aabb.minY);
+                minZ = Math.min(minZ, aabb.minZ);
+                maxX = Math.max(maxX, aabb.maxX);
+                maxY = Math.max(maxY, aabb.maxY);
+                maxZ = Math.max(maxZ, aabb.maxZ);
+            }
+        }
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    /**
+     * Static utility to calculate relative coordinates based on rotation.
+     */
+    public static Vec3d getRelativePosition(WorldPosition location, Vector3f position) {
+        Vector3f offset = rotateHitboxOffset(location.yRot(), position);
+        return new Vec3d(location.x + offset.x, location.y + offset.y, location.z - offset.z);
+    }
+
+    public static Vector3f rotateHitboxOffset(float yaw, Vector3f position) {
+        // Exact quarter turns keep adjoining faces aligned; quaternion roundoff can open tiny gaps.
+        if (yaw % 90 == 0) {
+            float normalized = (yaw % 360 + 360) % 360;
+            if (normalized == 180) return new Vector3f(position);
+            if (normalized == 0) return new Vector3f(-position.x, position.y, -position.z);
+            if (normalized == 90) return new Vector3f(-position.z, position.y, position.x);
+            if (normalized == 270) return new Vector3f(position.z, position.y, -position.x);
+        }
+        Quaternionf conjugated = QuaternionUtils.toQuaternionf(0f, (float) Math.toRadians(180 - yaw), 0f).conjugate();
+        return conjugated.transform(new Vector3f(position));
     }
 }

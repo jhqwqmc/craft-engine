@@ -29,7 +29,8 @@ public final class BukkitVariantSnapshot extends FurnitureSnapshotState {
     @Override
     public void addCollidersToWorld(World cWorld) {
         Object world = cWorld.minecraftWorld();
-        for (Collider entity : super.colliders) {
+        for (int colliderIndex = 0, colliderCount = super.colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
+            Collider entity = super.colliders.get(colliderIndex);
             Object minecraftEntity = entity.handle();
             Entity bukkitEntity = EntityProxy.INSTANCE.getBukkitEntity(minecraftEntity);
             bukkitEntity.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_COLLISION, PersistentDataType.BYTE, (byte) 1);

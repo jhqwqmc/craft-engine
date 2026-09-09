@@ -2,7 +2,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
-import net.momirealms.craftengine.core.entity.furniture.Collider;
+import net.momirealms.craftengine.core.entity.furniture.ColliderConfig;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -16,37 +16,34 @@ import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.Att
 import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.AttributesProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.phys.Vec3Proxy;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.*;
+import java.util.function.IntConsumer;
 
 public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     private final CustomFurnitureHitboxConfig config;
-    private final Collider collider;
+    public final ColliderConfig colliderConfig;
     private final Object spawnPacket;
     private final Object despawnPacket;
-    private final FurnitureHitboxPart part;
+    public final FurnitureHitboxPart part;
     private final int entityId;
 
     CustomFurnitureHitbox(Furniture furniture, CustomFurnitureHitboxConfig config) {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();
-        Vec3d pos = Furniture.getRelativePosition(position, config.position());
-        AABB aabb = AABB.makeBoundingBox(pos, config.width(), config.height());
-        this.collider = createCollider(furniture.world(), position, aabb, false, config.blocksBuilding(), config.canBeHitByProjectile());
+        Vec3d pos = Furniture.getRelativePosition(position, config.position);
+        AABB aabb = AABB.makeBoundingBox(pos, config.width, config.height);
+        this.colliderConfig = new ColliderConfig(aabb, config.colliderProperties);
         int entityId = EntityUtils.ENTITY_COUNTER.incrementAndGet();
         List<Object> packets = new ArrayList<>(3);
         packets.add(ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
                 entityId, UUID.randomUUID(), pos.x, pos.y, pos.z, 0, position.yRot,
-                config.entityType(), 0, Vec3Proxy.ZERO, 0
+                config.entityType, 0, Vec3Proxy.ZERO, 0
         ));
-        packets.add(ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(entityId, config.cachedValues()));
+        packets.add(ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(entityId, config.cachedValues));
         if (VersionHelper.isOrAbove1_20_5) {
             Object attributeIns = AttributeInstanceProxy.INSTANCE.newInstance$0(AttributesProxy.SCALE, $ -> {});
-            AttributeInstanceProxy.INSTANCE.setBaseValue(attributeIns, config.scale());
+            AttributeInstanceProxy.INSTANCE.setBaseValue(attributeIns, config.scale);
             packets.add(ClientboundUpdateAttributesPacketProxy.INSTANCE.newInstance$0(entityId, Collections.singletonList(attributeIns)));
         }
         this.spawnPacket = ClientboundBundlePacketProxy.INSTANCE.newInstance(packets);
@@ -56,13 +53,23 @@ public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     }
 
     @Override
-    public List<Collider> colliders() {
-        return List.of(this.collider);
+    public int colliderConfigCount() {
+        return 1;
     }
 
     @Override
-    public List<FurnitureHitboxPart> parts() {
-        return List.of(this.part);
+    public ColliderConfig colliderConfig(int index) {
+        return this.colliderConfig;
+    }
+
+    @Override
+    public int partCount() {
+        return 1;
+    }
+
+    @Override
+    public FurnitureHitboxPart part(int index) {
+        return this.part;
     }
 
     @Override
@@ -76,7 +83,7 @@ public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
     }
 
     @Override
-    public void collectInteractableEntityId(Consumer<Integer> collector) {
+    public void collectInteractableEntityId(IntConsumer collector) {
         collector.accept(this.entityId);
     }
 

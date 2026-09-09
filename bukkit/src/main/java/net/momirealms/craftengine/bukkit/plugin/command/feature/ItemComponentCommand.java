@@ -78,7 +78,7 @@ public final class ItemComponentCommand extends BukkitCommandFeature<CommandSend
             switch (this.action) {
                 case ADD -> {
                     try {
-                        itemInHand.setComponent(componentType, TagParser.parseTagFully(context.get("snbt")));
+                        itemInHand.setSparrowTagComponent(componentType, TagParser.parseTagFully(context.get("snbt")));
                     } catch (Exception e) {
                         Throwable cause = e;
                         while (cause.getCause() != null) {

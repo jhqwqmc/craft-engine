@@ -46,6 +46,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public final class DisplayItemFurnitureBehaviorTemplate extends FurnitureBehaviorTemplate {
     public static final FurnitureBehaviorFactory<DisplayItemFurnitureBehaviorTemplate> FACTORY = new Factory();
@@ -266,7 +267,7 @@ public final class DisplayItemFurnitureBehaviorTemplate extends FurnitureBehavio
         }
 
         @Override
-        public void gatherInteractableEntityId(Consumer<Integer> collector) {
+        public void gatherInteractableEntityId(IntConsumer collector) {
         }
 
         @Override

@@ -18,12 +18,10 @@ import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
 import net.momirealms.sparrow.nbt.CompoundTag;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,12 +65,7 @@ public final class CraftEngineFurniture {
      */
     @Nullable
     public static BukkitFurniture rayTrace(Location location, double maxDistance) {
-        RayTraceResult result = location.getWorld().rayTrace(location, location.getDirection(),
-                maxDistance, FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
-        if (result == null) return null;
-        Entity hitEntity = result.getHitEntity();
-        if (hitEntity == null) return null;
-        return getLoadedFurnitureByCollider(hitEntity);
+        return BukkitFurnitureManager.instance().rayTrace(location, maxDistance);
     }
 
     /**
@@ -86,13 +79,7 @@ public final class CraftEngineFurniture {
     public static BukkitFurniture rayTrace(Player player, double maxDistance) {
         BukkitServerPlayer serverPlayer = BukkitAdaptor.adapt(player);
         if (serverPlayer == null) return null;
-        Location eyeLocation = serverPlayer.getEyeLocation();
-        RayTraceResult result = player.getWorld().rayTrace(eyeLocation, eyeLocation.getDirection(),
-                maxDistance, FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
-        if (result == null) return null;
-        Entity hitEntity = result.getHitEntity();
-        if (hitEntity == null) return null;
-        return getLoadedFurnitureByCollider(hitEntity);
+        return rayTrace(serverPlayer.getEyeLocation(), maxDistance);
     }
 
     /**
@@ -105,12 +92,7 @@ public final class CraftEngineFurniture {
     public static BukkitFurniture rayTrace(Player player) {
         BukkitServerPlayer serverPlayer = BukkitAdaptor.adapt(player);
         if (serverPlayer == null) return null;
-        Location eyeLocation = serverPlayer.getEyeLocation();
-        RayTraceResult result = player.getWorld().rayTrace(eyeLocation, eyeLocation.getDirection(), serverPlayer.getCachedInteractionRange(), FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
-        if (result == null) return null;
-        Entity hitEntity = result.getHitEntity();
-        if (hitEntity == null) return null;
-        return getLoadedFurnitureByCollider(hitEntity);
+        return rayTrace(serverPlayer.getEyeLocation(), serverPlayer.getCachedInteractionRange());
     }
 
     /**

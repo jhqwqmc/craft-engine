@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.ColliderProperties;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;
@@ -22,6 +23,10 @@ public interface FurnitureHitBoxConfig<H extends FurnitureHitBox> {
 
     boolean canUseItemOn();
 
-    void prepareBoundingBox(WorldPosition targetPos, Consumer<AABB> aabbConsumer, boolean ignoreBlocksBuilding);
+    /** Opts a single, static collider into configuration-time optimization. */
+    default ColliderProperties colliderProperties() {
+        return null;
+    }
 
+    void prepareBoundingBox(WorldPosition targetPos, Consumer<AABB> aabbConsumer, boolean ignoreBlocksBuilding);
 }

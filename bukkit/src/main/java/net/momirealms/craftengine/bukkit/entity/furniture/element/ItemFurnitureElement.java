@@ -1,14 +1,15 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
+import net.momirealms.craftengine.core.world.WorldPosition;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.PacketUtils;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataResolver;
 import net.momirealms.craftengine.core.entity.furniture.data.ItemPatch;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundAddEntityPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundSetEntityDataPacketProxy;
@@ -18,13 +19,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-public final class ItemFurnitureElement extends AbstractConditionalFurnitureElement {
+public final class ItemFurnitureElement extends AbstractConditionalFurnitureElement implements TransformableFurnitureElement {
     public final ItemFurnitureElementConfig config;
     public final Furniture furniture;
     public final FurnitureDataResolver<ItemPatch> itemPatch;
-    public final Vec3d position;
+    public final WorldPosition position;
     public final int entityId1;
     public final int entityId2;
     public final Object despawnPacket;
@@ -33,12 +34,12 @@ public final class ItemFurnitureElement extends AbstractConditionalFurnitureElem
     public final Object cachedRidePacket;
     public final Object cachedUpdatePosPacket;
 
-    ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config, Vec3d pos) {
+    ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config, WorldPosition pos) {
         this(furniture, config, pos, EntityUtils.ENTITY_COUNTER.incrementAndGet(), EntityUtils.ENTITY_COUNTER.incrementAndGet(), false);
     }
 
-    ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config, Vec3d pos, int entityId1, int entityId2, boolean positionChanged) {
-        super(config.predicate, config.hasCondition);
+    ItemFurnitureElement(Furniture furniture, ItemFurnitureElementConfig config, WorldPosition pos, int entityId1, int entityId2, boolean positionChanged) {
+        super(config.predicate);
         this.furniture = furniture;
         this.itemPatch = config.createItemPatch(furniture);
         this.config = config;
@@ -93,11 +94,12 @@ public final class ItemFurnitureElement extends AbstractConditionalFurnitureElem
     }
 
     @Override
-    public void gatherInteractableEntityId(Consumer<Integer> collector) {
+    public void gatherInteractableEntityId(IntConsumer collector) {
     }
 
+
     @Override
-    public boolean supportsTransform() {
-        return true;
+    public @NotNull WorldPosition position() {
+        return this.position;
     }
 }

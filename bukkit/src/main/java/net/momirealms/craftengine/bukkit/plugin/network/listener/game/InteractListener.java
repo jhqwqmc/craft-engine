@@ -179,13 +179,7 @@ public final class InteractListener {
             // 先检查碰撞箱部分是否存在
             FurnitureHitBox hitBox = furniture.hitboxByEntityId(entityId);
             if (hitBox == null) return;
-            FurnitureHitboxPart part = null;
-            for (FurnitureHitboxPart p : hitBox.parts()) {
-                if (p.entityId() == entityId) {
-                    part = p;
-                    break;
-                }
-            }
+            FurnitureHitboxPart part = hitBox.findPart(entityId);
             if (part == null) {
                 return;
             }

@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataResolver;
 import net.momirealms.craftengine.core.entity.furniture.data.ItemPatch;
 import net.momirealms.craftengine.core.entity.player.Player;
@@ -23,9 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-public final class ArmorStandFurnitureElement extends AbstractConditionalFurnitureElement {
+public final class ArmorStandFurnitureElement extends AbstractConditionalFurnitureElement implements TransformableFurnitureElement {
     public final ArmorStandFurnitureElementConfig config;
     public final Furniture furniture;
     public final WorldPosition position;
@@ -48,7 +49,7 @@ public final class ArmorStandFurnitureElement extends AbstractConditionalFurnitu
     }
 
     ArmorStandFurnitureElement(Furniture furniture, ArmorStandFurnitureElementConfig config, WorldPosition pos, int entityId, boolean positionChanged) {
-        super(config.predicate, config.hasCondition);
+        super(config.predicate);
         this.config = config;
         this.furniture = furniture;
         this.itemPatch = config.createItemPatch(furniture);
@@ -110,12 +111,13 @@ public final class ArmorStandFurnitureElement extends AbstractConditionalFurnitu
     }
 
     @Override
-    public void gatherInteractableEntityId(Consumer<Integer> collector) {
+    public void gatherInteractableEntityId(IntConsumer collector) {
         collector.accept(this.entityId);
     }
 
     @Override
-    public boolean supportsTransform() {
-        return true;
+    public @NotNull WorldPosition position() {
+        return this.position;
     }
+
 }
