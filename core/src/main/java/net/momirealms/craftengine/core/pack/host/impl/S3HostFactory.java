@@ -51,16 +51,6 @@ public final class S3HostFactory implements ResourcePackHostFactory<S3Host> {
                         Dependencies.AMAZON_AWSSDK_THIRD_PARTY_JACKSON_CORE
                 )
         );
-        // The SDK's socket timeout alone does not bound retries or the whole upload.
-        ConfigSection settings = section.copy();
-        var timeout = settings.getValue("timeout");
-        if (timeout == null) {
-            settings.put("timeout", Map.of("api_call", 300));
-        } else if (timeout.is(Map.class)) {
-            Map<String, Object> timeouts = new LinkedHashMap<>(timeout.getAsSection().values());
-            if (!timeouts.containsKey("api_call") && !timeouts.containsKey("api-call")) timeouts.put("api_call", 300);
-            settings.put("timeout", timeouts);
-        }
-        return S3Host.FACTORY.create(id, settings);
+        return S3Host.FACTORY.create(id, section);
     }
 }
