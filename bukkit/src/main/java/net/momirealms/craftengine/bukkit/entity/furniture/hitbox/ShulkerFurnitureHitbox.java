@@ -1,6 +1,7 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.PacketUtils;
 import net.momirealms.craftengine.core.entity.furniture.Collider;
@@ -56,6 +57,9 @@ public final class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
                 entityIds[0], UUID.randomUUID(), x + offset.x, originalY, z - offset.z, 0, yaw,
                 EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0
         ));
+        // Older clients can reuse another display's shadow for this empty carrier (MC-276123).
+        packets.add(ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(entityIds[0],
+                List.of(BaseEntityData.SharedFlags.createEntityData((byte) 0x20))));
         packets.add(ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
                 entityIds[1], UUID.randomUUID(), x + offset.x, processedY, z - offset.z, 0, yaw,
                 EntityTypesProxy.SHULKER, 0, Vec3Proxy.ZERO, 0
