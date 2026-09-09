@@ -30,7 +30,7 @@ public final class ColliderMergePlan {
                 FurnitureHitBoxConfig<?> config = configs.get(configIndex);
                 ColliderProperties properties = config.colliderProperties();
                 List<AABB> bounds = new ArrayList<>(1);
-                if (properties != null && properties.requiresEntity)
+                if (properties != null)
                     config.prepareBoundingBox(origin, bounds::add, true);
                 boxes.add(bounds.size() == 1 ? new ColliderConfig(bounds.getFirst(), properties) : null);
             }
@@ -131,7 +131,7 @@ public final class ColliderMergePlan {
         if (size == 0) return;
         if (size == 1) {
             ColliderConfig config = input.getFirst();
-            if (config == null || !config.properties.requiresEntity) input.clear();
+            if (config == null) input.clear();
             return;
         }
         Object[] configs = input.elements();
@@ -151,7 +151,7 @@ public final class ColliderMergePlan {
                 second = root(parents, second);
                 if (first == second) continue;
                 ColliderConfig a = (ColliderConfig) configs[first], b = (ColliderConfig) configs[second];
-                if (!a.properties.requiresEntity || a.properties != b.properties) continue;
+                if (a.properties != b.properties) continue;
                 AABB union = unionValidated(a.bounds, b.bounds);
                 if (union == null) continue;
                 configs[first] = new ColliderConfig(union, a.properties);
@@ -162,7 +162,7 @@ public final class ColliderMergePlan {
         int kept = 0;
         for (int i = 0; i < size; i++) {
             ColliderConfig config = (ColliderConfig) configs[i];
-            if (config != null && config.properties.requiresEntity) configs[kept++] = config;
+            if (config != null) configs[kept++] = config;
         }
         input.size(kept);
     }

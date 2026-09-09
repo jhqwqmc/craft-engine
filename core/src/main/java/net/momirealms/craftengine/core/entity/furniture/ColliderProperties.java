@@ -16,13 +16,11 @@ public enum ColliderProperties {
     public final boolean canCollide;
     public final boolean blocksBuilding;
     public final boolean canBeHitByProjectile;
-    public final boolean requiresEntity;
 
     ColliderProperties(boolean canCollide, boolean blocksBuilding, boolean canBeHitByProjectile) {
         this.canCollide = canCollide;
         this.blocksBuilding = blocksBuilding;
         this.canBeHitByProjectile = canBeHitByProjectile;
-        this.requiresEntity = canCollide || blocksBuilding || canBeHitByProjectile;
     }
 
     public static ColliderProperties of(boolean canCollide, boolean blocksBuilding, boolean canBeHitByProjectile) {

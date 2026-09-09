@@ -25,7 +25,6 @@ import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.CEWorld;
 import net.momirealms.craftengine.core.world.WorldPosition;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.chunk.CEChunk;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.CraftWorldProxy;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
@@ -40,8 +39,6 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.HandlerList;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -66,7 +63,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
     private final Map<Integer, BukkitFurniture> byMetaEntityId = new ConcurrentHashMap<>(256, 0.5f);
     private final Map<Integer, BukkitFurniture> byInteractableEntityId = new ConcurrentHashMap<>(512, 0.5f);
     private final Map<Integer, BukkitFurniture> byColliderEntityId = new ConcurrentHashMap<>(512, 0.5f);
-    private final FurnitureSpatialIndex<BukkitFurniture> spatialIndex = new FurnitureSpatialIndex<>();
     // Event listeners
     private final FurnitureEventListener furnitureEventListener;
     private final PaperFurnitureEventListener paperFurnitureEventListener;
@@ -81,26 +77,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         this.plugin = plugin;
         this.furnitureEventListener = new FurnitureEventListener(this, plugin.worldManager());
         this.paperFurnitureEventListener = VersionHelper.hasPaperPatch ? new PaperFurnitureEventListener(this) : null;
-    }
-
-    @Nullable
-    public BukkitFurniture rayTrace(Location location, double maxDistance) {
-        location.checkFinite();
-        if (!Double.isFinite(maxDistance)) throw new IllegalArgumentException("maxDistance must be finite");
-        if (maxDistance < 0) return null;
-        World world = java.util.Objects.requireNonNull(location.getWorld(), "location world");
-        Vector direction = location.getDirection().normalize();
-        RayTraceResult block = world.rayTraceBlocks(location, direction, maxDistance, FluidCollisionMode.NEVER, true);
-        double limit = maxDistance;
-        if (block != null) {
-            // Vanilla gives a block priority when the two hits are equally far away.
-            limit = Math.nextDown(location.toVector().distance(block.getHitPosition()));
-            if (limit < 0) return null;
-        }
-        FurnitureSpatialIndex.Hit<BukkitFurniture> hit = this.spatialIndex.rayTrace(world.getUID(),
-                new Vec3d(location.getX(), location.getY(), location.getZ()),
-                new Vec3d(direction.getX(), direction.getY(), direction.getZ()), limit);
-        return hit == null || !hit.owner.isValid() ? null : hit.owner;
     }
 
     @Override
@@ -194,7 +170,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
             }
         }
         super.disable();
-        this.spatialIndex.clear();
         HandlerList.unregisterAll(this.furnitureEventListener);
         if (this.paperFurnitureEventListener != null) HandlerList.unregisterAll(this.paperFurnitureEventListener);
         unload();
@@ -438,7 +413,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
     void initFurniture(BukkitFurniture furniture) {
         int entityId = furniture.entityId();
         this.byMetaEntityId.put(entityId, furniture);
-        this.spatialIndex.add(furniture.world().uuid(), furniture, furniture.rayTraceBoxes());
         this.byInteractableEntityId.put(entityId, furniture);
         for (int id : furniture.interactableEntityIds()) {
             this.byInteractableEntityId.put(id, furniture);
@@ -475,7 +449,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     void invalidateFurniture(BukkitFurniture furniture, boolean isStopping) {
-        this.spatialIndex.remove(furniture);
         int entityId = furniture.entityId();
         // 移除entity id映射
         this.byMetaEntityId.remove(entityId);

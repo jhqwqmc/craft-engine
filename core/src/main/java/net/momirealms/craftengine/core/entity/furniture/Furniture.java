@@ -81,7 +81,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      */
     protected int[] colliderEntityIds;
     protected volatile boolean unsaved;
-    private List<AABB> rayTraceBoxes;
     private boolean hasExternalModel;
     private volatile FurniturePlacement placement;
 
@@ -427,16 +426,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             }
         }
 
-        // Keep the original shapes for ray tracing, including shapes that need no server entity.
-        if (colliderConfigs.isEmpty()) {
-            this.rayTraceBoxes = List.of();
-        } else {
-            List<AABB> boxes = new ArrayList<>(colliderConfigs.size());
-            for (int i = 0; i < colliderConfigs.size(); i++) {
-                boxes.add(colliderConfigs.get(i).bounds);
-            }
-            this.rayTraceBoxes = boxes;
-        }
         mergePlan.optimize(colliderConfigs, configuredColliders);
         List<Collider> colliders = new ObjectArrayList<>(colliderConfigs.size());
         this.colliderEntityIds = new int[colliderConfigs.size()];
@@ -720,10 +709,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      */
     public Vec3d getRelativePosition(Vector3f position) {
         return this.placement.relativePosition(position);
-    }
-
-    public List<AABB> rayTraceBoxes() {
-        return this.rayTraceBoxes;
     }
 
     /**

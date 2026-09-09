@@ -18,10 +18,12 @@ import net.momirealms.craftengine.core.world.World;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
 import net.momirealms.sparrow.nbt.CompoundTag;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,7 +67,12 @@ public final class CraftEngineFurniture {
      */
     @Nullable
     public static BukkitFurniture rayTrace(Location location, double maxDistance) {
-        return BukkitFurnitureManager.instance().rayTrace(location, maxDistance);
+        RayTraceResult result = location.getWorld().rayTrace(location, location.getDirection(),
+                maxDistance, FluidCollisionMode.NEVER, true, 0d, CraftEngineFurniture::isCollisionEntity);
+        if (result == null) return null;
+        Entity hitEntity = result.getHitEntity();
+        if (hitEntity == null) return null;
+        return getLoadedFurnitureByCollider(hitEntity);
     }
 
     /**
