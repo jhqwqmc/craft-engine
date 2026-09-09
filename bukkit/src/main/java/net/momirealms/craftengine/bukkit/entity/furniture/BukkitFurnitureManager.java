@@ -354,7 +354,7 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         createFurnitureInstance(entity, furnitureDefinition);
 
         // 补发一次包，修复
-        for (Player player : EntityUtils.getTrackedBy(entity, BukkitAdaptor::adapt)) {
+        for (Player player : EntityUtils.getTrackedBySet(entity, BukkitAdaptor::adapt)) {
             player.sendPacket(ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
                     entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
                     EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0

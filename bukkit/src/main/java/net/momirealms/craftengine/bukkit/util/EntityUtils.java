@@ -44,6 +44,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -246,35 +247,35 @@ public final class EntityUtils {
     }
 
     public static Set<Player> getTrackedBy(Entity entity) {
-        return getTrackedBy(entity, p -> p);
+        return getTrackedBySet(entity, p -> p);
     }
 
-    @SuppressWarnings("deprecation")
-    public static <T> Set<T> getTrackedBy(Entity entity, Function<Player, T> function) {
+    public static <T> Set<T> getTrackedBySet(Entity entity, Function<Player, T> function) {
         ImmutableSet.Builder<T> players = ImmutableSet.builder();
-        if (VersionHelper.hasPaperPatch) {
-            for (Player player : entity.getTrackedPlayers()) {
-                T adapted = function.apply(player);
+        collectTrackedBy(entity, function, players::add);
+        return players.build();
+    }
+
+    public static <T> List<T> getTrackedByList(Entity entity, Function<Player, T> function) {
+        List<T> players = new ArrayList<>();
+        collectTrackedBy(entity, function, players::add);
+        return players;
+    }
+
+    private static <T> void collectTrackedBy(Entity entity, Function<Player, T> function, Consumer<T> collector) {
+        Object serverLevel = CraftWorldProxy.INSTANCE.getWorld(entity.getWorld());
+        Int2ObjectMap<Object> entityMap = ChunkMapProxy.INSTANCE.getEntityMap(ServerChunkCacheProxy.INSTANCE.getChunkMap(ServerLevelProxy.INSTANCE.getChunkSource(serverLevel)));
+        Object tracker = entityMap.get(entity.getEntityId());
+        if (tracker != null) {
+            Set<Object> seenBy = ChunkMapProxy.TrackedEntityProxy.INSTANCE.getSeenBy(tracker);
+            for (Object connection : seenBy) {
+                Object player = ServerPlayerConnectionProxy.INSTANCE.getPlayer(connection);
+                T adapted = function.apply((Player) PlayerProxy.INSTANCE.getBukkitEntity(player));
                 if (adapted != null) {
-                    players.add(adapted);
-                }
-            }
-        } else {
-            Object serverLevel = CraftWorldProxy.INSTANCE.getWorld(entity.getWorld());
-            Int2ObjectMap<Object> entityMap = ChunkMapProxy.INSTANCE.getEntityMap(ServerChunkCacheProxy.INSTANCE.getChunkMap(ServerLevelProxy.INSTANCE.getChunkSource(serverLevel)));
-            Object tracker = entityMap.get(entity.getEntityId());
-            if (tracker != null) {
-                Set<Object> seenBy = ChunkMapProxy.TrackedEntityProxy.INSTANCE.getSeenBy(tracker);
-                for (Object connection : seenBy) {
-                    Object player = ServerPlayerConnectionProxy.INSTANCE.getPlayer(connection);
-                    T adapted = function.apply((Player) PlayerProxy.INSTANCE.getBukkitEntity(player));
-                    if (adapted != null) {
-                        players.add(adapted);
-                    }
+                    collector.accept(adapted);
                 }
             }
         }
-        return players.build();
     }
 
     public static BukkitEntity adaptNMS(Object handle) {

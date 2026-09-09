@@ -93,7 +93,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         this.updatePlacement();
         this.sourceItem = data.item().orElse(null);
         this.controller = FurnitureController.createController(this);
-        this.setVariantInternal(config.getVariant(data));
+        this.setVariantInternal(config.getVariant(data), List.of());
     }
 
     @Override
@@ -299,8 +299,12 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      * This sets up elements, hitboxes, seats, and culling data.
      */
     protected void setVariantInternal(FurnitureVariant variant) {
+        setVariantInternal(variant, trackedBy());
+    }
+
+    protected void setVariantInternal(FurnitureVariant variant, List<Player> trackedBy) {
         FurnitureVariant previousVariant = this.currentVariant;
-        int behaviorElementStart = buildVariantSnapshot(variant);
+        int behaviorElementStart = buildVariantSnapshot(variant, trackedBy);
         List<FurnitureElement> elements = this.snapshot.elements;
 
         // 外部模型
@@ -323,7 +327,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             // 行为元素在变体切换时被重建，旧实例已在 updateElements 中 hide，
             // 这里给正在观察的玩家补发新实例的 show，否则只有重新加载家具才能看到它们
             if (behaviorElementStart < elements.size()) {
-                List<Player> trackedBy = trackedBy();
                 if (!trackedBy.isEmpty()) {
                     boolean culling = Config.enableEntityCulling();
                     for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
@@ -342,7 +345,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         }
     }
 
-    private int buildVariantSnapshot(FurnitureVariant variant) {
+    private int buildVariantSnapshot(FurnitureVariant variant, List<Player> trackedBy) {
         this.currentVariant = variant;
         this.persistentData.setVariant(variant.name());
 
@@ -356,7 +359,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
         // 如果先前存在变体快照
         if (this.snapshot != null) {
-            elements = this.updateElements(elementConfigs);
+            elements = this.updateElements(elementConfigs, trackedBy);
             for (int elementIndex = 0, elementCount = elements.size(); elementIndex < elementCount; elementIndex++) {
                 FurnitureElement element = elements.get(elementIndex);
                 element.gatherInteractableEntityId(interactableCollector);
@@ -451,10 +454,10 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private List<FurnitureElement> updateElements(List<FurnitureElementConfig<? extends FurnitureElement>> newElementConfigList) {
+    private List<FurnitureElement> updateElements(List<FurnitureElementConfig<? extends FurnitureElement>> newElementConfigList,
+                                                  List<Player> trackedBy) {
         List<FurnitureElement> newElements = new ArrayList<>(newElementConfigList.size());
         if (this.snapshot.elements.isEmpty() && newElementConfigList.isEmpty()) return newElements;
-        List<Player> trackedBy = trackedBy();
         boolean hasTrackedBy = !trackedBy.isEmpty();
         boolean[] visibility = new boolean[trackedBy.size()];
         if (hasTrackedBy) {

@@ -111,7 +111,7 @@ public final class BukkitFurniture extends Furniture {
             }
         }
 
-        super.setVariantInternal(variant);
+        super.setVariantInternal(variant, trackedBy);
 
         // 后展示
         {
@@ -182,10 +182,10 @@ public final class BukkitFurniture extends Furniture {
                         if (result != null && result && throwable == null && this.isValid()) {
                             this.location = location;
                             super.updatePlacement();
-                            super.setVariantInternal(currentVariant());
+                            List<Player> afterTrackedBy = trackedBy();
+                            super.setVariantInternal(currentVariant(), afterTrackedBy);
                             BukkitFurnitureManager.instance().initFurniture(this);
                             this.addCollidersToWorld();
-                            List<Player> afterTrackedBy = trackedBy();
                             for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
                                 Player player = afterTrackedBy.get(playerIndex);
                                 if (previousTrackedBy.contains(player)) {
@@ -208,10 +208,10 @@ public final class BukkitFurniture extends Furniture {
                 }
                 this.location = location;
                 super.updatePlacement();
-                super.setVariantInternal(currentVariant());
+                List<Player> afterTrackedBy = trackedBy();
+                super.setVariantInternal(currentVariant(), afterTrackedBy);
                 BukkitFurnitureManager.instance().initFurniture(this);
                 this.addCollidersToWorld();
-                List<Player> afterTrackedBy = trackedBy();
                 for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
                     Player player = afterTrackedBy.get(playerIndex);
                     if (previousTrackedBy.contains(player)) {
@@ -303,14 +303,14 @@ public final class BukkitFurniture extends Furniture {
     public List<Player> trackedBy() {
         ItemDisplay itemDisplay = this.metaEntity.get();
         if (itemDisplay == null) return List.of();
-        return new ArrayList<>(EntityUtils.getTrackedBy(itemDisplay, BukkitAdaptor::adapt));
+        return EntityUtils.getTrackedByList(itemDisplay, BukkitAdaptor::adapt);
     }
 
     @Override
     public Set<Player> getTrackedBy() {
         ItemDisplay itemDisplay = this.metaEntity.get();
         if (itemDisplay == null) return Set.of();
-        return EntityUtils.getTrackedBy(itemDisplay, BukkitAdaptor::adapt);
+        return EntityUtils.getTrackedBySet(itemDisplay, BukkitAdaptor::adapt);
     }
 
     @Override
