@@ -242,9 +242,8 @@ public final class DisplayItemFurnitureBehaviorTemplate extends FurnitureBehavio
         public DisplayItemElement(Furniture furniture, DisplayItemFurnitureController furnitureHandler, Vector3f relative) {
             this.furniture = furniture;
             this.furnitureHandler = furnitureHandler;
-            WorldPosition furniturePos = furniture.position();
-            Vec3d position = Furniture.getRelativePosition(furniturePos, relative);
-            this.position = new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot, furniturePos.yRot);
+            WorldPosition position = furniture.placement().elementPosition(relative, 0, 0);
+            this.position = position;
             this.vehicleId = EntityUtils.ENTITY_COUNTER.incrementAndGet();
             this.passengerId = EntityUtils.ENTITY_COUNTER.incrementAndGet();
             this.spawnVehiclePacket = ClientboundAddEntityPacketProxy.INSTANCE.newInstance(

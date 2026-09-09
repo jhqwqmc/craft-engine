@@ -26,7 +26,7 @@ public final class ModelEngineFurnitureElement extends AbstractConditionalFurnit
         this.furniture = furniture;
         this.config = config;
         WorldPosition furniturePos = furniture.position();
-        Vec3d position = Furniture.getRelativePosition(furniturePos, config.position);
+        Vec3d position = furniture.getRelativePosition(config.position);
         this.location = new Location((World) furniturePos.world.platformWorld(), position.x, position.y, position.z, furniturePos.yRot + config.yaw, furniturePos.xRot + config.pitch);
         this.dummy = createDummy();
     }

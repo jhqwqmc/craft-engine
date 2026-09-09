@@ -19,7 +19,6 @@ import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.LegacyChatFormatter;
 import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -107,9 +106,7 @@ public final class ArmorStandFurnitureElementConfig implements TransformableFurn
 
     @Override
     public @NotNull WorldPosition getPos(@NotNull Furniture furniture) {
-        WorldPosition furniturePos = furniture.position();
-        Vec3d position = Furniture.getRelativePosition(furniturePos, this.position);
-        return new WorldPosition(furniturePos.world, position.x, position.y, position.z, furniturePos.xRot + xRot, furniturePos.yRot + yRot);
+        return furniture.placement().elementPosition(this.position, this.xRot, this.yRot);
     }
 
     private static class Factory implements FurnitureElementConfigFactory<ArmorStandFurnitureElement> {

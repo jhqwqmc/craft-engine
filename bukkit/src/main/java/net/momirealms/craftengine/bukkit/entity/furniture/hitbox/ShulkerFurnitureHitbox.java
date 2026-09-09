@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPa
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.core.world.WorldPosition;
+import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.*;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityTypesProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.AttributeInstanceProxy;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -37,7 +39,7 @@ public final class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
         this.config = config;
         this.entityIds = acquireEntityIds(EntityUtils.ENTITY_COUNTER::incrementAndGet);
         WorldPosition position = furniture.position();
-        Vector3f offset = Furniture.rotateHitboxOffset(position.yRot(), config.position);
+        Vector3f offset = furniture.placement().rotateOffset(config.position);
         double x = position.x();
         double y = position.y();
         double z = position.z();
@@ -79,6 +81,11 @@ public final class ShulkerFurnitureHitbox extends AbstractFurnitureHitBox {
         this.colliderConfig = config.spawner.create(entityIds, x, y, z, yaw, offset, packets, this.parts);
         this.spawnPacket = ClientboundBundlePacketProxy.INSTANCE.newInstance(packets);
         this.despawnPacket = ClientboundRemoveEntitiesPacketProxy.INSTANCE.newInstance(new IntArrayList(entityIds));
+    }
+
+    @Override
+    public void collectCullingBounds(Consumer<AABB> consumer) {
+        consumer.accept(this.colliderConfig.bounds);
     }
 
     @Override

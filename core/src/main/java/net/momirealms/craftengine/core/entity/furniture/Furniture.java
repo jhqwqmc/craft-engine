@@ -44,6 +44,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.IntConsumer;
 
@@ -82,12 +83,14 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     protected volatile boolean unsaved;
     private List<AABB> rayTraceBoxes;
     private boolean hasExternalModel;
+    private volatile FurniturePlacement placement;
 
     protected Furniture(Entity metaDataEntity, FurniturePersistentData data, FurnitureDefinition config) {
         this.config = config;
         this.persistentData = data;
         this.metaDataEntity = metaDataEntity;
         this.metaDataEntityId = metaDataEntity.entityId();
+        this.updatePlacement();
         this.sourceItem = data.item().orElse(null);
         this.controller = FurnitureController.createController(this);
         this.setVariantInternal(config.getVariant(data));
@@ -99,7 +102,15 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     }
 
     public WorldPosition position() {
-        return this.metaDataEntity.position();
+        return this.placement.origin;
+    }
+
+    public FurniturePlacement placement() {
+        return this.placement;
+    }
+
+    protected void updatePlacement() {
+        this.placement = new FurniturePlacement(this.metaDataEntity.position());
     }
 
     public World world() {
@@ -289,6 +300,49 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      */
     protected void setVariantInternal(FurnitureVariant variant) {
         FurnitureVariant previousVariant = this.currentVariant;
+        int behaviorElementStart = buildVariantSnapshot(variant);
+        List<FurnitureElement> elements = this.snapshot.elements;
+
+        // 外部模型
+        Supplier<ExternalModel> externalModel = variant.externalModel();
+        if (externalModel != null) {
+            Optional.ofNullable(externalModel.get()).ifPresent(model -> {
+                this.hasExternalModel = true;
+                try {
+                    model.bindModel(this.metaDataEntity);
+                } catch (Throwable e) {
+                    CraftEngine.instance().logger().warn("Failed to load external model for furniture " + id(), e);
+                }
+            });
+        } else {
+            this.hasExternalModel = false;
+        }
+
+        // 触发变体变化
+        if (previousVariant != null) {
+            // 行为元素在变体切换时被重建，旧实例已在 updateElements 中 hide，
+            // 这里给正在观察的玩家补发新实例的 show，否则只有重新加载家具才能看到它们
+            if (behaviorElementStart < elements.size()) {
+                List<Player> trackedBy = trackedBy();
+                if (!trackedBy.isEmpty()) {
+                    boolean culling = Config.enableEntityCulling();
+                    for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
+                        Player player = trackedBy.get(playerIndex);
+                        if (culling) {
+                            CullableHolder holder = player.getTrackedEntity(this.metaDataEntityId);
+                            if (holder == null || !holder.isShown) continue;
+                        }
+                        for (int i = behaviorElementStart; i < elements.size(); i++) {
+                            elements.get(i).show(player);
+                        }
+                    }
+                }
+            }
+            this.controller.onVariantChange(previousVariant);
+        }
+    }
+
+    private int buildVariantSnapshot(FurnitureVariant variant) {
         this.currentVariant = variant;
         this.persistentData.setVariant(variant.name());
 
@@ -391,46 +445,9 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
         // 虚拟碰撞箱的实体id
         this.interactableEntityIds = interactableEntityIds.toIntArray();
-        this.cullingData = createCullingData(variant.cullingData());
+        this.cullingData = createCullingData(variant.cullingData(), hitboxes);
         this.snapshot = createSnapshot(elements, hitboxes, hitboxMap, colliders, new IdentityHashMap<>(4));
-
-        // 外部模型
-        Supplier<ExternalModel> externalModel = variant.externalModel();
-        if (externalModel != null) {
-            Optional.ofNullable(externalModel.get()).ifPresent(model -> {
-                this.hasExternalModel = true;
-                try {
-                    model.bindModel(this.metaDataEntity);
-                } catch (Throwable e) {
-                    CraftEngine.instance().logger().warn("Failed to load external model for furniture " + id(), e);
-                }
-            });
-        } else {
-            this.hasExternalModel = false;
-        }
-
-        // 触发变体变化
-        if (previousVariant != null) {
-            // 行为元素在变体切换时被重建，旧实例已在 updateElements 中 hide，
-            // 这里给正在观察的玩家补发新实例的 show，否则只有重新加载家具才能看到它们
-            if (behaviorElementStart < elements.size()) {
-                List<Player> trackedBy = trackedBy();
-                if (!trackedBy.isEmpty()) {
-                    boolean culling = Config.enableEntityCulling();
-                    for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                        Player player = trackedBy.get(playerIndex);
-                        if (culling) {
-                            CullableHolder holder = player.getTrackedEntity(this.metaDataEntityId);
-                            if (holder == null || !holder.isShown) continue;
-                        }
-                        for (int i = behaviorElementStart; i < elements.size(); i++) {
-                            elements.get(i).show(player);
-                        }
-                    }
-                }
-            }
-            this.controller.onVariantChange(previousVariant);
-        }
+        return behaviorElementStart;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -572,18 +589,17 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      * Creates culling data based on hitboxes or pre-defined AABB.
      * Takes furniture rotation into account.
      */
-    private CullingData createCullingData(CullingData parent) {
+    private CullingData createCullingData(CullingData parent, List<FurnitureHitBox> hitboxes) {
         if (parent == null) return null;
         AABB aabb = parent.aabb;
         WorldPosition position = position();
         if (aabb == null) {
-            List<AABB> aabbs = new ArrayList<>();
-            List<? extends FurnitureHitBoxConfig<?>> hitboxConfigs = this.currentVariant.hitBoxConfigs();
-            for (int configIndex = 0, configCount = hitboxConfigs.size(); configIndex < configCount; configIndex++) {
-                FurnitureHitBoxConfig<?> hitBoxConfig = hitboxConfigs.get(configIndex);
-                hitBoxConfig.prepareBoundingBox(position, aabbs::add, true);
+            List<AABB> aabbs = new ArrayList<>(hitboxes.size());
+            Consumer<AABB> collector = aabbs::add;
+            for (int i = 0; i < hitboxes.size(); i++) {
+                hitboxes.get(i).collectCullingBounds(collector);
             }
-            return new CullingData(getMaxAABB(this.position(), aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
+            return new CullingData(getMaxAABB(position, aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         } else {
             Vector3f[] vertices = new Vector3f[]{
                     // 底面两个对角点
@@ -597,7 +613,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             double maxX = -Double.MAX_VALUE, maxY = aabb.maxY; // Y方向不变
             double minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
             for (Vector3f vertex : vertices) {
-                Vec3d rotatedPos = getRelativePosition(position, vertex);
+                Vec3d rotatedPos = getRelativePosition(vertex);
                 minX = Math.min(minX, rotatedPos.x);
                 minZ = Math.min(minZ, rotatedPos.z);
                 maxX = Math.max(maxX, rotatedPos.x);
@@ -700,7 +716,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
      * Converts a local offset to a global world coordinate based on current furniture position and rotation.
      */
     public Vec3d getRelativePosition(Vector3f position) {
-        return getRelativePosition(this.position(), position);
+        return this.placement.relativePosition(position);
     }
 
     public List<AABB> rayTraceBoxes() {

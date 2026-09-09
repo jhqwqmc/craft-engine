@@ -17,7 +17,6 @@ import net.momirealms.craftengine.core.plugin.context.Condition;
 import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.MiscUtils;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -80,10 +79,8 @@ public final class ItemFurnitureElementConfig implements TransformableFurnitureE
 
     @Override
     public @NotNull WorldPosition getPos(@NotNull Furniture furniture) {
-        WorldPosition furniturePos = furniture.position();
-        Vec3d pos = Furniture.getRelativePosition(furniturePos, this.position);
         // Item packets use fixed zero rotation, independent of the furniture's facing.
-        return new WorldPosition(furniturePos.world, pos.x, pos.y, pos.z);
+        return furniture.placement().position(this.position, 0, 0);
     }
 
     public FurnitureDataResolver<ItemPatch> createItemPatch(@NotNull Furniture furniture) {

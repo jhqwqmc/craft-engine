@@ -31,7 +31,7 @@ public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();
-        Vec3d pos = Furniture.getRelativePosition(position, config.position);
+        Vec3d pos = furniture.getRelativePosition(config.position);
         AABB aabb = AABB.makeBoundingBox(pos, config.width, config.height);
         this.colliderConfig = new ColliderConfig(aabb, config.colliderProperties);
         int entityId = EntityUtils.ENTITY_COUNTER.incrementAndGet();

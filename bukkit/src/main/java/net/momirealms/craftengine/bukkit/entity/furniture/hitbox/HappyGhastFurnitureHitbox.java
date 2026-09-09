@@ -36,7 +36,7 @@ public final class HappyGhastFurnitureHitbox extends AbstractFurnitureHitBox {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();
-        this.pos = Furniture.getRelativePosition(position, config.position);
+        this.pos = furniture.getRelativePosition(config.position);
         double bbSize = 4 * config.scale;
         AABB aabb = AABB.makeBoundingBox(this.pos, bbSize, bbSize);
         this.yaw = position.yRot;

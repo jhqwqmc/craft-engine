@@ -33,7 +33,7 @@ public final class InteractionFurnitureHitbox extends AbstractFurnitureHitBox {
         super(furniture, config);
         this.config = config;
         WorldPosition position = furniture.position();
-        Vec3d pos = Furniture.getRelativePosition(position, config.position);
+        Vec3d pos = furniture.getRelativePosition(config.position);
         AABB aabb = AABB.makeBoundingBox(pos, config.size.x, config.size.y);
         this.colliderConfig = new ColliderConfig(aabb, config.colliderProperties);
         int interactionId = EntityUtils.ENTITY_COUNTER.incrementAndGet();

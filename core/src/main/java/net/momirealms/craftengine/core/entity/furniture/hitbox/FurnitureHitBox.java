@@ -6,8 +6,10 @@ import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.entity.seat.SeatOwner;
 import net.momirealms.craftengine.core.world.EntityHitResult;
 import net.momirealms.craftengine.core.world.Vec3d;
+import net.momirealms.craftengine.core.world.collision.AABB;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public interface FurnitureHitBox {
@@ -18,13 +20,18 @@ public interface FurnitureHitBox {
         return EMPTY_SEATS;
     }
 
-    /** Describes collision shapes; real colliders are owned and created by the furniture. */
     default int colliderConfigCount() {
         return 0;
     }
 
     default ColliderConfig colliderConfig(int index) {
         throw new IndexOutOfBoundsException(index);
+    }
+
+    default void collectCullingBounds(Consumer<AABB> consumer) {
+        for (int i = 0, count = partCount(); i < count; i++) {
+            consumer.accept(part(i).aabb());
+        }
     }
 
     int partCount();

@@ -181,6 +181,7 @@ public final class BukkitFurniture extends Furniture {
                     try {
                         if (result != null && result && throwable == null && this.isValid()) {
                             this.location = location;
+                            super.updatePlacement();
                             super.setVariantInternal(currentVariant());
                             BukkitFurnitureManager.instance().initFurniture(this);
                             this.addCollidersToWorld();
@@ -206,6 +207,7 @@ public final class BukkitFurniture extends Furniture {
                     return CompletableFuture.completedFuture(false);
                 }
                 this.location = location;
+                super.updatePlacement();
                 super.setVariantInternal(currentVariant());
                 BukkitFurnitureManager.instance().initFurniture(this);
                 this.addCollidersToWorld();
