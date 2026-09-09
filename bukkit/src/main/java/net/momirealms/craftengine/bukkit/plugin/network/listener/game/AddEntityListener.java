@@ -7,6 +7,7 @@ import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
 import net.momirealms.craftengine.bukkit.plugin.network.handler.*;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.RegistryUtils;
+import net.momirealms.craftengine.core.entity.furniture.FurnitureSnapshotState;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileDisplay;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
@@ -109,14 +110,15 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             if (furniture != null) {
                 FurniturePacketHandler furniturePacketHandler = new FurniturePacketHandler(furniture);
                 EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, furniturePacketHandler);
+                FurnitureSnapshotState snapshotState = furniture.snapshotState();
                 if (Config.enableEntityCulling()) {
                     serverPlayer.addTrackedEntity(id, furniture);
-                    furniture.controller.onAsyncPlayerTrack(serverPlayer, furniturePacketHandler.snapshotState);
+                    furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
                 } else {
                     // 修复addEntityToWorld，包比事件先发的问题 (WE)
                     if (previous == null || previous instanceof ItemDisplayPacketHandler) {
-                        furniture.show(serverPlayer);
-                        furniture.controller.onAsyncPlayerTrack(serverPlayer, furniturePacketHandler.snapshotState);
+                        snapshotState.show(serverPlayer);
+                        furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
                     }
                 }
                 if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {

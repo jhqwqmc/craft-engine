@@ -11,19 +11,19 @@ import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 
 public final class FurniturePacketHandler implements EntityPacketHandler {
     public final Furniture furniture;
-    public final FurnitureSnapshotState snapshotState;
 
     public FurniturePacketHandler(Furniture furniture) {
         this.furniture = furniture;
-        this.snapshotState = furniture.snapshotState();
     }
 
     @Override
     public boolean handleEntitiesRemove(NetWorkUser user, IntList entityIds) {
         Player player = (Player) user;
         player.removeTrackedEntity(this.furniture.entityId());
-        this.snapshotState.hide(player);
-        this.furniture.controller.onAsyncPlayerUntrack(player, this.snapshotState);
+        // Rotation and variant changes replace the snapshot while this handler remains registered.
+        FurnitureSnapshotState snapshotState = this.furniture.snapshotState();
+        snapshotState.hide(player);
+        this.furniture.controller.onAsyncPlayerUntrack(player, snapshotState);
         return true;
     }
 

@@ -62,6 +62,7 @@ public final class BukkitFurniture extends Furniture {
 
     @Override
     public boolean setVariant(String variantName, boolean force) {
+        if (!this.isValid()) return false;
         FurnitureVariant variant = this.config.getVariant(variantName);
         if (variant == null) return false;
         if (this.currentVariant == variant) return false;
@@ -119,7 +120,7 @@ public final class BukkitFurniture extends Furniture {
         }
         try {
             ItemDisplay itemDisplay = this.metaEntity.get();
-            if (itemDisplay == null) {
+            if (itemDisplay == null || !itemDisplay.isValid()) {
                 this.isMoving.set(false); // 解锁
                 return CompletableFuture.completedFuture(false);
             }
@@ -160,7 +161,7 @@ public final class BukkitFurniture extends Furniture {
             if (VersionHelper.hasPaperPatch) {
                 return itemDisplay.teleportAsync(location).handle((result, throwable) -> {
                     try {
-                        if (result != null && result && throwable == null) {
+                        if (result != null && result && throwable == null && this.isValid()) {
                             this.location = location;
                             super.setVariantInternal(currentVariant());
                             BukkitFurnitureManager.instance().initFurniture(this);
@@ -181,6 +182,10 @@ public final class BukkitFurniture extends Furniture {
                 });
             } else {
                 itemDisplay.teleport(location);
+                if (!this.isValid()) {
+                    this.isMoving.set(false);
+                    return CompletableFuture.completedFuture(false);
+                }
                 this.location = location;
                 super.setVariantInternal(currentVariant());
                 BukkitFurnitureManager.instance().initFurniture(this);

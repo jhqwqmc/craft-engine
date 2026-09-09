@@ -55,7 +55,8 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     public final FurnitureController controller;
 
     protected CullingData cullingData;
-    protected FurnitureSnapshotState snapshot;
+    // Published by the entity thread and read by network handlers.
+    protected volatile FurnitureSnapshotState snapshot;
     protected FurnitureVariant currentVariant;
     protected Item sourceItem;
     /** IDs of virtual entities that need to be sent to clients */
