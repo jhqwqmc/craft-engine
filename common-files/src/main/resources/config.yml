@@ -9,6 +9,7 @@ forced-locale: ''
 
 # Data storage, used by features such as resource pack preferences. Restart to change the backend.
 # Only the selected database's dependencies are downloaded.
+# https://xiao-momi.github.io/craft-engine-wiki/getting_start/database
 storage:
   # json, sqlite, h2, mysql, mariadb, postgresql, mongodb
   type: sqlite
@@ -18,6 +19,7 @@ storage:
 
 resource-pack:
   # Run a workflow explicitly with /ce workflow <name>, or set its trigger below.
+  # https://xiao-momi.github.io/craft-engine-wiki/getting_start/workflows
   workflows:
     default:
       trigger: reload_pack
@@ -34,6 +36,7 @@ resource-pack:
 
   # Keys are pack IDs. Selected packs are sent in configuration order.
   # Player overrides take precedence over default.
+  # https://xiao-momi.github.io/craft-engine-wiki/getting_start/set_up_host
   packs:
     default:
       default: true
@@ -47,8 +50,7 @@ resource-pack:
   presets:
     default: [default]
 
-  # Shared HTTP server settings are read once for all self packs: /download/<pack-id>.
-  # self_forward hosts select the remote host ID with their 'pack' option.
+  # https://xiao-momi.github.io/craft-engine-wiki/getting_start/set_up_host/self
   self-host:
     ip: "auto"
     port: "auto"

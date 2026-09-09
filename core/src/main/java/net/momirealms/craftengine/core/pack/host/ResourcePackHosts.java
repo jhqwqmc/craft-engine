@@ -14,6 +14,7 @@ public final class ResourcePackHosts {
     public static final ResourcePackHostType<SelfHost> SELF = register(Key.ce("self"), SelfHost.FACTORY);
     public static final ResourcePackHostType<ExternalHost> EXTERNAL = register(Key.ce("external"), ExternalHost.FACTORY);
     public static final ResourcePackHostType<LobFileHost> LOBFILE = register(Key.ce("lobfile"), LobFileHost.FACTORY);
+    public static final ResourcePackHostType<MCPacksHost> MCPACKS = register(Key.ce("mcpacks"), MCPacksHost.FACTORY);
     public static final ResourcePackHostType<S3Host> S3 = register(Key.ce("s3"), S3HostFactory.INSTANCE);
     public static final ResourcePackHostType<OpenListHost> OPENLIST = register(Key.ce("openlist"), OpenListHost.FACTORY);
     public static final ResourcePackHostType<OpenListHost> ALIST = register(Key.ce("alist"), OpenListHost.FACTORY);
