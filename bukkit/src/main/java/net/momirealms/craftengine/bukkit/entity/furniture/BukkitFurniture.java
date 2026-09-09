@@ -22,6 +22,7 @@ import net.momirealms.craftengine.core.world.collision.AABB;
 import net.momirealms.craftengine.proxy.bukkit.craftbukkit.entity.CraftEntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundAddEntityPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacketProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.EntityTypesProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.phys.AABBProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.phys.Vec3Proxy;
@@ -47,7 +48,8 @@ public final class BukkitFurniture extends Furniture {
 
     @Override
     protected Collider createCollider(ColliderConfig config) {
-        return new BukkitCollider(world(), position(), config);
+        Object entity = this.metaDataEntity.minecraftEntity();
+        return new BukkitCollider(EntityProxy.INSTANCE.getLevel(entity), EntityProxy.INSTANCE.getX(entity), EntityProxy.INSTANCE.getY(entity), EntityProxy.INSTANCE.getZ(entity), config);
     }
 
     public BukkitFurniture(ItemDisplay metaEntity, FurnitureDefinition config, FurniturePersistentData data) {
