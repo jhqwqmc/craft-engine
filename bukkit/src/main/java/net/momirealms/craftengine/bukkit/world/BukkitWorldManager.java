@@ -380,12 +380,6 @@ public final class BukkitWorldManager implements WorldManager, Listener {
         }
         BukkitWorld injectedWorld = FastNMS.INSTANCE.createInjectedWorld(world);
         CraftWorldProxy.INSTANCE.setWorldBorder(world, injectedWorld);
-        if (VersionHelper.hasPaperPatch) {
-            injectWorldGeneration(injectedWorld);
-            if (!VersionHelper.hasFoliaPatch) {
-                injectWorldCallback(injectedWorld.minecraftWorld());
-            }
-        }
         return injectedWorld;
     }
 
@@ -403,6 +397,14 @@ public final class BukkitWorldManager implements WorldManager, Listener {
             }
         }
         ((WorldHolder) injectedWorld).setStorageWorld(ceWorld);
+        // Generation workers can call back as soon as the generator is installed.
+        // Both regular and Slime worlds must have their storage ready before that.
+        if (previous == null && VersionHelper.hasPaperPatch) {
+            injectWorldGeneration(injectedWorld);
+            if (!VersionHelper.hasFoliaPatch) {
+                injectWorldCallback(injectedWorld.minecraftWorld());
+            }
+        }
     }
 
     public CEWorld createStorageWorld(BukkitWorld injectedWorld) {
