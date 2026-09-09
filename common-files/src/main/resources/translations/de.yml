@@ -59,7 +59,6 @@ argument.parse.failure.aggregate.missing: <red>Fehlende Komponente '<arg:0>'</re
 argument.parse.failure.aggregate.failure: "<red>Ungültige Komponente '<arg:0>': <arg:1></red>"
 argument.parse.failure.either: <red>Konnte <arg:1> oder <arg:2> nicht aus '<arg:0>' auflösen</red>
 argument.parse.failure.namedtextcolor: <red>'<arg:0>' ist keine benannte Textfarbe</red>
-command.reload.too_fast: <red>Du lädst das Plugin zu schnell neu; der vorherige Reload ist noch nicht abgeschlossen</red>
 command.reload.config.failure: <red>Configs konnten nicht neu geladen werden. Bitte prüfe die Konsolen-Logs</red>
 command.reload.config.success: <dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Configs neu geladen <gray>(<hover:show_text:'<gray>Async/Sync'><color:#FFD700><arg:1></color>/<color:#F4A460><arg:2></color></hover> ms)</gray></white>
 command.reload.config.issues: <#FF5555>⚠ <bold><arg:0></bold> Problem(e) gefunden. <gray><italic>(Details in der Konsole prüfen)</italic></gray>
@@ -76,9 +75,11 @@ command.item.clear.success.single: <white><arg:0> Item(s) von Spieler <arg:1> en
 command.item.clear.success.multiple: <white><arg:0> Item(s) von <arg:1> Spielern entfernt</white>
 command.item.clear.test.single: <white><arg:0> passendes Item auf Spieler <arg:1> gefunden</white>
 command.item.clear.test.multiple: <white><arg:0> passendes Item auf <arg:1> Spielern gefunden</white>
-command.item.set_custom_model_data: <white>CustomModelData auf '<arg:0>' gesetzt</white>
-command.item.set_item_model: <white>ItemModel auf '<arg:0>' gesetzt</white>
-command.item.remove_item_component: <white>Item-Komponente '<arg:0>' entfernt</white>
+command.item.component.add: <white>Item-Komponente '<arg:0>' gesetzt</white>
+command.item.component.remove: <white>Item-Komponente '<arg:0>' entfernt</white>
+command.item.component.reset: <white>Item-Komponente '<arg:0>' auf den Standardwert zurückgesetzt</white>
+command.item.component.unknown: <red>Unbekannte Item-Komponente '<arg:0>'</red>
+command.item.component.invalid_value: '<red>Ungültiger SNBT-Wert für Item-Komponente ''<arg:0>'': <arg:1></red>'
 command.item.browser.missing_element: <red>Item-Browser kann aufgrund eines fehlenden GUI-Elements '<arg:0>' nicht geöffnet werden</red><gray><i><newline>Falls du nicht weißt, was diesen Fehler verursacht hat, klicke bitte <red><b><u><click:run_command:'/ce resource save-default /internal'><hover:show_text:'Plugin-interne Assets freigeben'>HIER</hover></click></u></b></red>, um die internen Assets des Plugins freizugeben</i></gray>
 command.search_recipe.not_found: <red>Kein Rezept für dieses Item gefunden</red>
 command.search_usage.not_found: <red>Keine Verwendung für dieses Item gefunden</red>

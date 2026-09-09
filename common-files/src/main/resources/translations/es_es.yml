@@ -59,7 +59,6 @@ argument.parse.failure.aggregate.missing: <red>Falta el componente '<arg:0>'</re
 argument.parse.failure.aggregate.failure: '<red>Componente no válido ''<arg:0>'': <arg:1></red>'
 argument.parse.failure.either: <red>No se pudo resolver <arg:1> o <arg:2> desde '<arg:0>'</red>
 argument.parse.failure.namedtextcolor: <red>'<arg:0>' no es un nombre de color de texto válido</red>
-command.reload.too_fast: <red>Estás recargando el plugin demasiado rápido; la recarga anterior aún no ha completado
 command.reload.config.failure: <red>Error al recargar las configuraciones. Por favor, revisa los registros de la consola
 command.reload.config.success: <dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Configuraciones recargadas <gray>(<hover:show_text:'<gray>Async/Sync'><color:#FFD700><arg:1></color>/<color:#F4A460><arg:2></color></hover> ms)</gray>
 command.reload.config.issues: '<#FF5555>⚠ <bold><arg:0></bold> problema(s) encontrado(s). <gray><italic>(Revisa la consola para más detalles)'
@@ -76,9 +75,11 @@ command.item.clear.success.single: <white>Se removieron <arg:0> objeto(s) del ju
 command.item.clear.success.multiple: <white>Se removieron <arg:0> objeto(s) de <arg:1> jugadores</white>
 command.item.clear.test.single: <white>Se encontraron <arg:0> objeto(s) coincidentes en el jugador <arg:1></white>
 command.item.clear.test.multiple: <white>Se encontraron <arg:0> objeto(s) coincidentes en <arg:1> jugadores</white>
-command.item.set_custom_model_data: <white>Se estableció el CustomModelData a '<arg:0>'</white>
-command.item.set_item_model: <white>Se estableció el ItemModel a '<arg:0>'</white>
-command.item.remove_item_component: <white>Se eliminó el componente de objeto '<arg:0>'</white>
+command.item.component.add: <white>Se estableció el componente de objeto '<arg:0>'</white>
+command.item.component.remove: <white>Se eliminó el componente de objeto '<arg:0>'</white>
+command.item.component.reset: <white>Se restableció el componente de objeto '<arg:0>' a su valor predeterminado</white>
+command.item.component.unknown: <red>Componente de objeto desconocido '<arg:0>'</red>
+command.item.component.invalid_value: '<red>Valor SNBT no válido para el componente de objeto ''<arg:0>'': <arg:1></red>'
 command.item.browser.missing_element: <red>No se puede abrir el navegador de objetos debido a que falta el elemento de GUI '<arg:0>'</red><gray><i><newline>Si no sabes qué causó este error, por favor haz clic <red><b><u><click:run_command:'/ce resource save-default /internal'><hover:show_text:'Liberar recursos internos del plugin'>AQUÍ</hover></click></u></b></red> para liberar los recursos internos del plugin</i></gray>
 command.search_recipe.not_found: <red>No se encontró ninguna receta para este objeto</red>
 command.search_usage.not_found: <red>No se encontró ningún uso para este objeto</red>

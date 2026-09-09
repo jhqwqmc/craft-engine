@@ -59,7 +59,6 @@ argument.parse.failure.aggregate.missing: <red>缺少「<arg:0>」元件</red>
 argument.parse.failure.aggregate.failure: <red>無效的「<arg:0>」元件：<arg:1></red>
 argument.parse.failure.either: <red>無法從「<arg:0>」解析出 <arg:1> 或 <arg:2></red>
 argument.parse.failure.namedtextcolor: <red>「<arg:0>」不是命名的文本顏色</red>
-command.reload.too_fast: <red>你重新載入插件的速度太快了，上一次的重新載入還沒有完成</red>
 command.reload.config.failure: <red>無法重新載入配置。請檢查控制台日誌</red>
 command.reload.config.success: <dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>配置檔案已重新載入完成</white><gray>（<hover:show_text:'<gray>異步/同步'><color:#FFD700><arg:1></color>/<color:#F4A460><arg:2></color></hover> 毫秒）</gray>
 command.reload.config.issues: <#FF5555>⚠ 發現 <bold><arg:0></bold> 個問題。<gray><italic>（請檢查控制台以獲取詳細資訊）</#FF5555>
@@ -76,9 +75,11 @@ command.item.clear.success.single: <white>已刪除玩家 <arg:1> 的 <arg:0> �
 command.item.clear.success.multiple: <white>已刪除 <arg:1> 個玩家的 <arg:0> 個物品</white>
 command.item.clear.test.single: <white>已從玩家 <arg:1> 身上發現 <arg:0> 個相關物品</white>
 command.item.clear.test.multiple: <white>已從 <arg:1> 個玩家身上發現 <arg:0> 個相關物品</white>
-command.item.set_custom_model_data: <white>已將自訂模型數據設定為「<arg:0>」</white>
-command.item.set_item_model: <white>已將物品模型設定為「<arg:0>」</white>
-command.item.remove_item_component: <white>已將物品的「<arg:0>」元件移除</white>
+command.item.component.add: <white>已設定物品的「<arg:0>」元件</white>
+command.item.component.remove: <white>已將物品的「<arg:0>」元件移除</white>
+command.item.component.reset: <white>已將物品的「<arg:0>」元件還原為預設值</white>
+command.item.component.unknown: <red>未知的物品元件「<arg:0>」</red>
+command.item.component.invalid_value: <red>物品元件「<arg:0>」的 SNBT 值無效：<arg:1></red>
 command.search_recipe.not_found: <red>找不到此物品的配方</red>
 command.search_usage.not_found: <red>找不到此物品的用途</red>
 command.search_recipe.no_item: <red>請手持物品後再執行此命令</red>

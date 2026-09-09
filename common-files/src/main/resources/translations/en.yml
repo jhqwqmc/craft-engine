@@ -68,7 +68,6 @@ argument.parse.failure.aggregate.missing: <red>Missing component '<arg:0>'</red>
 argument.parse.failure.aggregate.failure: '<red>Invalid component ''<arg:0>'': <arg:1></red>'
 argument.parse.failure.either: <red>Could not resolve <arg:1> or <arg:2> from '<arg:0>'</red>
 argument.parse.failure.namedtextcolor: <red>'<arg:0>' is not a named text color</red>
-command.reload.too_fast: <red>You are reloading the plugin too quickly; the previous reload has not yet completed
 command.reload.config.failure: <red>Failed to reload configs. Please check console logs
 command.reload.config.success: <dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>Configs reloaded <gray>(<hover:show_text:'<gray>Async/Sync'><color:#FFD700><arg:1></color>/<color:#F4A460><arg:2></color></hover> ms)</gray>
 command.reload.config.issues: '<#FF5555>⚠ <bold><arg:0></bold> issue(s) found. <gray><italic>(Check console for details)'
@@ -85,9 +84,11 @@ command.item.clear.success.single: <white>Removed <arg:0> item(s) from player <a
 command.item.clear.success.multiple: <white>Removed <arg:0> item(s) from <arg:1> players</white>
 command.item.clear.test.single: <white>Found <arg:0> matching item(s) on player <arg:1></white>
 command.item.clear.test.multiple: <white>Found <arg:0> matching item(s) on <arg:1> players</white>
-command.item.set_custom_model_data: <white>Set the CustomModelData to '<arg:0>'</white>
-command.item.set_item_model: <white>Set the ItemModel to '<arg:0>'</white>
-command.item.remove_item_component: <white>Removed item component '<arg:0>'</white>
+command.item.component.add: <white>Set item component '<arg:0>'</white>
+command.item.component.remove: <white>Removed item component '<arg:0>'</white>
+command.item.component.reset: <white>Reset item component '<arg:0>' to its default value</white>
+command.item.component.unknown: <red>Unknown item component '<arg:0>'</red>
+command.item.component.invalid_value: '<red>Invalid SNBT value for item component ''<arg:0>'': <arg:1></red>'
 command.item.browser.missing_element: <red>Cannot open item browser due to missing gui element '<arg:0>'</red><gray><i><newline>If you don't know what you did that caused this error, please click <red><b><u><click:run_command:'/ce resource save-default /internal'><hover:show_text:'Release plugin internal assets'>HERE</hover></click></u></b></red> to release the plugin's internal assets</i></gray>
 command.search_recipe.not_found: <red>No recipe found for this item</red>
 command.search_usage.not_found: <red>No usage found for this item</red>

@@ -63,7 +63,6 @@ argument.parse.failure.aggregate.missing: <red>缺少“<arg:0>”组件</red>
 argument.parse.failure.aggregate.failure: <red>无效的“<arg:0>”组件：<arg:1></red>
 argument.parse.failure.either: <red>无法从“<arg:0>”解析出<arg:1>或<arg:2></red>
 argument.parse.failure.namedtextcolor: <red>“<arg:0>”不是命名的文本颜色</red>
-command.reload.too_fast: <red>你重新加载插件的速度太快了，上一次的重新加载还没有完成</red>
 command.reload.config.failure: <red>无法重新加载配置。请检查控制台日志</red>
 command.reload.config.success: <dark_gray>» </dark_gray><gradient:#F4A460:#FFD700><b>CraftEngine</b></gradient> <gray>•</gray> <white>配置文件已重新加载完成</white><gray>（<hover:show_text:'<gray>异步/同步'><color:#FFD700><arg:1></color>/<color:#F4A460><arg:2></color></hover>毫秒）</gray>
 command.reload.config.issues: <#FF5555>⚠ 发现<bold><arg:0></bold>个问题。<gray><italic>（请检查控制台以获取详细信息）</#FF5555>
@@ -80,9 +79,11 @@ command.item.clear.success.single: <white>已移除玩家<arg:1>的<arg:0>个物
 command.item.clear.success.multiple: <white>已移除<arg:1>名玩家的<arg:0>个物品</white>
 command.item.clear.test.single: <white>已在玩家<arg:1>身上找到<arg:0>个匹配的物品</white>
 command.item.clear.test.multiple: <white>已在<arg:1>名玩家身上找到<arg:0>个匹配的物品</white>
-command.item.set_custom_model_data: <white>已将自定义模型数据设置为“<arg:0>”</white>
-command.item.set_item_model: <white>已将物品模型设置为“<arg:0>”</white>
-command.item.remove_item_component: <white>已将物品的“<arg:0>”组件移除</white>
+command.item.component.add: <white>已设置物品的“<arg:0>”组件</white>
+command.item.component.remove: <white>已将物品的“<arg:0>”组件移除</white>
+command.item.component.reset: <white>已将物品的“<arg:0>”组件恢复为默认值</white>
+command.item.component.unknown: <red>未知的物品组件“<arg:0>”</red>
+command.item.component.invalid_value: <red>物品组件“<arg:0>”的SNBT值无效：<arg:1></red>
 command.item.browser.missing_element: <red>由于缺少GUI元素“<arg:0>”，无法打开物品浏览器</red><gray><i><newline>如果你不清楚自己做了什么导致了此错误，请点击<red><b><u><click:run_command:'/ce resource save-default /internal'><hover:show_text:'释放插件内部资源'>这里</hover></click></u></b></red>释放插件的内部资源</i></gray>
 command.search_recipe.not_found: <red>找不到此物品的配方</red>
 command.search_usage.not_found: <red>找不到此物品的用途</red>

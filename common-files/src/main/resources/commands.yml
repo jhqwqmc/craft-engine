@@ -232,26 +232,26 @@ place_feature:
     - /craftengine feature place-feature
     - /ce feature place-feature
 
-set_item_custom_model_data:
+item_component_add:
   enable: true
-  permission: ce.command.admin.custom_model_data
+  permission: ce.command.admin.item.component.add
   usage:
-    - /craftengine item custom-model-data
-    - /ce item custom-model-data
+    - /craftengine item component add
+    - /ce item component add
 
-set_item_item_model:
+item_component_remove:
   enable: true
-  permission: ce.command.admin.item_model
+  permission: ce.command.admin.item.component.remove
   usage:
-    - /craftengine item item-model
-    - /ce item item-model
+    - /craftengine item component remove
+    - /ce item component remove
 
-remove_item_component:
+item_component_reset:
   enable: true
-  permission: ce.command.admin.remove_component
+  permission: ce.command.admin.item.component.reset
   usage:
-    - /craftengine item remove-component
-    - /ce item remove-component
+    - /craftengine item component reset
+    - /ce item component reset
 
 migrate_world_storage:
   enable: true

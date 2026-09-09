@@ -34,7 +34,6 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_WORKFLOW_SUCCESS = Component.translatable().key("command.workflow.success");
     TranslatableComponent.Builder COMMAND_WORKFLOW_FAILURE = Component.translatable().key("command.workflow.failure");
     TranslatableComponent.Builder COMMAND_RESOURCE_BUSY = Component.translatable().key("command.resource.busy");
-    TranslatableComponent.Builder COMMAND_RELOAD_TOO_FAST = Component.translatable().key("command.reload.too_fast");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_SUCCESS = Component.translatable().key("command.reload.config.success");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_ISSUES = Component.translatable().key("command.reload.config.issues");
     TranslatableComponent.Builder COMMAND_RELOAD_CONFIG_FAILURE = Component.translatable().key("command.reload.config.failure");
@@ -45,9 +44,11 @@ public interface MessageConstants {
     TranslatableComponent.Builder COMMAND_ITEM_GIVE_SUCCESS_SINGLE = Component.translatable().key("command.item.give.success.single");
     TranslatableComponent.Builder COMMAND_ITEM_GIVE_SUCCESS_MULTIPLE = Component.translatable().key("command.item.give.success.multiple");
     TranslatableComponent.Builder COMMAND_ITEM_GIVE_FAILURE_NOT_EXIST = Component.translatable().key("command.item.give.failure.not_exist");
-    TranslatableComponent.Builder COMMAND_ITEM_SET_CUSTOM_MODEL_DATA = Component.translatable().key("command.item.set_custom_model_data");
-    TranslatableComponent.Builder COMMAND_ITEM_SET_ITEM_MODEL = Component.translatable().key("command.item.set_item_model");
-    TranslatableComponent.Builder COMMAND_ITEM_REMOVE_ITEM_COMPONENT = Component.translatable().key("command.item.remove_item_component");
+    TranslatableComponent.Builder COMMAND_ITEM_COMPONENT_ADD = Component.translatable().key("command.item.component.add");
+    TranslatableComponent.Builder COMMAND_ITEM_COMPONENT_REMOVE = Component.translatable().key("command.item.component.remove");
+    TranslatableComponent.Builder COMMAND_ITEM_COMPONENT_RESET = Component.translatable().key("command.item.component.reset");
+    TranslatableComponent.Builder COMMAND_ITEM_COMPONENT_UNKNOWN = Component.translatable().key("command.item.component.unknown");
+    TranslatableComponent.Builder COMMAND_ITEM_COMPONENT_INVALID_VALUE = Component.translatable().key("command.item.component.invalid_value");
     TranslatableComponent.Builder COMMAND_ITEM_BROWSER_MISSING_ELEMENT = Component.translatable().key("command.item.browser.missing_element");
     TranslatableComponent.Builder COMMAND_SEARCH_RECIPE_NOT_FOUND = Component.translatable().key("command.search_recipe.not_found");
     TranslatableComponent.Builder COMMAND_SEARCH_RECIPE_NO_ITEM = Component.translatable().key("command.search_recipe.no_item");
