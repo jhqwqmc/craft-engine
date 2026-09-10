@@ -2,11 +2,7 @@ package net.momirealms.craftengine.proxy.minecraft.core.component;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import net.momirealms.sparrow.reflection.proxy.ASMProxyFactory;
-import net.momirealms.sparrow.reflection.proxy.annotation.FieldGetter;
-import net.momirealms.sparrow.reflection.proxy.annotation.FieldSetter;
-import net.momirealms.sparrow.reflection.proxy.annotation.MethodInvoker;
-import net.momirealms.sparrow.reflection.proxy.annotation.ReflectionProxy;
-import net.momirealms.sparrow.reflection.proxy.annotation.Type;
+import net.momirealms.sparrow.reflection.proxy.annotation.*;
 
 import java.util.Set;
 

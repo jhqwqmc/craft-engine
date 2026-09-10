@@ -4,7 +4,6 @@ import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackCacheEvent;
 import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackGenerateEvent;
 import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackPrepareEvent;
-import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.util.EventUtils;
 import net.momirealms.craftengine.bukkit.util.ResourcePackUtils;
@@ -15,6 +14,7 @@ import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
 import net.momirealms.craftengine.core.pack.obfuscation.ObfA;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.locale.TranslationManager;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.util.Base64Utils;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import org.bukkit.Bukkit;
@@ -28,8 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 
 public final class BukkitPackManager extends AbstractPackManager implements Listener {

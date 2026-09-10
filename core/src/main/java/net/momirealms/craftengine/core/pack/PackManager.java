@@ -1,18 +1,18 @@
 package net.momirealms.craftengine.core.pack;
 
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.pack.host.ResourcePackDownloadData;
-import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
+import net.momirealms.craftengine.core.pack.host.ResourcePackHost;
 import net.momirealms.craftengine.core.plugin.Manageable;
 import net.momirealms.craftengine.core.plugin.config.ConfigParser;
+import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.util.Tristate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;

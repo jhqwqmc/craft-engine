@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.entity.furniture.element;
 
-import net.momirealms.craftengine.core.world.WorldPosition;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.momirealms.craftengine.core.world.WorldPosition;
 
 import java.util.List;
 

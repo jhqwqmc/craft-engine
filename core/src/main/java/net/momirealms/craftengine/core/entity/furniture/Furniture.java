@@ -1,20 +1,12 @@
 package net.momirealms.craftengine.core.entity.furniture;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntArrays;
-import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureController;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
-import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementMatcher;
-import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
-import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
+import net.momirealms.craftengine.core.entity.furniture.element.*;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitboxPart;
@@ -40,8 +32,8 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 public abstract class Furniture implements Cullable, ChainParameterSource {
     public final FurnitureDefinition config;

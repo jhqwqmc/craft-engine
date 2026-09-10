@@ -3,19 +3,18 @@ package net.momirealms.craftengine.core.plugin.storage;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.model.Updates;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.bson.UuidRepresentation;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
+import org.bson.UuidRepresentation;
 
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

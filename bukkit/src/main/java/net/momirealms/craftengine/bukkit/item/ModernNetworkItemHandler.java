@@ -2,16 +2,15 @@ package net.momirealms.craftengine.bukkit.item;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-
 import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemDefinition;
 import net.momirealms.craftengine.core.item.component.DataComponentIds;
 import net.momirealms.craftengine.core.item.component.DataComponentKeys;
+import net.momirealms.craftengine.core.item.network.ItemModelMappings;
 import net.momirealms.craftengine.core.item.network.NetworkItemBuildContext;
 import net.momirealms.craftengine.core.item.network.NetworkItemHandler;
-import net.momirealms.craftengine.core.item.network.ItemModelMappings;
 import net.momirealms.craftengine.core.item.network.encrypt.ItemCrypto;
 import net.momirealms.craftengine.core.item.processor.ItemProcessor;
 import net.momirealms.craftengine.core.plugin.CraftEngine;

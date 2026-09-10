@@ -6,8 +6,6 @@ import net.momirealms.craftengine.core.plugin.config.ConfigSection;
 import net.momirealms.craftengine.core.plugin.dependency.Dependencies;
 
 import java.util.List;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public final class S3HostFactory implements ResourcePackHostFactory<S3Host> {
     public static final ResourcePackHostFactory<S3Host> INSTANCE = new S3HostFactory();

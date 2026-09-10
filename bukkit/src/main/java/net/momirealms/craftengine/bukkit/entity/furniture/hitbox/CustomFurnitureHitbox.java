@@ -16,7 +16,10 @@ import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.Att
 import net.momirealms.craftengine.proxy.minecraft.world.entity.ai.attributes.AttributesProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.phys.Vec3Proxy;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.IntConsumer;
 
 public final class CustomFurnitureHitbox extends AbstractFurnitureHitBox {

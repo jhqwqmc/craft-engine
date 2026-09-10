@@ -26,11 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class GlowingFurnitureBehaviorTemplate extends FurnitureBehaviorTemplate {

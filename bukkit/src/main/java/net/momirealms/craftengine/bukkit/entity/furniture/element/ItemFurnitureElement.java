@@ -1,15 +1,15 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
-import net.momirealms.craftengine.core.world.WorldPosition;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.PacketUtils;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
-import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataResolver;
 import net.momirealms.craftengine.core.entity.furniture.data.ItemPatch;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElement;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.util.MiscUtils;
+import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundAddEntityPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundSetEntityDataPacketProxy;

@@ -1,20 +1,15 @@
 package net.momirealms.craftengine.core.pack.host;
 
+import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.CancellationException;
+import java.util.concurrent.*;
 
 public final class HttpClientManager {
     private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(5);

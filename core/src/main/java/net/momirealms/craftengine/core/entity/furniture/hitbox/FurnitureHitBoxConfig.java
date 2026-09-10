@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.core.entity.furniture.hitbox;
 
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.ColliderProperties;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.collision.AABB;

@@ -1,8 +1,8 @@
 package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.bukkit.entity.data.animal.happyghast.HappyGhastData;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.ColliderProperties;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.AbstractFurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;

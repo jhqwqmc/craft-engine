@@ -2,8 +2,8 @@ package net.momirealms.craftengine.bukkit.entity.furniture.hitbox;
 
 import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.data.InteractionData;
-import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.ColliderProperties;
+import net.momirealms.craftengine.core.entity.furniture.Furniture;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.AbstractFurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfigFactory;
 import net.momirealms.craftengine.core.entity.seat.SeatConfig;

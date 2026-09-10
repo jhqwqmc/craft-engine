@@ -28,7 +28,6 @@ import net.momirealms.craftengine.core.sound.SoundSource;
 import net.momirealms.craftengine.core.util.ItemUtils;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
-import net.momirealms.craftengine.core.world.Vec3d;
 import net.momirealms.craftengine.core.world.WorldPosition;
 import net.momirealms.craftengine.core.world.context.InteractEntityContext;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundAddEntityPacketProxy;

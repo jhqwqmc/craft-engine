@@ -2,10 +2,13 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
 import net.momirealms.craftengine.bukkit.entity.data.item.ItemEntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataResolver;
+import net.momirealms.craftengine.core.entity.furniture.data.FurnitureDataSourceConfig;
+import net.momirealms.craftengine.core.entity.furniture.data.ItemPatch;
+import net.momirealms.craftengine.core.entity.furniture.data.SourceItemComponentsDataSourceConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
-import net.momirealms.craftengine.core.entity.furniture.data.*;
-import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
+import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.item.ItemKeys;
