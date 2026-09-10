@@ -326,7 +326,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         this.furnitureLightData = new FurnitureLightData();
         this.receivedMapData = CacheBuilder.newBuilder()
                 .weakKeys()
-                .expireAfterAccess(Duration.of(30, ChronoUnit.MINUTES))
+                .expireAfterAccess(Duration.of(10, ChronoUnit.MINUTES))
                 .concurrencyLevel(4)
                 .build();
     }
@@ -1964,14 +1964,6 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         return BlockGetterProxy.INSTANCE.clip(EntityProxy.INSTANCE.getLevel(serverPlayer), context);
     }
 
-    public Map<BlockPos, CullableHolder> trackedBlockEntityRenderers() {
-        return Collections.unmodifiableMap(this.trackedBlockEntityRenderers);
-    }
-
-    public Map<Integer, CullableHolder> trackedFurniture() {
-        return Collections.unmodifiableMap(this.trackedEntities);
-    }
-
     public boolean isRangeMining() {
         return this.isRangeMining;
     }
@@ -1981,7 +1973,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     }
 
     public FurnitureHitData furnitureHitData() {
-        return furnitureHitData;
+        return this.furnitureHitData;
     }
 
     public boolean addObtainedItem(Key item) {
