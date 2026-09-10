@@ -1906,10 +1906,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
 
     @Override
     public void removeTrackedEntity(int entityId) {
-        CullableHolder remove = this.trackedEntities.remove(entityId);
-        if (remove != null && remove.isShown) {
-            remove.cullable.hide(this);
-        }
+        this.trackedEntities.remove(entityId);
     }
 
     @Override

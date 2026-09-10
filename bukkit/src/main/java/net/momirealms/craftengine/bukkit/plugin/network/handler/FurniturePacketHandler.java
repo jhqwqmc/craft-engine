@@ -11,19 +11,26 @@ import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 
 public final class FurniturePacketHandler implements EntityPacketHandler {
     public final Furniture furniture;
+    // 保留本次开始追踪时的快照，供停止追踪时清理旧实体并配对行为回调。
+    public final FurnitureSnapshotState snapshotState;
 
     public FurniturePacketHandler(Furniture furniture) {
         this.furniture = furniture;
+        this.snapshotState = furniture.snapshotState();
     }
 
     @Override
     public boolean handleEntitiesRemove(NetWorkUser user, IntList entityIds) {
         Player player = (Player) user;
         player.removeTrackedEntity(this.furniture.entityId());
-        // Rotation and variant changes replace the snapshot while this handler remains registered.
-        FurnitureSnapshotState snapshotState = this.furniture.snapshotState();
-        snapshotState.hide(player);
-        this.furniture.controller.onAsyncPlayerUntrack(player, snapshotState);
+        FurnitureSnapshotState currentSnapshot = this.furniture.snapshotState();
+        currentSnapshot.hide(player);
+        // 变体切换、旋转会替换快照；旧快照的显示包可能晚于切换发送，不能只清理当前实体。
+        // 未替换快照时只隐藏一次，避免正常停止追踪重复发送移除包。
+        if (currentSnapshot != this.snapshotState) {
+            this.snapshotState.hide(player);
+        }
+        this.furniture.controller.onAsyncPlayerUntrack(player, this.snapshotState);
         return true;
     }
 

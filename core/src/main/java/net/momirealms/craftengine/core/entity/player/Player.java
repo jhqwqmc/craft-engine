@@ -321,6 +321,7 @@ public interface Player extends NetWorkUser, LivingEntity {
 
     void playParticle(Key particleId, double x, double y, double z);
 
+    /** 仅移除实体的剔除追踪记录；客户端隐藏由调用方负责。 */
     void removeTrackedEntity(int entityId);
 
     void clearTrackedEntities();

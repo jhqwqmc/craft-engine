@@ -110,7 +110,7 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             if (furniture != null) {
                 FurniturePacketHandler furniturePacketHandler = new FurniturePacketHandler(furniture);
                 EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, furniturePacketHandler);
-                FurnitureSnapshotState snapshotState = furniture.snapshotState();
+                FurnitureSnapshotState snapshotState = furniturePacketHandler.snapshotState;
                 if (Config.enableEntityCulling()) {
                     serverPlayer.addTrackedEntity(id, furniture);
                     furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
