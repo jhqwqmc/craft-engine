@@ -5,6 +5,7 @@ import net.momirealms.craftengine.bukkit.util.ComponentUtils;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.display.TextDisplayAlignment;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
@@ -189,7 +190,7 @@ public final class TextDisplayFurnitureElementConfig implements TransformableFur
                     section.getBoolean(IS_SEE_THROUGH),
                     section.getBoolean(USE_DEFAULT_BACKGROUND_COLOR),
                     section.getEnum("alignment", TextDisplayAlignment.class, TextDisplayAlignment.CENTER),
-                    MiscUtils.allOf(conditions)
+                    conditions.isEmpty() ? ConditionalFurnitureElement.ALWAYS_VISIBLE : MiscUtils.allOf(conditions)
             );
         }
     }

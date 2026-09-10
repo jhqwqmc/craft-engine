@@ -2,6 +2,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 
 import net.momirealms.craftengine.bukkit.entity.data.item.ItemEntityData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.*;
 import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
@@ -101,7 +102,7 @@ public final class ItemFurnitureElementConfig implements TransformableFurnitureE
                     legacyTintSource ?
                             SourceItemComponentsDataSourceConfig.create(List.of(DataComponentKeys.DYED_COLOR, DataComponentKeys.FIREWORK_EXPLOSION)) :
                             section.getValue(TINT_SOURCE, SourceItemComponentsDataSourceConfig::fromConfig, SourceItemComponentsDataSourceConfig.DEFAULT),
-                    MiscUtils.allOf(conditions)
+                    conditions.isEmpty() ? ConditionalFurnitureElement.ALWAYS_VISIBLE : MiscUtils.allOf(conditions)
             );
         }
     }

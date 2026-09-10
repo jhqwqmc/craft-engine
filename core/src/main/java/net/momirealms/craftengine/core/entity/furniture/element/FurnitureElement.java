@@ -1,7 +1,6 @@
 package net.momirealms.craftengine.core.entity.furniture.element;
 
 import net.momirealms.craftengine.core.entity.player.Player;
-import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 
 import java.util.function.IntConsumer;
 
@@ -15,7 +14,7 @@ public interface FurnitureElement {
 
     void update(Player player);
 
-    default boolean canSee(PlayerContext context) {
+    default boolean canSee(Player player) {
         return true;
     }
 

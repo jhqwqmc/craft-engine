@@ -11,6 +11,7 @@ import net.momirealms.craftengine.core.entity.culling.Cullable;
 import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureController;
+import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementMatcher;
@@ -27,7 +28,6 @@ import net.momirealms.craftengine.core.plugin.CraftEngine;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ChainParameterSource;
 import net.momirealms.craftengine.core.plugin.context.ContextKey;
-import net.momirealms.craftengine.core.plugin.context.PlayerContext;
 import net.momirealms.craftengine.core.plugin.context.parameter.FurnitureParameterProvider;
 import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.util.Key;
@@ -779,15 +779,19 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     }
 
     private static void updateFurnitureElementVisibility(Player player, FurnitureElement before, FurnitureElement after) {
-        PlayerContext context = player.constantContext();
-        boolean previousCanSee = before.canSee(context);
-        boolean afterCanSee = after.canSee(context);
+        boolean previousCanSee = before.canSee(player);
+        boolean afterCanSee = after.canSee(player);
         if (previousCanSee && afterCanSee) {
             after.update(player);
         } else if (previousCanSee) {
             after.hide(player);
         } else if (afterCanSee) {
-            after.show(player);
+            // 已通过条件判断，直接展示，避免再次构造上下文并重复求值。
+            if (after instanceof ConditionalFurnitureElement conditional) {
+                conditional.showInternal(player);
+            } else {
+                after.show(player);
+            }
         }
     }
 

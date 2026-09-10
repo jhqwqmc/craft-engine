@@ -4,6 +4,7 @@ import net.momirealms.craftengine.bukkit.entity.data.DisplayData;
 import net.momirealms.craftengine.core.block.BlockStateWrapper;
 import net.momirealms.craftengine.core.entity.display.Billboard;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
@@ -153,7 +154,7 @@ public final class BlockDisplayFurnitureElementConfig implements TransformableFu
                     brightness != null ? brightness.getInt(BLOCK_LIGHT, -1) : -1,
                     brightness != null ? brightness.getInt(SKY_LIGHT, -1) : -1,
                     section.getFloat(VIEW_RANGE, 1f),
-                    MiscUtils.allOf(conditions)
+                    conditions.isEmpty() ? ConditionalFurnitureElement.ALWAYS_VISIBLE : MiscUtils.allOf(conditions)
             );
         }
     }

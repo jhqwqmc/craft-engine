@@ -3,6 +3,7 @@ package net.momirealms.craftengine.bukkit.entity.furniture.element;
 import net.momirealms.craftengine.bukkit.entity.data.BaseEntityData;
 import net.momirealms.craftengine.bukkit.entity.data.decoration.ArmorStandData;
 import net.momirealms.craftengine.core.entity.furniture.Furniture;
+import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.data.*;
 import net.momirealms.craftengine.core.entity.furniture.element.TransformableFurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfigFactory;
@@ -129,7 +130,7 @@ public final class ArmorStandFurnitureElementConfig implements TransformableFurn
                             section.getValue(TINT_SOURCE, SourceItemComponentsDataSourceConfig::fromConfig, SourceItemComponentsDataSourceConfig.DEFAULT),
                     section.getBoolean("small"),
                     section.getEnum(GLOW_COLOR, LegacyChatFormatter.class),
-                    MiscUtils.allOf(conditions)
+                    conditions.isEmpty() ? ConditionalFurnitureElement.ALWAYS_VISIBLE : MiscUtils.allOf(conditions)
             );
         }
     }
