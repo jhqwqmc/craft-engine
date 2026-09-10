@@ -60,6 +60,43 @@ public final class FurniturePacketHandler implements EntityPacketHandler, Cullab
         if (this.shownSnapshot != null) {
             this.shownSnapshot.hideHitboxes(player);
         }
+        List<FurnitureElement> visible = this.updateVisibleElements(player, current.elements());
+        current.showHitboxes(player);
+        this.visibleElements = visible;
+        this.shownSnapshot = current;
+    }
+
+    private List<FurnitureElement> updateVisibleElements(Player player, List<FurnitureElement> elements) {
+        // 单元素首次显示和一对一切换直接比较，不构造匹配 Map 和可变列表。
+        if (elements.size() == 1 && this.visibleElements.size() <= 1) {
+            FurnitureElement element = elements.getFirst();
+            FurnitureElement previous = this.visibleElements.isEmpty() ? null : this.visibleElements.getFirst();
+            if (!element.canSee(player)) {
+                if (previous != null) previous.hide(player);
+                return List.of();
+            }
+            if (element instanceof TransformableFurnitureElement transformable
+                    && previous instanceof TransformableFurnitureElement old
+                    && old.entityId() == transformable.entityId()
+                    && old.getClass() == transformable.getClass()) {
+                transformable.update(player, old);
+            } else {
+                if (previous != null) previous.hide(player);
+                this.showVisibleElement(player, element);
+            }
+            return List.of(element);
+        }
+        // 首次显示（含剔除后重新显示）没有旧元素需要匹配。
+        if (this.visibleElements.isEmpty()) {
+            if (elements.isEmpty()) return List.of();
+            List<FurnitureElement> visible = new ObjectArrayList<>(elements.size());
+            for (FurnitureElement element : elements) {
+                if (!element.canSee(player)) continue;
+                this.showVisibleElement(player, element);
+                visible.add(element);
+            }
+            return visible;
+        }
         Int2ObjectOpenHashMap<TransformableFurnitureElement> previousElements = new Int2ObjectOpenHashMap<>();
         for (FurnitureElement element : this.visibleElements) {
             if (element instanceof TransformableFurnitureElement transformable) {
@@ -68,8 +105,8 @@ public final class FurniturePacketHandler implements EntityPacketHandler, Cullab
                 element.hide(player);
             }
         }
-        List<FurnitureElement> visible = new ObjectArrayList<>(current.elements().size());
-        for (FurnitureElement element : current.elements()) {
+        List<FurnitureElement> visible = new ObjectArrayList<>(elements.size());
+        for (FurnitureElement element : elements) {
             if (!element.canSee(player)) continue;
             TransformableFurnitureElement previous = element instanceof TransformableFurnitureElement transformable ? previousElements.remove(transformable.entityId()) : null;
             if (previous != null && previous.getClass() == element.getClass()) {
@@ -78,19 +115,23 @@ public final class FurniturePacketHandler implements EntityPacketHandler, Cullab
                 if (previous != null) {
                     previous.hide(player);
                 }
-                if (element instanceof ConditionalFurnitureElement conditional) {
-                    conditional.showInternal(player);
-                }
-                else element.show(player);
+                this.showVisibleElement(player, element);
             }
             visible.add(element);
         }
         for (TransformableFurnitureElement element : previousElements.values()) {
             element.hide(player);
         }
-        current.showHitboxes(player);
-        this.visibleElements = visible;
-        this.shownSnapshot = current;
+        return visible;
+    }
+
+    // 调用方已判断 canSee，条件元素不再重复构造上下文。
+    private void showVisibleElement(Player player, FurnitureElement element) {
+        if (element instanceof ConditionalFurnitureElement conditional) {
+            conditional.showInternal(player);
+        } else {
+            element.show(player);
+        }
     }
 
     @Override
