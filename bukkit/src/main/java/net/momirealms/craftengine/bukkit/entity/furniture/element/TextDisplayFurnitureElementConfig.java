@@ -99,34 +99,45 @@ public final class TextDisplayFurnitureElementConfig implements TransformableFur
         this.alignment = alignment;
         this.isSeeThrough = isSeeThrough;
         this.predicate = predicate;
+        Object[] spawnMetadata = createStaticMetadata(false);
+        Object[] updateMetadata = createStaticMetadata(true);
         this.metadata = (player, tintSource, force) -> {
-            List<Object> dataValues = new ArrayList<>();
-            if (glowColor != null) {
-                DisplayData.TextDisplayData.SharedFlags.addEntityData((byte) 0x40, dataValues);
-                DisplayData.TextDisplayData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
-            } else {
-                DisplayData.TextDisplayData.SharedFlags.addEntityData((byte) 0x0, dataValues, force);
-                DisplayData.TextDisplayData.GlowColorOverride.addEntityData(-1, dataValues, force);
+            Object[] staticMetadata = force ? updateMetadata : spawnMetadata;
+            List<Object> dataValues = new ArrayList<>(staticMetadata.length + 2);
+            for (Object value : staticMetadata) {
+                dataValues.add(value);
             }
-            DisplayData.TextDisplayData.Scale.addEntityData(this.scale, dataValues, force);
-            DisplayData.TextDisplayData.LeftRotation.addEntityData(this.rotation, dataValues, force);
-            DisplayData.TextDisplayData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues, force);
-            DisplayData.TextDisplayData.Translation.addEntityData(this.translation, dataValues, force);
-            DisplayData.TextDisplayData.ShadowRadius.addEntityData(this.shadowRadius, dataValues, force);
-            DisplayData.TextDisplayData.ShadowStrength.addEntityData(this.shadowStrength, dataValues, force);
             DisplayData.TextDisplayData.Text.addEntityData(ComponentUtils.adventureToMinecraft(AdventureHelper.deserialize(this.text, NetworkTextReplaceContext.of(player))), dataValues);
-            DisplayData.TextDisplayData.LineWidth.addEntityData(this.lineWidth, dataValues, force);
-            DisplayData.TextDisplayData.BackgroundColor.addEntityData(this.backgroundColor, dataValues, force);
-            DisplayData.TextDisplayData.TextOpacity.addEntityData(this.opacity, dataValues, force);
-            DisplayData.TextDisplayData.Flags.addEntityData(DisplayData.TextDisplayData.encodeFlags(this.hasShadow, this.isSeeThrough, this.useDefaultBackgroundColor, this.alignment), dataValues, force);
-            if (this.blockLight != -1 && this.skyLight != -1) {
-                DisplayData.TextDisplayData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
-            } else {
-                DisplayData.TextDisplayData.BrightnessOverride.addEntityData(-1, dataValues, force);
-            }
             DisplayData.TextDisplayData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues, force);
             return dataValues;
         };
+    }
+
+    private Object[] createStaticMetadata(boolean force) {
+        List<Object> dataValues = new ArrayList<>();
+        if (glowColor != null) {
+            DisplayData.TextDisplayData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+            DisplayData.TextDisplayData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+        } else {
+            DisplayData.TextDisplayData.SharedFlags.addEntityData((byte) 0x0, dataValues, force);
+            DisplayData.TextDisplayData.GlowColorOverride.addEntityData(-1, dataValues, force);
+        }
+        DisplayData.TextDisplayData.Scale.addEntityData(this.scale, dataValues, force);
+        DisplayData.TextDisplayData.LeftRotation.addEntityData(this.rotation, dataValues, force);
+        DisplayData.TextDisplayData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues, force);
+        DisplayData.TextDisplayData.Translation.addEntityData(this.translation, dataValues, force);
+        DisplayData.TextDisplayData.ShadowRadius.addEntityData(this.shadowRadius, dataValues, force);
+        DisplayData.TextDisplayData.ShadowStrength.addEntityData(this.shadowStrength, dataValues, force);
+        DisplayData.TextDisplayData.LineWidth.addEntityData(this.lineWidth, dataValues, force);
+        DisplayData.TextDisplayData.BackgroundColor.addEntityData(this.backgroundColor, dataValues, force);
+        DisplayData.TextDisplayData.TextOpacity.addEntityData(this.opacity, dataValues, force);
+        DisplayData.TextDisplayData.Flags.addEntityData(DisplayData.TextDisplayData.encodeFlags(this.hasShadow, this.isSeeThrough, this.useDefaultBackgroundColor, this.alignment), dataValues, force);
+        if (this.blockLight != -1 && this.skyLight != -1) {
+            DisplayData.TextDisplayData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+        } else {
+            DisplayData.TextDisplayData.BrightnessOverride.addEntityData(-1, dataValues, force);
+        }
+        return dataValues.toArray();
     }
 
     @Override

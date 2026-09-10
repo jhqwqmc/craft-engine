@@ -99,31 +99,42 @@ public final class ItemDisplayFurnitureElementConfig implements TransformableFur
             }
             return Optional.ofNullable(wrappedItem).orElseGet(() -> Item.byId(ItemKeys.BARRIER));
         };
+        Object[] spawnMetadata = createStaticMetadata(false);
+        Object[] updateMetadata = createStaticMetadata(true);
         this.metadata = (player, source, force) -> {
-            List<Object> dataValues = new ArrayList<>();
-            if (glowColor != null) {
-                DisplayData.ItemDisplayData.SharedFlags.addEntityData((byte) 0x40, dataValues);
-                DisplayData.ItemDisplayData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
-            } else {
-                DisplayData.ItemDisplayData.SharedFlags.addEntityData((byte) 0x0, dataValues, force);
-                DisplayData.ItemDisplayData.GlowColorOverride.addEntityData(-1, dataValues, force);
+            Object[] staticMetadata = force ? updateMetadata : spawnMetadata;
+            List<Object> dataValues = new ArrayList<>(staticMetadata.length + 2);
+            for (Object value : staticMetadata) {
+                dataValues.add(value);
             }
             DisplayData.ItemDisplayData.ItemStack.addEntityData(itemFunction.apply(player, source).minecraftItem(), dataValues);
-            DisplayData.ItemDisplayData.Scale.addEntityData(this.scale, dataValues, force);
-            DisplayData.ItemDisplayData.LeftRotation.addEntityData(this.rotation, dataValues, force);
-            DisplayData.ItemDisplayData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues, force);
-            DisplayData.ItemDisplayData.Translation.addEntityData(this.translation, dataValues, force);
-            DisplayData.ItemDisplayData.ItemTransform.addEntityData(this.displayContext.id(), dataValues, force);
-            DisplayData.ItemDisplayData.ShadowRadius.addEntityData(this.shadowRadius, dataValues, force);
-            DisplayData.ItemDisplayData.ShadowStrength.addEntityData(this.shadowStrength, dataValues, force);
-            if (this.blockLight != -1 && this.skyLight != -1) {
-                DisplayData.ItemDisplayData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
-            } else {
-                DisplayData.ItemDisplayData.BrightnessOverride.addEntityData(-1, dataValues, force);
-            }
             DisplayData.ItemDisplayData.ViewRange.addEntityData((float) (this.viewRange * player.displayEntityViewDistance()), dataValues, force);
             return dataValues;
         };
+    }
+
+    private Object[] createStaticMetadata(boolean force) {
+        List<Object> dataValues = new ArrayList<>();
+        if (glowColor != null) {
+            DisplayData.ItemDisplayData.SharedFlags.addEntityData((byte) 0x40, dataValues);
+            DisplayData.ItemDisplayData.GlowColorOverride.addEntityData(glowColor.color(), dataValues);
+        } else {
+            DisplayData.ItemDisplayData.SharedFlags.addEntityData((byte) 0x0, dataValues, force);
+            DisplayData.ItemDisplayData.GlowColorOverride.addEntityData(-1, dataValues, force);
+        }
+        DisplayData.ItemDisplayData.Scale.addEntityData(this.scale, dataValues, force);
+        DisplayData.ItemDisplayData.LeftRotation.addEntityData(this.rotation, dataValues, force);
+        DisplayData.ItemDisplayData.BillboardConstraints.addEntityData(this.billboard.id(), dataValues, force);
+        DisplayData.ItemDisplayData.Translation.addEntityData(this.translation, dataValues, force);
+        DisplayData.ItemDisplayData.ItemTransform.addEntityData(this.displayContext.id(), dataValues, force);
+        DisplayData.ItemDisplayData.ShadowRadius.addEntityData(this.shadowRadius, dataValues, force);
+        DisplayData.ItemDisplayData.ShadowStrength.addEntityData(this.shadowStrength, dataValues, force);
+        if (this.blockLight != -1 && this.skyLight != -1) {
+            DisplayData.ItemDisplayData.BrightnessOverride.addEntityData(this.blockLight << 4 | this.skyLight << 20, dataValues);
+        } else {
+            DisplayData.ItemDisplayData.BrightnessOverride.addEntityData(-1, dataValues, force);
+        }
+        return dataValues.toArray();
     }
 
     @Override
