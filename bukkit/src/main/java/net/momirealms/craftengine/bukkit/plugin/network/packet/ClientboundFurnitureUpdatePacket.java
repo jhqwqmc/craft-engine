@@ -34,7 +34,7 @@ public record ClientboundFurnitureUpdatePacket(int entityId) implements ClientCu
     @Override
     public void handle(NetWorkUser user, ByteBufPacketEvent event) {
         event.setCancelled(true);
-        if (user.entityPacketHandlers().get(this.entityId) instanceof FurniturePacketHandler handler) {
+        if (user.entityViews().get(this.entityId) instanceof FurniturePacketHandler handler) {
             handler.synchronize((Player) user);
         }
     }

@@ -107,21 +107,24 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(id);
             if (furniture != null) {
-                EntityPacketHandler previous = serverPlayer.entityPacketHandlers().get(id);
+                EntityPacketHandler previous = serverPlayer.entityViews().get(id);
                 // 补发生成包不能替换仍在追踪的处理器，否则会丢失行为快照并重复登记光照。
                 if (!(previous instanceof FurniturePacketHandler handler) || handler.furniture != furniture) {
                     FurniturePacketHandler furniturePacketHandler = new FurniturePacketHandler(furniture);
-                    serverPlayer.entityPacketHandlers().put(id, furniturePacketHandler);
+                    serverPlayer.entityViews().put(id, furniturePacketHandler);
                     if (Config.enableEntityCulling()) {
                         serverPlayer.addTrackedEntity(id, furniturePacketHandler);
                     }
                     furniturePacketHandler.synchronize(serverPlayer);
+                } else {
+                    // 首包可能早于 onLoad 完成，补包时复用处理器并同步已发布的快照。
+                    handler.synchronize(serverPlayer);
                 }
                 if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {
                     event.setCancelled(true);
                 }
             } else {
-                user.entityPacketHandlers().putIfAbsent(id, ItemDisplayPacketHandler.INSTANCE);
+                user.entityViews().putIfAbsent(id, ItemDisplayPacketHandler.INSTANCE);
             }
         };
         this.handlers[EntityTypesProxy.INTERACTION$registryId] = (user, event) -> {
@@ -132,7 +135,7 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
             if (furniture != null) {
                 event.setCancelled(true);
-                user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);
+                user.entityViews().put(id, FurnitureCollisionPacketHandler.INSTANCE);
             }
         };
         this.handlers[EntityTypesProxy.OAK_BOAT$registryId] = (user, event) -> {
@@ -143,7 +146,7 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByColliderEntityId(id);
             if (furniture != null) {
                 event.setCancelled(true);
-                user.entityPacketHandlers().put(id, FurnitureCollisionPacketHandler.INSTANCE);
+                user.entityViews().put(id, FurnitureCollisionPacketHandler.INSTANCE);
             }
         };
     }
@@ -151,7 +154,7 @@ public final class AddEntityListener implements ByteBufferPacketListener {
     private static EntityTypeHandler simpleAddEntityHandler(EntityPacketHandler handler) {
         return (user, event) -> {
             FriendlyByteBuf buf = event.getBuffer();
-            user.entityPacketHandlers().put(buf.readVarInt(), handler);
+            user.entityViews().put(buf.readVarInt(), handler);
         };
     }
 
@@ -164,15 +167,15 @@ public final class AddEntityListener implements ByteBufferPacketListener {
                 if (display != null) {
                     ProjectilePacketHandler handler = new ProjectilePacketHandler(customProjectile, display, id);
                     handler.convertAddCustomProjectilePacket(buf, event, user);
-                    user.entityPacketHandlers().put(id, handler);
+                    user.entityViews().put(id, handler);
                 } else {
                     if (fallback) {
-                        user.entityPacketHandlers().put(id, CommonItemPacketHandler.INSTANCE);
+                        user.entityViews().put(id, CommonItemPacketHandler.INSTANCE);
                     }
                 }
             }, () -> {
                 if (fallback) {
-                    user.entityPacketHandlers().put(id, CommonItemPacketHandler.INSTANCE);
+                    user.entityViews().put(id, CommonItemPacketHandler.INSTANCE);
                 }
             });
         };

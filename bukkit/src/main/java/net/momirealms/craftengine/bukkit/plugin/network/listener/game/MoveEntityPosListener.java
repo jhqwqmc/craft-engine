@@ -15,7 +15,7 @@ public final class MoveEntityPosListener implements ByteBufferPacketListener {
     public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
         FriendlyByteBuf buf = event.getBuffer();
         int entityId = buf.readVarInt();
-        EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
+        EntityPacketHandler handler = user.entityViews().get(entityId);
         if (handler != null) {
             handler.handleMove(user, event, entityId, buf);
         }

@@ -1,7 +1,7 @@
 package net.momirealms.craftengine.bukkit.plugin.network.handler;
 
-import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.plugin.network.packet.ClientboundFurnitureUpdatePacket;
@@ -19,7 +19,6 @@ import net.momirealms.craftengine.core.plugin.network.NetWorkUser;
 import net.momirealms.craftengine.core.plugin.network.event.ByteBufPacketEvent;
 import net.momirealms.craftengine.core.util.FriendlyByteBuf;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class FurniturePacketHandler implements EntityPacketHandler, Cullable {
@@ -35,7 +34,7 @@ public final class FurniturePacketHandler implements EntityPacketHandler, Cullab
 
     public void synchronize(Player player) {
         FurnitureSnapshotState current = this.furniture.clientSnapshot();
-        if (current == null) return; // 首包早于行为 onLoad 时，等待完成后的更新通知。
+        if (current == null) return; // 首包早于行为 onLoad 时，等待完成后补发的生成包。
         if (this.appliedSnapshot != current) {
             if (this.appliedSnapshot == null) {
                 this.furniture.controller.onAsyncPlayerTrack(player, current);

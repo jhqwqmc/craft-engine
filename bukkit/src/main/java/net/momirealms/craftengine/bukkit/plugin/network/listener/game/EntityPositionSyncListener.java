@@ -16,7 +16,7 @@ public final class EntityPositionSyncListener implements ByteBufferPacketListene
     public void onPacketSend(NetWorkUser user, ByteBufPacketEvent event) {
         FriendlyByteBuf buf = event.getBuffer();
         int entityId = buf.readVarInt();
-        EntityPacketHandler handler = user.entityPacketHandlers().get(entityId);
+        EntityPacketHandler handler = user.entityViews().get(entityId);
         if (handler != null) {
             handler.handleSyncEntityPosition(user, event, entityId, buf);
         }

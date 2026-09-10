@@ -22,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntConsumer;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public final class BetterModelFurnitureElement extends AbstractConditionalFurnitureElement {
     public final Furniture furniture;

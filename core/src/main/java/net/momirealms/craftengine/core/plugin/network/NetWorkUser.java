@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.core.plugin.network;
 
+import ca.spottedleaf.concurrentutil.map.concurrent.ints.ConcurrentChainedInt2ObjectHashTable;
 import com.mojang.authlib.properties.PropertyMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -16,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface NetWorkUser {
@@ -80,7 +80,7 @@ public interface NetWorkUser {
 
     World clientSideWorld();
 
-    Map<Integer, EntityPacketHandler> entityPacketHandlers();
+    ConcurrentChainedInt2ObjectHashTable<EntityPacketHandler> entityViews();
 
     boolean clientCustomBlockEnabled();
 

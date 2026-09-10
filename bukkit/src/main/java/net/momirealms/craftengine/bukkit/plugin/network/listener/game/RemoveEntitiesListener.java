@@ -19,7 +19,7 @@ public final class RemoveEntitiesListener implements ByteBufferPacketListener {
         IntList intList = buf.readIntIdList();
         for (int i = 0, size = intList.size(); i < size; i++) {
             int entityId = intList.getInt(i);
-            EntityPacketHandler handler = user.entityPacketHandlers().remove(entityId);
+            EntityPacketHandler handler = user.entityViews().remove(entityId);
             if (handler != null && handler.handleEntitiesRemove(user, intList)) {
                 changed = true;
             }

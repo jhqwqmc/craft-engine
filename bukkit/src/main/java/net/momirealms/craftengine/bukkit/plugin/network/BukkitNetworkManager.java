@@ -7,7 +7,6 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
-import net.momirealms.craftengine.bukkit.plugin.network.packet.ClientboundFurnitureUpdatePacket;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.command.feature.TotemAnimationCommand;
@@ -26,6 +25,7 @@ import net.momirealms.craftengine.bukkit.plugin.network.listener.login.HelloList
 import net.momirealms.craftengine.bukkit.plugin.network.listener.login.LoginAcknowledgedListener;
 import net.momirealms.craftengine.bukkit.plugin.network.listener.login.LoginFinishedListener;
 import net.momirealms.craftengine.bukkit.plugin.network.listener.status.StatusResponseListener;
+import net.momirealms.craftengine.bukkit.plugin.network.packet.ClientboundFurnitureUpdatePacket;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.plugin.user.FakeBukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.BlockStateUtils;
@@ -527,7 +527,7 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
         if (user != null) {
             user.setPlayer(player);
             // 玩家自身实体的包处理器（血量 metadata 缩放等）
-            user.entityPacketHandlers().put(user.entityId(), PlayerPacketHandler.INSTANCE);
+            user.entityViews().put(user.entityId(), PlayerPacketHandler.INSTANCE);
             this.onlineUsers.put(player.getUniqueId(), user);
             this.resetUserArray();
             // folia在此tick每个玩家

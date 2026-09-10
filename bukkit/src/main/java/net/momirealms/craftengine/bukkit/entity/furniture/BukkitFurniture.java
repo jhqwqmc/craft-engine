@@ -36,7 +36,10 @@ import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -55,7 +58,7 @@ public final class BukkitFurniture extends Furniture {
     public void publishClientSnapshot(List<Player> players) {
         this.clientSnapshot = this.snapshot;
         if (players.isEmpty()) return;
-        var packet = new ClientboundFurnitureUpdatePacket(this.entityId());
+        ClientboundFurnitureUpdatePacket packet = new ClientboundFurnitureUpdatePacket(this.entityId());
         for (Player player : players) player.sendCustomPacket(packet);
     }
 

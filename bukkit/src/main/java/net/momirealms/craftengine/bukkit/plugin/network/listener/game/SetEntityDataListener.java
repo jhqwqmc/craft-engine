@@ -32,7 +32,7 @@ public final class SetEntityDataListener implements ByteBufferPacketListener {
         if (!(user instanceof BukkitServerPlayer serverPlayer)) return;
         FriendlyByteBuf buf = event.getBuffer();
         int id = buf.readVarInt();
-        EntityPacketHandler handler = user.entityPacketHandlers().get(id);
+        EntityPacketHandler handler = user.entityViews().get(id);
         if (handler != null) {
             handler.handleSetEntityData(serverPlayer, event);
             return;

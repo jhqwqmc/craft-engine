@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.plugin.user;
 
+import ca.spottedleaf.concurrentutil.map.concurrent.ints.ConcurrentChainedInt2ObjectHashTable;
 import ca.spottedleaf.concurrentutil.map.concurrent.longs.ConcurrentChainedLong2ReferenceHashTable;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -13,13 +14,13 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
-import net.momirealms.craftengine.bukkit.pack.ResourcePackConfigurationTask;
 import net.momirealms.craftengine.bukkit.block.entity.renderer.display.BukkitDestroyStageDisplayRecorder;
 import net.momirealms.craftengine.bukkit.entity.BukkitLivingEntity;
 import net.momirealms.craftengine.bukkit.entity.furniture.BukkitFurniture;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.item.BukkitItemManager;
 import net.momirealms.craftengine.bukkit.nms.DelegatingContainer;
+import net.momirealms.craftengine.bukkit.pack.ResourcePackConfigurationTask;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.gui.CraftEngineGUIHolder;
 import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
@@ -211,7 +212,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     // tracked chunks
     private ConcurrentChainedLong2ReferenceHashTable<ClientChunk> trackedChunks;
     // entity view
-    private Map<Integer, EntityPacketHandler> entityTypeView;
+    private ConcurrentChainedInt2ObjectHashTable<EntityPacketHandler> entityTypeView;
     // 通过指令或api设定的语言
     @Nullable
     private Locale selectedLocale;
@@ -319,7 +320,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         this.trackedDynamicBlockEntityRenderers = new ConcurrentHashMap<>(64);
         this.trackedEntities = new ConcurrentHashMap<>(64);
         this.trackedChunks = ConcurrentChainedLong2ReferenceHashTable.createWithCapacity(128, 0.5f);
-        this.entityTypeView = new ConcurrentHashMap<>(128);
+        this.entityTypeView = ConcurrentChainedInt2ObjectHashTable.createWithCapacity(128, 0.75f);
         this.obtainedItems = new HashSet<>(32);
         this.furnitureHitData = new FurnitureHitData();
         this.furnitureLightData = new FurnitureLightData();
@@ -1471,7 +1472,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     }
 
     @Override
-    public Map<Integer, EntityPacketHandler> entityPacketHandlers() {
+    public ConcurrentChainedInt2ObjectHashTable<EntityPacketHandler> entityViews() {
         return this.entityTypeView;
     }
 
