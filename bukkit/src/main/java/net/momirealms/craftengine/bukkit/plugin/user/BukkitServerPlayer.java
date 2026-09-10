@@ -851,6 +851,11 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
             cullableObject.setShown(this, true);
             return;
         }
+        boolean rateLimit = Config.enableEntityCullingRateLimiting();
+        // 隐藏对象在额度耗尽时无法显示，跳过本轮可见性计算；已显示对象仍需检查是否隐藏。
+        if (rateLimit && !cullableObject.isShown && !this.culling.hasToken()) {
+            return;
+        }
         boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
         // 之前可见
         if (cullableObject.isShown) {
@@ -864,7 +869,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
             // 但是第一人称可见了
             if (firstPersonVisible) {
                 // 下次再说
-                if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                if (rateLimit && !this.culling.takeToken()) {
                     return;
                 }
                 cullableObject.setShown(this, true);
