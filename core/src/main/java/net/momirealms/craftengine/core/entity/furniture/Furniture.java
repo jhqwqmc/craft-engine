@@ -29,7 +29,6 @@ import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ChainParameterSource;
 import net.momirealms.craftengine.core.plugin.context.ContextKey;
 import net.momirealms.craftengine.core.plugin.context.parameter.FurnitureParameterProvider;
-import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
 import net.momirealms.craftengine.core.world.Vec3d;
@@ -437,7 +436,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         // 虚拟碰撞箱的实体id
         this.interactableEntityIds = interactableEntityIds.toIntArray();
         this.cullingData = createCullingData(variant.cullingData(), hitboxes);
-        this.snapshot = createSnapshot(elements, hitboxes, hitboxMap, colliders, new IdentityHashMap<>(4));
+        this.snapshot = createSnapshot(elements, hitboxes, hitboxMap, colliders);
         return behaviorElementStart;
     }
 
@@ -573,8 +572,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     protected abstract FurnitureSnapshotState createSnapshot(List<FurnitureElement> elements,
                                                              List<FurnitureHitBox> hitboxes,
                                                              Int2ObjectMap<FurnitureHitBox> hitboxMap,
-                                                             List<Collider> colliders,
-                                                             Map<CustomDataType<?>, Object> customData);
+                                                             List<Collider> colliders);
 
     /**
      * Creates culling data based on hitboxes or pre-defined AABB.

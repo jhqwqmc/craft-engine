@@ -10,6 +10,7 @@ import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.world.World;
 
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,18 +19,17 @@ public abstract class FurnitureSnapshotState {
     protected final List<FurnitureHitBox> hitboxes;
     protected final Int2ObjectMap<FurnitureHitBox> hitboxMap;
     protected final List<Collider> colliders;
-    protected final Map<CustomDataType<?>, Object> customData;
+    // 按需创建；家具线程写入后发布，供异步追踪回调读取。
+    protected volatile Map<CustomDataType<?>, Object> customData;
 
     public FurnitureSnapshotState(List<FurnitureElement> elements,
                                   List<FurnitureHitBox> hitboxes,
                                   Int2ObjectMap<FurnitureHitBox> hitboxMap,
-                                  List<Collider> colliders,
-                                  Map<CustomDataType<?>, Object> customData) {
+                                  List<Collider> colliders) {
         this.elements = elements;
         this.hitboxes = hitboxes;
         this.hitboxMap = hitboxMap;
         this.colliders = colliders;
-        this.customData = customData;
     }
 
     protected abstract void addCollidersToWorld(World world);
@@ -124,15 +124,22 @@ public abstract class FurnitureSnapshotState {
     }
 
     public Map<CustomDataType<?>, Object> customData() {
-        return Collections.unmodifiableMap(this.customData);
+        Map<CustomDataType<?>, Object> customData = this.customData;
+        return customData == null ? Collections.emptyMap() : Collections.unmodifiableMap(customData);
     }
 
     public <T> void setCustomData(CustomDataType<T> contextKey, T value) {
-        this.customData.put(contextKey, value);
+        Map<CustomDataType<?>, Object> customData = this.customData;
+        if (customData == null) {
+            customData = new IdentityHashMap<>(4);
+        }
+        customData.put(contextKey, value);
+        this.customData = customData;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getCustomData(CustomDataType<T> contextKey) {
-        return (T) this.customData.get(contextKey);
+        Map<CustomDataType<?>, Object> customData = this.customData;
+        return customData == null ? null : (T) customData.get(contextKey);
     }
 }

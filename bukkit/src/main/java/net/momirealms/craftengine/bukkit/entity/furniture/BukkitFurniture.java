@@ -13,7 +13,6 @@ import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBox;
 import net.momirealms.craftengine.core.entity.furniture.hitbox.FurnitureHitBoxConfig;
 import net.momirealms.craftengine.core.entity.player.Player;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
-import net.momirealms.craftengine.core.util.CustomDataType;
 import net.momirealms.craftengine.core.util.MiscUtils;
 import net.momirealms.craftengine.core.util.QuaternionUtils;
 import net.momirealms.craftengine.core.util.VersionHelper;
@@ -62,9 +61,8 @@ public final class BukkitFurniture extends Furniture {
     protected FurnitureSnapshotState createSnapshot(List<FurnitureElement> elements,
                                                     List<FurnitureHitBox> hitboxes,
                                                     Int2ObjectMap<FurnitureHitBox> hitboxMap,
-                                                    List<Collider> colliders,
-                                                    Map<CustomDataType<?>, Object> customData) {
-        return new BukkitVariantSnapshot(elements, hitboxes, hitboxMap, colliders, customData);
+                                                    List<Collider> colliders) {
+        return new BukkitVariantSnapshot(elements, hitboxes, hitboxMap, colliders);
     }
 
     @Override
