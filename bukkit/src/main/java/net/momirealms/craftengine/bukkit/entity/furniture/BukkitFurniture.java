@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.entity.BukkitEntity;
+import net.momirealms.craftengine.bukkit.plugin.network.packet.ClientboundFurnitureUpdatePacket;
 import net.momirealms.craftengine.bukkit.util.CollisionUtils;
 import net.momirealms.craftengine.bukkit.util.EntityUtils;
 import net.momirealms.craftengine.bukkit.util.LocationUtils;
@@ -44,6 +45,19 @@ public final class BukkitFurniture extends Furniture {
     private final AtomicBoolean isMoving = new AtomicBoolean(false);
     private final WeakReference<ItemDisplay> metaEntity;
     private Location location;
+    // 仅在构建、行为回调和服务端登记完成后发布，网络线程不会读取构建中的快照。
+    private volatile FurnitureSnapshotState clientSnapshot;
+
+    public FurnitureSnapshotState clientSnapshot() {
+        return this.clientSnapshot;
+    }
+
+    public void publishClientSnapshot(List<Player> players) {
+        this.clientSnapshot = this.snapshot;
+        if (players.isEmpty()) return;
+        var packet = new ClientboundFurnitureUpdatePacket(this.entityId());
+        for (Player player : players) player.sendCustomPacket(packet);
+    }
 
     @Override
     protected Collider createCollider(ColliderConfig config) {
@@ -98,28 +112,14 @@ public final class BukkitFurniture extends Furniture {
         }
 
         List<Player> trackedBy = this.trackedBy();
-        // 先移除
-        {
-            BukkitFurnitureManager.instance().unregisterFurniture(this, false);
-            super.destroySeats();
-            super.clearColliders();
-            for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                Player player = trackedBy.get(playerIndex);
-                super.snapshot.hideHitboxes(player);
-            }
-        }
-
-        super.setVariantInternal(variant, trackedBy);
-
-        // 后展示
-        {
-            BukkitFurnitureManager.instance().registerFurniture(this);
-            this.addCollidersToWorld();
-            for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                Player player = trackedBy.get(playerIndex);
-                super.snapshot.showHitboxes(player);
-            }
-        }
+        // 服务端实体仍在家具所属线程销毁和登记。
+        BukkitFurnitureManager.instance().unregisterFurniture(this, false);
+        super.destroySeats();
+        super.clearColliders();
+        super.setVariantInternal(variant);
+        BukkitFurnitureManager.instance().registerFurniture(this);
+        this.addCollidersToWorld();
+        this.publishClientSnapshot(trackedBy);
         return true;
     }
 
@@ -162,15 +162,10 @@ public final class BukkitFurniture extends Furniture {
             }
 
             // 先移除
-            List<Player> previousTrackedBy = trackedBy();
             {
                 BukkitFurnitureManager.instance().unregisterFurniture(this, false);
                 super.destroySeats();
                 super.clearColliders();
-                for (int playerIndex = 0, playerCount = previousTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                    Player player = previousTrackedBy.get(playerIndex);
-                    super.snapshot.hideHitboxes(player);
-                }
             }
 
             Location location = LocationUtils.toLocation(position);
@@ -181,15 +176,10 @@ public final class BukkitFurniture extends Furniture {
                             this.location = location;
                             super.updatePlacement();
                             List<Player> afterTrackedBy = trackedBy();
-                            super.setVariantInternal(currentVariant(), afterTrackedBy);
+                            super.setVariantInternal(currentVariant());
                             BukkitFurnitureManager.instance().registerFurniture(this);
                             this.addCollidersToWorld();
-                            for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                                Player player = afterTrackedBy.get(playerIndex);
-                                if (previousTrackedBy.contains(player)) {
-                                    super.snapshot.showHitboxes(player);
-                                }
-                            }
+                            this.publishClientSnapshot(afterTrackedBy);
                             return true;
                         } else {
                             return false;
@@ -207,15 +197,10 @@ public final class BukkitFurniture extends Furniture {
                 this.location = location;
                 super.updatePlacement();
                 List<Player> afterTrackedBy = trackedBy();
-                super.setVariantInternal(currentVariant(), afterTrackedBy);
+                super.setVariantInternal(currentVariant());
                 BukkitFurnitureManager.instance().registerFurniture(this);
                 this.addCollidersToWorld();
-                for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                    Player player = afterTrackedBy.get(playerIndex);
-                    if (previousTrackedBy.contains(player)) {
-                        super.snapshot.showHitboxes(player);
-                    }
-                }
+                this.publishClientSnapshot(afterTrackedBy);
                 this.isMoving.set(false);
                 return CompletableFuture.completedFuture(true);
             }

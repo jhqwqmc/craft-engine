@@ -320,6 +320,7 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         CompoundTag data = (CompoundTag) Optional.ofNullable(furnitureInstance.persistentData.getTag(FurniturePersistentData.CUSTOM_DATA)).orElseGet(CompoundTag::new);
         furnitureInstance.controller.loadCustomData(data);
         furnitureInstance.controller.onLoad();
+        furnitureInstance.publishClientSnapshot(furnitureInstance.trackedBy());
     }
 
     /**

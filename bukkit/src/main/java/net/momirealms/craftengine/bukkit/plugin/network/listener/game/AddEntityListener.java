@@ -7,7 +7,6 @@ import net.momirealms.craftengine.bukkit.plugin.network.BukkitNetworkManager;
 import net.momirealms.craftengine.bukkit.plugin.network.handler.*;
 import net.momirealms.craftengine.bukkit.plugin.user.BukkitServerPlayer;
 import net.momirealms.craftengine.bukkit.util.RegistryUtils;
-import net.momirealms.craftengine.core.entity.furniture.FurnitureSnapshotState;
 import net.momirealms.craftengine.core.entity.projectile.ProjectileDisplay;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.network.EntityPacketHandler;
@@ -108,20 +107,15 @@ public final class AddEntityListener implements ByteBufferPacketListener {
             BukkitServerPlayer serverPlayer = (BukkitServerPlayer) user;
             BukkitFurniture furniture = BukkitFurnitureManager.instance().loadedFurnitureByMetaEntityId(id);
             if (furniture != null) {
-                FurniturePacketHandler furniturePacketHandler = new FurniturePacketHandler(furniture);
-                EntityPacketHandler previous = serverPlayer.entityPacketHandlers().put(id, furniturePacketHandler);
-                FurnitureSnapshotState snapshotState = furniturePacketHandler.snapshotState;
-                if (Config.enableEntityCulling()) {
-                    serverPlayer.addTrackedEntity(id, furniture);
-                    furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
-                } else {
-                    // WorldEdit/NMS 添加时，ServerLevel 先建追踪器，后触发 EntityAddToWorldEvent。
-                    // 第一份包可能已按普通 ItemDisplay 处理；manager 补发后在这里接管虚拟显示。
-                    // 重复包不应重复执行 show。开启剔除时由上面的 trackedEntity/culling 路径管理显示。
-                    if (previous == null || previous instanceof ItemDisplayPacketHandler) {
-                        snapshotState.show(serverPlayer);
-                        furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
+                EntityPacketHandler previous = serverPlayer.entityPacketHandlers().get(id);
+                // 补发生成包不能替换仍在追踪的处理器，否则会丢失行为快照并重复登记光照。
+                if (!(previous instanceof FurniturePacketHandler handler) || handler.furniture != furniture) {
+                    FurniturePacketHandler furniturePacketHandler = new FurniturePacketHandler(furniture);
+                    serverPlayer.entityPacketHandlers().put(id, furniturePacketHandler);
+                    if (Config.enableEntityCulling()) {
+                        serverPlayer.addTrackedEntity(id, furniturePacketHandler);
                     }
+                    furniturePacketHandler.synchronize(serverPlayer);
                 }
                 if (Config.hideBaseEntity() && !furniture.hasExternalModel()) {
                     event.setCancelled(true);

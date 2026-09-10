@@ -8,10 +8,8 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.momirealms.craftengine.core.entity.Entity;
 import net.momirealms.craftengine.core.entity.culling.Cullable;
-import net.momirealms.craftengine.core.entity.culling.CullableHolder;
 import net.momirealms.craftengine.core.entity.culling.CullingData;
 import net.momirealms.craftengine.core.entity.furniture.behavior.FurnitureController;
-import net.momirealms.craftengine.core.entity.furniture.element.ConditionalFurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElement;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementConfig;
 import net.momirealms.craftengine.core.entity.furniture.element.FurnitureElementMatcher;
@@ -25,7 +23,6 @@ import net.momirealms.craftengine.core.entity.seat.Seat;
 import net.momirealms.craftengine.core.entity.seat.SeatOwner;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.CraftEngine;
-import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.plugin.context.ChainParameterSource;
 import net.momirealms.craftengine.core.plugin.context.ContextKey;
 import net.momirealms.craftengine.core.plugin.context.parameter.FurnitureParameterProvider;
@@ -90,7 +87,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         this.updatePlacement();
         this.sourceItem = data.item().orElse(null);
         this.controller = FurnitureController.createController(this);
-        this.setVariantInternal(config.getVariant(data), List.of());
+        this.setVariantInternal(config.getVariant(data));
     }
 
     @Override
@@ -292,17 +289,13 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
     }
 
     /**
-     * Internal logic to initialize components based on a specific variant.
-     * This sets up elements, hitboxes, seats, and culling data.
+     * 构建服务端变体快照：准备元素、交互箱、座椅、物理 Collider 和剔除数据。
+     * 此处只复用实体 ID、构造新状态，不发送客户端变体更新包。
+     * 平台层完成行为回调和实体登记后再发布，由玩家网络线程比较已应用快照。
      */
     protected void setVariantInternal(FurnitureVariant variant) {
-        setVariantInternal(variant, trackedBy());
-    }
-
-    protected void setVariantInternal(FurnitureVariant variant, List<Player> trackedBy) {
         FurnitureVariant previousVariant = this.currentVariant;
-        int behaviorElementStart = buildVariantSnapshot(variant, trackedBy);
-        List<FurnitureElement> elements = this.snapshot.elements;
+        buildVariantSnapshot(variant);
 
         // 外部模型
         Supplier<ExternalModel> externalModel = variant.externalModel();
@@ -319,30 +312,13 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
             this.hasExternalModel = false;
         }
 
-        // 触发变体变化
+        // 触发变体变化，可能变体也无变化，而只是移动
         if (previousVariant != null) {
-            // 行为元素在变体切换时被重建，旧实例已在 updateElements 中 hide，
-            // 这里给正在观察的玩家补发新实例的 show，否则只有重新加载家具才能看到它们
-            if (behaviorElementStart < elements.size()) {
-                if (!trackedBy.isEmpty()) {
-                    boolean culling = Config.enableEntityCulling();
-                    for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                        Player player = trackedBy.get(playerIndex);
-                        if (culling) {
-                            CullableHolder holder = player.getTrackedEntity(this.metaDataEntityId);
-                            if (holder == null || !holder.isShown) continue;
-                        }
-                        for (int i = behaviorElementStart; i < elements.size(); i++) {
-                            elements.get(i).show(player);
-                        }
-                    }
-                }
-            }
             this.controller.onVariantChange(previousVariant);
         }
     }
 
-    private int buildVariantSnapshot(FurnitureVariant variant, List<Player> trackedBy) {
+    private void buildVariantSnapshot(FurnitureVariant variant) {
         this.currentVariant = variant;
         this.persistentData.setVariant(variant.name());
 
@@ -356,7 +332,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
 
         // 如果先前存在变体快照
         if (this.snapshot != null) {
-            elements = this.updateElements(elementConfigs, trackedBy);
+            elements = this.updateElements(elementConfigs);
             for (int elementIndex = 0, elementCount = elements.size(); elementIndex < elementCount; elementIndex++) {
                 FurnitureElement element = elements.get(elementIndex);
                 element.gatherInteractableEntityId(interactableCollector);
@@ -372,8 +348,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         }
 
         // 行为提供的元素
-        // 变体切换时行为会重新创建元素（全新 entityId），记录追加前的下标，事后补发 show 包
-        int behaviorElementStart = elements.size();
         this.controller.gatherElements(element -> {
             elements.add(element);
             element.gatherInteractableEntityId(interactableCollector);
@@ -437,29 +411,12 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         this.interactableEntityIds = interactableEntityIds.toIntArray();
         this.cullingData = createCullingData(variant.cullingData(), hitboxes);
         this.snapshot = createSnapshot(elements, hitboxes, hitboxMap, colliders);
-        return behaviorElementStart;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private List<FurnitureElement> updateElements(List<FurnitureElementConfig<? extends FurnitureElement>> newElementConfigList,
-                                                  List<Player> trackedBy) {
+    private List<FurnitureElement> updateElements(List<FurnitureElementConfig<? extends FurnitureElement>> newElementConfigList) {
         List<FurnitureElement> newElements = new ArrayList<>(newElementConfigList.size());
         if (this.snapshot.elements.isEmpty() && newElementConfigList.isEmpty()) return newElements;
-        boolean hasTrackedBy = !trackedBy.isEmpty();
-        boolean[] visibility = new boolean[trackedBy.size()];
-        if (hasTrackedBy) {
-            if (Config.enableEntityCulling()) {
-                for (int i = 0; i < trackedBy.size(); i++) {
-                    CullableHolder trackedEntity = trackedBy.get(i).getTrackedEntity(this.metaDataEntityId);
-                    if (trackedEntity != null && trackedEntity.isShown) {
-                        visibility[i] = true;
-                    }
-                }
-            } else {
-                Arrays.fill(visibility, true);
-            }
-        }
-
         /*
          *
          * 1 对 1，命中率最高
@@ -474,22 +431,11 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                 position = transformConfig.getPos(this);
                 if (previousElement instanceof TransformableFurnitureElement transformable && transformConfig.elementClass().isInstance(previousElement)) {
                     element = ((TransformableFurnitureElementConfig) transformConfig).transform(this, transformable,
-                            position, !position.equals(transformable.position()));
+                            position);
                 }
             }
-            if (element != null) {
-                for (int z = 0; z < trackedBy.size(); z++) {
-                    if (visibility[z]) updateFurnitureElementVisibility(trackedBy.get(z), previousElement, element);
-                }
-            } else {
+            if (element == null) {
                 element = config instanceof TransformableFurnitureElementConfig<?> transformConfig ? transformConfig.create(this, position) : config.create(this);
-                for (int z = 0; z < trackedBy.size(); z++) {
-                    if (visibility[z]) {
-                        Player player = trackedBy.get(z);
-                        previousElement.hide(player);
-                        element.show(player);
-                    }
-                }
             }
             newElements.add(element);
         } else {
@@ -507,7 +453,7 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                     position = transformConfig.getPos(this);
                     previousElement = matcher.match(transformConfig.elementClass(), position, true);
                     if (previousElement != null) {
-                        element = ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement, position, false);
+                        element = ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement, position);
                     }
                 }
                 if (element == null) {
@@ -520,15 +466,11 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                     unmatchedCount++;
                 } else {
                     newElements.add(element);
-                    for (int z = 0; z < trackedBy.size(); z++) {
-                        if (visibility[z]) updateFurnitureElementVisibility(trackedBy.get(z), previousElement, element);
-                    }
                 }
             }
             for (int i = 0; i < unmatchedCount; i++) {
-                assert unmatched != null;
                 FurnitureElementConfig<?> config = unmatched[i];
-                TransformableFurnitureElement previousElement = null;
+                TransformableFurnitureElement previousElement;
                 FurnitureElement element;
                 if (config instanceof TransformableFurnitureElementConfig<?> transformConfig) {
                     // The first pass stores a non-null position for every unmatched transformable config.
@@ -537,33 +479,12 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                     assert position != null;
                     previousElement = matcher.match(transformConfig.elementClass(), position, false);
                     element = previousElement != null
-                            ? ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement,
-                            position, !position.equals(previousElement.position()))
+                            ? ((TransformableFurnitureElementConfig) transformConfig).transform(this, previousElement, position)
                             : transformConfig.create(this, position);
                 } else {
                     element = config.create(this);
                 }
                 newElements.add(element);
-                for (int z = 0; z < trackedBy.size(); z++) {
-                    if (visibility[z]) {
-                        Player player = trackedBy.get(z);
-                        if (previousElement != null) updateFurnitureElementVisibility(player, previousElement, element);
-                        else element.show(player);
-                    }
-                }
-            }
-            FurnitureElement[] previousElements = matcher.remaining;
-
-            if (hasTrackedBy) {
-                for (int i = 0; i < previousElements.length; i++) {
-                    FurnitureElement previousElement = previousElements[i];
-                    if (previousElement != null) {
-                        for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
-                            Player player = trackedBy.get(playerIndex);
-                            previousElement.hide(player);
-                        }
-                    }
-                }
             }
         }
         return newElements;
@@ -775,22 +696,6 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         return true;
     }
 
-    private static void updateFurnitureElementVisibility(Player player, FurnitureElement before, FurnitureElement after) {
-        boolean previousCanSee = before.canSee(player);
-        boolean afterCanSee = after.canSee(player);
-        if (previousCanSee && afterCanSee) {
-            after.update(player);
-        } else if (previousCanSee) {
-            after.hide(player);
-        } else if (afterCanSee) {
-            // 已通过条件判断，直接展示，避免再次构造上下文并重复求值。
-            if (after instanceof ConditionalFurnitureElement conditional) {
-                conditional.showInternal(player);
-            } else {
-                after.show(player);
-            }
-        }
-    }
 
     private static final class CullingBounds implements Consumer<AABB> {
         private double minX, minY, minZ;

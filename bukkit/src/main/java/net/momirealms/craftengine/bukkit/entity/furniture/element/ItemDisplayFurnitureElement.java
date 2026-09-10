@@ -29,14 +29,12 @@ public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnit
     public final int entityId;
     public final Object cachedDespawnPacket;
     public final Object cachedSpawnPacket;
-    public final Object cachedUpdatePosPacket;
-    public final UUID uuid = UUID.randomUUID();
 
     ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config, WorldPosition pos) {
-        this(furniture, config, pos, EntityUtils.ENTITY_COUNTER.incrementAndGet(), false);
+        this(furniture, config, pos, EntityUtils.ENTITY_COUNTER.incrementAndGet());
     }
 
-    ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config, WorldPosition pos, int entityId, boolean positionChanged) {
+    ItemDisplayFurnitureElement(Furniture furniture, ItemDisplayFurnitureElementConfig config, WorldPosition pos, int entityId) {
         super(config.predicate);
         this.config = config;
         this.furniture = furniture;
@@ -45,11 +43,10 @@ public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnit
         this.position = pos;
         this.cachedDespawnPacket = ClientboundRemoveEntitiesPacketProxy.INSTANCE.newInstance(MiscUtils.init(new IntArrayList(), a -> a.add(entityId)));
         this.cachedSpawnPacket = ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
-                this.entityId, this.uuid,
+                this.entityId, UUID.randomUUID(),
                 this.position.x, this.position.y, this.position.z, this.position.xRot, this.position.yRot,
                 EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0
         );
-        this.cachedUpdatePosPacket = positionChanged ? EntityUtils.createUpdatePosPacket(this.entityId, this.position.x, this.position.y, this.position.z, this.position.yRot, this.position.xRot, false) : null;
     }
 
     @Override
@@ -72,15 +69,25 @@ public final class ItemDisplayFurnitureElement extends AbstractConditionalFurnit
 
     @Override
     public void update(Player player) {
-        if (this.cachedUpdatePosPacket != null) {
-            player.sendPackets(List.of(this.cachedUpdatePosPacket, ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(this.entityId, this.config.metadata.apply(player, this.itemPatch, true))), false);
-        } else {
-            player.sendPacket(ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(this.entityId, this.config.metadata.apply(player, this.itemPatch, true)), false);
-        }
+        player.sendPacket(ClientboundSetEntityDataPacketProxy.INSTANCE.newInstance(this.entityId, this.config.metadata.apply(player, this.itemPatch, true)), false);
     }
 
     @Override
     public void gatherInteractableEntityId(IntConsumer collector) {
+    }
+
+    @Override
+    public int entityId() {
+        return this.entityId;
+    }
+
+    @Override
+    public void update(Player player, TransformableFurnitureElement previous) {
+        // 按玩家实际已显示的位置比较，允许跳过中间变体快照。
+        if (!this.position.equals(previous.position())) {
+            player.sendPacket(EntityUtils.createUpdatePosPacket(this.entityId, this.position.x, this.position.y, this.position.z, this.position.yRot, this.position.xRot, false), false);
+        }
+        this.update(player);
     }
 
     @Override

@@ -96,8 +96,8 @@ public final class ArmorStandFurnitureElementConfig implements TransformableFurn
     }
 
     @Override
-    public @NotNull ArmorStandFurnitureElement transform(@NotNull Furniture furniture, @NotNull ArmorStandFurnitureElement previous, @NotNull WorldPosition pos, boolean positionChanged) {
-        return new ArmorStandFurnitureElement(furniture, this, pos, previous.entityId, positionChanged);
+    public @NotNull ArmorStandFurnitureElement transform(@NotNull Furniture furniture, @NotNull ArmorStandFurnitureElement previous, @NotNull WorldPosition pos) {
+        return new ArmorStandFurnitureElement(furniture, this, pos, previous.entityId);
     }
 
     @Override

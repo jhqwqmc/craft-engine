@@ -109,9 +109,8 @@ public final class BlockDisplayFurnitureElementConfig implements TransformableFu
     }
 
     @Override
-    public @NotNull BlockDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull BlockDisplayFurnitureElement previous,
-                         @NotNull WorldPosition pos, boolean positionChanged) {
-        return new BlockDisplayFurnitureElement(furniture, this, pos, previous.entityId, positionChanged);
+    public @NotNull BlockDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull BlockDisplayFurnitureElement previous, @NotNull WorldPosition pos) {
+        return new BlockDisplayFurnitureElement(furniture, this, pos, previous.entityId);
     }
 
     @Override

@@ -11,8 +11,7 @@ public interface TransformableFurnitureElementConfig<E extends TransformableFurn
     @NotNull E create(@NotNull Furniture furniture, @NotNull WorldPosition position);
 
     /** Creates the updated element using the previous element's entity IDs. */
-    @NotNull E transform(@NotNull Furniture furniture, @NotNull E previous,
-                         @NotNull WorldPosition position, boolean positionChanged);
+    @NotNull E transform(@NotNull Furniture furniture, @NotNull E previous, @NotNull WorldPosition position);
 
     @Override
     default @NotNull E create(@NotNull Furniture furniture) {

@@ -7,6 +7,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import net.momirealms.craftengine.bukkit.plugin.network.packet.ClientboundFurnitureUpdatePacket;
 import net.momirealms.craftengine.bukkit.block.BukkitBlockManager;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.bukkit.plugin.command.feature.TotemAnimationCommand;
@@ -180,6 +181,8 @@ public final class BukkitNetworkManager extends AbstractNetworkManager implement
         if (VersionHelper.hasLeavesPatch) {
             this.injectLeavesBotList();
         }
+        // register custom packets
+        ClientboundFurnitureUpdatePacket.init();
     }
 
     private boolean checkHasCompressionThreshold() {

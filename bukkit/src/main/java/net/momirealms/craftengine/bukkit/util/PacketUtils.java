@@ -1,8 +1,10 @@
 package net.momirealms.craftengine.bukkit.util;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.network.event.NMSPacketEvent;
+import net.momirealms.craftengine.core.util.Key;
 import net.momirealms.craftengine.core.util.VersionHelper;
 import net.momirealms.craftengine.proxy.minecraft.network.FriendlyByteBufProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.RegistryFriendlyByteBufProxy;
@@ -10,6 +12,9 @@ import net.momirealms.craftengine.proxy.minecraft.network.codec.ByteBufCodecsPro
 import net.momirealms.craftengine.proxy.minecraft.network.codec.StreamDecoderProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.codec.StreamEncoderProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.BundlePacketProxy;
+import net.momirealms.craftengine.proxy.minecraft.network.protocol.common.ClientboundCustomPayloadPacketProxy;
+import net.momirealms.craftengine.proxy.minecraft.network.protocol.common.ServerboundCustomPayloadPacketProxy;
+import net.momirealms.craftengine.proxy.minecraft.network.protocol.common.custom.DiscardedPayloadProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundBundlePacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundSetEntityDataPacketProxy;
 import net.momirealms.craftengine.proxy.minecraft.network.protocol.game.ClientboundSetPassengersPacketProxy;
@@ -62,6 +67,23 @@ public final class PacketUtils {
             if (FriendlyByteBufProxy.CLASS.isInstance(buf)) return buf;
             return FriendlyByteBufProxy.INSTANCE.newInstance(buf);
         }
+    }
+
+    public static Object createClientboundCustomPayloadPacket(Key channel, byte[] data) {
+        Object id = KeyUtils.toIdentifier(channel);
+        if (!VersionHelper.isOrAbove1_20_2) {
+            // 1.20–1.20.1：包直接保存频道与正文，不包含协议包 ID。
+            return ClientboundCustomPayloadPacketProxy.INSTANCE.newInstance(id, FriendlyByteBufProxy.INSTANCE.newInstance(Unpooled.wrappedBuffer(data)));
+        }
+        Object payload;
+        if (VersionHelper.isOrAbove1_20_5) {
+            // 1.20.5+：Bukkit 的 DiscardedPayload 保留正文，Paper 补丁使用 byte[]。
+            payload = DiscardedPayloadProxy.CONSTRUCTOR.newInstance(id, DiscardedPayloadProxy.PAPER_PATCH ? data : Unpooled.wrappedBuffer(data));
+        } else {
+            // 1.20.2–1.20.4：DiscardedPayload 不保存正文；UnknownPayload 实现同一接口且可写出原始数据。
+            payload = ServerboundCustomPayloadPacketProxy.UnknownPayloadProxy.CONSTRUCTOR.newInstance(id, ServerboundCustomPayloadPacketProxy.UnknownPayloadProxy.PAPER_PATCH ? data : Unpooled.wrappedBuffer(data));
+        }
+        return ClientboundCustomPayloadPacketProxy.INSTANCE.newInstance(payload);
     }
 
     public static Object createClientboundSetPassengersPacket(int vehicle, int... passengers) {

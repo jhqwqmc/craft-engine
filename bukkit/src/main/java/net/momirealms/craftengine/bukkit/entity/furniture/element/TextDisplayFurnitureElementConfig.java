@@ -146,9 +146,8 @@ public final class TextDisplayFurnitureElementConfig implements TransformableFur
     }
 
     @Override
-    public @NotNull TextDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull TextDisplayFurnitureElement previous,
-                         @NotNull WorldPosition pos, boolean positionChanged) {
-        return new TextDisplayFurnitureElement(furniture, this, pos, previous.entityId, positionChanged);
+    public @NotNull TextDisplayFurnitureElement transform(@NotNull Furniture furniture, @NotNull TextDisplayFurnitureElement previous, @NotNull WorldPosition pos) {
+        return new TextDisplayFurnitureElement(furniture, this, pos, previous.entityId);
     }
 
     @Override

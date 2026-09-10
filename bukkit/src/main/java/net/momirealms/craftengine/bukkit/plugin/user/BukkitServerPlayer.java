@@ -143,8 +143,6 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     public static final Key ENABLE_ENTITY_CULLING = Key.ce("enable_entity_culling");
     public static final Key ENABLE_FURNITURE_DEBUG = Key.ce("enable_furniture_debug");
     public static final Key DAMAGE_VISIBILITY = Key.ce("damage_visibility");
-    private static final int CUSTOM_PAYLOAD_PLAY = BukkitNetworkManager.PACKET_IDS.clientboundCustomPayloadPacket$play();
-    private static final int CUSTOM_PAYLOAD_CONFIG = BukkitNetworkManager.PACKET_IDS.clientboundCustomPayloadPacket$configuration();
     private final BukkitCraftEngine plugin;
 
     // connection state
@@ -605,12 +603,18 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         ClientCustomPacketType<? extends ClientCustomPacket> type = BuiltInRegistries.CLIENT_MOD_PACKET.getValue(packet.id());
         if (type == null || !type.checkPermission(this)) return;
         FriendlyByteBuf result = new FriendlyByteBuf(Unpooled.buffer());
-        result.writeVarInt(this.encoderState == ConnectionState.PLAY ? CUSTOM_PAYLOAD_PLAY : CUSTOM_PAYLOAD_CONFIG);
-        result.writeKey(packet.id());
-        @SuppressWarnings("unchecked")
-        var codec = (NetworkCodec<FriendlyByteBuf, ClientCustomPacket>) packet.codec();
-        codec.encode(result, packet);
-        this.channel.writeAndFlush(result);
+        byte[] data;
+        try {
+            @SuppressWarnings("unchecked")
+            var codec = (NetworkCodec<FriendlyByteBuf, ClientCustomPacket>) packet.codec();
+            codec.encode(result, packet);
+            data = new byte[result.readableBytes()];
+            result.readBytes(data);
+        } finally {
+            result.release();
+        }
+        // 交给 Connection 排队和 NMS 编码器选择协议包 ID，与普通实体包使用相同发送路径。
+        this.sendPacket(PacketUtils.createClientboundCustomPayloadPacket(packet.id(), data), false);
     }
 
     @Override
