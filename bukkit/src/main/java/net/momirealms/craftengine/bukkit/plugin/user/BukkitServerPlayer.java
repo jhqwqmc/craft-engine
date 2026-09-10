@@ -851,14 +851,9 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
             cullableObject.setShown(this, true);
             return;
         }
-        boolean rateLimit = Config.enableEntityCullingRateLimiting();
-        // 隐藏对象在额度耗尽时无法显示，跳过本轮可见性计算；已显示对象仍需检查是否隐藏。
-        if (rateLimit && !cullableObject.isShown && !this.culling.hasToken()) {
-            return;
-        }
-        boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
         // 之前可见
         if (cullableObject.isShown) {
+            boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
             // 第一人称可见时结果已与第三人称无关
             if (!firstPersonVisible && !this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
                 cullableObject.setShown(this, false);
@@ -866,10 +861,16 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         }
         // 之前不可见
         else {
+            // 隐藏对象在额度耗尽时无法显示，跳过本轮可见性计算；已显示对象仍需检查是否隐藏。
+            boolean limit = Config.enableEntityCullingRateLimiting();
+            if (limit && !this.culling.hasToken()) {
+                return;
+            }
+            boolean firstPersonVisible = this.culling.isVisible(cullingData, this.firstPersonCameraVec3, useRayTracing);
             // 但是第一人称可见了
             if (firstPersonVisible) {
                 // 下次再说
-                if (rateLimit && !this.culling.takeToken()) {
+                if (limit && !this.culling.takeToken()) {
                     return;
                 }
                 cullableObject.setShown(this, true);
@@ -877,7 +878,7 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
             }
             if (this.culling.isVisible(cullingData, this.thirdPersonCameraVec3, useRayTracing)) {
                 // 下次再说
-                if (Config.enableEntityCullingRateLimiting() && !this.culling.takeToken()) {
+                if (limit && !this.culling.takeToken()) {
                     return;
                 }
                 cullableObject.setShown(this, true);
