@@ -344,19 +344,17 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
             return;
         }
 
+        // 已经在其他事件里加载过了
+        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
+        if (previous != null) return;
+
         // 获取家具配置
         Key key = Key.of(id);
         Optional<FurnitureDefinition> optionalFurniture = furnitureById(key);
         if (optionalFurniture.isEmpty()) return;
 
-        // 已经在其他事件里加载过了
-        FurnitureDefinition furnitureDefinition = optionalFurniture.get();
-        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
-        if (previous != null) return;
-
-        // 当前补载路径只创建实例，未执行 createFurnitureAndLoadBehavior 中的 loadCustomData/onLoad，
-        // 也未执行批量入口的 ID 迁移。这是待统一的行为差异，不是已证明必要的版本差异。
-        createAndRegisterFurniture(entity, furnitureDefinition);
+        // 外部复制的实体同样需要恢复行为并发布客户端快照，否则补包也无法显示。
+        createFurnitureAndLoadBehavior(entity, optionalFurniture.get(), readFurniturePersistentData(entity), null);
         sendSpawnPacketToTrackedPlayers(entity);
     }
 
@@ -428,11 +426,6 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
             // 损坏了？一般不会
             return new FurniturePersistentData(null);
         }
-    }
-
-    // 创建、登记运行时实例并安排派生实体激活；行为数据恢复另由 createFurnitureAndLoadBehavior 执行。
-    private BukkitFurniture createAndRegisterFurniture(ItemDisplay display, FurnitureDefinition furniture) {
-        return createAndRegisterFurniture(display, furniture, readFurniturePersistentData(display), null);
     }
 
     // 顺序不可随意调整：构造快照 -> 登记所有 ID -> 添加真实 Collider -> 激活显示元素。
