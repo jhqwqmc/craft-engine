@@ -102,7 +102,7 @@ public final class BukkitFurniture extends Furniture {
         List<Player> trackedBy = this.trackedBy();
         // 先移除
         {
-            BukkitFurnitureManager.instance().invalidateFurniture(this, false);
+            BukkitFurnitureManager.instance().unregisterFurniture(this, false);
             super.destroySeats();
             super.clearColliders();
             for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
@@ -115,7 +115,7 @@ public final class BukkitFurniture extends Furniture {
 
         // 后展示
         {
-            BukkitFurnitureManager.instance().initFurniture(this);
+            BukkitFurnitureManager.instance().registerFurniture(this);
             this.addCollidersToWorld();
             for (int playerIndex = 0, playerCount = trackedBy.size(); playerIndex < playerCount; playerIndex++) {
                 Player player = trackedBy.get(playerIndex);
@@ -166,7 +166,7 @@ public final class BukkitFurniture extends Furniture {
             // 先移除
             List<Player> previousTrackedBy = trackedBy();
             {
-                BukkitFurnitureManager.instance().invalidateFurniture(this, false);
+                BukkitFurnitureManager.instance().unregisterFurniture(this, false);
                 super.destroySeats();
                 super.clearColliders();
                 for (int playerIndex = 0, playerCount = previousTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
@@ -184,7 +184,7 @@ public final class BukkitFurniture extends Furniture {
                             super.updatePlacement();
                             List<Player> afterTrackedBy = trackedBy();
                             super.setVariantInternal(currentVariant(), afterTrackedBy);
-                            BukkitFurnitureManager.instance().initFurniture(this);
+                            BukkitFurnitureManager.instance().registerFurniture(this);
                             this.addCollidersToWorld();
                             for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
                                 Player player = afterTrackedBy.get(playerIndex);
@@ -210,7 +210,7 @@ public final class BukkitFurniture extends Furniture {
                 super.updatePlacement();
                 List<Player> afterTrackedBy = trackedBy();
                 super.setVariantInternal(currentVariant(), afterTrackedBy);
-                BukkitFurnitureManager.instance().initFurniture(this);
+                BukkitFurnitureManager.instance().registerFurniture(this);
                 this.addCollidersToWorld();
                 for (int playerIndex = 0, playerCount = afterTrackedBy.size(); playerIndex < playerCount; playerIndex++) {
                     Player player = afterTrackedBy.get(playerIndex);
@@ -257,6 +257,9 @@ public final class BukkitFurniture extends Furniture {
 
     @Override
     public void destroy(Player player) {
+        // 这是 CE 主动拆除（含 preRemove/postRemove）的入口。
+        // Paper 上 metaEntity.remove 会同步进入 manager.unloadFurnitureFromEntity，撤销登记并调用 onUnload；
+        // /kill、WorldEdit 删除不会反向调用本方法。纯 Spigot 缺少该 Paper 单实体回调，详见生命周期文档。
         try {
             this.controller.preRemove(player);
         } finally {
@@ -315,6 +318,8 @@ public final class BukkitFurniture extends Furniture {
 
     @Override
     public void saveIfDirty() {
+        // 更新元数据实体的 PDC，不直接写区块文件。WorldSave 和运行时卸载都会调用，
+        // 包括已经不再 valid 的元数据实体；不能用 isValid() 作为保存前提。
         if (super.isUnsaved()) {
             CompoundTag dataToSave = new CompoundTag();
             this.controller.saveCustomData(dataToSave);

@@ -28,6 +28,9 @@ public final class BukkitVariantSnapshot extends FurnitureSnapshotState {
 
     @Override
     public void addCollidersToWorld(World cWorld) {
+        // 只把运行时派生 Collider 加入世界；元数据实体才是家具存档的来源。
+        // 非持久化不等于不能被 WorldEdit 导出 NBT：复制后自定义子类会变成普通 Interaction/Boat，
+        // 因此入世界前写 PDC 标记，供 manager 的单实体补载入口识别并清理副本。
         Object world = cWorld.minecraftWorld();
         for (int colliderIndex = 0, colliderCount = super.colliders.size(); colliderIndex < colliderCount; colliderIndex++) {
             Collider entity = super.colliders.get(colliderIndex);

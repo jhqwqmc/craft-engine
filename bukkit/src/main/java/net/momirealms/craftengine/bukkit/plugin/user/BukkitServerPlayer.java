@@ -740,6 +740,9 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
                 }
             }
             this.lastHitFurniture = furniture;
+            if (forceShow) {
+                this.sendActionBar(furniture == null ? Component.empty() : Component.text(furniture.id().asString() + " | Colliders: " + furniture.colliders().size()));
+            }
             if (furniture != null && forceShow) {
                 FurnitureVariant currentVariant = furniture.currentVariant();
                 List<AABB> aabbs = new ArrayList<>();
@@ -1752,6 +1755,10 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
     @Override
     public void setEnableFurnitureDebug(boolean enable) {
         this.enableFurnitureDebug = enable;
+        if (!enable) {
+            this.lastHitFurniture = null;
+            this.sendActionBar(Component.empty());
+        }
         platformPlayer().getPersistentDataContainer().set(KeyUtils.toNamespacedKey(ENABLE_FURNITURE_DEBUG), PersistentDataType.BOOLEAN, enable);
     }
 

@@ -1,5 +1,6 @@
 package net.momirealms.craftengine.bukkit.entity.furniture;
 
+import ca.spottedleaf.concurrentutil.map.concurrent.ints.ConcurrentChainedInt2ReferenceHashTable;
 import net.momirealms.craftengine.bukkit.api.BukkitAdaptor;
 import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
 import net.momirealms.craftengine.bukkit.entity.furniture.hitbox.InteractionFurnitureHitboxConfig;
@@ -43,9 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public final class BukkitFurnitureManager extends AbstractFurnitureManager {
@@ -60,9 +59,12 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
 
     private final BukkitCraftEngine plugin;
 
-    private final Map<Integer, BukkitFurniture> byMetaEntityId = new ConcurrentHashMap<>(256, 0.5f);
-    private final Map<Integer, BukkitFurniture> byInteractableEntityId = new ConcurrentHashMap<>(512, 0.5f);
-    private final Map<Integer, BukkitFurniture> byColliderEntityId = new ConcurrentHashMap<>(512, 0.5f);
+    // 同一个元数据实体会经过多个入口；以运行时 entityId 去重，不能用家具配置 ID 去重。
+    // 先登记再添加 Collider，先撤销登记再移除 Collider，避免同步嵌套事件重复创建/卸载。
+    // 并发哈希表供网络线程查询；它不意味着同一家具可跨 Folia 区域并发初始化。
+    private final ConcurrentChainedInt2ReferenceHashTable<BukkitFurniture> byMetaEntityId = ConcurrentChainedInt2ReferenceHashTable.createWithCapacity(256, 0.5f);
+    private final ConcurrentChainedInt2ReferenceHashTable<BukkitFurniture> byInteractableEntityId = ConcurrentChainedInt2ReferenceHashTable.createWithCapacity(512, 0.5f);
+    private final ConcurrentChainedInt2ReferenceHashTable<BukkitFurniture> byColliderEntityId = ConcurrentChainedInt2ReferenceHashTable.createWithCapacity(512, 0.5f);
     // Event listeners
     private final FurnitureEventListener furnitureEventListener;
     private final PaperFurnitureEventListener paperFurnitureEventListener;
@@ -85,15 +87,19 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
     }
 
     public BukkitFurniture place(Location location, FurnitureDefinition furniture, FurniturePersistentData data, boolean playSound, @Nullable net.momirealms.craftengine.core.entity.player.Player player) {
+        // Bukkit spawn 的 consumer 在元数据实体加入世界之前执行。
+        // 提前建立家具映射，使首次生成包就能被 AddEntityListener 识别；
+        // 后续 Paper 单实体事件只会命中去重。各版本使用相同的家具初始化流程。
         Entity furnitureEntity = EntityUtils.spawnEntity(location.getWorld(), location, EntityType.ITEM_DISPLAY, entity -> {
             ItemDisplay display = (ItemDisplay) entity;
+            FurniturePersistentData placedData = new FurniturePersistentData(data.copyTag());
             display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_KEY, PersistentDataType.STRING, furniture.id().toString());
             try {
-                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, data.toBytes());
+                display.getPersistentDataContainer().set(BukkitFurnitureManager.FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY, placedData.toBytes());
             } catch (IOException e) {
                 this.plugin.logger().warn("Failed to set furniture PDC for " + furniture.id().toString(), e);
             }
-            handleMetaEntityDuringChunkLoad(display);
+            createFurnitureAndLoadBehavior(display, furniture, placedData, null);
         });
         if (playSound) {
             SoundData sound = furniture.settings().sounds().placeSound();
@@ -120,18 +126,20 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         Bukkit.getPluginManager().registerEvents(this.furnitureEventListener, this.plugin.javaPlugin());
         if (this.paperFurnitureEventListener != null) Bukkit.getPluginManager().registerEvents(this.paperFurnitureEventListener, this.plugin.javaPlugin());
 
-        // 对世界上已有实体的记录
+        // 插件启用时，已有实体的加载事件可能早已发生，需要主动扫描补登记。
+        // 与区块批量加载共用从元数据实体恢复家具的入口。
+        // Folia 中把每个实体的恢复提交给其 EntityScheduler，不能在启用线程直接增删实体。
         if (VersionHelper.hasFoliaPatch) {
             BiConsumer<Entity, Runnable> taskExecutor = (entity, runnable) -> entity.getScheduler().run(this.plugin.javaPlugin(), (t) -> runnable.run(), () -> {});
             for (World world : Bukkit.getWorlds()) {
                 List<Entity> entities = world.getEntities();
                 for (Entity entity : entities) {
                     if (entity instanceof ItemDisplay display) {
-                        taskExecutor.accept(entity, () -> handleMetaEntityDuringChunkLoad(display));
+                        taskExecutor.accept(entity, () -> restoreFurnitureFromEntity(display));
                     } else if (entity instanceof Interaction interaction) {
-                        taskExecutor.accept(entity, () -> handleCollisionEntityDuringChunkLoad(interaction));
+                        taskExecutor.accept(entity, () -> removeStaleColliderEntity(interaction));
                     } else if (entity instanceof Boat boat) {
-                        taskExecutor.accept(entity, () -> handleCollisionEntityDuringChunkLoad(boat));
+                        taskExecutor.accept(entity, () -> removeStaleColliderEntity(boat));
                     }
                 }
             }
@@ -140,11 +148,11 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
                 List<Entity> entities = world.getEntities();
                 for (Entity entity : entities) {
                     if (entity instanceof ItemDisplay display) {
-                        handleMetaEntityDuringChunkLoad(display);
+                        restoreFurnitureFromEntity(display);
                     } else if (entity instanceof Interaction interaction) {
-                        handleCollisionEntityDuringChunkLoad(interaction);
+                        removeStaleColliderEntity(interaction);
                     } else if (entity instanceof Boat boat) {
-                        handleCollisionEntityDuringChunkLoad(boat);
+                        removeStaleColliderEntity(boat);
                     }
                 }
             }
@@ -153,13 +161,15 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
 
     @Override
     public void disable() {
+        // 停用只拆除运行时状态并保存 PDC，不删除作为存档载体的 ItemDisplay。
+        // isStopping 避免在服务器收尾期间从家具卸载回调继续批量增删 Collider/座椅。
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
                 try {
                     if (entity instanceof ItemDisplay itemDisplay) {
-                        handleMetaEntityUnload(itemDisplay, true);
+                        unloadFurnitureFromEntity(itemDisplay, true);
                     } else if (CraftEngineFurniture.isCollisionEntity(entity)) {
-                        handleCollisionEntityUnload(entity);
+                        unregisterColliderEntity(entity);
                         if (!VersionHelper.hasFoliaPatch) {
                             entity.remove();
                         }
@@ -198,20 +208,23 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         return this.byColliderEntityId.get(entityId);
     }
 
-    // 当元数据实体被卸载了
-    public void handleMetaEntityUnload(ItemDisplay entity, boolean isStopping) {
-        // 不是持久化的
-        if (!entity.isPersistent()) {
-            return;
-        }
+    /**
+     * 结束一个已登记家具的运行时生命周期，不等同于玩家拆除家具。
+     * Paper 单实体移除、区块/世界卸载、插件停用都会到达这里；先撤销映射实现去重。
+     * /kill 和 WorldEdit 删除走 onUnload，不会补调用 destroy(player) 的 preRemove/postRemove。
+     * 不要增加 isValid() 判断：已核对版本的单实体移除事件触发时 valid 已被设为 false。
+     */
+    public void unloadFurnitureFromEntity(ItemDisplay entity, boolean isStopping) {
         int id = entity.getEntityId();
         BukkitFurniture furniture = this.byMetaEntityId.get(id);
         if (furniture != null) {
 
-            // 标记无效
-            this.invalidateFurniture(furniture, isStopping);
+            // 必须先撤销登记；下面销毁 Collider 会同步触发它自己的移除事件。
+            this.unregisterFurniture(furniture, isStopping);
 
-            // 区块还在加载的时候，就重复卸载了。为极其特殊情况
+            // Paper 普通区块卸载也会在 EntityLookup 状态切换栈内触发单实体移除事件，
+            // 不仅是「加载时意外卸载」。此时同一 section 不允许递归增删实体。
+            // 当前策略是跳过座椅销毁，不是安排稍后重试；排查残留时须区分这两种语义。
             if (!isStopping) {
                 if (VersionHelper.hasPaperPatch) {
                     Location location = entity.getLocation();
@@ -235,26 +248,32 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
     }
 
-    // 保险起见，collision实体卸载也移除一下
-    public void handleCollisionEntityUnload(Entity entity) {
+    // 单个 Collider 离开世界只清理反向映射，不递归卸载整个家具，也不自动重建这个 Collider。
+    public void unregisterColliderEntity(Entity entity) {
         int id = entity.getEntityId();
         this.byColliderEntityId.remove(id);
     }
 
-    // 检查这个区块的实体是否已经被加载了
+    // CE 自己的阶段标记：批量恢复完成后置 true，已有区块启动扫描也会置 true，CEChunk.unload 清除。
+    // 不是 Bukkit Chunk.isEntitiesLoaded()，也不表示 Paper 当前允许实体增删。
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean isEntitiesLoaded(Location location) {
+    private boolean isChunkEntityRestoreComplete(Location location) {
         CEWorld ceWorld = BukkitAdaptor.adapt(location.getWorld()).storageWorld();
         CEChunk ceChunk = ceWorld.getChunkAtIfLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
         if (ceChunk == null) return false;
         return ceChunk.isEntitiesLoaded();
     }
 
-    public void handleMetaEntityDuringChunkLoad(ItemDisplay entity) {
-        handleMetaEntityDuringChunkLoad(entity, null);
+    /**
+     * 从元数据实体的 PDC 恢复家具；供区块批量加载、世界/启动扫描及放置时的 ID 迁移使用。
+     * 完成 ID 迁移、运行时登记、行为数据恢复和 onLoad，再给已有观察者补发生成包。
+     */
+    public void restoreFurnitureFromEntity(ItemDisplay entity) {
+        restoreFurnitureFromEntity(entity, null);
     }
 
-    public void handleMetaEntityDuringChunkLoad(ItemDisplay entity, @Nullable SafeEntityOperationRunner runner) {
+    /** 同一 EntitiesLoadEvent 可共享 runner；不要跨事件或跨 tick 保存这个 runner。 */
+    public void restoreFurnitureFromEntity(ItemDisplay entity, @Nullable SafeEntityOperationRunner runner) {
         // 实体可能不是持久的
         if (!entity.isPersistent()) {
             return;
@@ -263,6 +282,10 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         // 获取家具pdc
         String id = entity.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
         if (id == null) return;
+
+        // 已经在其他事件里加载过了
+        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
+        if (previous != null) return;
 
         // 处理无效的家具
         if (Config.handleInvalidFurniture()) {
@@ -283,36 +306,39 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         Optional<FurnitureDefinition> optionalFurniture = furnitureById(key);
         if (optionalFurniture.isEmpty()) return;
 
-        // 只对1.20.2及以上生效，1.20.1比较特殊
-        if (!VersionHelper.isOrAbove1_20_2) {
-            return;
-        }
-
-        // 已经在其他事件里加载过了
-        FurnitureDefinition furnitureDefinition = optionalFurniture.get();
-        BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
-        if (previous != null) return;
-
         // 创建新的家具
-        BukkitFurniture furnitureInstance = createFurnitureInstance(entity, furnitureDefinition, runner);
+        createFurnitureAndLoadBehavior(entity, optionalFurniture.get(), readFurniturePersistentData(entity), runner);
+        // 区块恢复时，追踪器可能在批量事件之前就发出了生成包；已有实体扫描也有同样的问题。
+        // 必须在登记完成后补包，否则网络线程仍将元数据识别为普通 ItemDisplay，虚拟显示不会生成。
+        sendSpawnPacketToTrackedPlayers(entity);
+    }
+
+    // 完整恢复入口：先构建/登记，再恢复行为数据并通知 onLoad。
+    // Collider 的实际入世界操作可能延迟一 tick，因此 onLoad 不保证所有派生实体已经有效。
+    private void createFurnitureAndLoadBehavior(ItemDisplay entity, FurnitureDefinition definition, FurniturePersistentData persistentData, @Nullable SafeEntityOperationRunner runner) {
+        BukkitFurniture furnitureInstance = createAndRegisterFurniture(entity, definition, persistentData, runner);
         CompoundTag data = (CompoundTag) Optional.ofNullable(furnitureInstance.persistentData.getTag(FurniturePersistentData.CUSTOM_DATA)).orElseGet(CompoundTag::new);
         furnitureInstance.controller.loadCustomData(data);
         furnitureInstance.controller.onLoad();
     }
 
-    public void handleMetaEntityAfterChunkLoad(ItemDisplay entity) {
+    /**
+     * Paper EntityAddToWorldEvent 的单实体补载入口，主要覆盖 WorldEdit/外部 NMS 生成。
+     * 此事件位于 ServerLevel.EntityCallbacks.onTrackingStart 内；追踪器已建立，生成包可能已发送，
+     * 但 EntityLookup 的状态切换尚未退出。因此既需要补包，又可能需要推迟 Collider 入世界。
+     * 普通区块恢复时它同样触发，各版本均通过 CE 阶段标记交给后面的批量入口处理。
+     */
+    public void handleFurnitureEntityAdded(ItemDisplay entity) {
         // 实体可能不是持久的
-        if (!entity.isPersistent()) {
-            return;
-        }
+        // 这里不要检查是否持久化，因为这里通常是后加的
 
         // 获取家具pdc
         String id = entity.getPersistentDataContainer().get(FURNITURE_KEY, PersistentDataType.STRING);
         if (id == null) return;
 
-        // 这个区块还处于加载实体中，这个时候不处理（1.20.1需要特殊处理）
+        // CE 区块不存在或尚未完成批量恢复时，在这里跳过，等 EntitiesLoadEvent。
         Location location = entity.getLocation();
-        if (VersionHelper.isOrAbove1_20_2 && !isEntitiesLoaded(location)) {
+        if (!isChunkEntityRestoreComplete(location)) {
             return;
         }
 
@@ -326,19 +352,32 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         BukkitFurniture previous = this.byMetaEntityId.get(entity.getEntityId());
         if (previous != null) return;
 
-        createFurnitureInstance(entity, furnitureDefinition);
+        // 当前补载路径只创建实例，未执行 createFurnitureAndLoadBehavior 中的 loadCustomData/onLoad，
+        // 也未执行批量入口的 ID 迁移。这是待统一的行为差异，不是已证明必要的版本差异。
+        createAndRegisterFurniture(entity, furnitureDefinition);
+        sendSpawnPacketToTrackedPlayers(entity);
+    }
 
-        // 补发一次包，修复
-        for (Player player : EntityUtils.getTrackedBySet(entity, BukkitAdaptor::adapt)) {
-            player.sendPacket(ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
-                    entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
-                    EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0
-            ), false);
+    /**
+     * 补发早于家具登记的生成包，让 AddEntityListener 接管虚拟元素/HitBox；不重新添加 NMS 实体。
+     * 原包若已识别为家具，网络侧会处理重复包；尚未追踪的玩家则等待正常的初始生成包。
+     */
+    private void sendSpawnPacketToTrackedPlayers(ItemDisplay entity) {
+        List<Player> trackedBy = EntityUtils.getTrackedByList(entity, BukkitAdaptor::adapt);
+        if (trackedBy.isEmpty()) return;
+        Location location = entity.getLocation();
+        Object packet = ClientboundAddEntityPacketProxy.INSTANCE.newInstance(
+                entity.getEntityId(), entity.getUniqueId(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(),
+                EntityTypesProxy.ITEM_DISPLAY, 0, Vec3Proxy.ZERO, 0
+        );
+        for (Player player : trackedBy) {
+            player.sendPacket(packet, false);
         }
     }
 
-    public void handleCollisionEntityAfterChunkLoad(Entity entity) {
-        // 如果是碰撞实体，那么就忽略
+    /** 单实体事件：保留正常创建的自定义 Collider，只清理带碰撞标记的普通 NMS 实体副本。 */
+    public void removeCopiedColliderEntity(Entity entity) {
+        // 正常 addCollidersToWorld 同样触发 EntityAddToWorldEvent，不能在这里删除它。
         if (CraftEntityProxy.INSTANCE.getEntity(entity) instanceof CollisionEntity) {
             return;
         }
@@ -349,16 +388,21 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
         // 实体未加载
         Location location = entity.getLocation();
-        if (!isEntitiesLoaded(location)) {
+        if (!isChunkEntityRestoreComplete(location)) {
             return;
         }
 
-        // 移除被WorldEdit错误复制的碰撞实体
+        // WorldEdit 的 NBT 复制保留 PDC 标记，但按原版类型重新创建，丢失 CollisionEntity 子类。
+        // 刚进入追踪回调的副本可能处于禁止移除状态，必须经安全操作入口延后处理。
         runSafeEntityOperation(location.getChunk(), entity::remove);
     }
 
-    public void handleCollisionEntityDuringChunkLoad(Entity collisionEntity) {
-        // faster
+    /**
+     * 批量恢复/扫描时清理旧 Collider；家具会从元数据实体重新生成运行时 Collider。
+     * 与单实体入口不同，这里连 CollisionEntity 子类也删除，不能拿来处理正常 Collider 的 add 事件。
+     */
+    public void removeStaleColliderEntity(Entity collisionEntity) {
+        // 原有运行时子类或携带 PDC 标记的存档/复制副本都属于本入口的清理对象。
         if (CraftEntityProxy.INSTANCE.getEntity(collisionEntity) instanceof CollisionEntity) {
             collisionEntity.remove();
             return;
@@ -373,7 +417,7 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         collisionEntity.remove();
     }
 
-    private FurniturePersistentData getFurnitureDataAccessor(Entity baseEntity) {
+    private FurniturePersistentData readFurniturePersistentData(Entity baseEntity) {
         byte[] extraData = baseEntity.getPersistentDataContainer().get(FURNITURE_EXTRA_DATA_KEY, PersistentDataType.BYTE_ARRAY);
         if (extraData == null) return new FurniturePersistentData(null);
         try {
@@ -384,15 +428,19 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
     }
 
-    // 创建家具实例，并初始化碰撞实体
-    private BukkitFurniture createFurnitureInstance(ItemDisplay display, FurnitureDefinition furniture) {
-        return createFurnitureInstance(display, furniture, null);
+    // 创建、登记运行时实例并安排派生实体激活；行为数据恢复另由 createFurnitureAndLoadBehavior 执行。
+    private BukkitFurniture createAndRegisterFurniture(ItemDisplay display, FurnitureDefinition furniture) {
+        return createAndRegisterFurniture(display, furniture, readFurniturePersistentData(display), null);
     }
 
-    // 创建家具实例，并初始化碰撞实体
-    private BukkitFurniture createFurnitureInstance(ItemDisplay display, FurnitureDefinition furniture, @Nullable SafeEntityOperationRunner runner) {
-        BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, getFurnitureDataAccessor(display));
-        initFurniture(bukkitFurniture);
+    // 顺序不可随意调整：构造快照 -> 登记所有 ID -> 添加真实 Collider -> 激活显示元素。
+    // 登记必须早于派生实体入世界，否则同步事件/生成包处理器无法识别它们所属的家具。
+    private BukkitFurniture createAndRegisterFurniture(ItemDisplay display,
+                                                       FurnitureDefinition furniture,
+                                                       FurniturePersistentData data,
+                                                       @Nullable SafeEntityOperationRunner runner) {
+        BukkitFurniture bukkitFurniture = new BukkitFurniture(display, furniture, data);
+        registerFurniture(bukkitFurniture);
         Location location = display.getLocation();
         Runnable action = () -> {
             bukkitFurniture.addCollidersToWorld();
@@ -410,7 +458,8 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         return bukkitFurniture;
     }
 
-    void initFurniture(BukkitFurniture furniture) {
+    /** 登记实体 ID 映射并按需安装 ticker；也用于变体切换或移动后的重新登记。 */
+    void registerFurniture(BukkitFurniture furniture) {
         int entityId = furniture.entityId();
         this.byMetaEntityId.put(entityId, furniture);
         this.byInteractableEntityId.put(entityId, furniture);
@@ -448,7 +497,8 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
     }
 
-    void invalidateFurniture(BukkitFurniture furniture, boolean isStopping) {
+    /** 撤销实体 ID 映射、停用元素，并在非停服时尝试移除 Collider；不调用行为 onUnload。 */
+    void unregisterFurniture(BukkitFurniture furniture, boolean isStopping) {
         int entityId = furniture.entityId();
         // 移除entity id映射
         this.byMetaEntityId.remove(entityId);
@@ -471,6 +521,8 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         }
     }
 
+    // 单实体/section 的状态切换期间 Paper 会拒绝移除。这里跳过，不创建重试任务。
+    // 普通区块卸载随后还有批量清理；不要把它当作任意时机都保证成功的 destroy。
     private void tryRemoveCollider(Collider collider) {
         if (VersionHelper.hasPaperPatch) {
             Object entity = collider.handle();
@@ -481,6 +533,8 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         collider.destroy();
     }
 
+    // 1.20.x 使用 io.papermc.paper 的 EntityLookup；本地 1.21.1+ 样本使用 Moonrise 同等机制。
+    // 判断的是当前调用栈内的递归修改限制，不是「区块是否已加载」。纯 Spigot 没有这套限制。
     private boolean shouldDeferEntityOperation(Chunk chunk) {
         if (!VersionHelper.hasPaperPatch) return false;
         Object world = CraftWorldProxy.INSTANCE.getWorld(chunk.getWorld());
@@ -489,6 +543,8 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         return slices != null && ChunkEntitySlicesProxy.INSTANCE.isPreventingStatusUpdates(slices);
     }
 
+    // 延迟一 tick 用来退出 Paper 状态切换栈；在 Folia 上 scheduler 按目标区块调度。
+    // 它不会把任意异步调用变成合法操作，也不会在执行时复核家具是否仍然登记。
     private void runSafeEntityOperation(Chunk chunk, Runnable action) {
         if (!chunk.isLoaded()) return;
         if (shouldDeferEntityOperation(chunk)) {
@@ -502,6 +558,10 @@ public final class BukkitFurnitureManager extends AbstractFurnitureManager {
         return new SafeEntityOperationRunner(chunk);
     }
 
+    /**
+     * 只供同一个区块的一次同步批量处理使用，共享 shouldDeferEntityOperation 的结果。
+     * 每个 action 仍分别提交任务；这不是合并任务队列，也不是长期有效的区块状态缓存。
+     */
     public final class SafeEntityOperationRunner {
         private final Chunk chunk;
         private boolean resolved;

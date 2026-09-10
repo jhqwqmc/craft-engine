@@ -115,7 +115,9 @@ public final class AddEntityListener implements ByteBufferPacketListener {
                     serverPlayer.addTrackedEntity(id, furniture);
                     furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);
                 } else {
-                    // 修复addEntityToWorld，包比事件先发的问题 (WE)
+                    // WorldEdit/NMS 添加时，ServerLevel 先建追踪器，后触发 EntityAddToWorldEvent。
+                    // 第一份包可能已按普通 ItemDisplay 处理；manager 补发后在这里接管虚拟显示。
+                    // 重复包不应重复执行 show。开启剔除时由上面的 trackedEntity/culling 路径管理显示。
                     if (previous == null || previous instanceof ItemDisplayPacketHandler) {
                         snapshotState.show(serverPlayer);
                         furniture.controller.onAsyncPlayerTrack(serverPlayer, snapshotState);

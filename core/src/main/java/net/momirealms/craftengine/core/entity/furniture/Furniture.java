@@ -586,12 +586,11 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         AABB aabb = parent.aabb;
         WorldPosition position = position();
         if (aabb == null) {
-            List<AABB> aabbs = new ArrayList<>(hitboxes.size());
-            Consumer<AABB> collector = aabbs::add;
+            CullingBounds bounds = new CullingBounds();
             for (int i = 0; i < hitboxes.size(); i++) {
-                hitboxes.get(i).collectCullingBounds(collector);
+                hitboxes.get(i).collectCullingBounds(bounds);
             }
-            return new CullingData(getMaxAABB(position, aabbs), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
+            return new CullingData(bounds.toAABB(position), parent.maxDistance, parent.aabbExpansion, parent.rayTracing);
         } else {
             Vector3f[] vertices = new Vector3f[]{
                     // 底面两个对角点
@@ -792,25 +791,21 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
         }
     }
 
-    /**
-     * Calculates an enclosing AABB that contains all provided AABBs.
-     */
-    private static @NotNull AABB getMaxAABB(WorldPosition pos, List<AABB> aabbs) {
-        double minX = pos.x;
-        double minY = pos.y;
-        double minZ = pos.z;
-        double maxX = pos.x;
-        double maxY = pos.y;
-        double maxZ = pos.z;
-        for (int i = 0; i < aabbs.size(); i++) {
-            AABB aabb = aabbs.get(i);
-            if (i == 0) {
+    private static final class CullingBounds implements Consumer<AABB> {
+        private double minX, minY, minZ;
+        private double maxX, maxY, maxZ;
+        private boolean empty = true;
+
+        @Override
+        public void accept(AABB aabb) {
+            if (this.empty) {
                 minX = aabb.minX;
                 minY = aabb.minY;
                 minZ = aabb.minZ;
                 maxX = aabb.maxX;
                 maxY = aabb.maxY;
                 maxZ = aabb.maxZ;
+                this.empty = false;
             } else {
                 minX = Math.min(minX, aabb.minX);
                 minY = Math.min(minY, aabb.minY);
@@ -820,7 +815,11 @@ public abstract class Furniture implements Cullable, ChainParameterSource {
                 maxZ = Math.max(maxZ, aabb.maxZ);
             }
         }
-        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+
+        private AABB toAABB(WorldPosition pos) {
+            return this.empty ? new AABB(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z)
+                    : new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+        }
     }
 
     /**

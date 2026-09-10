@@ -808,6 +808,10 @@ public class CEChunk {
         return this.sections;
     }
 
+    /**
+     * CE 的实体恢复阶段标记：家具批量加载完成或已有区块启动扫描时设为 true，unload 时清除。
+     * 不等同于 Bukkit 的实体磁盘加载状态，更不能据此判断 Paper 是否正在禁止实体增删。
+     */
     public boolean isEntitiesLoaded() {
         return this.isEntitiesLoaded;
     }
