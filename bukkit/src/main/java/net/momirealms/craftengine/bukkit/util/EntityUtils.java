@@ -262,17 +262,28 @@ public final class EntityUtils {
         return players;
     }
 
+    @SuppressWarnings("deprecation")
     private static <T> void collectTrackedBy(Entity entity, Function<Player, T> function, Consumer<T> collector) {
-        Object serverLevel = CraftWorldProxy.INSTANCE.getWorld(entity.getWorld());
-        Int2ObjectMap<Object> entityMap = ChunkMapProxy.INSTANCE.getEntityMap(ServerChunkCacheProxy.INSTANCE.getChunkMap(ServerLevelProxy.INSTANCE.getChunkSource(serverLevel)));
-        Object tracker = entityMap.get(entity.getEntityId());
-        if (tracker != null) {
-            Set<Object> seenBy = ChunkMapProxy.TrackedEntityProxy.INSTANCE.getSeenBy(tracker);
-            for (Object connection : seenBy) {
-                Object player = ServerPlayerConnectionProxy.INSTANCE.getPlayer(connection);
+        if (VersionHelper.hasPaperPatch) {
+            Set<Player> trackedPlayers = entity.getTrackedPlayers();
+            for (Player player : trackedPlayers) {
                 T adapted = function.apply((Player) PlayerProxy.INSTANCE.getBukkitEntity(player));
                 if (adapted != null) {
                     collector.accept(adapted);
+                }
+            }
+        } else {
+            Object serverLevel = CraftWorldProxy.INSTANCE.getWorld(entity.getWorld());
+            Int2ObjectMap<Object> entityMap = ChunkMapProxy.INSTANCE.getEntityMap(ServerChunkCacheProxy.INSTANCE.getChunkMap(ServerLevelProxy.INSTANCE.getChunkSource(serverLevel)));
+            Object tracker = entityMap.get(entity.getEntityId());
+            if (tracker != null) {
+                Set<Object> seenBy = ChunkMapProxy.TrackedEntityProxy.INSTANCE.getSeenBy(tracker);
+                for (Object connection : seenBy) {
+                    Object player = ServerPlayerConnectionProxy.INSTANCE.getPlayer(connection);
+                    T adapted = function.apply((Player) PlayerProxy.INSTANCE.getBukkitEntity(player));
+                    if (adapted != null) {
+                        collector.accept(adapted);
+                    }
                 }
             }
         }

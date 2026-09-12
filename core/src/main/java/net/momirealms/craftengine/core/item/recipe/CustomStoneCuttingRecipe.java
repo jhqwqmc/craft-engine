@@ -6,25 +6,35 @@ import net.momirealms.craftengine.core.item.recipe.input.SingleItemInput;
 import net.momirealms.craftengine.core.item.recipe.result.CustomRecipeResult;
 import net.momirealms.craftengine.core.plugin.config.ConfigConstants;
 import net.momirealms.craftengine.core.plugin.config.ConfigSection;
+import net.momirealms.craftengine.core.plugin.context.CommonFunctions;
+import net.momirealms.craftengine.core.plugin.context.Context;
+import net.momirealms.craftengine.core.plugin.context.function.Function;
 import net.momirealms.craftengine.core.util.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public final class CustomStoneCuttingRecipe extends AbstractGroupedRecipe {
+public final class CustomStoneCuttingRecipe extends AbstractGroupedRecipe implements FunctionalRecipe {
     public static final Serializer SERIALIZER = new Serializer();
     private final Ingredient ingredient;
+    private final Function<Context>[] functions;
 
     public CustomStoneCuttingRecipe(Key id,
                                     boolean showNotification,
                                     CustomRecipeResult result,
                                     String group,
-                                    Ingredient ingredient) {
+                                    Ingredient ingredient,
+                                    Function<Context>[] functions) {
         super(id, showNotification, result, group);
         this.ingredient = ingredient;
+        this.functions = functions;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public Function<Context>[] functions() {
+        return this.functions;
+    }
+
     @Override
     public boolean matches(RecipeInput input) {
         return this.ingredient.test(((SingleItemInput) input).input());
@@ -57,14 +67,15 @@ public final class CustomStoneCuttingRecipe extends AbstractGroupedRecipe {
 
     public static class Serializer extends AbstractRecipeSerializer<CustomStoneCuttingRecipe> {
 
-        @SuppressWarnings({"DuplicatedCode"})
+        @SuppressWarnings({"unchecked", "DuplicatedCode"})
         @Override
         public CustomStoneCuttingRecipe readConfig(Key id, ConfigSection section) {
             return new CustomStoneCuttingRecipe(id,
                     section.getBoolean(SHOW_NOTIFICATIONS, true),
                     super.parseResult(section.getNonNullValue("result", ConfigConstants.ARGUMENT_SECTION)),
                     section.getString("group"),
-                    section.getNonNullValue(INGREDIENTS, ConfigConstants.ARGUMENT_LIST, super::parseIngredient)
+                    section.getNonNullValue(INGREDIENTS, ConfigConstants.ARGUMENT_LIST, super::parseIngredient),
+                    section.getList(FUNCTIONS, CommonFunctions::fromConfig).toArray(new Function[0])
             );
         }
 
@@ -74,7 +85,8 @@ public final class CustomStoneCuttingRecipe extends AbstractGroupedRecipe {
             return new CustomStoneCuttingRecipe(id,
                     true,
                     parseResult(VANILLA_RECIPE_HELPER.stoneCuttingResult(json)), group,
-                    parseVanillaIngredient(VANILLA_RECIPE_HELPER.singleIngredient(json.get("ingredient")))
+                    parseVanillaIngredient(VANILLA_RECIPE_HELPER.singleIngredient(json.get("ingredient"))),
+                    null
             );
         }
     }

@@ -35,6 +35,7 @@ import net.momirealms.craftengine.proxy.minecraft.world.ContainerProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.entity.player.PlayerProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.inventory.AbstractContainerMenuProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.inventory.CraftingContainerProxy;
+import net.momirealms.craftengine.proxy.minecraft.world.inventory.ResultContainerProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.inventory.SlotProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.item.ItemStackProxy;
 import net.momirealms.craftengine.proxy.minecraft.world.item.crafting.*;
@@ -1004,12 +1005,16 @@ public final class RecipeEventListener implements Listener {
     @Nullable
     private Key getCurrentCraftingRecipeId(CraftingInventory inventory) {
         Object craftContainer = CraftInventoryProxy.INSTANCE.getInventory(inventory);
-        Object recipeHolderOrRecipe;
         if (VersionHelper.isOrAbove1_21) {
-            recipeHolderOrRecipe = CraftingContainerProxy.INSTANCE.getCurrentRecipe(craftContainer);
+            return recipeIdFromHolderOrRecipe(CraftingContainerProxy.INSTANCE.getCurrentRecipe(craftContainer));
         } else {
-            recipeHolderOrRecipe = ContainerProxy.INSTANCE.getCurrentRecipe(craftContainer);
+            return recipeIdFromHolderOrRecipe(ContainerProxy.INSTANCE.getCurrentRecipe(craftContainer));
         }
+    }
+
+    // RecipeHolder 于 1.20.2 引入，此前直接存放 Recipe
+    @Nullable
+    private Key recipeIdFromHolderOrRecipe(@Nullable Object recipeHolderOrRecipe) {
         if (recipeHolderOrRecipe == null) return null;
         if (VersionHelper.isOrAbove1_21_2) {
             return KeyUtils.identifierToKey(ResourceKeyProxy.INSTANCE.getIdentifier(RecipeHolderProxy.INSTANCE.getId(recipeHolderOrRecipe)));
@@ -1360,6 +1365,129 @@ public final class RecipeEventListener implements Listener {
                     }
                 }
             }
+        }
+    }
+
+    // 切石机产出
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onStonecuttingFinish(InventoryClickEvent event) {
+        if (!Config.enableRecipeSystem() || !VersionHelper.PREMIUM) return;
+        if (!(event.getView().getTopInventory() instanceof StonecutterInventory inventory)) return;
+        // 只关心结果槽
+        if (event.getRawSlot() != 1) return;
+        if (ItemStackUtils.isEmpty(inventory.getResult())) return;
+
+        InventoryAction action = event.getAction();
+        // 无事发生，不要更新
+        if (action == InventoryAction.NOTHING) {
+            return;
+        }
+
+        Player player = InventoryUtils.getPlayerFromInventoryEvent(event);
+        BukkitServerPlayer serverPlayer = BukkitAdaptor.adapt(player);
+        if (serverPlayer == null) return;
+
+        // 切石机选中配方后会把配方记录在结果容器里
+        Object mcPlayer = serverPlayer.minecraftPlayer();
+        Object stonecutterMenu = PlayerProxy.INSTANCE.getContainerMenu(mcPlayer);
+        Object resultSlot = AbstractContainerMenuProxy.INSTANCE.getSlot(stonecutterMenu, 1 /* result slot */);
+        if (resultSlot == null) return;
+        Object resultContainer = SlotProxy.INSTANCE.getContainer(resultSlot);
+        Key recipeId = recipeIdFromHolderOrRecipe(ResultContainerProxy.INSTANCE.getRecipeUsed(resultContainer));
+        if (recipeId == null) return;
+        Optional<Recipe> optionalRecipe = this.recipeManager.recipeById(recipeId);
+        // 也许是其他插件注册的配方，直接无视
+        if (optionalRecipe.isEmpty() || !(optionalRecipe.get() instanceof CustomStoneCuttingRecipe ceRecipe)) {
+            return;
+        }
+        // 没有函数你凑什么热闹
+        if (!ceRecipe.hasFunctions()) {
+            return;
+        }
+
+        // 对低版本nothing不全的兼容
+        if (!VersionHelper.isOrAbove1_20_5 && LegacyInventoryUtils.isHotBarSwapAndReadd(action)) {
+            int slot = event.getHotbarButton();
+            if (slot == -1) {
+                if (!serverPlayer.getItemInHand(InteractionHand.OFF_HAND).isEmpty()) {
+                    return;
+                }
+            } else {
+                ItemStack item = player.getInventory().getItem(slot);
+                if (!ItemStackUtils.isEmpty(item)) {
+                    return;
+                }
+            }
+        }
+
+        ClickType click = event.getClick();
+        // 扔出，循环丢弃直到原料耗尽
+        if (click == ClickType.CONTROL_DROP) {
+            if (!ItemStackUtils.isEmpty(event.getCursor())) {
+                return;
+            }
+            // 由插件自己处理，每次丢弃都要额外执行函数
+            event.setResult(Event.Result.DENY);
+
+            for (;;) {
+                // 此时配方已经更新，如果变化了，那么就不要操作
+                if (!recipeId.equals(recipeIdFromHolderOrRecipe(ResultContainerProxy.INSTANCE.getRecipeUsed(resultContainer)))) {
+                    break;
+                }
+
+                Object takenItem = SlotProxy.INSTANCE.safeTake(resultSlot, 1, Integer.MAX_VALUE, mcPlayer);
+                if (ItemStackProxy.INSTANCE.isEmpty(takenItem)) {
+                    break;
+                }
+
+                PlayerProxy.INSTANCE.drop(mcPlayer, takenItem, true);
+
+                // 有函数的情况下，执行函数
+                PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer);
+                for (Function<Context> function : ceRecipe.functions()) {
+                    function.run(context);
+                }
+            }
+            return;
+        }
+
+        // 多次合成
+        if (click.isShiftClick()) {
+            // 由插件自己处理多次合成
+            event.setResult(Event.Result.DENY);
+
+            for (;;) {
+                // 此时配方已经更新，如果变化了，那么就不要操作
+                if (!recipeId.equals(recipeIdFromHolderOrRecipe(ResultContainerProxy.INSTANCE.getRecipeUsed(resultContainer)))) {
+                    break;
+                }
+
+                // 连续获取
+                Object itemMoved = AbstractContainerMenuProxy.INSTANCE.quickMoveStack(stonecutterMenu, mcPlayer, 1 /* result slot */);
+                if (ItemStackProxy.INSTANCE.isEmpty(itemMoved)) {
+                    break;
+                }
+
+                // 有函数的情况下，执行函数
+                PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer);
+                for (Function<Context> function : ceRecipe.functions()) {
+                    function.run(context);
+                }
+            }
+            return;
+        }
+
+        // 单次取出，其余操作（中键克隆、数字键交换等）都不会真正拿走产物
+        boolean takeOnce = click == ClickType.LEFT || click == ClickType.RIGHT
+                || (click == ClickType.DROP && ItemStackUtils.isEmpty(event.getCursor()));
+        if (!takeOnce) {
+            return;
+        }
+
+        // 有函数的情况下，执行函数
+        PlayerOptionalContext context = PlayerOptionalContext.of(serverPlayer);
+        for (Function<Context> function : ceRecipe.functions()) {
+            function.run(context);
         }
     }
 

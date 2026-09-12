@@ -651,7 +651,13 @@ public class BukkitServerPlayer extends BukkitLivingEntity implements Player {
         this.channel.config().setAutoRead(false);
         Runnable handleDisconnection = () -> ConnectionProxy.INSTANCE.handleDisconnection(this.connection());
         if (VersionHelper.hasFoliaPatch) {
-            this.plugin.scheduler().platform().run(handleDisconnection, null, platformPlayer());
+            org.bukkit.entity.Player player = platformPlayer();
+            if (player == null) {
+                // 配置阶段尚未绑定玩家实体，连接清理由全局线程处理。
+                this.plugin.scheduler().platform().run(handleDisconnection);
+            } else {
+                this.plugin.scheduler().platform().run(handleDisconnection, null, player);
+            }
         } else {
             BlockableEventLoopProxy.INSTANCE.scheduleOnMain(MinecraftServerProxy.INSTANCE.getServer(), handleDisconnection);
         }
